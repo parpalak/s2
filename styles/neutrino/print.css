@@ -1,0 +1,68 @@
+body {
+	background: #fff;
+	color: #000;
+	font-size: 10pt;
+	font-family: "Times New Roman", Georgia, Times, serif;
+	}
+
+#header {
+	font-size: 8pt;
+	border-bottom: 1px solid #000;
+	text-align: right;
+	}
+
+#crumbs {
+	float: left;
+	font-size: 8pt;
+	}
+	#crumbs a {
+		color: #000;
+		text-decoration: none;
+		}
+
+#menu,
+#clearing,
+form,
+#debug,
+.comment.form {
+	display: none;
+	}
+
+.reply {
+	margin: 0 0 1em 2em;
+	}
+
+h1 {
+	font-size: 2em;
+	margin-bottom: 0;
+	}
+
+a:link, a:visited {
+	color: #05c;
+	background: transparent;
+	text-decoration: underline;
+	}
+
+#content a:after,
+#copyright a:after {
+	content: " (" attr(href) ") ";
+	font-size: 90%;
+	}
+/* Put your site URL here if you prefer URLs starting with '/'. */
+/* 	#content a[href^="/"]:after {
+		content: " (http://example.com" attr(href) ") ";
+		} */
+	#content a[href^="#"]:after {
+		content: "";
+		}
+
+#content table {
+	border-collapse: collapse;
+	}
+	#content table td {
+		border: 1px solid #000;
+		}
+
+#copyright {
+	border-top: 1px solid #000;
+	}

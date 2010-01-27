@@ -1,0 +1,102 @@
+/*
+// 2005-03-21
+// Copyright (c) Art. Lebedev | http://www.artlebedev.ru/
+// Author - Vladimir Tokmakov
+//
+// Modified by Roman Parpalak
+*/
+
+.tabsheets,
+.tabsheets dt,
+.tabsheets dd {
+	margin: 0;
+	padding: 0;
+	width: auto;
+	border: none;
+}
+
+dl.tabsheets dt,
+dl.tabsheets dd {
+	background-color: #eee;
+	color: #000;
+	border: 1px solid #eee;
+	border-color: #fff #aaa #aaa #fff;
+}
+
+dl.tabsheets dd {
+	border-width: 0px 0 0 0;
+}
+
+.tabsheets {
+	position: relative;
+	padding: 0;
+}
+
+.tabsheets dt {
+	float: left;
+	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	padding: 4px 6px 8px 26px;
+	cursor: default;
+	white-space: nowrap;
+	margin-top: 1px;
+	background-position: 4px 3px;
+	background-repeat: no-repeat;
+	position: relative;
+	top: 7px;
+	z-index: 1;
+}
+
+.tabsheets dt.active {
+	background-color: #fff;
+	margin-top: 0;
+}
+
+.tabsheets dd {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	display: block;
+	left: 0;
+	padding: 29px 0 0;
+}
+
+.tabsheets dd .reducer {
+	position: relative;
+	z-index: 2;
+	border-top: 1px solid #fff;
+	background: #eee;
+	overflow: auto;
+	height: 100%;
+	padding: 0.833em;
+}
+
+#list_tab,
+#admin-stat_tab {
+	margin-left: 0.833em;
+}
+
+.tabsheets dd.inactive {
+	display: none;
+}
+
+.tabsheets dd.inactive iframe,
+.tabsheets dd.inactive select,
+.tabsheets dd.inactive textarea,
+.tabsheets dd.inactive input {
+	display: none ! important;
+}
+.tabsheets dd.active {
+	display: block;
+}
+
+#list_tab { background-image: url('../i/co.png'); }
+#edit_tab { background-image: url('../i/pe.png'); }
+#view_tab { background-image: url('../i/view.png'); }
+#pict_tab { background-image: url('../i/fp.png'); }
+#comm_tab { background-image: url('../i/comments.png'); }
+#tag_tab { background-image: url('../i/key.png'); }
+#admin_tab { background-image: url('../i/wrench_orange.png'); }
+#admin-stat_tab { background-image: url('../i/chart_bar.png'); }
+#admin-opt_tab { background-image: url('../i/cog.png'); }
+#admin-user_tab { background-image: url('../i/user.png'); }
+#admin-ext_tab { background-image: url('../i/plugin.png'); }

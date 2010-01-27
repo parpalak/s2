@@ -1,0 +1,761 @@
+/* Fixing the box model for some blocks */
+.tabsheets,
+.tabsheets dd,
+.tabsheets dd .reducer,
+.r-float,
+.l-float,
+.border,
+.text_wrapper,
+#keyvalues,
+#comm_div,
+.tagswitcher,
+#wText,
+#commtext,
+#kText,
+.fields input,
+div.input.text input,
+.r-float input[type="text"] {
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	}
+
+/*===========================[General styles for height: 100%]================*/
+
+html,
+.tabsheets,
+.border,
+.r-float {
+	overflow: hidden;
+	}
+
+html,
+body {
+	height: 100%;
+	min-height: 100%;
+	}
+
+.tabsheets,
+.text_wrapper,
+.tabsheets dd .reducer form[name="tagform"],
+.tabsheets dd .reducer form[name="artform"],
+.tabsheets dd .reducer form[name="commform"],
+.r-float,
+.l-float,
+.border,
+#comm_div {
+	height: 100%;
+	}
+
+.tags_list,
+#tree,
+#keytable div {
+	overflow: auto;
+	height: 100%;
+	}
+
+/*===========================[General styles]=================================*/
+
+body {
+	margin: 0;
+	padding: 0;
+	background: #eee;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 75%;
+	color: #000;
+	}
+
+#login_pan {
+	position: absolute;
+	z-index: 20;
+	top: 0.167em;
+	right: 0.167em;
+	}
+
+#loading {
+	height: 20px;
+	width: 20px;
+	float: left;
+	margin: 1px;
+	border: 1px solid #E4BB50;
+	background: #FFF4D7 url('../i/loading.gif') 50% 50% no-repeat;
+	}
+
+#tooltip {
+	background: #FFF4D7;
+	border: 1px solid #E4BB50;
+	color: #000;
+	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	margin: 0px;
+	padding: 1px 5px;
+	position: absolute;
+	z-index: 10;
+	visibility: hidden;
+	}
+
+a img {
+	border: 0;
+	}
+
+a.js,
+a.js:active,
+a.js:hover,
+a.js:visited,
+table.sort a.js {
+	text-decoration: none;
+	border-bottom: 1px dashed #05c;
+	color: #05c;
+	outline: none;
+	display: inline;
+	padding: 0;
+	}
+
+hr {
+	margin: 5px 0;
+	padding: 0;
+	background-color: #eee;
+	color: #ddd;
+	border: 1px solid #eee;
+	border-color: #aaa #fff #fff #aaa;
+	}
+
+.tabsheets dd .no-scroll {
+	overflow: hidden;
+	}
+
+#pict_frame,
+#preview_frame {
+	width: 100%;
+	height: 100%;
+	border: 0;
+	margin: 0;
+	}
+
+/*=======================[Site map tab]=======================================*/
+
+/* Styles for the tree */
+
+.source {
+	color: #aaa;
+	}
+
+#dragged {
+	color: #fff;
+	background: #00c;
+	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	border: 1px dotted #ff3;
+	padding: 1px 2px;
+	margin: 0;
+	position: absolute;
+	z-index: 100;
+	visibility: hidden;
+	}
+
+.over_top {
+	border-top: 0.5em solid #007;
+	position: relative;
+	top: 0.25em;
+	}
+
+.over_bottom {
+	border-bottom: 0.5em solid #007;
+	position: relative;
+	top: -0.25em;
+	}
+
+.over_far {
+	background: #FFF4D7;
+	border: 1px solid #fa0;
+	color: #000;
+	}
+
+#tree {
+	background: #fff;
+	border: 1px solid #eee;
+	border-color: #aaa #fff #fff #aaa;
+	position: relative;
+	}
+
+/*
+ * Styles for the tree proper.
+ * ".treeview" style definitions are based on code by Vladimir Tokmakov.
+ * See http://www.artlebedev.ru/tools/technogrette/html/treeview/ for details.
+ */
+
+.treeview {
+	padding: 0px;
+	width: 100%;
+	}
+	.treeview span {
+		cursor: default;
+		}
+	.treeview ul {
+		overflow: hidden;
+		width: 100%;
+		margin: 0;
+		padding: 0 0 1.5em 0;
+		list-style-type: none;
+		}
+		.treeview ul ul {
+			overflow: visible;
+			width: auto;
+			margin: 0 0 0 0;
+			padding: 0 0 0 0.75em;
+			}
+		.treeview ul.l {
+			border-left: 1px solid;
+			margin-left: -1px;
+			}
+	.treeview li {
+		margin: 0;
+		padding: 0;
+		}
+		.treeview li.cl ul {
+			display: none;
+			}
+		.treeview li li {
+			margin: 0 0 0 0.5em;
+			border-left: 1px dotted;
+			padding: 0;
+			}
+		.treeview li div {
+			position: relative; height: 1.5em; min-height: 16px;
+			}
+			.treeview li li div {
+				border-bottom: 1px dotted;
+				}
+		.treeview li p {
+			position: absolute; z-index: 2; top: 0.833em; left: 1.75em;
+			width: 100%;
+			margin: 0;
+			padding: 0;
+			border-bottom: 1px dashed;
+			}
+	.treeview a {
+		padding: 0.1em 0.2em;
+		white-space: nowrap;
+		}
+		.treeview a.sc {
+			position: absolute;
+			top: 0.083em;
+			margin-left: -0.833em;
+			padding: 0.25em 0;
+			text-decoration: none;
+			background: transparent;
+			}
+			.treeview a.sc img {
+				height: 9px;
+				width: 9px;
+				}
+	.treeview img.i {
+		border-right: 2px solid;
+		vertical-align: top;
+		}
+	.treeview span {
+		line-height: 1.333em;
+		}
+
+/* colors */
+.treeview li p,
+.treeview img.i,
+.treeview .sc {
+	background: #fff;
+	}
+.treeview ul.l,
+.treeview li p,
+.treeview img.i {
+	border-color: #fff;
+	}
+.treeview ul li li,
+.treeview ul li li div {
+	border-color: #999;
+	}
+.treeview a,
+.treeview a.sc,
+.treeview a.sc:hover {
+	color: #000;
+	}
+
+/* Context buttons */
+
+#context_buttons {
+	display: none;
+	}
+
+.but_panel {
+	position: relative;
+	padding: 1px 0;
+	color: #fff;
+	background: #007;
+	border: 1px dotted #ff8;
+	}
+	.but_panel #context_buttons {
+		margin-left: 2em;
+		display: inline;
+		}
+	.but_panel span img {
+		width: 16px;
+		height: 16px;
+		margin-left: 4px;
+		vertical-align: top;
+		color: #000;
+		}
+		.but_panel span img[src="i/comments.png"] {
+			display: none;
+			}
+			.but_panel[comm] span img[src="i/comments.png"] {
+				display: inline-block;
+				}
+	.but_panel img:hover {
+		background-color: #fff;
+		outline: #eee outset 1px;
+		}
+	.but_panel input {
+		background: #fff;
+		color: #000;
+		border: 1px solid #aaa;
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		font-size: 100%;
+		padding: 1px 0;
+		margin: -1px 0 0 -1px;
+		}
+
+ul .but_panel .delete {
+	display: none;
+	}
+	ul ul .but_panel .delete {
+		display: inline-block;
+		}
+
+/* Tags */
+
+#tree_panel {
+	padding-bottom: 30px;
+	float: left;
+	width: 100%;
+	margin-right: -30px;
+	padding-right: 30px;
+	}
+
+#keytable {
+	float: right;
+	width: 16px; /**/
+	border: 0;
+	padding: 0;
+	overflow: hidden;
+	}
+	#keytable div {
+		float: left;
+		}
+	#keytable ul,
+	#keytable ul li{
+		list-style-type: none;
+		padding: 0;
+		margin: 0;
+		}
+
+#keynames {
+	width: 200px;
+	display: none; /**/
+	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	}
+	#keynames ul {
+		border-left: 1px solid #fff;
+		min-height: 100%;
+		}
+		#keynames ul li {
+			border: 1px solid #eee;
+			border-width: 1px 1px 1px 0;
+			border-left-width: 0;
+			background: #eee;
+			padding: 0 10px;
+			}
+			#keynames ul li.cur_key {
+				padding-left: 12px;
+				margin-left: -1px;
+				border-top-color: #aaa;
+				border-right-color: #fff;
+				border-bottom-color: #fff;
+				}
+
+#keyvalues {
+	width: 200px;
+	padding: 0;
+	border: 1px solid #fff;
+	border-color: #aaa transparent #fff #aaa;
+	display: none; /**/
+	}
+	#keyvalues img {
+		height: 16px;
+		width: 16px;
+		float: right;
+		}
+		#keyvalues img:hover {
+			background: #fff;
+			}
+	#keyvalues ul li {
+		padding: 0.25em 0.5em;
+		}
+
+.tagswitcher {
+	position: relative;
+	width: 16px;
+	}
+	.tagswitcher img {
+		position: absolute;
+		background: #aaa;
+		top: 50%;
+		height: 10px;
+		width: 10px;
+		padding: 30px 3px;
+		margin-top: -35px;
+		cursor: pointer;
+		cursor: hand;
+		}
+
+#keyvalues ul li:hover,
+.tagswitcher img:hover{
+	background: #fafac0;
+	}
+
+/* Buttons in the panel */
+
+.pan {
+	padding-bottom: 5px;
+	}
+	.pan img {
+		margin: 0px;
+		padding: 2px;
+		height: 16px;
+		width: 16px;
+		border: #eee solid 1px;
+		}
+		.pan img:hover {
+			border-color: #fff #aaa #aaa #fff;
+			}
+		.pan img:active {
+			border-color: #aaa #fff #fff #aaa;
+			}
+
+/*=======================[Table styles]=======================================*/
+
+/*
+ * The following style definitions are based on code by Alexander Shurkayev.
+ * See http://htmlcoder.visions.ru/JavaScript/?22 for details.
+ */
+
+table.sort {
+	background: #f3f3f3;
+	border-collapse: collapse;
+	margin: 1em 0;
+	}
+
+	table.sort tr.hidden td {
+		background: #ddd;
+		text-decoration: line-through;
+		color: #333;
+		}
+	table.sort tr.good td {
+		background: #e8ffe8;
+		}
+	table.sort tr.hidden.good td {
+		background: #a8e8a8;
+		text-decoration: line-through;
+		color: #333;
+		}
+
+	table.sort tbody tr:hover {
+		background: #fafac0;
+		}
+
+	table.sort td {
+		border: 1px solid #ccc;
+		}
+		table.sort thead td {
+			background: #ccc;
+			cursor: pointer;
+			cursor: hand;
+			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+			text-align: center;
+			vertical-align: middle;
+			}
+			table.sort thead td span {
+				margin-right: 0.5em;
+				font-weight: bold;
+				}
+			table.sort thead td.curcol {
+				background: #060;
+				color: #fff;
+				}
+		table.sort tbody td {
+			text-align: center;
+			}
+			table.sort tbody td.content {
+				text-align: left;
+				}
+
+	table.sort a {
+		display: block;
+		padding: 3px 0.5em;
+		}
+
+	table.sort img {
+		border: 1px transparent solid;
+		}
+		table.sort img:hover {
+			border: 1px #E4BB50 solid;
+			border-color: #fff #aaa #aaa #fff;
+			background: #eee;
+			}
+		table.sort img:active {
+			border: 1px #E4BB50 solid;
+			border-color: #aaa #fff #fff #aaa;
+			background: #eee;
+			}
+
+/*=======================[Tags tab]===========================================*/
+
+.tags_list {
+	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	}
+	.tags_list a,
+	.tags_list a:active,
+	.tags_list a:hover,
+	.tags_list a:visited {
+		color: #05c;
+		outline: none;
+		}
+
+/*===========================[Editor styles]==================================*/
+
+.border,
+.r-float {
+	border: 1px solid #eee;
+	border-color: #fff #aaa #aaa #fff;
+	padding: 5px;
+	}
+
+.l-float {
+	float: left;
+	width: 100%;
+	margin-right: -320px;
+	padding-right: 320px;
+	}
+
+.pad-1 {
+	margin-right: -160px;
+	padding-right: 160px;
+	}
+
+.r-float {
+	float: right;
+	width: 150px;
+	margin-left: 10px;
+	}
+	.r-float select {
+		font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+		}
+	.r-float input[type="text"] {
+		width: 100%;
+		}
+	.r-float input[type="checkbox"] {
+		vertical-align: sub;
+		}
+
+table.fields {
+	width: 100%;
+	border: 0;
+	border-collapse: collapse;
+	margin: 0;
+	margin-bottom: 0.25em;
+	}
+	table.fields tr td {
+		vertical-align: middle;
+		border: 0;
+		padding: 1px 0;
+		}
+		table.fields tr td.label {
+			text-align: right;
+			padding-right: 0.5em;
+			padding-left: 0.5em;
+			width: 9.5em;
+			white-space: nowrap;
+			}
+
+.r-float input[type="text"],
+div.input.text input,
+.fields input[type="text"] {
+	padding: 2px;
+	font: 1em Arial, Helvetica, sans-serif;
+	}
+
+.fields input[type="text"],
+div.input.text input,
+#wText,
+#commtext,
+#kText {
+	width: 100%;
+	margin: 0;
+	border: 1px solid #ccc;
+	border-color: #aaa #ccc #ccc #aaa;
+	}
+
+.fields input.char-2 {
+	width: 1.917em;
+	}
+.fields input.char-4 {
+	width: 3em;
+	}
+
+#wText,
+#commtext,
+#kText {
+	height: 100%;
+	line-height: 1.2;
+	padding: 0.25em;
+	}
+
+.bitbtn {
+	font: 0.917em/1.2 Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	padding: 1px 2px 2px 20px;
+	height: 23px;
+	min-width: 120px;
+	background-position: 1px 1px;
+	background-repeat: no-repeat;
+	background-color: #f2f2f2;
+	border: 2px solid #ccc;
+	border-color: #fff #aaa #aaa #fff;
+	}
+	.bitbtn:active {
+		border-color: #aaa #fff #fff #aaa;
+		}
+
+.bitbtn.save { background-image: url(../i/page_white_save.png);}
+.bitbtn.reset { background-image: url(../i/page_white_refresh.png);}
+.bitbtn.new { background-image: url(../i/page_white.png);}
+.bitbtn.parag { background-image: url(../i/par.png);}
+.bitbtn.savetag { background-image: url(../i/key_save.png);}
+.bitbtn.resettag { background-image: url(../i/key_refresh.png);}
+.enabled .bitbtn.flip_ext { background-image: url(../i/stop.png);}
+.disabled .bitbtn.flip_ext { background-image: url(../i/play.png);}
+.bitbtn.uninst_ext { background-image: url(../i/plugin_delete.png);}
+.bitbtn.inst_ext { background-image: url(../i/plugin_add.png);}
+
+/*=======================[Options tab]========================================*/
+
+fieldset {
+	border: 1px solid #ccc;
+	margin: 0 0 0.5em;
+	padding: 0.5em;
+	}
+	fieldset legend {
+		font-weight: bold;
+		color: #333;
+		}
+
+div.input {
+	width: auto;
+	margin-left: 20em;
+	margin-right: 0.5em;
+	position: relative;
+	padding: 0.416em 0;
+	}
+	div.input input,
+	div.input.select select {
+		position: absolute;
+		top: 0.25em;
+		left: 0;
+		}
+	div.input.select {
+		min-height: 1.5em;
+		}
+	div.input.select select {
+		margin: 0;
+		font: 1em Arial, Helvetica, sans-serif;
+		}
+	div.input.checkbox input {
+		margin: 0.166em 0;
+		}
+	div.input.text label {
+		padding: 0;
+		}
+	div.input.checkbox label {
+		margin-left: 1.583em;
+		}
+		div.input label small {
+			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+			color: #666;
+			margin: 1.636em 0 0 0.454em;
+			display: block;
+			}
+	div.input label span,
+	div.input .subhead {
+		display: block;
+		float: left;
+		text-align: right;
+		position: relative;
+		width: 19em;
+		margin-left: -20em;
+		font-weight: bold;
+		color: #555;
+		}
+		div.input label span em {
+			color: #f00;
+			position: absolute;
+			right: 0;
+			top: 1.25em;
+			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+			}
+
+/*=======================[Extensions tab]=====================================*/
+
+#comm_div {
+	padding-top: 2em;
+	}
+
+#ext_div h2,
+#comm_div h2 {
+	font-size: 1.4em;
+	font-weight: normal;
+	margin: 0;
+	border-bottom: 3px double #ddd;
+	}
+
+.extension,
+.info-box {
+	margin: 1em 0;
+	border: 1px solid #ccc;
+	padding: 1em 1em 0;
+	}
+	.extension .info {
+		float: left;
+		width: 100%;
+		margin-right: -200px;
+		}
+	.extension .options {
+		float: right;
+		text-align: right;
+		width: 200px;
+		}
+	.extension h3 {
+		margin-top: 0;
+		}
+	.extension p,
+	.extension h3,
+	.info-box p {
+		margin: 0 0 1em;
+		font-size: 1em;
+		}
+	.info-box p strong,
+	.extension.error h3 {
+		color: red;
+		}
+
+.info-box {
+	background: #fafae0;
+	border: 1px solid #dda;
+	}
+
+.extension.disabled {
+	background: #ccc;
+	}

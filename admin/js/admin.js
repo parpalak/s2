@@ -1,0 +1,1373 @@
+/**
+ * Main JS functions
+ *
+ * Drag & drop, event handlers for the admin panel
+ *
+ * @copyright (C) 2007-2010 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package S2
+ */
+
+// Simple hooks managing
+
+var hooks = [];
+
+function add_hook (hook, code)
+{
+	if (typeof(hooks[hook]) != 'string')
+		hooks[hook] = code;
+	else
+		hooks[hook] += code;
+}
+
+// Helper functions
+
+function str_replace(substr, newsubstr, str)
+{
+	while (str.indexOf(substr) >= 0)
+		str = str.replace(substr, newsubstr);
+	return str;
+}
+
+function get_attr(sStr, sAttr)
+{
+	var iBeg = sStr.indexOf(sAttr);
+	if (iBeg)
+	{
+		var iStart = sStr.indexOf('"', iBeg) + 1;
+		var iEnd = sStr.indexOf('"', iStart);
+		return sStr.substring(iStart, iEnd);
+	}
+	return '';
+}
+
+var bIE = document.attachEvent != null;
+var bFF = !document.attachEvent && document.addEventListener;
+
+var eTextarea;
+
+function Init ()
+{
+	InitMovableDivs();
+	InitShortcuts();
+	InitTooltips();
+	cur_page = document.location.hash;
+	setInterval(CheckPage, 400);
+	SetWait(false);
+}
+
+function InitTooltips ()
+{
+	if (bIE)
+	{
+		document.attachEvent("onmouseover", ShowTip);
+		document.attachEvent("onmouseout", HideTip);
+	}
+	if (bFF)
+	{
+		document.addEventListener("mouseover", ShowTip, false);
+		document.addEventListener("mouseout", HideTip, false);
+	}
+}
+
+// Turning animated icon on or off
+
+function SetWait (bWait)
+{
+	var eAni = document.getElementById("loading");
+	var eTree = document.getElementById("tree_div");
+
+	if (bWait)
+	{
+		eAni.style.display = "block";
+		eTree.style.cursor = "wait";
+		tooltip.h();
+	}
+	else
+	{
+		eAni.style.display = "none";
+		eTree.style.cursor = "default";
+	}
+}
+
+// Handling "back" and "forward" browser buttons
+
+var cur_page = '';
+
+function SetPage (sId)
+{
+	cur_page = '#' + str_replace('_tab', '', sId);
+	if (document.location.hash != cur_page)
+		document.location.hash = cur_page;
+	//window.open('#' + pagehash[1], '_self');
+}
+
+function CheckPage ()
+{
+	if (document.location.hash != cur_page)
+	{
+		var new_page = document.location.hash.substr(1)
+		if (new_page.indexOf('-') != -1)
+			SelectTab(document.getElementById(new_page.split('-')[0] + '_tab'), false);
+		SelectTab(document.getElementById(new_page + '_tab'), true);
+	}
+}
+
+// Handling CTRL + S shortcut
+
+var ua = navigator.userAgent.toLowerCase();
+var isIE = (ua.indexOf("msie") != -1 && ua.indexOf("opera") == -1);
+var isSafari = ua.indexOf("safari") != -1;
+var isGecko = (ua.indexOf("gecko") != -1 && !isSafari);
+
+function InitShortcuts ()
+{
+	var event = isIE || isSafari ? 'keydown' : 'keypress';
+	if (bIE)
+		document.attachEvent ('on' + event, SaveHandler);
+	if (bFF)
+		document.addEventListener (event, SaveHandler, true);
+}
+
+function SaveHandler (e)
+{
+	e = e || window.event;
+	var key = e.keyCode || e.which;
+	key = !isGecko ? (key == 83 ? 1 : 0) : (key == 115 ? 1 : 0);
+	if (e.ctrlKey && key)
+	{
+		if (e.preventDefault)
+			e.preventDefault();
+		e.returnValue = false;
+
+		if (document.artform && '#edit' == cur_page)
+			document.artform.onsubmit();
+
+		if (document.commform && '#comm' == cur_page)
+			document.commform.onsubmit();
+
+		if (document.tagform && '#tag' == cur_page)
+			SaveTag();
+
+		if (document.optform && '#admin-opt' == cur_page)
+			SaveOptions();
+
+		window.focus();
+		return false;
+	}
+}
+
+// Creating the button panel and div for drag
+
+var draggableDiv = null, buttonPanel = null;
+
+function InitMovableDivs ()
+{
+	if (draggableDiv == null)
+	{
+		draggableDiv = document.createElement("DIV");
+		document.body.appendChild(draggableDiv);
+		draggableDiv.setAttribute("id", "dragged");
+		MoveDraggableDiv(-99, -99);
+	}
+	if (buttonPanel == null)
+	{
+		buttonPanel = document.getElementById('context_buttons');
+		buttonPanel.parentNode.removeChild(buttonPanel);
+	}
+}
+
+function MoveDraggableDiv(x, y)
+{
+	draggableDiv.style.width = "auto";
+
+	draggableDiv.style.left = x + 10 + "px";
+	draggableDiv.style.top = y + 0 + "px";
+}
+
+// Expanding the tree
+
+var asExpanded = [];
+
+function ExpandSavedItem(sId)
+{
+	var iId = parseInt(sId);
+
+	if (!isNaN(iId))
+		asExpanded[iId] = '';
+}
+
+function SaveExpand ()
+{
+	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
+	var i, iId;
+
+	for (i = aSpan.length; i-- ;)
+	{
+		iId = parseInt(aSpan[i].id);
+		if (!isNaN(iId))
+			asExpanded[iId] = aSpan[i].parentNode.parentNode.parentNode.className;
+	}
+}
+
+function LoadExpand ()
+{
+	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
+	var i, iId;
+
+	for (i = aSpan.length; i-- ;)
+	{
+		iId = parseInt(aSpan[i].id);
+		if (!isNaN(iId) && asExpanded[iId] == "" && aSpan[i].parentNode.firstChild.nodeName == "A")
+		{
+			aSpan[i].parentNode.firstChild.innerHTML = '<img src="i/m.gif" alt="" />';
+			aSpan[i].parentNode.parentNode.parentNode.className = '';
+			aSpan[i].parentNode.childNodes[1].setAttribute("src", "i/fo.png");
+		}
+	}
+}
+
+function UnHide (eThis)
+{
+	if (eThis.parentNode.parentNode.parentNode.className == 'cl')
+	{
+		eThis.innerHTML = '<img src="i/m.gif" alt="" />';
+		eThis.parentNode.parentNode.parentNode.className = '';
+		eThis.nextSibling.setAttribute("src", "i/fo.png");
+	}
+	else
+	{
+		eThis.innerHTML = '<img src="i/p.gif" alt="" />';
+		eThis.parentNode.parentNode.parentNode.className = 'cl';
+		eThis.nextSibling.setAttribute("src", "i/fc.png");
+	}
+	return false;
+}
+
+function CloseAll ()
+{
+	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
+	var i, iId;
+
+	for (i = aSpan.length; i-- ;)
+	{
+		iId = parseInt(aSpan[i].id);
+		if (!isNaN(iId) && aSpan[i].parentNode.firstChild.nodeName == "A")
+		{
+			aSpan[i].parentNode.firstChild.innerHTML = '<img src="i/p.gif" alt="" />';
+			aSpan[i].parentNode.parentNode.parentNode.className = 'cl';
+			aSpan[i].parentNode.childNodes[1].setAttribute("src", "i/fc.png");
+		}
+	}
+}
+
+function OpenAll ()
+{
+	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
+	var i, iId;
+
+	for (i = aSpan.length; i-- ;)
+	{
+		iId = parseInt(aSpan[i].id);
+		if (!isNaN(iId) && aSpan[i].parentNode.firstChild.nodeName == "A")
+		{
+			aSpan[i].parentNode.firstChild.innerHTML = '<img src="i/m.gif" alt="" />';
+			aSpan[i].parentNode.parentNode.parentNode.className = '';
+			aSpan[i].parentNode.childNodes[1].setAttribute("src", "i/fo.png");
+		}
+	}
+}
+
+function RefreshTree()
+{
+	var Response = GETSyncRequest(sUrl + "action=load_tree&id=0");
+	if (Response.status != '200')
+		return;
+
+	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
+	SetCallbacks();
+}
+
+//=======================[Tree event handlers]==================================
+
+function SetCallbacks ()
+{
+	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
+
+	for (var i = aSpan.length; i-- ;)
+	{
+		if (isNaN(parseInt(aSpan[i].id)))
+			continue;
+
+		aSpan[i].onmousedown = MouseDown;
+		aSpan[i].onmouseover = MouseIn;
+		aSpan[i].onmouseout = MouseOut;
+		aSpan[i].unselectable = true;
+		if (aSpan[i].parentNode.firstChild.nodeName == "A")
+		{
+			if (aSpan[i].parentNode.childNodes[1].nodeName != "IMG")
+			{
+				var eImg = document.createElement("IMG");
+
+				eImg.setAttribute("alt", "");
+				eImg.setAttribute("class", "i");
+				eImg.setAttribute("src", "i/fc.png");
+				eImg.onmousedown = MouseDown;
+
+				aSpan[i].parentNode.insertBefore(eImg, aSpan[i].parentNode.childNodes[1]);
+			}
+		}
+		else if (aSpan[i].parentNode.firstChild.nodeName != "IMG")
+		{
+			var eImg = document.createElement("IMG");
+
+			eImg.setAttribute("alt", "");
+			eImg.setAttribute("class", "i");
+			eImg.setAttribute("src", "i/page_white.png");
+			eImg.onmousedown = MouseDown;
+
+			aSpan[i].parentNode.insertBefore(eImg, aSpan[i].parentNode.firstChild);
+		}
+	}
+}
+
+//=======================[Highlight and renaming]===============================
+
+function HighlightItem (item)
+{
+	item.className = "but_panel";
+	item.appendChild(buttonPanel);
+}
+
+function ReleaseItem ()
+{
+	if (buttonPanel.parentNode)
+	{
+		buttonPanel.parentNode.className = "";
+		buttonPanel.parentNode.removeChild(buttonPanel);
+	}
+}
+
+var sSavedName = "", eInput;
+
+function RejectName ()
+{
+	if (sSavedName == "")
+		return;
+
+	var eSpan = eInput.parentNode;
+	eSpan.firstChild.nodeValue = sSavedName;
+	sSavedName = "";
+	eSpan.removeChild(eInput);
+	eSpan.onmousedown = MouseDown;
+}
+
+function KeyPress (e)
+{
+	var iCode = (e ? e : window.event).keyCode;
+
+	// Enter
+	if (iCode == 13)
+	{
+		var eSpan = eInput.parentNode;
+
+		SaveExpand();
+		var Response = POSTSyncRequest(sUrl + "action=rename&id=" + buttonPanel.parentNode.id, "title=" + encodeURIComponent(eInput.value));
+		ReleaseItem();
+		if (Response.status != '200')
+			return;
+
+		// We could call SetParentChildren() here.
+		// That function can remove children if the argument is "".
+		// But we do know that Response.text can't be empty on renaming.
+		eSpan.parentNode.parentNode.parentNode.parentNode.innerHTML = Response.text;
+		sSavedName = "";
+		SetCallbacks();
+		LoadExpand();
+	}
+	// Escape
+	if (iCode == 27)
+		RejectName();
+}
+
+function EditItemName (item)
+{
+	sSavedName = item.firstChild.nodeValue;
+	var iWidth = item.offsetWidth - item.lastChild.offsetWidth;
+
+	eInput = document.createElement("INPUT");
+	eInput.setAttribute("type", "text");
+	eInput.onblur = RejectName;
+	eInput.onkeypress = KeyPress;
+	eInput.setAttribute("value", sSavedName);
+	eInput.style.width = iWidth + "px";
+
+	item.insertBefore(eInput, item.childNodes[1]);
+	eInput.focus();
+	eInput.select();
+	item.firstChild.nodeValue = "";
+	item.onmousedown = null;
+}
+
+//=======================[Drag & drop]==========================================
+
+var sourceElement, acceptorElement, sourceParent;
+var far;
+
+var dragging;
+
+// We have to create a "UL" child node if there is no one
+function SetItemChildren (eSpan, sInnerHTML)
+{
+	var eLi = eSpan.parentNode.parentNode.parentNode;
+
+	if (eLi.lastChild.nodeName == "UL")
+	{
+		eLi.lastChild.innerHTML = sInnerHTML;
+
+		var eThis = eSpan.parentNode.firstChild;
+
+		if (eThis.parentNode.parentNode.parentNode.className == 'cl')
+		{
+			eThis.innerHTML = '<img src="i/m.gif" alt="" />';
+			eThis.parentNode.parentNode.parentNode.className = '';
+			eThis.nextSibling.setAttribute("src", "i/fo.png");
+		}
+	}
+	else
+	{
+		var eUl = document.createElement("UL");
+
+		eLi.className = "";
+		eLi.appendChild(eUl);
+		eUl.innerHTML = sInnerHTML;
+
+		var eA = document.createElement("A");
+
+		eA.setAttribute("href", "#");
+		eA.className = "sc";
+		eA.setAttribute("onclick", "return UnHide(this)");
+		eA.innerHTML = '<img src="i/m.gif" alt="" />';
+
+		eLi.firstChild.firstChild.firstChild.setAttribute("src", "i/fo.png");
+		eLi.firstChild.firstChild.insertBefore(eA, eLi.firstChild.firstChild.firstChild);
+	}
+}
+
+// We have to remove the "UL" node if the list is empty
+function SetParentChildren (eParentUl, str)
+{
+	if (str != "")
+		eParentUl.innerHTML = str;
+	else
+	{
+		var eLi = eParentUl.parentNode;
+		eLi.removeChild(eLi.lastChild);
+		eLi.firstChild.firstChild.removeChild(eLi.firstChild.firstChild.firstChild);
+		eLi.firstChild.firstChild.firstChild.setAttribute("src", "i/page_white.png");
+	}
+}
+
+var drag_html = '';
+
+function StartDrag ()
+{
+	ReleaseItem();
+
+	sourceElement.className = 'source';
+	dragging = true;
+
+	drag_html = '<strong>' + sourceElement.innerHTML + '</strong>';
+	draggableDiv.innerHTML = drag_html;
+	draggableDiv.style.visibility = 'visible';
+
+	sourceParent = sourceElement.parentNode.parentNode.parentNode.parentNode;
+	far = 0;
+}
+
+function StopDrag()
+{
+	dragging = false;
+	sourceElement.className = "";
+	MoveDraggableDiv(-99, -99);
+	draggableDiv.style.visibility = "hidden";
+	drag_html = '';
+
+	if (acceptorElement)
+	{
+		SaveExpand();
+
+		acceptorElement.className = "";
+
+		if (far)
+		{
+			var eItem = acceptorElement;
+			var eSourceLi = sourceElement.parentNode.parentNode.parentNode;
+
+			while (eItem)
+			{
+				if (eItem == eSourceLi)
+				{
+					alert(S2_LANG_NO_LOOPS);
+					acceptorElement = null;
+					return;
+				}
+				eItem = eItem.parentNode;
+			}
+
+			var Response = GETSyncRequest(sUrl + "action=drag&sid=" + sourceElement.id + "&did=" + acceptorElement.id + "&far=" + far);
+			if (Response.status != '200')
+			{
+				acceptorElement = null;
+				return;
+			}
+
+			var a = Response.text.split('|', 2);
+			SetParentChildren(sourceParent, a[1]); //source
+			SetItemChildren(acceptorElement, a[0]); //destination
+		}
+		else
+		{
+			var Response = GETSyncRequest(sUrl + "action=drag&sid=" + sourceElement.id + "&did=" + acceptorElement.id + "&far=" + far);
+			if (Response.status != '200')
+			{
+				acceptorElement = null;
+				return;
+			}
+			sourceParent.innerHTML = Response.text;
+		}
+		acceptorElement = null;
+		SetCallbacks();
+		LoadExpand();
+	}
+}
+
+//=======================[Mouse events]=========================================
+
+var mouseX, mouseY, mouseStartX, mouseStartY = 0;
+
+function MouseDown(e)
+{
+	var t = window.event ? window.event.srcElement : e.target;
+
+	if (t.nodeName == "IMG" && t.nextSibling)
+		t = t.nextSibling;
+
+	if (t.nodeName == "SPAN" && !isNaN(parseInt(t.id)))
+		sourceElement = t;
+	else
+		// Do not handle span child eventss
+		return;
+
+	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
+	mouseStartX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
+	mouseStartY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
+
+	if (bIE)
+	{
+		document.attachEvent("onmousemove", MouseMove);
+		document.attachEvent("onmouseup", MouseUp);
+		window.event.cancelBubble = true;
+		window.event.returnValue = false;
+	}
+	if (bFF)
+	{
+		document.addEventListener("mousemove", MouseMove, true);
+		document.addEventListener("mouseup", MouseUp, true);
+		e.preventDefault();
+	}
+}
+
+function MouseMove(e)
+{
+	if (!dragging && (Math.abs(mouseStartY - mouseY) > 2 || Math.abs(mouseStartX - mouseX) > 2))
+		StartDrag();
+
+	var oCanvas = document.getElementsByTagName(
+	(document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY"
+	)[0];
+	mouseX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
+	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
+
+	MoveDraggableDiv(mouseX, mouseY);
+}
+
+var idTimer, bIntervalPassed = true;
+
+function MouseUp(e)
+{
+	var is_drop = dragging;
+	if (dragging)
+		StopDrag();
+
+	if (sSavedName)
+		RejectName();
+
+	if (bMouseInKeyvalues)
+	{
+		AddKey(sourceElement.id);
+		KeyvaluesMouseOut();
+	}
+	else if (!bIntervalPassed)
+	{
+		// Double click
+		if (!is_drop)
+			var wnd = window.open(sUrl + "action=preview&id=" + sourceElement.id, 'previewwindow1', 'scrollbars=yes,toolbar=yes', 'True');
+
+		clearTimeout(idTimer);
+		bIntervalPassed = true;
+	}
+	else
+	{
+		// Single click
+		if (sourceElement == buttonPanel.parentNode)
+		{
+			// Highlighted item
+			var sJob = is_drop ? '' : ' EditItemName(document.getElementById("' + sourceElement.id + '"));';
+			bIntervalPassed = false;
+			idTimer = setTimeout('bIntervalPassed = true;' + sJob, 400);
+		}
+		else
+		{
+			ReleaseItem();
+			HighlightItem(sourceElement);
+			bIntervalPassed = false;
+			idTimer = setTimeout('bIntervalPassed = true;', 400);
+		}
+	}
+	sourceElement = null;
+
+	if (bIE)
+	{
+		document.detachEvent ("onmousemove", MouseMove);
+		document.detachEvent ("onmouseup", MouseUp);
+	}
+	if (bFF)
+	{
+		document.removeEventListener ("mousemove", MouseMove, true);
+		document.removeEventListener ("mouseup", MouseUp, true);
+	}
+}
+
+//=======================[Rollovers]============================================
+
+function MouseIn(e)
+{
+	var t = window.event ? window.event.srcElement : e.target;
+
+	if (sourceElement != null && t != acceptorElement && t != sourceElement)
+	{
+		acceptorElement = t;
+		if (far)
+		{
+			t.className = "over_far";
+			draggableDiv.innerHTML = drag_html + '<br />' +
+				str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
+		}
+		else
+		{
+			if (t.parentNode.parentNode.parentNode.parentNode != sourceParent)
+			{
+				far = 1;
+				t.className = "over_far";
+				draggableDiv.innerHTML = drag_html + '<br />' +
+					str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
+			}
+			else
+			{
+				if (mouseStartY > mouseY)
+				{
+					draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_UP;
+					t.className = "over_top";
+				}
+				else
+				{
+					draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_DOWN;
+					t.className = "over_bottom";
+				}
+			}
+		}
+	}
+/* 	if (bFF)
+{
+		e.preventDefault();
+	}
+	else if (bIE)
+{
+		window.event.cancelBubble = true;
+		window.event.returnValue = false;
+	}
+ */}
+
+function MouseOut(e)
+{
+	var t = window.event ? window.event.srcElement : e.target;
+
+	if (sourceElement != null && t == acceptorElement && t != sourceElement)
+	{
+		t.className = "";
+		acceptorElement = null;
+		draggableDiv.innerHTML = drag_html;
+	}
+/* 	if (bFF)
+{
+		e.preventDefault();
+	}
+	else if (bIE)
+{
+		window.event.cancelBubble = true;
+		window.event.returnValue = false;
+	} */
+}
+
+//=======================[Tree button handlers]=================================
+
+function DeleteArticle ()
+{
+	var eSpan = buttonPanel.parentNode;
+
+	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, S2_LANG_DELETE_ITEM)))
+		return;
+
+	var Response = GETSyncRequest(sUrl + "action=delete&id=" + eSpan.id);
+	if (Response.status != '200')
+		return;
+
+	SaveExpand();
+	ReleaseItem();
+	SetParentChildren(eSpan.parentNode.parentNode.parentNode.parentNode, Response.text);
+	SetCallbacks();
+	LoadExpand();
+}
+
+function CreateChildArticle ()
+{
+	var eSpan = buttonPanel.parentNode;
+	var eLi = eSpan.parentNode.parentNode.parentNode;
+
+	var Response = GETSyncRequest(sUrl + "action=create&id=" + eSpan.id);
+	if (Response.status != '200')
+		return;
+
+	ReleaseItem();
+	SetItemChildren(eSpan, Response.text);
+	SetCallbacks();
+
+	eSpan = eLi.lastChild.lastChild.firstChild.firstChild.childNodes[1];
+
+	HighlightItem(eSpan);
+	EditItemName(eSpan);
+}
+
+function EditArticle()
+{
+	var eSpan = buttonPanel.parentNode;
+
+	var Response = GETSyncRequest(sUrl + "action=load&id=" + eSpan.id);
+	if (Response.status != '200')
+		return;
+
+	document.getElementById('form_div').innerHTML = Response.text;
+	SelectTab(document.getElementById('edit_tab'), true);
+	eTextarea = document.getElementById("wText");
+}
+
+function LoadComments ()
+{
+	var eSpan = buttonPanel.parentNode;
+
+	var Response = GETSyncRequest(sUrl + "action=load_comments&id=" + eSpan.id);
+	if (Response.status != '200')
+		return;
+
+	document.getElementById('comm_div').innerHTML = Response.text;
+	init_table(null);
+	SelectTab(document.getElementById('comm_tab'), true);
+}
+
+//=======================[Editor button handlers]===============================
+
+function Logout ()
+{
+	GETSyncRequest(sUrl + "action=logout");
+	document.location.reload();
+}
+
+function ClearForm()
+{
+	if (!confirm(S2_LANG_CLEAR_PROMPT))
+		return false;
+
+	var aeInput = document.artform.getElementsByTagName("INPUT"), i;
+	for (i = aeInput.length; i-- ;)
+		if (aeInput[i].type == "text")
+			aeInput[i].value = "";
+
+	aeInput = document.artform.getElementsByTagName("TEXTAREA");
+	for (i = aeInput.length; i-- ;)
+		aeInput[i].value = "";
+
+	return false;
+}
+
+function SetTime(eForm, sName)
+{
+	var d = new Date();
+
+	d.setTime(time_shift + d.getTime());
+
+	eForm[sName + '[hour]'].value = d.getHours();
+	eForm[sName + '[min]'].value = d.getMinutes();
+	eForm[sName + '[day]'].value = d.getDate();
+	eForm[sName + '[mon]'].value = d.getMonth() + 1;
+	eForm[sName + '[year]'].value = d.getFullYear();
+
+	return false;
+}
+
+function StringFromForm (aeItem)
+{
+	var sRequest = "ajax=1", i, eItem;
+
+	for (i = aeItem.length; i-- ;)
+	{
+		eItem = aeItem[i];
+		if (eItem.nodeName == "INPUT")
+		{
+			if (eItem.type == "text" || eItem.type == "hidden")
+				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+			if (eItem.type == "checkbox" && eItem.checked)
+				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+		}
+		if (eItem.nodeName == "TEXTAREA" || eItem.nodeName == "SELECT")
+			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+	}
+
+	return sRequest;
+}
+
+function SaveArticle (sAction)
+{
+	var sRequest = StringFromForm(document.artform);
+
+	var Response = POSTSyncRequest(sUrl + "action=" + sAction, sRequest);
+	if (Response.status == '200')
+	{
+		if (Response.text != '')
+			alert(Response.text);
+	}
+
+	eTextarea = document.getElementById("wText");
+	return false;
+}
+
+function TagSelection (sTag)
+{
+	return InsertTag('<' + sTag + '>', '</' + sTag + '>');
+}
+
+function InsertTag(sOpenTag, sCloseTag)
+{
+	if (typeof(eTextarea.selectionStart) != 'undefined')
+	{
+		var iStart = eTextarea.selectionStart, iEnd = eTextarea.selectionEnd;
+		var s = new String(eTextarea.value);
+
+		var s1 = s.substring(0, iStart);
+		var s2 = s.substring(iStart, iEnd);
+		var s3 = s.substring(iEnd);
+		eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
+		eTextarea.setSelectionRange(iStart, iEnd + sOpenTag.length + sCloseTag.length);
+		eTextarea.focus();
+	}
+	else if (document.selection)
+	{
+		var eSelect = document.selection.createRange();
+		eSelect.text = sOpenTag + eSelect.text + sCloseTag;
+		eSelect.select();
+	}
+	else
+		eTextarea.value = eTextarea.value + sOpenTag + sCloseTag;
+
+	return false;
+}
+var iSelStart = iSelEnd = -10;
+
+function GetImage ()
+{
+	if (typeof(eTextarea.selectionStart) != 'undefined')
+	{
+		iSelStart = eTextarea.selectionStart;
+		iSelEnd = eTextarea.selectionEnd;
+	}
+	ShowPictMan('edit_tab');
+	return false;
+}
+
+function Paragraph ()
+{
+	var Response = POSTSyncRequest(sUrl + "action=smart_paragraph", 'data=' + encodeURIComponent(eTextarea.value));
+
+	if (Response.status == '200')
+		eTextarea.value = Response.text;
+}
+
+//=======================[Comment management]===================================
+
+function DeleteComment(iId)
+{
+	if (!confirm(S2_LANG_DELETE_COMMENT))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=delete_comment&id=" + iId);
+
+	if (Response.status == '200')
+	{
+		document.getElementById('comm_div').innerHTML = Response.text;
+		init_table(null);
+	}
+
+	return false;
+}
+
+function EditComment(iId)
+{
+	var Response = GETSyncRequest(sUrl + "action=edit_comment&id=" + iId);
+	if (Response.status != '200')
+		return false;
+
+	document.getElementById('comm_div').innerHTML = Response.text;
+	return false;
+}
+
+function SaveComment(sType)
+{
+	var sRequest = StringFromForm(document.commform);
+	var Response = POSTSyncRequest(sUrl + "action=save_comment&type=" + sType, sRequest);
+	if (Response.status == '200')
+	{
+		document.getElementById('comm_div').innerHTML = Response.text;
+		init_table(null);
+	}
+	return false;
+}
+
+function DoAction(sAction, iId, sID)
+{
+	var Response = GETSyncRequest(sUrl + "action=" + sAction + "&id=" + iId);
+	if (Response.status == '200')
+	{
+		document.getElementById(sID).innerHTML = Response.text;
+		init_table(null);
+	}
+	return false;
+}
+
+function ShowHiddenComm ()
+{
+	var Response = GETSyncRequest(sUrl + "action=load_hidden_comments");
+	if (Response.status == '200')
+	{
+		document.getElementById('comm_div').innerHTML = Response.text;
+		init_table(null);
+	}
+	return false;
+}
+
+//=======================[Tags for articles]====================================
+
+function InitKeynames ()
+{
+	var Response = GETSyncRequest(sUrl + "action=load_tagnames");
+	if (Response.status == '200')
+		document.getElementById('tag_list').innerHTML = Response.text;
+	return false;
+}
+
+var bKeysOpen = false;
+
+function SwitchKeys (eItem)
+{
+	if (bKeysOpen)
+	{
+		document.getElementById('keytable').style.width = "16px";
+		document.getElementById('keyvalues').style.display = "none";
+		document.getElementById('keynames').style.display = "none";
+		document.getElementById('tree_panel').style.marginRight = "-30px";
+		document.getElementById('tree_panel').style.paddingRight = "30px";
+		eItem.src = 'i/ko.gif';
+		eItem.alt = S2_LANG_SHOW_TAGS;
+	}
+	else
+	{
+		InitKeynames();
+		document.getElementById('keytable').style.width = "416px";
+		document.getElementById('keyvalues').style.display = "block";
+		document.getElementById('keynames').style.display = "block";
+		document.getElementById('tree_panel').style.marginRight = "-430px";
+		document.getElementById('tree_panel').style.paddingRight = "430px";
+		eItem.src = 'i/kc.gif';
+		eItem.alt = S2_LANG_HIDE_TAGS;
+	}
+	bKeysOpen = !bKeysOpen;
+	return false;
+}
+
+var iTagId, eCurrentItem = null;
+
+function ChooseKey (eItem)
+{
+	if (eCurrentItem)
+	{
+		eCurrentItem.className = "";
+		eCurrentItem.onmouseover = null;
+		eCurrentItem.onmouseout = null;
+	}
+	eCurrentItem = eItem;
+	eCurrentItem.onmouseover = KeyvaluesMouseIn;
+	eCurrentItem.onmouseout = KeyvaluesMouseOut;
+	eCurrentItem.className = "cur_key";
+	iTagId = eItem.getAttribute("tagid");
+
+	var Response = GETSyncRequest(sUrl + "action=load_tagvalues&id=" + iTagId);
+	if (Response.status == '200')
+		document.getElementById("keyvalues").innerHTML = Response.text;
+
+	return false;
+}
+
+var bMouseInKeyvalues = false;
+
+function KeyvaluesMouseIn ()
+{
+	if (!sourceElement || !eCurrentItem)
+		return;
+
+	bMouseInKeyvalues = true;
+	var aName = eCurrentItem.innerHTML.split(' (');
+	draggableDiv.innerHTML = drag_html + '<br />' +
+		str_replace('%s', aName[aName.length - 2], S2_LANG_ADD_TO_TAG);
+
+	document.getElementById("keyvalues").style.backgroundColor = "#ddf";
+	eCurrentItem.style.backgroundColor = "#ddf";
+}
+
+function KeyvaluesMouseOut ()
+{
+	bMouseInKeyvalues = false;
+	if (sourceElement)
+		draggableDiv.innerHTML = drag_html;
+
+	document.getElementById("keyvalues").style.backgroundColor = "";
+
+	if (eCurrentItem)
+		eCurrentItem.style.backgroundColor = "";
+}
+
+function AddKey (aId)
+{
+	var Response = GETSyncRequest(sUrl + "action=add_to_tag&tag_id=" + iTagId + "&article_id=" + aId);
+	if (Response.status == '200')
+	{
+		document.getElementById("keyvalues").innerHTML = Response.text;
+		eCurrentItem.childNodes[1].innerHTML = parseInt(eCurrentItem.childNodes[1].innerHTML) + 1;
+	}
+	return false;
+}
+
+function DeleteKey (iId)
+{
+	if (!confirm(S2_LANG_DELETE_TAG_LINK))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=delete_from_tag&id=" + iId);
+	if (Response.status == '200')
+	{
+		document.getElementById("keyvalues").innerHTML = Response.text;
+		eCurrentItem.childNodes[1].innerHTML = parseInt(eCurrentItem.childNodes[1].innerHTML) - 1;
+	}
+	return false;
+}
+
+//=======================[Inserting pictures]===================================
+
+var eSrcInput = eWidthInput = eHeightInput = null, bPictManLoaded = false, sReturnTab = '';
+
+function ShowPictMan (sTab)
+{
+	if (!bPictManLoaded)
+	{
+		var wnd = window.open('pictman.php', 'pict_frame', '', 'True');
+		bPictManLoaded = true;
+	}
+	sReturnTab = sTab;
+	SelectTab(document.getElementById('pict_tab'), true);
+}
+
+function ReturnImage(s, w, h)
+{
+	SelectTab(document.getElementById(sReturnTab), true);
+
+	if (sReturnTab == 'edit_tab')
+	{
+		var sOpenTag ='<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
+
+		if (iSelStart >= 0)
+		{
+			var s = new String(eTextarea.value);
+			var s1 = s.substring(0, iSelStart);
+			var s2 = s.substring(iSelStart, iSelEnd);
+			var s3 = s.substring(iSelEnd);
+			eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
+			eTextarea.setSelectionRange(iSelStart, iSelEnd + sOpenTag.length + sCloseTag.length);
+			eTextarea.focus();
+		}
+		else if (document.selection)
+		{
+			var eSelect = document.selection.createRange();
+			eSelect.text = sOpenTag + eSelect.text + sCloseTag;
+			eSelect.select();
+		}
+		else
+			eTextarea.value = eTextarea.value + sOpenTag + sCloseTag;
+	}
+}
+
+//=======================[Preview]==============================================
+
+function Preview ()
+{
+	if (!eTextarea)
+		return;
+
+	var s = str_replace('<!-- text -->', eTextarea.value, template);
+	s = str_replace('<!-- title -->', '<h1>' + document.artform["page[title]"].value + '</h1>', s);
+	window.frames['preview_frame'].document.open();
+	window.frames['preview_frame'].document.write(s);
+	window.frames['preview_frame'].document.close();
+}
+
+//=======================[Users tab]============================================
+
+function LoadUserList ()
+{
+	var eDiv = document.getElementById('user_div');
+
+	var Response = GETSyncRequest(sUrl + "action=load_userlist");
+	if (Response.status == '200')
+	{
+		eDiv.innerHTML = Response.text;
+		init_table(null);
+	}
+}
+
+function AddUser (sUser)
+{
+	if (sUser == '')
+	{
+		alert(S2_LANG_EMPTY_LOGIN);
+		return false;
+	}
+
+	var Response = GETSyncRequest(sUrl + "action=add_user&name=" + sUser);
+	if (Response.status == '200')
+	{
+		document.getElementById('user_div').innerHTML = Response.text;
+		init_table(null);
+	}
+	return false;
+}
+
+function SetPermission (sUser, sPermission)
+{
+	var Response = GETSyncRequest(sUrl + "action=user_set_permission&name=" + sUser + '&permission=' + sPermission);
+	if (Response.status == '200')
+	{
+		document.getElementById('user_div').innerHTML = Response.text;
+		init_table(null);
+	}
+	return false;
+}
+
+function SetUserPassword (sUser)
+{
+	var s = prompt(str_replace('%s', sUser, S2_LANG_NEW_PASSWORD));
+	if (typeof(s) != 'string')
+		return false;
+
+	var Response = POSTSyncRequest(sUrl + "action=user_set_password&name=" + sUser, 'pass=' + encodeURIComponent(hex_md5(s + 'Life is not so easy :-)')));
+	if (Response.status == '200')
+		alert(Response.text);
+
+	return false;
+}
+
+function SetUserEmail (sUser, sEmail)
+{
+	var s = prompt(str_replace('%s', sUser, S2_LANG_NEW_EMAIL));
+	if (typeof(s) == 'string')
+	{
+		var Response = GETSyncRequest(sUrl + "action=user_set_email&name=" + sUser + '&email=' + s);
+		if (Response.status == '200')
+		{
+			document.getElementById('user_div').innerHTML = Response.text;
+			init_table(null);
+		}
+	}
+	return false;
+}
+
+function DeleteUser (sUser)
+{
+	if (!confirm(str_replace('%s', sUser, S2_LANG_DELETE_USER)))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=delete_user&name=" + sUser);
+	if (Response.status == '200')
+	{
+		document.getElementById('user_div').innerHTML = Response.text;
+		init_table(null);
+	}
+	return false;
+}
+
+//=======================[Tags tab]=============================================
+
+function LoadTags ()
+{
+ 	var eDiv = document.getElementById('tag_div');
+
+	if (eDiv.innerHTML != '')
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=load_tags");
+	if (Response.status == '200')
+		eDiv.innerHTML = Response.text;
+
+	return false;
+}
+
+function LoadTag (iId)
+{
+	var Response = GETSyncRequest(sUrl + "action=load_tag&id=" + iId);
+
+	if (Response.status == '200')
+		document.getElementById('tag_div').innerHTML = Response.text;
+
+	return false;
+}
+
+function SaveTag ()
+{
+	if (document.tagform['tag[name]'].value == '')
+	{
+		alert(S2_LANG_EMPTY_TAG);
+		return false;
+	}
+
+	var sRequest = StringFromForm(document.tagform);
+	var Response = POSTSyncRequest(sUrl + "action=save_tag", sRequest);
+	if (Response.status == '200')
+		document.getElementById('tag_div').innerHTML = Response.text;
+
+	return false;
+}
+
+function DeleteTag (iId, sName)
+{
+	if (!confirm(str_replace('%s', sName, S2_LANG_DELETE_TAG)))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=delete_tag&id=" + iId);
+	if (Response.status == '200')
+		document.getElementById('tag_div').innerHTML = Response.text;
+
+	return false;
+}
+
+//=======================[Options tab]==========================================
+
+function LoadOptions ()
+{
+	var eDiv = document.getElementById('opt_div');
+
+	var Response = GETSyncRequest(sUrl + "action=load_options");
+	if (Response.status == '200')
+		eDiv.innerHTML = Response.text;
+
+	return false;
+}
+
+function SaveOptions ()
+{
+	var sRequest = StringFromForm(document.optform);
+	var Response = POSTSyncRequest(sUrl + "action=save_options", sRequest);
+	if (Response.status == '200')
+		document.getElementById('opt_div').innerHTML = Response.text;
+
+	return false;
+}
+
+//=======================[Extensions tab]=======================================
+
+function LoadExtensions ()
+{
+	var eDiv = document.getElementById('ext_div');
+
+	var Response = GETSyncRequest(sUrl + "action=load_extensions");
+	if (Response.status == '200')
+		eDiv.innerHTML = Response.text;
+
+	return false;
+}
+
+function FlipExtension (sId)
+{
+	var eDiv = document.getElementById('ext_div');
+
+	var Response = GETSyncRequest(sUrl + "action=flip_extension&id=" + sId);
+	if (Response.status == '200')
+		eDiv.innerHTML = Response.text;
+
+	return false;
+}
+
+function UninstallExtension (sId, sMessage)
+{
+	if (!confirm(str_replace('%s', sId, S2_LANG_DELETE_EXTENSION)))
+		return false;
+
+	if (sMessage != '' && !confirm(str_replace('%s', sMessage, S2_LANG_UNINSTALL_MESSAGE)))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=uninstall_extension&id=" + sId);
+	if (Response.status == '200')
+		document.getElementById('ext_div').innerHTML = Response.text;
+
+	return false;
+}
+
+function InstallExtension (sId, sMessage)
+{
+	if (!confirm((sMessage != '' ? str_replace('%s', sMessage, S2_LANG_INSTALL_MESSAGE) : '') + str_replace('%s', sId, S2_LANG_INSTALL_EXTENSION)))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=install_extension&id=" + sId);
+	if (Response.status == '200')
+		document.getElementById('ext_div').innerHTML = Response.text;
+
+	return false;
+}
+
+//=======================[Stat tab]=============================================
+
+function LoadStatInfo ()
+{
+	var eDiv = document.getElementById('stat_div');
+
+	var Response = GETSyncRequest(sUrl + 'action=load_stat_info');
+	if (Response.status == '200')
+		eDiv.innerHTML = Response.text;
+
+	return false;
+}
