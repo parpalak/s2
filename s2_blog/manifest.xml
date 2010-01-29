@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Blog
+ *
+ * Allows to add a blog to your S2 site
+ *
+ * @copyright (C) 2007-2010 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_blog
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_blog</id>
+	<title>Blog</title>
+	<version>1.0a</version>
+	<description>Adds a blog to your site.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0dev</minversion>
+	<maxtestedon>1.0a</maxtestedon>
+
+	<note type="uninstall" timing="pre">Warning! All your posts and user comments will be deleted during the uninstall process. It is strongly recommended you to disable 'Blog' extension instead or to upgrade it without uninstalling.</note>
+
+	<install><![CDATA[
+// Setup posts table
+if (!$s2_db->table_exists('s2_blog_posts'))
+{
+	$schema = array(
+		'FIELDS'			=> array(
+			'id'				=> array(
+				'datatype'		=> 'SERIAL',
+				'allow_null'	=> false
+			),
+			'create_time'	=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'modify_time'	=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'title'			=> array(
+				'datatype'		=> 'VARCHAR(255)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+			'text'			=> array(
+				'datatype'		=> 'TEXT',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+			'published'		=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'favorite'		=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'commented'		=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '1'
+			),
+			'label'			=> array(
+				'datatype'		=> 'VARCHAR(255)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+			'url'			=> array(
+				'datatype'		=> 'VARCHAR(255)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			)
+		),
+		'PRIMARY KEY'	=> array('id'),
+		'INDEXES'		=> array(
+			'url_idx'			=> array('url'),
+			'create_time_idx'	=> array('create_time'),
+			'label_idx'			=> array('label')
+		)
+	);
+
+	$s2_db->create_table('s2_blog_posts', $schema);
+}
+
+// Setup blog comments table
+if (!$s2_db->table_exists('s2_blog_comments'))
+{
+	$schema = array(
+		'FIELDS'		=> array(
+			'id'			=> array(
+				'datatype'		=> 'SERIAL',
+				'allow_null'	=> false
+			),
+			'post_id'		=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'time'			=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'ip'			=> array(
+				'datatype'		=> 'VARCHAR(39)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+			'nick'			=> array(
+				'datatype'		=> 'VARCHAR(50)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+			'email'			=> array(
+				'datatype'		=> 'VARCHAR(80)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+			'show_email'	=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'subscribed'	=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'shown'			=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '1'
+			),
+			'sent'			=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '1'
+			),
+			'good'			=> array(
+				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'text'			=> array(
+				'datatype'		=> 'TEXT',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+		),
+		'PRIMARY KEY'	=> array('id'),
+		'INDEXES'		=> array(
+			'post_id_idx'	=> array('post_id'),
+			'time_idx'		=> array('time')
+		)
+	);
+
+	$s2_db->create_table('s2_blog_comments', $schema);
+}
+
+// Setup table to link posts and tags
+if (!$s2_db->table_exists('s2_blog_post_tag'))
+{
+	$schema = array(
+		'FIELDS'		=> array(
+			'id'		=> array(
+				'datatype'		=> 'SERIAL',
+				'allow_null'	=> false
+			),
+			'post_id'	=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'tag_id'	=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+		),
+		'PRIMARY KEY'	=> array('id'),
+		'INDEXES'		=> array(
+			'post_id_idx'		=> array('post_id'),
+			'tag_id_idx'		=> array('tag_id'),
+		),
+	);
+
+	$s2_db->create_table('s2_blog_post_tag', $schema);
+}
+
+// Add extension options to the config table
+$s2_blog_config = array(
+	'S2_BLOG_URL'		=> 'blog',
+	'S2_BLOG_TITLE'		=> 'My blog',
+	'S2_BLOG_CRUMBS'	=> '<a href="/">Main page</a> &rarr;',
+);
+
+foreach ($s2_blog_config as $conf_name => $conf_value)
+{
+	if (defined($conf_name))
+		continue;
+
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
+	);
+
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+}
+
+// User permissions
+if (!$s2_db->field_exists('users', 'edit_s2_blog'))
+{
+	$s2_db->add_field('users', 'edit_s2_blog', 'INT(10)', false, '0', 'edit_site');
+
+	$query = array(
+		'UPDATE'	=> 'users',
+		'SET'		=> 'edit_s2_blog = 1',
+		'WHERE'		=> 'edit_site = 1'
+	);
+
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+}
+
+// A field in tags table for important tags displaying
+if (!$s2_db->field_exists('tags', 's2_blog_important'))
+	$s2_db->add_field('tags', 's2_blog_important', 'INT(1)', false, '0');
+
+	]]></install>
+
+	<uninstall><![CDATA[
+$query = array(
+	'DELETE'	=> 'config',
+	'WHERE'		=> 'name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\', \'S2_BLOG_CRUMBS\')',
+);
+$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+$s2_db->drop_table('s2_blog_posts');
+$s2_db->drop_table('s2_blog_post_tag');
+$s2_db->drop_table('s2_blog_comments');
+
+$s2_db->drop_field('users', 'edit_s2_blog');
+$s2_db->drop_field('tags', 's2_blog_important');
+	]]></uninstall>
+
+	<hooks>
+
+		<hook id="rq_start,ai_start,idx_start"><![CDATA[
+define('BLOG_BASE', S2_PATH.'/'.urlencode(S2_BLOG_URL).'/');
+define('BLOG_KEYWORDS', BLOG_BASE.urlencode(S2_TAGS_URL).'/');
+		]]></hook>
+
+		<hook id="idx_get_content"><![CDATA[
+if (strpos($request_uri, S2_BLOG_URL) === 1)
+{
+	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
+		include $ext_info['path'].'/blog_functions.php';
+	include $ext_info['path'].'/main.php';
+
+	return true;
+}
+		]]></hook>
+
+		<hook id="idx_template_pre_replace"><![CDATA[
+if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
+{
+	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
+		include $ext_info['path'].'/blog_functions.php';
+	$replace['<!-- s2_blog_last_comments -->'] = '<div class="header">'.$lang_s2_blog['Last comments'].'</div>'.s2_blog_recent_comments();
+}
+if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
+{
+	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
+		include $ext_info['path'].'/blog_functions.php';
+	$replace['<!-- s2_blog_last_post -->'] = s2_blog_last_post();
+}
+$replace['<!-- s2_blog_calendar -->'] = !empty($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
+		]]></hook>
+
+		<hook id="fn_process_tags_pre_get_tags_qr"><![CDATA[
+$subquery = array(
+	'SELECT'	=> 'p.id',
+	'FROM'		=> 's2_blog_posts AS p',
+	'JOINS'		=> array(
+		array(
+			'INNER JOIN'	=> 's2_blog_post_tag AS pt',
+			'ON'			=> 'p.id = pt.post_id'
+		)
+	),
+	'WHERE'		=> 'pt.tag_id = atg.tag_id AND p.published = 1',
+	'LIMIT'		=> '1'
+);
+$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+$query['SELECT'] .= ', ('.$raw_query.') IS NOT NULL as s2_blog_is_posts';
+
+$s2_blog_links = array();
+		]]></hook>
+
+		<hook id="fn_process_tags_loop_get_tags"><![CDATA[
+if ($row['s2_blog_is_posts'])
+	$s2_blog_links[] = '<a href="'.BLOG_KEYWORDS.urlencode($row['url']).'/">'.$row['name'].'</a>';
+		]]></hook>
+
+		<hook id="fn_process_tags_end"><![CDATA[
+// Links to blog tags
+if (!empty($s2_blog_links))
+{
+	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	$output[] = '<div class="header">'.$lang_s2_blog['See in blog'].'</div>'.implode(', ', $s2_blog_links);
+}
+		]]></hook>
+
+		<hook id="ai_head_end"><![CDATA[
+echo '<script type="text/javascript" src="'.$ext_info['url'].'/blog.js"></script>'."\n";
+echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/admin.css" />'."\n";
+		]]></hook>
+
+		<hook id="rq_custom_action"><![CDATA[
+require $ext_info['path'].'/request.php';
+		]]></hook>
+
+		<hook id="ai_pre_edit"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+?>
+		<dt id="blog_tab"><?php echo $lang_s2_blog['Blog']; ?></dt>
+		<dd>
+			<div class="reducer">
+				<form name="blogform">
+					<table width="100%" class="fields">
+						<tr>
+							<td class="label"><?php echo $lang_s2_blog['Start time']; ?></td>
+							<td><input style="width: 10em;" type="text" name="posts[start_time]" size="20" value="01.01.<?php echo S2_START_YEAR; ?>" /></td>
+							<td class="label"><?php echo $lang_s2_blog['Search label']; ?></td>
+							<td><input type="text" name="posts[text]" size="40" value="" /></td>
+							<td align="right"><input style="background-image: url(<?php echo S2_BASE_URL; ?>/admin/i/page_white_add.png);" class="bitbtn" name="button" type="button" value="Создать новую запись" onclick="return CreateBlankRecord();" /></td>
+						</tr>
+						<tr>
+							<td class="label"><?php echo $lang_s2_blog['End time']; ?></td>
+							<td><input style="width: 10em;" type="text" name="posts[end_time]" size="20" value="<?php echo date('d.m.Y'); ?>" /></td>
+							<td class="label"><?php echo $lang_s2_blog['Tag label']; ?></td>
+							<td><input type="text" name="posts[key]" size="40" value="" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td style="padding-left: 0.5em;"><input type="checkbox" id="hidd" name="posts[hidden]" value="1" /><label for="hidd"><?php echo $lang_s2_blog['Only hidden']; ?></label></td>
+							<td><input name="button" type="submit" value="<?php echo $lang_s2_blog['Show posts']; ?>" onclick="return LoadPosts();" /></td>
+							<td></td>
+						</tr>
+					</table>
+				</form>
+				<div id="blog_div"></div>
+			</div>
+		</dd>
+<?php
+		]]></hook>
+
+		<hook id="fn_output_tag_form_pre_url"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+?>
+		<label for="s2_blog_important_tag" title="<?php echo $lang_s2_blog['Important tag info']; ?>">
+			<input type="checkbox" id="s2_blog_important_tag" name="tag[s2_blog_important]" value="1"<? if ($tag['s2_blog_important']) echo ' checked="checked"' ?> />
+			<?php echo $lang_s2_blog['Important tag']; ?>
+		</label>
+		<hr />
+<?php
+		]]></hook>
+
+		<hook id="rq_action_load_tags_start"><![CDATA[
+$tag['s2_blog_important'] = 0;
+		]]></hook>
+
+		<hook id="rq_action_load_tag_pre_get_tag_qr,rq_action_save_tag_pre_get_tag_qr"><![CDATA[
+$query['SELECT'] .= ', s2_blog_important';
+		]]></hook>
+
+		<hook id="rq_action_delete_tag_pre_new_form_output"><![CDATA[
+$query = array(
+	'DELETE'	=> 's2_blog_post_tag',
+	'WHERE'		=> 'tag_id = '.$id,
+);
+($hook = s2_hook('blrq_action_delete_tag_pre_del_links_qr')) ? eval($hook) : null;
+$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+$tag['s2_blog_important'] = 0;
+		]]></hook>
+
+		<hook id="rq_action_save_tag_pre_id_check"><![CDATA[
+$s2_blog_important = isset($_POST['tag']['s2_blog_important']) ? (int) $_POST['tag']['s2_blog_important'] : 0;
+		]]></hook>
+
+		<hook id="rq_action_save_tag_pre_upd_qr"><![CDATA[
+$query['SET'] .= ', s2_blog_important = '.$s2_blog_important;
+		]]></hook>
+
+		<hook id="rq_action_save_tag_pre_ins_qr"><![CDATA[
+$query['INSERT'] .= ', s2_blog_important';
+$query['VALUES'] .= ', \''.$s2_blog_important.'\'';
+		]]></hook>
+
+		<hook id="fn_output_tag_form_pre_get_tags_qr"><![CDATA[
+$subquery = array(
+	'SELECT'	=> 'count(*)',
+	'FROM'		=> 's2_blog_post_tag AS pt',
+	'WHERE'		=> 't.tag_id = pt.tag_id'
+);
+$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+$query['SELECT'] .= ', ('.$raw_query.') AS post_count';
+		]]></hook>
+
+		<hook id="fn_output_tag_form_loop_get_tags_qr"><![CDATA[
+$info .= '/'.$row['post_count'];
+		]]></hook>
+
+		<hook id="fn_get_user_list_start"><![CDATA[
+array_splice($s2_user_permissions, -1, 0, 'edit_s2_blog');
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+$lang_user_permissions['edit_s2_blog'] = $lang_s2_blog['Edit blog perm'];
+		]]></hook>
+
+		<hook id="rq_action_save_comment_start,rq_action_save_tag_start,rq_action_delete_tag_start,prq_action_create_subfolder_start,prq_action_delete_folder_start,prq_action_delete_file_start,prq_action_rename_folder_start,prq_action_rename_file_start,prq_action_drag_start,prq_action_load_items_start,prq_action_move_file_start,prq_action_upload_start,prq_action_upload_window_start"><![CDATA[
+$required_rights[] = 'edit_s2_blog';
+		]]></hook>
+
+		<hook id="rq_action_save_comment_end"><![CDATA[
+if ($type == 'blog')
+{
+	// Does the comment exist?
+	// We need post id for displaying comments
+	$query = array(
+		'SELECT'	=> 'post_id',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('blrq_action_save_comment_pre_get_rid_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	if ($s2_db->num_rows($result) != 1)
+		die('Comment not found!');
+
+	$post_id = $s2_db->result($result);
+
+	// Save comment
+	$query = array(
+		'UPDATE'	=> 's2_blog_comments',
+		'SET'		=> "nick = '$nick', email = '$email', text = '$text', show_email = '$show_email', subscribed = '$subscribed'",
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('blrq_action_save_comment_pre_upd_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	require $ext_info['path'].'/blog_lib.php';
+
+	echo s2_blog_show_comments($post_id);
+}
+		]]></hook>
+
+		<hook id="rq_action_load_hidden_comments_end"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+require $ext_info['path'].'/blog_lib.php';
+
+echo s2_blog_show_comments(0);
+		]]></hook>
+
+		<hook id="opt_start"><![CDATA[
+$s2_const_types['S2_BLOG_URL'] = 'string';
+$s2_const_types['S2_BLOG_TITLE'] = 'string';
+$s2_const_types['S2_BLOG_CRUMBS'] = 'string';
+		]]></hook>
+
+		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+$fieldset = array(
+	'S2_BLOG_TITLE' => s2_get_input('S2_BLOG_TITLE', $options['S2_BLOG_TITLE'], $lang_s2_blog['Blog title'], $lang_s2_blog['Blog title label']),
+	'S2_BLOG_URL' => s2_get_input('S2_BLOG_URL', $options['S2_BLOG_URL'], $lang_s2_blog['Blog URL'], $lang_s2_blog['Blog URL label']),
+	'S2_BLOG_CRUMBS' => s2_get_input('S2_BLOG_CRUMBS', $options['S2_BLOG_CRUMBS'], $lang_s2_blog['Blog crumbs'], $lang_s2_blog['Blog crumbs label']),
+);
+($hook = s2_hook('s2_blog_opt_pre_blog_fs_merge')) ? eval($hook) : null;
+$output .= '<fieldset><legend>'.$lang_s2_blog['Blog'].'</legend>'.implode('', $fieldset).'</fieldset>';
+		]]></hook>
+
+		<hook id="fn_get_counters_end"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+
+$query = array(
+	'SELECT'	=> 'count(*)',
+	'FROM'		=> 's2_blog_posts',
+	'WHERE'		=> 'published = 1'
+);
+($hook = s2_hook('blfn_get_counters_pre_get_posts_qr')) ? eval($hook) : null;
+$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+$counters[] = sprintf($lang_s2_blog['Blog posts now'], $s2_db->result($result));
+
+$query = array(
+	'SELECT'	=> 'count(*)',
+	'FROM'		=> 's2_blog_comments',
+	'WHERE'		=> 'shown = 1'
+);
+($hook = s2_hook('blfn_get_counters_pre_get_comm_qr')) ? eval($hook) : null;
+$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+$counters[] = sprintf($lang_s2_blog['Blog comments now'], $s2_db->result($result));
+
+		]]></hook>
+
+		<hook id="fn_for_premoderation_end"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+require $ext_info['path'].'/blog_lib.php';
+
+$output .= s2_blog_show_comments(0);
+		]]></hook>
+
+		<hook id="fn_preload_editor_start"><![CDATA[
+if (strpos($_GET['path'], S2_BLOG_URL) === 1)
+{
+	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	require $ext_info['path'].'/blog_lib.php';
+
+	$path = substr($_GET['path'], strlen(S2_BLOG_URL) + 1);
+	$path = explode('/', $path);   //   []/[2006]/[12]/[31]/[newyear]
+	if (count($path) < 5)
+		return true;
+
+	$start_time = mktime(0, 0, 0, $path[2], $path[3], $path[1]);
+	$end_time = mktime(0, 0, 0, $path[2], $path[3]+1, $path[1]);
+
+	$query = array (
+		'SELECT'	=> 'id',
+		'FROM'		=> 's2_blog_posts',
+		'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND url=\''.$s2_db->escape($path[4]).'\''
+	);
+	($hook = s2_hook('blfn_preload_editor_loop_pre_get_post_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	if ($row = $s2_db->fetch_assoc($result))
+	{
+		s2_blog_edit_post_form($row['id']);
+		echo '<script type="text/javascript">document.location.hash = "#edit"; eTextarea = document.getElementById("wText");</script>';
+	}
+
+	return true;
+}
+		]]></hook>
+
+		<hook id="cmnt_pre_get_page_info_qr"><![CDATA[
+if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+	$query = array(
+		'SELECT'	=> 'create_time, url, title, 0 AS parent_id',
+		'FROM'		=> 's2_blog_posts',
+		'WHERE'		=> 'id = '.$id.' AND published = 1 AND commented = 1'
+	);
+		]]></hook>
+
+		<hook id="cmnt_pre_path_check"><![CDATA[
+if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+	$path = '/'.urlencode(S2_BLOG_URL).date('/Y/m/d', $row['create_time']);
+		]]></hook>
+
+		<hook id="cmnt_pre_save_comment_qr"><![CDATA[
+if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+{
+	$query['INSERT'] = 'post_id, time, ip, nick, email, show_email, subscribed, sent, shown, good, text';
+	$query['INTO'] = 's2_blog_comments';
+}
+		]]></hook>
+
+		<hook id="cmnt_pre_get_subscribers_qr"><![CDATA[
+if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+	$query = array(
+		'SELECT'	=> 'DISTINCT nick, email',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'post_id = '.$id.' and subscribed = 1 and email <> \''.$s2_db->escape($email).'\''
+	);
+		]]></hook>
+
+		<hook id="cmnt_pre_get_comment_count_qr"><![CDATA[
+if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+	$query = array(
+		'SELECT'	=> 'count(id)',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'post_id = '.$id.' AND shown = 1'
+	);
+		]]></hook>
+
+		<hook id="fn_comment_form_pre_output"><![CDATA[
+if (defined('S2_BLOG_HANDLED'))
+	$action = S2_BASE_URL.'/comment.php?type=s2_blog';
+		]]></hook>
+
+		<hook id="idx_pre_rss"><![CDATA[
+if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+{
+	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
+		include $ext_info['path'].'/blog_functions.php';
+	if (!defined('S2_RSS_FUNCTIONS_LOADED'))
+		require S2_ROOT.'include/rss.php';
+	s2_no_cache(false);
+	s2_do_rss();
+	die;
+}
+		]]></hook>
+
+		<hook id="fn_do_rss_pre_output"><![CDATA[
+if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+{
+	global $lang_s2_blog;
+
+	$rss_title = S2_BLOG_TITLE;
+	$rss_link = S2_BASE_URL.'/'.urlencode(S2_BLOG_URL).'/';
+	$rss_description = sprintf($lang_s2_blog['RSS description'], S2_BLOG_TITLE);
+}
+		]]></hook>
+
+		<hook id="fn_do_rss_pre_get_articles"><![CDATA[
+if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+{
+	$posts_info = s2_blog_last_posts_array();
+	$items = array();
+	foreach ($posts_info as $post)
+		$items[] = array(
+			'title'			=> $post['title'],
+			'text'			=> $post['text'].'<p>'.sprintf($lang_s2_blog['Tags:'], $post['tags']).'</p>',
+			'time'			=> $post['create_time'],
+			'modify_time'	=> $post['modify_time'],
+			'rel_path'		=> '/'.urlencode(S2_BLOG_URL).date('/Y/m/d/', $post['create_time']).urlencode($post['url']),
+		);
+	return $items;
+}
+		]]></hook>
+
+		<hook id="idx_pre_meta_merge"><![CDATA[
+if (!isset($lang_s2_blog))
+	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+$meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.S2_BASE_URL.'/'.urlencode(S2_BLOG_URL).'/rss.xml" />';
+		]]></hook>
+
+	</hooks>
+</extension>

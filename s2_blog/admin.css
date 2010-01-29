@@ -1,0 +1,9 @@
+#blog_tab {
+	background-image: url('i/page_white_text.png');
+	}
+
+.tags_list span {
+	color: #fff;
+	font-weight: bold;
+	background: #f00;
+	}

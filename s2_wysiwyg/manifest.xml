@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * WYSIWYG
+ *
+ * Adds TinyMCE WYSIWYG editor to the article edit form.
+ *
+ * @copyright (C) 2007-2010 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_wysiwyg
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_wysiwyg</id>
+	<title>WYSIWYG</title>
+	<version>1.0a</version>
+	<description>Adds TinyMCE WYSIWYG editor to the article edit form.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0dev</minversion>
+	<maxtestedon>1.0a</maxtestedon>
+
+	<hooks>
+		<hook id="ai_head_end"><![CDATA[
+?>
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>
+<?php
+		]]></hook>
+
+		<hook id="ai_after_js_init"><![CDATA[
+?>
+var sPictUrl = '<?php echo S2_PATH; ?>/admin/pictman.php';
+add_hook('fn_tab_switch_start', 'if (sType == "view_tab") tinyMCE.triggerSave();');
+<?php
+		]]></hook>
+
+		<hook id="rq_action_load_pre_output"><![CDATA[
+s2_add_js_header('SetDocumentPath("'.S2_PATH.s2_path_from_id($id).'"); tinyMCE.execCommand("mceRemoveControl", false, "wText");');
+s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "wText");');
+		]]></hook>
+
+		<hook id="fn_output_article_form_pre_parag_btn,s2_blog_fn_post_form_after_labels" priority="9"><![CDATA[
+ob_start();
+		]]></hook>
+
+		<hook id="fn_output_article_form_pre_save,s2_blog_fn_post_form_after_clear" priority="1"><![CDATA[
+ob_end_clean();
+		]]></hook>
+
+		<hook id="fn_toolbar_start"><![CDATA[
+return '';
+		]]></hook>
+
+		<hook id="fn_output_article_form_pre_text,s2_blog_fn_post_form_pre_text"><![CDATA[
+$padding -= 2.4;
+		]]></hook>
+
+		<hook id="s2_blog_fn_post_form_pre_output"><![CDATA[
+s2_add_js_header('SetDocumentPath("'.BLOG_BASE.date('Y/m/d/', $page['create_time']).'"); tinyMCE.execCommand("mceRemoveControl", false, "wText");');
+s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "wText");');
+		]]></hook>
+
+	</hooks>
+</extension>

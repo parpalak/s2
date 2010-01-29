@@ -1,0 +1,144 @@
+/**
+ * Helper functions for blog administrating
+ *
+ * @copyright (C) 2007-2010 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_blog
+ */
+
+function BlogAddTag(iId)
+{
+	var sPostTags = document.artform.keywords.value;
+
+	if (sPostTags.indexOf('|' + iId + '|') != -1)
+	{
+		sPostTags = sPostTags.replace('|' + iId + '|', '|');
+		document.getElementById('tag_' + iId).innerHTML = '';
+
+		if (sPostTags != '|')
+		{
+			var aTags = sPostTags.slice(1, -1).split('|');
+			for (var i = aTags.length; i-- ;)
+				document.getElementById('tag_' + aTags[i]).innerHTML = i + 1;
+		}
+	}
+	else
+	{
+		sPostTags = sPostTags + iId + '|';
+		document.getElementById('tag_' + iId).innerHTML = sPostTags.slice(1, -1).split('|').length;
+	}
+
+	document.artform.keywords.value = sPostTags;
+	return false;
+}
+
+function LoadPosts ()
+{
+	var sRequest = StringFromForm(document.blogform);
+	var Response = POSTSyncRequest(sUrl + "action=load_blog_posts", sRequest);
+	if (Response.status == '200')
+	{
+		document.getElementById('blog_div').innerHTML = Response.text;
+		init_table(null);
+	}
+	return false;
+}
+
+function EditRecord (iId)
+{
+	var Response = GETSyncRequest(sUrl + "action=edit_blog_post&id=" + iId);
+	if (Response.status != '200')
+		return false;
+
+	document.getElementById('form_div').innerHTML = Response.text;
+	SelectTab(document.getElementById('edit_tab'), true);
+	eTextarea = document.getElementById("wText");
+
+	return false;
+}
+
+function DeleteRecord (eItem, iId, sWarning)
+{
+	if (!confirm(sWarning))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=delete_blog_post&id=" + iId);
+	if (Response.status == '200')
+	{
+		if (Response.text)
+			alert(Response.text)
+		else
+			eItem.parentNode.parentNode.parentNode.parentNode.removeChild(eItem.parentNode.parentNode.parentNode);
+	}
+
+	return false;
+}
+
+function CreateBlankRecord ()
+{
+	var Response = GETSyncRequest(sUrl + 'action=create_blog_post');
+	if (Response.status != '200')
+		return false;
+
+	document.getElementById('form_div').innerHTML = Response.text;
+	SelectTab(document.getElementById('edit_tab'), true);
+	eTextarea = document.getElementById("wText");
+
+	return false;
+}
+
+// Blog comments
+
+function LoadBlogComments (iId)
+{
+	var Response = GETSyncRequest(sUrl + "action=load_blog_comments&id=" + iId);
+	if (Response.status != '200')
+		return false;
+
+	document.getElementById('comm_div').innerHTML = Response.text;
+	init_table(null);
+	SelectTab(document.getElementById('comm_tab'), true);
+
+	return false;
+}
+
+function DeleteBlogComment (iId)
+{
+	if (!confirm(S2_LANG_DELETE_COMMENT))
+		return false;
+
+	var Response = GETSyncRequest(sUrl + "action=delete_blog_comment&id=" + iId);
+	if (Response.status == '200')
+	{
+		document.getElementById('comm_div').innerHTML = Response.text;
+		init_table(null);
+	}
+	return false 
+}
+
+function EditBlogComment (iId)
+{
+	var Response = GETSyncRequest(sUrl + "action=edit_blog_comment&id=" + iId);
+	if (Response.status != '200')
+		return false;
+
+	document.getElementById('comm_div').innerHTML = Response.text;
+	return false;
+}
+
+function ToggleFavBlog (eItem, iId)
+{
+	var Response = GETSyncRequest(sUrl + "action=flip_favorite_post&id=" + iId);
+
+	if (Response.status != '200')
+		return false;
+
+	if (eItem.outerHTML)
+		eItem.outerHTML = Response.text;
+	else
+	{
+		eItem.setAttribute('src', get_attr(Response.text, 'src'));
+		eItem.setAttribute('alt', get_attr(Response.text, 'alt'));
+	}
+	return false;
+}

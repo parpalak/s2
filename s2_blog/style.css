@@ -1,0 +1,81 @@
+div.yc {
+	margin: 0 -1em;
+	padding: 0;
+	}
+	div.yc div {
+		width: 197px;
+		float: left;
+		padding: 1em;
+		height: 14em;
+		}
+
+#content table.yc td {
+	vertical-align: top;
+	padding: 15px 10px;
+	border: none;
+	}
+
+table.cal {
+	margin: 1.857em 0 0 0;
+	border-collapse: collapse;
+	}
+	.cal tr td, #content .cal tr td {
+		padding: 0;
+		border: solid 1px #ddd;
+		width: 27px;
+		text-align: center;
+		}
+		.cal tr td.sun {
+			background: #fff6f6;
+			}
+		.cal tr td a {
+			display: block;
+			}
+	.cal tr.dw td {
+		font-weight: bold;
+		background: #e6e6e6;
+		}
+		.cal tr.dw td.sun {
+			color: #ff0000;
+			}
+
+.cal tr td.cur,
+.cal tr td.cur a{
+	background: #60c0cf;
+	font-weight: bold;
+	color: #fff;
+	}
+
+.cal tr td a:hover { background: #ffd;}
+.cal tr td.cur a:hover { background: #70cfdf;}
+
+table.cal_mon {
+	border-collapse: collapse;
+	width: 196px;
+	text-align: center;
+	font-weight: bold;
+	}
+
+a.nav_mon { display: block;}
+a.nav_mon:hover { background: #ffd;}
+
+.post.foot {
+	color: #666;
+	font-size: 0.923em;
+	border-top: 1px solid #ddd;
+	margin: 1em 0 5em 0;
+	}
+
+.post .favorite {
+	display: block;
+	margin-left: -24px;
+	float: left;
+	margin-right: 8px;
+	width: 16px;
+	color: transparent;
+	background: url(i/star.gif) no-repeat 0 50%;
+	}
+
+.post .see_also {
+	font-size: 0.846em;
+	}

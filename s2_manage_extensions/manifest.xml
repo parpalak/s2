@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Manage extensions
+ *
+ * Adds the "Refresh hooks" button to the extension list.
+ *
+ * @copyright (C) 2009-2010 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_manage_extensions
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_manage_extensions</id>
+	<title>Manage Extensions</title>
+	<version>1.0a</version>
+	<description>Adds the "Refresh hooks" button to the extension list. It can be useful for extension developers.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0dev</minversion>
+	<maxtestedon>1.0a</maxtestedon>
+
+	<hooks>
+
+		<hook id="ai_head_end"><![CDATA[
+echo '<script type="text/javascript" src="'.$ext_info['url'].'/functions.js"></script>'."\n";
+		]]></hook>
+
+		<hook id="fn_extension_list_pre_inst_item_merge"><![CDATA[
+$buttons = array_merge(array('refresh_hooks' => '<button class="bitbtn" style="background-image: url('.S2_BASE_URL.'/admin/i/refresh.png);" onclick="return emRefreshHooks(\''.s2_htmlencode(addslashes($id)).'\');" />Refresh Hooks</button>'), $buttons);
+		]]></hook>
+
+		<hook id="rq_custom_action"><![CDATA[
+if ($action == 's2_manage_extensions_refresh_hooks')
+{
+	$required_rights = array('edit_users');
+	($hook = s2_hook('rq_action_load_extensions_start')) ? eval($hook) : null;
+	s2_test_user_rights($session_id, $required_rights);
+
+	if (!isset($_GET['id']))
+		die('Error in GET parameters.');
+	$id = $_GET['id'];
+
+	require 'extensions.php';
+	require $ext_info['path'].'/functions.php';
+
+	echo s2_manage_extensions_refresh_hooks($id);
+	echo s2_extension_list();
+}
+		]]></hook>
+
+		</hooks>
+</extension>
