@@ -290,7 +290,7 @@ function s2_blog_edit_post_form ($id)
 		echo "\t\t\t\t".'<span id="tag_'.$tag_id.'">'.(isset($tag_order[$tag_id]) ? $tag_order[$tag_id] : '').'</span> <a href="#" onclick="return BlogAddTag(\''.$tag_id.'\');">'.$tag.' ('.$tag_count[$tag_id].')</a><br />'."\n";
 
 ?>
-				<input type="text" name="keywords" size="10" value="<?php echo $tag_string; ?>" />
+				<input type="hidden" name="keywords" value="<?php echo $tag_string; ?>" />
 			</div>
 		</div>
 	</div>
