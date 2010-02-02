@@ -10,10 +10,10 @@
 require S2_ROOT.'include/functions.php';
 require S2_ROOT.'include/utf8/utf8.php';
 
-define('S2_VERSION', '1.0dev');
+define('S2_VERSION', '1.0a');
 
 // Uncomment these lines for debug
-define('S2_DEBUG', 1);
+//define('S2_DEBUG', 1);
 //define('S2_SHOW_QUERIES', 1);
 
 // Reverse the effect of register_globals
