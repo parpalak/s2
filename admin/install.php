@@ -919,11 +919,11 @@ else
 
 	$alerts = array();
 	// Check if the cache directory is writable
-	if (!is_writable('./cache/'))
+	if (!is_writable(S2_ROOT.'cache/'))
 		$alerts[] = '<li><span>'.$lang_install['No cache write'].'</span></li>';
 
 	// Check if default pictures directory is writable
-	if (!is_writable('./pictures/'))
+	if (!is_writable(S2_ROOT.'pictures/'))
 		$alerts[] = '<li><span>'.$lang_install['No pictures write'].'</span></li>';
 
 	// Check if we disabled uploading pictures because file_uploads was disabled
