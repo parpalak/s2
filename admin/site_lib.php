@@ -400,9 +400,15 @@ function s2_show_comments ($id)
 
 	// Getting comments
 	$query = array(
-		'SELECT'	=> 'id, time, nick, email, show_email, subscribed, text, shown, good, ip',
-		'FROM'		=> 'art_comments',
-		'WHERE'		=> 'article_id = '.$id,
+		'SELECT'	=> 'a.title, c.article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.good, c.ip',
+		'FROM'		=> 'art_comments AS c',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 'articles AS a',
+				'ON'			=> 'a.id = c.article_id'
+			)
+		),
+		'WHERE'		=> 'c.article_id = '.$id,
 		'ORDER BY'	=> 'time'
 	);
 
@@ -431,7 +437,7 @@ function s2_show_comments ($id)
 	$result2 = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	$show_hidden = $s2_db->num_rows($result2) == 1 && $s2_db->result($result2);
 
-	$comm_table = '';
+	$article_titles = $comments_tables = array();
 	while ($row = $s2_db->fetch_assoc($result))
 	{
 		// Preparing row style
@@ -484,10 +490,11 @@ function s2_show_comments ($id)
 		}
 
 		($hook = s2_hook('fn_show_comments_pre_table_row_merge')) ? eval($hook) : null;
-		$comm_table .= '<tr'.$class.'><td>'.s2_htmlencode($row['nick']).'</td><td class="content">'.s2_htmlencode($row['text']).'</td><td>'.date("Y/m/d, H:i", $row['time']).'</td><td>'.$ip.'</td><td>'.$email.'</td><td>'.$buttons.'</td></tr>';
+		$comments_tables[$row['article_id']][] = '<tr'.$class.'><td>'.s2_htmlencode($row['nick']).'</td><td class="content">'.s2_htmlencode($row['text']).'</td><td>'.date("Y/m/d, H:i", $row['time']).'</td><td>'.$ip.'</td><td>'.$email.'</td><td>'.$buttons.'</td></tr>';
+		$article_titles[$row['article_id']] = $row['title'];
 	}
 
-	// Building table title
+	/* 	// Building table title
 	if ($id)
 	{
 		$query = array(
@@ -503,9 +510,16 @@ function s2_show_comments ($id)
 		$table_title = sprintf($lang_admin['Article comments'], $table_title);
 	}
 	else
-		$table_title = $lang_admin['Hidden comments'];
+		$table_title = $lang_admin['Hidden comments']; */
 
-	$output = '<h2>'.$table_title.'</h2><table class="sort" width="100%"><thead><tr><td>'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td>'.$lang_admin['Date'].'</td><td>'.$lang_admin['IP'].'</td><td>'.$lang_admin['Email'].'</td><td>&nbsp;</td></tr></thead><tbody>'.$comm_table.'</tbody></table>';
+	$output = '';
+	foreach ($article_titles as $article_id => $title)
+		$output .= '<h2>'.sprintf($lang_admin['Article comments'], $title).'</h2>'.
+			'<table class="sort" width="100%">'.
+				'<thead><tr><td>'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td>'.$lang_admin['Date'].'</td><td>'.$lang_admin['IP'].'</td><td>'.$lang_admin['Email'].'</td><td>&nbsp;</td></tr></thead>'.
+				'<tbody>'.implode('', $comments_tables[$article_id]).'</tbody>'.
+			'</table>';
+
 	($hook = s2_hook('fn_show_comments_end')) ? eval($hook) : null;
 	return $output;
 }
