@@ -150,7 +150,6 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 		<dt id="comm_tab"><?php echo $lang_common['Comments']; ?></dt>
 		<dd>
 			<div class="reducer">
-				<a href="#" class="js" style="position: absolute;" onclick="return ShowHiddenComm();"><?php echo $lang_admin['Show hidden comments']; ?></a>
 				<div id="comm_div"><?php echo s2_for_premoderation(); ?></div>
 			</div>
 		</dd>

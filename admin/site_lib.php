@@ -392,11 +392,26 @@ function s2_output_article_form ($id)
 
 }
 
-// Displays the comments table for the article with $id
-// If $id == 0 this function displays all hidden comments
-function s2_show_comments ($id)
+function s2_comment_menu_links ($mode = false)
+{
+	global $lang_admin;
+
+	$output = array(
+		'<a href="#" class="js'.($mode == 'new' ? ' curr' : '').'" onclick="return LoadTable(\'load_new_comments\', \'comm_div\');">'.$lang_admin['Show new comments'].'</a>',
+		'<a href="#" class="js'.($mode == 'hidden' ? ' curr' : '').'" onclick="return LoadTable(\'load_hidden_comments\', \'comm_div\');">'.$lang_admin['Show hidden comments'].'</a>',
+		'<a href="#" class="js'.($mode == 'last' ? ' curr' : '').'" onclick="return LoadTable(\'load_last_comments\', \'comm_div\');">'.$lang_admin['Show last comments'].'</a>',
+	);
+
+	($hook = s2_hook('fn_comment_menu_links_end')) ? eval($hook) : null;
+	return '<p class="js">'.implode('', $output).'</p>';
+}
+
+// Displays the comments tables
+function s2_show_comments ($mode, $id = 0)
 {
 	global $s2_db, $session_id, $lang_admin;
+
+	$output = s2_comment_menu_links($mode);
 
 	// Getting comments
 	$query = array(
@@ -412,23 +427,42 @@ function s2_show_comments ($id)
 		'ORDER BY'	=> 'time'
 	);
 
-	// Show all hidden commetns
-	if (!$id)
+	$comments_header = '';
+	if ($mode == 'hidden')
+	{
+		// Show all hidden commetns
 		$query['WHERE'] = 'shown = 0';
+		$comments_header = '<h2>'.$lang_admin['Hidden comments'].'</h2>';
+	}
+	elseif ($mode == 'new')
+	{
+		// Show unverified commetns
+		$query['WHERE'] = 'shown = 0 AND sent = 0';
+		$comments_header = '<h2>'.$lang_admin['New comments'].'</h2>';
+	}
+	elseif ($mode == 'last')
+	{
+		// Show last 20 commetns
+		unset($query['WHERE']);
+		$query['ORDER BY'] = 'time DESC';
+		$query['LIMIT'] = '20';
+		$comments_header = '<h2>'.$lang_admin['Last comments'].'</h2>';
+	}
 
 	($hook = s2_hook('fn_show_comments_pre_get_comm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$output .= $comments_header;
 	if (!$s2_db->num_rows($result))
-		return '<h2>'.$lang_admin['Hidden comments'].'</h2><div class="info-box"><p>'.$lang_admin['No comments'].'</p></div>';
+		return $output.'<div class="info-box"><p>'.$lang_admin['No comments'].'</p></div>';
 
 	// Determine if we can show hidden info like e-mails and IP
 	$query = array(
 		'SELECT'	=> 'view_hidden',
-		'FROM'		=> 'users_online AS l',
+		'FROM'		=> 'users_online AS o',
 		'JOINS'		=> array(
 			array(
 				'INNER JOIN'	=> 'users AS u',
-				'ON'			=> 'u.login = l.login'
+				'ON'			=> 'u.login = o.login'
 			)
 		),
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($session_id).'\''
@@ -494,29 +528,10 @@ function s2_show_comments ($id)
 		$article_titles[$row['article_id']] = $row['title'];
 	}
 
-	/* 	// Building table title
-	if ($id)
-	{
-		$query = array(
-			'SELECT'	=> 'title',
-			'FROM'		=> 'articles',
-			'WHERE'		=> 'id = '.$id
-		);
-		($hook = s2_hook('fn_show_comments_pre_get_title_query')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-		list($table_title) = $s2_db->fetch_row($result);
-
-		($hook = s2_hook('fn_show_comments_pre_title_merge')) ? eval($hook) : null;
-		$table_title = sprintf($lang_admin['Article comments'], $table_title);
-	}
-	else
-		$table_title = $lang_admin['Hidden comments']; */
-
-	$output = '';
 	foreach ($article_titles as $article_id => $title)
-		$output .= '<h2>'.sprintf($lang_admin['Article comments'], $title).'</h2>'.
+		$output .= '<h3>'.sprintf($lang_admin['Article comments'], $title).'</h3>'.
 			'<table class="sort" width="100%">'.
-				'<thead><tr><td>'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td>'.$lang_admin['Date'].'</td><td>'.$lang_admin['IP'].'</td><td>'.$lang_admin['Email'].'</td><td>&nbsp;</td></tr></thead>'.
+				'<thead><tr><td width="8%">'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td width="8%">'.$lang_admin['Date'].'</td><td width="8%">'.$lang_admin['IP'].'</td><td width="10%">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
 				'<tbody>'.implode('', $comments_tables[$article_id]).'</tbody>'.
 			'</table>';
 
@@ -653,7 +668,7 @@ function s2_get_user_list ($cur_login, $is_admin = false)
 function s2_for_premoderation ()
 {
 	if (!S2_PREMODERATION)
-		return '';
+		return s2_comment_menu_links();
 
 	global $s2_db, $login, $lang_admin;
 
@@ -669,7 +684,7 @@ function s2_for_premoderation ()
 
 	$output = '<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
 	$output .= '<script type="text/javascript">document.location.hash = "#comm";</script>';
-	$output .= s2_show_comments(0);
+	$output .= s2_show_comments('hidden');
 
 	($hook = s2_hook('fn_for_premoderation_end')) ? eval($hook) : null;
 	return $output;

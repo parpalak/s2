@@ -963,12 +963,12 @@ function DoAction(sAction, iId, sID)
 	return false;
 }
 
-function ShowHiddenComm ()
+function LoadTable(sAction, sID)
 {
-	var Response = GETSyncRequest(sUrl + "action=load_hidden_comments");
+	var Response = GETSyncRequest(sUrl + "action=" + sAction);
 	if (Response.status == '200')
 	{
-		document.getElementById('comm_div').innerHTML = Response.text;
+		document.getElementById(sID).innerHTML = Response.text;
 		init_table(null);
 	}
 	return false;
