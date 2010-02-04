@@ -618,7 +618,7 @@ elseif ($action == 'hide_comment')
 		($hook = s2_hook('rq_action_hide_comment_pre_get_page_info_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		if ($article = $s2_db->fetch_assoc($result) && ($path = s2_path_from_id($article['parent_id'], true)) !== false)
+		if (($article = $s2_db->fetch_assoc($result)) && ($path = s2_path_from_id($article['parent_id'], true)) !== false)
 		{
 			$link = S2_BASE_URL.$path.'/'.urlencode($article['url']);
 
