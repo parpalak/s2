@@ -669,14 +669,29 @@ function s2_for_premoderation ()
 
 	global $s2_db, $login, $lang_admin;
 
+	// Check for permissions
 	$query = array(
 		'SELECT'	=> 'login',
 		'FROM'		=> 'users',
 		'WHERE'		=> 'login = \''.$s2_db->escape($login).'\' AND hide_comments = 1'
 	);
-	($hook = s2_hook('fn_for_premoderation_pre_perm_check_query')) ? eval($hook) : null;
+	($hook = s2_hook('fn_for_premoderation_pre_perm_check_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	if (!$s2_db->num_rows($result))
+		return s2_comment_menu_links();
+
+	// Check if there are new comments
+	$query = array(
+		'SELECT'	=> 'count(id)',
+		'FROM'		=> 'art_comments',
+		'WHERE'		=> 'shown = 0 AND sent = 0'
+	);
+	($hook = s2_hook('fn_for_premoderation_pre_comm_check_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$new_comment_count = $s2_db->result($result);
+
+	($hook = s2_hook('fn_for_premoderation_pre_comm_check')) ? eval($hook) : null;
+	if (!$new_comment_count)
 		return s2_comment_menu_links();
 
 	$output = s2_comment_menu_links('new');
