@@ -514,8 +514,6 @@ elseif ($action == 'edit_comment')
 		die('Error in GET parameters.');
 	$id = (int) $_GET['id'];
 
-	echo s2_comment_menu_links();
-
 	// Get comment
 	$query = array(
 		'SELECT'	=> 'id, nick, email, text, show_email, subscribed',
