@@ -411,8 +411,6 @@ function s2_show_comments ($mode, $id = 0)
 {
 	global $s2_db, $session_id, $lang_admin;
 
-	$output = s2_comment_menu_links($mode);
-
 	// Getting comments
 	$query = array(
 		'SELECT'	=> 'a.title, c.article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.good, c.ip',
@@ -427,18 +425,18 @@ function s2_show_comments ($mode, $id = 0)
 		'ORDER BY'	=> 'time'
 	);
 
-	$comments_header = '';
+	$output = '';
 	if ($mode == 'hidden')
 	{
 		// Show all hidden commetns
 		$query['WHERE'] = 'shown = 0';
-		$comments_header = '<h2>'.$lang_admin['Hidden comments'].'</h2>';
+		$output = '<h2>'.$lang_admin['Hidden comments'].'</h2>';
 	}
 	elseif ($mode == 'new')
 	{
 		// Show unverified commetns
 		$query['WHERE'] = 'shown = 0 AND sent = 0';
-		$comments_header = '<h2>'.$lang_admin['New comments'].'</h2>';
+		$output = '<h2>'.$lang_admin['New comments'].'</h2>';
 	}
 	elseif ($mode == 'last')
 	{
@@ -446,12 +444,11 @@ function s2_show_comments ($mode, $id = 0)
 		unset($query['WHERE']);
 		$query['ORDER BY'] = 'time DESC';
 		$query['LIMIT'] = '20';
-		$comments_header = '<h2>'.$lang_admin['Last comments'].'</h2>';
+		$output = '<h2>'.$lang_admin['Last comments'].'</h2>';
 	}
 
 	($hook = s2_hook('fn_show_comments_pre_get_comm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$output .= $comments_header;
 	if (!$s2_db->num_rows($result))
 		return $output.'<div class="info-box"><p>'.$lang_admin['No comments'].'</p></div>';
 
@@ -680,11 +677,12 @@ function s2_for_premoderation ()
 	($hook = s2_hook('fn_for_premoderation_pre_perm_check_query')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	if (!$s2_db->num_rows($result))
-		return '';
+		return s2_comment_menu_links();
 
-	$output = '<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
+	$output = s2_comment_menu_links('new');
+	$output .= '<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
 	$output .= '<script type="text/javascript">document.location.hash = "#comm";</script>';
-	$output .= s2_show_comments('hidden');
+	$output .= s2_show_comments('new');
 
 	($hook = s2_hook('fn_for_premoderation_end')) ? eval($hook) : null;
 	return $output;

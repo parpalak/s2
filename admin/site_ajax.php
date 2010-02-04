@@ -429,6 +429,7 @@ elseif ($action == 'load_comments')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 
+	echo s2_comment_menu_links();
 	echo s2_show_comments('all', (int) $_GET['id']);
 }
 
@@ -438,6 +439,7 @@ elseif ($action == 'load_hidden_comments')
 	($hook = s2_hook('rq_action_load_hidden_comments_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
+	echo s2_comment_menu_links('hidden');
 	echo s2_show_comments('hidden');
 
 	($hook = s2_hook('rq_action_load_hidden_comments_end')) ? eval($hook) : null;
@@ -449,6 +451,7 @@ elseif ($action == 'load_last_comments')
 	($hook = s2_hook('rq_action_load_last_comments_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
+	echo s2_comment_menu_links('last');
 	echo s2_show_comments('last');
 
 	($hook = s2_hook('rq_action_load_last_comments_end')) ? eval($hook) : null;
@@ -460,6 +463,7 @@ elseif ($action == 'load_new_comments')
 	($hook = s2_hook('rq_action_load_new_comments_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
+	echo s2_comment_menu_links('new');
 	echo s2_show_comments('new');
 
 	($hook = s2_hook('rq_action_load_new_comments_end')) ? eval($hook) : null;
@@ -496,6 +500,7 @@ elseif ($action == 'delete_comment')
 	($hook = s2_hook('rq_action_delete_comment_pre_del_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+	echo s2_comment_menu_links();
 	echo s2_show_comments('all', $article_id);
 }
 
@@ -508,6 +513,8 @@ elseif ($action == 'edit_comment')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 	$id = (int) $_GET['id'];
+
+	echo s2_comment_menu_links();
 
 	// Get comment
 	$query = array(
@@ -569,6 +576,7 @@ elseif ($action == 'save_comment')
 		($hook = s2_hook('rq_action_save_comment_pre_upd_qr')) ? eval($hook) : null;
 		$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+		echo s2_comment_menu_links();
 		echo s2_show_comments('all', $article_id);
 	}
 
@@ -647,6 +655,7 @@ elseif ($action == 'hide_comment')
 	($hook = s2_hook('rq_action_hide_comment_pre_upd_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+	echo s2_comment_menu_links();
 	echo s2_show_comments('all', $comment['article_id']);
 }
 
@@ -683,6 +692,7 @@ elseif ($action == 'mark_comment')
 	($hook = s2_hook('rq_action_mark_comment_pre_upd_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+	echo s2_comment_menu_links();
 	echo s2_show_comments('all', $article_id);
 }
 
