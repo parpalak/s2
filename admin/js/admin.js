@@ -152,7 +152,6 @@ function SaveHandler (e)
 		if (document.optform && '#admin-opt' == cur_page)
 			SaveOptions();
 
-		window.focus();
 		return false;
 	}
 }
