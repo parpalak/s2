@@ -327,7 +327,7 @@ echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/admin.cs
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[
-require $ext_info['path'].'/request.php';
+require $ext_info['path'].'/blog_ajax.php';
 		]]></hook>
 
 		<hook id="ai_pre_edit"><![CDATA[
