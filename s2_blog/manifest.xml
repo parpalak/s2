@@ -461,8 +461,8 @@ if ($type == 'blog')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	require $ext_info['path'].'/blog_lib.php';
 
+	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $post_id);
 }
 		]]></hook>
@@ -596,7 +596,6 @@ $new_comment_count += $s2_db->result($result);
 
 		<hook id="fn_for_premoderation_end"><![CDATA[
 include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-require $ext_info['path'].'/blog_lib.php';
 
 $output .= s2_show_comments('s2_blog_new');
 		]]></hook>
