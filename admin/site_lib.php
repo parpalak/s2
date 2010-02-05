@@ -501,7 +501,6 @@ function s2_show_comments ($mode, $id = 0)
 		{
 			$ip = $row['ip'];
 
-			// Preparing e-mail value
 			$email_status = array();
 			if (!$row['show_email'])
 				$email_status['hidden'] = $lang_admin['Hidden'];
@@ -512,7 +511,7 @@ function s2_show_comments ($mode, $id = 0)
 			$email_status_merged = !empty($email_status) ? ' ('.implode(', ', $email_status).')' : '';
 
 			($hook = s2_hook('fn_show_comments_pre_email_merge')) ? eval($hook) : null;
-			$email = $show_hidden ? '<a href="mailto:'.$row['email'].'">'.$row['email'].'</a>'.$email_status_merged : '';
+			$email = '<a href="mailto:'.$row['email'].'">'.$row['email'].'</a>'.$email_status_merged;
 		}
 		else
 		{
@@ -526,7 +525,7 @@ function s2_show_comments ($mode, $id = 0)
 	}
 
 	foreach ($article_titles as $article_id => $title)
-		$output .= '<h3>'.sprintf($lang_admin['Article comments'], $title).'</h3>'.
+		$output .= '<h3>'.sprintf($lang_admin['Comments to'], $title).'</h3>'.
 			'<table class="sort" width="100%">'.
 				'<thead><tr><td width="8%">'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td width="8%">'.$lang_admin['Date'].'</td><td width="8%">'.$lang_admin['IP'].'</td><td width="10%">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
 				'<tbody>'.implode('', $comments_tables[$article_id]).'</tbody>'.
