@@ -235,9 +235,9 @@ elseif ($action == 'load_blog_comments')
 	$id = (int)$_GET['id'];
 
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	require $ext_info['path'].'/blog_lib.php';
 
-	echo s2_blog_show_comments($id);
+	echo s2_comment_menu_links();
+	echo s2_show_comments('s2_blog', $id);
 }
 
 elseif ($action == 'delete_blog_comment')
@@ -272,9 +272,9 @@ elseif ($action == 'delete_blog_comment')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	require $ext_info['path'].'/blog_lib.php';
 
-	echo s2_blog_show_comments($post_id);
+	echo s2_comment_menu_links();
+	echo s2_show_comments('s2_blog', $post_id);
 }
 
 elseif ($action == 'edit_blog_comment')
@@ -376,9 +376,9 @@ elseif ($action == 'hide_blog_comment')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	require $ext_info['path'].'/blog_lib.php';
 
-	echo s2_blog_show_comments($comment['post_id']);
+	echo s2_comment_menu_links();
+	echo s2_show_comments('s2_blog', $comment['post_id']);
 }
 
 elseif ($action == 'mark_blog_comment')
@@ -415,7 +415,7 @@ elseif ($action == 'mark_blog_comment')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	require $ext_info['path'].'/blog_lib.php';
 
-	echo s2_blog_show_comments($post_id);
+	echo s2_comment_menu_links();
+	echo s2_show_comments('s2_blog', $post_id);
 }

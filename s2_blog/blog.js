@@ -116,16 +116,6 @@ function DeleteBlogComment (iId)
 	return false 
 }
 
-function EditBlogComment (iId)
-{
-	var Response = GETSyncRequest(sUrl + "action=edit_blog_comment&id=" + iId);
-	if (Response.status != '200')
-		return false;
-
-	document.getElementById('comm_div').innerHTML = Response.text;
-	return false;
-}
-
 function ToggleFavBlog (eItem, iId)
 {
 	var Response = GETSyncRequest(sUrl + "action=flip_favorite_post&id=" + iId);

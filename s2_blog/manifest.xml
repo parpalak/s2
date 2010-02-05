@@ -463,15 +463,81 @@ if ($type == 'blog')
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	require $ext_info['path'].'/blog_lib.php';
 
-	echo s2_blog_show_comments($post_id);
+	echo s2_show_comments('s2_blog', $post_id);
 }
 		]]></hook>
 
 		<hook id="rq_action_load_hidden_comments_end"><![CDATA[
 include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-require $ext_info['path'].'/blog_lib.php';
 
-echo s2_blog_show_comments(0);
+echo s2_show_comments('s2_blog_hidden');
+		]]></hook>
+
+		<hook id="rq_action_load_last_comments_end"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+
+echo s2_show_comments('s2_blog_last');
+		]]></hook>
+
+		<hook id="rq_action_load_new_comments_end"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+
+echo s2_show_comments('s2_blog_new');
+		]]></hook>
+
+		<hook id="fn_show_comments_pre_get_comm_qr"><![CDATA[
+if (strpos($mode, 's2_blog') === 0)
+{
+	global $lang_s2_blog;
+
+	$query = array(
+		'SELECT'	=> 'p.title, c.post_id AS article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.good, c.ip',
+		'FROM'		=> 's2_blog_comments AS c',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 's2_blog_posts AS p',
+				'ON'			=> 'p.id = c.post_id'
+			)
+		),
+		'WHERE'		=> 'c.post_id = '.$id,
+		'ORDER BY'	=> 'time'
+	);
+
+	$output = '';
+	if ($mode == 's2_blog_hidden')
+	{
+		// Show all hidden commetns
+		$query['WHERE'] = 'shown = 0';
+		$output = '<h2>'.$lang_s2_blog['Blog hidden comments'].'</h2>';
+	}
+	elseif ($mode == 's2_blog_new')
+	{
+		// Show unverified commetns
+		$query['WHERE'] = 'shown = 0 AND sent = 0';
+		$output = '<h2>'.$lang_s2_blog['Blog new comments'].'</h2>';
+	}
+	elseif ($mode == 's2_blog_last')
+	{
+		// Show last 20 commetns
+		unset($query['WHERE']);
+		$query['ORDER BY'] = 'time DESC';
+		$query['LIMIT'] = '20';
+		$output = '<h2>'.$lang_s2_blog['Blog last comments'].'</h2>';
+	}
+}
+		]]></hook>
+
+		<hook id="fn_show_comments_pre_table_row_merge"><![CDATA[
+if (strpos($mode, 's2_blog') === 0)
+{
+	$s2_blog_replace = array(
+		'DeleteComment' => 'DeleteBlogComment',
+		'edit_comment' => 'edit_blog_comment',
+		'mark_comment' => 'mark_blog_comment',
+		'hide_comment' => 'hide_blog_comment',
+	);
+	$buttons = strtr($buttons, $s2_blog_replace);
+}
 		]]></hook>
 
 		<hook id="opt_start"><![CDATA[
@@ -516,11 +582,23 @@ $counters[] = sprintf($lang_s2_blog['Blog comments now'], $s2_db->result($result
 
 		]]></hook>
 
+		<hook id="fn_for_premoderation_pre_comm_check"><![CDATA[
+// Check if there are new comments
+$query = array(
+	'SELECT'	=> 'count(id)',
+	'FROM'		=> 's2_blog_comments',
+	'WHERE'		=> 'shown = 0 AND sent = 0'
+);
+($hook = s2_hook('blfn_for_premoderation_pre_comm_check_qr')) ? eval($hook) : null;
+$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+$new_comment_count += $s2_db->result($result);
+		]]></hook>
+
 		<hook id="fn_for_premoderation_end"><![CDATA[
 include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 require $ext_info['path'].'/blog_lib.php';
 
-$output .= s2_blog_show_comments(0);
+$output .= s2_show_comments('s2_blog_new');
 		]]></hook>
 
 		<hook id="fn_preload_editor_start"><![CDATA[

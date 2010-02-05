@@ -32,8 +32,10 @@ $lang_s2_blog = array(
 
 'Delete warning'			=> 'Удалить запись «%s» и все комментарии к ней?',
 
-'Blog comments'				=> 'Комментарии к статье «%s»',
+'Blog comments'				=> 'Комментарии к записи «%s»',
 'Blog hidden comments'		=> 'Скрытые комментарии в блоге',
+'Blog new comments'			=> 'Непроверенные комментарии в блоге',
+'Blog last comments'		=> 'Последние комментарии в блоге',
 
 'Post'						=> 'Запись',
 'Label'						=> 'Метка',
