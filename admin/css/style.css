@@ -262,9 +262,6 @@ hr {
 		border-right: 2px solid;
 		vertical-align: top;
 		}
-	.treeview span {
-		line-height: 1.333em;
-		}
 
 /* colors */
 .treeview li p,
@@ -286,6 +283,64 @@ hr {
 .treeview a.sc:hover {
 	color: #000;
 	}
+
+
+.treetree ul {
+	padding: 0;
+	margin: 0;
+	}
+	.treetree ul li {
+		list-style-type: none;
+		background-image : url(../i/i.gif);
+		background-position : top left;
+		background-repeat : repeat-y;
+		margin-left: 18px;
+		}
+		.treetree > ul > li {
+			margin-left: 0;
+			}
+		.treetree ul li.IsLast {
+			background-image: url(../i/i_half.gif);
+			background-repeat : no-repeat;
+			}
+
+.ExpandOpen > div:first-child {
+	background-image: url(../i/expand_minus.gif);
+	}
+.ExpandClosed > div:first-child {
+	background-image: url(../i/expand_plus.gif);
+	}
+.ExpandLeaf > div:first-child {
+	background-image: url(../i/expand_leaf.gif);
+	}
+
+.treetree ul li > div {
+	margin-left: 18px;
+	min-height: 18px;
+	}
+
+.treetree ul li > div:first-child {
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin-left: 0;
+	}
+
+	.treetree span {
+		line-height: 1.333em;
+		}
+
+.treetree .ExpandOpen ul {
+	display: block;
+	}
+.treetree .ExpandClosed ul {
+	display: none;
+	}
+
+.treetree .ExpandLeaf div {
+	cursor: default;
+	}
+
 
 /* Context buttons */
 

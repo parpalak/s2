@@ -184,11 +184,11 @@ function MoveDraggableDiv(x, y)
 	draggableDiv.style.top = y + 0 + "px";
 }
 
-// Expanding the tree
+//=======================[Expanding the tree]===================================
 
 var asExpanded = [];
 
-function ExpandSavedItem(sId)
+function ExpandSavedItem (sId)
 {
 	var iId = parseInt(sId);
 
@@ -198,136 +198,57 @@ function ExpandSavedItem(sId)
 
 function SaveExpand ()
 {
-	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
+	var aSpan = document.getElementById('tree_div').getElementsByTagName('SPAN');
 	var i, iId;
+
+	asExpanded = [];
 
 	for (i = aSpan.length; i-- ;)
 	{
 		iId = parseInt(aSpan[i].id);
-		if (!isNaN(iId))
-			asExpanded[iId] = aSpan[i].parentNode.parentNode.parentNode.className;
+		if (!isNaN(iId) && aSpan[i].parentNode.parentNode.className.indexOf('ExpandOpen') != -1)
+			asExpanded[iId] = 1;
 	}
 }
 
 function LoadExpand ()
 {
-	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
-	var i, iId;
+	var i, eLi;
 
-	for (i = aSpan.length; i-- ;)
+	for (i in asExpanded)
 	{
-		iId = parseInt(aSpan[i].id);
-		if (!isNaN(iId) && asExpanded[iId] == "" && aSpan[i].parentNode.firstChild.nodeName == "A")
-		{
-			aSpan[i].parentNode.firstChild.innerHTML = '<img src="i/m.gif" alt="" />';
-			aSpan[i].parentNode.parentNode.parentNode.className = '';
-			aSpan[i].parentNode.childNodes[1].setAttribute("src", "i/fo.png");
-		}
+		eLi = document.getElementById(i).parentNode.parentNode;
+		eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
 	}
-}
-
-function UnHide (eThis)
-{
-	if (eThis.parentNode.parentNode.parentNode.className == 'cl')
-	{
-		eThis.innerHTML = '<img src="i/m.gif" alt="" />';
-		eThis.parentNode.parentNode.parentNode.className = '';
-		eThis.nextSibling.setAttribute("src", "i/fo.png");
-	}
-	else
-	{
-		eThis.innerHTML = '<img src="i/p.gif" alt="" />';
-		eThis.parentNode.parentNode.parentNode.className = 'cl';
-		eThis.nextSibling.setAttribute("src", "i/fc.png");
-	}
-	return false;
 }
 
 function CloseAll ()
 {
-	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
-	var i, iId;
+	var i, aLi = document.getElementById("tree_div").getElementsByTagName("LI");
 
-	for (i = aSpan.length; i-- ;)
-	{
-		iId = parseInt(aSpan[i].id);
-		if (!isNaN(iId) && aSpan[i].parentNode.firstChild.nodeName == "A")
-		{
-			aSpan[i].parentNode.firstChild.innerHTML = '<img src="i/p.gif" alt="" />';
-			aSpan[i].parentNode.parentNode.parentNode.className = 'cl';
-			aSpan[i].parentNode.childNodes[1].setAttribute("src", "i/fc.png");
-		}
-	}
+	for (i = aLi.length; i-- ;)
+		if (aLi[i].className.indexOf('ExpandOpen') != -1)
+			aLi[i].className = str_replace('ExpandOpen', 'ExpandClosed', aLi[i].className);
 }
 
 function OpenAll ()
 {
-	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
-	var i, iId;
+	var i, aLi = document.getElementById("tree_div").getElementsByTagName("LI");
 
-	for (i = aSpan.length; i-- ;)
-	{
-		iId = parseInt(aSpan[i].id);
-		if (!isNaN(iId) && aSpan[i].parentNode.firstChild.nodeName == "A")
-		{
-			aSpan[i].parentNode.firstChild.innerHTML = '<img src="i/m.gif" alt="" />';
-			aSpan[i].parentNode.parentNode.parentNode.className = '';
-			aSpan[i].parentNode.childNodes[1].setAttribute("src", "i/fo.png");
-		}
-	}
+	for (i = aLi.length; i-- ;)
+		if (aLi[i].className.indexOf('ExpandClosed') != -1)
+			aLi[i].className = str_replace('ExpandClosed', 'ExpandOpen', aLi[i].className);
 }
 
-function RefreshTree()
+function RefreshTree ()
 {
-	var Response = GETSyncRequest(sUrl + "action=load_tree&id=0");
+	var Response = GETSyncRequest(sUrl + 'action=load_tree&id=0');
 	if (Response.status != '200')
 		return;
 
+	SaveExpand()
 	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
-	SetCallbacks();
-}
-
-//=======================[Tree event handlers]==================================
-
-function SetCallbacks ()
-{
-	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
-
-	for (var i = aSpan.length; i-- ;)
-	{
-		if (isNaN(parseInt(aSpan[i].id)))
-			continue;
-
-		aSpan[i].onmousedown = MouseDown;
-		aSpan[i].onmouseover = MouseIn;
-		aSpan[i].onmouseout = MouseOut;
-		aSpan[i].unselectable = true;
-		if (aSpan[i].parentNode.firstChild.nodeName == "A")
-		{
-			if (aSpan[i].parentNode.childNodes[1].nodeName != "IMG")
-			{
-				var eImg = document.createElement("IMG");
-
-				eImg.setAttribute("alt", "");
-				eImg.setAttribute("class", "i");
-				eImg.setAttribute("src", "i/fc.png");
-				eImg.onmousedown = MouseDown;
-
-				aSpan[i].parentNode.insertBefore(eImg, aSpan[i].parentNode.childNodes[1]);
-			}
-		}
-		else if (aSpan[i].parentNode.firstChild.nodeName != "IMG")
-		{
-			var eImg = document.createElement("IMG");
-
-			eImg.setAttribute("alt", "");
-			eImg.setAttribute("class", "i");
-			eImg.setAttribute("src", "i/page_white.png");
-			eImg.onmousedown = MouseDown;
-
-			aSpan[i].parentNode.insertBefore(eImg, aSpan[i].parentNode.firstChild);
-		}
-	}
+	LoadExpand();
 }
 
 //=======================[Highlight and renaming]===============================
@@ -379,9 +300,8 @@ function KeyPress (e)
 		// We could call SetParentChildren() here.
 		// That function can remove children if the argument is "".
 		// But we do know that Response.text can't be empty on renaming.
-		eSpan.parentNode.parentNode.parentNode.parentNode.innerHTML = Response.text;
+		eSpan.parentNode.parentNode.parentNode.innerHTML = Response.text;
 		sSavedName = "";
-		SetCallbacks();
 		LoadExpand();
 	}
 	// Escape
@@ -418,38 +338,16 @@ var dragging;
 // We have to create a "UL" child node if there is no one
 function SetItemChildren (eSpan, sInnerHTML)
 {
-	var eLi = eSpan.parentNode.parentNode.parentNode;
+	var eLi = eSpan.parentNode.parentNode;
 
 	if (eLi.lastChild.nodeName == "UL")
-	{
 		eLi.lastChild.innerHTML = sInnerHTML;
-
-		var eThis = eSpan.parentNode.firstChild;
-
-		if (eThis.parentNode.parentNode.parentNode.className == 'cl')
-		{
-			eThis.innerHTML = '<img src="i/m.gif" alt="" />';
-			eThis.parentNode.parentNode.parentNode.className = '';
-			eThis.nextSibling.setAttribute("src", "i/fo.png");
-		}
-	}
 	else
 	{
 		var eUl = document.createElement("UL");
-
-		eLi.className = "";
+		eLi.className = str_replace('ExpandLeaf', 'ExpandOpen', eLi.className);
 		eLi.appendChild(eUl);
 		eUl.innerHTML = sInnerHTML;
-
-		var eA = document.createElement("A");
-
-		eA.setAttribute("href", "#");
-		eA.className = "sc";
-		eA.setAttribute("onclick", "return UnHide(this)");
-		eA.innerHTML = '<img src="i/m.gif" alt="" />';
-
-		eLi.firstChild.firstChild.firstChild.setAttribute("src", "i/fo.png");
-		eLi.firstChild.firstChild.insertBefore(eA, eLi.firstChild.firstChild.firstChild);
 	}
 }
 
@@ -462,8 +360,7 @@ function SetParentChildren (eParentUl, str)
 	{
 		var eLi = eParentUl.parentNode;
 		eLi.removeChild(eLi.lastChild);
-		eLi.firstChild.firstChild.removeChild(eLi.firstChild.firstChild.firstChild);
-		eLi.firstChild.firstChild.firstChild.setAttribute("src", "i/page_white.png");
+		eLi.className = str_replace('ExpandOpen', 'ExpandLeaf', eLi.className);
 	}
 }
 
@@ -480,7 +377,7 @@ function StartDrag ()
 	draggableDiv.innerHTML = drag_html;
 	draggableDiv.style.visibility = 'visible';
 
-	sourceParent = sourceElement.parentNode.parentNode.parentNode.parentNode;
+	sourceParent = sourceElement.parentNode.parentNode.parentNode;
 	far = 0;
 }
 
@@ -501,7 +398,7 @@ function StopDrag()
 		if (far)
 		{
 			var eItem = acceptorElement;
-			var eSourceLi = sourceElement.parentNode.parentNode.parentNode;
+			var eSourceLi = sourceElement.parentNode.parentNode;
 
 			while (eItem)
 			{
@@ -536,23 +433,31 @@ function StopDrag()
 			sourceParent.innerHTML = Response.text;
 		}
 		acceptorElement = null;
-		SetCallbacks();
 		LoadExpand();
 	}
 }
 
 //=======================[Mouse events]=========================================
 
-var mouseX, mouseY, mouseStartX, mouseStartY = 0;
+var mouseX, mouseY, mouseStartX, mouseStartY;
 
-function MouseDown(e)
+function MouseDown (e)
 {
 	var t = window.event ? window.event.srcElement : e.target;
 
-	if (t.nodeName == "IMG" && t.nextSibling)
-		t = t.nextSibling;
+	if (t.nodeName == 'DIV' && t.innerHTML == '')
+	{
+		// Click on the expand image
+		var node = t.parentNode;
 
-	if (t.nodeName == "SPAN" && !isNaN(parseInt(t.id)))
+		if (node.className.indexOf('ExpandOpen') != -1)
+			node.className = str_replace('ExpandOpen', 'ExpandClosed', node.className);
+		else if (node.className.indexOf('ExpandClosed') != -1)
+			node.className = str_replace('ExpandClosed', 'ExpandOpen', node.className);
+
+		return;
+	}
+	else if (t.nodeName == "SPAN" && !isNaN(parseInt(t.id)))
 		sourceElement = t;
 	else
 		// Do not handle span child eventss
@@ -577,14 +482,12 @@ function MouseDown(e)
 	}
 }
 
-function MouseMove(e)
+function MouseMove (e)
 {
-	if (!dragging && (Math.abs(mouseStartY - mouseY) > 2 || Math.abs(mouseStartX - mouseX) > 2))
+	if (!dragging && (Math.abs(mouseStartY - mouseY) > 5 || Math.abs(mouseStartX - mouseX) > 5))
 		StartDrag();
 
-	var oCanvas = document.getElementsByTagName(
-	(document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY"
-	)[0];
+	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
 	mouseX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
@@ -654,7 +557,7 @@ function MouseIn(e)
 {
 	var t = window.event ? window.event.srcElement : e.target;
 
-	if (sourceElement != null && t != acceptorElement && t != sourceElement)
+	if (t.nodeName == 'SPAN' && sourceElement != null && t != acceptorElement && t != sourceElement)
 	{
 		acceptorElement = t;
 		if (far)
@@ -665,7 +568,7 @@ function MouseIn(e)
 		}
 		else
 		{
-			if (t.parentNode.parentNode.parentNode.parentNode != sourceParent)
+			if (t.parentNode.parentNode.parentNode != sourceParent)
 			{
 				far = 1;
 				t.className = "over_far";
@@ -734,15 +637,14 @@ function DeleteArticle ()
 
 	SaveExpand();
 	ReleaseItem();
-	SetParentChildren(eSpan.parentNode.parentNode.parentNode.parentNode, Response.text);
-	SetCallbacks();
+	SetParentChildren(eSpan.parentNode.parentNode.parentNode, Response.text);
 	LoadExpand();
 }
 
 function CreateChildArticle ()
 {
 	var eSpan = buttonPanel.parentNode;
-	var eLi = eSpan.parentNode.parentNode.parentNode;
+	var eLi = eSpan.parentNode.parentNode;
 
 	var Response = GETSyncRequest(sUrl + "action=create&id=" + eSpan.id);
 	if (Response.status != '200')
@@ -750,15 +652,14 @@ function CreateChildArticle ()
 
 	ReleaseItem();
 	SetItemChildren(eSpan, Response.text);
-	SetCallbacks();
 
-	eSpan = eLi.lastChild.lastChild.firstChild.firstChild.childNodes[1];
+	eSpan = eLi.lastChild.lastChild.lastChild.lastChild;
 
 	HighlightItem(eSpan);
 	EditItemName(eSpan);
 }
 
-function EditArticle()
+function EditArticle ()
 {
 	var eSpan = buttonPanel.parentNode;
 
@@ -890,6 +791,7 @@ function InsertTag(sOpenTag, sCloseTag)
 
 	return false;
 }
+
 var iSelStart = iSelEnd = -10;
 
 function GetImage ()

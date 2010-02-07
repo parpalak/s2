@@ -163,66 +163,46 @@ function s2_delete_branch ($id)
 }
 
 //
-// Functions that build HTML tree for the admin panel
+// Builds HTML tree for the admin panel
 //
 
-function s2_get_branch($id, $last = 0)
+function s2_get_child_branches ($id, $root = true)
 {
 	global $s2_db;
 
-	$query = array(
-		'SELECT'	=> 'title, id, priority, published, (SELECT count(*) FROM '.$s2_db->prefix.'art_comments AS c WHERE a.id = c.article_id) as comments_count, parent_id',
-		'FROM'		=> 'articles AS a',
-		'WHERE'		=> 'id = '.$id
+	$subquery = array(
+		'SELECT'	=> 'count(*)',
+		'FROM'		=> 'art_comments AS c',
+		'WHERE'		=> 'a.id = c.article_id'
 	);
-	($hook = s2_hook('fn_get_branch_pre_get_art_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-	$row = $s2_db->fetch_assoc($result);
-
-	$strike = $row['published'] ? '' : ' style="text-decoration: line-through;"';
-	$comm = $row['comments_count'] ? ' comm="'.$row['comments_count'].'"' : '';
-
-	$span = '<span id="'.$row['id'].'"'.$strike.$comm.'>'.$row['title'].'</span>';
-
-	$expand = '';
-	$children = s2_get_child_branches($id);
-	if ($children)
-	{
-		$expand = '<a href="#" class="sc" onclick="return UnHide(this)"><img src="i/p.gif" alt="" /></a>';
-		$children = $last ? '<ul class="l">'.$children.'</ul>' : '<ul>'.$children.'</ul>';
-	}
-
-	($hook = s2_hook('fn_get_branch_end')) ? eval($hook) : null;
-
-	return '<li class="cl"><div><p>'.$expand.$span.'</p></div>'.$children.'</li>';
-}
-
-function s2_get_child_branches($id)
-{
-	global $s2_db;
+	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'id',
-		'FROM'		=> 'articles',
+		'SELECT'	=> 'title, id, priority, published, ('.$raw_query.') as comments_count, parent_id',
+		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'parent_id = '.$id,
 		'ORDER BY'	=> 'priority'
 	);
 	($hook = s2_hook('fn_get_child_branches_pre_get_art_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$return = '';
+	$output = '';
 	for ($i = $s2_db->num_rows($result); $i-- ;)
 	{
-		list($id) = $s2_db->fetch_row($result);
-		$branch = s2_get_branch($id, !$i);
+		$article = $s2_db->fetch_assoc($result);
+
+		$expand = '<div></div>';
+		$strike = $article['published'] ? '' : ' style="text-decoration: line-through;"';
+		$comments = $article['comments_count'] ? ' comm="'.$article['comments_count'].'"' : '';
+		$span = '<div><span id="'.$article['id'].'"'.$strike.$comments.'>'.$article['title'].'</span></div>';
+		$children = s2_get_child_branches($article['id'], false);
 
 		($hook = s2_hook('fn_get_child_branches_after_get_branch')) ? eval($hook) : null;
-		$return .= $branch;
+		$output .= '<li class="'.($children ? 'ExpandClosed' : 'ExpandLeaf').(!$i ? ' IsLast' : '' ).'">'.$expand.$span.$children.'</li>';
 	}
 
 	($hook = s2_hook('fn_get_child_branches_end')) ? eval($hook) : null;
-	return $return;
+	return $output && !$root ? '<ul>'.$output.'</ul>' : $output;
 }
 
 //
