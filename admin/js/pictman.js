@@ -18,13 +18,18 @@ function str_replace(substr, newsubstr, str)
 var bIE = document.attachEvent != null;
 var bFF = !document.attachEvent && document.addEventListener;
 
+if (bIE)
+	attachEvent("onload", Init);
+if (bFF)
+	addEventListener("load", Init, true);
+
 //=======================[Expanding tree]=======================================
 
 var asExpanded = [];
 
 function ExpandSavedItem (sId)
 {
-	asExpanded[sId] = "";
+	asExpanded[sId] = true;
 }
 
 function SaveExpand ()
@@ -34,38 +39,20 @@ function SaveExpand ()
 
 	for (var i = aSpan.length; i-- ;)
 		if (sPath = aSpan[i].getAttribute("path"))
-			asExpanded[sPath] = aSpan[i].parentNode.parentNode.parentNode.className;
+			asExpanded[sPath] = aSpan[i].parentNode.parentNode.className.indexOf('ExpandOpen') != -1;
 }
 
 function LoadExpand ()
 {
 	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
-	var sPath;
+	var sPath, eLi;
 
 	for (var i = aSpan.length; i-- ;)
-		if ((sPath = aSpan[i].getAttribute("path")) && asExpanded[sPath] == "" && aSpan[i].parentNode.firstChild.nodeName == "A")
+		if ((sPath = aSpan[i].getAttribute("path")) && asExpanded[sPath])
 		{
-			aSpan[i].parentNode.firstChild.innerHTML = '<img src="i/m.gif" alt="" />';
-			aSpan[i].parentNode.parentNode.parentNode.className = '';
-			aSpan[i].parentNode.childNodes[1].setAttribute("src", "i/fo.png");
+			eLi = aSpan[i].parentNode.parentNode;
+			eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
 		}
-}
-
-function UnHide (eThis)
-{
-	if (eThis.parentNode.parentNode.parentNode.className == 'cl')
-	{
-		eThis.innerHTML = '<img src="i/m.gif" alt="" />';
-		eThis.parentNode.parentNode.parentNode.className = '';
-		eThis.nextSibling.setAttribute("src", "i/fo.png");
-	}
-	else
-	{
-		eThis.innerHTML = '<img src="i/p.gif" alt="" />';
-		eThis.parentNode.parentNode.parentNode.className = 'cl';
-		eThis.nextSibling.setAttribute("src", "i/fc.png");
-	}
-	return false;
 }
 
 //=======================[Moving divs]==========================================
@@ -87,50 +74,6 @@ function InitMovableDivs ()
 		buttonPanel.setAttribute("id", "buttons");
 		buttonPanel.innerHTML = '<img src="i/page_white_add.png" onclick="CreateSubFolder(); return false;" alt="' + S2_LANG_CREATE_SUBFOLDER + '" /><img src="i/delete.png" class="delete" onclick="DeleteFolder(); return false;" alt="' + S2_LANG_DELETE + '" />';
 	}
-}
-
-//=======================[Event handlers]=======================================
-
-function SetCallbacks ()
-{
-	var aSpan = document.getElementById("tree_div").getElementsByTagName("SPAN");
-
-	for (var i = aSpan.length; i-- ;)
-	{
-		if (typeof(aSpan[i].getAttribute("path")) != 'string')
-			continue;
-
-		aSpan[i].onmousedown = MouseDown;
-		aSpan[i].onmouseover = MouseIn;
-		aSpan[i].onmouseout= MouseOut;
-		aSpan[i].unselectable = true;
-		if (aSpan[i].parentNode.firstChild.nodeName == "A")
-		{
-			if (aSpan[i].parentNode.childNodes[1].nodeName != "IMG") 
-			{
-				var eImg = document.createElement("IMG");
-
-				eImg.setAttribute("alt", "");
-				eImg.setAttribute("class", "i");
-				eImg.setAttribute("src", "i/fc.png");
-				eImg.onmousedown = MouseDown;
-
-				aSpan[i].parentNode.insertBefore(eImg, aSpan[i].parentNode.childNodes[1]);
-			}
-		}
-		else if (aSpan[i].parentNode.firstChild.nodeName != "IMG")
-		{
-			var eImg = document.createElement("IMG");
-
-			eImg.setAttribute("alt", "");
-			eImg.setAttribute("class", "i");
-			eImg.setAttribute("src", "i/fc.png");
-			eImg.onmousedown = MouseDown;
-
-			aSpan[i].parentNode.insertBefore(eImg, aSpan[i].parentNode.firstChild);
-		}
-	}
-	InitMovableDivs();
 }
 
 function MoveDraggableDiv (x, y)
@@ -210,14 +153,13 @@ function RejectName ()
 		eItem.firstChild.nodeValue = sSavedName;
 		sSavedName = "";
 		eItem.removeChild(eInput);
-		eItem.onmousedown = MouseDown;
 	}
 	if (eItem.nodeName == "LI")
 	{
 		eItem.childNodes[2].nodeValue = sSavedName;
 		sSavedName = "";
 		eItem.removeChild(eInput);
-		eItem.firstChild.onmousedown = MouseDown;
+//		eItem.firstChild.onmousedown = MouseDown;
 	}
 }
 
@@ -239,9 +181,9 @@ function KeyPress (e)
 			if (Response.status == '200')
 			{
 				var a = Response.text.split('|');
-				eItem.parentNode.parentNode.parentNode.parentNode.innerHTML = a[0];
+				eItem.parentNode.parentNode.parentNode.innerHTML = a[0];
 				eFilePanel.innerHTML = a[1];
-				SetCallbacks();
+				//SetCallbacks();
 				LoadExpand();
 			}
 			sSavedName = "";
@@ -264,7 +206,7 @@ function EditItemName (item)
 	if (item.nodeName == "SPAN" && item.getAttribute("path"))
 	{
 		sSavedName = item.firstChild.nodeValue;
-		var iWidth = item.offsetWidth - item.lastChild.offsetWidth;
+		var iWidth = item.offsetWidth - item.lastChild.offsetWidth + 20;
 
 		eInput = document.createElement("INPUT");
 		eInput.setAttribute("type", "text");
@@ -277,7 +219,7 @@ function EditItemName (item)
 		eInput.focus();
 		eInput.select();
 		item.firstChild.nodeValue = "";
-		item.onmousedown = null;
+		//item.onmousedown = null;
 	}
 
 	if (item.nodeName == "LI")
@@ -307,7 +249,7 @@ var dragging;
 
 function SetItemChildren (eSpan, sInnerHTML)
 {
-	var eLi = eSpan.parentNode.parentNode.parentNode;
+	var eLi = eSpan.parentNode.parentNode;
 
 	if (eLi.lastChild.nodeName == "UL")
 		eLi.lastChild.innerHTML = sInnerHTML;
@@ -315,20 +257,11 @@ function SetItemChildren (eSpan, sInnerHTML)
 	{
 		var eUl = document.createElement("UL");
 
-		eLi.className = "";
+		eLi.className = str_replace('ExpandLeaf', 'ExpandOpen', eLi.className);
 		eLi.appendChild(eUl);
 		eUl.innerHTML = sInnerHTML;
-
-		var eA = document.createElement("A");
-
-		eA.setAttribute("href", "#");
-		eA.className = "sc";
-		eA.setAttribute("onclick", "return UnHide(this)");
-		eA.innerHTML = '<img src="i/m.gif" alt="" />';
-
-		eLi.firstChild.firstChild.insertBefore(eA, eLi.firstChild.firstChild.firstChild);
 	}
-	ExpandSavedItem(eSpan.id);
+	ExpandSavedItem(eSpan.getAttribute("path"));
 }
 
 function SetParentChildren (eParentUl, str)
@@ -339,7 +272,7 @@ function SetParentChildren (eParentUl, str)
 	{
 		var eLi = eParentUl.parentNode;
 		eLi.removeChild(eLi.lastChild);
-		eLi.firstChild.firstChild.removeChild(eLi.firstChild.firstChild.firstChild);
+		eLi.className = str_replace('ExpandOpen', 'ExpandLeaf', eLi.className);
 	}
 }
 
@@ -356,12 +289,12 @@ function StartDrag ()
 
 	ReleaseItem();
 
-	sourceElement.className = "source";
+	sourceElement.className = 'source';
 
 	draggableDiv.innerHTML = sourceElement.innerHTML;
 	draggableDiv.style.visibility = 'visible';
 
-	sourceParent = sourceElement.parentNode.parentNode.parentNode.parentNode;
+	sourceParent = sourceElement.parentNode.parentNode.parentNode;
 }
 
 function StopDrag ()
@@ -386,7 +319,7 @@ function StopDrag ()
 			acceptorElement.className = "";
 
 			var eItem = acceptorElement;
-			var eSourceLi = sourceElement.parentNode.parentNode.parentNode;
+			var eSourceLi = sourceElement.parentNode.parentNode;
 
 			while (eItem)
 			{
@@ -406,7 +339,6 @@ function StopDrag ()
 				var a = Response.text.split('|');
 				SetParentChildren(sourceParent, a[1]); //source
 				SetItemChildren(acceptorElement, a[0]); //destination
-				SetCallbacks();
 				LoadExpand();
 			}
 		}
@@ -428,42 +360,55 @@ function MouseDown (e)
 		else
 			t = t.parentNode;
 
-	if (t.nodeName == "SPAN" && typeof(t.getAttribute("path")) == 'string')
+	if (t.nodeName == 'DIV' && t.innerHTML == '')
+	{
+		// Click on the expand image
+		var node = t.parentNode;
+
+		if (node.className.indexOf('ExpandOpen') != -1)
+			node.className = str_replace('ExpandOpen', 'ExpandClosed', node.className);
+		else if (node.className.indexOf('ExpandClosed') != -1)
+			node.className = str_replace('ExpandClosed', 'ExpandOpen', node.className);
+
+		return;
+	}
+	else if (t.nodeName == "SPAN" && typeof(t.getAttribute("path")) == 'string')
 		sourceElement = t;
 	else if (t.nodeName == "SPAN" && t.getAttribute("fname"))
 		sourceFElement = t;
 	else
 		return;
 
-	var oCanvas = document.getElementsByTagName(
-	(document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY"
-	)[0];
+	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
 	mouseStartX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseStartY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
 	if (bIE)
 	{
-		document.attachEvent ("onmousemove", MouseMove);
-		document.attachEvent ("onmouseup", MouseUp);
-		window.event.cancelBubble = true;
+		document.attachEvent("onmousemove", MouseMove);
+		document.attachEvent("onmouseup", MouseUp);
+		document.getElementById('tree_div').attachEvent('onmouseover', MouseIn);
+		document.getElementById('tree_div').attachEvent('onmouseout', MouseOut);
+		//window.event.cancelBubble = true;
 		window.event.returnValue = false;
+		t.unselectable = true;
 	}
 	if (bFF)
 	{
-		document.addEventListener ("mousemove", MouseMove, true);
-		document.addEventListener ("mouseup", MouseUp, true);
+		document.addEventListener("mousemove", MouseMove, true);
+		document.addEventListener("mouseup", MouseUp, true);
+		document.getElementById('tree_div').addEventListener('mouseover', MouseIn, false);
+		document.getElementById('tree_div').addEventListener('mouseout', MouseOut, false);
 		e.preventDefault();
 	}
 }
 
 function MouseMove (e)
 {
-	if (!dragging && (Math.abs(mouseStartY - mouseY) > 2 || Math.abs(mouseStartX - mouseX) > 2))
+	if (!dragging && (Math.abs(mouseStartY - mouseY) > 5 || Math.abs(mouseStartX - mouseX) > 5))
 		StartDrag();
 
-	oCanvas = document.getElementsByTagName(
-	(document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY"
-	)[0];
+	oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
 	mouseX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
@@ -525,35 +470,30 @@ function MouseUp(e)
 
 	if (bIE)
 	{
-		document.detachEvent ("onmousemove", MouseMove);
-		document.detachEvent ("onmouseup", MouseUp);
+		document.detachEvent("onmousemove", MouseMove);
+		document.detachEvent("onmouseup", MouseUp);
+		document.getElementById('tree_div').detachEvent('onmouseover', MouseIn);
+		document.getElementById('tree_div').detachEvent('onmouseout', MouseOut);
 	}
 	if (bFF)
 	{
-		document.removeEventListener ("mousemove", MouseMove, true);
-		document.removeEventListener ("mouseup", MouseUp, true);
+		document.removeEventListener("mousemove", MouseMove, true);
+		document.removeEventListener("mouseup", MouseUp, true);
+		document.getElementById('tree_div').removeEventListener('mouseover', MouseIn, false);
+		document.getElementById('tree_div').removeEventListener('mouseout', MouseOut, false);
 	}
 }
 
-//=======================[Rollovers]============================================
+// Rollovers
 
 function MouseIn(e)
 {
 	var t = e ? e.target : window.event.srcElement;
 
-	if ((sourceElement != null) && (t != acceptorElement) && (t != sourceElement) || (sourceFElement != null))
+	if (t.nodeName == 'SPAN' && typeof(t.getAttribute("path")) == 'string' && (sourceElement != null && t != acceptorElement && t != sourceElement || sourceFElement != null))
 	{
 		acceptorElement = t;
 		t.className = "over_far";
-	}
-	if (bIE)
-	{
-		window.event.cancelBubble = true;
-		window.event.returnValue = false;
-	}
-	if (bFF)
-	{
-		e.preventDefault();
 	}
 }
 
@@ -561,20 +501,11 @@ function MouseOut(e)
 {
 	var t = e ? e.target : window.event.srcElement;
 
-	if ((sourceElement != null) && (t == acceptorElement) && (t != sourceElement) || (sourceFElement != null))
+//	if ((sourceElement != null) && (t == acceptorElement) && (t != sourceElement) || (sourceFElement != null))
+	if (t == acceptorElement)
 	{
 		t.className = "";
 		acceptorElement = null;
-	}
-
-	if (bIE)
-	{
-		window.event.cancelBubble = true;
-		window.event.returnValue = false;
-	}
-	if (bFF)
-	{
-		e.preventDefault();
 	}
 }
 
@@ -593,8 +524,7 @@ function DeleteFolder ()
 		return;
 
 	SaveExpand();
-	SetParentChildren(eSpan.parentNode.parentNode.parentNode.parentNode, Response.text);
-	SetCallbacks();
+	SetParentChildren(eSpan.parentNode.parentNode.parentNode, Response.text);
 	LoadExpand();
 	eFilePanel.innerHTML = '';
 }
@@ -612,24 +542,21 @@ function DeleteFile (sName)
 function CreateSubFolder ()
 {
 	var eSpan = buttonPanel.parentNode;
-	var eLi = eSpan.parentNode.parentNode.parentNode;
+	var eLi = eSpan.parentNode.parentNode;
 
-	//SaveExpand();
 	ReleaseItem();
 	var Response = GETSyncRequest(sUrl + "action=create_subfolder&path=" + eSpan.getAttribute('path'));
 	if (Response.status != '200')
 		return;
 
 	SetItemChildren(eSpan, Response.text);
-	SetCallbacks();
-	//LoadExpand();
 
 	eSpan = null;
 	var eUl = eLi.lastChild;
 	for (var i = eUl.childNodes.length; i-- ;)
-		if (eUl.childNodes[i].firstChild.firstChild.childNodes[1].getAttribute('selected'))
+		if (eUl.childNodes[i].childNodes[1].lastChild.getAttribute('selected'))
 		{
-			eSpan = eUl.childNodes[i].firstChild.firstChild.childNodes[1];
+			eSpan = eUl.childNodes[i].childNodes[1].lastChild;
 			break;
 		}
 
@@ -642,21 +569,24 @@ function CreateSubFolder ()
 
 function Init ()
 {
+	InitMovableDivs();
+
 	eFileInfo = document.getElementById("finfo");
 	eFilePanel = document.getElementById("files");
 	eFilePanel.onmousedown = MouseDown;
-	SetCallbacks();
 
 	// Init tooltips
 	if (bIE)
 	{
 		document.attachEvent("onmouseover", ShowTip);
 		document.attachEvent("onmouseout", HideTip);
+		document.getElementById('tree_div').attachEvent('onmousedown', MouseDown);
 	}
 	if (bFF)
 	{
 		document.addEventListener("mouseover", ShowTip, false);
 		document.addEventListener("mouseout", HideTip, false);
+		document.getElementById('tree_div').addEventListener('mousedown', MouseDown, false);
 	}
 }
 

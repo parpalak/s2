@@ -187,148 +187,56 @@ hr {
 	position: relative;
 	}
 
-/*
- * Styles for the tree proper.
- * ".treeview" style definitions are based on code by Vladimir Tokmakov.
- * See http://www.artlebedev.ru/tools/technogrette/html/treeview/ for details.
- */
-
-.treeview {
-	padding: 0px;
-	width: 100%;
-	}
-	.treeview span {
-		cursor: default;
-		}
-	.treeview ul {
-		overflow: hidden;
-		width: 100%;
-		margin: 0;
-		padding: 0 0 1.5em 0;
-		list-style-type: none;
-		}
-		.treeview ul ul {
-			overflow: visible;
-			width: auto;
-			margin: 0 0 0 0;
-			padding: 0 0 0 0.75em;
-			}
-		.treeview ul.l {
-			border-left: 1px solid;
-			margin-left: -1px;
-			}
-	.treeview li {
-		margin: 0;
-		padding: 0;
-		}
-		.treeview li.cl ul {
-			display: none;
-			}
-		.treeview li li {
-			margin: 0 0 0 0.5em;
-			border-left: 1px dotted;
-			padding: 0;
-			}
-		.treeview li div {
-			position: relative; height: 1.5em; min-height: 16px;
-			}
-			.treeview li li div {
-				border-bottom: 1px dotted;
-				}
-		.treeview li p {
-			position: absolute; z-index: 2; top: 0.833em; left: 1.75em;
-			width: 100%;
-			margin: 0;
-			padding: 0;
-			border-bottom: 1px dashed;
-			}
-	.treeview a {
-		padding: 0.1em 0.2em;
-		white-space: nowrap;
-		}
-		.treeview a.sc {
-			position: absolute;
-			top: 0.083em;
-			margin-left: -0.833em;
-			padding: 0.25em 0;
-			text-decoration: none;
-			background: transparent;
-			}
-			.treeview a.sc img {
-				height: 9px;
-				width: 9px;
-				}
-	.treeview img.i {
-		border-right: 2px solid;
-		vertical-align: top;
-		}
-
-/* colors */
-.treeview li p,
-.treeview img.i,
-.treeview .sc {
-	background: #fff;
-	}
-.treeview ul.l,
-.treeview li p,
-.treeview img.i {
-	border-color: #fff;
-	}
-.treeview ul li li,
-.treeview ul li li div {
-	border-color: #999;
-	}
-.treeview a,
-.treeview a.sc,
-.treeview a.sc:hover {
-	color: #000;
-	}
-
-
 .treetree ul {
 	padding: 0;
 	margin: 0;
 	}
 	.treetree ul li {
 		list-style-type: none;
-		background-image : url(../i/i.gif);
-		background-position : top left;
+		background-image : url(../i/tree_icons.gif);
+		background-position: -72px 0;
 		background-repeat : repeat-y;
 		margin-left: 18px;
 		}
-		.treetree > ul > li {
-			margin-left: 0;
-			}
 		.treetree ul li.IsLast {
-			background-image: url(../i/i_half.gif);
-			background-repeat : no-repeat;
+			background-position: -72px -27px;
+			background-repeat: no-repeat;
+			}
+		.treetree > ul > li,
+		.treetree > ul > li.IsLast {
+			margin-left: 0;
+			background: none;
 			}
 
-.ExpandOpen > div:first-child {
-	background-image: url(../i/expand_minus.gif);
-	}
-.ExpandClosed > div:first-child {
-	background-image: url(../i/expand_plus.gif);
-	}
-.ExpandLeaf > div:first-child {
-	background-image: url(../i/expand_leaf.gif);
-	}
+		.treetree ul li > div {
+			margin-left: 18px;
+			min-height: 18px;
+			}
+			.treetree ul li > div:first-child {
+				width: 36px;
+				height: 18px;
+				float: left;
+				margin-left: 0;
+				background-image : url(../i/tree_icons.gif);
+				background-position: -36px 0;
+				background-repeat : no-repeat;
+				}
+				.treetree ul li.ExpandOpen > div:first-child {
+					background-position: 0 0;
+					}
+				.treetree ul li.ExpandClosed > div:first-child {
+					background-position: 0 -18px;
+					}
+				.treetree ul li.ExpandLeaf > div:first-child {
+					background-position: -36px 0;
+					}
 
-.treetree ul li > div {
-	margin-left: 18px;
-	min-height: 18px;
+.treetree span {
+	line-height: 1.333em;
 	}
-
-.treetree ul li > div:first-child {
-	width: 18px;
-	height: 18px;
-	float: left;
-	margin-left: 0;
+.treetree  div {
+	cursor: default;
 	}
-
-	.treetree span {
-		line-height: 1.333em;
-		}
 
 .treetree .ExpandOpen ul {
 	display: block;
@@ -336,11 +244,6 @@ hr {
 .treetree .ExpandClosed ul {
 	display: none;
 	}
-
-.treetree .ExpandLeaf div {
-	cursor: default;
-	}
-
 
 /* Context buttons */
 
@@ -350,7 +253,7 @@ hr {
 
 .but_panel {
 	position: relative;
-	padding: 1px 0;
+	padding: 0 0 2px;
 	color: #fff;
 	background: #007;
 	border: 1px dotted #ff8;
@@ -364,12 +267,13 @@ hr {
 		height: 16px;
 		margin-left: 4px;
 		vertical-align: top;
+		margin-top: 1px;
 		color: #000;
 		}
 		.but_panel span img[src="i/comments.png"] {
 			display: none;
 			}
-			.but_panel[comm] span img[src="i/comments.png"] {
+			.but_panel[comments] span img[src="i/comments.png"] {
 				display: inline-block;
 				}
 	.but_panel img:hover {
@@ -382,8 +286,8 @@ hr {
 		border: 1px solid #aaa;
 		font-family: Verdana, Arial, Helvetica, sans-serif;
 		font-size: 100%;
-		padding: 1px 0;
-		margin: -1px 0 0 -1px;
+		padding: 0 0 2px;
+		margin: 0px 0 -1px -1px;
 		}
 
 ul .but_panel .delete {

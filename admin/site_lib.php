@@ -193,7 +193,7 @@ function s2_get_child_branches ($id, $root = true)
 
 		$expand = '<div></div>';
 		$strike = $article['published'] ? '' : ' style="text-decoration: line-through;"';
-		$comments = $article['comments_count'] ? ' comm="'.$article['comments_count'].'"' : '';
+		$comments = $article['comments_count'] ? ' comments="'.$article['comments_count'].'"' : '';
 		$span = '<div><span id="'.$article['id'].'"'.$strike.$comments.'>'.$article['title'].'</span></div>';
 		$children = s2_get_child_branches($article['id'], false);
 

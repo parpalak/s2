@@ -1,5 +1,5 @@
 #tree_div,
-.treeview,
+.treetree,
 #file-wrap,
 #brd {
 	height: 100%;
@@ -9,7 +9,7 @@
 	}
 
 #brd,
-.treeview {
+.treetree {
 	border: 1px solid #eee;
 	border-color: #aaa #f6f6f6 #f6f6f6 #aaa;
 	}
@@ -21,7 +21,7 @@
 	padding: 0 1em;
 	}
 
-.treeview {
+.treetree {
 	width: 300px;
 	padding-right: 20px;
 	background: #fff;
@@ -110,4 +110,8 @@
 	margin-left: 20px;
 	clear: both;
 	line-height: 1.6;
+	}
+
+.treetree ul li.ExpandLeaf > div:first-child {
+	background-position: -36px -18px;
 	}

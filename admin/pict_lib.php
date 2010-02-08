@@ -64,7 +64,7 @@ function s2_walk_dir ($dir, $created_name = false)
 		{
 			($hook = s2_hook('fn_walk_dir_format_item_start')) ? eval($hook) : null;
 			$item_count++;
-			$spans[] = '<span path="'.$dir.'/'.$item.'"'.($created_name !== false && $created_name == $item ? ' selected="selected"' : '').'>'.$item .'</span>';
+			$spans[] = '<div><span path="'.$dir.'/'.$item.'"'.($created_name === $item ? ' selected="selected"' : '').'>'.$item .'</span></div>';
 			$subdirs[] = s2_walk_dir($dir.'/'.$item);
 		}
 	}
@@ -73,9 +73,9 @@ function s2_walk_dir ($dir, $created_name = false)
 	for ($i = 0; $i < $item_count; $i++)
 	{
 		($hook = s2_hook('fn_walk_dir_pre_item_merge')) ? eval($hook) : null;
-		$subdir = $subdirs[$i] ? '<ul'.($i == $item_count - 1 ? ' class="l"' : '').'>'.$subdirs[$i].'</ul>' : '';
-		$expand = $subdir ? '<a href="#" class="sc" onclick="return UnHide(this)"><img src="i/p.gif" alt="" /></a>' : '';
-		$output .= '<li class="cl"><div><p>'.$expand.$spans[$i].'</p></div>'.$subdir.'</li>';
+		$subdir = $subdirs[$i] ? '<ul>'.$subdirs[$i].'</ul>' : '';
+		$expand = '<div></div>';
+		$output .= '<li class="'.($subdir ? 'ExpandClosed' : 'ExpandLeaf').($i == $item_count - 1 ? ' IsLast' : '').'">'.$expand.$spans[$i].$subdir.'</li>';
 	}
 
 	($hook = s2_hook('fn_walk_dir_end')) ? eval($hook) : null;

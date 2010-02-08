@@ -44,11 +44,11 @@ var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
 </script>
 </head>
 
-<body onload="Init();">
+<body>
 	<div id="tree_div">
-		<div class="treeview">
+		<div class="treetree">
 			<ul>
-				<li class="cl"><div><p><a href="#" class="sc" onclick="return UnHide(this)"><img src="i/p.gif" alt="" /></a><span path=""><?php echo $lang_pictures['Pictures'];?></span></p></div><ul><?php echo s2_walk_dir(''); ?></ul></li>
+				<li class="ExpandClosed IsLast"><div></div><div><span path=""><?php echo $lang_pictures['Pictures'];?></span></div><ul><?php echo s2_walk_dir(''); ?></ul></li>
 			</ul>
 			<div id="fupload">
 				<?php s2_upload_form(); ?>
