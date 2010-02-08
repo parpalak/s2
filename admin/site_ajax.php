@@ -313,15 +313,6 @@ elseif ($action == 'preview')
 	header('Location: '.S2_BASE_URL.s2_path_from_id((int) $_GET['id']));
 }
 
-elseif ($action == 'phpinfo')
-{
-	$required_rights = array('view');
-	($hook = s2_hook('rq_action_phpinfo_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
-
-	phpinfo();
-}
-
 //=======================[Tag management]=======================================
 
 elseif ($action == 'load_tagnames')
@@ -1004,6 +995,16 @@ elseif ($action == 'load_stat_info')
 
 	echo s2_stat_info();
 }
+
+elseif ($action == 'phpinfo')
+{
+	$required_rights = array('view');
+	($hook = s2_hook('rq_action_phpinfo_start')) ? eval($hook) : null;
+	s2_test_user_rights($session_id, $required_rights);
+
+	phpinfo();
+}
+
 
 ($hook = s2_hook('rq_custom_action')) ? eval($hook) : null;
 

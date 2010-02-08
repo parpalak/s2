@@ -154,7 +154,7 @@ function s2_check_comment_question ($key, $answer)
 //
 // Sends comments to subscribed users
 //
-function s2_mail_comment($name, $email, $text, $title, $url, $aut_name)
+function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name)
 {
 	global $lang_comments;
 
