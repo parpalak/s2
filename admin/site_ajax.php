@@ -485,33 +485,10 @@ elseif ($action == 'delete_comment')
 
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
-	$id = (int) $_GET['id'];
-
-	// Does the comment exist?
-	// We need article_id for displaying the other comments
-	$query = array(
-		'SELECT'	=> 'article_id',
-		'FROM'		=> 'art_comments',
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('rq_action_delete_comment_pre_get_aid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
-
-	list($article_id) = $s2_db->fetch_row($result);
-
-	$query = array(
-		'DELETE'	=> 'art_comments',
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('rq_action_delete_comment_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require 'comments.php';
 
-	echo s2_comment_menu_links();
-	echo s2_show_comments('all', $article_id);
+	s2_delete_comment((int) $_GET['id']);
 }
 
 elseif ($action == 'edit_comment')
@@ -522,24 +499,10 @@ elseif ($action == 'edit_comment')
 
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
-	$id = (int) $_GET['id'];
-
-	// Get comment
-	$query = array(
-		'SELECT'	=> 'id, nick, email, text, show_email, subscribed',
-		'FROM'		=> 'art_comments',
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('rq_action_edit_comment_pre_get_aid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
-
-	$comment = $s2_db->fetch_assoc($result);
 
 	require 'comments.php';
 
-	s2_output_comment_form($comment, 'site');
+	s2_edit_comment((int) $_GET['id']);
 }
 
 elseif ($action == 'save_comment')
@@ -548,51 +511,9 @@ elseif ($action == 'save_comment')
 	($hook = s2_hook('rq_action_save_comment_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
-	if (!isset($_POST['comment']['nick']) || !isset($_POST['comment']['email']) || !isset($_POST['comment']['text']) || !isset($_POST['comment']['id']))
-		die('Error in POST data.');
+	require 'comments.php';
 
-	$nick = $s2_db->escape($_POST['comment']['nick']);
-	$email = $s2_db->escape($_POST['comment']['email']);
-	$text = $s2_db->escape($_POST['comment']['text']);
-	$id = (int) $_POST['comment']['id'];
-
-	$show_email = (int) isset($_POST['comment']['show_email']);
-	$subscribed = (int) isset($_POST['comment']['subscribed']);
-
-	$type = isset($_GET['type']) ? $_GET['type'] : '';
-
-	if ($type == 'site')
-	{
-		// Does the comment exist?
-		// We need article_id for displaying comments
-		$query = array(
-			'SELECT'	=> 'article_id',
-			'FROM'		=> 'art_comments',
-			'WHERE'		=> 'id = '.$id
-		);
-		($hook = s2_hook('rq_action_save_comment_pre_get_aid_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-		if ($s2_db->num_rows($result) != 1)
-			die('Comment not found!');
-
-		$article_id = $s2_db->result($result);
-
-		// Save comment
-		$query = array(
-			'UPDATE'	=> 'art_comments',
-			'SET'		=> "nick = '$nick', email = '$email', text = '$text', show_email = '$show_email', subscribed = '$subscribed'",
-			'WHERE'		=> 'id = '.$id
-		);
-		($hook = s2_hook('rq_action_save_comment_pre_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		require 'comments.php';
-
-		echo s2_comment_menu_links();
-		echo s2_show_comments('all', $article_id);
-	}
-
-	($hook = s2_hook('rq_action_save_comment_end')) ? eval($hook) : null;
+	s2_save_comment();
 }
 
 elseif ($action == 'hide_comment')
@@ -603,74 +524,10 @@ elseif ($action == 'hide_comment')
 
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
-	$id = (int)$_GET['id'];
-
-	// Does the comment exist?
-	// We need article_id for displaying comments.
-	// Also we need the comment if the premoderation is turned on.
-	$query = array(
-		'SELECT'	=> 'article_id, sent, shown, nick, email, text',
-		'FROM'		=> 'art_comments',
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('rq_action_hide_comment_pre_get_comment_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
-
-	$comment = $s2_db->fetch_assoc($result);
-
-	$sent = 1;
-	if (!$comment['shown'] && !$comment['sent'])
-	{
-		// Premoderation is enabled and we have to send the comment to be shown
-		// to subscribed commentators
-		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
-			require S2_ROOT.'include/comments.php';
-		require S2_ROOT.'lang/'.S2_LANGUAGE.'/comments.php';
-
-		// Getting some info about the article commented
-		$query = array(
-			'SELECT'	=> 'title, parent_id, url',
-			'FROM'		=> 'articles',
-			'WHERE'		=> 'id = '.$comment['article_id'].' AND published = 1 AND commented = 1'
-		);
-		($hook = s2_hook('rq_action_hide_comment_pre_get_page_info_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		if (($article = $s2_db->fetch_assoc($result)) && ($path = s2_path_from_id($article['parent_id'], true)) !== false)
-		{
-			$link = S2_BASE_URL.$path.'/'.urlencode($article['url']);
-
-			// Fetching receivers' names and adresses
-			$query = array(
-				'SELECT'	=> 'DISTINCT nick, email',
-				'FROM'		=> 'art_comments',
-				'WHERE'		=> 'article_id = '.$comment['article_id'].' and subscribed = 1 and email <> \''.$s2_db->escape($comment['email']).'\''
-			);
-			($hook = s2_hook('rq_action_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-			while ($receiver = $s2_db->fetch_assoc($result))
-				s2_mail_comment($receiver['nick'], $receiver['email'], $comment['text'], $article['title'], $link, $comment['nick']);
-		}
-		else
-			$sent = 0;
-	}
-
-	// Toggle comment visibility
-	$query = array(
-		'UPDATE'	=> 'art_comments',
-		'SET'		=> 'shown = 1 - shown, sent = '.$sent,
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('rq_action_hide_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require 'comments.php';
 
-	echo s2_comment_menu_links();
-	echo s2_show_comments('all', $comment['article_id']);
+	s2_toggle_hide_comment((int)$_GET['id']);
 }
 
 elseif ($action == 'mark_comment')
@@ -681,35 +538,10 @@ elseif ($action == 'mark_comment')
 
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
-	$id = (int)$_GET['id'];
-
-	// Does the comment exist?
-	// We need article_id for displaying comments
-	$query = array(
-		'SELECT'	=> 'article_id',
-		'FROM'		=> 'art_comments',
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('rq_action_mark_comment_pre_get_aid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
-
-	list($article_id) = $s2_db->fetch_row($result);
-
-	// Mark comment
-	$query = array(
-		'UPDATE'	=> 'art_comments',
-		'SET'		=> 'good = 1 - good',
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('rq_action_mark_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require 'comments.php';
 
-	echo s2_comment_menu_links();
-	echo s2_show_comments('all', $article_id);
+	s2_toggle_mark_comment((int)$_GET['id']);
 }
 
 //=======================[User management]======================================
