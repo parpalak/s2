@@ -22,6 +22,15 @@ function add_hook (hook, code)
 
 // Helper functions
 
+/* Object.prototype.attachEvent = function (sEvent, fnHandler) {
+	this.addEventListener(sEvent.indexOf('on') == 0 ? sEvent.replace('on', '') : sEvent, fnHandler, false);
+}
+
+Object.prototype.detachEvent = function (sEvent, fnHandler) {
+	this.removeEventListener(sEvent.indexOf('on') == 0 ? sEvent.replace('on', '') : sEvent, fnHandler, false);
+}
+ */
+
 function str_replace(substr, newsubstr, str)
 {
 	while (str.indexOf(substr) >= 0)
@@ -471,13 +480,12 @@ function MouseDown (e)
 	{
 		document.attachEvent("onmousemove", MouseMove);
 		document.attachEvent("onmouseup", MouseUp);
-		window.event.cancelBubble = true;
 		window.event.returnValue = false;
 	}
 	if (bFF)
 	{
-		document.addEventListener("mousemove", MouseMove, true);
-		document.addEventListener("mouseup", MouseUp, true);
+		document.addEventListener("mousemove", MouseMove, false);
+		document.addEventListener("mouseup", MouseUp, false);
 		e.preventDefault();
 	}
 }
@@ -546,8 +554,8 @@ function MouseUp(e)
 	}
 	if (bFF)
 	{
-		document.removeEventListener ("mousemove", MouseMove, true);
-		document.removeEventListener ("mouseup", MouseUp, true);
+		document.removeEventListener ("mousemove", MouseMove, false);
+		document.removeEventListener ("mouseup", MouseUp, false);
 	}
 }
 
@@ -590,16 +598,7 @@ function MouseIn(e)
 			}
 		}
 	}
-/* 	if (bFF)
-{
-		e.preventDefault();
-	}
-	else if (bIE)
-{
-		window.event.cancelBubble = true;
-		window.event.returnValue = false;
-	}
- */}
+}
 
 function MouseOut(e)
 {
@@ -611,15 +610,6 @@ function MouseOut(e)
 		acceptorElement = null;
 		draggableDiv.innerHTML = drag_html;
 	}
-/* 	if (bFF)
-{
-		e.preventDefault();
-	}
-	else if (bIE)
-{
-		window.event.cancelBubble = true;
-		window.event.returnValue = false;
-	} */
 }
 
 //=======================[Tree button handlers]=================================
