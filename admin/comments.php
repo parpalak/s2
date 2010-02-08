@@ -297,6 +297,8 @@ function s2_toggle_hide_comment ($id)
 		// to subscribed commentators
 		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
 			require S2_ROOT.'include/comments.php';
+
+		global $lang_comments;
 		require S2_ROOT.'lang/'.S2_LANGUAGE.'/comments.php';
 
 		// Getting some info about the article commented
