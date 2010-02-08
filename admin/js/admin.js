@@ -100,6 +100,8 @@ function SaveHandler (e)
 	key = !isGecko ? (key == 83 ? 1 : 0) : (key == 115 ? 1 : 0);
 	if (e.ctrlKey && key)
 	{
+		(hook = hooks['fn_save_handler_start']) ? eval(hook) : null;
+
 		if (e.preventDefault)
 			e.preventDefault();
 		e.returnValue = false;

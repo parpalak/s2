@@ -8,10 +8,11 @@
 function Make_Tabsheet ()
 {
 	var i, j, eDD, eDT, aeDL_child, eToSwitch = false, bActivated;
+	var aeDl = document.getElementsByTagName("DL");
 	var sActiveTab = document.location.hash + '_tab';
+
 	if (sActiveTab.indexOf('-') != -1)
 		sActiveTab += sActiveTab.split('-')[0] + '_tab';
-	var aeDl = document.getElementsByTagName("DL");
 
 	for (i = aeDl.length; i-- ;)
 	{
@@ -60,7 +61,7 @@ function Make_Tabsheet ()
 function OnSwitch (eTab) {
 	var sType = eTab.getAttribute('id');
 
-	hooks['fn_tab_switch_start'] ? eval(hooks['fn_tab_switch_start']) : null;
+	(hook = hooks['fn_tab_switch_start']) ? eval(hook) : null;
 
 	if (sType == 'view_tab')
 	{
