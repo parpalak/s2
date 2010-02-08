@@ -100,7 +100,7 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>
 </head>
 
-<body onload="Init();">
+<body>
 	<div id="login_pan">
 		<div id="loading"></div>
 		<?php printf($lang_admin['Welcome'], $login)."\n"; ?>
@@ -118,7 +118,7 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 						<img src="i/refresh.png" onclick="RefreshTree(); return false;" alt="<?php echo $lang_admin['Refresh']; ?>" />
 					</div>
 					<?php s2_context_buttons(); ?>
-					<div id="tree" class="treetree" onmousedown="MouseDown(arguments[0])" onmouseover="MouseIn(arguments[0])" onmouseout="MouseOut(arguments[0])"></div>
+					<div id="tree" class="treetree"></div>
 				</div>
 				<div id="keytable" class="r-float">
 					<div class="tagswitcher"><img src="i/ko.gif" alt="<?php echo $lang_admin['Show tags']; ?>" onclick="return SwitchKeys(this);"></div>

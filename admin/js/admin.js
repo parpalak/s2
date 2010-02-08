@@ -22,15 +22,6 @@ function add_hook (hook, code)
 
 // Helper functions
 
-/* Object.prototype.attachEvent = function (sEvent, fnHandler) {
-	this.addEventListener(sEvent.indexOf('on') == 0 ? sEvent.replace('on', '') : sEvent, fnHandler, false);
-}
-
-Object.prototype.detachEvent = function (sEvent, fnHandler) {
-	this.removeEventListener(sEvent.indexOf('on') == 0 ? sEvent.replace('on', '') : sEvent, fnHandler, false);
-}
- */
-
 function str_replace(substr, newsubstr, str)
 {
 	while (str.indexOf(substr) >= 0)
@@ -50,32 +41,82 @@ function get_attr(sStr, sAttr)
 	return '';
 }
 
+// Initialization
+
 var bIE = document.attachEvent != null;
 var bFF = !document.attachEvent && document.addEventListener;
 
+if (bIE)
+	attachEvent("onload", Init);
+if (bFF)
+	addEventListener("load", Init, true);
+
 var eTextarea;
+
+var ua = navigator.userAgent.toLowerCase();
+var isIE = (ua.indexOf("msie") != -1 && ua.indexOf("opera") == -1);
+var isSafari = ua.indexOf("safari") != -1;
+var isGecko = (ua.indexOf("gecko") != -1 && !isSafari);
 
 function Init ()
 {
 	InitMovableDivs();
-	InitShortcuts();
-	InitTooltips();
-	cur_page = document.location.hash;
-	setInterval(CheckPage, 400);
-	SetWait(false);
-}
 
-function InitTooltips ()
-{
+	var keyboard_event = isIE || isSafari ? 'keydown' : 'keypress';
 	if (bIE)
 	{
+		// Ctrl + S
+		document.attachEvent('on' + keyboard_event, SaveHandler);
+
+		// Mouse events in the tree
+		document.getElementById('tree').attachEvent('onmousedown', MouseDown);
+
+		// Tooltips
 		document.attachEvent("onmouseover", ShowTip);
 		document.attachEvent("onmouseout", HideTip);
 	}
 	if (bFF)
 	{
+		// Ctrl + S
+		document.addEventListener(keyboard_event, SaveHandler, true);
+
+		// Mouse events in the tree
+		document.getElementById('tree').addEventListener('mousedown', MouseDown, false);
+
+		// Tooltips
 		document.addEventListener("mouseover", ShowTip, false);
 		document.addEventListener("mouseout", HideTip, false);
+	}
+
+	cur_page = document.location.hash;
+	setInterval(CheckPage, 400);
+	SetWait(false);
+}
+
+function SaveHandler (e)
+{
+	e = e || window.event;
+	var key = e.keyCode || e.which;
+	key = !isGecko ? (key == 83 ? 1 : 0) : (key == 115 ? 1 : 0);
+	if (e.ctrlKey && key)
+	{
+		if (e.preventDefault)
+			e.preventDefault();
+		e.returnValue = false;
+
+		if (document.artform && '#edit' == cur_page)
+			document.artform.onsubmit();
+
+		if (document.commform && '#comm' == cur_page)
+			document.commform.onsubmit();
+
+		if (document.tagform && '#tag' == cur_page)
+			SaveTag();
+
+		if (document.optform && '#admin-opt' == cur_page)
+			SaveOptions();
+
+		return false;
 	}
 }
 
@@ -119,49 +160,6 @@ function CheckPage ()
 		if (new_page.indexOf('-') != -1)
 			SelectTab(document.getElementById(new_page.split('-')[0] + '_tab'), false);
 		SelectTab(document.getElementById(new_page + '_tab'), true);
-	}
-}
-
-// Handling CTRL + S shortcut
-
-var ua = navigator.userAgent.toLowerCase();
-var isIE = (ua.indexOf("msie") != -1 && ua.indexOf("opera") == -1);
-var isSafari = ua.indexOf("safari") != -1;
-var isGecko = (ua.indexOf("gecko") != -1 && !isSafari);
-
-function InitShortcuts ()
-{
-	var event = isIE || isSafari ? 'keydown' : 'keypress';
-	if (bIE)
-		document.attachEvent ('on' + event, SaveHandler);
-	if (bFF)
-		document.addEventListener (event, SaveHandler, true);
-}
-
-function SaveHandler (e)
-{
-	e = e || window.event;
-	var key = e.keyCode || e.which;
-	key = !isGecko ? (key == 83 ? 1 : 0) : (key == 115 ? 1 : 0);
-	if (e.ctrlKey && key)
-	{
-		if (e.preventDefault)
-			e.preventDefault();
-		e.returnValue = false;
-
-		if (document.artform && '#edit' == cur_page)
-			document.artform.onsubmit();
-
-		if (document.commform && '#comm' == cur_page)
-			document.commform.onsubmit();
-
-		if (document.tagform && '#tag' == cur_page)
-			SaveTag();
-
-		if (document.optform && '#admin-opt' == cur_page)
-			SaveOptions();
-
-		return false;
 	}
 }
 
@@ -288,7 +286,6 @@ function RejectName ()
 	eSpan.firstChild.nodeValue = sSavedName;
 	sSavedName = "";
 	eSpan.removeChild(eInput);
-	eSpan.onmousedown = MouseDown;
 }
 
 function KeyPress (e)
@@ -334,7 +331,6 @@ function EditItemName (item)
 	eInput.focus();
 	eInput.select();
 	item.firstChild.nodeValue = "";
-	item.onmousedown = null;
 }
 
 //=======================[Drag & drop]==========================================
@@ -478,12 +474,17 @@ function MouseDown (e)
 
 	if (bIE)
 	{
+		document.attachEvent("onmouseover", MouseIn);
+		document.attachEvent("onmouseout", MouseOut);
 		document.attachEvent("onmousemove", MouseMove);
 		document.attachEvent("onmouseup", MouseUp);
 		window.event.returnValue = false;
+		t.unselectable = true;
 	}
 	if (bFF)
 	{
+		document.addEventListener("mouseover", MouseIn, false);
+		document.addEventListener("mouseout", MouseOut, false);
 		document.addEventListener("mousemove", MouseMove, false);
 		document.addEventListener("mouseup", MouseUp, false);
 		e.preventDefault();
@@ -504,7 +505,7 @@ function MouseMove (e)
 
 var idTimer, bIntervalPassed = true;
 
-function MouseUp(e)
+function MouseUp (e)
 {
 	var is_drop = dragging;
 	if (dragging)
@@ -530,42 +531,43 @@ function MouseUp(e)
 	else
 	{
 		// Single click
+		var sJob = '';
 		if (sourceElement == buttonPanel.parentNode)
-		{
 			// Highlighted item
-			var sJob = is_drop ? '' : ' EditItemName(document.getElementById("' + sourceElement.id + '"));';
-			bIntervalPassed = false;
-			idTimer = setTimeout('bIntervalPassed = true;' + sJob, 400);
-		}
+			sJob = !is_drop ? ' EditItemName(document.getElementById("' + sourceElement.id + '"));' : '';
 		else
 		{
 			ReleaseItem();
 			HighlightItem(sourceElement);
-			bIntervalPassed = false;
-			idTimer = setTimeout('bIntervalPassed = true;', 400);
 		}
+		bIntervalPassed = false;
+		idTimer = setTimeout('bIntervalPassed = true;' + sJob, 400);
 	}
 	sourceElement = null;
 
 	if (bIE)
 	{
-		document.detachEvent ("onmousemove", MouseMove);
-		document.detachEvent ("onmouseup", MouseUp);
+		document.detachEvent("onmouseover", MouseIn);
+		document.detachEvent("onmouseout", MouseOut);
+		document.detachEvent("onmousemove", MouseMove);
+		document.detachEvent("onmouseup", MouseUp);
 	}
 	if (bFF)
 	{
-		document.removeEventListener ("mousemove", MouseMove, false);
-		document.removeEventListener ("mouseup", MouseUp, false);
+		document.removeEventListener("mouseover", MouseIn, false);
+		document.removeEventListener("mouseout", MouseOut, false);
+		document.removeEventListener("mousemove", MouseMove, false);
+		document.removeEventListener("mouseup", MouseUp, false);
 	}
 }
 
-//=======================[Rollovers]============================================
+// Rollovers
 
-function MouseIn(e)
+function MouseIn (e)
 {
 	var t = window.event ? window.event.srcElement : e.target;
 
-	if (t.nodeName == 'SPAN' && sourceElement != null && t != acceptorElement && t != sourceElement)
+	if (t.nodeName == 'SPAN' && sourceElement != null && !isNaN(parseInt(t.id)) && t != acceptorElement && t != sourceElement)
 	{
 		acceptorElement = t;
 		if (far)
