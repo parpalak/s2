@@ -14,6 +14,7 @@ require S2_ROOT.'include/common.php';
 require S2_ROOT.'lang/'.S2_LANGUAGE.'/admin.php';
 require 'site_lib.php';
 require 'login.php';
+require 'comments.php';
 
 ($hook = s2_hook('ai_start')) ? eval($hook) : null;
 
