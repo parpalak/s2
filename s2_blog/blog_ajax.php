@@ -234,6 +234,7 @@ elseif ($action == 'load_blog_comments')
 		die('Error in GET parameters.');
 	$id = (int)$_GET['id'];
 
+	require 'comments.php';
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 
 	echo s2_comment_menu_links();
@@ -272,6 +273,7 @@ elseif ($action == 'delete_blog_comment')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	require 'comments.php';
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $post_id);
@@ -299,6 +301,8 @@ elseif ($action == 'edit_blog_comment')
 		die('Comment not found!');
 
 	$comment = $s2_db->fetch_assoc($result);
+
+	require 'comments.php';
 
 	s2_output_comment_form($comment, 'blog');
 }
@@ -376,6 +380,7 @@ elseif ($action == 'hide_blog_comment')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	require 'comments.php';
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $comment['post_id']);
@@ -415,6 +420,7 @@ elseif ($action == 'mark_blog_comment')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	require 'comments.php';
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $post_id);

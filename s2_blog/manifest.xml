@@ -461,6 +461,7 @@ if ($type == 'blog')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	require 'comments.php';
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $post_id);
