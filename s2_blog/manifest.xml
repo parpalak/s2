@@ -434,7 +434,7 @@ $lang_user_permissions['edit_s2_blog'] = $lang_s2_blog['Edit blog perm'];
 $required_rights[] = 'edit_s2_blog';
 		]]></hook>
 
-		<hook id="rq_action_save_comment_end"><![CDATA[
+		<hook id="fn_save_comment_end"><![CDATA[
 if ($type == 'blog')
 {
 	// Does the comment exist?
@@ -444,7 +444,7 @@ if ($type == 'blog')
 		'FROM'		=> 's2_blog_comments',
 		'WHERE'		=> 'id = '.$id
 	);
-	($hook = s2_hook('blrq_action_save_comment_pre_get_rid_qr')) ? eval($hook) : null;
+	($hook = s2_hook('blfn_save_comment_pre_get_pid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	if ($s2_db->num_rows($result) != 1)
 		die('Comment not found!');
@@ -457,11 +457,11 @@ if ($type == 'blog')
 		'SET'		=> "nick = '$nick', email = '$email', text = '$text', show_email = '$show_email', subscribed = '$subscribed'",
 		'WHERE'		=> 'id = '.$id
 	);
-	($hook = s2_hook('blrq_action_save_comment_pre_upd_qr')) ? eval($hook) : null;
+	($hook = s2_hook('blfn_save_comment_pre_upd_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+	global $lang_s2_blog;
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	require 'comments.php';
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $post_id);
