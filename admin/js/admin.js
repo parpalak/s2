@@ -666,17 +666,19 @@ function EditArticle ()
 	eTextarea = document.getElementById("wText");
 }
 
-function LoadComments ()
+function LoadComments (iId)
 {
-	var eSpan = buttonPanel.parentNode;
+	if (typeof(iId) == 'undefined')
+		iId = buttonPanel.parentNode.id;
 
-	var Response = GETSyncRequest(sUrl + "action=load_comments&id=" + eSpan.id);
+	var Response = GETSyncRequest(sUrl + "action=load_comments&id=" + iId);
 	if (Response.status != '200')
-		return;
+		return false;
 
 	document.getElementById('comm_div').innerHTML = Response.text;
 	init_table(null);
 	SelectTab(document.getElementById('comm_tab'), true);
+	return false;
 }
 
 //=======================[Editor button handlers]===============================
@@ -774,7 +776,7 @@ function InsertTag(sOpenTag, sCloseTag)
 		eTextarea.setSelectionRange(iStart, iEnd + sOpenTag.length + sCloseTag.length);
 		eTextarea.focus();
 	}
-	else if (document.selection)
+	else if (document.selection && document.selection.type == 'Text')
 	{
 		var eSelect = document.selection.createRange();
 		eSelect.text = sOpenTag + eSelect.text + sCloseTag;

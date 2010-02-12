@@ -362,9 +362,12 @@ function s2_output_article_form ($id)
 		<input class="bitbtn save" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" />
 <?php ($hook = s2_hook('fn_output_article_form_after_save')) ? eval($hook) : null; ?>
 		<hr />
-<?php ($hook = s2_hook('fn_output_article_form_pre_prv')) ? eval($hook) : null; ?>
-		<img src="i/monitor.png" alt="<?php echo $lang_admin['Preview ready']; ?>" width="16" height="16" onclick="window.open(sUrl + 'action=preview&id=<?php echo $page['id']; ?>', 'previewwindow', 'scrollbars=yes,toolbar=yes', 'True'); return false;" />
-<?php ($hook = s2_hook('fn_output_article_form_after_prv')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_output_article_form_pre_links')) ? eval($hook) : null; ?>
+		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadComments(<?php echo $page['id']; ?>);"><?php echo $lang_common['Comments']; ?></a>
+		<br />
+		<br />
+		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo S2_PATH ?>/admin/site_ajax.php?action=preview&id=<?php echo $page['id']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
+<?php ($hook = s2_hook('fn_output_article_form_after_links')) ? eval($hook) : null; ?>
 	</div>
 <?php ($hook = s2_hook('fn_output_article_form_after_cols')) ? eval($hook) : null; ?>
 </form>

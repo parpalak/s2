@@ -27,7 +27,7 @@ var S2_LANG_SERVER_RESPONSE		= 'Ответ сервера:';
 
 var S2_LANG_CLICK_TO_SORT		= 'Нажмите на заголовок, чтобы отсортировать колонку';
 
-var S2_LANG_RESET_PROMPT		= 'Вернуться к сохраненному варианту (без изменений)?';
+var S2_LANG_RESET_PROMPT		= 'Вернуться к первоначальному варианту (без изменений)?';
 var S2_LANG_CLEAR_PROMPT		= 'Очистить форму?';
 
 var S2_LANG_MOVE				= 'Переместить в «%s»';

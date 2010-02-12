@@ -307,10 +307,18 @@ elseif ($action == 'save')
 
 elseif ($action == 'preview')
 {
+	$required_rights = array('view');
+	($hook = s2_hook('rq_action_preview_start')) ? eval($hook) : null;
+	s2_test_user_rights($session_id, $required_rights);
+
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 
-	header('Location: '.S2_BASE_URL.s2_path_from_id((int) $_GET['id']));
+	$path = s2_path_from_id((int) $_GET['id'], true);
+	if ($path === false)
+		echo $lang_admin['Preview not found'];
+	else
+		header('Location: '.S2_BASE_URL.$path);
 }
 
 //=======================[Tag management]=======================================
