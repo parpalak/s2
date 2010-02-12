@@ -126,14 +126,14 @@ function s2_blog_output_post_list ($criteria)
 			$comment = $row['comment_count'] ? '<a href="#" onclick="return LoadBlogComments('.$row['id'].');" ondblclick="return true;">'.$row['comment_count'].'</a>' : ($row['commented'] ? '' : '×'); // commented
 			$buttons = array(
 				'favorite' => $row['favorite'] ?
-					'<img src="i/sy.png" height="16" width="16" alt="'.$lang_s2_blog['Undo favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">' :
-					'<img src="i/sg.png" height="16" width="16" alt="'.$lang_s2_blog['Do favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">',
-				'delete' => '<img src="i/cross.png" height="16" width="16" alt="Удалить" onclick="return DeleteRecord(this, '.$row['id'].', \''.s2_htmlencode(addslashes(sprintf($lang_s2_blog['Delete warning'], $row['title']))).'\');">',
+					'<img class="favorite" src="i/1.gif" alt="'.$lang_s2_blog['Undo favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">' :
+					'<img class="notfavorite" src="i/1.gif" alt="'.$lang_s2_blog['Do favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">',
+				'delete' => '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteRecord(this, '.$row['id'].', \''.s2_htmlencode(addslashes(sprintf($lang_s2_blog['Delete warning'], $row['title']))).'\');">',
 			);
 
 			($hook = s2_hook('blrq_action_load_blog_posts_pre_item_merge')) ? eval($hook) : null;
 
-			$buttons = '<nobr>'.implode('', $buttons).'</nobr>';
+			$buttons = '<span class="buttons">'.implode('', $buttons).'</span>';
 			$tags = implode(', ', $row['tags']);
 			$date = date('Y/m/d', $row['create_time']);
 
@@ -181,9 +181,16 @@ function s2_blog_edit_post_form ($id)
 {
 	global $s2_db, $lang_s2_blog, $lang_common, $lang_admin;
 
+	$subquery = array(
+		'SELECT'	=> 'count(*)',
+		'FROM'		=> 's2_blog_comments AS c',
+		'WHERE'		=> 'p.id = c.post_id'
+	);
+	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
 	$query = array(
-		'SELECT'	=> 'title, text, create_time, modify_time, published, favorite, commented, url, label',
-		'FROM'		=> 's2_blog_posts',
+		'SELECT'	=> 'title, text, create_time, modify_time, published, favorite, commented, url, label, ('.$raw_query.') AS comment_num',
+		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('s2_blog_fn_post_form_pre_page_get_qr')) ? eval($hook) : null;
@@ -343,8 +350,21 @@ function s2_blog_edit_post_form ($id)
 		<input class="bitbtn save" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" />
 <?php ($hook = s2_hook('s2_blog_fn_post_form_after_save')) ? eval($hook) : null; ?>
 		<hr />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_prv')) ? eval($hook) : null; ?>
-		<a href="<?php echo $page['path']; ?>" target="_blank"><img src="i/monitor.png" alt="<?php echo $lang_admin['Preview ready']; ?>" width="16" height="16" /></a>
+<?php
+
+	($hook = s2_hook('s2_blog_fn_post_form_pre_links')) ? eval($hook) : null;
+
+	if ($page['comment_num'])
+	{
+?>
+		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadBlogComments(<?php echo $id; ?>);"><?php echo $lang_common['Comments']; ?></a>
+		<br />
+		<br />
+<?php
+	}
+
+?>
+		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo $page['path']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
 <?php ($hook = s2_hook('s2_blog_fn_post_form_after_prv')) ? eval($hook) : null; ?>
 	</div>
 </form>

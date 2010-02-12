@@ -1,5 +1,15 @@
 #blog_tab {
-	background-image: url('i/page_white_text.png');
+	background-image: url('i/icons.png');
+	background-position: 4px -33px;
+	}
+
+table.sort .buttons .favorite {
+	background-image: url('i/icons.png');
+	background-position: 0 -16px;
+	}
+table.sort .buttons .notfavorite {
+	background-image: url('i/icons.png');
+	background-position: 0 0;
 	}
 
 .tags_list span {

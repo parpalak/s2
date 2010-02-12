@@ -127,8 +127,9 @@ function ToggleFavBlog (eItem, iId)
 		eItem.outerHTML = Response.text;
 	else
 	{
-		eItem.setAttribute('src', get_attr(Response.text, 'src'));
+		eItem.setAttribute('class', get_attr(Response.text, 'class'));
 		eItem.setAttribute('alt', get_attr(Response.text, 'alt'));
 	}
+
 	return false;
 }

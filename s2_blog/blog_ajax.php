@@ -216,8 +216,8 @@ elseif ($action == 'flip_favorite_post')
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 
 	$button = $favorite ?
-		'<img src="i/sy.png" height="16" width="16" alt="'.$lang_s2_blog['Undo favorite'].'" onclick="return ToggleFavBlog(this, '.$id.');">' :
-		'<img src="i/sg.png" height="16" width="16" alt="'.$lang_s2_blog['Do favorite'].'" onclick="return ToggleFavBlog(this, '.$id.');">';
+		'<img class="favorite" src="i/1.gif" alt="'.$lang_s2_blog['Undo favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">' :
+		'<img class="notfavorite" src="i/1.gif" alt="'.$lang_s2_blog['Do favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">';
 
 	echo $button;
 }
