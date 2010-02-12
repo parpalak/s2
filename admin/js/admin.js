@@ -88,6 +88,12 @@ function Init ()
 		document.addEventListener("mouseout", HideTip, false);
 	}
 
+	window.onbeforeunload = function ()
+	{
+		if (document.artform && curr_md5 != hex_md5(StringFromForm(document.artform)))
+			return S2_LANG_UNSAVED_EXIT;
+	}
+
 	cur_page = document.location.hash;
 	setInterval(CheckPage, 400);
 	SetWait(false);
@@ -653,8 +659,13 @@ function CreateChildArticle ()
 	EditItemName(eSpan);
 }
 
+var curr_md5 = '';
+
 function EditArticle ()
 {
+	if (document.artform && curr_md5 != hex_md5(StringFromForm(document.artform)) && !confirm(S2_LANG_UNSAVED))
+		return;
+
 	var eSpan = buttonPanel.parentNode;
 
 	var Response = GETSyncRequest(sUrl + "action=load&id=" + eSpan.id);
@@ -662,6 +673,7 @@ function EditArticle ()
 		return;
 
 	document.getElementById('form_div').innerHTML = Response.text;
+	curr_md5 = hex_md5(StringFromForm(document.artform));
 	SelectTab(document.getElementById('edit_tab'), true);
 	eTextarea = document.getElementById("wText");
 }
@@ -751,6 +763,8 @@ function SaveArticle (sAction)
 	{
 		if (Response.text != '')
 			alert(Response.text);
+		else
+			curr_md5 = hex_md5(sRequest);
 	}
 
 	eTextarea = document.getElementById("wText");
