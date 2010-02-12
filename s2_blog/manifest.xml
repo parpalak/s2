@@ -626,7 +626,7 @@ if (strpos($_GET['path'], S2_BLOG_URL) === 1)
 	if ($row = $s2_db->fetch_assoc($result))
 	{
 		s2_blog_edit_post_form($row['id']);
-		echo '<script type="text/javascript">document.location.hash = "#edit"; eTextarea = document.getElementById("wText");</script>';
+		echo '<script type="text/javascript">document.location.hash = "#edit"; eTextarea = document.getElementById("wText"); curr_md5 = hex_md5(StringFromForm(document.artform));</script>';
 	}
 
 	return true;
