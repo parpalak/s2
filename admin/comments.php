@@ -99,19 +99,19 @@ function s2_show_comments ($mode, $id = 0)
 
 		// Preparing row buttons
 		$buttons = array();
-		$buttons['edit'] = '<img src="i/ce.png" alt="'.$lang_admin['Edit'].'" width="16" height="16" onclick="return DoAction(\'edit_comment\', '.$row['id'].', \'comm_div\');" />';
+		$buttons['edit'] = '<img class="edit" src="i/1.gif" alt="'.$lang_admin['Edit'].'" onclick="return DoAction(\'edit_comment\', '.$row['id'].', \'comm_div\');" />';
 		$buttons['hide'] =  $row['shown'] ?
-			'<img src="i/cd.png" alt="'.$lang_admin['Hide'].'" width="16" height="16" onclick="return DoAction(\'hide_comment\', '.$row['id'].', \'comm_div\');" />' :
-			'<img src="i/ca.png" alt="'.$lang_admin['Show'].'" width="16" height="16" onclick="return DoAction(\'hide_comment\', '.$row['id'].', \'comm_div\')" />' ;
+			'<img class="hide" src="i/1.gif" alt="'.$lang_admin['Hide'].'" onclick="return DoAction(\'hide_comment\', '.$row['id'].', \'comm_div\');" />' :
+			'<img class="show" src="i/1.gif" alt="'.$lang_admin['Show'].'" onclick="return DoAction(\'hide_comment\', '.$row['id'].', \'comm_div\')" />' ;
 
 		$buttons['mark'] = $row['good'] ?
-			'<img src="i/thumb_down.png" alt="'.$lang_admin['Unmark comment'].'" width="16" height="16" onclick="return DoAction(\'mark_comment\', '.$row['id'].', \'comm_div\');" />' :
-			'<img src="i/thumb_up.png" alt="'.$lang_admin['Mark comment'].'" width="16" height="16" onclick="return DoAction(\'mark_comment\', '.$row['id'].', \'comm_div\');" />';
+			'<img class="unmark" src="i/1.gif" alt="'.$lang_admin['Unmark comment'].'" onclick="return DoAction(\'mark_comment\', '.$row['id'].', \'comm_div\');" />' :
+			'<img class="mark" src="i/1.gif" alt="'.$lang_admin['Mark comment'].'" onclick="return DoAction(\'mark_comment\', '.$row['id'].', \'comm_div\');" />';
 
-		$buttons['delete'] = '<img src="i/cross.png" alt="'.$lang_admin['Delete'].'" width="16" height="16" onclick="return DeleteComment('.$row['id'].');" />';
+		$buttons['delete'] = '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteComment('.$row['id'].');" />';
 
 		($hook = s2_hook('fn_show_comments_pre_buttons_merge')) ? eval($hook) : null;
-		$buttons = '<nobr>'.implode('', $buttons).'</nobr>';
+		$buttons = '<span class="buttons">'.implode('', $buttons).'</span>';
 
 		if ($show_hidden)
 		{

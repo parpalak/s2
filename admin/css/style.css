@@ -269,17 +269,22 @@ hr {
 		vertical-align: top;
 		margin-top: 1px;
 		color: #000;
+		background: url(../i/icons.png);
 		}
-		.but_panel span img[src="i/comments.png"] {
+		.but_panel span img.edit { background-position: -32px -32px;}
+		.but_panel span img.add { background-position: -32px 0px;}
+		.but_panel span img.delete { background-position: 0px -32px;}
+		.but_panel span img.comments {
+			background: url(../i/tab_icons.png) 0 -100px;
 			display: none;
 			}
-			.but_panel[comments] span img[src="i/comments.png"] {
+			.but_panel[comments] span img.comments {
 				display: inline-block;
 				}
-	.but_panel img:hover {
-		background-color: #fff;
-		outline: #eee outset 1px;
-		}
+		.but_panel span img:hover {
+			background-color: #fff;
+			outline: #eee outset 1px;
+			}
 	.but_panel input {
 		background: #fff;
 		color: #000;
@@ -388,24 +393,57 @@ ul .but_panel .delete {
 	background: #fafac0;
 	}
 
-/* Buttons in the panel */
+/*=======================[Toolbar buttons]====================================*/
 
-.pan {
+.toolbar {
 	padding-bottom: 5px;
 	}
-	.pan img {
-		margin: 0px;
+	.toolbar img {
+		margin: 0;
 		padding: 2px;
 		height: 16px;
 		width: 16px;
 		border: #eee solid 1px;
+		background: url(../i/toolbar.png) transparent;
 		}
-		.pan img:hover {
+		.toolbar img:hover {
 			border-color: #fff #aaa #aaa #fff;
 			}
-		.pan img:active {
+		.toolbar img:active {
 			border-color: #aaa #fff #fff #aaa;
 			}
+
+.toolbar .new { background-position: -88px -16px; }
+.toolbar .b { background-position: 2px -52px; }
+.toolbar .i { background-position: -16px -52px; }
+.toolbar .strike { background-position: -34px -52px; }
+.toolbar .big { background-position: -52px -52px; }
+.toolbar .small { background-position: -70px -52px; }
+
+.toolbar .h2 { background-position: 2px -34px; }
+.toolbar .h3 { background-position: -16px -34px; }
+.toolbar .h4 { background-position: -34px -34px; }
+.toolbar .pre { background-position: -52px -34px; }
+.toolbar .code { background-position: -70px -34px; }
+.toolbar .nobr{ background-position: -88px -34px; }
+
+.toolbar .a { background-position: -88px -52px; }
+.toolbar .quote { background-position: -16px -16px; }
+.toolbar .img { background-position: -34px -16px; }
+.toolbar .ul { background-position: -106px -34px; }
+.toolbar .ol { background-position: -106px -16px; }
+.toolbar .li{ background-position: -106px 2px; }
+
+.toolbar .left { background-position: 2px 2px; }
+.toolbar .center { background-position: -16px 2px; }
+.toolbar .right { background-position: -34px 2px; }
+.toolbar .justify { background-position: -52px 2px; }
+.toolbar .sup { background-position: -70px 2px; }
+.toolbar .sub { background-position: -88px 2px; }
+
+.toolbar .refresh { background-position: 2px -16px; }
+.toolbar .expand { background-position: -52px -16px; }
+.toolbar .collapse { background-position: -70px -16px; }
 
 /*=======================[Table styles]=======================================*/
 
@@ -469,18 +507,39 @@ table.sort {
 		padding: 3px 0.5em;
 		}
 
+	table.sort .buttons {
+		white-space: nowrap;
+		}
+		table.sort .buttons img,
+		table.sort img.buttons {
+			width: 16px;
+			height: 16px;
+			background: url(../i/icons.png);
+			}
+		table.sort .buttons .hide { background-position: -16px -16px; }
+		table.sort .buttons .show { background-position: -16px 0; }
+		table.sort .buttons .mark { background-position: -48px 0; }
+		table.sort .buttons .unmark { background-position: -48px -16px; }
+		table.sort .buttons .delete { background-position: 0 -32px; }
+		table.sort .buttons .edit { background-position: -32px -32px; }
+		table.sort .buttons .rename { background-position: -32px -16px; }
+		table.sort .buttons.yes { background-position: 0 0; }
+		table.sort .buttons.no { background-position: 0 -16px; }
 	table.sort img {
-		border: 1px transparent solid;
+		border: none;
+		margin: 1px;
 		}
 		table.sort img:hover {
 			border: 1px #E4BB50 solid;
 			border-color: #fff #aaa #aaa #fff;
-			background: #eee;
+			background-color: #fff;
+			margin: 0;
 			}
 		table.sort img:active {
 			border: 1px #E4BB50 solid;
 			border-color: #aaa #fff #fff #aaa;
-			background: #eee;
+			background-color: #fff;
+			margin: 0;
 			}
 
 /*=======================[Tags tab]===========================================*/
@@ -595,21 +654,23 @@ div.input.text input,
 	background-color: #f2f2f2;
 	border: 2px solid #ccc;
 	border-color: #fff #aaa #aaa #fff;
+	background-image: url(../i/button_icons.png);
 	}
 	.bitbtn:active {
 		border-color: #aaa #fff #fff #aaa;
 		}
 
-.bitbtn.save { background-image: url(../i/page_white_save.png);}
-.bitbtn.reset { background-image: url(../i/page_white_refresh.png);}
-.bitbtn.new { background-image: url(../i/page_white.png);}
-.bitbtn.parag { background-image: url(../i/par.png);}
-.bitbtn.savetag { background-image: url(../i/key_save.png);}
-.bitbtn.resettag { background-image: url(../i/key_refresh.png);}
-.enabled .bitbtn.flip_ext { background-image: url(../i/stop.png);}
-.disabled .bitbtn.flip_ext { background-image: url(../i/play.png);}
-.bitbtn.uninst_ext { background-image: url(../i/plugin_delete.png);}
-.bitbtn.inst_ext { background-image: url(../i/plugin_add.png);}
+.bitbtn.save { background-position: 1px -35px; }
+.bitbtn.reset { background-position: 1px -17px; }
+.bitbtn.new { background-position: 1px 1px; }
+.bitbtn.parag { background-position: 1px -53px; }
+.bitbtn.savetag { background-position: 1px -161px; }
+.bitbtn.resettag { background-position: 1px -143px; }
+.enabled .bitbtn.flip_ext { background-position: 1px -89px; }
+.disabled .bitbtn.flip_ext { background-position: 1px -71px; }
+.bitbtn.uninst_ext { background-position: 1px -125px; }
+.bitbtn.inst_ext { background-position: 1px -107px; }
+.bitbtn.add_user { background-position: 1px -179px; }
 
 /*=======================[Options tab]========================================*/
 

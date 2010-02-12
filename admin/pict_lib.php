@@ -157,7 +157,7 @@ function s2_get_files ($dir)
 				$preview = '<img src="pict_ajax.php?action=preview&file='.$dir.'/'.$item.'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.' alt="" />';
 		}
 
-		$delete_button = '<img class="del" src="i/delete.png" onclick="DeleteFile(\''.$dir.'/'.$item.'\');" alt="'.$lang_pictures['Delete'].'" />';
+		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.$dir.'/'.$item.'\');" alt="'.$lang_pictures['Delete'].'" />';
 
 		($hook = s2_hook('fn_get_files_pre_output_merge')) ? eval($hook) : null;
 		$output .= '<li><span fname="'.$dir.'/'.$item.'"'.$fsize.' fval="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';

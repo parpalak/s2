@@ -406,9 +406,9 @@ function s2_grb ($b, $login, $permission, $allow_modify)
 {
 	global $lang_admin;
 
-	$src = $b ? 'tick' : 'cross';
+	$class = $b ? 'yes' : 'no';
 	$alt = $b ? $lang_admin['Deny'] : $lang_admin['Allow'];
-	return '<img src="i/'.$src.'.png" height="16" width="16" alt="'.($allow_modify ? $alt : '').'" '.($allow_modify ? 'onclick="return SetPermission(\''.s2_htmlencode(addslashes($login)).'\', \''.$permission.'\');" ' : '').'/>';
+	return '<img class="buttons '.$class.'" src="i/1.gif" alt="'.($allow_modify ? $alt : '').'" '.($allow_modify ? 'onclick="return SetPermission(\''.s2_htmlencode(addslashes($login)).'\', \''.$permission.'\');" ' : '').'/>';
 }
 
 function s2_get_user_list ($cur_login, $is_admin = false)
@@ -464,12 +464,12 @@ function s2_get_user_list ($cur_login, $is_admin = false)
 
 		$buttons = array();
 		if ($is_admin || $login == $cur_login)
-			$buttons['change_pass'] = '<img src="i/textfield.png" width="16" height="16" alt="'.$lang_admin['Change password'].'" onclick="return SetUserPassword(\''.s2_htmlencode(addslashes($login)).'\');">';
+			$buttons['change_pass'] = '<img class="rename" src="i/1.gif" alt="'.$lang_admin['Change password'].'" onclick="return SetUserPassword(\''.s2_htmlencode(addslashes($login)).'\');">';
 		if ($is_admin)
-			$buttons['delete'] = '<img src="i/delete.png" width="16" height="16" alt="'.$lang_admin['Delete user'].'" onclick="return DeleteUser(\''.s2_htmlencode(addslashes($login)).'\');">';
+			$buttons['delete'] = '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete user'].'" onclick="return DeleteUser(\''.s2_htmlencode(addslashes($login)).'\');">';
 
 		($hook = s2_hook('fn_get_user_list_loop_pre_buttons_merge')) ? eval($hook) : null;
-		$buttons = '<td><nobr>'.implode('', $buttons).'</nobr></td>';
+		$buttons = '<td><span class="buttons">'.implode('', $buttons).'</span></td>';
 
 		($hook = s2_hook('fn_get_user_list_loop_pre_row_merge')) ? eval($hook) : null;
 		$body[] = '<td>'.s2_htmlencode($login).'</td>'.$permissions.'<td>'.$email_link.'</td>'.$buttons;
@@ -552,40 +552,40 @@ function s2_toolbar ()
 
 ?>
 <hr />
-<div class="pan">
-	<img src="i/page_white.png" alt="<?php echo $lang_admin['Clear']; ?>" onclick="return ClearForm();" />
+<div class="toolbar">
+	<img class="new" src="i/1.gif" alt="<?php echo $lang_admin['Clear']; ?>" onclick="return ClearForm();" />
 	&nbsp;
-	<img src="i/b.png" alt="<?php echo $lang_admin['Bold']; ?>" onclick="return TagSelection('strong');" />
-	<img src="i/i.png" alt="<?php echo $lang_admin['Italic']; ?>" onclick="return TagSelection('em');" />
-	<img src="i/s.png" alt="<?php echo $lang_admin['Strike']; ?>" onclick="return TagSelection('s');" />
+	<img class="b" src="i/1.gif" alt="<?php echo $lang_admin['Bold']; ?>" onclick="return TagSelection('strong');" />
+	<img class="i" src="i/1.gif" alt="<?php echo $lang_admin['Italic']; ?>" onclick="return TagSelection('em');" />
+	<img class="strike" src="i/1.gif" alt="<?php echo $lang_admin['Strike']; ?>" onclick="return TagSelection('s');" />
 	&nbsp;
-	<img src="i/link.png" alt="<?php echo $lang_admin['Link']; ?>" onclick="return InsertTag('<a href=&quot;&quot;>', '</a>');" />
-	<img src="i/quote.png" alt="<?php echo $lang_admin['Quote']; ?>" onclick="return TagSelection('blockquote');" />
-	<img src="i/picture.png" alt="<?php echo $lang_admin['Image']; ?>" onclick="return GetImage();" />
+	<img class="a" src="i/1.gif" alt="<?php echo $lang_admin['Link']; ?>" onclick="return InsertTag('<a href=&quot;&quot;>', '</a>');" />
+	<img class="quote" src="i/1.gif" alt="<?php echo $lang_admin['Quote']; ?>" onclick="return TagSelection('blockquote');" />
+	<img class="img" src="i/1.gif" alt="<?php echo $lang_admin['Image']; ?>" onclick="return GetImage();" />
 	&nbsp;
-	<img src="i/big.png" alt="<?php echo $lang_admin['BIG']; ?>" onclick="return TagSelection('big');" />
-	<img src="i/small.png" alt="<?php echo $lang_admin['SMALL']; ?>" onclick="return TagSelection('small');" />
+	<img class="big" src="i/1.gif" alt="<?php echo $lang_admin['BIG']; ?>" onclick="return TagSelection('big');" />
+	<img class="small" src="i/1.gif" alt="<?php echo $lang_admin['SMALL']; ?>" onclick="return TagSelection('small');" />
 	&nbsp;
-	<img src="i/sup.png" alt="<?php echo $lang_admin['SUP']; ?>" onclick="return TagSelection('sup');" />
-	<img src="i/sub.png" alt="<?php echo $lang_admin['SUB']; ?>" onclick="return TagSelection('sub');" />
+	<img class="sup" src="i/1.gif" alt="<?php echo $lang_admin['SUP']; ?>" onclick="return TagSelection('sup');" />
+	<img class="sub" src="i/1.gif" alt="<?php echo $lang_admin['SUB']; ?>" onclick="return TagSelection('sub');" />
 	&nbsp;
-	<img src="i/h2.png" alt="<?php echo $lang_admin['Header 2']; ?>" onclick="return TagSelection('h2');" />
-	<img src="i/h3.png" alt="<?php echo $lang_admin['Header 3']; ?>" onclick="return TagSelection('h3');" />
-	<img src="i/h4.png" alt="<?php echo $lang_admin['Header 4']; ?>" onclick="return TagSelection('h4');" />
+	<img class="h2" src="i/1.gif" alt="<?php echo $lang_admin['Header 2']; ?>" onclick="return TagSelection('h2');" />
+	<img class="h3" src="i/1.gif" alt="<?php echo $lang_admin['Header 3']; ?>" onclick="return TagSelection('h3');" />
+	<img class="h4" src="i/1.gif" alt="<?php echo $lang_admin['Header 4']; ?>" onclick="return TagSelection('h4');" />
 	&nbsp;
-	<img src="i/left.png" alt="<?php echo $lang_admin['Left']; ?>" onclick="return TagSelection('p');" />
-	<img src="i/center.png" alt="<?php echo $lang_admin['Center']; ?>" onclick="return InsertTag('<p align=&quot;center&quot;>', '</p>');" />
-	<img src="i/right.png" alt="<?php echo $lang_admin['Right']; ?>" onclick="return InsertTag('<p align=&quot;right&quot;>', '</p>');" />
-	<img src="i/justify.png" alt="<?php echo $lang_admin['Justify']; ?>" onclick="return InsertTag('<p align=&quot;justify&quot;>', '</p>');" />
+	<img class="left" src="i/1.gif" alt="<?php echo $lang_admin['Left']; ?>" onclick="return TagSelection('p');" />
+	<img class="center" src="i/1.gif" alt="<?php echo $lang_admin['Center']; ?>" onclick="return InsertTag('<p align=&quot;center&quot;>', '</p>');" />
+	<img class="right" src="i/1.gif" alt="<?php echo $lang_admin['Right']; ?>" onclick="return InsertTag('<p align=&quot;right&quot;>', '</p>');" />
+	<img class="justify" src="i/1.gif" alt="<?php echo $lang_admin['Justify']; ?>" onclick="return InsertTag('<p align=&quot;justify&quot;>', '</p>');" />
 	&nbsp;
-	<img src="i/ul.png" alt="<?php echo $lang_admin['UL']; ?>" onclick="return TagSelection('ul');" />
-	<img src="i/ol.png" alt="<?php echo $lang_admin['OL']; ?>" onclick="return TagSelection('ol');" />
-	<img src="i/li.png" alt="<?php echo $lang_admin['LI']; ?>" onclick="return TagSelection('li');" />
+	<img class="ul" src="i/1.gif" alt="<?php echo $lang_admin['UL']; ?>" onclick="return TagSelection('ul');" />
+	<img class="ol" src="i/1.gif" alt="<?php echo $lang_admin['OL']; ?>" onclick="return TagSelection('ol');" />
+	<img class="li" src="i/1.gif" alt="<?php echo $lang_admin['LI']; ?>" onclick="return TagSelection('li');" />
 	&nbsp;
-	<img src="i/pre.png" alt="<?php echo $lang_admin['PRE']; ?>" onclick="return TagSelection('pre');" />
-	<img src="i/code.png" alt="<?php echo $lang_admin['CODE']; ?>" onclick="return TagSelection('code');" />
+	<img class="pre" src="i/1.gif" alt="<?php echo $lang_admin['PRE']; ?>" onclick="return TagSelection('pre');" />
+	<img class="code" src="i/1.gif" alt="<?php echo $lang_admin['CODE']; ?>" onclick="return TagSelection('code');" />
 	&nbsp;
-	<img src="i/nobr.png" alt="<?php echo $lang_admin['NOBR']; ?>" onclick="return TagSelection('nobr');" />
+	<img class="nobr" src="i/1.gif" alt="<?php echo $lang_admin['NOBR']; ?>" onclick="return TagSelection('nobr');" />
 </div>
 <?php
 
@@ -596,10 +596,10 @@ function s2_context_buttons ()
 	global $lang_common, $lang_admin;
 
 	$buttons = array(
-		'Edit'			=> '<img src="i/pencil.png" onclick="EditArticle();" alt="'.$lang_admin['Edit'].'" />',
-		'Comments'		=> '<img src="i/comments.png" onclick="LoadComments();" alt="'.$lang_common['Comments'].'" />',
-		'Subarticle'	=> '<img src="i/page_white_add.png" onclick="CreateChildArticle();" alt="'.$lang_admin['Create subarticle'].'" />',
-		'Delete'		=> '<img src="i/delete.png" class="delete" onclick="DeleteArticle();" alt="'.$lang_admin['Delete'].'" />',
+		'Edit'			=> '<img class="edit" src="i/1.gif" onclick="EditArticle();" alt="'.$lang_admin['Edit'].'" />',
+		'Comments'		=> '<img class="comments" src="i/1.gif" onclick="LoadComments();" alt="'.$lang_common['Comments'].'" />',
+		'Subarticle'	=> '<img class="add" src="i/1.gif" onclick="CreateChildArticle();" alt="'.$lang_admin['Create subarticle'].'" />',
+		'Delete'		=> '<img class="delete" src="i/1.gif" onclick="DeleteArticle();" alt="'.$lang_admin['Delete'].'" />',
 	);
 
 	($hook = s2_hook('fn_context_buttons_start')) ? eval($hook) : null;

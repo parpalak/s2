@@ -113,10 +113,10 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 		<dd>
 			<div class="reducer" id="tree_div">
 				<div id="tree_panel" class="l-float">
-					<div class="pan">
-						<img src="i/ao.png" onclick="OpenAll(); return false;" alt="<?php echo $lang_admin['Expand']; ?>" />
-						<img src="i/ai.png" onclick="CloseAll(); return false;" alt="<?php echo $lang_admin['Collapse']; ?>" />
-						<img src="i/refresh.png" onclick="RefreshTree(); return false;" alt="<?php echo $lang_admin['Refresh']; ?>" />
+					<div class="toolbar">
+						<img class="expand" src="i/1.gif" onclick="OpenAll(); return false;" alt="<?php echo $lang_admin['Expand']; ?>" />
+						<img class="collapse" src="i/1.gif" onclick="CloseAll(); return false;" alt="<?php echo $lang_admin['Collapse']; ?>" />
+						<img class="refresh" src="i/1.gif" onclick="RefreshTree(); return false;" alt="<?php echo $lang_admin['Refresh']; ?>" />
 					</div>
 					<?php s2_context_buttons(); ?>
 					<div id="tree" class="treetree"></div>
@@ -177,9 +177,8 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 				<dd>
 					<div class="reducer">
 						<p align="center">
-							<img src="i/ua.png" height="16" width="16" alt="" align="middle" />
 							<input type="text" name="userlogin" id="userlogin" size="30" value="" />
-							<input type="button" onclick="return AddUser(document.getElementById('userlogin').value);" value="<?php echo $lang_admin['Add user']; ?>" />
+							<input class="bitbtn add_user" type="button" onclick="return AddUser(document.getElementById('userlogin').value);" value="<?php echo $lang_admin['Add user']; ?>" />
 						</p>
 						<hr />
 						<div id="user_div"></div>

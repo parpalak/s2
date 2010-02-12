@@ -72,7 +72,7 @@ function InitMovableDivs ()
 	{
 		buttonPanel = document.createElement("SPAN");
 		buttonPanel.setAttribute("id", "buttons");
-		buttonPanel.innerHTML = '<img src="i/page_white_add.png" onclick="CreateSubFolder(); return false;" alt="' + S2_LANG_CREATE_SUBFOLDER + '" /><img src="i/delete.png" class="delete" onclick="DeleteFolder(); return false;" alt="' + S2_LANG_DELETE + '" />';
+		buttonPanel.innerHTML = '<img class="add" src="i/1.gif" onclick="return CreateSubFolder();" alt="' + S2_LANG_CREATE_SUBFOLDER + '" /><img src="i/1.gif" class="delete" onclick="return DeleteFolder();" alt="' + S2_LANG_DELETE + '" />';
 	}
 }
 
@@ -516,17 +516,18 @@ function DeleteFolder ()
 	var eSpan = buttonPanel.parentNode;
 
 	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, S2_LANG_DELETE_ITEM)))
-		return;
+		return false;
 
 	ReleaseItem();
 	var Response = GETSyncRequest(sUrl + "action=delete_folder&path=" + eSpan.getAttribute('path'));
 	if (Response.status != '200')
-		return;
+		return false;
 
 	SaveExpand();
 	SetParentChildren(eSpan.parentNode.parentNode.parentNode, Response.text);
 	LoadExpand();
 	eFilePanel.innerHTML = '';
+	return false;
 }
 
 function DeleteFile (sName)
@@ -547,7 +548,7 @@ function CreateSubFolder ()
 	ReleaseItem();
 	var Response = GETSyncRequest(sUrl + "action=create_subfolder&path=" + eSpan.getAttribute('path'));
 	if (Response.status != '200')
-		return;
+		return false;
 
 	SetItemChildren(eSpan, Response.text);
 
@@ -565,6 +566,7 @@ function CreateSubFolder ()
 		HighlightItem(eSpan);
 		EditItemName(eSpan);
 	}
+	return false;
 }
 
 function Init ()
