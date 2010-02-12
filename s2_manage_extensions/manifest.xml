@@ -20,7 +20,7 @@
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0dev</minversion>
-	<maxtestedon>1.0a</maxtestedon>
+	<maxtestedon>1.0a1</maxtestedon>
 
 	<hooks>
 
@@ -29,7 +29,7 @@ echo '<script type="text/javascript" src="'.$ext_info['url'].'/functions.js"></s
 		]]></hook>
 
 		<hook id="fn_extension_list_pre_inst_item_merge"><![CDATA[
-$buttons = array_merge(array('refresh_hooks' => '<button class="bitbtn" style="background-image: url('.S2_BASE_URL.'/admin/i/refresh.png);" onclick="return emRefreshHooks(\''.s2_htmlencode(addslashes($id)).'\');" />Refresh Hooks</button>'), $buttons);
+$buttons = array_merge(array('refresh_hooks' => '<button class="bitbtn" style="background-image: url('.$ext_info['url'].'/r.png);" onclick="return emRefreshHooks(\''.s2_htmlencode(addslashes($id)).'\');" />Refresh Hooks</button>'), $buttons);
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[
