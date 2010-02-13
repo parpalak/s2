@@ -57,3 +57,6 @@ function ReturnImage(s, w, h)
 	wImage.document.forms[0].elements['width'].value = w;
 	wImage.document.forms[0].elements['height'].value = h;
 }
+
+add_hook('fn_tab_switch_start', 'if (sType == "view_tab") tinyMCE.triggerSave();');
+add_hook('fn_is_changed', 'tinyMCE.triggerSave();');
