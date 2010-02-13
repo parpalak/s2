@@ -46,7 +46,7 @@ function LoadPosts ()
 
 function EditRecord (iId)
 {
-	if (document.artform && curr_md5 != hex_md5(StringFromForm(document.artform)) && !confirm(S2_LANG_UNSAVED))
+	if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + "action=edit_blog_post&id=" + iId);
@@ -54,7 +54,7 @@ function EditRecord (iId)
 		return false;
 
 	document.getElementById('form_div').innerHTML = Response.text;
-	curr_md5 = hex_md5(StringFromForm(document.artform));
+	CommitChanges(document.artform);
 	SelectTab(document.getElementById('edit_tab'), true);
 	eTextarea = document.getElementById("wText");
 
