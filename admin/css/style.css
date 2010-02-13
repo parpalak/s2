@@ -358,15 +358,16 @@ ul .but_panel .delete {
 	padding: 0;
 	border: 1px solid #fff;
 	border-color: #aaa transparent #fff #aaa;
-	display: none; /**/
+	display: none;
 	}
 	#keyvalues img {
 		height: 16px;
 		width: 16px;
 		float: right;
+		background: url(../i/icons.png) 0 -32px;
 		}
 		#keyvalues img:hover {
-			background: #fff;
+			background-color: #fff;
 			}
 	#keyvalues ul li {
 		padding: 0.25em 0.5em;
@@ -377,8 +378,8 @@ ul .but_panel .delete {
 	width: 16px;
 	}
 	.tagswitcher img {
+		background: url(../i/tag.gif) -4px 50% no-repeat #aaa;
 		position: absolute;
-		background: #aaa;
 		top: 50%;
 		height: 10px;
 		width: 10px;
@@ -387,10 +388,13 @@ ul .but_panel .delete {
 		cursor: pointer;
 		cursor: hand;
 		}
+		.tagswitcher img.closed {
+			background-position: 6px 50%;
+			}
 
 #keyvalues ul li:hover,
 .tagswitcher img:hover{
-	background: #fafac0;
+	background-color: #fafac0;
 	}
 
 /*=======================[Toolbar buttons]====================================*/

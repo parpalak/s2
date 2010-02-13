@@ -923,7 +923,7 @@ function SwitchKeys (eItem)
 		document.getElementById('keynames').style.display = "none";
 		document.getElementById('tree_panel').style.marginRight = "-30px";
 		document.getElementById('tree_panel').style.paddingRight = "30px";
-		eItem.src = 'i/ko.gif';
+		eItem.className = 'closed';
 		eItem.alt = S2_LANG_SHOW_TAGS;
 	}
 	else
@@ -934,7 +934,7 @@ function SwitchKeys (eItem)
 		document.getElementById('keynames').style.display = "block";
 		document.getElementById('tree_panel').style.marginRight = "-430px";
 		document.getElementById('tree_panel').style.paddingRight = "430px";
-		eItem.src = 'i/kc.gif';
+		eItem.className = 'opened';
 		eItem.alt = S2_LANG_HIDE_TAGS;
 	}
 	bKeysOpen = !bKeysOpen;

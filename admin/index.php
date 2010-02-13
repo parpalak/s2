@@ -122,7 +122,7 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 					<div id="tree" class="treetree"></div>
 				</div>
 				<div id="keytable" class="r-float">
-					<div class="tagswitcher"><img src="i/ko.gif" alt="<?php echo $lang_admin['Show tags']; ?>" onclick="return SwitchKeys(this);"></div>
+					<div class="tagswitcher"><img class="closed" src="i/1.gif" alt="<?php echo $lang_admin['Show tags']; ?>" onclick="return SwitchKeys(this);"></div>
 					<div id="keyvalues" onmouseout="KeyvaluesMouseOut();" onmouseover="KeyvaluesMouseIn();"><?php echo $lang_admin['Choose tag']; ?></div>
 					<div id="keynames"><ul id="tag_list"></ul></div>
 				</div>
