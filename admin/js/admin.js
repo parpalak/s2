@@ -90,7 +90,7 @@ function Init ()
 
 	window.onbeforeunload = function ()
 	{
-		if (document.artform && curr_md5 != hex_md5(StringFromForm(document.artform)))
+		if (document.artform && IsChanged(document.artform))
 			return S2_LANG_UNSAVED_EXIT;
 	}
 
@@ -169,6 +169,25 @@ function CheckPage ()
 			SelectTab(document.getElementById(new_page.split('-')[0] + '_tab'), false);
 		SelectTab(document.getElementById(new_page + '_tab'), true);
 	}
+}
+
+// Tracking editor content changes
+
+var curr_md5 = '';
+
+function CommitChanges (arg)
+{
+	if (typeof(arg) == 'string')
+		curr_md5 = hex_md5(arg);
+	else
+		curr_md5 = hex_md5(StringFromForm(arg));
+}
+
+function IsChanged (eForm)
+{
+	(hook = hooks['fn_is_changed']) ? eval(hook) : null;
+
+	return curr_md5 != hex_md5(StringFromForm(eForm));
 }
 
 // Creating the button panel and div for drag
@@ -659,11 +678,9 @@ function CreateChildArticle ()
 	EditItemName(eSpan);
 }
 
-var curr_md5 = '';
-
 function EditArticle ()
 {
-	if (document.artform && curr_md5 != hex_md5(StringFromForm(document.artform)) && !confirm(S2_LANG_UNSAVED))
+	if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
 		return;
 
 	var eSpan = buttonPanel.parentNode;
@@ -673,7 +690,7 @@ function EditArticle ()
 		return;
 
 	document.getElementById('form_div').innerHTML = Response.text;
-	curr_md5 = hex_md5(StringFromForm(document.artform));
+	CommitChanges(document.artform)
 	SelectTab(document.getElementById('edit_tab'), true);
 	eTextarea = document.getElementById("wText");
 }
@@ -764,7 +781,7 @@ function SaveArticle (sAction)
 		if (Response.text != '')
 			alert(Response.text);
 		else
-			curr_md5 = hex_md5(sRequest);
+			CommitChanges(sRequest);
 	}
 
 	eTextarea = document.getElementById("wText");
