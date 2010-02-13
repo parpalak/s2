@@ -316,15 +316,22 @@ function s2_toggle_hide_comment ($id)
 
 			// Fetching receivers' names and adresses
 			$query = array(
-				'SELECT'	=> 'DISTINCT nick, email',
+				'SELECT'	=> 'id, nick, email, ip, time',
 				'FROM'		=> 'art_comments',
 				'WHERE'		=> 'article_id = '.$comment['article_id'].' and subscribed = 1 and email <> \''.$s2_db->escape($comment['email']).'\''
 			);
 			($hook = s2_hook('fn_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
 			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+			$receivers = array();
 			while ($receiver = $s2_db->fetch_assoc($result))
-				s2_mail_comment($receiver['nick'], $receiver['email'], $comment['text'], $article['title'], $link, $comment['nick']);
+				$receivers[$receiver['email']] = $receiver;
+
+			foreach ($receivers as $receiver)
+			{
+				$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$comment['article_id'].'&unsubscribe='.substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16);
+				s2_mail_comment($receiver['nick'], $receiver['email'], $comment['text'], $article['title'], $link, $comment['nick'], $unsubscribe_link);
+			}
 		}
 		else
 			$sent = 0;

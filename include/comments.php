@@ -154,7 +154,7 @@ function s2_check_comment_question ($key, $answer)
 //
 // Sends comments to subscribed users
 //
-function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name)
+function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name, $unsubscribe_link)
 {
 	global $lang_comments;
 
@@ -164,6 +164,7 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name)
 	$message = str_replace('<title>', $title, $message);
 	$message = str_replace('<url>', $url, $message);
 	$message = str_replace('<text>', $text, $message);
+	$message = str_replace('<unsubscribe>', $unsubscribe_link, $message);
 
 	// Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
 	$message = str_replace(array("\n", "\0"), array("\r\n", ''), $message);

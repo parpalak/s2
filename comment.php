@@ -33,6 +33,62 @@ if (isset($_GET['go']))
 	die;
 }
 
+if (isset($_GET['unsubscribe']))
+{
+	header('Content-Type: text/html; charset=utf-8');
+
+	if (isset($_GET['id']) && isset($_GET['mail']))
+	{
+		$query = array(
+			'SELECT'	=> 'id, nick, email, ip, time',
+			'FROM'		=> 'art_comments',
+			'WHERE'		=> 'article_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
+		);
+		($hook = s2_hook('cmnt_unsubscribe_pre_get_receivers_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		while ($receiver = $s2_db->fetch_assoc($result))
+		{
+			if ($_GET['unsubscribe'] == substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16))
+			{
+				$query = array(
+					'UPDATE'	=> 'art_comments',
+					'SET'		=> 'subscribed = 0',
+					'WHERE'		=> 'article_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
+				);
+				($hook = s2_hook('cmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
+				$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><?php echo $lang_comments['Unsubscribed OK']; ?></title>
+</head>
+<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
+	<h1><?php echo $lang_comments['Unsubscribed OK']; ?></h1>
+	<?php echo $lang_comments['Unsubscribed OK info']; ?>
+</body>
+<?php
+
+				die;
+			}
+		}
+	}
+
+?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><?php echo $lang_comments['Unsubscribed failed info']; ?></title>
+</head>
+<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
+	<h1><?php echo $lang_comments['Unsubscribed failed']; ?></h1>
+	<?php echo $lang_comments['Unsubscribed failed info']; ?>
+</body>
+<?php
+
+	die;
+}
+
 if (!S2_ENABLED_COMMENTS)
 	s2_comment_error(array($lang_comment_errors['disabled']));
 
@@ -125,15 +181,22 @@ $message = s2_bbcode_to_mail($text);
 if (!S2_PREMODERATION)
 {
 	$query = array(
-		'SELECT'	=> 'DISTINCT nick, email',
+		'SELECT'	=> 'id, nick, email, ip, time',
 		'FROM'		=> 'art_comments',
 		'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email <> \''.$s2_db->escape($email).'\''
 	);
 	($hook = s2_hook('cmnt_pre_get_subscribers_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	while ($mrow = $s2_db->fetch_assoc($result))
-		s2_mail_comment($mrow['nick'], $mrow['email'], $message, $row['title'], $link, $name);
+	$receivers = array();
+	while ($receiver = $s2_db->fetch_assoc($result))
+		$receivers[$receiver['email']] = $receiver;
+
+	foreach ($receivers as $receiver)
+	{
+		$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$id.'&unsubscribe='.substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16);
+		s2_mail_comment($receiver['nick'], $receiver['email'], $message, $row['title'], $link, $name, $unsubscribe_link);
+	}
 }
 
 // Sending the comment to moderators
@@ -145,7 +208,7 @@ $query = array(
 ($hook = s2_hook('cmnt_pre_get_moderators_qr')) ? eval($hook) : null;
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 while ($mrow = $s2_db->fetch_assoc($result))
-	s2_mail_comment($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name);
+	s2_mail_comment($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, '---');
 
 if (!S2_PREMODERATION)
 {
