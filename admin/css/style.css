@@ -84,9 +84,9 @@ body {
 	background: #FFF4D7;
 	border: 1px solid #E4BB50;
 	color: #000;
-	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
-	margin: 0px;
-	padding: 1px 5px;
+	font: menu;
+	margin: 0;
+	padding: 2px 6px;
 	position: absolute;
 	z-index: 10;
 	visibility: hidden;
@@ -457,31 +457,32 @@ ul .but_panel .delete {
  */
 
 table.sort {
-	background: #f3f3f3;
+	background: #fff;
 	border-collapse: collapse;
 	margin: 1em 0;
 	}
 
-	table.sort tr.hidden td {
-		background: #ddd;
-		text-decoration: line-through;
-		color: #333;
+	table.sort tr.hidden {
+		background: #f5f5f5;
+		color: #666;
 		}
-	table.sort tr.good td {
+	table.sort tr.hidden td {
+		text-decoration: line-through;
+		}
+	table.sort tr.good {
 		background: #e8ffe8;
 		}
-	table.sort tr.hidden.good td {
-		background: #a8e8a8;
-		text-decoration: line-through;
-		color: #333;
+	table.sort tr.hidden.good {
+		background: #c0f3c0;
 		}
 
 	table.sort tbody tr:hover {
-		background: #fafac0;
+		background: #fafad0;
 		}
 
 	table.sort td {
-		border: 1px solid #ccc;
+		border: 1px solid #eee;
+		border-width: 1px 0;
 		}
 		table.sort thead td {
 			background: #ccc;
@@ -496,7 +497,7 @@ table.sort {
 				font-weight: bold;
 				}
 			table.sort thead td.curcol {
-				background: #060;
+				background: #68c;
 				color: #fff;
 				}
 		table.sort tbody td {
