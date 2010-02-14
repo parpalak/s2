@@ -202,6 +202,9 @@ hr {
 			background-position: -72px -27px;
 			background-repeat: no-repeat;
 			}
+	.treetree > ul {
+		padding: 0.333em 0.5em;
+		}
 		.treetree > ul > li,
 		.treetree > ul > li.IsLast {
 			margin-left: 0;
