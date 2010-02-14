@@ -24,7 +24,8 @@ div.input.text input,
 html,
 .tabsheets,
 .border,
-.r-float {
+.r-float,
+.tabsheets dd .no-scroll {
 	overflow: hidden;
 	}
 
@@ -128,10 +129,6 @@ hr {
 	color: #ddd;
 	border: 1px solid #eee;
 	border-color: #aaa #fff #fff #aaa;
-	}
-
-.tabsheets dd .no-scroll {
-	overflow: hidden;
 	}
 
 #pict_frame,
