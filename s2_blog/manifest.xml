@@ -343,7 +343,7 @@ include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 							<td><input style="width: 10em;" type="text" name="posts[start_time]" size="20" value="01.01.<?php echo S2_START_YEAR; ?>" /></td>
 							<td class="label"><?php echo $lang_s2_blog['Search label']; ?></td>
 							<td><input type="text" name="posts[text]" size="40" value="" /></td>
-							<td align="right"><input style="background-image: url(<?php echo S2_BASE_URL; ?>/admin/i/page_white_add.png);" class="bitbtn" name="button" type="button" value="Создать новую запись" onclick="return CreateBlankRecord();" /></td>
+							<td align="right"><input class="bitbtn add_post" name="button" type="button" value="<?php echo $lang_s2_blog['Create new']; ?>" onclick="return CreateBlankRecord();" /></td>
 						</tr>
 						<tr>
 							<td class="label"><?php echo $lang_s2_blog['End time']; ?></td>

@@ -17,3 +17,8 @@ table.sort .buttons .notfavorite {
 	font-weight: bold;
 	background: #f00;
 	}
+
+.bitbtn.add_post {
+	background-image: url(i/icons.png);
+	background-position: 1px -56px;
+	}
