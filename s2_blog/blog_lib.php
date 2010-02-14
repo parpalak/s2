@@ -371,3 +371,81 @@ function s2_blog_edit_post_form ($id)
 <?
 
 }
+
+function s2_blog_toggle_hide_comment ($id)
+{
+	global $s2_db;
+	// Does the comment exist?
+	// We need post id for displaying comments.
+	// Also we need the comment if the premoderation is turned on.
+	$query = array(
+		'SELECT'	=> 'post_id, sent, shown, nick, email, text',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('blrq_action_hide_blog_comment_pre_get_comment_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	if ($s2_db->num_rows($result) != 1)
+		die('Comment not found!');
+
+	$comment = $s2_db->fetch_assoc($result);
+
+	$sent = 1;
+	if (!$comment['shown'] && !$comment['sent'])
+	{
+		// Premoderation is enabled and we have to send the comment to be shown
+		// to subscribed commentators
+		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
+			require S2_ROOT.'include/comments.php';
+
+		global $lang_comments;
+		require S2_ROOT.'lang/'.S2_LANGUAGE.'/comments.php';
+
+		// Getting some info about the post commented
+		$query = array(
+			'SELECT'	=> 'title, create_time, url',
+			'FROM'		=> 's2_blog_posts',
+			'WHERE'		=> 'id = '.$comment['post_id'].' AND published = 1 AND commented = 1'
+		);
+		($hook = s2_hook('blrq_action_hide_blog_comment_pre_get_post_info_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		if ($post = $s2_db->fetch_assoc($result))
+		{
+			$link = S2_BASE_URL.'/'.urlencode(S2_BLOG_URL).date('/Y/m/d/', $post['create_time']).urlencode($post['url']);
+
+			// Fetching receivers' names and adresses
+			$query = array(
+				'SELECT'	=> 'id, nick, email, ip, time',
+				'FROM'		=> 's2_blog_comments',
+				'WHERE'		=> 'post_id = '.$comment['post_id'].' and subscribed = 1 and email <> \''.$s2_db->escape($comment['email']).'\''
+			);
+			($hook = s2_hook('s2_blog_fn_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
+			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+			$receivers = array();
+			while ($receiver = $s2_db->fetch_assoc($result))
+				$receivers[$receiver['email']] = $receiver;
+
+			foreach ($receivers as $receiver)
+			{
+				$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$comment['post_id'].'&blog_unsubscribe='.substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16);
+				s2_mail_comment($receiver['nick'], $receiver['email'], $comment['text'], $post['title'], $link, $comment['nick'], $unsubscribe_link);
+			}
+		}
+		else
+			$sent = 0;
+	}
+
+	// Toggle comment visibility
+	$query = array(
+		'UPDATE'	=> 's2_blog_comments',
+		'SET'		=> 'shown = 1 - shown, sent = '.$sent,
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('blrq_action_hide_blog_comment_pre_upd_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	echo s2_comment_menu_links();
+	echo s2_show_comments('s2_blog', $comment['post_id']);
+}
