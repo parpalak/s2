@@ -141,13 +141,18 @@ function s2_show_comments ($mode, $id = 0)
 	}
 
 	foreach ($article_titles as $article_id => $title)
-		$output .=
-			'<h3><a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">'.$title.'</a></h3>'.
-			($mode != 'all' ? '<a href="#" title="'.sprintf($lang_admin['All comments to'], $title).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>' : '').
+	{
+		$output_header = '<h3><a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">'.$title.'</a></h3>';
+		$output_subheader = $mode != 'all' ? '<a href="#" title="'.sprintf($lang_admin['All comments to'], $title).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>' : '';
+		$output_body = 
 			'<table class="sort" width="100%">'.
 				'<thead><tr><td width="8%">'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td width="8%">'.$lang_admin['Date'].'</td><td width="8%">'.$lang_admin['IP'].'</td><td width="10%">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
-				'<tbody>'.implode('', $mode == 'last' ? array_reverse($comments_tables[$article_id]) : $comments_tables[$article_id]).'</tbody>'.
+				'<tbody>'.implode('', strpos($mode, 'last') !== false ? array_reverse($comments_tables[$article_id]) : $comments_tables[$article_id]).'</tbody>'.
 			'</table>';
+
+		($hook = s2_hook('fn_show_comments_pre_output_merge')) ? eval($hook) : null;
+		$output .= $output_header.$output_subheader.$output_body;
+	}
 
 	($hook = s2_hook('fn_show_comments_end')) ? eval($hook) : null;
 	return $output;
