@@ -541,6 +541,14 @@ if (strpos($mode, 's2_blog') === 0)
 }
 		]]></hook>
 
+		<hook id="fn_show_comments_pre_output_merge"><![CDATA[
+if (strpos($mode, 's2_blog') === 0)
+{
+	$output_header = str_replace('EditArticle', 'EditRecord', $output_header);
+	$output_subheader = $mode == 's2_blog' ? '' : str_replace('LoadComments', 'LoadBlogComments', $output_subheader);
+}
+		]]></hook>
+
 		<hook id="opt_start"><![CDATA[
 $s2_const_types['S2_BLOG_URL'] = 'string';
 $s2_const_types['S2_BLOG_TITLE'] = 'string';
