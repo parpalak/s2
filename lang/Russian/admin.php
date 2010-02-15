@@ -95,7 +95,6 @@ $lang_admin = array(
 'Go to editor'				=> 'Перейти к редактированию статьи',
 'All comments to'			=> 'Все комментарии к «%s»',
 'All comments to'			=> 'Все комментарии к «%s»',
-'Comments table header'		=> '%1$s | %2$s',
 'Show hidden comments'		=> 'Скрытые',
 'Show last comments'		=> 'Последние',
 'Show new comments'			=> 'Непроверенные',
