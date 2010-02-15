@@ -164,10 +164,9 @@ function s2_extension_list ()
 
 		$ext_item[] = '<div class="extension '.($ext['disabled'] == '1' ? 'disabled' : 'enabled').'">'.
 			'<div class="info"><h3>'.s2_htmlencode($ext['title']).sprintf($lang_admin_ext['Version'], $ext['version']).'</h3>'.
-			'<p>'.sprintf($lang_admin_ext['Extension by'], s2_htmlencode($ext['author'])).'</p>'.
-			(($ext['description'] != '') ? '<p>'.s2_htmlencode($ext['description']).'</p>' : '').
-			$extra_info.'</div><div class="options">'.implode('<br />', $buttons).'</div>'.
-			'<br clear="both" /></div>';
+			'<p>'.sprintf($lang_admin_ext['Extension by'], s2_htmlencode($ext['author'])).'</p>'.$extra_info.'</div>'.
+			(($ext['description'] != '') ? '<p class="description">'.s2_htmlencode($ext['description']).'</p>' : '').
+			'<div class="options">'.implode('<br />', $buttons).'</div></div>';
 
 		$installed_count++;
 	}

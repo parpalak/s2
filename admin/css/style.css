@@ -13,7 +13,8 @@
 #kText,
 .fields input,
 div.input.text input,
-.r-float input[type="text"] {
+.r-float input[type="text"],
+.extension  p.description {
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -768,14 +769,23 @@ div.input {
 	}
 	.extension .info {
 		float: left;
+		width: 20em;
+		}
+	.extension  p.description {
+		float: right;
 		width: 100%;
-		margin-right: -200px;
+		margin-left: -20em;
+		padding-left: 20em;
 		}
 	.extension .options {
-		float: right;
-		text-align: right;
-		width: 200px;
+		padding-left: 20em;
 		}
+		.extension .options br {
+			display: none;
+			}
+		.extension .options button {
+			margin: 0 1em 1em 0;
+			}
 	.extension h3 {
 		margin-top: 0;
 		}
@@ -797,4 +807,6 @@ div.input {
 
 .extension.disabled {
 	background: #ccc;
+	color: #666;
+	text-decoration: line-through;
 	}
