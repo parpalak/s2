@@ -678,21 +678,23 @@ function CreateChildArticle ()
 	EditItemName(eSpan);
 }
 
-function EditArticle ()
+function EditArticle (iId)
 {
 	if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
-		return;
+		return false;
 
-	var eSpan = buttonPanel.parentNode;
+	if (typeof(iId) == 'undefined')
+		iId = buttonPanel.parentNode.id;
 
-	var Response = GETSyncRequest(sUrl + "action=load&id=" + eSpan.id);
+	var Response = GETSyncRequest(sUrl + "action=load&id=" + iId);
 	if (Response.status != '200')
-		return;
+		return false;
 
 	document.getElementById('form_div').innerHTML = Response.text;
 	CommitChanges(document.artform)
 	SelectTab(document.getElementById('edit_tab'), true);
 	eTextarea = document.getElementById("wText");
+	return false;
 }
 
 function LoadComments (iId)

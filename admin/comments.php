@@ -141,7 +141,14 @@ function s2_show_comments ($mode, $id = 0)
 	}
 
 	foreach ($article_titles as $article_id => $title)
-		$output .= '<h3>'.sprintf($lang_admin['Comments to'], $title).'</h3>'.
+		$output .=
+			'<h3>'.
+				sprintf(
+					$lang_admin['Comments table header'],
+					'<a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">'.$title.'</a>',
+					'<a href="#" title="'.sprintf($lang_admin['All comments to'], $title).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>'
+				).
+			'</h3>'.
 			'<table class="sort" width="100%">'.
 				'<thead><tr><td width="8%">'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td width="8%">'.$lang_admin['Date'].'</td><td width="8%">'.$lang_admin['IP'].'</td><td width="10%">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
 				'<tbody>'.implode('', $comments_tables[$article_id]).'</tbody>'.
