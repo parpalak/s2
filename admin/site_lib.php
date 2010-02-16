@@ -178,7 +178,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 	$comment_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'title, id, priority, published, ('.$comment_num_query.') as comment_num, parent_id',
+		'SELECT'	=> 'title, id, create_time, priority, published, ('.$comment_num_query.') as comment_num, parent_id',
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'parent_id = '.$id,
 		'ORDER BY'	=> 'priority'
@@ -217,7 +217,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 		$strike = $article['published'] ? '' : ' style="text-decoration: line-through;"';
 		// Custom attribute
 		$comments = $article['comment_num'] ? ' comments="'.$article['comment_num'].'"' : '';
-		$span = '<div><span id="'.$article['id'].'"'.$strike.$comments.'>'.$article['title'].'</span></div>';
+		$span = '<div><span class="additional">'.s2_date($article['create_time']).'</span><span id="'.$article['id'].'"'.$strike.$comments.'>'.$article['title'].'</span></div>';
 
 		// We do not display childrens in search results
 		$children = !$search ? s2_get_child_branches($article['id'], false) : '';

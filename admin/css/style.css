@@ -242,6 +242,19 @@ hr {
 .treetree span {
 	line-height: 1.333em;
 	}
+	.treetree div > span {
+		background: #fff;
+		}
+	.treetree span.additional {
+		width: 16em;
+		margin-left: -16em;
+		text-align: right;
+		color: #ccc;
+		float: right;
+		}
+	.treetree li div:hover span.additional {
+		color: #bb5;
+		}
 .treetree  div {
 	cursor: default;
 	}
@@ -259,7 +272,7 @@ hr {
 	display: none;
 	}
 
-.but_panel {
+.treetree .but_panel {
 	position: relative;
 	padding: 0 0 2px;
 	color: #fff;
