@@ -197,8 +197,6 @@ elseif ($action == 'rename')
 	);
 	($hook = s2_hook('rq_action_rename_pre_upd_title_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-	echo s2_get_child_branches($parent_id);
 }
 
 elseif ($action == 'create')

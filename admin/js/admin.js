@@ -382,19 +382,22 @@ function KeyPress (e)
 	if (iCode == 13)
 	{
 		var eSpan = eInput.parentNode;
+		var sTitle = eInput.value;
 
 		SaveExpand();
-		var Response = POSTSyncRequest(sUrl + "action=rename&id=" + buttonPanel.parentNode.id, "title=" + encodeURIComponent(eInput.value));
+		var Response = POSTSyncRequest(sUrl + "action=rename&id=" + buttonPanel.parentNode.id, "title=" + encodeURIComponent(sTitle));
 		ReleaseItem();
-		if (Response.status != '200')
-			return;
-
-		// We could call SetParentChildren() here.
-		// That function can remove children if the argument is "".
-		// But we do know that Response.text can't be empty on renaming.
-		eSpan.parentNode.parentNode.parentNode.innerHTML = Response.text;
-		sSavedName = "";
-		LoadExpand();
+		if (Response.status == '200')
+		{
+			if (Response.text != '')
+				alert(Response.text);
+			else
+			{
+				eSpan.firstChild.nodeValue = sTitle;
+				sSavedName = "";
+				eSpan.removeChild(eInput);
+			}
+		}
 	}
 	// Escape
 	if (iCode == 27)
