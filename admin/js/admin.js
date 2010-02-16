@@ -401,10 +401,10 @@ function KeyPress (e)
 		RejectName();
 }
 
-function EditItemName (item)
+function EditItemName (eSpan)
 {
-	sSavedName = item.firstChild.nodeValue;
-	var iWidth = item.offsetWidth - item.lastChild.offsetWidth;
+	sSavedName = eSpan.firstChild.nodeValue;
+	var iWidth = eSpan.offsetWidth - eSpan.lastChild.offsetWidth;
 
 	eInput = document.createElement("INPUT");
 	eInput.setAttribute("type", "text");
@@ -413,10 +413,10 @@ function EditItemName (item)
 	eInput.setAttribute("value", sSavedName);
 	eInput.style.width = iWidth + "px";
 
-	item.insertBefore(eInput, item.childNodes[1]);
+	eSpan.insertBefore(eInput, eSpan.childNodes[1]);
 	eInput.focus();
 	eInput.select();
-	item.firstChild.nodeValue = "";
+	eSpan.firstChild.nodeValue = "";
 }
 
 //=======================[Drag & drop]==========================================
