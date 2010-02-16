@@ -166,7 +166,7 @@ function s2_delete_branch ($id)
 // Builds HTML tree for the admin panel
 //
 
-function s2_get_child_branches ($id, $root = true)
+function s2_get_child_branches ($id, $root = true, $search = false)
 {
 	global $s2_db;
 
@@ -175,14 +175,35 @@ function s2_get_child_branches ($id, $root = true)
 		'FROM'		=> 'art_comments AS c',
 		'WHERE'		=> 'a.id = c.article_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$comment_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'title, id, priority, published, ('.$raw_query.') as comments_count, parent_id',
+		'SELECT'	=> 'title, id, priority, published, ('.$comment_num_query.') as comment_num, parent_id',
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'parent_id = '.$id,
 		'ORDER BY'	=> 'priority'
 	);
+	if ($search)
+	{
+		// This function also can search through the site :)
+		$condition = array();
+		foreach (explode(' ', $search) as $word)
+			if ($word != '')
+				$condition[] = 'title LIKE \'%'.$s2_db->escape($word).'%\' OR pagetext LIKE \'%'.$s2_db->escape($word).'%\'';
+		if (count($condition))
+		{
+			$query['WHERE'] = '('.implode(' OR ', $condition).')';
+
+			$subquery = array(
+				'SELECT'	=> 'count(*)',
+				'FROM'		=> 'articles AS a2',
+				'WHERE'		=> 'a2.parent_id = a.id'
+			);
+			$child_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+			$query['SELECT'] .= ', ('.$child_num_query.') as child_num';
+		}
+	}
 	($hook = s2_hook('fn_get_child_branches_pre_get_art_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
@@ -191,14 +212,18 @@ function s2_get_child_branches ($id, $root = true)
 	{
 		$article = $s2_db->fetch_assoc($result);
 
+		// This element will have onclick event handler and proper styles
 		$expand = '<div></div>';
 		$strike = $article['published'] ? '' : ' style="text-decoration: line-through;"';
-		$comments = $article['comments_count'] ? ' comments="'.$article['comments_count'].'"' : '';
+		// Custom attribute
+		$comments = $article['comment_num'] ? ' comments="'.$article['comment_num'].'"' : '';
 		$span = '<div><span id="'.$article['id'].'"'.$strike.$comments.'>'.$article['title'].'</span></div>';
-		$children = s2_get_child_branches($article['id'], false);
+
+		// We do not display childrens in search results
+		$children = !$search ? s2_get_child_branches($article['id'], false) : '';
 
 		($hook = s2_hook('fn_get_child_branches_after_get_branch')) ? eval($hook) : null;
-		$output .= '<li class="'.($children ? 'ExpandClosed' : 'ExpandLeaf').(!$i ? ' IsLast' : '' ).'">'.$expand.$span.$children.'</li>';
+		$output .= '<li class="'.($children || $search && $article['child_num'] ? 'ExpandClosed' : 'ExpandLeaf').(!$i ? ' IsLast' : '' ).($search ? ' Search' : '').'">'.$expand.$span.$children.'</li>';
 	}
 
 	($hook = s2_hook('fn_get_child_branches_end')) ? eval($hook) : null;

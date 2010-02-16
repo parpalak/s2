@@ -256,6 +256,18 @@ elseif ($action == 'load_tree')
 	echo s2_get_child_branches((int)$_GET['id']);
 }
 
+elseif ($action == 'search')
+{
+	$required_rights = array('view');
+	($hook = s2_hook('rq_action_load_tree_start')) ? eval($hook) : null;
+	s2_test_user_rights($session_id, $required_rights);
+
+	if (!isset($_GET['s']))
+		die('Error in GET parameters.');
+
+	echo s2_get_child_branches(0, true, trim($_GET['s']));
+}
+
 //=======================[Pages editor]=========================================
 
 // Loading data from DB into the editor form

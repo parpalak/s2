@@ -88,6 +88,30 @@ function Init ()
 		document.addEventListener("mouseout", HideTip, false);
 	}
 
+	var search_field = document.getElementById('search_field');
+	search_field.onkeypress = SearchKeyPress;
+	ResetSearchField();
+	search_field.onblur = function ()
+	{
+		var search_field = document.getElementById('search_field');
+		if (search_field.value == '')
+		{
+			search_field.is_empty = true;
+			search_field.style.color = '#999';
+			search_field.value = S2_LANG_SEARCH;
+		}
+	}
+	search_field.onfocus = function ()
+	{
+		var search_field = document.getElementById('search_field');
+		if (search_field.is_empty)
+		{
+			search_field.style.color = '#000';
+			search_field.is_empty = false;
+			search_field.value = '';
+		}
+	}
+
 	window.onbeforeunload = function ()
 	{
 		if (document.artform && IsChanged(document.artform))
@@ -126,6 +150,40 @@ function SaveHandler (e)
 
 		return false;
 	}
+}
+
+// Search field events handler
+
+var search_timer, search_string;
+
+function ResetSearchField ()
+{
+	var search_field = document.getElementById('search_field');
+	search_field.value = S2_LANG_SEARCH;
+	search_field.is_empty = true;
+	search_field.style.color = '#999';
+}
+
+function SearchKeyPress (e)
+{
+	e = e || window.event;
+	var key = e.keyCode || e.which;
+
+	clearTimeout(search_timer);
+	search_string = document.getElementById('search_field').value;
+	if (key == 13)
+		DoSearch();
+	else
+		search_timer = setTimeout(DoSearch, 1500);
+}
+
+function DoSearch ()
+{
+	var Response = GETSyncRequest(sUrl + 'action=search&s=' + encodeURIComponent(search_string));
+	if (Response.status != '200')
+		return;
+
+	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
 }
 
 // Turning animated icon on or off
@@ -280,6 +338,7 @@ function RefreshTree ()
 	if (Response.status != '200')
 		return;
 
+	ResetSearchField();
 	SaveExpand()
 	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
 	LoadExpand();
@@ -501,18 +560,24 @@ function MouseDown (e)
 
 	if (bIE)
 	{
-		document.attachEvent("onmouseover", MouseIn);
-		document.attachEvent("onmouseout", MouseOut);
-		document.attachEvent("onmousemove", MouseMove);
+		if (t.parentNode.parentNode.parentNode.parentNode.id != 'tree')
+		{
+			document.attachEvent("onmouseover", MouseIn);
+			document.attachEvent("onmouseout", MouseOut);
+			document.attachEvent("onmousemove", MouseMove);
+		}
 		document.attachEvent("onmouseup", MouseUp);
 		window.event.returnValue = false;
 		t.unselectable = true;
 	}
 	if (bFF)
 	{
-		document.addEventListener("mouseover", MouseIn, false);
-		document.addEventListener("mouseout", MouseOut, false);
-		document.addEventListener("mousemove", MouseMove, false);
+		if (t.parentNode.parentNode.parentNode.parentNode.id != 'tree')
+		{
+			document.addEventListener("mouseover", MouseIn, false);
+			document.addEventListener("mouseout", MouseOut, false);
+			document.addEventListener("mousemove", MouseMove, false);
+		}
 		document.addEventListener("mouseup", MouseUp, false);
 		e.preventDefault();
 	}

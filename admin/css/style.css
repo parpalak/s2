@@ -231,6 +231,13 @@ hr {
 				.treetree ul li.ExpandLeaf > div:first-child {
 					background-position: -36px 0;
 					}
+				.treetree ul li.Search > div:first-child {
+					width: 18px;
+					background-position: -18px -18px;
+					}
+					.treetree ul li.Search.ExpandLeaf > div:first-child {
+						background-position: -54px 0;
+						}
 
 .treetree span {
 	line-height: 1.333em;
@@ -273,7 +280,12 @@ hr {
 		background: url(../i/icons.png);
 		}
 		.but_panel span img.edit { background-position: -32px -32px;}
-		.but_panel span img.add { background-position: -32px 0px;}
+		.but_panel span img.add {
+			background-position: -32px 0px;
+			}
+			.Search .but_panel span img.add {
+				display: none;
+				}
 		.but_panel span img.delete { background-position: 0px -32px;}
 		.but_panel span img.comments {
 			background: url(../i/tab_icons.png) 0 -100px;
@@ -397,58 +409,6 @@ ul .but_panel .delete {
 .tagswitcher img:hover{
 	background-color: #fafac0;
 	}
-
-/*=======================[Toolbar buttons]====================================*/
-
-.toolbar {
-	padding-bottom: 5px;
-	}
-	.toolbar img {
-		margin: 0;
-		padding: 2px;
-		height: 16px;
-		width: 16px;
-		border: #eee solid 1px;
-		background: url(../i/toolbar.png) transparent;
-		}
-		.toolbar img:hover {
-			border-color: #fff #aaa #aaa #fff;
-			}
-		.toolbar img:active {
-			border-color: #aaa #fff #fff #aaa;
-			}
-
-.toolbar .new { background-position: -88px -16px; }
-.toolbar .b { background-position: 2px -52px; }
-.toolbar .i { background-position: -16px -52px; }
-.toolbar .strike { background-position: -34px -52px; }
-.toolbar .big { background-position: -52px -52px; }
-.toolbar .small { background-position: -70px -52px; }
-
-.toolbar .h2 { background-position: 2px -34px; }
-.toolbar .h3 { background-position: -16px -34px; }
-.toolbar .h4 { background-position: -34px -34px; }
-.toolbar .pre { background-position: -52px -34px; }
-.toolbar .code { background-position: -70px -34px; }
-.toolbar .nobr{ background-position: -88px -34px; }
-
-.toolbar .a { background-position: -88px -52px; }
-.toolbar .quote { background-position: -16px -16px; }
-.toolbar .img { background-position: -34px -16px; }
-.toolbar .ul { background-position: -106px -34px; }
-.toolbar .ol { background-position: -106px -16px; }
-.toolbar .li{ background-position: -106px 2px; }
-
-.toolbar .left { background-position: 2px 2px; }
-.toolbar .center { background-position: -16px 2px; }
-.toolbar .right { background-position: -34px 2px; }
-.toolbar .justify { background-position: -52px 2px; }
-.toolbar .sup { background-position: -70px 2px; }
-.toolbar .sub { background-position: -88px 2px; }
-
-.toolbar .refresh { background-position: 2px -16px; }
-.toolbar .expand { background-position: -52px -16px; }
-.toolbar .collapse { background-position: -70px -16px; }
 
 /*=======================[Table styles]=======================================*/
 
@@ -631,7 +591,8 @@ div.input.text input,
 div.input.text input,
 #wText,
 #commtext,
-#kText {
+#kText,
+#search_field {
 	width: 100%;
 	margin: 0;
 	border: 1px solid #ccc;
@@ -680,6 +641,65 @@ div.input.text input,
 .bitbtn.uninst_ext { background-position: 1px -125px; }
 .bitbtn.inst_ext { background-position: 1px -107px; }
 .bitbtn.add_user { background-position: 1px -179px; }
+
+/*=======================[Toolbar]============================================*/
+
+.toolbar {
+	padding-bottom: 5px;
+	}
+	.toolbar img {
+		margin: 0;
+		padding: 2px;
+		height: 16px;
+		width: 16px;
+		border: #eee solid 1px;
+		background: url(../i/toolbar.png) transparent;
+		vertical-align: top;
+		}
+		.toolbar img:hover {
+			border-color: #fff #aaa #aaa #fff;
+			}
+		.toolbar img:active {
+			border-color: #aaa #fff #fff #aaa;
+			}
+
+.toolbar .new { background-position: -88px -16px; }
+.toolbar .b { background-position: 2px -52px; }
+.toolbar .i { background-position: -16px -52px; }
+.toolbar .strike { background-position: -34px -52px; }
+.toolbar .big { background-position: -52px -52px; }
+.toolbar .small { background-position: -70px -52px; }
+
+.toolbar .h2 { background-position: 2px -34px; }
+.toolbar .h3 { background-position: -16px -34px; }
+.toolbar .h4 { background-position: -34px -34px; }
+.toolbar .pre { background-position: -52px -34px; }
+.toolbar .code { background-position: -70px -34px; }
+.toolbar .nobr{ background-position: -88px -34px; }
+
+.toolbar .a { background-position: -88px -52px; }
+.toolbar .quote { background-position: -16px -16px; }
+.toolbar .img { background-position: -34px -16px; }
+.toolbar .ul { background-position: -106px -34px; }
+.toolbar .ol { background-position: -106px -16px; }
+.toolbar .li{ background-position: -106px 2px; }
+
+.toolbar .left { background-position: 2px 2px; }
+.toolbar .center { background-position: -16px 2px; }
+.toolbar .right { background-position: -34px 2px; }
+.toolbar .justify { background-position: -52px 2px; }
+.toolbar .sup { background-position: -70px 2px; }
+.toolbar .sub { background-position: -88px 2px; }
+
+.toolbar .refresh { background-position: 2px -16px; }
+.toolbar .expand { background-position: -52px -16px; }
+.toolbar .collapse { background-position: -70px -16px; }
+
+#search_field {
+	float: right;
+	width: 300px;
+	color: #999;
+	}
 
 /*=======================[Options tab]========================================*/
 
@@ -761,7 +781,6 @@ div.input {
 	font-size: 1.2em;
 	font-weight: normal;
 	margin: 1em 0 0.5em;
-	border-bottom: 1px solid #ddd;
 	}
 
 .extension,

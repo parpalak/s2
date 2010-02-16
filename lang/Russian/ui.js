@@ -1,3 +1,4 @@
+var S2_LANG_SEARCH				= 'Поиск';
 var S2_LANG_LOAD_TREE			= 'Загружается структура сайта...';
 var S2_LANG_NO_LOOPS			= 'Переместить раздел в дочерние разделы невозможно!';
 var S2_LANG_DELETE_COMMENT		= 'Удалить комментарий?';
