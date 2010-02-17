@@ -32,7 +32,7 @@ function str_replace (substr, newsubstr, str)
 function get_attr (sStr, sAttr)
 {
 	var iBeg = sStr.indexOf(sAttr);
-	if (iBeg)
+	if (iBeg != -1)
 	{
 		var iStart = sStr.indexOf('"', iBeg) + 1;
 		var iEnd = sStr.indexOf('"', iStart);
@@ -860,7 +860,6 @@ function SaveArticle (sAction)
 			CommitChanges(sRequest);
 	}
 
-	eTextarea = document.getElementById('wText');
 	return false;
 }
 
