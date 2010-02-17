@@ -209,11 +209,16 @@ function SearchKeyPress (e)
 	var key = e.keyCode || e.which;
 
 	clearTimeout(search_timer);
-	search_string = document.getElementById('search_field').value;
 	if (key == 13)
+	{
+		search_string = document.getElementById('search_field').value;
 		DoSearch();
+	}
 	else
+	{
+		setTimeout("search_string = document.getElementById('search_field').value", 0);
 		search_timer = setTimeout(DoSearch, 1500);
+	}
 }
 
 function DoSearch ()
