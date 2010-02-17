@@ -711,8 +711,10 @@ div.input.text input,
 #search_field {
 	float: right;
 	width: 300px;
-	color: #999;
 	}
+	#search_field.inactive {
+		color: #ccc;
+		}
 
 /*=======================[Options tab]========================================*/
 

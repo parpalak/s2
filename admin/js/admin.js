@@ -134,18 +134,16 @@ function Init ()
 		var search_field = document.getElementById('search_field');
 		if (search_field.value == '')
 		{
-			search_field.is_empty = true;
-			search_field.style.color = '#999';
+			search_field.className = 'inactive';
 			search_field.value = S2_LANG_SEARCH;
 		}
 	}
 	search_field.onfocus = function ()
 	{
 		var search_field = document.getElementById('search_field');
-		if (search_field.is_empty)
+		if (search_field.className == 'inactive')
 		{
-			search_field.style.color = '#000';
-			search_field.is_empty = false;
+			search_field.className = '';
 			search_field.value = '';
 		}
 	}
@@ -202,8 +200,7 @@ function ResetSearchField ()
 {
 	var search_field = document.getElementById('search_field');
 	search_field.value = S2_LANG_SEARCH;
-	search_field.is_empty = true;
-	search_field.style.color = '#999';
+	search_field.className = 'inactive';
 }
 
 function SearchKeyPress (e)
