@@ -22,14 +22,14 @@ function add_hook (hook, code)
 
 // Helper functions
 
-function str_replace(substr, newsubstr, str)
+function str_replace (substr, newsubstr, str)
 {
 	while (str.indexOf(substr) >= 0)
 		str = str.replace(substr, newsubstr);
 	return str;
 }
 
-function get_attr(sStr, sAttr)
+function get_attr (sStr, sAttr)
 {
 	var iBeg = sStr.indexOf(sAttr);
 	if (iBeg)
@@ -41,22 +41,58 @@ function get_attr(sStr, sAttr)
 	return '';
 }
 
+function SetTime (eForm, sName)
+{
+	var d = new Date();
+
+	d.setTime(time_shift + d.getTime());
+
+	eForm[sName + '[hour]'].value = d.getHours();
+	eForm[sName + '[min]'].value = d.getMinutes();
+	eForm[sName + '[day]'].value = d.getDate();
+	eForm[sName + '[mon]'].value = d.getMonth() + 1;
+	eForm[sName + '[year]'].value = d.getFullYear();
+
+	return false;
+}
+
+function StringFromForm (aeItem)
+{
+	var sRequest = 'ajax=1', i, eItem;
+
+	for (i = aeItem.length; i-- ;)
+	{
+		eItem = aeItem[i];
+		if (eItem.nodeName == 'INPUT')
+		{
+			if (eItem.type == 'text' || eItem.type == 'hidden')
+				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+			if (eItem.type == 'checkbox' && eItem.checked)
+				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+		}
+		if (eItem.nodeName == 'TEXTAREA' || eItem.nodeName == 'SELECT')
+			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+	}
+
+	return sRequest;
+}
+
 // Initialization
 
 var bIE = document.attachEvent != null;
 var bFF = !document.attachEvent && document.addEventListener;
 
 if (bIE)
-	attachEvent("onload", Init);
+	attachEvent('onload', Init);
 if (bFF)
-	addEventListener("load", Init, true);
+	addEventListener('load', Init, true);
 
 var eTextarea;
 
 var ua = navigator.userAgent.toLowerCase();
-var isIE = (ua.indexOf("msie") != -1 && ua.indexOf("opera") == -1);
-var isSafari = ua.indexOf("safari") != -1;
-var isGecko = (ua.indexOf("gecko") != -1 && !isSafari);
+var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
+var isSafari = ua.indexOf('safari') != -1;
+var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
 
 function Init ()
 {
@@ -72,8 +108,8 @@ function Init ()
 		document.getElementById('tree').attachEvent('onmousedown', MouseDown);
 
 		// Tooltips
-		document.attachEvent("onmouseover", ShowTip);
-		document.attachEvent("onmouseout", HideTip);
+		document.attachEvent('onmouseover', ShowTip);
+		document.attachEvent('onmouseout', HideTip);
 	}
 	if (bFF)
 	{
@@ -84,10 +120,12 @@ function Init ()
 		document.getElementById('tree').addEventListener('mousedown', MouseDown, false);
 
 		// Tooltips
-		document.addEventListener("mouseover", ShowTip, false);
-		document.addEventListener("mouseout", HideTip, false);
+		document.addEventListener('mouseover', ShowTip, false);
+		document.addEventListener('mouseout', HideTip, false);
 	}
 
+	// Search field help message.
+	// It appears when the field is empty.
 	var search_field = document.getElementById('search_field');
 	search_field.onkeypress = SearchKeyPress;
 	ResetSearchField();
@@ -111,6 +149,10 @@ function Init ()
 			search_field.value = '';
 		}
 	}
+
+	var eTagValues = document.getElementById('tag_values');
+	eTagValues.onmouseover = TagvaluesMouseIn;
+	eTagValues.onmouseout = TagvaluesMouseOut;
 
 	window.onbeforeunload = function ()
 	{
@@ -190,19 +232,19 @@ function DoSearch ()
 
 function SetWait (bWait)
 {
-	var eAni = document.getElementById("loading");
-	var eTree = document.getElementById("tree_div");
+	var eAni = document.getElementById('loading');
+	var eTree = document.getElementById('tree_div');
 
 	if (bWait)
 	{
-		eAni.style.display = "block";
-		eTree.style.cursor = "wait";
+		eAni.style.display = 'block';
+		eTree.style.cursor = 'wait';
 		tooltip.h();
 	}
 	else
 	{
-		eAni.style.display = "none";
-		eTree.style.cursor = "default";
+		eAni.style.display = 'none';
+		eTree.style.cursor = 'default';
 	}
 }
 
@@ -256,9 +298,9 @@ function InitMovableDivs ()
 {
 	if (draggableDiv == null)
 	{
-		draggableDiv = document.createElement("DIV");
+		draggableDiv = document.createElement('DIV');
 		document.body.appendChild(draggableDiv);
-		draggableDiv.setAttribute("id", "dragged");
+		draggableDiv.setAttribute('id', 'dragged');
 		MoveDraggableDiv(-99, -99);
 	}
 	if (buttonPanel == null)
@@ -270,10 +312,10 @@ function InitMovableDivs ()
 
 function MoveDraggableDiv(x, y)
 {
-	draggableDiv.style.width = "auto";
+	draggableDiv.style.width = 'auto';
 
-	draggableDiv.style.left = x + 10 + "px";
-	draggableDiv.style.top = y + 0 + "px";
+	draggableDiv.style.left = x + 10 + 'px';
+	draggableDiv.style.top = y + 0 + 'px';
 }
 
 //=======================[Expanding the tree]===================================
@@ -316,7 +358,7 @@ function LoadExpand ()
 
 function CloseAll ()
 {
-	var i, aLi = document.getElementById("tree_div").getElementsByTagName("LI");
+	var i, aLi = document.getElementById('tree_div').getElementsByTagName('LI');
 
 	for (i = aLi.length; i-- ;)
 		if (aLi[i].className.indexOf('ExpandOpen') != -1)
@@ -325,7 +367,7 @@ function CloseAll ()
 
 function OpenAll ()
 {
-	var i, aLi = document.getElementById("tree_div").getElementsByTagName("LI");
+	var i, aLi = document.getElementById('tree_div').getElementsByTagName('LI');
 
 	for (i = aLi.length; i-- ;)
 		if (aLi[i].className.indexOf('ExpandClosed') != -1)
@@ -348,7 +390,7 @@ function RefreshTree ()
 
 function HighlightItem (item)
 {
-	item.className = "but_panel";
+	item.className = 'but_panel';
 	item.appendChild(buttonPanel);
 }
 
@@ -356,25 +398,25 @@ function ReleaseItem ()
 {
 	if (buttonPanel.parentNode)
 	{
-		buttonPanel.parentNode.className = "";
+		buttonPanel.parentNode.className = '';
 		buttonPanel.parentNode.removeChild(buttonPanel);
 	}
 }
 
-var sSavedName = "", eInput;
+var sSavedName = '', eInput;
 
 function RejectName ()
 {
-	if (sSavedName == "")
+	if (sSavedName == '')
 		return;
 
 	var eSpan = eInput.parentNode;
 	eSpan.firstChild.nodeValue = sSavedName;
-	sSavedName = "";
+	sSavedName = '';
 	eSpan.removeChild(eInput);
 }
 
-function KeyPress (e)
+function RenameKeyPress (e)
 {
 	var iCode = (e ? e : window.event).keyCode;
 
@@ -385,7 +427,7 @@ function KeyPress (e)
 		var sTitle = eInput.value;
 
 		SaveExpand();
-		var Response = POSTSyncRequest(sUrl + "action=rename&id=" + buttonPanel.parentNode.id, "title=" + encodeURIComponent(sTitle));
+		var Response = POSTSyncRequest(sUrl + 'action=rename&id=' + buttonPanel.parentNode.id, 'title=' + encodeURIComponent(sTitle));
 		ReleaseItem();
 		if (Response.status == '200')
 		{
@@ -394,7 +436,7 @@ function KeyPress (e)
 			else
 			{
 				eSpan.firstChild.nodeValue = sTitle;
-				sSavedName = "";
+				sSavedName = '';
 				eSpan.removeChild(eInput);
 			}
 		}
@@ -409,17 +451,17 @@ function EditItemName (eSpan)
 	sSavedName = eSpan.firstChild.nodeValue;
 	var iWidth = eSpan.offsetWidth - eSpan.lastChild.offsetWidth;
 
-	eInput = document.createElement("INPUT");
-	eInput.setAttribute("type", "text");
+	eInput = document.createElement('INPUT');
+	eInput.setAttribute('type', 'text');
 	eInput.onblur = RejectName;
-	eInput.onkeypress = KeyPress;
-	eInput.setAttribute("value", sSavedName);
-	eInput.style.width = iWidth + "px";
+	eInput.onkeypress = RenameKeyPress;
+	eInput.setAttribute('value', sSavedName);
+	eInput.style.width = iWidth + 'px';
 
 	eSpan.insertBefore(eInput, eSpan.childNodes[1]);
 	eInput.focus();
 	eInput.select();
-	eSpan.firstChild.nodeValue = "";
+	eSpan.firstChild.nodeValue = '';
 }
 
 //=======================[Drag & drop]==========================================
@@ -434,11 +476,11 @@ function SetItemChildren (eSpan, sInnerHTML)
 {
 	var eLi = eSpan.parentNode.parentNode;
 
-	if (eLi.lastChild.nodeName == "UL")
+	if (eLi.lastChild.nodeName == 'UL')
 		eLi.lastChild.innerHTML = sInnerHTML;
 	else
 	{
-		var eUl = document.createElement("UL");
+		var eUl = document.createElement('UL');
 		eLi.className = str_replace('ExpandLeaf', 'ExpandOpen', eLi.className);
 		eLi.appendChild(eUl);
 		eUl.innerHTML = sInnerHTML;
@@ -448,7 +490,7 @@ function SetItemChildren (eSpan, sInnerHTML)
 // We have to remove the "UL" node if the list is empty
 function SetParentChildren (eParentUl, str)
 {
-	if (str != "")
+	if (str != '')
 		eParentUl.innerHTML = str;
 	else
 	{
@@ -478,16 +520,16 @@ function StartDrag ()
 function StopDrag()
 {
 	dragging = false;
-	sourceElement.className = "";
+	sourceElement.className = '';
 	MoveDraggableDiv(-99, -99);
-	draggableDiv.style.visibility = "hidden";
+	draggableDiv.style.visibility = 'hidden';
 	drag_html = '';
 
 	if (acceptorElement)
 	{
 		SaveExpand();
 
-		acceptorElement.className = "";
+		acceptorElement.className = '';
 
 		if (far)
 		{
@@ -505,7 +547,7 @@ function StopDrag()
 				eItem = eItem.parentNode;
 			}
 
-			var Response = GETSyncRequest(sUrl + "action=drag&sid=" + sourceElement.id + "&did=" + acceptorElement.id + "&far=" + far);
+			var Response = GETSyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far);
 			if (Response.status != '200')
 			{
 				acceptorElement = null;
@@ -518,7 +560,7 @@ function StopDrag()
 		}
 		else
 		{
-			var Response = GETSyncRequest(sUrl + "action=drag&sid=" + sourceElement.id + "&did=" + acceptorElement.id + "&far=" + far);
+			var Response = GETSyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far);
 			if (Response.status != '200')
 			{
 				acceptorElement = null;
@@ -551,13 +593,13 @@ function MouseDown (e)
 
 		return;
 	}
-	else if (t.nodeName == "SPAN" && !isNaN(parseInt(t.id)))
+	else if (t.nodeName == 'SPAN' && !isNaN(parseInt(t.id)))
 		sourceElement = t;
 	else
 		// Do not handle span child eventss
 		return;
 
-	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
+	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == 'CSS1Compat') ? 'HTML' : 'BODY')[0];
 	mouseStartX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseStartY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
@@ -565,11 +607,11 @@ function MouseDown (e)
 	{
 		if (t.parentNode.parentNode.parentNode.parentNode.id != 'tree')
 		{
-			document.attachEvent("onmouseover", MouseIn);
-			document.attachEvent("onmouseout", MouseOut);
-			document.attachEvent("onmousemove", MouseMove);
+			document.attachEvent('onmouseover', MouseIn);
+			document.attachEvent('onmouseout', MouseOut);
+			document.attachEvent('onmousemove', MouseMove);
 		}
-		document.attachEvent("onmouseup", MouseUp);
+		document.attachEvent('onmouseup', MouseUp);
 		window.event.returnValue = false;
 		t.unselectable = true;
 	}
@@ -577,18 +619,18 @@ function MouseDown (e)
 	{
 		if (t.parentNode.parentNode.parentNode.parentNode.id != 'tree')
 		{
-			document.addEventListener("mouseover", MouseIn, false);
-			document.addEventListener("mouseout", MouseOut, false);
-			document.addEventListener("mousemove", MouseMove, false);
+			document.addEventListener('mouseover', MouseIn, false);
+			document.addEventListener('mouseout', MouseOut, false);
+			document.addEventListener('mousemove', MouseMove, false);
 		}
-		document.addEventListener("mouseup", MouseUp, false);
+		document.addEventListener('mouseup', MouseUp, false);
 		e.preventDefault();
 	}
 }
 
 function MouseMove (e)
 {
-	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
+	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == 'CSS1Compat') ? 'HTML' : 'BODY')[0];
 	mouseX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
@@ -609,16 +651,16 @@ function MouseUp (e)
 	if (sSavedName)
 		RejectName();
 
-	if (bMouseInKeyvalues)
+	if (bMouseInTagvalues)
 	{
-		AddKey(sourceElement.id);
-		KeyvaluesMouseOut();
+		AddArticleToTag(sourceElement.id);
+		TagvaluesMouseOut();
 	}
 	else if (!bIntervalPassed)
 	{
 		// Double click
 		if (!is_drop)
-			var wnd = window.open(sUrl + "action=preview&id=" + sourceElement.id, 'previewwindow1', 'scrollbars=yes,toolbar=yes', 'True');
+			var wnd = window.open(sUrl + 'action=preview&id=' + sourceElement.id, 'previewwindow1', 'scrollbars=yes,toolbar=yes', 'True');
 
 		clearTimeout(idTimer);
 		bIntervalPassed = true;
@@ -642,17 +684,17 @@ function MouseUp (e)
 
 	if (bIE)
 	{
-		document.detachEvent("onmouseover", MouseIn);
-		document.detachEvent("onmouseout", MouseOut);
-		document.detachEvent("onmousemove", MouseMove);
-		document.detachEvent("onmouseup", MouseUp);
+		document.detachEvent('onmouseover', MouseIn);
+		document.detachEvent('onmouseout', MouseOut);
+		document.detachEvent('onmousemove', MouseMove);
+		document.detachEvent('onmouseup', MouseUp);
 	}
 	if (bFF)
 	{
-		document.removeEventListener("mouseover", MouseIn, false);
-		document.removeEventListener("mouseout", MouseOut, false);
-		document.removeEventListener("mousemove", MouseMove, false);
-		document.removeEventListener("mouseup", MouseUp, false);
+		document.removeEventListener('mouseover', MouseIn, false);
+		document.removeEventListener('mouseout', MouseOut, false);
+		document.removeEventListener('mousemove', MouseMove, false);
+		document.removeEventListener('mouseup', MouseUp, false);
 	}
 }
 
@@ -667,7 +709,7 @@ function MouseIn (e)
 		acceptorElement = t;
 		if (far)
 		{
-			t.className = "over_far";
+			t.className = 'over_far';
 			draggableDiv.innerHTML = drag_html + '<br />' +
 				str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
 		}
@@ -676,7 +718,7 @@ function MouseIn (e)
 			if (t.parentNode.parentNode.parentNode != sourceParent)
 			{
 				far = 1;
-				t.className = "over_far";
+				t.className = 'over_far';
 				draggableDiv.innerHTML = drag_html + '<br />' +
 					str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
 			}
@@ -685,12 +727,12 @@ function MouseIn (e)
 				if (mouseStartY > mouseY)
 				{
 					draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_UP;
-					t.className = "over_top";
+					t.className = 'over_top';
 				}
 				else
 				{
 					draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_DOWN;
-					t.className = "over_bottom";
+					t.className = 'over_bottom';
 				}
 			}
 		}
@@ -703,7 +745,7 @@ function MouseOut(e)
 
 	if (sourceElement != null && t == acceptorElement && t != sourceElement)
 	{
-		t.className = "";
+		t.className = '';
 		acceptorElement = null;
 		draggableDiv.innerHTML = drag_html;
 	}
@@ -718,7 +760,7 @@ function DeleteArticle ()
 	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, S2_LANG_DELETE_ITEM)))
 		return;
 
-	var Response = GETSyncRequest(sUrl + "action=delete&id=" + eSpan.id);
+	var Response = GETSyncRequest(sUrl + 'action=delete&id=' + eSpan.id);
 	if (Response.status != '200')
 		return;
 
@@ -733,7 +775,7 @@ function CreateChildArticle ()
 	var eSpan = buttonPanel.parentNode;
 	var eLi = eSpan.parentNode.parentNode;
 
-	var Response = GETSyncRequest(sUrl + "action=create&id=" + eSpan.id);
+	var Response = GETSyncRequest(sUrl + 'action=create&id=' + eSpan.id);
 	if (Response.status != '200')
 		return;
 
@@ -754,14 +796,14 @@ function EditArticle (iId)
 	if (typeof(iId) == 'undefined')
 		iId = buttonPanel.parentNode.id;
 
-	var Response = GETSyncRequest(sUrl + "action=load&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=load&id=' + iId);
 	if (Response.status != '200')
 		return false;
 
 	document.getElementById('form_div').innerHTML = Response.text;
 	CommitChanges(document.artform)
 	SelectTab(document.getElementById('edit_tab'), true);
-	eTextarea = document.getElementById("wText");
+	eTextarea = document.getElementById('wText');
 	return false;
 }
 
@@ -770,7 +812,7 @@ function LoadComments (iId)
 	if (typeof(iId) == 'undefined')
 		iId = buttonPanel.parentNode.id;
 
-	var Response = GETSyncRequest(sUrl + "action=load_comments&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=load_comments&id=' + iId);
 	if (Response.status != '200')
 		return false;
 
@@ -784,7 +826,7 @@ function LoadComments (iId)
 
 function Logout ()
 {
-	GETSyncRequest(sUrl + "action=logout");
+	GETSyncRequest(sUrl + 'action=logout');
 	document.location.reload();
 }
 
@@ -793,59 +835,23 @@ function ClearForm()
 	if (!confirm(S2_LANG_CLEAR_PROMPT))
 		return false;
 
-	var aeInput = document.artform.getElementsByTagName("INPUT"), i;
+	var aeInput = document.artform.getElementsByTagName('INPUT'), i;
 	for (i = aeInput.length; i-- ;)
-		if (aeInput[i].type == "text")
-			aeInput[i].value = "";
+		if (aeInput[i].type == 'text')
+			aeInput[i].value = '';
 
-	aeInput = document.artform.getElementsByTagName("TEXTAREA");
+	aeInput = document.artform.getElementsByTagName('TEXTAREA');
 	for (i = aeInput.length; i-- ;)
-		aeInput[i].value = "";
+		aeInput[i].value = '';
 
 	return false;
-}
-
-function SetTime(eForm, sName)
-{
-	var d = new Date();
-
-	d.setTime(time_shift + d.getTime());
-
-	eForm[sName + '[hour]'].value = d.getHours();
-	eForm[sName + '[min]'].value = d.getMinutes();
-	eForm[sName + '[day]'].value = d.getDate();
-	eForm[sName + '[mon]'].value = d.getMonth() + 1;
-	eForm[sName + '[year]'].value = d.getFullYear();
-
-	return false;
-}
-
-function StringFromForm (aeItem)
-{
-	var sRequest = "ajax=1", i, eItem;
-
-	for (i = aeItem.length; i-- ;)
-	{
-		eItem = aeItem[i];
-		if (eItem.nodeName == "INPUT")
-		{
-			if (eItem.type == "text" || eItem.type == "hidden")
-				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
-			if (eItem.type == "checkbox" && eItem.checked)
-				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
-		}
-		if (eItem.nodeName == "TEXTAREA" || eItem.nodeName == "SELECT")
-			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
-	}
-
-	return sRequest;
 }
 
 function SaveArticle (sAction)
 {
 	var sRequest = StringFromForm(document.artform);
 
-	var Response = POSTSyncRequest(sUrl + "action=" + sAction, sRequest);
+	var Response = POSTSyncRequest(sUrl + 'action=' + sAction, sRequest);
 	if (Response.status == '200')
 	{
 		if (Response.text != '')
@@ -854,7 +860,7 @@ function SaveArticle (sAction)
 			CommitChanges(sRequest);
 	}
 
-	eTextarea = document.getElementById("wText");
+	eTextarea = document.getElementById('wText');
 	return false;
 }
 
@@ -904,7 +910,7 @@ function GetImage ()
 
 function Paragraph ()
 {
-	var Response = POSTSyncRequest(sUrl + "action=smart_paragraph", 'data=' + encodeURIComponent(eTextarea.value));
+	var Response = POSTSyncRequest(sUrl + 'action=smart_paragraph', 'data=' + encodeURIComponent(eTextarea.value));
 
 	if (Response.status == '200')
 		eTextarea.value = Response.text;
@@ -912,12 +918,12 @@ function Paragraph ()
 
 //=======================[Comment management]===================================
 
-function DeleteComment(iId)
+function DeleteComment (iId)
 {
 	if (!confirm(S2_LANG_DELETE_COMMENT))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=delete_comment&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=delete_comment&id=' + iId);
 
 	if (Response.status == '200')
 	{
@@ -928,9 +934,9 @@ function DeleteComment(iId)
 	return false;
 }
 
-function EditComment(iId)
+function EditComment (iId)
 {
-	var Response = GETSyncRequest(sUrl + "action=edit_comment&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=edit_comment&id=' + iId);
 	if (Response.status != '200')
 		return false;
 
@@ -938,10 +944,10 @@ function EditComment(iId)
 	return false;
 }
 
-function SaveComment(sType)
+function SaveComment (sType)
 {
 	var sRequest = StringFromForm(document.commform);
-	var Response = POSTSyncRequest(sUrl + "action=save_comment&type=" + sType, sRequest);
+	var Response = POSTSyncRequest(sUrl + 'action=save_comment&type=' + sType, sRequest);
 	if (Response.status == '200')
 	{
 		document.getElementById('comm_div').innerHTML = Response.text;
@@ -950,9 +956,9 @@ function SaveComment(sType)
 	return false;
 }
 
-function DoAction(sAction, iId, sID)
+function LoadTable (sAction, sID)
 {
-	var Response = GETSyncRequest(sUrl + "action=" + sAction + "&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=' + sAction);
 	if (Response.status == '200')
 	{
 		document.getElementById(sID).innerHTML = Response.text;
@@ -961,9 +967,9 @@ function DoAction(sAction, iId, sID)
 	return false;
 }
 
-function LoadTable(sAction, sID)
+function LoadTableExt (sAction, iId, sID)
 {
-	var Response = GETSyncRequest(sUrl + "action=" + sAction);
+	var Response = GETSyncRequest(sUrl + 'action=' + sAction + '&id=' + iId);
 	if (Response.status == '200')
 	{
 		document.getElementById(sID).innerHTML = Response.text;
@@ -971,118 +977,119 @@ function LoadTable(sAction, sID)
 	}
 	return false;
 }
+
 
 //=======================[Tags for articles]====================================
 
-function InitKeynames ()
+function LoadTagNames ()
 {
-	var Response = GETSyncRequest(sUrl + "action=load_tagnames");
+	var Response = GETSyncRequest(sUrl + 'action=load_tagnames');
 	if (Response.status == '200')
 		document.getElementById('tag_list').innerHTML = Response.text;
 	return false;
 }
 
-var bKeysOpen = false;
+var bTagsOpen = false;
 
-function SwitchKeys (eItem)
+function SwitchTags (eItem)
 {
-	if (bKeysOpen)
+	if (bTagsOpen)
 	{
-		document.getElementById('keytable').style.width = "16px";
-		document.getElementById('keyvalues').style.display = "none";
-		document.getElementById('keynames').style.display = "none";
-		document.getElementById('tree_panel').style.marginRight = "-30px";
-		document.getElementById('tree_panel').style.paddingRight = "30px";
+		document.getElementById('keytable').style.width = '16px';
+		document.getElementById('tag_values').style.display = 'none';
+		document.getElementById('tag_names').style.display = 'none';
+		document.getElementById('tree_panel').style.marginRight = '-30px';
+		document.getElementById('tree_panel').style.paddingRight = '30px';
 		eItem.className = 'closed';
 		eItem.alt = S2_LANG_SHOW_TAGS;
 	}
 	else
 	{
-		InitKeynames();
-		document.getElementById('keytable').style.width = "416px";
-		document.getElementById('keyvalues').style.display = "block";
-		document.getElementById('keynames').style.display = "block";
-		document.getElementById('tree_panel').style.marginRight = "-430px";
-		document.getElementById('tree_panel').style.paddingRight = "430px";
+		LoadTagNames();
+		document.getElementById('keytable').style.width = '416px';
+		document.getElementById('tag_values').style.display = 'block';
+		document.getElementById('tag_names').style.display = 'block';
+		document.getElementById('tree_panel').style.marginRight = '-430px';
+		document.getElementById('tree_panel').style.paddingRight = '430px';
 		eItem.className = 'opened';
 		eItem.alt = S2_LANG_HIDE_TAGS;
 	}
-	bKeysOpen = !bKeysOpen;
+	bTagsOpen = !bTagsOpen;
 	return false;
 }
 
-var iTagId, eCurrentItem = null;
+var iCurrentTagId, eCurrentTag = null;
 
-function ChooseKey (eItem)
+function ChooseTag (eItem)
 {
-	if (eCurrentItem)
+	if (eCurrentTag)
 	{
-		eCurrentItem.className = "";
-		eCurrentItem.onmouseover = null;
-		eCurrentItem.onmouseout = null;
+		eCurrentTag.className = '';
+		eCurrentTag.onmouseover = null;
+		eCurrentTag.onmouseout = null;
 	}
-	eCurrentItem = eItem;
-	eCurrentItem.onmouseover = KeyvaluesMouseIn;
-	eCurrentItem.onmouseout = KeyvaluesMouseOut;
-	eCurrentItem.className = "cur_key";
-	iTagId = eItem.getAttribute("tagid");
+	eCurrentTag = eItem;
+	eCurrentTag.onmouseover = TagvaluesMouseIn;
+	eCurrentTag.onmouseout = TagvaluesMouseOut;
+	eCurrentTag.className = 'cur_tag';
+	iCurrentTagId = eCurrentTag.getAttribute('tagid');
 
-	var Response = GETSyncRequest(sUrl + "action=load_tagvalues&id=" + iTagId);
+	var Response = GETSyncRequest(sUrl + 'action=load_tagvalues&id=' + iCurrentTagId);
 	if (Response.status == '200')
-		document.getElementById("keyvalues").innerHTML = Response.text;
+		document.getElementById('tag_values').innerHTML = Response.text;
 
 	return false;
 }
 
-var bMouseInKeyvalues = false;
+var bMouseInTagvalues = false;
 
-function KeyvaluesMouseIn ()
+function TagvaluesMouseIn ()
 {
-	if (!sourceElement || !eCurrentItem)
+	if (!sourceElement || !eCurrentTag)
 		return;
 
-	bMouseInKeyvalues = true;
-	var aName = eCurrentItem.innerHTML.split(' (');
+	bMouseInTagvalues = true;
+	var aName = eCurrentTag.innerHTML.split(' (');
 	draggableDiv.innerHTML = drag_html + '<br />' +
 		str_replace('%s', aName[aName.length - 2], S2_LANG_ADD_TO_TAG);
 
-	document.getElementById("keyvalues").style.backgroundColor = "#ddf";
-	eCurrentItem.style.backgroundColor = "#ddf";
+	document.getElementById('tag_values').style.backgroundColor = '#ddf';
+	eCurrentTag.style.backgroundColor = '#ddf';
 }
 
-function KeyvaluesMouseOut ()
+function TagvaluesMouseOut ()
 {
-	bMouseInKeyvalues = false;
+	bMouseInTagvalues = false;
 	if (sourceElement)
 		draggableDiv.innerHTML = drag_html;
 
-	document.getElementById("keyvalues").style.backgroundColor = "";
+	document.getElementById('tag_values').style.backgroundColor = '';
 
-	if (eCurrentItem)
-		eCurrentItem.style.backgroundColor = "";
+	if (eCurrentTag)
+		eCurrentTag.style.backgroundColor = '';
 }
 
-function AddKey (aId)
+function AddArticleToTag (iId)
 {
-	var Response = GETSyncRequest(sUrl + "action=add_to_tag&tag_id=" + iTagId + "&article_id=" + aId);
+	var Response = GETSyncRequest(sUrl + 'action=add_to_tag&tag_id=' + iCurrentTagId + '&article_id=' + iId);
 	if (Response.status == '200')
 	{
-		document.getElementById("keyvalues").innerHTML = Response.text;
-		eCurrentItem.childNodes[1].innerHTML = parseInt(eCurrentItem.childNodes[1].innerHTML) + 1;
+		document.getElementById('tag_values').innerHTML = Response.text;
+		eCurrentTag.childNodes[1].innerHTML = parseInt(eCurrentTag.childNodes[1].innerHTML) + 1;
 	}
 	return false;
 }
 
-function DeleteKey (iId)
+function DeleteArticleFromTag (iId)
 {
 	if (!confirm(S2_LANG_DELETE_TAG_LINK))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=delete_from_tag&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=delete_from_tag&id=' + iId);
 	if (Response.status == '200')
 	{
-		document.getElementById("keyvalues").innerHTML = Response.text;
-		eCurrentItem.childNodes[1].innerHTML = parseInt(eCurrentItem.childNodes[1].innerHTML) - 1;
+		document.getElementById('tag_values').innerHTML = Response.text;
+		eCurrentTag.childNodes[1].innerHTML = parseInt(eCurrentTag.childNodes[1].innerHTML) - 1;
 	}
 	return false;
 }
@@ -1139,7 +1146,7 @@ function Preview ()
 		return;
 
 	var s = str_replace('<!-- text -->', eTextarea.value, template);
-	s = str_replace('<!-- title -->', '<h1>' + document.artform["page[title]"].value + '</h1>', s);
+	s = str_replace('<!-- title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);
 	window.frames['preview_frame'].document.open();
 	window.frames['preview_frame'].document.write(s);
 	window.frames['preview_frame'].document.close();
@@ -1151,7 +1158,7 @@ function LoadUserList ()
 {
 	var eDiv = document.getElementById('user_div');
 
-	var Response = GETSyncRequest(sUrl + "action=load_userlist");
+	var Response = GETSyncRequest(sUrl + 'action=load_userlist');
 	if (Response.status == '200')
 	{
 		eDiv.innerHTML = Response.text;
@@ -1167,7 +1174,7 @@ function AddUser (sUser)
 		return false;
 	}
 
-	var Response = GETSyncRequest(sUrl + "action=add_user&name=" + sUser);
+	var Response = GETSyncRequest(sUrl + 'action=add_user&name=' + sUser);
 	if (Response.status == '200')
 	{
 		document.getElementById('user_div').innerHTML = Response.text;
@@ -1178,7 +1185,7 @@ function AddUser (sUser)
 
 function SetPermission (sUser, sPermission)
 {
-	var Response = GETSyncRequest(sUrl + "action=user_set_permission&name=" + sUser + '&permission=' + sPermission);
+	var Response = GETSyncRequest(sUrl + 'action=user_set_permission&name=' + sUser + '&permission=' + sPermission);
 	if (Response.status == '200')
 	{
 		document.getElementById('user_div').innerHTML = Response.text;
@@ -1193,7 +1200,7 @@ function SetUserPassword (sUser)
 	if (typeof(s) != 'string')
 		return false;
 
-	var Response = POSTSyncRequest(sUrl + "action=user_set_password&name=" + sUser, 'pass=' + encodeURIComponent(hex_md5(s + 'Life is not so easy :-)')));
+	var Response = POSTSyncRequest(sUrl + 'action=user_set_password&name=' + sUser, 'pass=' + encodeURIComponent(hex_md5(s + 'Life is not so easy :-)')));
 	if (Response.status == '200')
 		alert(Response.text);
 
@@ -1205,7 +1212,7 @@ function SetUserEmail (sUser, sEmail)
 	var s = prompt(str_replace('%s', sUser, S2_LANG_NEW_EMAIL));
 	if (typeof(s) == 'string')
 	{
-		var Response = GETSyncRequest(sUrl + "action=user_set_email&name=" + sUser + '&email=' + s);
+		var Response = GETSyncRequest(sUrl + 'action=user_set_email&name=' + sUser + '&email=' + s);
 		if (Response.status == '200')
 		{
 			document.getElementById('user_div').innerHTML = Response.text;
@@ -1220,7 +1227,7 @@ function DeleteUser (sUser)
 	if (!confirm(str_replace('%s', sUser, S2_LANG_DELETE_USER)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=delete_user&name=" + sUser);
+	var Response = GETSyncRequest(sUrl + 'action=delete_user&name=' + sUser);
 	if (Response.status == '200')
 	{
 		document.getElementById('user_div').innerHTML = Response.text;
@@ -1238,7 +1245,7 @@ function LoadTags ()
 	if (eDiv.innerHTML != '')
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=load_tags");
+	var Response = GETSyncRequest(sUrl + 'action=load_tags');
 	if (Response.status == '200')
 		eDiv.innerHTML = Response.text;
 
@@ -1247,7 +1254,7 @@ function LoadTags ()
 
 function LoadTag (iId)
 {
-	var Response = GETSyncRequest(sUrl + "action=load_tag&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=load_tag&id=' + iId);
 
 	if (Response.status == '200')
 		document.getElementById('tag_div').innerHTML = Response.text;
@@ -1264,7 +1271,7 @@ function SaveTag ()
 	}
 
 	var sRequest = StringFromForm(document.tagform);
-	var Response = POSTSyncRequest(sUrl + "action=save_tag", sRequest);
+	var Response = POSTSyncRequest(sUrl + 'action=save_tag', sRequest);
 	if (Response.status == '200')
 		document.getElementById('tag_div').innerHTML = Response.text;
 
@@ -1276,7 +1283,7 @@ function DeleteTag (iId, sName)
 	if (!confirm(str_replace('%s', sName, S2_LANG_DELETE_TAG)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=delete_tag&id=" + iId);
+	var Response = GETSyncRequest(sUrl + 'action=delete_tag&id=' + iId);
 	if (Response.status == '200')
 		document.getElementById('tag_div').innerHTML = Response.text;
 
@@ -1289,7 +1296,7 @@ function LoadOptions ()
 {
 	var eDiv = document.getElementById('opt_div');
 
-	var Response = GETSyncRequest(sUrl + "action=load_options");
+	var Response = GETSyncRequest(sUrl + 'action=load_options');
 	if (Response.status == '200')
 		eDiv.innerHTML = Response.text;
 
@@ -1299,7 +1306,7 @@ function LoadOptions ()
 function SaveOptions ()
 {
 	var sRequest = StringFromForm(document.optform);
-	var Response = POSTSyncRequest(sUrl + "action=save_options", sRequest);
+	var Response = POSTSyncRequest(sUrl + 'action=save_options', sRequest);
 	if (Response.status == '200')
 		document.getElementById('opt_div').innerHTML = Response.text;
 
@@ -1312,7 +1319,7 @@ function LoadExtensions ()
 {
 	var eDiv = document.getElementById('ext_div');
 
-	var Response = GETSyncRequest(sUrl + "action=load_extensions");
+	var Response = GETSyncRequest(sUrl + 'action=load_extensions');
 	if (Response.status == '200')
 		eDiv.innerHTML = Response.text;
 
@@ -1323,7 +1330,7 @@ function FlipExtension (sId)
 {
 	var eDiv = document.getElementById('ext_div');
 
-	var Response = GETSyncRequest(sUrl + "action=flip_extension&id=" + sId);
+	var Response = GETSyncRequest(sUrl + 'action=flip_extension&id=' + sId);
 	if (Response.status == '200')
 		eDiv.innerHTML = Response.text;
 
@@ -1338,7 +1345,7 @@ function UninstallExtension (sId, sMessage)
 	if (sMessage != '' && !confirm(str_replace('%s', sMessage, S2_LANG_UNINSTALL_MESSAGE)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=uninstall_extension&id=" + sId);
+	var Response = GETSyncRequest(sUrl + 'action=uninstall_extension&id=' + sId);
 	if (Response.status == '200')
 		document.getElementById('ext_div').innerHTML = Response.text;
 
@@ -1350,7 +1357,7 @@ function InstallExtension (sId, sMessage)
 	if (!confirm((sMessage != '' ? str_replace('%s', sMessage, S2_LANG_INSTALL_MESSAGE) : '') + str_replace('%s', sId, S2_LANG_INSTALL_EXTENSION)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=install_extension&id=" + sId);
+	var Response = GETSyncRequest(sUrl + 'action=install_extension&id=' + sId);
 	if (Response.status == '200')
 		document.getElementById('ext_div').innerHTML = Response.text;
 

@@ -441,7 +441,7 @@ function s2_get_tag_articles ($tag_id)
 
 	$list = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$list .= '<li><img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete from list'].'" onclick="DeleteKey('.$row['link_id'].');" />'.$row['title'].'</li>';
+		$list .= '<li><img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete from list'].'" onclick="DeleteArticleFromTag('.$row['link_id'].');" />'.$row['title'].'</li>';
 
 	return $list ? '<ul>' . $list . '</ul>' : '';
 }

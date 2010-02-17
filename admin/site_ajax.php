@@ -349,7 +349,7 @@ elseif ($action == 'load_tagnames')
 
 	$list = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$list .= '<li tagid="'.$row['tag_id'].'" onclick="ChooseKey(this);">'.s2_htmlencode($row['name']).' (<span>'.$row['article_count'].'</span>)</li>';
+		$list .= '<li tagid="'.$row['tag_id'].'" onclick="ChooseTag(this);">'.s2_htmlencode($row['name']).' (<span>'.$row['article_count'].'</span>)</li>';
 
 	echo $list;
 }

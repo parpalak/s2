@@ -6,7 +6,7 @@
 .l-float,
 .border,
 .text_wrapper,
-#keyvalues,
+#tag_values,
 .tagswitcher,
 #wText,
 #commtext,
@@ -355,23 +355,23 @@ ul .but_panel .delete {
 		margin: 0;
 		}
 
-#keynames {
+#tag_names {
 	width: 200px;
 	display: none; /**/
 	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	}
-	#keynames ul {
+	#tag_names ul {
 		border-left: 1px solid #fff;
 		min-height: 100%;
 		}
-		#keynames ul li {
+		#tag_names ul li {
 			border: 1px solid #eee;
 			border-width: 1px 1px 1px 0;
 			border-left-width: 0;
 			background: #eee;
 			padding: 0 10px;
 			}
-			#keynames ul li.cur_key {
+			#tag_names ul li.cur_tag {
 				padding-left: 12px;
 				margin-left: -1px;
 				border-top-color: #aaa;
@@ -379,23 +379,23 @@ ul .but_panel .delete {
 				border-bottom-color: #fff;
 				}
 
-#keyvalues {
+#tag_values {
 	width: 200px;
 	padding: 0;
 	border: 1px solid #fff;
 	border-color: #aaa transparent #fff #aaa;
 	display: none;
 	}
-	#keyvalues img {
+	#tag_values img {
 		height: 16px;
 		width: 16px;
 		float: right;
 		background: url(../i/icons.png) 0 -32px;
 		}
-		#keyvalues img:hover {
+		#tag_values img:hover {
 			background-color: #fff;
 			}
-	#keyvalues ul li {
+	#tag_values ul li {
 		padding: 0.25em 0.5em;
 		}
 
@@ -418,7 +418,7 @@ ul .but_panel .delete {
 			background-position: 6px 50%;
 			}
 
-#keyvalues ul li:hover,
+#tag_values ul li:hover,
 .tagswitcher img:hover{
 	background-color: #fafac0;
 	}

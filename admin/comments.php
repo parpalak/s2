@@ -99,14 +99,14 @@ function s2_show_comments ($mode, $id = 0)
 
 		// Preparing row buttons
 		$buttons = array();
-		$buttons['edit'] = '<img class="edit" src="i/1.gif" alt="'.$lang_admin['Edit'].'" onclick="return DoAction(\'edit_comment\', '.$row['id'].', \'comm_div\');" />';
+		$buttons['edit'] = '<img class="edit" src="i/1.gif" alt="'.$lang_admin['Edit'].'" onclick="return LoadTableExt(\'edit_comment\', '.$row['id'].', \'comm_div\');" />';
 		$buttons['hide'] =  $row['shown'] ?
-			'<img class="hide" src="i/1.gif" alt="'.$lang_admin['Hide'].'" onclick="return DoAction(\'hide_comment\', '.$row['id'].', \'comm_div\');" />' :
-			'<img class="show" src="i/1.gif" alt="'.$lang_admin['Show'].'" onclick="return DoAction(\'hide_comment\', '.$row['id'].', \'comm_div\')" />' ;
+			'<img class="hide" src="i/1.gif" alt="'.$lang_admin['Hide'].'" onclick="return LoadTableExt(\'hide_comment\', '.$row['id'].', \'comm_div\');" />' :
+			'<img class="show" src="i/1.gif" alt="'.$lang_admin['Show'].'" onclick="return LoadTableExt(\'hide_comment\', '.$row['id'].', \'comm_div\')" />' ;
 
 		$buttons['mark'] = $row['good'] ?
-			'<img class="unmark" src="i/1.gif" alt="'.$lang_admin['Unmark comment'].'" onclick="return DoAction(\'mark_comment\', '.$row['id'].', \'comm_div\');" />' :
-			'<img class="mark" src="i/1.gif" alt="'.$lang_admin['Mark comment'].'" onclick="return DoAction(\'mark_comment\', '.$row['id'].', \'comm_div\');" />';
+			'<img class="unmark" src="i/1.gif" alt="'.$lang_admin['Unmark comment'].'" onclick="return LoadTableExt(\'mark_comment\', '.$row['id'].', \'comm_div\');" />' :
+			'<img class="mark" src="i/1.gif" alt="'.$lang_admin['Mark comment'].'" onclick="return LoadTableExt(\'mark_comment\', '.$row['id'].', \'comm_div\');" />';
 
 		$buttons['delete'] = '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteComment('.$row['id'].');" />';
 
