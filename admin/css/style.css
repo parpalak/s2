@@ -344,6 +344,7 @@ ul .but_panel .delete {
 	border: 0;
 	padding: 0;
 	overflow: hidden;
+	background: #eee;
 	}
 	#keytable div {
 		float: left;
