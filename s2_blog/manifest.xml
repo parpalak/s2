@@ -50,7 +50,7 @@ if (!$s2_db->table_exists('s2_blog_posts'))
 				'default'		=> '\'\''
 			),
 			'text'			=> array(
-				'datatype'		=> 'TEXT',
+				'datatype'		=> 'LONGTEXT',
 				'allow_null'	=> false,
 				'default'		=> '\'\''
 			),
