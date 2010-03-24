@@ -558,7 +558,7 @@ else
 				'default'		=> '\'\''
 			),
 			'pagetext'		=> array(
-				'datatype'		=> 'TEXT',
+				'datatype'		=> 'LONGTEXT',
 				'allow_null'	=> false,
 				'default'		=> '\'\''
 			),
