@@ -402,12 +402,14 @@ function s2_output_article_form ($id)
 	{
 ?>
 		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadComments(<?php echo $page['id']; ?>);"><?php echo $lang_common['Comments']; ?></a>
-		<br />
-		<br />
 <?php
 	}
+	else
+		echo "\t\t".$lang_admin['No comments']."\n";
 
 ?>
+		<br />
+		<br />
 		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo S2_PATH ?>/admin/site_ajax.php?action=preview&id=<?php echo $page['id']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
 <?php ($hook = s2_hook('fn_output_article_form_after_links')) ? eval($hook) : null; ?>
 	</div>
