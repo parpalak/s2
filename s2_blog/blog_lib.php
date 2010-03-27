@@ -35,7 +35,7 @@ function s2_blog_output_post_list ($criteria)
 	if (isset($criteria['text']) &&  $criteria['text'] != '')
 	{
 		$condition = array();
-		foreach(explode(' ', $criteria['text']) as $word)
+		foreach (explode(' ', $criteria['text']) as $word)
 			if ($word != '')
 				$condition[] = 'title LIKE \'%'.$s2_db->escape($word).'%\' OR p.text LIKE \'%'.$s2_db->escape($word).'%\'';
 		if (count($condition))
@@ -71,7 +71,7 @@ function s2_blog_output_post_list ($criteria)
 	if ($key_search != '')
 	{
 		$tag_ids = array();
-		foreach($tag_names as $tag_id => $tag)
+		foreach ($tag_names as $tag_id => $tag)
 			if (stristr($tag, $key_search) !== false && $tag_count[$tag_id])
 				$tag_ids[] = $tag_id;
 
@@ -358,12 +358,14 @@ function s2_blog_edit_post_form ($id)
 	{
 ?>
 		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadBlogComments(<?php echo $id; ?>);"><?php echo $lang_common['Comments']; ?></a>
-		<br />
-		<br />
 <?php
 	}
+	else
+		echo "\t\t".$lang_admin['No comments']."\n";
 
 ?>
+		<br />
+		<br />
 		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo $page['path']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
 <?php ($hook = s2_hook('s2_blog_fn_post_form_after_prv')) ? eval($hook) : null; ?>
 	</div>
