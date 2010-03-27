@@ -217,7 +217,7 @@ function SearchKeyPress (e)
 	else
 	{
 		setTimeout("search_string = document.getElementById('search_field').value", 0);
-		search_timer = setTimeout(DoSearch, 1500);
+		search_timer = setTimeout(DoSearch, 1000);
 	}
 }
 
