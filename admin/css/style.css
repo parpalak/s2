@@ -223,10 +223,10 @@ hr {
 				background-repeat : no-repeat;
 				}
 				.treetree ul li.ExpandOpen > div:first-child {
-					background-position: 0 0;
+					background-position: 0 -18px;
 					}
 				.treetree ul li.ExpandClosed > div:first-child {
-					background-position: 0 -18px;
+					background-position: 0 0;
 					}
 				.treetree ul li.ExpandLeaf > div:first-child {
 					background-position: -36px 0;
