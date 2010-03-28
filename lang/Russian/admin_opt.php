@@ -34,8 +34,8 @@ $lang_const_names = array(
 
 $lang_admin_opt = array(
 
-'Styles'					=> 'Тема оформления:',
-'Languages'					=> 'Язык:',
+'Styles'					=> 'Тема оформления',
+'Languages'					=> 'Язык',
 'Save options'				=> 'Сохранить параметры (Ctrl + S)',
 'Invalid webmaster email'	=> 'Неверно указан e-mail автора сайта. Используется старый e-mail.',
 'Invalid style'				=> 'Была указана неверная тема оформления.',
