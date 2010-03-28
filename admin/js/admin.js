@@ -88,6 +88,7 @@ if (bFF)
 	addEventListener('load', Init, true);
 
 var eTextarea;
+var sCurrTextId = ''; // A unique string for the document currently loaded to the editor
 
 var ua = navigator.userAgent.toLowerCase();
 var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
@@ -792,20 +793,30 @@ function CreateChildArticle ()
 
 function EditArticle (iId)
 {
-	if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
-		return false;
-
 	if (typeof(iId) == 'undefined')
 		iId = buttonPanel.parentNode.id;
 
-	var Response = GETSyncRequest(sUrl + 'action=load&id=' + iId);
-	if (Response.status != '200')
-		return false;
+	var sURI = sUrl + 'action=load&id=' + iId;
 
-	document.getElementById('form_div').innerHTML = Response.text;
-	CommitChanges(document.artform)
+	if (sCurrTextId != sURI)
+	{
+		// We are going to reload the editor content
+		// only if the article to be loaded differs from the current one.
+
+		if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
+			return false;
+
+		var Response = GETSyncRequest(sURI);
+		if (Response.status != '200')
+			return false;
+
+		document.getElementById('form_div').innerHTML = Response.text;
+		CommitChanges(document.artform)
+		eTextarea = document.getElementById('wText');
+
+		sCurrTextId = sURI;
+	}
 	SelectTab(document.getElementById('edit_tab'), true);
-	eTextarea = document.getElementById('wText');
 	return false;
 }
 

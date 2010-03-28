@@ -583,7 +583,7 @@ function s2_preload_editor ()
 	}
 
 	s2_output_article_form($id);
-	echo '<script type="text/javascript">document.location.hash = "#edit"; eTextarea = document.getElementById("wText"); curr_md5 = hex_md5(StringFromForm(document.artform));</script>';
+	echo '<script type="text/javascript">document.location.hash = "#edit"; eTextarea = document.getElementById("wText"); curr_md5 = hex_md5(StringFromForm(document.artform)); sCurrTextId = sUrl + "action=load&id='.$id.'";</script>';
 }
 
 function s2_toolbar ()
