@@ -46,18 +46,27 @@ function LoadPosts ()
 
 function EditRecord (iId)
 {
-	if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
-		return false;
+	var sURI = sUrl + "action=edit_blog_post&id=" + iId;
 
-	var Response = GETSyncRequest(sUrl + "action=edit_blog_post&id=" + iId);
-	if (Response.status != '200')
-		return false;
+	if (sCurrTextId != sURI)
+	{
+		// We are going to reload the editor content
+		// only if the article to be loaded differs from the current one.
 
-	document.getElementById('form_div').innerHTML = Response.text;
-	CommitChanges(document.artform);
+		if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
+			return false;
+
+		var Response = GETSyncRequest(sURI);
+		if (Response.status != '200')
+			return false;
+
+		document.getElementById('form_div').innerHTML = Response.text;
+		CommitChanges(document.artform);
+		eTextarea = document.getElementById("wText");
+
+		sCurrTextId = sURI;
+	}
 	SelectTab(document.getElementById('edit_tab'), true);
-	eTextarea = document.getElementById("wText");
-
 	return false;
 }
 
