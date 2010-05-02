@@ -122,7 +122,7 @@ function s2_get_template ($template_id, $path = false)
 		$template = preg_replace('#<a href="(.*?)">(.*?)</a>#e', '_s2_check_link(\'\\1\', \''.$request_uri.'\', \'\\2\')', $template);
 	}
 
-	($hook = s2_hook('fn_get_template_start')) ? eval($hook) : null;
+	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
 	return $template;
 }
 
