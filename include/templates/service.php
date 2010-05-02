@@ -5,7 +5,6 @@
 <title><!-- head_title --></title>
 <!-- meta -->
 <!-- styles -->
-<!-- link_rss -->
 </head>
 
 <body>
@@ -15,14 +14,8 @@
 	<div id="center">
 		<div id="container">
 			<div id="content">
-				<!-- s2_blog_last_post -->
-				<!-- last_articles -->
+				<!-- title -->
 				<!-- text -->
-			</div>
-			<div id="menu">
-				<!-- menu -->
-				<!-- last_comments -->
-				<!-- s2_blog_last_comments -->
 			</div>
 			<div class="clearing"></div>
 		</div>

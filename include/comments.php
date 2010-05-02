@@ -32,7 +32,7 @@ function s2_field_name ($index)
 	return '';
 }
 
-function s2_comment_form ($id)
+function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subscribed = false, $text = false)
 {
 	global $lang_common;
 
@@ -59,37 +59,32 @@ function s2_comment_form ($id)
 
 ?>
 				<form method="post" action="<?php echo $action?>">
-					<?php echo $lang_common['Your name']; ?>
-					<br />
-					<input class="comm_input" type="text" name="<?php echo s2_field_name('name');?>" maxlength="50" size="40" />
-					<br /><br />
-					<?php echo $lang_common['Your email']; ?>
-					<br />
-					<input class="comm_input" type="text" name="<?php echo s2_field_name('email')?>" maxlength="50" size="40" />
-					<br /><br />
-					<input type="checkbox" id="showmail" name="<?php echo s2_field_name('show_email')?>" checked="checked" />
-					<label for="showmail"><?php echo $lang_common['Show email label']; ?></label>
-					<br />
-					<input type="checkbox" id="subscr" name="<?php echo s2_field_name('subscribed')?>" />
-					<label for="subscr"><?php echo $lang_common['Subscript label']; ?></label>
-					<br /><br />
-					<?php echo $lang_common['Your comment']; ?>
-					<br />
-					<textarea class="comm_input" cols="50" rows="10" name="<?php echo s2_field_name('text')?>"></textarea>
-					<br />
-					<?php echo $lang_common['Comment syntax info']; ?>
-					<br />
-					<span id="qsp">
+					<p class="input name">
+						<?php echo $lang_common['Your name']; ?><br />
+						<input type="text" name="<?php echo s2_field_name('name');?>" value="<?php echo s2_htmlencode($name); ?>" maxlength="50" size="40" />
+					</p>
+					<p class="input email">
+						<?php echo $lang_common['Your email']; ?><br />
+						<input type="text" name="<?php echo s2_field_name('email')?>" value="<?php echo s2_htmlencode($email); ?>" maxlength="50" size="40" /><br />
+						<label for="showmail" title="<?php echo $lang_common['Show email label title']; ?>"><input type="checkbox" id="showmail" name="<?php echo s2_field_name('show_email')?>" <?php if ($showmail) echo 'checked="checked" '; ?>/><?php echo $lang_common['Show email label']; ?></label><br />
+						<label for="subscr" title="<?php echo $lang_common['Subscript label title']; ?>"><input type="checkbox" id="subscr" name="<?php echo s2_field_name('subscribed')?>" <?php if ($subscribed) echo 'checked="checked" '; ?>/><?php echo $lang_common['Subscript label']; ?></label>
+					</p>
+					<p class="input text">
+						<?php echo $lang_common['Your comment']; ?><br />
+						<textarea cols="50" rows="10" name="<?php echo s2_field_name('text'); ?>"><?php echo s2_htmlencode($text); ?></textarea>
 						<br />
-						<?php printf($lang_common['Comment question'], '&#x003'.$a.';&#x003'.$b.';&#x002b;&#x003'.$c.';'); ?>
-						<br />
-						<input class="comm_input" type="text" name="<?php echo s2_field_name('quest')?>" maxlength="50" size="40" id="quest" />
-						<br />
-					</span>
-					<input type="hidden" name="<?php echo s2_field_name('id')?>" value="<?php echo $id?>" />
-					<input type="hidden" name="<?php echo s2_field_name('key')?>" value="<?php echo $key?>" />
-					<br />
-					<input class="comm_submit" type="submit" value="<?php echo $lang_common['Submit']; ?>" />
+						<small class="comment-syntax"><?php echo $lang_common['Comment syntax info']; ?></small>
+					</p>
+					<p id="qsp">
+						<?php printf($lang_common['Comment question'], '&#x003'.$a.';&#x003'.$b.';&#x002b;&#x003'.$c.';'); ?><br />
+						<input class="comm_input" type="text" name="<?php echo s2_field_name('quest'); ?>" maxlength="50" size="40" id="quest" />
+					</p>
+					<input type="hidden" name="<?php echo s2_field_name('id')?>" value="<?php echo intval($id); ?>" />
+					<input type="hidden" name="<?php echo s2_field_name('key')?>" value="<?php echo $key; ?>" />
+					<p class="input buttons">
+						<input type="submit" name="submit" value="<?php echo $lang_common['Submit']; ?>" />
+						<input type="submit" name="preview" value="<?php echo $lang_common['Preview']; ?>" />
+					</p>
 				</form>
 				<script type="text/javascript">
 <!--

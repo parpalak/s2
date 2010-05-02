@@ -28,7 +28,7 @@
 			</div>
 			<div class="clearing"></div>
 		</div>
-		<!-- debug -->
+<!-- debug -->
 	</div>
 
 	<div id="footer">

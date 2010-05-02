@@ -126,6 +126,36 @@ function s2_get_template ($template_id, $path = false)
 	return $template;
 }
 
+function s2_get_service_template ($template_id = 'service.php', $path = false)
+{
+	global $lang_common;
+
+	$template = s2_get_template($template_id, $path);
+
+	$replace['<!-- meta -->'] = '<meta name="Generator" content="S2 '.S2_VERSION.'" />';
+	$replace['<!-- site_title -->'] = S2_SITE_NAME;
+
+	// Including the style
+	ob_start();
+	include S2_ROOT.'styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
+	$replace['<!-- styles -->'] = ob_get_clean();
+
+	// Footer
+	$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
+	$link = S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : '<a href="'.S2_BASE_URL.'/">'.$author.'</a>';
+
+	$replace['<!-- copyright -->'] = (S2_START_YEAR != date('Y') ?
+		sprintf($lang_common['Copyright 2'], $link, S2_START_YEAR, date('Y')) :
+		sprintf($lang_common['Copyright 1'], $link, date('Y'))).' '.
+		sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	return $template;
+}
+
+
 //
 // Returns the full path for an article
 //
@@ -292,14 +322,15 @@ function s2_get_saved_queries()
 	ob_start();
 
 ?>
-		<table>
-			<thead>
-				<tr>
-					<th class="tcl" scope="col">Time, ms</th>
-					<th class="tcr" scope="col">Query</th>
-				</tr>
-			</thead>
-			<tbody>
+		<div id="debug">
+			<table>
+				<thead>
+					<tr>
+						<th class="tcl" scope="col">Time, ms</th>
+						<th class="tcr" scope="col">Query</th>
+					</tr>
+				</thead>
+				<tbody>
 <?php
 
 	$query_time_total = 0.0;
@@ -308,21 +339,22 @@ function s2_get_saved_queries()
 		$query_time_total += $cur_query[1];
 
 ?>
-				<tr>
-					<td class="tcl"><?php echo (($cur_query[1] != 0) ? s2_number_format($cur_query[1]*1000, false) : '&#160;') ?></td>
-					<td class="tcr"><?php echo s2_htmlencode($cur_query[0]) ?></td>
-				</tr>
+					<tr>
+						<td class="tcl"><?php echo (($cur_query[1] != 0) ? s2_number_format($cur_query[1]*1000, false) : '&#160;') ?></td>
+						<td class="tcr"><?php echo s2_htmlencode($cur_query[0]) ?></td>
+					</tr>
 <?php
 
 	}
 
 ?>
-				<tr class="totals">
-					<td class="tcl"><em><?php echo s2_number_format($query_time_total*1000, false) ?></em></td>
-					<td class="tcr"><em>Total query time</em></td>
-				</tr>
-			</tbody>
-		</table>
+					<tr class="totals">
+						<td class="tcl"><em><?php echo s2_number_format($query_time_total*1000, false) ?></em></td>
+						<td class="tcr"><em>Total query time</em></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 <?php
 
 	return ob_get_clean();

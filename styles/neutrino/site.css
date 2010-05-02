@@ -89,7 +89,13 @@ blockquote {
 
 /* Forms */
 
-textarea.comm_input { width: 99%; }
+p.text textarea { width: 99%; }
+p.input.buttons input {
+	margin-right: 2em;
+	}
+p.input input[type="checkbox"] {
+	vertical-align: middle;
+	}
 
 /* Layout */
 

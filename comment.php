@@ -100,7 +100,7 @@ $_POST[s2_field_name('subscribed')] = $subscribed = (int) isset($_POST[s2_field_
 
 ($hook = s2_hook('cmnt_pre_post_check')) ? eval($hook) : null;
 
-// Make sure we have all POST data
+// Make sure we have all the POST data
 foreach ($s2_comment_fields as $field)
 	if (!isset($_POST[$field]))
 		s2_comment_error(array($lang_comment_errors['post_error']));
@@ -113,23 +113,18 @@ foreach ($s2_comment_fields as $field)
 $errors = array();
 
 $text = trim($_POST[s2_field_name('text')]);
-
 if (empty($text))
 	$errors[] = $lang_comment_errors['missing_text'];
-
 if (strlen($text) > S2_MAX_COMMENT_BYTES)
 	$errors[] = sprintf($lang_comment_errors['long_text'], S2_MAX_COMMENT_BYTES);
 
 $email = $_POST[s2_field_name('email')];
-
 if (!is_valid_email($email))
 	$errors[] = $lang_comment_errors['email'];
 
 $name = trim($_POST[s2_field_name('name')]);
-
 if (empty($name))
 	$errors[] = $lang_comment_errors['missing_nick'];
-
 if (utf8_strlen($name) > 50)
 	$errors[] = $lang_comment_errors['long_nick'];
 
@@ -139,6 +134,36 @@ if (!s2_check_comment_question($_POST[s2_field_name('key')], $_POST[s2_field_nam
 $id = (int) $_POST[s2_field_name('id')];
 
 ($hook = s2_hook('cmnt_after_post_check')) ? eval($hook) : null;
+
+if (isset($_POST['preview']))
+{
+	// Handling "Preview" button
+	header('Content-Type: text/html; charset=utf-8');
+
+	$template = s2_get_service_template();
+	$replace['<!-- head_title -->'] = $lang_comments['Comment preview'];
+	$replace['<!-- title -->'] = '<h1>'.$lang_comments['Comment preview'].'</h1>';
+	$replace['<!-- text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
+
+	$name = '<strong>'.($show_email ? s2_js_mailto(s2_htmlencode($name), $email) : s2_htmlencode($name)).'</strong>';
+
+	($hook = s2_hook('cmnt_pre_comment_merge')) ? eval($hook) : null;
+
+	$comments = "\t\t\t\t".'<div class="reply_info">'.sprintf($lang_common['Comment info format'], s2_date_time(time()), $name).'</div>'."\n".
+		"\t\t\t\t".'<div class="reply">'.s2_bbcode_to_html(s2_htmlencode($text)).'</div>'."\n";
+	$replace['<!-- text -->'] = '<p>'.$lang_comments['Comment preview info'].'</p>'."\n".
+		$comments.
+		"\t\t\t\t".'<h2>'.$lang_common['Post a comment'].'</h2>'."\n"
+		.$replace['<!-- text -->'];
+	$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	($hook = s2_hook('cmnt_pre_preview_output')) ? eval($hook) : null;
+
+	die($template);
+}
 
 // What are we going to comment?
 $query = array(
@@ -151,14 +176,38 @@ $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 if (!$row = $s2_db->fetch_assoc($result))
 	$errors[] = $lang_comment_errors['no_item'];
-
-$path = s2_path_from_id($row['parent_id'], true);
-($hook = s2_hook('cmnt_pre_path_check')) ? eval($hook) : null;
-if ($path === false)
-	$errors[] = $lang_comment_errors['no_item'];
+else
+{
+	$path = s2_path_from_id($row['parent_id'], true);
+	($hook = s2_hook('cmnt_pre_path_check')) ? eval($hook) : null;
+	if ($path === false)
+		$errors[] = $lang_comment_errors['no_item'];
+}
 
 if (!empty($errors))
-	s2_comment_error($errors);
+{
+	header('Content-Type: text/html; charset=utf-8');
+
+	$template = s2_get_service_template();
+	$replace['<!-- head_title -->'] = $lang_common['Error'];
+	$replace['<!-- title -->'] = '<h1>'.$lang_common['Error'].'</h1>';
+	$replace['<!-- text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
+
+	$error_text = '<p>'.$lang_comment_errors['Error message'].'</p><ul>';
+	foreach ($errors as $error)
+		$error_text .=  '<li>'.$error.'</li>';
+	$error_text .=  '</ul>';
+
+	$replace['<!-- text -->'] = $error_text.'<p>'.$lang_comments['Fix error'].'</p>'.$replace['<!-- text -->'];
+	$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
+
+	die($template);
+}
 
 $link = S2_BASE_URL.$path.'/'.urlencode($row['url']);
 

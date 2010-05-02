@@ -130,7 +130,7 @@ $replace['<!-- copyright -->'] = (S2_START_YEAR != date('Y') ?
 	sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
 
 // Queries
-$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? '<div id="debug">'.s2_get_saved_queries().'</div>' : '';
+$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
 $etag = md5($template);
 // Add here placeholders to be excluded from the ETag calculation
