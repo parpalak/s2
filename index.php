@@ -152,7 +152,7 @@ foreach ($replace as $what => $to)
 if (defined('S2_DEBUG'))
 {
 	list($usec, $sec) = explode(' ', microtime());
-	$page['generate_time'] = 't = '.s2_number_format(1000*((float)$usec + (float)$sec - $s2_start)).'; q = '.$s2_db->get_num_queries();
+	$page['generate_time'] = 't = '.s2_number_format(((float)$usec + (float)$sec - $s2_start), true, 3).'; q = '.$s2_db->get_num_queries();
 	$template = str_replace('<!-- querytime -->', $page['generate_time'], $template);
 	$etag .= md5($page['generate_time']);
 }
