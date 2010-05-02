@@ -744,7 +744,7 @@ if (isset($_GET['blog_unsubscribe']))
 		]]></hook>
 
 		<hook id="fn_comment_form_pre_output"><![CDATA[
-if (defined('S2_BLOG_HANDLED'))
+if (defined('S2_BLOG_HANDLED') || isset($_GET['type']) && $_GET['type'] == 's2_blog')
 	$action = S2_BASE_URL.'/comment.php?type=s2_blog';
 		]]></hook>
 
