@@ -118,6 +118,8 @@ function s2_blog_get_comments ($id)
 		$name = '<strong>'.($row['show_email'] ? s2_js_mailto($nick, $row['email']) : $nick).'</strong>';
 		$link = '<a name="'.$i.'" href="#'.$i.'">#'.$i.'</a>. ';
 
+		($hook = s2_hook('fn_blog_get_comments_pre_comment_merge')) ? eval($hook) : null;
+
 		$comments .= '<div class="reply_info">'.$link.sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name).'</div>'."\n".
 			'<div class="reply'.($row['good'] ? ' good' : '').'">'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</div>';
 	}
