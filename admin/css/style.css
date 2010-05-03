@@ -571,7 +571,7 @@ table.sort {
 		width: 100%;
 		}
 	.r-float input[type="checkbox"] {
-		vertical-align: sub;
+		vertical-align: middle;
 		}
 
 table.fields {
@@ -638,10 +638,18 @@ div.input.text input,
 	background-color: #f2f2f2;
 	border: 2px solid #ccc;
 	border-color: #fff #aaa #aaa #fff;
+	-moz-border-top-colors: #ddd #fff;
+	-moz-border-left-colors: #ddd #fff;
+	-moz-border-right-colors: #999 #ccc;
+	-moz-border-bottom-colors: #999 #ccc;
 	background-image: url(../i/button_icons.png);
 	}
 	.bitbtn:active {
 		border-color: #aaa #fff #fff #aaa;
+		-moz-border-top-colors: #999 #ccc;
+		-moz-border-left-colors: #999 #ccc;
+		-moz-border-right-colors: #ddd #fff;
+		-moz-border-bottom-colors: #ddd #fff;
 		}
 
 .bitbtn.save { background-position: 1px -35px; }
