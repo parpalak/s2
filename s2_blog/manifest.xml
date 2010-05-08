@@ -712,34 +712,38 @@ if (isset($_GET['blog_unsubscribe']))
 				($hook = s2_hook('blcmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
 				$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php echo $lang_comments['Unsubscribed OK']; ?></title>
-</head>
-<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
-	<h1><?php echo $lang_comments['Unsubscribed OK']; ?></h1>
-	<?php echo $lang_comments['Unsubscribed OK info']; ?>
-</body>
-<?php
+				$template = s2_get_service_template();
+				$replace = array(
+					'<!-- head_title -->'	=> $lang_comments['Unsubscribed OK'],
+					'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
+					'<!-- text -->'			=> $lang_comments['Unsubscribed OK info'],
+					'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+				);
 
-				die;
+				($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+
+				foreach ($replace as $what => $to)
+					$template = str_replace($what, $to, $template);
+
+				die($template);
 			}
 		}
 	}
 
-?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php echo $lang_comments['Unsubscribed failed info']; ?></title>
-</head>
-<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
-	<h1><?php echo $lang_comments['Unsubscribed failed']; ?></h1>
-	<?php echo $lang_comments['Unsubscribed failed info']; ?>
-</body>
-<?php
+	$template = s2_get_service_template();
+	$replace = array(
+		'<!-- head_title -->'	=> $lang_comments['Unsubscribed failed'],
+		'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
+		'<!-- text -->'			=> $lang_comments['Unsubscribed failed info'],
+		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+	);
 
-	die;
+	($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	die($template);
 }
 		]]></hook>
 
