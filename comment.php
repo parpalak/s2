@@ -19,18 +19,20 @@ if (isset($_GET['go']))
 	// Outputs "comment saved" message (used if the premoderation mode is enabled)
 	header('Content-Type: text/html; charset=utf-8');
 
-?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php echo $lang_comments['Comment sent']; ?></title>
-</head>
-<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
-	<h1><?php echo $lang_comments['Comment sent']; ?></h1>
-	<?php printf($lang_comments['Comment sent info'], $_GET['go'], S2_BASE_URL.'/'); ?>
-</body>
-<?php
+	$template = s2_get_service_template();
+	$replace = array(
+		'<!-- head_title -->'	=> $lang_comments['Comment sent'],
+		'<!-- title -->'		=> '<h1>'.$lang_comments['Comment sent'].'</h1>',
+		'<!-- text -->'			=> sprintf($lang_comments['Comment sent info'], $_GET['go'], S2_BASE_URL.'/'),
+		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+	);
 
-	die;
+	($hook = s2_hook('cmnt_pre_sent_comment_output')) ? eval($hook) : null;
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	die($template);
 }
 
 if (isset($_GET['unsubscribe']))
@@ -59,34 +61,38 @@ if (isset($_GET['unsubscribe']))
 				($hook = s2_hook('cmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
 				$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php echo $lang_comments['Unsubscribed OK']; ?></title>
-</head>
-<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
-	<h1><?php echo $lang_comments['Unsubscribed OK']; ?></h1>
-	<?php echo $lang_comments['Unsubscribed OK info']; ?>
-</body>
-<?php
+				$template = s2_get_service_template();
+				$replace = array(
+					'<!-- head_title -->'	=> $lang_comments['Unsubscribed OK'],
+					'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
+					'<!-- text -->'			=> $lang_comments['Unsubscribed OK info'],
+					'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+				);
 
-				die;
+				($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+
+				foreach ($replace as $what => $to)
+					$template = str_replace($what, $to, $template);
+
+				die($template);
 			}
 		}
 	}
 
-?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php echo $lang_comments['Unsubscribed failed info']; ?></title>
-</head>
-<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
-	<h1><?php echo $lang_comments['Unsubscribed failed']; ?></h1>
-	<?php echo $lang_comments['Unsubscribed failed info']; ?>
-</body>
-<?php
+	$template = s2_get_service_template();
+	$replace = array(
+		'<!-- head_title -->'	=> $lang_comments['Unsubscribed failed'],
+		'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
+		'<!-- text -->'			=> $lang_comments['Unsubscribed failed info'],
+		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+	);
 
-	die;
+	($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	die($template);
 }
 
 if (!S2_ENABLED_COMMENTS)
@@ -160,8 +166,6 @@ if (isset($_POST['preview']))
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
 
-	($hook = s2_hook('cmnt_pre_preview_output')) ? eval($hook) : null;
-
 	die($template);
 }
 
@@ -201,10 +205,10 @@ if (!empty($errors))
 	$replace['<!-- text -->'] = $error_text.'<p>'.$lang_comments['Fix error'].'</p>'.$replace['<!-- text -->'];
 	$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
+	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
+
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
-
-	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
 
 	die($template);
 }
