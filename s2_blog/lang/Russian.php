@@ -30,6 +30,7 @@ $lang_s2_blog = array(
 'Only hidden'				=> 'Только скрытые записи',
 'Show posts'				=> 'Показать записи',
 'Create new'				=> 'Создать новую запись',
+'Date pattern'				=> 'd.m.Y', // For example, 'Y/m/d'. 'Y', 'm' and 'd' stand for a year, a month and a day.
 
 'Delete warning'			=> 'Удалить запись «%s» и все комментарии к ней?',
 
@@ -44,9 +45,9 @@ $lang_s2_blog = array(
 'No label'					=> '— Нет метки —',
 'New label'					=> 'Или новая метка:',
 
-'Invalid start date'		=> 'Неправильный формат начальной даты.',
-'Invalid end date'			=> 'Неправильный формат конечной даты.',
-'No posts found'			=> 'Записей, удовлетворяющих критериям, не найдено.',
+'Invalid start date'		=> 'Неправильный формат начальной даты. Например, вчера было <b>%1$s</b>, а&nbsp;сегодня&nbsp;— <b>%2$s</b>.',
+'Invalid end date'			=> 'Неправильный формат конечной даты. Например, вчера было <b>%1$s</b>, а&nbsp;сегодня&nbsp;— <b>%2$s</b>.',
+'No posts found'			=> 'Записей, удовлетворяющих критериям, не&nbsp;найдено.',
 'Do favorite'				=> 'Добавить в избранное',
 'Undo favorite'				=> 'Удалить из избранного',
 

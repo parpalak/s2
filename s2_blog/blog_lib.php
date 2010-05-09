@@ -7,6 +7,32 @@
  * @package s2_blog
  */
 
+
+// Converts a date like 2010/05/09 into the timestamp
+function s2_blog_parse_date ($time, $day_shift = 0)
+{
+	global $lang_s2_blog;
+
+	$regex = $lang_s2_blog['Date pattern']; // 'Y/m/d'
+	if (!preg_match_all('#[Ymd]#', $regex, $pattern_matches))
+		return 'Error in $lang_s2_blog[\'Date pattern\']';
+
+	$replace = array(
+		'Y' => '(\d{4})',
+		'm' => '(\d{1,2})',
+		'd' => '(\d{1,2})',
+	);
+	$regex = strtr(preg_quote($regex), $replace);
+	if (!preg_match('#^' . $regex . '$#', $time, $time_matches))
+		return false;
+
+	foreach ($pattern_matches[0] as $i => $interval)
+		$time_array[$interval] = $time_matches[$i + 1];
+
+	return checkdate($time_array['m'], $time_array['d'], $time_array['Y']) ?
+		mktime(0, 0, 0, $time_array['m'], $time_array['d'] + $day_shift, $time_array['Y']) : false;
+}
+
 function s2_blog_output_post_list ($criteria)
 {
 	global $s2_db, $lang_common, $lang_admin, $lang_s2_blog, $session_id;
@@ -16,20 +42,24 @@ function s2_blog_output_post_list ($criteria)
 
 	if (!empty($criteria['start_time']))
 	{
-		$bt = explode('.', $criteria['start_time']);
-		if (count($bt) != 3 || !checkdate($bt[1], $bt[0], $bt[2]))
-			$messages[] = $lang_s2_blog['Invalid start date'];
+		$time = s2_blog_parse_date($criteria['start_time']);
+		if ($time === false)
+			$messages[] = sprintf($lang_s2_blog['Invalid start date'], date($lang_s2_blog['Date pattern'], time() - 86400), date($lang_s2_blog['Date pattern']));
+		elseif ((int) $time != 0)
+			$conditions[] = 'create_time > ' . ((int) $time);
 		else
-			$conditions[] = 'create_time > ' . mktime(0, 0, 0, $bt[1], $bt[0], $bt[2]);
+			$messages[] = $time;
 	}
 
 	if (!empty($criteria['end_time']))
 	{
-		$bt = explode('.', $criteria['end_time']);
-		if (count($bt) != 3 || !checkdate($bt[1], $bt[0], $bt[2]))
-			$messages [] = $lang_s2_blog['Invalid end date'];
+		$time = s2_blog_parse_date($criteria['end_time'], 1);
+		if ($time === false)
+			$messages[] = sprintf($lang_s2_blog['Invalid end date'], date($lang_s2_blog['Date pattern'], time() - 86400), date($lang_s2_blog['Date pattern']));
+		elseif ((int) $time != 0)
+			$conditions[] = 'create_time < ' . ((int) $time);
 		else
-			$conditions[] = 'create_time < ' . mktime(0, 0, 0, $bt[1], $bt[0] + 1, $bt[2]);
+			$messages[] = $time;
 	}
 
 	if (isset($criteria['text']) &&  $criteria['text'] != '')
