@@ -567,7 +567,7 @@ table.sort {
 	.r-float label {
 		display: block;
 		overflow: hidden;
-		margin: 0.25em 0;
+		margin: 0.5em 0;
 		}
 		.r-float label.error {
 			outline: 2px solid #f66;

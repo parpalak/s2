@@ -397,18 +397,18 @@ function s2_output_article_form ($id)
 	</div>
 <?php ($hook = s2_hook('fn_output_article_form_pre_btn_col')) ? eval($hook) : null; ?>
 	<div class="r-float">
-<?php ($hook = s2_hook('fn_output_article_form_pre_checkboxes')) ? eval($hook) : null; ?>
-		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"' ?> />
-		<?php echo $lang_admin['Published']; ?></label>
-		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"' ?> />
-		<?php echo $lang_common['Favorite']; ?></label>
-		<label for="com"><input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"' ?> />
-		<?php echo $lang_admin['Commented']; ?></label>
-<?php ($hook = s2_hook('fn_output_article_form_after_checkboxes')) ? eval($hook) : null; ?>
+		<input type="hidden" name="page[id]" value="<?php echo $page['id']; ?>" />
+<?php ($hook = s2_hook('fn_output_article_form_pre_parag_btn')) ? eval($hook) : null; ?>
+		<input class="bitbtn parag" type="button" value="<?php echo $lang_admin['Paragraphs']; ?>" onclick="return Paragraph();" />
+<?php ($hook = s2_hook('fn_output_article_form_after_parag_btn')) ? eval($hook) : null; ?>
 		<hr />
-<?php ($hook = s2_hook('fn_output_article_form_pre_url')) ? eval($hook) : null; ?>
-		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
-		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" /></label>
+<?php ($hook = s2_hook('fn_output_article_form_pre_reset')) ? eval($hook) : null; ?>
+		<input class="bitbtn reset" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm(S2_LANG_RESET_PROMPT);" />
+		<br />
+<?php ($hook = s2_hook('fn_output_article_form_pre_clear')) ? eval($hook) : null; ?>
+		<input class="bitbtn new" type="button" value="<?php echo $lang_admin['Clear']; ?>" onclick="ClearForm(); return false;" />
+<?php ($hook = s2_hook('fn_output_article_form_after_clear')) ? eval($hook) : null; ?>
+		<hr />
 <?php ($hook = s2_hook('fn_output_article_form_pre_template')) ? eval($hook) : null; ?>
 		<label><?php echo $lang_admin['Template']; ?><br />
 		<select name="page[template]">
@@ -422,27 +422,12 @@ function s2_output_article_form ($id)
 <?php ($hook = s2_hook('fn_output_article_form_pre_subcontent')) ? eval($hook) : null; ?>
 		<label for="subarticles"><input type="checkbox" id="subarticles" name="flags[children_preview]" value="1"<? if ($page['children_preview']) echo ' checked="checked"' ?> />
 		<?php echo $lang_admin['Subcontent']; ?></label>
-<?php ($hook = s2_hook('fn_output_article_form_after_subcontent')) ? eval($hook) : null; ?>
-		<hr />
-		<input type="hidden" name="page[id]" value="<?php echo $page['id']; ?>" />
-<?php ($hook = s2_hook('fn_output_article_form_pre_parag_btn')) ? eval($hook) : null; ?>
-		<input class="bitbtn parag" type="button" value="<?php echo $lang_admin['Paragraphs']; ?>" onclick="return Paragraph();" />
-<?php ($hook = s2_hook('fn_output_article_form_after_parag_btn')) ? eval($hook) : null; ?>
-		<hr />
-<?php ($hook = s2_hook('fn_output_article_form_pre_reset')) ? eval($hook) : null; ?>
-		<input class="bitbtn reset" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm(S2_LANG_RESET_PROMPT);" />
-		<br />
-<?php ($hook = s2_hook('fn_output_article_form_pre_clear')) ? eval($hook) : null; ?>
-		<input class="bitbtn new" type="button" value="<?php echo $lang_admin['Clear']; ?>" onclick="ClearForm(); return false;" />
-<?php ($hook = s2_hook('fn_output_article_form_after_clear')) ? eval($hook) : null; ?>
-		<hr />
-<?php ($hook = s2_hook('fn_output_article_form_pre_save')) ? eval($hook) : null; ?>
-		<input class="bitbtn save" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" />
-<?php ($hook = s2_hook('fn_output_article_form_after_save')) ? eval($hook) : null; ?>
-		<hr />
+<?php ($hook = s2_hook('fn_output_article_form_pre_checkboxes')) ? eval($hook) : null; ?>
+		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"' ?> />
+		<?php echo $lang_common['Favorite']; ?></label>
+		<label for="com"><input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"' ?> />
+		<?php echo $lang_admin['Commented']; ?></label>	
 <?php
-
-	($hook = s2_hook('fn_output_article_form_pre_links')) ? eval($hook) : null;
 
 	if ($page['comment_count'])
 	{
@@ -454,10 +439,21 @@ function s2_output_article_form ($id)
 		echo "\t\t".$lang_admin['No comments']."\n";
 
 ?>
+<?php ($hook = s2_hook('fn_output_article_form_after_checkboxes')) ? eval($hook) : null; ?>
+		<hr />
+<?php ($hook = s2_hook('fn_output_article_form_pre_url')) ? eval($hook) : null; ?>
+		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
+		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" /></label>
+<?php ($hook = s2_hook('fn_output_article_form_pre_published')) ? eval($hook) : null; ?>
+		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"' ?> />
+		<?php echo $lang_admin['Published']; ?></label>
+<?php ($hook = s2_hook('fn_output_article_form_pre_save')) ? eval($hook) : null; ?>
+		<input class="bitbtn save" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" />
+<?php ($hook = s2_hook('fn_output_article_form_after_save')) ? eval($hook) : null; ?>
 		<br />
 		<br />
 		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo S2_PATH ?>/admin/site_ajax.php?action=preview&id=<?php echo $page['id']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
-<?php ($hook = s2_hook('fn_output_article_form_after_links')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_output_article_form_after_btn_col')) ? eval($hook) : null; ?>
 	</div>
 <?php ($hook = s2_hook('fn_output_article_form_after_cols')) ? eval($hook) : null; ?>
 </form>
