@@ -564,14 +564,28 @@ table.sort {
 	width: 150px;
 	margin-left: 10px;
 	}
+	.r-float label {
+		display: block;
+		overflow: hidden;
+		margin: 0.25em 0;
+		}
+		.r-float label.error {
+			outline: 2px solid #f66;
+			background: #fdd;
+			}
+		.r-float label.ok {
+			outline: 2px solid #bfb;
+			background: #dfd;
+			}
+		.r-float label input[type="checkbox"] {
+			float: left;
+			margin: 2px 0.25em;
+			}
 	.r-float select {
 		font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 		}
 	.r-float input[type="text"] {
 		width: 100%;
-		}
-	.r-float input[type="checkbox"] {
-		vertical-align: middle;
 		}
 
 table.fields {

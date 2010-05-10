@@ -252,6 +252,44 @@ function s2_get_time_input ($name, $values)
 	return str_replace(array_keys($replace), array_values($replace), $format);
 }
 
+function s2_check_form_controls ($id)
+{
+	global $s2_db;
+
+	s2_add_js_header_delayed('var e = document.getElementById("pub"); e.parentNode.className = e.checked ? "ok" : "";');
+
+	$query = array(
+		'SELECT'	=> 'parent_id, url',
+		'FROM'		=> 'articles',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('rq_action_save_article_pre_get_pid_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	list($parent_id, $url) = $s2_db->fetch_row($result);
+
+	if ($parent_id != S2_ROOT_ID)
+	{
+		$query = array(
+			'SELECT'	=> 'count(id)',
+			'FROM'		=> 'articles',
+			'WHERE'		=> 'url = \''.$url.'\' AND parent_id = '.$parent_id
+		);
+		($hook = s2_hook('rq_action_save_article_pre_get_pid_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		if ($s2_db->result($result) != 1)
+		{
+			s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className="error"; e.title=e.getAttribute("title_unique");');
+			return;
+		}
+		elseif ($url == '')
+		{
+			s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className="error"; e.title=e.getAttribute("title_empty");');
+			return;
+		}
+	}
+	s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className=""; e.title="";');
+}
+
 function s2_output_article_form ($id)
 {
 	global $s2_db, $lang_templates, $lang_common, $lang_admin;
@@ -282,6 +320,19 @@ function s2_output_article_form ($id)
 		($hook = s2_hook('fn_output_article_form_pre_perm_check')) ? eval($hook) : null;
 		s2_test_user_rights($GLOBALS['session_id'], $required_rights);
 	}
+
+	$query = array(
+		'SELECT'	=> 'count(id)',
+		'FROM'		=> 'articles',
+		'WHERE'		=> 'url = \''.$page['url'].'\' AND parent_id = '.$page['parent_id']
+	);
+	($hook = s2_hook('rq_action_save_article_pre_get_pid_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$url_error = '';
+	if ($s2_db->result($result) != 1)
+		$url_error = $lang_admin['URL not unique'];
+	elseif ($page['url'] == '' && $page['parent_id'] != S2_ROOT_ID)
+		$url_error = $lang_admin['URL empty'];
 
 	$cr_time = s2_array_from_time($page['create_time']);
 	$m_time = s2_array_from_time($page['modify_time']);
@@ -347,23 +398,19 @@ function s2_output_article_form ($id)
 <?php ($hook = s2_hook('fn_output_article_form_pre_btn_col')) ? eval($hook) : null; ?>
 	<div class="r-float">
 <?php ($hook = s2_hook('fn_output_article_form_pre_checkboxes')) ? eval($hook) : null; ?>
-		<input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"' ?> />
-		<label for="pub"><?php echo $lang_admin['Published']; ?></label>
-		<br />
-		<input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"' ?> />
-		<label for="fav"><?php echo $lang_common['Favorite']; ?></label>
-		<br />
-		<input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"' ?> />
-		<label for="com"><?php echo $lang_admin['Commented']; ?></label>
+		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"' ?> />
+		<?php echo $lang_admin['Published']; ?></label>
+		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"' ?> />
+		<?php echo $lang_common['Favorite']; ?></label>
+		<label for="com"><input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"' ?> />
+		<?php echo $lang_admin['Commented']; ?></label>
 <?php ($hook = s2_hook('fn_output_article_form_after_checkboxes')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_output_article_form_pre_url')) ? eval($hook) : null; ?>
-		<?php echo $lang_admin['URL part']; ?>
-		<br />
-		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" />
-		<br />
+		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
+		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" /></label>
 <?php ($hook = s2_hook('fn_output_article_form_pre_template')) ? eval($hook) : null; ?>
-		<?php echo $lang_admin['Template']; ?><br />
+		<label><?php echo $lang_admin['Template']; ?><br />
 		<select name="page[template]">
 <?php
 
@@ -371,11 +418,10 @@ function s2_output_article_form ($id)
 		echo "\t\t\t".'<option value="'.$n.'"'.($page['template'] == $n ? ' selected' : '').'>'.$v.'</option>'."\n";
 
 ?>
-		</select>
-		<br />
+		</select></label>
 <?php ($hook = s2_hook('fn_output_article_form_pre_subcontent')) ? eval($hook) : null; ?>
-		<input type="checkbox" id="subarticles" name="flags[children_preview]" value="1"<? if ($page['children_preview']) echo ' checked="checked"' ?> />
-		<label for="subarticles"><?php echo $lang_admin['Subcontent']; ?></label>
+		<label for="subarticles"><input type="checkbox" id="subarticles" name="flags[children_preview]" value="1"<? if ($page['children_preview']) echo ' checked="checked"' ?> />
+		<?php echo $lang_admin['Subcontent']; ?></label>
 <?php ($hook = s2_hook('fn_output_article_form_after_subcontent')) ? eval($hook) : null; ?>
 		<hr />
 		<input type="hidden" name="page[id]" value="<?php echo $page['id']; ?>" />

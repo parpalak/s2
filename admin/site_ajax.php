@@ -231,9 +231,9 @@ elseif ($action == 'create')
 	$max_priority = $s2_db->result($result);
 
 	$query = array(
-		'INSERT'	=> 'parent_id, title, priority',
+		'INSERT'	=> 'parent_id, title, priority, url',
 		'INTO'		=> 'articles',
-		'VALUES'	=> $id.', \''.$lang_admin['New page'].'\', '.($max_priority + 1)
+		'VALUES'	=> $id.', \''.$lang_admin['New page'].'\', '.($max_priority + 1).', \'new\''
 	);
 	($hook = s2_hook('rq_action_create_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -312,7 +312,9 @@ elseif ($action == 'save')
 	($hook = s2_hook('rq_action_save_article_pre_post_upd_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	if ($s2_db->affected_rows() == -1)
-		echo $lang_admin['Not saved correct'];
+		die($lang_admin['Not saved correct']);
+
+	s2_check_form_controls($id);
 }
 
 elseif ($action == 'preview')
