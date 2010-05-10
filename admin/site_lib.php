@@ -399,7 +399,7 @@ function s2_output_article_form ($id)
 	<div class="r-float">
 		<input type="hidden" name="page[id]" value="<?php echo $page['id']; ?>" />
 <?php ($hook = s2_hook('fn_output_article_form_pre_parag_btn')) ? eval($hook) : null; ?>
-		<input class="bitbtn parag" type="button" value="<?php echo $lang_admin['Paragraphs']; ?>" onclick="return Paragraph();" />
+		<input class="bitbtn parag" type="button" title="<?php echo $lang_admin['Paragraphs info']; ?>" value="<?php echo $lang_admin['Paragraphs']; ?>" onclick="return Paragraph();" />
 <?php ($hook = s2_hook('fn_output_article_form_after_parag_btn')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_output_article_form_pre_reset')) ? eval($hook) : null; ?>
@@ -420,12 +420,12 @@ function s2_output_article_form ($id)
 ?>
 		</select></label>
 <?php ($hook = s2_hook('fn_output_article_form_pre_subcontent')) ? eval($hook) : null; ?>
-		<label for="subarticles"><input type="checkbox" id="subarticles" name="flags[children_preview]" value="1"<? if ($page['children_preview']) echo ' checked="checked"' ?> />
+		<label for="subarticles" title="<?php echo $lang_admin['Children preview']; ?>"><input type="checkbox" id="subarticles" name="flags[children_preview]" value="1"<? if ($page['children_preview']) echo ' checked="checked"' ?> />
 		<?php echo $lang_admin['Subcontent']; ?></label>
 <?php ($hook = s2_hook('fn_output_article_form_pre_checkboxes')) ? eval($hook) : null; ?>
 		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"' ?> />
 		<?php echo $lang_common['Favorite']; ?></label>
-		<label for="com"><input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"' ?> />
+		<label for="com" title="<?php echo $lang_admin['Commented info']; ?>"><input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"' ?> />
 		<?php echo $lang_admin['Commented']; ?></label>	
 <?php
 
@@ -448,7 +448,7 @@ function s2_output_article_form ($id)
 		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"' ?> />
 		<?php echo $lang_admin['Published']; ?></label>
 <?php ($hook = s2_hook('fn_output_article_form_pre_save')) ? eval($hook) : null; ?>
-		<input class="bitbtn save" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" />
+		<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
 <?php ($hook = s2_hook('fn_output_article_form_after_save')) ? eval($hook) : null; ?>
 		<br />
 		<br />
