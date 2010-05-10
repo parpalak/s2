@@ -114,13 +114,13 @@ function s2_stat_info()
 		$php_accelerator = $lang_admin['N/A'];
 
 	$version = array(
-		'<a href="http://s2cms.ru/" target="_blank">S2 '.S2_VERSION.'</a>',
+		'<a href="http://s2cms.ru/" target="_blank">S2 '.S2_VERSION.' &uarr;</a>',
 		'© 2007–2010 Roman Parpalak',
 	);
 
 	$environment = array(
 		sprintf($lang_admin['OS'], PHP_OS),
-		'<a href="site_ajax.php?action=phpinfo" title="'.$lang_admin['PHP info'].'" target="_blank">PHP: '.PHP_VERSION.'</a>',
+		'<a href="site_ajax.php?action=phpinfo" title="'.$lang_admin['PHP info'].'" target="_blank">PHP: '.PHP_VERSION.' &uarr;</a>',
 		sprintf($lang_admin['Accelerator'], $php_accelerator),
 	);
 

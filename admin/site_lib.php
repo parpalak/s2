@@ -432,7 +432,7 @@ function s2_output_article_form ($id)
 	if ($page['comment_count'])
 	{
 ?>
-		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadComments(<?php echo $page['id']; ?>);"><?php echo $lang_common['Comments']; ?></a>
+		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadComments(<?php echo $page['id']; ?>);"><?php echo $lang_common['Comments']; ?> &rarr;</a>
 <?php
 	}
 	else

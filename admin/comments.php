@@ -142,7 +142,7 @@ function s2_show_comments ($mode, $id = 0)
 
 	foreach ($article_titles as $article_id => $title)
 	{
-		$output_header = '<h3><a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">'.$title.'</a></h3>';
+		$output_header = '<h3><a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">&larr; '.$title.'</a></h3>';
 		$output_subheader = $mode != 'all' ? '<a href="#" title="'.sprintf($lang_admin['All comments to'], $title).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>' : '';
 		$output_body = 
 			'<table class="sort" width="100%">'.
