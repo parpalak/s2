@@ -236,6 +236,26 @@ function s2_blog_edit_post_form ($id)
 
 	$page['path'] = BLOG_BASE.date('Y/m/d/', $page['create_time']).urlencode($page['url']);
 
+	$url_error = '';
+	if ($page['url'] == '')
+		$url_error = $lang_admin['URL empty'];
+	else
+	{
+		$start_time = intval($page['create_time'] / 86400) * 86400;
+		$end_time = $start_time + 86400;
+
+		$query = array(
+			'SELECT'	=> 'count(id)',
+			'FROM'		=> 's2_blog_posts',
+			'WHERE'		=> 'url = \''.$page['url'].'\' AND create_time < '.$end_time.' AND create_time >= '.$start_time
+		);
+		($hook = s2_hook('s2_blog_fn_post_form_pre_check_url_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		if ($s2_db->result($result) != 1)
+			$url_error = $lang_admin['URL not unique'];
+	}
+
 	$cr_time = s2_array_from_time($page['create_time']);
 	$m_time = s2_array_from_time($page['modify_time']);
 
@@ -379,10 +399,10 @@ function s2_blog_edit_post_form ($id)
 ?>
 		<hr />
 <?php ($hook = s2_hook('s2_blog_fn_post_form_pre_url')) ? eval($hook) : null; ?>
-		<label><?php echo $lang_admin['URL part']; ?><br />
+		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
 		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" /></label>
 <?php ($hook = s2_hook('s2_blog_fn_post_form_pre_published')) ? eval($hook) : null; ?>
-		<label for="pub"><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"'?> />
+		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Published']; ?></label>
 <?php ($hook = s2_hook('s2_blog_fn_post_form_pre_save')) ? eval($hook) : null; ?>
 		<input class="bitbtn save" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" />
@@ -400,6 +420,7 @@ function s2_blog_edit_post_form ($id)
 function s2_blog_toggle_hide_comment ($id)
 {
 	global $s2_db;
+
 	// Does the comment exist?
 	// We need post id for displaying comments.
 	// Also we need the comment if the premoderation is turned on.
@@ -419,7 +440,7 @@ function s2_blog_toggle_hide_comment ($id)
 	if (!$comment['shown'] && !$comment['sent'])
 	{
 		// Premoderation is enabled and we have to send the comment to be shown
-		// to subscribed commentators
+		// to the subscribed commentators
 		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
 			require S2_ROOT.'include/comments.php';
 
@@ -439,7 +460,7 @@ function s2_blog_toggle_hide_comment ($id)
 		{
 			$link = S2_BASE_URL.'/'.urlencode(S2_BLOG_URL).date('/Y/m/d/', $post['create_time']).urlencode($post['url']);
 
-			// Fetching receivers' names and adresses
+			// Fetching receivers' names and addresses
 			$query = array(
 				'SELECT'	=> 'id, nick, email, ip, time',
 				'FROM'		=> 's2_blog_comments',

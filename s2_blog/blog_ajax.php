@@ -125,7 +125,29 @@ elseif ($action == 'save_blog')
 	}
 
 	if ($error)
-		echo $lang_admin['Not saved correct'];
+		die($lang_admin['Not saved correct']);
+
+	s2_add_js_header_delayed('var e = document.getElementById("pub"); e.parentNode.className = e.checked ? "ok" : "";');
+	if ($page['url'] == '')
+		s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className="error"; e.title=e.getAttribute("title_empty");');
+	else
+	{
+		$start_time = intval($create_time / 86400) * 86400;
+		$end_time = $start_time + 86400;
+
+		$query = array(
+			'SELECT'	=> 'count(id)',
+			'FROM'		=> 's2_blog_posts',
+			'WHERE'		=> 'url = \''.$page['url'].'\' AND create_time < '.$end_time.' AND create_time >= '.$start_time
+		);
+		($hook = s2_hook('blrq_action_save_blog_pre_check_url_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		if ($s2_db->result($result) != 1)
+			s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className="error"; e.title=e.getAttribute("title_unique");');
+		else
+			s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className=""; e.title="";');
+	}
 }
 
 elseif ($action == 'create_blog_post')
