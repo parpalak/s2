@@ -899,9 +899,11 @@ function InsertTag(sOpenTag, sCloseTag)
 	}
 	else if (document.selection && document.selection.type == 'Text')
 	{
+		var old_top = eTextarea.scrollTop;
 		var eSelect = document.selection.createRange();
 		eSelect.text = sOpenTag + eSelect.text + sCloseTag;
 		eSelect.select();
+		eTextarea.scrollTop = old_top; 
 	}
 	else
 		eTextarea.value = eTextarea.value + sOpenTag + sCloseTag;
