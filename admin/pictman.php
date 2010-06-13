@@ -36,7 +36,6 @@ s2_test_user_rights($session_id, $required_rights);
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/pictman.js"></script>
-<script type="text/javascript" src="js/tooltips.js"></script>
 <script type="text/javascript" src="../lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/admin/pict_ajax.php?';

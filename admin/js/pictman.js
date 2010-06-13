@@ -594,8 +594,6 @@ function Init ()
 
 function SetWait (bWait)
 {
-	if (bWait)
-		tooltip.h();
 }
 
 function UploadSubmit (eForm)
@@ -608,4 +606,27 @@ function RefreshFiles ()
 	var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
 	if (Response.status == '200')
 		eFilePanel.innerHTML = Response.text;
+}
+
+// Tooltips
+
+function ShowTip (e)
+{
+	var eItem = window.event ? window.event.srcElement : e.target;
+
+	if (eItem.nodeName == "IMG")
+	{
+		var alt = eItem.getAttribute('alt');
+		window.status = alt;
+		if (!eItem.getAttribute('title'))
+			eItem.setAttribute('title', alt);
+	}
+}
+
+function HideTip (e)
+{
+	var eItem = window.event ? window.event.srcElement : e.target;
+
+	if (eItem.nodeName == "IMG")
+		window.status = window.defaultStatus;
 }

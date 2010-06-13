@@ -193,6 +193,29 @@ function SaveHandler (e)
 	}
 }
 
+// Tooltips
+
+function ShowTip (e)
+{
+	var eItem = window.event ? window.event.srcElement : e.target;
+
+	if (eItem.nodeName == "IMG")
+	{
+		var alt = eItem.getAttribute('alt');
+		window.status = alt;
+		if (!eItem.getAttribute('title'))
+			eItem.setAttribute('title', alt);
+	}
+}
+
+function HideTip (e)
+{
+	var eItem = window.event ? window.event.srcElement : e.target;
+
+	if (eItem.nodeName == "IMG")
+		window.status = window.defaultStatus;
+}
+
 // Search field events handler
 
 var search_timer, search_string;
@@ -242,7 +265,6 @@ function SetWait (bWait)
 	{
 		eAni.style.display = 'block';
 		eTree.style.cursor = 'wait';
-		tooltip.h();
 	}
 	else
 	{

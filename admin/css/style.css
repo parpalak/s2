@@ -81,18 +81,6 @@ body {
 	background: #FFF4D7 url('../i/loading.gif') 50% 50% no-repeat;
 	}
 
-#tooltip {
-	background: #FFF4D7;
-	border: 1px solid #E4BB50;
-	color: #000;
-	font: menu;
-	margin: 0;
-	padding: 2px 6px;
-	position: absolute;
-	z-index: 10;
-	visibility: hidden;
-	}
-
 a img {
 	border: 0;
 	}
