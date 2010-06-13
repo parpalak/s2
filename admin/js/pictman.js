@@ -348,7 +348,7 @@ function StopDrag ()
 
 //=======================[Mouse events]=========================================
 
-var mouseX, mouseY, mouseStartX, mouseStartY = 0;
+var mouseX, mouseY, mouseStartX, mouseStartY;
 
 function MouseDown (e)
 {
@@ -405,12 +405,12 @@ function MouseDown (e)
 
 function MouseMove (e)
 {
-	if (!dragging && (Math.abs(mouseStartY - mouseY) > 5 || Math.abs(mouseStartX - mouseX) > 5))
-		StartDrag();
-
-	oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
+	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
 	mouseX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
+
+	if (!dragging && (Math.abs(mouseStartY - mouseY) > 5 || Math.abs(mouseStartX - mouseX) > 5))
+		StartDrag();
 
 	MoveDraggableDiv(mouseX, mouseY);
 }
