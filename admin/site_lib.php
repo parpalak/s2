@@ -263,7 +263,7 @@ function s2_check_form_controls ($id)
 		'FROM'		=> 'articles',
 		'WHERE'		=> 'id = '.$id
 	);
-	($hook = s2_hook('rq_action_save_article_pre_get_pid_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_check_form_controls_pre_get_pid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	list($parent_id, $url) = $s2_db->fetch_row($result);
 
@@ -274,8 +274,9 @@ function s2_check_form_controls ($id)
 			'FROM'		=> 'articles',
 			'WHERE'		=> 'url = \''.$url.'\' AND parent_id = '.$parent_id
 		);
-		($hook = s2_hook('rq_action_save_article_pre_get_pid_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_check_form_controls_pre_check_url_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
 		if ($s2_db->result($result) != 1)
 		{
 			s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className="error"; e.title=e.getAttribute("title_unique");');
@@ -326,8 +327,9 @@ function s2_output_article_form ($id)
 		'FROM'		=> 'articles',
 		'WHERE'		=> 'url = \''.$page['url'].'\' AND parent_id = '.$page['parent_id']
 	);
-	($hook = s2_hook('rq_action_save_article_pre_get_pid_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_output_article_form_pre_get_pid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
 	$url_error = '';
 	if ($s2_db->result($result) != 1)
 		$url_error = $lang_admin['URL not unique'];
