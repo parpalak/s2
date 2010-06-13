@@ -891,8 +891,10 @@ function InsertTag(sOpenTag, sCloseTag)
 		var s1 = s.substring(0, iStart);
 		var s2 = s.substring(iStart, iEnd);
 		var s3 = s.substring(iEnd);
+		var old_top = eTextarea.scrollTop;
 		eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
 		eTextarea.setSelectionRange(iStart, iEnd + sOpenTag.length + sCloseTag.length);
+		eTextarea.scrollTop = old_top; 
 		eTextarea.focus();
 	}
 	else if (document.selection && document.selection.type == 'Text')
@@ -1135,8 +1137,10 @@ function ReturnImage(s, w, h)
 			var s1 = s.substring(0, iSelStart);
 			var s2 = s.substring(iSelStart, iSelEnd);
 			var s3 = s.substring(iSelEnd);
+			var old_top = eTextarea.scrollTop;
 			eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
 			eTextarea.setSelectionRange(iSelStart, iSelEnd + sOpenTag.length + sCloseTag.length);
+			eTextarea.scrollTop = old_top; 
 			eTextarea.focus();
 		}
 		else if (document.selection)

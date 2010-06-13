@@ -58,7 +58,11 @@ function Make_Tabsheet ()
 	return true;
 }
 
-function OnSwitch (eTab) {
+var iEditorScrollTop = 0;
+var iPreviewScrollTop = 0;
+
+function OnSwitch (eTab)
+{
 	var sType = eTab.getAttribute('id');
 
 	(hook = hooks['fn_tab_switch_start']) ? eval(hook) : null;
@@ -66,9 +70,13 @@ function OnSwitch (eTab) {
 	if (sType == 'view_tab')
 	{
 		Preview();
+		if (iPreviewScrollTop)
+			window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop = iPreviewScrollTop;
 	}
 	else if (sType == 'edit_tab')
 	{
+		if (eTextarea && iEditorScrollTop)
+			eTextarea.scrollTop = iEditorScrollTop;
 	}
 	else if (sType == 'list_tab')
 	{
@@ -125,11 +133,17 @@ function SelectTab(eTab, bAddToHistory)
 			break;
 	}
 
+	if (eTextarea.scrollTop)
+		iEditorScrollTop = eTextarea.scrollTop;
+
+	if (window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop)
+		iPreviewScrollTop = window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop;
+
 	if (eSheet.className == "inactive")
 	{
 		eTab.className = "on";
 		var aeDL_child = eTab.parentNode.childNodes;
-		for (var i = aeDL_child.length ; i-- ;)
+		for (var i = aeDL_child.length; i-- ;)
 			if (aeDL_child[i].nodeName == "DT" && aeDL_child[i].className != "on")
 				aeDL_child[i].className = "";
 			else if (aeDL_child[i].nodeName == "DD")
