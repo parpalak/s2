@@ -245,7 +245,7 @@ function EditItemName (item)
 
 var sourceElement, acceptorElement, sourceParent, sourceFElement;
 
-var dragging;
+var dragging = false;
 
 function SetItemChildren (eSpan, sInnerHTML)
 {
@@ -352,7 +352,7 @@ var mouseX, mouseY, mouseStartX, mouseStartY;
 
 function MouseDown (e)
 {
-	var t = e ? e.target : window.event.srcElement;
+	var t = window.event ? window.event.srcElement : e.target;
 
 	if (t.nodeName == "IMG")
 		if (t.nextSibling)
@@ -379,7 +379,7 @@ function MouseDown (e)
 	else
 		return;
 
-	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == "CSS1Compat") ? "HTML" : "BODY")[0];
+	var oCanvas = document.getElementsByTagName("HTML")[0];
 	mouseStartX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseStartY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
@@ -389,7 +389,7 @@ function MouseDown (e)
 		document.attachEvent("onmouseup", MouseUp);
 		document.getElementById('tree_div').attachEvent('onmouseover', MouseIn);
 		document.getElementById('tree_div').attachEvent('onmouseout', MouseOut);
-		//window.event.cancelBubble = true;
+		window.event.cancelBubble = true;
 		window.event.returnValue = false;
 		t.unselectable = true;
 	}
@@ -413,6 +413,11 @@ function MouseMove (e)
 		StartDrag();
 
 	MoveDraggableDiv(mouseX, mouseY);
+
+	if (bIE)
+		window.event.returnValue = false;
+	if (bFF)
+		e.preventDefault();
 }
 
 var idTimer, bIntervalPassed = true;
@@ -488,7 +493,7 @@ function MouseUp(e)
 
 function MouseIn(e)
 {
-	var t = e ? e.target : window.event.srcElement;
+	var t = window.event ? window.event.srcElement : e.target;
 
 	if (t.nodeName == 'SPAN' && typeof(t.getAttribute("path")) == 'string' && (sourceElement != null && t != acceptorElement && t != sourceElement || sourceFElement != null))
 	{
@@ -499,7 +504,7 @@ function MouseIn(e)
 
 function MouseOut(e)
 {
-	var t = e ? e.target : window.event.srcElement;
+	var t = window.event ? window.event.srcElement : e.target;
 
 //	if ((sourceElement != null) && (t == acceptorElement) && (t != sourceElement) || (sourceFElement != null))
 	if (t == acceptorElement)
@@ -575,7 +580,6 @@ function Init ()
 
 	eFileInfo = document.getElementById("finfo");
 	eFilePanel = document.getElementById("files");
-	eFilePanel.onmousedown = MouseDown;
 
 	// Init tooltips
 	if (bIE)
