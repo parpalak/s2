@@ -469,7 +469,7 @@ function s2_get_tag_articles ($tag_id)
 	global $s2_db, $lang_admin;
 
 	$query = array(
-		'SELECT'	=> 'art.title, atg.id as link_id',
+		'SELECT'	=> 'art.id, art.title, atg.id as link_id',
 		'FROM'		=> 'articles AS art',
 		'JOINS'		=> array(
 			array(
@@ -487,7 +487,7 @@ function s2_get_tag_articles ($tag_id)
 
 	$list = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$list .= '<li><img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete from list'].'" onclick="DeleteArticleFromTag('.$row['link_id'].');" />'.$row['title'].'</li>';
+		$list .= '<li onclick="OpenById('.$row['id'].');"><img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete from list'].'" onclick="DeleteArticleFromTag('.$row['link_id'].');" />'.$row['title'].'</li>';
 
 	return $list ? '<ul>' . $list . '</ul>' : '';
 }

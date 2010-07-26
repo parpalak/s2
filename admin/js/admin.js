@@ -399,6 +399,22 @@ function OpenAll ()
 			aLi[i].className = str_replace('ExpandClosed', 'ExpandOpen', aLi[i].className);
 }
 
+function OpenById (sId)
+{
+	CloseAll();
+
+	var e = document.getElementById(sId);
+	ReleaseItem();
+	HighlightItem(e);
+
+	while (e.parentNode)
+	{
+		e = e.parentNode;
+		if (e.nodeName == 'LI' && e.className.indexOf('ExpandClosed') != -1)
+			e.className = str_replace('ExpandClosed', 'ExpandOpen', e.className);
+	}
+}
+
 function RefreshTree ()
 {
 	var Response = GETSyncRequest(sUrl + 'action=load_tree&id=0');
