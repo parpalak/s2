@@ -402,9 +402,12 @@ function OpenAll ()
 function OpenById (sId)
 {
 	CloseAll();
+	ReleaseItem();
 
 	var e = document.getElementById(sId);
-	ReleaseItem();
+	if (!e)
+		return;
+
 	HighlightItem(e);
 
 	while (e.parentNode)
