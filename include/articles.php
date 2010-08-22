@@ -132,7 +132,7 @@ function s2_last_articles ()
 
 	$output = '';
 	foreach ($articles as $item)
-		$output .= '<h3 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.S2_PATH.$item['rel_path'].'">'.$item['title'].'</a></h3>'.
+		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.S2_PATH.$item['rel_path'].'">'.$item['title'].'</a></h3>'.
 			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
 			 '<div class="preview cite">'.$item['text'].'</div>';
 
@@ -535,7 +535,7 @@ function parse_page_url ($request_uri)
 				$page['subcontent'] = '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>';
 
 				foreach ($subsections as $item)
-					$page['subcontent'] .= '<p><a href="'.$item['url'].'">'.$item['title'].'</a></p>';
+					$page['subcontent'] .= '<p class="subsection"><a href="'.$item['url'].'">'.$item['title'].'</a></p>';
 			}
 		}
 
@@ -625,7 +625,7 @@ function parse_page_url ($request_uri)
 
 			($hook = s2_hook('fn_parse_page_url_pre_comment_merge')) ? eval($hook) : null;
 
-			$comments .= '<div class="reply_info">'.$link.sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name).'</div>'."\n".
+			$comments .= '<div class="reply_info'.($row['good'] ? ' good' : '').'">'.$link.sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name).'</div>'."\n".
 				'<div class="reply'.($row['good'] ? ' good' : '').'">'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</div>';
 		}
 
