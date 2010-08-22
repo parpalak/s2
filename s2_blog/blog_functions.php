@@ -452,9 +452,9 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 	}
 
 	// Titles
-	$output = '<table class="cal">'.$header.'<tr class="dw">';
+	$output = '<table class="cal">'.$header.'<tr>';
 	for ($i = 0; $i < 7; $i++)
-		$output .= '<td'.($i % 7 == 5 || $i % 7 == 6 ? ' class="sun"' : '').'>'.$lang_s2_blog_days[$i].'</td>';
+		$output .= '<th'.($i % 7 == 5 || $i % 7 == 6 ? ' class="sun"' : '').'>'.$lang_s2_blog_days[$i].'</td>';
 	$output .= '</tr><tr>';
 
 	// Empty cells before
@@ -635,8 +635,8 @@ function s2_blog_last_post ()
 	{
 		$post = array_shift($posts);
 		$link = BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']);
-		$output .= '<h3 class="post head">'.($post['tags'] ? '<small>'.preg_replace('/<a.*?>(.*?)<\/a>/', "\\1", $post['tags']).' &rarr;</small> ' : '').'<a href="'.$link.'">'.$post['title'].'</a></h3>'."\n".
-			'<div class="post time">'.s2_date_time($post['create_time']).'</div>'."\n".
+		$output .= '<h2 class="preview">'.($post['tags'] ? '<small>'.preg_replace('/<a.*?>(.*?)<\/a>/', "\\1", $post['tags']).' &rarr;</small> ' : '').'<a href="'.$link.'">'.$post['title'].'</a></h3>'."\n".
+			'<div class="preview time">'.s2_date_time($post['create_time']).'</div>'."\n".
 			'<div class="post body">'.$post['text'].'</div>'."\n";
 	}
 
