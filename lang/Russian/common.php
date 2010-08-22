@@ -26,6 +26,7 @@ $lang_common = array(
 'RSS link title'			=> 'Последние статьи на сайте',
 
 // Comments
+'Wrote'						=> 'пишет:',
 'Comment info format'		=> '%1$s. %2$s пишет:',
 'Post a comment'			=> 'Оставьте свой комментарий',
 'Your name'					=> 'Ваше имя:',

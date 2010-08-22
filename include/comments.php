@@ -191,7 +191,7 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name, $unsubs
 //
 function s2_bbcode_to_html ($s)
 {
-	global $lang_comments;
+	global $lang_common;
 
 	$s = str_replace("''", '"', $s);
 	$s = str_replace("\r", '', $s);
@@ -200,7 +200,7 @@ function s2_bbcode_to_html ($s)
 	$s = preg_replace('#\[B\](.*?)\[/B\]#isu', '<strong>\1</strong>', $s);
 
 	while (preg_match ('/\[Q\s*?=\s*?([^\]]*)\s*?\].*?\[\/Q.*?\]/uis', $s))
-		$s = preg_replace('/\s*\[Q\s*?=\s*?([^\]]*)\s*?\]\s*(.*?)\s*\[\/Q.*?\]\s*/uis', '<blockquote><strong>\\1</strong> '.$lang_comments['Wrote'].'<br/><br/><em>\\2</em></blockquote>', $s);
+		$s = preg_replace('/\s*\[Q\s*?=\s*?([^\]]*)\s*?\]\s*(.*?)\s*\[\/Q.*?\]\s*/uis', '<blockquote><strong>\\1</strong> '.$lang_common['Wrote'].'<br/><br/><em>\\2</em></blockquote>', $s);
 
 	while (preg_match ('/\[Q\s*?\].*?\[\/Q\s*?\]/uis', $s))
 		$s = preg_replace('/\s*\[Q\s*?\]\s*(.*?)\s*\[\/Q\s*?\]\s*/uis', '<blockquote>\\1</blockquote>', $s);
