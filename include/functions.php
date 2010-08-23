@@ -87,6 +87,8 @@ function s2_frendly_filesize ($size)
 //
 function s2_get_template ($template_id, $path = false)
 {
+	global $lang_common;
+
 	if ($path === false)
 		$path = S2_ROOT.'include/templates/';
 
@@ -96,8 +98,10 @@ function s2_get_template ($template_id, $path = false)
 
 	if (file_exists(S2_ROOT.'styles/'.S2_STYLE.'/templates/'.$template_id))
 		$path = S2_ROOT.'styles/'.S2_STYLE.'/templates/'.$template_id;
-	else
+	elseif (file_exists($path.$template_id))
 		$path = $path.$template_id;
+	else 
+		error(sprintf($lang_common['Template not found'], $path.$template_id));
 
 	ob_start();
 	include $path;
@@ -376,12 +380,28 @@ function s2_404_header ()
 
 function error_404 ()
 {
+	global $lang_common;
+
 //	@log_it("\n40x!".date('d.m H:i:s ').$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']." ".getenv('REQUEST_URI').' '.$_SERVER['HTTP_REFERER'], '404');
 	//include "404/error.php";
 	//exit();
 	header('HTTP/1.1 404 Not Found');
-	define('S2_HTTP_RESPONSE_CODE_SET', 1);
-	error('404 Not Found');
+	header('Content-Type: text/html; charset=utf-8');
+
+	$template = s2_get_service_template('error404.php');
+	$replace = array(
+		'<!-- head_title -->'	=> $lang_common['Error 404'],
+		'<!-- title -->'		=> '<h1>'.$lang_common['Error 404'].'</h1>',
+		'<!-- text -->'			=> sprintf($lang_common['Error 404 text'], S2_BASE_URL),
+		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+	);
+
+	($hook = s2_hook('fn_error_404_pre_replace')) ? eval($hook) : null;
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	die($template);
 }
 
 // Display a simple error message
@@ -392,8 +412,7 @@ function error()
 	if (!headers_sent())
 	{
 		// if no HTTP responce code is set we send 503
-		if (!defined('S2_HTTP_RESPONSE_CODE_SET'))
-			header('HTTP/1.1 503 Service Temporarily Unavailable');
+		header('HTTP/1.1 503 Service Temporarily Unavailable');
 		header('Content-type: text/html; charset=utf-8');
 	}
 

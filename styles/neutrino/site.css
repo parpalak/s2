@@ -9,6 +9,17 @@ body {
 	margin: 0;
 	}
 
+body.e404 {
+	background: #eee;
+	}
+	.e404 h1 {
+		color: red;
+		}
+	.e404 #crumbs {
+		height: 1em;
+		}
+
+
 *+html body, * html body {
 	font-size: 87.5%;
 	}
