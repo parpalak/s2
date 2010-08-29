@@ -4,7 +4,7 @@
 /**
  * Counter
  *
- * Adds a simple hits/hosts counter.
+ * Adds a simple hits/hosts and RSS subscribers counter.
  *
  * @copyright (C) 2007-2010 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
@@ -16,10 +16,10 @@
 	<id>s2_counter</id>
 	<title>Counter</title>
 	<version>1.0a</version>
-	<description>A simple hits/hosts counter.</description>
+	<description>A simple hits/hosts and RSS subscribers counter.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0dev</minversion>
+	<minversion>1.0a1</minversion>
 	<maxtestedon>1.0a1</maxtestedon>
 
 	<hooks>
