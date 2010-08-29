@@ -138,5 +138,9 @@ function s2_stat_info()
 	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Environment'].'</span>'.implode('<br />', $environment).'</div>';
 	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Database'].'</span>'.implode('<br />', $database).'</div>';
 
-	return '<fieldset><legend>'.$lang_admin['Stat'].'</legend>'.$output.'</fieldset>';
+	$output = '<fieldset><legend>'.$lang_admin['Stat'].'</legend>'.$output.'</fieldset>';
+
+	($hook = s2_hook('fn_stat_info_end')) ? eval($hook) : null;
+
+	return $output;
 }
