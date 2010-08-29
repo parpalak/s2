@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Only the settings with values not equal to defaults are in this file. If you want to see the
-full list of available settings, check the amstock_settings.xml file in the amstock folder. -->
 <settings>
 	<margins>5</margins>
 	<add_time_stamp>true</add_time_stamp>
@@ -12,7 +10,7 @@ full list of available settings, check the amstock_settings.xml file in the amst
 			 <letter number="1000000000">B</letter>
 		</letters>
 	</number_format>
-	<data_sets> 
+	<data_sets>
 		<data_set did="0">
 			<title>Hits/hosts info</title>
 			<short>ES</short>
