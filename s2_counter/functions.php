@@ -72,7 +72,7 @@ function s2_counter_get_total_hits ()
 	return $hits;
 }
 
-function s2_counter_save_curr_info($total_hits, $today_hits, $today_hosts)
+function s2_counter_save_curr_info ($total_hits, $today_hits, $today_hosts)
 {
 	global $ext_info;
 
@@ -97,69 +97,44 @@ function s2_counter_process ()
 	if (!is_file($ext_info['path'].S2_COUNTER_TODAY_DATA_FNAME) && !is_writable(dirname($ext_info['path'].S2_COUNTER_TODAY_DATA_FNAME)))
 		return;
 
-	$found = false;
-	$today_hits = $today_hosts = 0;
-
 	$f_day_info = fopen($ext_info['path'].S2_COUNTER_TODAY_DATA_FNAME, 'a+');
 	flock($f_day_info, LOCK_EX);
 
-	$ips = file($ext_info['path'].S2_COUNTER_TODAY_DATA_FNAME);
+	$ips = unserialize(file_get_contents($ext_info['path'].S2_COUNTER_TODAY_DATA_FNAME));
 
 	if (date('j', filemtime($ext_info['path'].S2_COUNTER_TODAY_DATA_FNAME)) == date('j'))
 	{
-		// We already have some hits today
+		// We have already some hits today
 
 		// Let's correct the data saved before
+		if (isset($ips[$_SERVER['REMOTE_ADDR']]))
+			$ips[$_SERVER['REMOTE_ADDR']]++;
+		else
+			$ips[$_SERVER['REMOTE_ADDR']] = 1;
+
 		$today_hosts = count($ips);
-		for($i = $today_hosts; $i-- ;)
-		{
-			$line = explode('^', $ips[$i]);
-			if ($line[0] == $_SERVER['REMOTE_ADDR'])
-			{
-				$line[1]++;
-				$line[2] = time();
-				$ips[$i] = implode('^', $line);
-
-				$found = true;
-			}
-
-			$today_hits += $line[1];
-		}
+		$today_hits = array_sum($ips);
 	}
 	else
 	{
 		// It's a new day!
 
-		// Let's process the data collected yesterday
-		$yesterday_hits = 0;
-		$yesterday_hosts = count($ips);
-		for($i = $yesterday_hosts; $i-- ;)
-		{
-			$line = explode('^', $ips[$i]);
-			$yesterday_hits += $line[1];
-		}
-
-		//
+		// Logging yesterday info
 		$f = fopen($ext_info['path'].S2_COUNTER_ARCH_INFO_FNAME, 'a+');
-		fputs($f, date('Y-m-d', time() - 86400).'^'.$yesterday_hits.'^'.$yesterday_hosts."\n");
+		fputs($f, date('Y-m-d', time() - 86400).'^'.array_sum($ips).'^'.count($ips)."\n");
 		fclose($f);
 
 		// Erase yesterday info
 		unset($ips);
-		$ips = array();
-	}
+		$ips[$_SERVER['REMOTE_ADDR']] = 1;
 
-	if (!$found)
-	{
-		$today_hits++;
-		$today_hosts++;
-		$ips[] = $_SERVER['REMOTE_ADDR'].'^1^'.time();
+		$today_hits = $today_hosts = 1;
 	}
 
 	// Let's write the modified data
 	ftruncate($f_day_info, 0);
-	for($i = 0; $i < count($ips); $i++)
-		fputs($f_day_info, trim($ips[$i])."\n");
+	fwrite($f_day_info, serialize($ips));
+	fflush($f_day_info);
 	fflush($f_day_info);
 
 	flock($f_day_info,LOCK_UN);
