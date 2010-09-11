@@ -454,7 +454,7 @@ function s2_output_article_form ($id)
 <?php ($hook = s2_hook('fn_output_article_form_after_save')) ? eval($hook) : null; ?>
 		<br />
 		<br />
-		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo S2_PATH ?>/admin/site_ajax.php?action=preview&id=<?php echo $page['id']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
+		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo S2_PATH ?>/_admin/site_ajax.php?action=preview&id=<?php echo $page['id']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
 <?php ($hook = s2_hook('fn_output_article_form_after_btn_col')) ? eval($hook) : null; ?>
 	</div>
 <?php ($hook = s2_hook('fn_output_article_form_after_cols')) ? eval($hook) : null; ?>

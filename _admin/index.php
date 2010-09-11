@@ -91,7 +91,7 @@ $template = str_replace('<!-- styles -->', ob_get_clean(), $template);
 <script type="text/javascript" src="js/tablesort.js"></script>
 <script type="text/javascript" src="js/admin.js"></script>
 <script type="text/javascript">
-var sUrl = '<?php echo S2_PATH; ?>/admin/site_ajax.php?';
+var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
 var cur_date = new Date();
 var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.getTime();
 var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), array(' ', '', '\\\'', '</scr\' + \'ipt>') , $template); ?>';
@@ -137,7 +137,7 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 		<dt id="view_tab"><?php echo $lang_admin['Preview']; ?></dt>
 		<dd>
 			<div class="reducer no-scroll" style="padding: 0;">
-				<iframe src="<?php echo S2_PATH; ?>/admin/site_ajax.php?action=load_preview_frame" frameborder="0" id="preview_frame" name="preview_frame"></iframe>
+				<iframe src="<?php echo S2_PATH; ?>/_admin/site_ajax.php?action=load_preview_frame" frameborder="0" id="preview_frame" name="preview_frame"></iframe>
 			</div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_pictures')) ? eval($hook) : null; ?>

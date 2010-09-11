@@ -38,7 +38,7 @@ s2_test_user_rights($session_id, $required_rights);
 <script type="text/javascript" src="js/pictman.js"></script>
 <script type="text/javascript" src="../lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 <script type="text/javascript">
-var sUrl = '<?php echo S2_PATH; ?>/admin/pict_ajax.php?';
+var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
 var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
 </script>
 </head>

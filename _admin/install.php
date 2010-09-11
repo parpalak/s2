@@ -134,7 +134,7 @@ if (!isset($_POST['form_sent']))
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>S2 Installation</title>
-<link rel="stylesheet" type="text/css" href="<?php echo S2_ROOT ?>admin/css/style.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo S2_ROOT ?>_admin/css/style.css" />
 <style type="text/css">
 html {
 	overflow: auto;
@@ -957,7 +957,7 @@ else
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>S2 Installation</title>
-<link rel="stylesheet" type="text/css" href="<?php echo S2_ROOT ?>admin/css/style.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo S2_ROOT ?>_admin/css/style.css" />
 <style type="text/css">
 html {
 	overflow: auto;

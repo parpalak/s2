@@ -32,6 +32,7 @@
 	<div id="footer">
 		<p id="queries"><!-- querytime --></p>
 		<p id="copyright"><!-- copyright --></p>
+		<!-- s2_counter_img -->
 	</div>
 </body>
 </html>

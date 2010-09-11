@@ -24,7 +24,7 @@ if (file_exists(S2_ROOT.'config.php'))
 	include S2_ROOT.'config.php';
 
 if (!defined('S2_BASE_URL'))
-	error('The file \'config.php\' doesn\'t exist or is corrupt. Please run <a href="'.preg_replace('#'.(S2_ROOT == '../' ? '/[a-z_\.]*' : '').'/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME']).'admin/install.php">install.php</a> to install S2 first.');
+	error('The file \'config.php\' doesn\'t exist or is corrupt. Please run <a href="'.preg_replace('#'.(S2_ROOT == '../' ? '/[a-z_\.]*' : '').'/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME']).'_admin/install.php">install.php</a> to install S2 first.');
 
 if (defined('S2_DEBUG'))
 	error_reporting(E_ALL);
