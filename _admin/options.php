@@ -55,9 +55,9 @@ function s2_read_options ()
 function s2_get_styles ()
 {
 	$styles = array();
-	$d = dir(S2_ROOT.'styles');
+	$d = dir(S2_ROOT.'_styles');
 	while (($entry = $d->read()) !== false)
-		if ($entry != '.' && $entry != '..' && is_dir(S2_ROOT.'styles/'.$entry) && file_exists(S2_ROOT.'styles/'.$entry.'/'.$entry.'.php'))
+		if ($entry != '.' && $entry != '..' && is_dir(S2_ROOT.'_styles/'.$entry) && file_exists(S2_ROOT.'_styles/'.$entry.'/'.$entry.'.php'))
 			$styles[] = $entry;
 
 	$d->close();
@@ -203,7 +203,7 @@ function s2_save_options ($opt)
 	}
 
 	$style = preg_replace('#[\.\\\/]#', '', $opt['style']);
-	if (!file_exists(S2_ROOT.'styles/'.$style.'/'.$style.'.php'))
+	if (!file_exists(S2_ROOT.'_styles/'.$style.'/'.$style.'.php'))
 		$return .= '<p style="color: red;">'.$lang_admin_opt['Invalid style'].'</p>';
 	else if ($style != S2_STYLE)
 	{

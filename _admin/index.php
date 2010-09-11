@@ -70,7 +70,7 @@ $return = ($hook = s2_hook('ai_pre_get_template')) ? eval($hook) : null;
 $template = $return ? $return : s2_get_template('site.php');
 
 ob_start();
-include S2_ROOT.'styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
+include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
 $template = str_replace('<!-- styles -->', ob_get_clean(), $template);
 
 ?>

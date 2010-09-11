@@ -96,8 +96,8 @@ function s2_get_template ($template_id, $path = false)
 	if ($return)
 		return $return;
 
-	if (file_exists(S2_ROOT.'styles/'.S2_STYLE.'/templates/'.$template_id))
-		$path = S2_ROOT.'styles/'.S2_STYLE.'/templates/'.$template_id;
+	if (file_exists(S2_ROOT.'_styles/'.S2_STYLE.'/templates/'.$template_id))
+		$path = S2_ROOT.'_styles/'.S2_STYLE.'/templates/'.$template_id;
 	elseif (file_exists($path.$template_id))
 		$path = $path.$template_id;
 	else 
@@ -141,7 +141,7 @@ function s2_get_service_template ($template_id = 'service.php', $path = false)
 
 	// Including the style
 	ob_start();
-	include S2_ROOT.'styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
+	include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
 	$replace['<!-- styles -->'] = ob_get_clean();
 
 	// Footer

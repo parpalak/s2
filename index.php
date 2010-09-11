@@ -92,7 +92,7 @@ $replace['<!-- link_rss -->'] = '<link rel="alternate" type="application/rss+xml
 
 // Including the style
 ob_start();
-include S2_ROOT.'styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
+include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
 $replace['<!-- styles -->'] = ob_get_clean();
 
 // Content
