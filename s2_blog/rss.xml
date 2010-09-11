@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+	<data_sets> 
+		<data_set>
+			<title>Blog RSS subscribers</title>
+			<short>RSS - blog</short>
+			<color>6A3F9A</color>
+			<main_drop_down>false</main_drop_down>
+			<compare_list_box selected="true"></compare_list_box>
+			<file_name>data/rss_s2_blog.txt.log</file_name>
+			<csv>
+				<separator>^</separator>
+				<date_format>YYYY-MM-DD</date_format>
+				<columns>
+					<column>date</column>
+					<column>close</column>
+				</columns>
+			 </csv>
+		</data_set>
+	</data_sets>
+
+	<charts>
+		<chart cid="0">
+			<comparing>
+				<recalculate>false</recalculate>
+				<width>3</width>
+				<bullet>round_outline</bullet>
+				<smoothed>true</smoothed>
+			</comparing>
+
+			<graphs>
+				<graph gid="0">
+					<compare_source>close</compare_source>
+					<legend>
+						<date_comparing key="true" title="true"><![CDATA[<b>{close}</b>]]></date_comparing>
+						<period_comparing key="true" title="true"><![CDATA[<b>{close}</b>]]></period_comparing>
+					</legend>
+				</graph>
+			</graphs>
+		</chart>
+	</charts>
+
+</settings>

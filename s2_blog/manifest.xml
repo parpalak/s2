@@ -800,5 +800,11 @@ if (!isset($lang_s2_blog))
 $meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.S2_BASE_URL.'/'.urlencode(S2_BLOG_URL).'/rss.xml" />';
 		]]></hook>
 
+		<hook id="fn_s2_count_rss_count_start"><![CDATA[
+global $request_uri;
+if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+	$filename = '/data/rss_s2_blog.txt';
+		]]></hook>
+
 	</hooks>
 </extension>

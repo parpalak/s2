@@ -146,3 +146,5 @@ function ToggleFavBlog (eItem, iId)
 
 	return false;
 }
+
+add_hook('fn_s2_counter_draw_chart_pre_rss', 'settings_file += ",../extensions/s2_blog/rss.xml?" + Math.random();');
