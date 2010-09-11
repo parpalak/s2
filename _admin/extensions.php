@@ -15,7 +15,7 @@ if (!defined('S2_ROOT'))
 if (!defined('S2_XML_FUNCTIONS_LOADED'))
 	require S2_ROOT.'include/xml.php';
 
-require S2_ROOT.'lang/'.S2_LANGUAGE.'/admin_ext.php';
+require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_ext.php';
 
 // Make sure we have XML support
 if (!function_exists('xml_parser_create'))

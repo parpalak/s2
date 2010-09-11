@@ -78,7 +78,7 @@ if (!defined('S2_CONFIG_LOADED'))
 	require S2_CACHE_DIR.'cache_config.php';
 }
 
-require S2_ROOT.'lang/'.S2_LANGUAGE.'/common.php';
+require S2_ROOT.'_lang/'.S2_LANGUAGE.'/common.php';
 
 // Load hooks
 if (file_exists(S2_CACHE_DIR.'cache_hooks.php'))

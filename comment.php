@@ -10,7 +10,7 @@
 define('S2_ROOT', './');
 require S2_ROOT.'include/common.php';
 require S2_ROOT.'include/comments.php';
-require S2_ROOT.'lang/'.S2_LANGUAGE.'/comments.php';
+require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
 
 ($hook = s2_hook('cmnt_start')) ? eval($hook) : null;
 

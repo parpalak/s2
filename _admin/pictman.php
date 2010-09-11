@@ -11,7 +11,7 @@
 
 define(S2_ROOT, '../');
 require S2_ROOT.'include/common.php';
-require S2_ROOT.'lang/'.S2_LANGUAGE.'/pictures.php';
+require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';
 require 'pict_lib.php';
 
@@ -36,7 +36,7 @@ s2_test_user_rights($session_id, $required_rights);
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/pictman.js"></script>
-<script type="text/javascript" src="../lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
+<script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
 var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';

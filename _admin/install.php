@@ -69,8 +69,8 @@ if (!file_exists(S2_ROOT.'lang/'.$language.'/install.php'))
 	exit('The language pack you have chosen doesn\'t seem to exist or is corrupt. Please recheck and try again.');
 
 // Load the language files
-require S2_ROOT.'lang/'.$language.'/install.php';
-include S2_ROOT.'lang/'.$language.'/common.php';
+require S2_ROOT.'_lang/'.$language.'/install.php';
+include S2_ROOT.'_lang/'.$language.'/common.php';
 
 if (isset($_POST['generate_config']))
 {
@@ -348,7 +348,7 @@ else
 	if (utf8_strlen($base_url) == 0)
 		error($lang_install['Missing base url']);
 
-	if (!file_exists(S2_ROOT.'lang/'.$default_lang.'/common.php'))
+	if (!file_exists(S2_ROOT.'_lang/'.$default_lang.'/common.php'))
 		error($lang_install['Invalid language']);
 
 	// Load the appropriate DB layer class

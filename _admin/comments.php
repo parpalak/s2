@@ -306,7 +306,7 @@ function s2_toggle_hide_comment ($id)
 			require S2_ROOT.'include/comments.php';
 
 		global $lang_comments;
-		require S2_ROOT.'lang/'.S2_LANGUAGE.'/comments.php';
+		require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
 
 		// Getting some info about the article commented
 		$query = array(

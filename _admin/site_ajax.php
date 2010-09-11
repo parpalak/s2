@@ -11,7 +11,7 @@
 
 define('S2_ROOT', '../');
 require S2_ROOT.'include/common.php';
-require S2_ROOT.'lang/'.S2_LANGUAGE.'/admin.php';
+require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
 require 'login.php';
 require 'site_lib.php';
 
@@ -926,7 +926,7 @@ elseif ($action == 'load_options')
 	s2_test_user_rights($session_id, $required_rights);
 
 	require 'options.php';
-	require S2_ROOT.'lang/'.S2_LANGUAGE.'/admin_opt.php';
+	require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_opt.php';
 
 	echo s2_get_options();
 }
@@ -938,7 +938,7 @@ elseif ($action == 'save_options')
 	s2_test_user_rights($session_id, $required_rights);
 
 	require 'options.php';
-	require S2_ROOT.'lang/'.S2_LANGUAGE.'/admin_opt.php';
+	require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_opt.php';
 
 	$return = s2_save_options($_POST['opt']);
 	echo s2_get_options($return);

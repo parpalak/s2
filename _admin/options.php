@@ -75,9 +75,9 @@ function s2_get_styles ()
 function s2_read_lang_dir ()
 {
 	$langs = array();
-	$d = dir(S2_ROOT.'lang');
+	$d = dir(S2_ROOT.'_lang');
 	while (($entry = $d->read()) !== false)
-		if ($entry != '.' && $entry != '..' && is_dir(S2_ROOT.'lang/'.$entry) && file_exists(S2_ROOT.'lang/'.$entry.'/common.php'))
+		if ($entry != '.' && $entry != '..' && is_dir(S2_ROOT.'_lang/'.$entry) && file_exists(S2_ROOT.'_lang/'.$entry.'/common.php'))
 			$langs[] = $entry;
 
 	$d->close();
@@ -217,7 +217,7 @@ function s2_save_options ($opt)
 	}
 
 	$lang = preg_replace('#[\.\\\/]#', '', $opt['lang']);
-	if (!file_exists(S2_ROOT.'lang/'.$lang.'/common.php'))
+	if (!file_exists(S2_ROOT.'_lang/'.$lang.'/common.php'))
 		$return .= '<p style="color: red;">'.sprintf($lang_admin_opt['Invalid lang pack'], s2_htmlencode($lang)).'</p>';
 	else if ($lang != S2_LANGUAGE)
 	{
