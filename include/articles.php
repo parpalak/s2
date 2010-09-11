@@ -14,7 +14,7 @@
 // Returns an array containing full URLs, keys are preserved.
 // If somewhere is a hidden parent, the URL is removed from the returning array.
 //
-// Actually it's one of S2 best things! :)
+// Actually it's one of the best things in S2! :)
 //
 function s2_get_group_url ($parent_ids, $urls)
 {
