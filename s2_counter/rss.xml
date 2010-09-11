@@ -10,19 +10,20 @@
 			 <letter number="1000000000">B</letter>
 		</letters>
 	</number_format>
-	<data_sets>
-		<data_set did="0">
-			<title>Hits/hosts info</title>
-			<short>ES</short>
-			<color>7f8da9</color>
+
+	<data_sets> 
+		<data_set>
+			<title>Site RSS subscribers</title>
+			<short>RSS - site</short>
+			<color>EAB303</color>
 			<file_name>data/rss_main.txt.log</file_name>
+			<main_drop_down selected="true"></main_drop_down>
 			<csv>
-				<reverse>true</reverse>
 				<separator>^</separator>
 				<date_format>YYYY-MM-DD</date_format>
 				<columns>
 					<column>date</column>
-					<column>index1</column>
+					<column>close</column>
 				</columns>
 			</csv>
 		</data_set>
@@ -30,45 +31,44 @@
 
 	<charts>
 		<chart cid="0">
-			<height>60</height>
-			<title>Value</title>
-			<border_color>#CCCCCC</border_color>
+			<border_color>CCCCCC</border_color>
 			<border_alpha>100</border_alpha>
 
 			<values>
 				<x>
-					<bg_color>#FA7373</bg_color>
+					<bg_color>eedddd</bg_color>
 				</x>
+				<y_right>
+					<bg_alpha>60</bg_alpha>
+					<bg_color>000000</bg_color>
+					<text_color>FFFFFF</text_color>
+					<digits_after_decimal>
+						<percents>0</percents>
+					</digits_after_decimal>
+				</y_right>
 			</values>
+
 			<legend>
 				<show_date>true</show_date>
 			</legend>
 
-			<column_width>100</column_width>
-
-			<events>
-				<color>fac622</color>
-			</events>
-
 			<graphs>
 				<graph gid="0">
-					<title>RSS - main</title>
-					<color>#999999</color>
+					<axis>right</axis>
 					<data_sources>
-						<close>index1</close>
+						<close>close</close>
 					</data_sources>
 					<width>3</width>
-
 					<bullet>round_outline</bullet>
 					<smoothed>true</smoothed>
 
 					<legend>
-						<date key="true" title="true"><![CDATA[{close}]]></date>
+						<date key="true" title="true"><![CDATA[<b>{close}</b>]]></date>
+						<period key="true" title="true"><![CDATA[<b>{close}</b>]]></period>
 					</legend>
 				</graph>
 			</graphs>
 		</chart>
-
 	</charts>
 
 	<data_set_selector>
@@ -94,11 +94,8 @@
 	</header>
 
 	<scroller>
-		<graph_data_source>index1</graph_data_source>
+		<graph_data_source>close</graph_data_source>
 		<resize_button_style>dragger</resize_button_style>
-		<playback>
-			<enabled>true</enabled>
-			<speed>3</speed>
-		</playback>
 	</scroller>
+
 </settings>

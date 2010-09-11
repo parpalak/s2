@@ -13,11 +13,10 @@
 	<data_sets>
 		<data_set did="0">
 			<title>Hits/hosts info</title>
-			<short>ES</short>
+			<short>Hits/hosts</short>
 			<color>7f8da9</color>
 			<file_name>data/arch_info.txt</file_name>
 			<csv>
-				<reverse>true</reverse>
 				<separator>^</separator>
 				<date_format>YYYY-MM-DD</date_format>
 				<columns>
@@ -31,44 +30,47 @@
 
 	<charts>
 		<chart cid="0">
-			<height>60</height>
-			<title>Value</title>
-			<border_color>#CCCCCC</border_color>
+			<border_color>CCCCCC</border_color>
 			<border_alpha>100</border_alpha>
 
 			<values>
 				<x>
-					<bg_color>#FAC303</bg_color>
+					<bg_color>eedddd</bg_color>
 				</x>
+				<y_right>
+					<bg_alpha>60</bg_alpha>
+					<bg_color>000000</bg_color>
+					<text_color>FFFFFF</text_color>
+					<digits_after_decimal>
+						<percents>0</percents>
+					</digits_after_decimal>
+				</y_right>
 			</values>
+
 			<legend>
 				<show_date>true</show_date>
 			</legend>
 
-			<column_width>100</column_width>
-
-			<events>
-				<color>fac622</color>
-			</events>
-
 			<graphs>
 				<graph gid="0">
+					<axis>right</axis>
 					<title>Hosts</title>
 					<color>#70DE05</color>
 					<data_sources>
 						<close>index2</close>
 					</data_sources>
 					<width>3</width>
-
 					<bullet>round_outline</bullet>
 					<smoothed>true</smoothed>
 
 					<legend>
 						<date key="true" title="true"><![CDATA[{close}]]></date>
+						<period key="true" title="true"><![CDATA[{close}]]></period>
 					</legend>
 				</graph>
 
 				<graph gid="1">
+					<axis>right</axis>
 					<title>Hits</title>
 					<data_sources>
 						<close>index1</close>
@@ -79,6 +81,7 @@
 
 					<legend>
 						<date key="true" title="true"><![CDATA[{close}]]></date>
+						<period key="true" title="true"><![CDATA[{close}]]></period>
 					</legend>
 				</graph>
 			</graphs>
@@ -111,9 +114,5 @@
 	<scroller>
 		<graph_data_source>index1</graph_data_source>
 		<resize_button_style>dragger</resize_button_style>
-		<playback>
-			<enabled>true</enabled>
-			<speed>3</speed>
-		</playback>
 	</scroller>
 </settings>
