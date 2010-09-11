@@ -133,7 +133,7 @@ function SelectTab(eTab, bAddToHistory)
 			break;
 	}
 
-	if (eTextarea.scrollTop)
+	if (eTextarea && eTextarea.scrollTop)
 		iEditorScrollTop = eTextarea.scrollTop;
 
 	if (window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop)
