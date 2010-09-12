@@ -229,10 +229,11 @@ elseif ($action == 'upload')
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="S2-State-Success" content="S2-State-Success" />
 <title><?php echo $lang_pictures['Upload file'] ?></title>
 <meta http-equiv="Pragma" content="no-cache" />
 </head>
-<body onload="(window.parent.RefreshFiles ? window.parent : opener).RefreshFiles();<?php echo $error_message; ?>">
+<body onload="<?php echo $error_message; ?>">
 </body>
 </html>
 <?

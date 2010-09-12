@@ -605,11 +605,17 @@ function UploadSubmit (eForm)
 	eForm.dir.value = sCurDir;
 }
 
-function RefreshFiles ()
+function FileUploaded ()
 {
-	var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
-	if (Response.status == '200')
-		eFilePanel.innerHTML = Response.text;
+	var html = window.frames['submit_result'].document.getElementsByTagName('html')[0].innerHTML;
+	if (html.indexOf('S2-State-Success') >= 0)
+	{
+		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
+		if (Response.status == '200')
+			eFilePanel.innerHTML = Response.text;
+	}
+	else
+		window.open('javascript:document.write(\'' + html.replace(/\\/g, "\\\\") + '\'); document.close();', 's2_error', 'width=500,height=300');
 }
 
 // Tooltips
