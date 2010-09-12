@@ -51,7 +51,7 @@ xmlhttp = getHTTPRequestObject();
 function unknown_error (sError, iStatus)
 {
 	if (sError.indexOf('</body>') >= 0 && sError.indexOf('</html>') >= 0)
-		window.open('javascript:document.write(\'' + sError.replace(/\\/g, "\\\\") + '\'); document.close();', 's2_error', 'width=500,height=300');
+		window.open('javascript:document.write(\'' + sError.replace(/\\/g, "\\\\").replace(/\'/g, '\\\'') + '\'); document.close();', 's2_error', 'width=500,height=300');
 	else
 		alert(S2_LANG_UNKNOWN_ERROR + ' ' + iStatus + '\n' +
 			S2_LANG_SERVER_RESPONSE + '\n' + sError);

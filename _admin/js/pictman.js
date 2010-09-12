@@ -615,7 +615,7 @@ function FileUploaded ()
 			eFilePanel.innerHTML = Response.text;
 	}
 	else
-		window.open('javascript:document.write(\'' + html.replace(/\\/g, "\\\\") + '\'); document.close();', 's2_error', 'width=500,height=300');
+		window.open('javascript:document.write(\'' + html.replace(/\\/g, "\\\\").replace(/\'/g, '\\\'') + '\'); document.close();', 's2_error', 'width=500,height=300');
 }
 
 // Tooltips
