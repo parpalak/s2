@@ -759,7 +759,7 @@ if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
 		include $ext_info['path'].'/blog_functions.php';
 	if (!defined('S2_RSS_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/rss.php';
+		require S2_ROOT.'_include/rss.php';
 	s2_no_cache(false);
 	s2_do_rss();
 	die;

@@ -343,7 +343,7 @@ function s2_blog_posts_by_tag ($tag)
 	list($tag_id, $tag_descr, $tag_name) = $s2_db->fetch_row($result);
 
 	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
-		include S2_ROOT.'include/articles.php';
+		include S2_ROOT.'_include/articles.php';
 	$art_links = s2_articles_by_tag($tag_id);
 	if (count($art_links))
 		$tag_descr .= '<p>'.$lang_s2_blog['Articles by tag'].'<br />'.implode('<br />', $art_links).'</p>';

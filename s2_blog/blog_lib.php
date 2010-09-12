@@ -442,10 +442,10 @@ function s2_blog_toggle_hide_comment ($id)
 		// Premoderation is enabled and we have to send the comment to be shown
 		// to the subscribed commentators
 		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
-			require S2_ROOT.'include/comments.php';
+			require S2_ROOT.'_include/comments.php';
 
 		global $lang_comments;
-		require S2_ROOT.'lang/'.S2_LANGUAGE.'/comments.php';
+		require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
 
 		// Getting some info about the post commented
 		$query = array(
