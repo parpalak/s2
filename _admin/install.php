@@ -552,7 +552,7 @@ else
 				'allow_null'	=> false,
 				'default'		=> '\'\''
 			),
-			'citation'		=> array(
+			'excerpt'		=> array(
 				'datatype'		=> 'TEXT',
 				'allow_null'	=> false,
 				'default'		=> '\'\''
@@ -907,7 +907,7 @@ else
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url, pagetext, citation',
+		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url, pagetext, excerpt',
 		'INTO'		=> 'articles',
 		'VALUES'	=> '2, \''.$lang_install['Page example'].'\', '.$now.', '.$now.', 1, \'\', \'page1\', \''.$lang_install['Page text'].'\', \''.$lang_install['Page text'].'\''
 	);

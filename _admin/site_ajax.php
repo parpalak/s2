@@ -306,7 +306,7 @@ elseif ($action == 'save')
 
 	$query = array(
 		'UPDATE'	=> 'articles',
-		'SET'		=> "title = '".$s2_db->escape($page['title'])."', meta_keys = '".$s2_db->escape($page['meta_keys'])."', meta_desc = '".$s2_db->escape($page['meta_desc'])."', citation = '".$s2_db->escape($page['citation'])."', pagetext = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, children_preview = $children_preview, template = '".$s2_db->escape($page['template'])."'",
+		'SET'		=> "title = '".$s2_db->escape($page['title'])."', meta_keys = '".$s2_db->escape($page['meta_keys'])."', meta_desc = '".$s2_db->escape($page['meta_desc'])."', excerpt = '".$s2_db->escape($page['excerpt'])."', pagetext = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, children_preview = $children_preview, template = '".$s2_db->escape($page['template'])."'",
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('rq_action_save_article_pre_post_upd_qr')) ? eval($hook) : null;

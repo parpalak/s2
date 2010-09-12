@@ -83,7 +83,7 @@ function s2_last_articles_array ($limit = '5')
 	$raw_query_child_num = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'id, title, create_time, modify_time, citation, url, parent_id, ('.$raw_query_parent_title.') AS ptitle',
+		'SELECT'	=> 'id, title, create_time, modify_time, excerpt, url, parent_id, ('.$raw_query_parent_title.') AS ptitle',
 		'FROM'		=> 'articles AS a',
 		'ORDER BY'	=> 'create_time DESC',
 		'WHERE'		=> '('.$raw_query_child_num.') IS NULL',
@@ -105,7 +105,7 @@ function s2_last_articles_array ($limit = '5')
 		$last[$i]['ptitle'] = $row['ptitle'];
 		$last[$i]['time'] = $row['create_time'];
 		$last[$i]['modify_time'] = $row['modify_time'];
-		$last[$i]['text'] = $row['citation'];
+		$last[$i]['text'] = $row['excerpt'];
 	}
 
 	$urls = s2_get_group_url($parent_ids, $urls);
@@ -482,7 +482,7 @@ function parse_page_url ($request_uri)
 		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 		$query = array (
-			'SELECT'	=> 'title, url, ('.$raw_query1.') IS NOT NULL AS children_exist, id, citation, create_time, parent_id',
+			'SELECT'	=> 'title, url, ('.$raw_query1.') IS NOT NULL AS children_exist, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
 			'WHERE'		=> 'parent_id = '.$id.' AND published=1',
 			'ORDER BY'	=> 'priority'
@@ -510,7 +510,7 @@ function parse_page_url ($request_uri)
 				$subarticles[] = array(
 					'title' => s2_htmlencode($row['title']),
 					'time' => $row['create_time'],
-					'citation' => $row['citation'],
+					'excerpt' => $row['excerpt'],
 					'url' => $current_path.'/'.urlencode($row['url'])
 				);
 				$menu_subarticles[] = '<li><a href="'.$current_path.'/'.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
@@ -565,7 +565,7 @@ function parse_page_url ($request_uri)
 				foreach ($subarticles as $item)
 					$page['subcontent'] .= '<h3 class="article"><a href="'.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
 						'<div class="article date">'.s2_date($item['time']).'</div>'."\n".
-						'<p class="article">'.$item['citation'].'</p>'."\n";
+						'<p class="article">'.$item['excerpt'].'</p>'."\n";
 			}
 		}
 	}
@@ -576,7 +576,7 @@ function parse_page_url ($request_uri)
 
 		// Fetching "brothers"
 		$query = array (
-			'SELECT'	=> 'title, url, id, citation, create_time, parent_id',
+			'SELECT'	=> 'title, url, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
 			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND (SELECT id FROM '.$s2_db->prefix.'articles i WHERE i.parent_id = a.id AND i.published = 1 LIMIT 1) IS NULL',
 			'ORDER BY'	=> 'priority'

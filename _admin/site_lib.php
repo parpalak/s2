@@ -305,7 +305,7 @@ function s2_output_article_form ($id)
 	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'title, meta_keys, meta_desc, citation, pagetext as text, create_time, modify_time, published, favorite, commented, url, children_preview, template, parent_id, ('.$raw_query.') as comment_count',
+		'SELECT'	=> 'title, meta_keys, meta_desc, excerpt, pagetext as text, create_time, modify_time, published, favorite, commented, url, children_preview, template, parent_id, ('.$raw_query.') as comment_count',
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'id = '.$id
 	);
@@ -364,7 +364,7 @@ function s2_output_article_form ($id)
 <?php ($hook = s2_hook('fn_output_article_form_pre_cite')) ? eval($hook) : null; ?>
 				<tr>
 					<td class="label"><?php echo $lang_admin['Cite']; ?></td>
-					<td><input type="text" name="page[citation]" size="100" value="<?php echo s2_htmlencode($page['citation']); ?>" /></td>
+					<td><input type="text" name="page[excerpt]" size="100" value="<?php echo s2_htmlencode($page['excerpt']); ?>" /></td>
 				</tr>
 <?php ($hook = s2_hook('fn_output_article_form_after_cite')) ? eval($hook) : null; ?>
 			</table>
