@@ -65,7 +65,7 @@ function generate_config_file()
 
 $language = isset($_GET['lang']) ? $_GET['lang'] : (isset($_POST['req_language']) ? trim($_POST['req_language']) : 'Russian');
 $language = preg_replace('#[\.\\\/]#', '', $language);
-if (!file_exists(S2_ROOT.'lang/'.$language.'/install.php'))
+if (!file_exists(S2_ROOT.'_lang/'.$language.'/install.php'))
 	exit('The language pack you have chosen doesn\'t seem to exist or is corrupt. Please recheck and try again.');
 
 // Load the language files
