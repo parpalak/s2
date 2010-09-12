@@ -814,18 +814,14 @@ div.input {
 	margin: 1em 0;
 	border: 1px solid #ccc;
 	padding: 1em 1em 0;
+	overflow: hidden;
 	}
 	.extension .info {
 		float: left;
-		width: 20em;
+		width: 19em;
 		}
+	.extension .options,
 	.extension  p.description {
-		float: right;
-		width: 100%;
-		margin-left: -20em;
-		padding-left: 20em;
-		}
-	.extension .options {
 		padding-left: 20em;
 		}
 		.extension .options br {
