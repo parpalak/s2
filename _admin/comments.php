@@ -239,12 +239,10 @@ function s2_output_comment_form ($comment, $type)
 			</div>
 		</div>
 		<div class="r-float">
-			<input type="checkbox" id="eml" name="comment[show_email]" value="1"<?php if ($comment['show_email']) echo ' checked="checked"'?> />
-			<label for="eml"><?php echo $lang_admin['Show email']; ?></label>
-			<br />
-			<input type="checkbox" id="sbs" name="comment[subscribed]" value="1"<?php if ($comment['subscribed']) echo ' checked="checked"'?> />
-			<label for="sbs"><?php echo $lang_admin['Subscribed']; ?></label>
-			<br />
+			<label for="eml"><input type="checkbox" id="eml" name="comment[show_email]" value="1"<?php if ($comment['show_email']) echo ' checked="checked"'?> />
+			<?php echo $lang_admin['Show email']; ?></label>
+			<label for="sbs"><input type="checkbox" id="sbs" name="comment[subscribed]" value="1"<?php if ($comment['subscribed']) echo ' checked="checked"'?> />
+			<?php echo $lang_admin['Subscribed']; ?></label>
 <?php ($hook = s2_hook('fn_output_comment_form_after_checkboxes')) ? eval($hook) : null; ?>
 			<hr />
 <?php ($hook = s2_hook('fn_output_comment_form_pre_submit')) ? eval($hook) : null; ?>
