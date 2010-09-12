@@ -629,20 +629,19 @@ function FileUploaded ()
 function ShowTip (e)
 {
 	var eItem = window.event ? window.event.srcElement : e.target;
+	var title = eItem.getAttribute('title');
 
-	if (eItem.nodeName == "IMG")
+	if (!title && eItem.nodeName == "IMG")
 	{
-		var alt = eItem.getAttribute('alt');
-		window.status = alt;
-		if (!eItem.getAttribute('title'))
-			eItem.setAttribute('title', alt);
+		title = eItem.getAttribute('alt');
+		eItem.setAttribute('title', title);
 	}
+
+	if (title)
+		window.status = title;
 }
 
 function HideTip (e)
 {
-	var eItem = window.event ? window.event.srcElement : e.target;
-
-	if (eItem.nodeName == "IMG")
-		window.status = window.defaultStatus;
+	window.status = window.defaultStatus;
 }
