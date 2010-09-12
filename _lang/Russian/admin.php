@@ -4,7 +4,8 @@ $lang_admin = array(
 
 // Common admin panel
 'Welcome'					=> 'Привет, <strong>%s</strong>.',
-'Logout'					=> 'Выйти',
+'Logout'					=> 'Выйти?',
+'Logout info'				=> 'Выход из системы здесь',
 'Delete from list'			=> 'Удалить статью из этого списка',
 'New page'					=> 'Новая страница',
 'Admin panel'				=> 'Панель управления',
