@@ -53,7 +53,7 @@ function s2_generate_config_cache()
 	// Output config as PHP code
 	$fh = @fopen(S2_CACHE_DIR.'cache_config.php', 'wb');
 	if (!$fh)
-		error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \'cache\'.', __FILE__, __LINE__);
+		error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \'_cache\'.', __FILE__, __LINE__);
 
 	fwrite($fh, '<?php'."\n\n".'define(\'S2_CONFIG_LOADED\', 1);'."\n\n".$output."\n");
 
@@ -119,7 +119,7 @@ function generate_hooks_cache()
 	// Output hooks as PHP code
 	$fh = @fopen(S2_CACHE_DIR.'cache_hooks.php', 'wb');
 	if (!$fh)
-		error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \'cache\'.', __FILE__, __LINE__);
+		error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \'_cache\'.', __FILE__, __LINE__);
 
 	fwrite($fh, '<?php'."\n\n".'if (!defined(\'S2_HOOKS_LOADED\'))'."\n\t".'define(\'S2_HOOKS_LOADED\', 1);'."\n\n".'$s2_hooks = '.var_export($output, true).';');
 
@@ -180,7 +180,7 @@ function generate_updates_cache()
 	// Output update status as PHP code
 	$fh = @fopen(S2_CACHE_DIR.'cache_updates.php', 'wb');
 	if (!$fh)
-		error('Unable to write updates cache file to cache directory. Please make sure PHP has write access to the directory \'cache\'.', __FILE__, __LINE__);
+		error('Unable to write updates cache file to cache directory. Please make sure PHP has write access to the directory \'_cache\'.', __FILE__, __LINE__);
 
 	fwrite($fh, '<?php'."\n\n".'if (!defined(\'S2_UPDATES_LOADED\')) define(\'S2_UPDATES_LOADED\', 1);'."\n\n".'$s2_updates = '.var_export($output, true).';'."\n\n".'?>');
 

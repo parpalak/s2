@@ -919,7 +919,7 @@ else
 
 	$alerts = array();
 	// Check if the cache directory is writable
-	if (!is_writable(S2_ROOT.'cache/'))
+	if (!is_writable(S2_ROOT.'_cache/'))
 		$alerts[] = '<li><span>'.$lang_install['No cache write'].'</span></li>';
 
 	// Check if default pictures directory is writable

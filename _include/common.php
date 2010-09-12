@@ -55,7 +55,7 @@ define('S2_ROOT_ID', 0);
 
 // If the cache directory is not specified, we use the default setting
 if (!defined('S2_CACHE_DIR'))
-	define('S2_CACHE_DIR', S2_ROOT.'cache/');
+	define('S2_CACHE_DIR', S2_ROOT.'_cache/');
 
 // If the image directory is not specified, we use the default setting
 if (!defined('S2_IMG_DIR'))
