@@ -59,7 +59,7 @@ if (!defined('S2_CACHE_DIR'))
 
 // If the image directory is not specified, we use the default setting
 if (!defined('S2_IMG_DIR'))
-	define('S2_IMG_DIR', 'pictures');
+	define('S2_IMG_DIR', '_pictures');
 define('S2_IMG_PATH', S2_ROOT.S2_IMG_DIR);
 
 // Load DB abstraction layer and connect
