@@ -19,8 +19,8 @@
 	<description>Adds TinyMCE WYSIWYG editor to the article edit form.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0dev</minversion>
-	<maxtestedon>1.0a</maxtestedon>
+	<minversion>1.0a1</minversion>
+	<maxtestedon>1.0a1</maxtestedon>
 
 	<hooks>
 		<hook id="ai_head_end"><![CDATA[
@@ -32,7 +32,7 @@
 
 		<hook id="ai_after_js_init"><![CDATA[
 ?>
-var sPictUrl = '<?php echo S2_PATH; ?>/admin/pictman.php';
+var sPictUrl = '<?php echo S2_PATH; ?>/_admin/pictman.php';
 <?php
 		]]></hook>
 
