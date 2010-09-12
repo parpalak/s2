@@ -405,7 +405,7 @@ function s2_blog_edit_post_form ($id)
 		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Published']; ?></label>
 <?php ($hook = s2_hook('s2_blog_fn_post_form_pre_save')) ? eval($hook) : null; ?>
-		<input class="bitbtn save" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" />
+		<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
 <?php ($hook = s2_hook('s2_blog_fn_post_form_after_save')) ? eval($hook) : null; ?>
 		<br />
 		<br />
