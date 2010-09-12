@@ -65,18 +65,23 @@ body {
 	color: #000;
 	}
 
-#login_pan {
+#logout {
+	text-align: center;
+	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	position: absolute;
 	z-index: 20;
-	top: 0.167em;
-	right: 0.167em;
+	top: 0em;
+	right: 0em;
+	padding: 1px 3px;
+	background: #fff;
+	border-left: 1px solid #ccc;
 	}
 
 #loading {
 	height: 20px;
 	width: 20px;
 	float: left;
-	margin: 1px;
+	margin: 2px 3px 2px 0;
 	border: 1px solid #E4BB50;
 	background: #FFF4D7 url('../i/loading.gif') 50% 50% no-repeat;
 	}

@@ -101,10 +101,10 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 </head>
 
 <body>
-	<div id="login_pan">
+	<div id="logout">
 		<div id="loading"></div>
-		<?php printf($lang_admin['Welcome'], $login)."\n"; ?>
-		<input type="button" value="<?php echo $lang_admin['Logout']; ?>" onclick="return Logout();" />
+		<?php printf($lang_admin['Welcome'], $login)."\n"; ?><br />
+		<a href="#" onclick="return Logout();"><?php echo $lang_admin['Logout']; ?></a>
 	</div>
 <?php ($hook = s2_hook('ai_pre_site')) ? eval($hook) : null; ?>
 	<dl class="tabsheets">
