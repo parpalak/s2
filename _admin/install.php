@@ -33,13 +33,13 @@ error_reporting(E_ALL);
 @set_time_limit(0);
 
 // We need some stuff from functions.php
-require S2_ROOT.'include/functions.php';
+require S2_ROOT.'_include/functions.php';
 require 'options.php';
 
 // Load UTF-8 functions
-require S2_ROOT.'include/utf8/utf8.php';
-require S2_ROOT.'include/utf8/ucwords.php';
-require S2_ROOT.'include/utf8/trim.php';
+require S2_ROOT.'_include/utf8/utf8.php';
+require S2_ROOT.'_include/utf8/ucwords.php';
+require S2_ROOT.'_include/utf8/trim.php';
 
 // Strip out "bad" UTF-8 characters
 s2_remove_bad_characters();
@@ -355,27 +355,27 @@ else
 	switch ($db_type)
 	{
 		case 'mysql':
-			require S2_ROOT.'include/dblayer/mysql.php';
+			require S2_ROOT.'_include/dblayer/mysql.php';
 			break;
 			
 		case 'mysql_innodb':
-			require S2_ROOT.'include/dblayer/mysql_innodb.php';
+			require S2_ROOT.'_include/dblayer/mysql_innodb.php';
 			break;
 
 		case 'mysqli':
-			require S2_ROOT.'include/dblayer/mysqli.php';
+			require S2_ROOT.'_include/dblayer/mysqli.php';
 			break;
 
 		case 'mysqli_innodb':
-			require S2_ROOT.'include/dblayer/mysqli_innodb.php';
+			require S2_ROOT.'_include/dblayer/mysqli_innodb.php';
 			break;
 			
 		case 'pgsql':
-			require S2_ROOT.'include/dblayer/pgsql.php';
+			require S2_ROOT.'_include/dblayer/pgsql.php';
 			break;
 
 		case 'sqlite':
-			require S2_ROOT.'include/dblayer/sqlite.php';
+			require S2_ROOT.'_include/dblayer/sqlite.php';
 			break;
 
 		default:

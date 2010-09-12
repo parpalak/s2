@@ -25,27 +25,27 @@ if (defined('S2_SHOW_QUERIES'))
 switch ($db_type)
 {
 	case 'mysql':
-		require S2_ROOT.'include/dblayer/mysql.php';
+		require S2_ROOT.'_include/dblayer/mysql.php';
 		break;
 
 	case 'mysql_innodb':
-		require S2_ROOT.'include/dblayer/mysql_innodb.php';
+		require S2_ROOT.'_include/dblayer/mysql_innodb.php';
 		break;
 
 	case 'mysqli':
-		require S2_ROOT.'include/dblayer/mysqli.php';
+		require S2_ROOT.'_include/dblayer/mysqli.php';
 		break;
 
 	case 'mysqli_innodb':
-		require S2_ROOT.'include/dblayer/mysqli_innodb.php';
+		require S2_ROOT.'_include/dblayer/mysqli_innodb.php';
 		break;
 
 	case 'pgsql':
-		require S2_ROOT.'include/dblayer/pgsql.php';
+		require S2_ROOT.'_include/dblayer/pgsql.php';
 		break;
 
 	case 'sqlite':
-		require S2_ROOT.'include/dblayer/sqlite.php';
+		require S2_ROOT.'_include/dblayer/sqlite.php';
 		break;
 
 	default:

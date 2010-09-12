@@ -7,8 +7,8 @@
  * @package S2
  */
 
-require S2_ROOT.'include/functions.php';
-require S2_ROOT.'include/utf8/utf8.php';
+require S2_ROOT.'_include/functions.php';
+require S2_ROOT.'_include/utf8/utf8.php';
 
 define('S2_VERSION', '1.0a1');
 
@@ -63,7 +63,7 @@ if (!defined('S2_IMG_DIR'))
 define('S2_IMG_PATH', S2_ROOT.S2_IMG_DIR);
 
 // Load DB abstraction layer and connect
-require S2_ROOT.'include/dblayer/common_db.php';
+require S2_ROOT.'_include/dblayer/common_db.php';
 
 // Load cached config
 if (file_exists(S2_CACHE_DIR.'cache_config.php'))
@@ -72,7 +72,7 @@ if (file_exists(S2_CACHE_DIR.'cache_config.php'))
 if (!defined('S2_CONFIG_LOADED'))
 {
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/cache.php';
+		require S2_ROOT.'_include/cache.php';
 
 	s2_generate_config_cache();
 	require S2_CACHE_DIR.'cache_config.php';
@@ -87,7 +87,7 @@ if (file_exists(S2_CACHE_DIR.'cache_hooks.php'))
 if (!defined('S2_HOOKS_LOADED'))
 {
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/cache.php';
+		require S2_ROOT.'_include/cache.php';
 
 	generate_hooks_cache();
 	require S2_CACHE_DIR.'cache_hooks.php';

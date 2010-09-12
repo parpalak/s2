@@ -12,7 +12,7 @@ list($usec, $sec) = explode(' ', microtime());
 $s2_start = ((float)$usec + (float)$sec);
 
 define(S2_ROOT, './');
-require S2_ROOT.'include/common.php';
+require S2_ROOT.'_include/common.php';
 
 ($hook = s2_hook('idx_start')) ? eval($hook) : null;
 
@@ -42,16 +42,16 @@ if (substr($request_uri, -3) == '---')
 if ($request_uri == '/rss.xml')
 {
 	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/articles.php';
+		require S2_ROOT.'_include/articles.php';
 	if (!defined('S2_RSS_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/rss.php';
+		require S2_ROOT.'_include/rss.php';
 	s2_no_cache(false);
 	s2_do_rss();
 	die;
 }
 
 if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
-	require S2_ROOT.'include/comments.php';
+	require S2_ROOT.'_include/comments.php';
 
 //
 // Obtaining the content (array $page) and the template ($template string)
@@ -61,7 +61,7 @@ $return = ($hook = s2_hook('idx_get_content')) ? eval($hook) : null;
 if (!$return)
 {
 	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/articles.php';
+		require S2_ROOT.'_include/articles.php';
 	parse_page_url($request_uri);
 }
 

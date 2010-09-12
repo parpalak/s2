@@ -160,7 +160,7 @@ function generate_updates_cache()
 	if ($result != null && strpos($result['content'], '</updates>') !== false)
 	{
 		if (!defined('S2_XML_FUNCTIONS_LOADED'))
-			require S2_ROOT.'include/xml.php';
+			require S2_ROOT.'_include/xml.php';
 
 		$output = xml_to_array(s2_trim($result['content']));
 		$output = current($output);

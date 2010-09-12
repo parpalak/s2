@@ -10,7 +10,7 @@
  */
 
 define(S2_ROOT, '../');
-require S2_ROOT.'include/common.php';
+require S2_ROOT.'_include/common.php';
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';
 require 'pict_lib.php';

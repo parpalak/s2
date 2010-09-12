@@ -231,7 +231,7 @@ function s2_save_options ($opt)
 	}
 
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/cache.php';
+		require S2_ROOT.'_include/cache.php';
 
 	s2_generate_config_cache();
 

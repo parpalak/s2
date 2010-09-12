@@ -13,7 +13,7 @@ if (!defined('S2_ROOT'))
 	die;
 
 if (!defined('S2_XML_FUNCTIONS_LOADED'))
-	require S2_ROOT.'include/xml.php';
+	require S2_ROOT.'_include/xml.php';
 
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_ext.php';
 
@@ -345,7 +345,7 @@ function s2_install_extension ($id)
 
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/cache.php';
+		require S2_ROOT.'_include/cache.php';
 
 	s2_clear_cache();
 
@@ -440,7 +440,7 @@ function s2_flip_extension ($id)
 
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/cache.php';
+		require S2_ROOT.'_include/cache.php';
 
 	generate_hooks_cache();
 	global $s2_hooks;
@@ -521,7 +521,7 @@ function s2_uninstall_extension ($id)
 
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/cache.php';
+		require S2_ROOT.'_include/cache.php';
 
 	s2_clear_cache();
 

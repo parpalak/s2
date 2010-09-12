@@ -90,7 +90,7 @@ function s2_get_template ($template_id, $path = false)
 	global $lang_common;
 
 	if ($path === false)
-		$path = S2_ROOT.'include/templates/';
+		$path = S2_ROOT.'_include/templates/';
 
 	$return = ($hook = s2_hook('fn_get_template_start')) ? eval($hook) : null;
 	if ($return)
