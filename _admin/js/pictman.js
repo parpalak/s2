@@ -600,13 +600,19 @@ function SetWait (bWait)
 {
 }
 
+var was_upload = false;
+
 function UploadSubmit (eForm)
 {
 	eForm.dir.value = sCurDir;
+	was_upload = true;
 }
 
 function FileUploaded ()
 {
+	if (!was_upload)
+		return;
+
 	var html = window.frames['submit_result'].document.getElementsByTagName('html')[0].innerHTML;
 	if (html.indexOf('S2-State-Success') >= 0)
 	{

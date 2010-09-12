@@ -290,7 +290,7 @@ function s2_upload_form ()
 					<input type="submit" value="<?php echo $lang_pictures['Upload']; ?>" /> <?php echo $lang_pictures['Upload to']; ?> <span id="fold_name"><strong><?php echo $lang_pictures['Pictures']; ?></strong></span>
 					<input type="hidden" name="dir" value="" />
 				</form>
-				<iframe name="submit_result" id="submit_result" src="" width="0" height="0" frameborder="0" align="left" onload="FileUploaded();" ></iframe>
+				<iframe name="submit_result" id="submit_result" src="" width="0" height="0" frameborder="0" align="left" onload="FileUploaded();"></iframe>
 <?php
 
 }
