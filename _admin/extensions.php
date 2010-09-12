@@ -48,10 +48,10 @@ function s2_extension_list ()
 	$ext_item = array();
 	$ext_error = array();
 
-	$d = dir(S2_ROOT.'extensions');
+	$d = dir(S2_ROOT.'_extensions');
 	while (($entry = $d->read()) !== false)
 	{
-		if ($entry{0} != '.' && is_dir(S2_ROOT.'extensions/'.$entry))
+		if ($entry{0} != '.' && is_dir(S2_ROOT.'_extensions/'.$entry))
 		{
 			if (preg_match('/[^0-9a-z_]/', $entry))
 			{
@@ -62,7 +62,7 @@ function s2_extension_list ()
 				++$num_failed;
 				continue;
 			}
-			else if (!file_exists(S2_ROOT.'extensions/'.$entry.'/manifest.xml'))
+			else if (!file_exists(S2_ROOT.'_extensions/'.$entry.'/manifest.xml'))
 			{
 				$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
 					'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
@@ -73,7 +73,7 @@ function s2_extension_list ()
 			}
 
 			// Parse manifest.xml into an array
-			$ext_data = is_readable(S2_ROOT.'extensions/'.$entry.'/manifest.xml') ? s2_xml_to_array(file_get_contents(S2_ROOT.'extensions/'.$entry.'/manifest.xml')) : '';
+			$ext_data = is_readable(S2_ROOT.'_extensions/'.$entry.'/manifest.xml') ? s2_xml_to_array(file_get_contents(S2_ROOT.'_extensions/'.$entry.'/manifest.xml')) : '';
 			if (empty($ext_data))
 			{
 				$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
@@ -195,7 +195,7 @@ function s2_install_extension ($id)
 
 	// Load manifest (either locally or from punbb.informer.com updates service)
 //	if (isset($_GET['install']))
-		$manifest = is_readable(S2_ROOT.'extensions/'.$id.'/manifest.xml') ? file_get_contents(S2_ROOT.'extensions/'.$id.'/manifest.xml') : false;
+		$manifest = is_readable(S2_ROOT.'_extensions/'.$id.'/manifest.xml') ? file_get_contents(S2_ROOT.'_extensions/'.$id.'/manifest.xml') : false;
 	// else
 	// {
 		// $remote_file = get_remote_file('http://s2cms.com/update/manifest/'.$id.'.xml', 16);
@@ -243,8 +243,8 @@ function s2_install_extension ($id)
 	// $ext_info contains some information about the extension being installed
 	$ext_info = array(
 		'id'			=> $id,
-		'path'			=> S2_ROOT.'extensions/'.$id,
-		'url'			=> S2_BASE_URL.'/extensions/'.$id,
+		'path'			=> S2_ROOT.'_extensions/'.$id,
+		'url'			=> S2_BASE_URL.'/_extensions/'.$id,
 		'dependencies'	=> array()
 	);
 
@@ -252,8 +252,8 @@ function s2_install_extension ($id)
 	{
 		$ext_info['dependencies'][$dependency] = array(
 			'id'	=> $dependency,
-			'path'	=> S2_ROOT.'extensions/'.$dependency,
-			'url'	=> S2_BASE_URL.'/extensions/'.$dependency,
+			'path'	=> S2_ROOT.'_extensions/'.$dependency,
+			'url'	=> S2_BASE_URL.'/_extensions/'.$dependency,
 		);
 	}
 
@@ -493,8 +493,8 @@ function s2_uninstall_extension ($id)
 
 	$ext_info = array(
 		'id'			=> $id,
-		'path'			=> S2_ROOT.'extensions/'.$id,
-		'url'			=> S2_BASE_URL.'/extensions/'.$id
+		'path'			=> S2_ROOT.'_extensions/'.$id,
+		'url'			=> S2_BASE_URL.'/_extensions/'.$id
 	);
 
 	$messages = array();

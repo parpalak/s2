@@ -93,8 +93,8 @@ function generate_hooks_cache()
 	{
 		$load_ext_info = '$GLOBALS[\'ext_info_stack\'][] = array('."\n".
 			'\'id\'				=> \''.$cur_hook['extension_id'].'\','."\n".
-			'\'path\'			=> S2_ROOT.\'extensions/'.$cur_hook['extension_id'].'\','."\n".
-			'\'url\'			=> S2_BASE_URL.\'/extensions/'.$cur_hook['extension_id'].'\','."\n".
+			'\'path\'			=> S2_ROOT.\'_extensions/'.$cur_hook['extension_id'].'\','."\n".
+			'\'url\'			=> S2_BASE_URL.\'/_extensions/'.$cur_hook['extension_id'].'\','."\n".
 			'\'dependencies\'	=> array ('."\n";
 
 		$dependencies = explode('|', substr($cur_hook['dependencies'], 1, -1));
@@ -106,8 +106,8 @@ function generate_hooks_cache()
 
 			$load_ext_info .= '\''.$cur_dependency.'\'	=> array('."\n".
 				'\'id\'				=> \''.$cur_dependency.'\','."\n".
-				'\'path\'			=> S2_ROOT.\'extensions/'.$cur_dependency.'\','."\n".
-				'\'url\'			=> S2_BASE_URL.\'/extensions/'.$cur_dependency.'\'),'."\n";
+				'\'path\'			=> S2_ROOT.\'_extensions/'.$cur_dependency.'\','."\n".
+				'\'url\'			=> S2_BASE_URL.\'/_extensions/'.$cur_dependency.'\'),'."\n";
 		}
 
 		$load_ext_info .= ')'."\n".');'."\n".'$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];';
