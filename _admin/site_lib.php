@@ -795,7 +795,7 @@ function s2_output_tag_form ($tag, $m_time)
 <?php ($hook = s2_hook('fn_output_tag_form_after_replace_tag')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_output_tag_form_pre_submit')) ? eval($hook) : null; ?>
-		<input class="bitbtn savetag" name="button" type="submit" value="<?php echo $lang_admin['Save']; ?>" onclick="return SaveTag();" />
+		<input class="bitbtn savetag" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" onclick="return SaveTag();" />
 <?php ($hook = s2_hook('fn_output_tag_form_after_submit')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_output_tag_form_pre_reset')) ? eval($hook) : null; ?>
