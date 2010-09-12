@@ -10,18 +10,18 @@
 
 function s2_counter_draw_chart ()
 {
-	var hits = new SWFObject("../extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
-	hits.addVariable("path", "../extensions/s2_counter/");
-	var settings_file = "../extensions/s2_counter/traffic.xml?" + Math.random();
+	var hits = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
+	hits.addVariable("path", "../_extensions/s2_counter/");
+	var settings_file = "../_extensions/s2_counter/traffic.xml?" + Math.random();
 
 	(hook = hooks['fn_s2_counter_draw_chart_pre_hits']) ? eval(hook) : null;
 
 	hits.addVariable("settings_file", encodeURIComponent(settings_file));
 	hits.write("s2_counter_hits");
 
-	var rss = new SWFObject("../extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
-	rss.addVariable("path", "../extensions/s2_counter/");
-	settings_file = "../extensions/s2_counter/rss.xml?" + Math.random();
+	var rss = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
+	rss.addVariable("path", "../_extensions/s2_counter/");
+	settings_file = "../_extensions/s2_counter/rss.xml?" + Math.random();
 
 	(hook = hooks['fn_s2_counter_draw_chart_pre_rss']) ? eval(hook) : null;
 
