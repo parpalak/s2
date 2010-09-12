@@ -18,7 +18,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
-	$manifest = is_readable(S2_ROOT.'extensions/'.$id.'/manifest.xml') ? file_get_contents(S2_ROOT.'extensions/'.$id.'/manifest.xml') : false;
+	$manifest = is_readable(S2_ROOT.'_extensions/'.$id.'/manifest.xml') ? file_get_contents(S2_ROOT.'_extensions/'.$id.'/manifest.xml') : false;
 
 	// Parse manifest.xml into an array and validate it
 	$ext_data = s2_xml_to_array($manifest);
@@ -60,7 +60,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'include/cache.php';
+		require S2_ROOT.'_include/cache.php';
 
 	s2_clear_cache();
 

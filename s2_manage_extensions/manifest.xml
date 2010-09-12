@@ -19,7 +19,7 @@
 	<description>Adds the "Refresh hooks" button to the extension list. It can be useful for extension developers.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0dev</minversion>
+	<minversion>1.0a1</minversion>
 	<maxtestedon>1.0a1</maxtestedon>
 
 	<hooks>
