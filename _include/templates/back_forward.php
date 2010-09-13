@@ -5,9 +5,10 @@
 <title><!-- head_title --></title>
 <!-- meta -->
 <!-- styles -->
+<!-- link_rss -->
 </head>
 
-<body class="service">
+<body class="back_forward">
 	<div id="crumbs"><!-- crumbs --></div>
 	<div id="header"><!-- site_title --></div>
 
@@ -15,7 +16,13 @@
 		<div id="container">
 			<div id="content">
 				<!-- title -->
+				<!-- date -->
 				<!-- text -->
+				<!-- subarticles -->
+				<!-- back_forward -->
+				<!-- tag_list -->
+				<!-- comments -->
+				<!-- comment_form -->
 			</div>
 			<div class="clearing"></div>
 		</div>

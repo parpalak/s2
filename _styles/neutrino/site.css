@@ -219,6 +219,10 @@ body {
 	width: 200%
 	}
 
+.back_forward #content {
+	width: 300%;
+	}
+
 .clearing {
 	clear: both;
 	}
@@ -323,6 +327,33 @@ body {
 #menu ul ul li:before {
 	content: '\2014\a0';
 	}
+
+#content ul.back_forward li:before {
+	content: '';
+	}
+
+#content ul.back_forward {
+	overflow: hidden;
+	margin: 0 0 1.5em;
+	padding: 0;
+	zoom: 1;
+	}
+	#content ul.back_forward li {
+		behavior: none;
+		float: left;
+		margin: 0 2%;
+		text-indent: 0;
+		padding: 0;
+		width: 46%;
+		}
+		#content ul.back_forward li.up {
+			text-align: center;
+			margin: 0;
+			width: 100%;
+			}
+		#content ul.back_forward li.back {
+			text-align: right;
+			}
 
 img[align="left"] {
 	margin-right: 1.5em;

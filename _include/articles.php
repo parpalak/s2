@@ -570,7 +570,7 @@ function parse_page_url ($request_uri)
 		}
 	}
 
-	if (!$page['children_exist'] && $is_menu)
+	if (!$page['children_exist'] && ($is_menu || strpos($template, '<!-- back_forward -->') !== false))
 	{
 		// It's an article. We have to fetch other articles in the parent section
 
@@ -585,6 +585,8 @@ function parse_page_url ($request_uri)
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$menu_articles = array();
+		$i = 0;
+		$curr_item = -1;
 		while ($row = $s2_db->fetch_assoc($result))
 		{
 			// A neighbour
@@ -592,11 +594,22 @@ function parse_page_url ($request_uri)
 				'<li class="active"><span>'.s2_htmlencode($row['title']).'</span></li>' :
 				'<li><a href="'.$parent_path.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
 
+			if ($id == $row['id'])
+				$curr_item = $i;
+
 			($hook = s2_hook('fn_parse_page_url_add_neighbour')) ? eval($hook) : null;
+
+			$i++;
 		}
 
 		$page['menu']['articles'] = '<div class="header">'.sprintf($lang_common['More in this section'], '<a href="./">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>').'</div>'."\n".
 			'<ul>'."\n".implode("\n", $menu_articles)."\n".'</ul>'."\n";
+
+		if ($curr_item != -1)
+			$page['back_forward'] = '<ul class="back_forward">'.
+				'<li class="up"><a href="./">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a> &uarr;</li>'.
+				(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back">&larr; ', $menu_articles[$curr_item - 1]) : '').
+				(isset($menu_articles[$curr_item + 1]) ? str_replace('</li>', ' &rarr;</li>', $menu_articles[$curr_item + 1]) : '').'</ul>';
 	}
 
 	// Tags

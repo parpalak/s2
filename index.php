@@ -110,6 +110,8 @@ if (S2_ENABLED_COMMENTS && $page['commented'])
 else
 	$replace['<!-- comment_form -->'] = '';
 
+$replace['<!-- back_forward -->'] = !empty($page['back_forward']) ? $page['back_forward'] : '';
+
 // Aside
 $replace['<!-- menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
 $replace['<!-- article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';

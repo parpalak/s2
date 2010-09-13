@@ -193,5 +193,6 @@ $lang_templates = array(
 ''					=> '— как у раздела —',
 'site.php'			=> 'Обычная страница',
 'mainpage.php'		=> 'Главная страница',
+'back_forward.php'	=> 'Страница без меню',
 
 );

@@ -8,7 +8,7 @@
 <!-- link_rss -->
 </head>
 
-<body>
+<body class="site">
 	<div id="crumbs"><!-- crumbs --></div>
 	<div id="header"><!-- site_title --></div>
 
