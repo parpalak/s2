@@ -123,7 +123,7 @@ function s2_get_template ($template_id, $path = false)
 			else
 				return '<a href="'.$url.'">'.$text.'</a>';
 		}
-		$template = preg_replace('#<a href="(.*?)">(.*?)</a>#e', '_s2_check_link(\'\\1\', \''.$request_uri.'\', \'\\2\')', $template);
+		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.$request_uri.'\', \'\\2\')', $template);
 	}
 
 	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
