@@ -194,7 +194,7 @@ function s2_blog_tag_list ()
 		'FROM'		=> 'tags AS t',
 		'ORDER BY'	=> 'post_count DESC'
 	);
-	($hook = s2_hook('s2_blog_fn_post_form_pre_page_get_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_pre_page_get_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$names = $urls = $counts = array();
@@ -223,14 +223,14 @@ function s2_blog_edit_post_form ($id)
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'id = '.$id
 	);
-	($hook = s2_hook('s2_blog_fn_post_form_pre_page_get_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_pre_page_get_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	$page = $s2_db->fetch_assoc($result);
 
 	if (!$page['published'])
 	{
 		$required_rights = array('view_hidden');
-		($hook = s2_hook('s2_blog_fn_post_form_pre_perm_check')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_blog_post_form_pre_perm_check')) ? eval($hook) : null;
 		s2_test_user_rights($GLOBALS['session_id'], $required_rights);
 	}
 
@@ -249,7 +249,7 @@ function s2_blog_edit_post_form ($id)
 			'FROM'		=> 's2_blog_posts',
 			'WHERE'		=> 'url = \''.$page['url'].'\' AND create_time < '.$end_time.' AND create_time >= '.$start_time
 		);
-		($hook = s2_hook('s2_blog_fn_post_form_pre_check_url_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_blog_post_form_pre_check_url_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		if ($s2_db->result($result) != 1)
@@ -265,7 +265,7 @@ function s2_blog_edit_post_form ($id)
 		'WHERE'		=> 'post_id = '.$id,
 		'ORDER BY'	=> 'id'
 	);
-	($hook = s2_hook('s2_blog_fn_post_form_pre_tags_get_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_pre_tags_get_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$i = 0;
@@ -285,28 +285,28 @@ function s2_blog_edit_post_form ($id)
 		'GROUP BY'	=> 'label',
 		'ORDER BY'	=> 'count(label) DESC'
 	);
-	($hook = s2_hook('fn_blog_get_post_pre_labels_fetch_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_get_post_pre_labels_fetch_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$labels = array();
 	while ($row = $s2_db->fetch_row($result))
 		$labels[] = $row[0];
 
-	($hook = s2_hook('s2_blog_fn_post_form_pre_output')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_pre_output')) ? eval($hook) : null;
 
 ?>
 <form name="artform" action="" onsubmit="setTimeout('SaveArticle(\'save_blog\');', 0); return false;">
 	<div class="l-float">
 		<div class="border">
 			<table class="fields">
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_title')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_title')) ? eval($hook) : null; ?>
 				<tr>
 					<td class="label"><?php echo $lang_admin['Title']; ?></td>
 					<td><input type="text" name="page[title]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['title']); ?>" /></td>
 				</tr>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_after_title')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_title')) ? eval($hook) : null; ?>
 			</table>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_after_fields1')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_fields1')) ? eval($hook) : null; ?>
 			<table class="fields">
 				<tr>
 					<td class="label"><?php echo $lang_admin['Create time']; ?></td>
@@ -323,11 +323,11 @@ function s2_blog_edit_post_form ($id)
 			</table>
 <?php
 
-	($hook = s2_hook('s2_blog_fn_post_form_after_fields2')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_after_fields2')) ? eval($hook) : null;
 
 	s2_toolbar();
 	$padding = 8;
-	($hook = s2_hook('s2_blog_fn_post_form_pre_text')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_pre_text')) ? eval($hook) : null;
 
 ?>
 			<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
@@ -335,7 +335,7 @@ function s2_blog_edit_post_form ($id)
 			</div>
 		</div>
 	</div>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_tag_col')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_tag_col')) ? eval($hook) : null; ?>
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
 		<hr />
@@ -351,20 +351,20 @@ function s2_blog_edit_post_form ($id)
 			</div>
 		</div>
 	</div>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_btn_col')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_btn_col')) ? eval($hook) : null; ?>
 	<div class="r-float">
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_parag_btn')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_parag_btn')) ? eval($hook) : null; ?>
 		<input class="bitbtn parag" type="button" value="<?php echo $lang_admin['Paragraphs']; ?>" onclick="return Paragraph();" />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_after_parag_btn')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_parag_btn')) ? eval($hook) : null; ?>
 		<hr />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_reset')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_reset')) ? eval($hook) : null; ?>
 		<input class="bitbtn reset" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm(S2_LANG_RESET_PROMPT);" />
 		<br />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_clear')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_clear')) ? eval($hook) : null; ?>
 		<input class="bitbtn new" type="button" value="<?php echo $lang_admin['Clear']; ?>" onclick="ClearForm(); return false;" />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_after_clear')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_clear')) ? eval($hook) : null; ?>
 		<hr />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_labels')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_labels')) ? eval($hook) : null; ?>
 		<label><?php echo $lang_s2_blog['Labels']; ?><br />
 		<select size="1" name="page[label]">
 <?php
@@ -376,7 +376,7 @@ function s2_blog_edit_post_form ($id)
 		</select></label>
 		<label><?php echo $lang_s2_blog['New label']; ?><br />
 		<input type="text" name="page[new_label]" size="15" maxlength="30" value="" /></label>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_checkboxes')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_checkboxes')) ? eval($hook) : null; ?>
 		<input type="hidden" name="page[id]" value="<?php echo $id; ?>" />
 		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"'?> />
 		<?php echo $lang_common['Favorite']; ?></label>
@@ -384,7 +384,7 @@ function s2_blog_edit_post_form ($id)
 		<?php echo $lang_admin['Commented']; ?></label>
 <?php
 
-	($hook = s2_hook('s2_blog_fn_post_form_pre_links')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_pre_links')) ? eval($hook) : null;
 
 	if ($page['comment_num'])
 	{
@@ -395,22 +395,22 @@ function s2_blog_edit_post_form ($id)
 	else
 		echo "\t\t".$lang_admin['No comments']."\n";
 
-	($hook = s2_hook('s2_blog_fn_post_form_after_checkboxes')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_post_form_after_checkboxes')) ? eval($hook) : null;
 ?>
 		<hr />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_url')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_url')) ? eval($hook) : null; ?>
 		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
 		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" /></label>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_published')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_published')) ? eval($hook) : null; ?>
 		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Published']; ?></label>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_pre_save')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_save')) ? eval($hook) : null; ?>
 		<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
-<?php ($hook = s2_hook('s2_blog_fn_post_form_after_save')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_save')) ? eval($hook) : null; ?>
 		<br />
 		<br />
 		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo $page['path']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
-<?php ($hook = s2_hook('s2_blog_fn_post_form_after_prv')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_prv')) ? eval($hook) : null; ?>
 	</div>
 </form>
 <?
@@ -466,7 +466,7 @@ function s2_blog_toggle_hide_comment ($id)
 				'FROM'		=> 's2_blog_comments',
 				'WHERE'		=> 'post_id = '.$comment['post_id'].' and subscribed = 1 and email <> \''.$s2_db->escape($comment['email']).'\''
 			);
-			($hook = s2_hook('s2_blog_fn_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
+			($hook = s2_hook('fn_s2_blog_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
 			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 			$receivers = array();
