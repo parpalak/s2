@@ -20,24 +20,38 @@ function s2_blog_extent_number ($n)
 
 $s2_blog_fav_link = '<a href="'.BLOG_BASE.urlencode(S2_FAVORITE_URL).'/" class="favorite" title="'.$lang_s2_blog['Favorite'].'">*</a>';
 
-function s2_blog_format_post ($header, $time, $body, $keywords, $comments, $favorite = 0, $show_fav = 1)
+function s2_blog_format_post ($header, $date, $date_time, $body, $keywords, $comments, $favorite = 0)
 {
 	global $s2_blog_fav_link, $lang_s2_blog;
 
-	if ($keywords)
-		$comments = sprintf($lang_s2_blog['Tags:'], $keywords).($comments && S2_SHOW_COMMENTS ? ' | '.$comments : '');
+	$html = '<h2 class="post head">%6$s%1$s</h2>'."\n".
+		'<div class="post time">%3$s</div>'."\n".
+		'<div class="post body">%4$s</div>'."\n".
+		'<div class="post foot">%5$s</div>'."\n";
 
-	return '<h2 class="post head">'.($favorite && $show_fav ? $s2_blog_fav_link : '').$header.'</h2>'."\n".
-		'<div class="post time">'.$time.'</div>'."\n".
-		'<div class="post body">'.$body.'</div>'."\n".
-		'<div class="post foot">'.$comments.'</div>'."\n";
+	($hook = s2_hook('fn_s2_blog_format_post_start')) ? eval($hook) : null;
+
+	if (!S2_SHOW_COMMENTS)
+		$comments = '';
+
+	if ($keywords)
+		$comments = sprintf($lang_s2_blog['Tags:'], $keywords).($comments ? ' | '.$comments : '');
+
+	($hook = s2_hook('fn_s2_blog_format_post_end')) ? eval($hook) : null;
+
+	return sprintf($html, $header, $date, $date_time, $body, $comments, ($favorite ? $s2_blog_fav_link : ''));
 }
 
 function s2_blog_format_see_also ($title_array)
 {
 	global $lang_s2_blog;
 
-	return '<p class="see_also"><strong>'.$lang_s2_blog['See also'].'</strong><br />' . implode('<br />', $title_array) . '</p>';
+	$html = '<p class="see_also"><b>%1$s</b><br />%2$s</p>';
+	$title_separator = '<br />';
+
+	($hook = s2_hook('fn_s2_blog_format_see_also_start')) ? eval($hook) : null;
+
+	return sprintf($html, $lang_s2_blog['See also'], implode($title_separator, $title_array));
 }
 
 //
@@ -102,6 +116,8 @@ function s2_blog_get_comments ($id)
 	global $s2_db, $lang_common;
 
 	$comments = '';
+	$html_comment = '<div class="reply_info"><a name="%1$s" href="#%1$s">#%1$s</a>. %2$s</div>'."\n".
+		'<div class="reply%3$s">%4$s</div>'."\n";
 
 	$query = array(
 		'SELECT'	=> 'nick, time, email, show_email, good, text',
@@ -116,15 +132,18 @@ function s2_blog_get_comments ($id)
 	{
 		$nick = s2_htmlencode($row['nick']);
 		$name = '<strong>'.($row['show_email'] ? s2_js_mailto($nick, $row['email']) : $nick).'</strong>';
-		$link = '<a name="'.$i.'" href="#'.$i.'">#'.$i.'</a>. ';
 
 		($hook = s2_hook('fn_blog_get_comments_pre_comment_merge')) ? eval($hook) : null;
 
-		$comments .= '<div class="reply_info">'.$link.sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name).'</div>'."\n".
-			'<div class="reply'.($row['good'] ? ' good' : '').'">'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</div>';
+		$comments .= sprintf($html_comment,
+			$i,
+			sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name),
+			($row['good'] ? ' good' : ''),
+			s2_bbcode_to_html(s2_htmlencode($row['text']))
+		);
 	}
 
-	return $comments ? '<h2 class="comment">'.$lang_common['Comments'].'</h2>'.$comments : '';
+	return $comments ? '<h2 class="comment">'.$lang_common['Comments'].'</h2>'."\n".$comments : '';
 }
 
 function s2_blog_get_posts ($sub_query, $desc = '')
@@ -198,6 +217,7 @@ function s2_blog_get_posts ($sub_query, $desc = '')
 	{
 		$link = BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']);
 		$header = '<a href="'.$link.'">'.$row['title'].'</a>';
+		$date = s2_date($row['create_time']);
 		$time = s2_date_time($row['create_time']);
 		$tags = isset($a[$row['id']]['tags']) ? implode(', ', $a[$row['id']]['tags']) : '';
 		$text = $row['text'];
@@ -207,7 +227,7 @@ function s2_blog_get_posts ($sub_query, $desc = '')
 
 		($hook = s2_hook('fn_blog_get_posts_loop_pre_post_merge')) ? eval($hook) : null;
 
-		$output .= s2_blog_format_post($header, $time, $text, $tags, $comment, $row['favorite']);
+		$output .= s2_blog_format_post($header, $date, $time, $text, $tags, $comment, $row['favorite']);
 	}
 
 	return $output;
@@ -313,6 +333,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 
 	$output = s2_blog_format_post(
 		$row['title'],
+		s2_date($row['create_time']),
 		s2_date_time($row['create_time']),
 		$row['text'],
 		implode(', ', $tags),
@@ -614,6 +635,7 @@ function s2_blog_last_posts ()
 	foreach ($posts as $post)
 		$output .= s2_blog_format_post(
 			'<a href="'.BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.$post['title'].'</a>',
+			s2_date($post['create_time']),
 			s2_date_time($post['create_time']),
 			$post['text'],
 			$post['tags'],
@@ -630,14 +652,29 @@ function s2_blog_last_post ()
 {
 	$posts = s2_blog_last_posts_array();
 
+	$html = '<h2 class="preview">%1$s<a href="%2$s">%3$s</a></h3>'."\n".
+		'<div class="preview time">%5$s</div>'."\n".
+		'<div class="post body">%6$s</div>'."\n";
+
+	($hook = s2_hook('fn_s2_blog_last_post_start')) ? eval($hook) : null;
+
 	$output = '';
 	for ($i = 0; $i < 1; $i++)
 	{
 		$post = array_shift($posts);
 		$link = BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']);
-		$output .= '<h2 class="preview">'.($post['tags'] ? '<small>'.preg_replace('/<a.*?>(.*?)<\/a>/', "\\1", $post['tags']).' &rarr;</small> ' : '').'<a href="'.$link.'">'.$post['title'].'</a></h3>'."\n".
-			'<div class="preview time">'.s2_date_time($post['create_time']).'</div>'."\n".
-			'<div class="post body">'.$post['text'].'</div>'."\n";
+		$tag_prefix = $post['tags'] ? '<small>'.preg_replace('/<a.*?>(.*?)<\/a>/', "\\1", $post['tags']).' &rarr;</small> ' : '';
+
+		($hook = s2_hook('fn_s2_blog_last_post_pre_post_merge')) ? eval($hook) : null;
+
+		$output .= sprintf($html,
+			$tag_prefix,
+			$link,
+			$post['title'],
+			s2_date($post['create_time']),
+			s2_date_time($post['create_time']),
+			$post['text']
+		);
 	}
 
 	return $output;
