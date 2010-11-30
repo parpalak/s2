@@ -52,7 +52,7 @@ function s2_read_options ()
 // HTML code for the controls
 //
 
-function s2_get_styles ()
+function s2_get_styles ($current_style)
 {
 	$styles = array();
 	$d = dir(S2_ROOT.'_styles');
@@ -67,7 +67,7 @@ function s2_get_styles ()
 	$return = '';
 
 	foreach ($styles as $style)
-		$return .= '<option value="'.$style.'"'.(S2_STYLE == $style ? 'selected="selected"' : '').'>'.str_replace('_', ' ', $style).'</option>'."\n";
+		$return .= '<option value="'.$style.'"'.($current_style == $style ? 'selected="selected"' : '').'>'.str_replace('_', ' ', $style).'</option>'."\n";
 
 	return '<select id="style_select" name="opt[style]">'.$return.'</select>';
 }
@@ -85,7 +85,7 @@ function s2_read_lang_dir ()
 	return $langs;
 }
 
-function s2_get_lang ()
+function s2_get_lang ($current_lang)
 {
 	$langs = s2_read_lang_dir();
 
@@ -94,7 +94,7 @@ function s2_get_lang ()
 	$return = '';
 
 	foreach ($langs as $lang)
-		$return .= '<option value="'.$lang.'"'.(S2_LANGUAGE == $lang ? 'selected="selected"' : '').'>'.str_replace('_', ' ', $lang).'</option>'."\n";
+		$return .= '<option value="'.$lang.'"'.($current_lang == $lang ? 'selected="selected"' : '').'>'.str_replace('_', ' ', $lang).'</option>'."\n";
 
 	return '<select id="lang_select" name="opt[lang]">'.$return.'</select>';
 }
@@ -120,8 +120,8 @@ function s2_get_options ($message = '')
 
 	$output = $message ? '<div class="info-box">'.$message.'</div>' : '';
 
-	$style = '<div class="input select"><label for="style_select"><span>'.$lang_admin_opt['Styles'].'</span></label>'.s2_get_styles().'</div>';
-	$lang = '<div class="input select"><label for="lang_select"><span>'.$lang_admin_opt['Languages'].'</span></label>'.s2_get_lang().'</div>';
+	$style = '<div class="input select"><label for="style_select"><span>'.$lang_admin_opt['Styles'].'</span></label>'.s2_get_styles($options['S2_STYLE']).'</div>';
+	$lang = '<div class="input select"><label for="lang_select"><span>'.$lang_admin_opt['Languages'].'</span></label>'.s2_get_lang($options['S2_LANGUAGE']).'</div>';
 
 	($hook = s2_hook('fn_get_options_pre_site_fs')) ? eval($hook) : null;
 	$fieldset = array(
