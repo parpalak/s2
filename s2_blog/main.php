@@ -12,10 +12,7 @@ $s2_blog_path = explode('/', $s2_blog_path);   //   []/[2006]/[12]/[31]/[newyear
 
 $page['commented'] = 0;
 
-if (count($s2_blog_path) <= 1)
-	$s2_blog_path[1] = '';
-
-if ($s2_blog_path[1] == '')
+if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '')
 {
 	// Main page
 
@@ -66,7 +63,9 @@ elseif ($s2_blog_path[1] == S2_TAGS_URL)
 		$page['head_title'] = $page['title'] = $lang_s2_blog['Tags'];
 	}
 }
-else { // []/[2006]/[12]/[31]/[newyear]
+else
+{
+	// []/[2006]/[12]/[31]/[newyear]
 	$s2_blog_path[1] = (int) $s2_blog_path[1];
 	if ($s2_blog_path[1] < S2_START_YEAR || $s2_blog_path[1] > (int) date('Y'))
 		error_404();
