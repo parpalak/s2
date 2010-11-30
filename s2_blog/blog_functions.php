@@ -656,10 +656,12 @@ function s2_blog_last_post ()
 		'<div class="preview time">%5$s</div>'."\n".
 		'<div class="post body">%6$s</div>'."\n";
 
+	$num_post = 1;
+
 	($hook = s2_hook('fn_s2_blog_last_post_start')) ? eval($hook) : null;
 
 	$output = '';
-	for ($i = 0; $i < 1; $i++)
+	for ($i = 0; $i < $num_post; $i++)
 	{
 		$post = array_shift($posts);
 		$link = BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']);
