@@ -14,7 +14,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 {
 	global $s2_db;
 
-	($hook = s2_hook('fn_manage_extensions_refresh_hooks_start')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_manage_extensions_refresh_hooks_start')) ? eval($hook) : null;
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
@@ -35,7 +35,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 		'WHERE'		=> 'extension_id=\''.$s2_db->escape($id).'\''
 	);
 
-	($hook = s2_hook('fn_manage_extensions_refresh_hooks_pre_delete_hooks')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_manage_extensions_refresh_hooks_pre_delete_hooks')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	// Now insert the hooks
@@ -52,7 +52,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 					'VALUES'	=> '\''.$s2_db->escape(trim($cur_hook)).'\', \''.$s2_db->escape($id).'\', \''.$s2_db->escape(trim($ext_hook['content'])).'\', '.time().', '.(isset($ext_hook['attributes']['priority']) ? $ext_hook['attributes']['priority'] : 5)
 				);
 
-				($hook = s2_hook('fn_manage_extensions_refresh_hooks_pre_add_hook')) ? eval($hook) : null;
+				($hook = s2_hook('fn_s2_manage_extensions_refresh_hooks_pre_add_hook')) ? eval($hook) : null;
 				$s2_db->query_build($query) or error(__FILE__, __LINE__);
 			}
 		}
