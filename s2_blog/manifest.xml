@@ -714,10 +714,10 @@ if (isset($_GET['blog_unsubscribe']))
 
 				$template = s2_get_service_template();
 				$replace = array(
-					'<!-- head_title -->'	=> $lang_comments['Unsubscribed OK'],
-					'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
-					'<!-- text -->'			=> $lang_comments['Unsubscribed OK info'],
-					'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+					'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
+					'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
+					'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
+					'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 				);
 
 				($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
@@ -732,10 +732,10 @@ if (isset($_GET['blog_unsubscribe']))
 
 	$template = s2_get_service_template();
 	$replace = array(
-		'<!-- head_title -->'	=> $lang_comments['Unsubscribed failed'],
-		'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
-		'<!-- text -->'			=> $lang_comments['Unsubscribed failed info'],
-		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+		'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed failed'],
+		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
+		'<!-- s2_text -->'			=> $lang_comments['Unsubscribed failed info'],
+		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
 	($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;

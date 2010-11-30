@@ -120,7 +120,7 @@ else
 $page['meta_description'] = S2_BLOG_TITLE;
 $page['head_title'] = empty($page['head_title']) ? S2_BLOG_TITLE : $page['head_title'].' - '.S2_BLOG_TITLE;
 
-if (strpos($template, '<!-- menu -->') !== false)
+if (strpos($template, '<!-- s2_menu -->') !== false)
 	$page['menu']['s2_blog_navigation'] = '<div class="header">'.$lang_s2_blog['Navigation'].'</div>'.s2_blog_navigation($request_uri);
 
 define('S2_BLOG_HANDLED', 1);
