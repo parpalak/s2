@@ -136,19 +136,19 @@ function s2_get_service_template ($template_id = 'service.php', $path = false)
 
 	$template = s2_get_template($template_id, $path);
 
-	$replace['<!-- meta -->'] = '<meta name="Generator" content="S2 '.S2_VERSION.'" />';
-	$replace['<!-- site_title -->'] = S2_SITE_NAME;
+	$replace['<!-- s2_meta -->'] = '<meta name="Generator" content="S2 '.S2_VERSION.'" />';
+	$replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
 
 	// Including the style
 	ob_start();
 	include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
-	$replace['<!-- styles -->'] = ob_get_clean();
+	$replace['<!-- s2_styles -->'] = ob_get_clean();
 
 	// Footer
 	$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
 	$link = S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : '<a href="'.S2_BASE_URL.'/">'.$author.'</a>';
 
-	$replace['<!-- copyright -->'] = (S2_START_YEAR != date('Y') ?
+	$replace['<!-- s2_copyright -->'] = (S2_START_YEAR != date('Y') ?
 		sprintf($lang_common['Copyright 2'], $link, S2_START_YEAR, date('Y')) :
 		sprintf($lang_common['Copyright 1'], $link, date('Y'))).' '.
 		sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
@@ -390,10 +390,10 @@ function error_404 ()
 
 	$template = s2_get_service_template('error404.php');
 	$replace = array(
-		'<!-- head_title -->'	=> $lang_common['Error 404'],
-		'<!-- title -->'		=> '<h1>'.$lang_common['Error 404'].'</h1>',
-		'<!-- text -->'			=> sprintf($lang_common['Error 404 text'], S2_BASE_URL),
-		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+		'<!-- s2_head_title -->'	=> $lang_common['Error 404'],
+		'<!-- s2_title -->'			=> '<h1>'.$lang_common['Error 404'].'</h1>',
+		'<!-- s2_text -->'			=> sprintf($lang_common['Error 404 text'], S2_BASE_URL),
+		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
 	($hook = s2_hook('fn_error_404_pre_replace')) ? eval($hook) : null;

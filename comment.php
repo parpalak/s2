@@ -21,10 +21,10 @@ if (isset($_GET['go']))
 
 	$template = s2_get_service_template();
 	$replace = array(
-		'<!-- head_title -->'	=> $lang_comments['Comment sent'],
-		'<!-- title -->'		=> '<h1>'.$lang_comments['Comment sent'].'</h1>',
-		'<!-- text -->'			=> sprintf($lang_comments['Comment sent info'], $_GET['go'], S2_BASE_URL.'/'),
-		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+		'<!-- s2_head_title -->'	=> $lang_comments['Comment sent'],
+		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Comment sent'].'</h1>',
+		'<!-- s2_text -->'			=> sprintf($lang_comments['Comment sent info'], $_GET['go'], S2_BASE_URL.'/'),
+		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
 	($hook = s2_hook('cmnt_pre_sent_comment_output')) ? eval($hook) : null;
@@ -63,10 +63,10 @@ if (isset($_GET['unsubscribe']))
 
 				$template = s2_get_service_template();
 				$replace = array(
-					'<!-- head_title -->'	=> $lang_comments['Unsubscribed OK'],
-					'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
-					'<!-- text -->'			=> $lang_comments['Unsubscribed OK info'],
-					'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+					'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
+					'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
+					'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
+					'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 				);
 
 				($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
@@ -81,10 +81,10 @@ if (isset($_GET['unsubscribe']))
 
 	$template = s2_get_service_template();
 	$replace = array(
-		'<!-- head_title -->'	=> $lang_comments['Unsubscribed failed'],
-		'<!-- title -->'		=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
-		'<!-- text -->'			=> $lang_comments['Unsubscribed failed info'],
-		'<!-- debug -->'		=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+		'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed failed'],
+		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
+		'<!-- s2_text -->'			=> $lang_comments['Unsubscribed failed info'],
+		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
 	($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
@@ -147,9 +147,9 @@ if (isset($_POST['preview']))
 	header('Content-Type: text/html; charset=utf-8');
 
 	$template = s2_get_service_template();
-	$replace['<!-- head_title -->'] = $lang_comments['Comment preview'];
-	$replace['<!-- title -->'] = '<h1>'.$lang_comments['Comment preview'].'</h1>';
-	$replace['<!-- text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
+	$replace['<!-- s2_head_title -->'] = $lang_comments['Comment preview'];
+	$replace['<!-- s2_title -->'] = '<h1>'.$lang_comments['Comment preview'].'</h1>';
+	$replace['<!-- s2_text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
 
 	$name = '<strong>'.($show_email ? s2_js_mailto(s2_htmlencode($name), $email) : s2_htmlencode($name)).'</strong>';
 
@@ -157,11 +157,11 @@ if (isset($_POST['preview']))
 
 	$comments = "\t\t\t\t".'<div class="reply_info">'.sprintf($lang_common['Comment info format'], s2_date_time(time()), $name).'</div>'."\n".
 		"\t\t\t\t".'<div class="reply">'.s2_bbcode_to_html(s2_htmlencode($text)).'</div>'."\n";
-	$replace['<!-- text -->'] = '<p>'.$lang_comments['Comment preview info'].'</p>'."\n".
+	$replace['<!-- s2_text -->'] = '<p>'.$lang_comments['Comment preview info'].'</p>'."\n".
 		$comments.
 		"\t\t\t\t".'<h2>'.$lang_common['Post a comment'].'</h2>'."\n"
-		.$replace['<!-- text -->'];
-	$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+		.$replace['<!-- s2_text -->'];
+	$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
@@ -193,17 +193,17 @@ if (!empty($errors))
 	header('Content-Type: text/html; charset=utf-8');
 
 	$template = s2_get_service_template();
-	$replace['<!-- head_title -->'] = $lang_common['Error'];
-	$replace['<!-- title -->'] = '<h1>'.$lang_common['Error'].'</h1>';
-	$replace['<!-- text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
+	$replace['<!-- s2_head_title -->'] = $lang_common['Error'];
+	$replace['<!-- s2_title -->'] = '<h1>'.$lang_common['Error'].'</h1>';
+	$replace['<!-- s2_text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
 
 	$error_text = '<p>'.$lang_comment_errors['Error message'].'</p><ul>';
 	foreach ($errors as $error)
 		$error_text .=  '<li>'.$error.'</li>';
 	$error_text .=  '</ul>';
 
-	$replace['<!-- text -->'] = $error_text.'<p>'.$lang_comments['Fix error'].'</p>'.$replace['<!-- text -->'];
-	$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+	$replace['<!-- s2_text -->'] = $error_text.'<p>'.$lang_comments['Fix error'].'</p>'.$replace['<!-- s2_text -->'];
+	$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
 	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
 

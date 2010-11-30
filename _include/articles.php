@@ -465,10 +465,10 @@ function parse_page_url ($request_uri)
 	// Getting page template
 	$template = s2_get_template($template_id);
 
-	$is_menu = strpos($template, '<!-- menu -->') !== false;
+	$is_menu = strpos($template, '<!-- s2_menu -->') !== false;
 
 	// Dealing with sections, subsections, neighbours
-	if ($page['children_exist'] && (($page['children_preview'] && strpos($template, '<!-- subarticles -->') !== false) || $is_menu))
+	if ($page['children_exist'] && (($page['children_preview'] && strpos($template, '<!-- s2_subarticles -->') !== false) || $is_menu))
 	{
 		// It's a section. We have to fetch subsections and articles.
 
@@ -570,7 +570,7 @@ function parse_page_url ($request_uri)
 		}
 	}
 
-	if (!$page['children_exist'] && ($is_menu || strpos($template, '<!-- back_forward -->') !== false))
+	if (!$page['children_exist'] && ($is_menu || strpos($template, '<!-- s2_back_forward -->') !== false))
 	{
 		// It's an article. We have to fetch other articles in the parent section
 
@@ -613,11 +613,11 @@ function parse_page_url ($request_uri)
 	}
 
 	// Tags
-	if (strpos($template, '<!-- article_tags -->') !== false)
+	if (strpos($template, '<!-- s2_article_tags -->') !== false)
 		$page['article_tags'] = s2_process_tags($id);
 
 	// Comments
-	if ($page['commented'] && S2_SHOW_COMMENTS && strpos($template, '<!-- comments -->') !== false)
+	if ($page['commented'] && S2_SHOW_COMMENTS && strpos($template, '<!-- s2_comments -->') !== false)
 	{
 		$query = array(
 			'SELECT'	=> 'nick, time, email, show_email, good, text',

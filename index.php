@@ -72,7 +72,7 @@ s2_no_cache(false);
 //
 
 // HTML head
-$replace['<!-- head_title -->'] = empty($page['head_title']) ?
+$replace['<!-- s2_head_title -->'] = empty($page['head_title']) ?
 	(!empty($page['title']) ? $page['title'].' - ' : '').S2_SITE_NAME :
 	$page['head_title'];
 
@@ -86,57 +86,57 @@ if (!empty($page['meta_description']))
 	$meta_tags[] = '<meta name="description" content="'.s2_htmlencode($page['meta_description']).'" />';
 
 ($hook = s2_hook('idx_pre_meta_merge')) ? eval($hook) : null;
-$replace['<!-- meta -->'] = implode("\n", $meta_tags);
+$replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
 
-$replace['<!-- link_rss -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.S2_BASE_URL.'/rss.xml" />';
+$replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.S2_BASE_URL.'/rss.xml" />';
 
 // Including the style
 ob_start();
 include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
-$replace['<!-- styles -->'] = ob_get_clean();
+$replace['<!-- s2_styles -->'] = ob_get_clean();
 
 // Content
-$replace['<!-- site_title -->'] = S2_SITE_NAME;
+$replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
 
-$replace['<!-- title -->'] = !empty($page['title']) ? '<h1>'.$page['title'].'</h1>' : '';
-$replace['<!-- date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
-$replace['<!-- crumbs -->'] = isset($page['path']) ? $page['path'] : '';
-$replace['<!-- text -->'] = isset($page['text']) ? $page['text'] : '';
-$replace['<!-- subarticles -->'] = isset($page['subcontent']) ? $page['subcontent'] : '';
-$replace['<!-- comments -->'] = isset($page['comments']) ? $page['comments'] : '';
+$replace['<!-- s2_title -->'] = !empty($page['title']) ? '<h1>'.$page['title'].'</h1>' : '';
+$replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
+$replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $page['path'] : '';
+$replace['<!-- s2_text -->'] = isset($page['text']) ? $page['text'] : '';
+$replace['<!-- s2_subarticles -->'] = isset($page['subcontent']) ? $page['subcontent'] : '';
+$replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
 
 if (S2_ENABLED_COMMENTS && $page['commented'])
-	$replace['<!-- comment_form -->'] = '<h2 class="comment form">'.$lang_common['Post a comment'].'</h2>'."\n".s2_comment_form($page['id']);
+	$replace['<!-- s2_comment_form -->'] = '<h2 class="comment form">'.$lang_common['Post a comment'].'</h2>'."\n".s2_comment_form($page['id']);
 else
-	$replace['<!-- comment_form -->'] = '';
+	$replace['<!-- s2_comment_form -->'] = '';
 
-$replace['<!-- back_forward -->'] = !empty($page['back_forward']) ? $page['back_forward'] : '';
+$replace['<!-- s2_back_forward -->'] = !empty($page['back_forward']) ? $page['back_forward'] : '';
 
 // Aside
-$replace['<!-- menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
-$replace['<!-- article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';
+$replace['<!-- s2_menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
+$replace['<!-- s2_article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';
 
-if (strpos($template, '<!-- last_comments -->') !== false && ($last_comments = s2_last_artilce_comments()))
-	$replace['<!-- last_comments -->'] = '<div class="header">'.$lang_common['Last comments'].'</div>'.$last_comments;
+if (strpos($template, '<!-- s2_last_comments -->') !== false && ($last_comments = s2_last_artilce_comments()))
+	$replace['<!-- s2_last_comments -->'] = '<div class="header">'.$lang_common['Last comments'].'</div>'.$last_comments;
 
-if (strpos($template, '<!-- last_articles -->') !== false)
-	$replace['<!-- last_articles -->'] = s2_last_articles();
+if (strpos($template, '<!-- s2_last_articles -->') !== false)
+	$replace['<!-- s2_last_articles -->'] = s2_last_articles();
 
 // Footer
 $author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
 $link = S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : '<a href="'.S2_BASE_URL.'/">'.$author.'</a>';
 
-$replace['<!-- copyright -->'] = (S2_START_YEAR != date('Y') ?
+$replace['<!-- s2_copyright -->'] = (S2_START_YEAR != date('Y') ?
 	sprintf($lang_common['Copyright 2'], $link, S2_START_YEAR, date('Y')) :
 	sprintf($lang_common['Copyright 1'], $link, date('Y'))).' '.
 	sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
 
 // Queries
-$replace['<!-- debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
 $etag = md5($template);
 // Add here placeholders to be excluded from the ETag calculation
-$etag_skip = array('<!-- comment_form -->');
+$etag_skip = array('<!-- s2_comment_form -->');
 
 ($hook = s2_hook('idx_template_pre_replace')) ? eval($hook) : null;
 
@@ -155,7 +155,7 @@ if (defined('S2_DEBUG'))
 {
 	list($usec, $sec) = explode(' ', microtime());
 	$page['generate_time'] = 't = '.s2_number_format(((float)$usec + (float)$sec - $s2_start), true, 3).'; q = '.$s2_db->get_num_queries();
-	$template = str_replace('<!-- querytime -->', $page['generate_time'], $template);
+	$template = str_replace('<!-- s2_querytime -->', $page['generate_time'], $template);
 	$etag .= md5($page['generate_time']);
 }
 

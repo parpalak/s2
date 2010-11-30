@@ -71,7 +71,7 @@ $template = $return ? $return : s2_get_template('site.php');
 
 ob_start();
 include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
-$template = str_replace('<!-- styles -->', ob_get_clean(), $template);
+$template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
