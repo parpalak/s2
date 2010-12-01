@@ -255,7 +255,7 @@ $s2_db->drop_field('tags', 's2_blog_important');
 	<hooks>
 
 		<hook id="rq_start,ai_start,idx_start"><![CDATA[
-define('BLOG_BASE', S2_PATH.'/'.urlencode(S2_BLOG_URL).'/');
+define('BLOG_BASE', S2_PATH.'/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/');
 define('BLOG_KEYWORDS', BLOG_BASE.urlencode(S2_TAGS_URL).'/');
 		]]></hook>
 
@@ -652,7 +652,7 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 
 		<hook id="cmnt_pre_path_check"><![CDATA[
 if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
-	$path = '/'.urlencode(S2_BLOG_URL).date('/Y/m/d', $row['create_time']);
+	$path = '/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $row['create_time']);
 		]]></hook>
 
 		<hook id="cmnt_pre_save_comment_qr"><![CDATA[
@@ -772,7 +772,7 @@ if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
 	global $lang_s2_blog;
 
 	$rss_title = S2_BLOG_TITLE;
-	$rss_link = S2_BASE_URL.'/'.urlencode(S2_BLOG_URL).'/';
+	$rss_link = S2_BASE_URL.'/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/';
 	$rss_description = sprintf($lang_s2_blog['RSS description'], S2_BLOG_TITLE);
 }
 		]]></hook>
@@ -788,7 +788,7 @@ if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
 			'text'			=> $s2_blog_post['text'].(!empty($s2_blog_post['tags']) ? '<p>'.sprintf($lang_s2_blog['Tags:'], $s2_blog_post['tags']).'</p>' : ''),
 			'time'			=> $s2_blog_post['create_time'],
 			'modify_time'	=> $s2_blog_post['modify_time'],
-			'rel_path'		=> '/'.urlencode(S2_BLOG_URL).date('/Y/m/d/', $s2_blog_post['create_time']).urlencode($s2_blog_post['url']),
+			'rel_path'		=> '/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $s2_blog_post['create_time']).urlencode($s2_blog_post['url']),
 		);
 	return $s2_blog_items;
 }
@@ -797,7 +797,7 @@ if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
 		<hook id="idx_pre_meta_merge"><![CDATA[
 if (!isset($lang_s2_blog))
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-$meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.S2_BASE_URL.'/'.urlencode(S2_BLOG_URL).'/rss.xml" />';
+$meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.S2_BASE_URL.'/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml" />';
 		]]></hook>
 
 		<hook id="fn_s2_count_rss_count_start"><![CDATA[

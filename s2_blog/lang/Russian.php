@@ -57,7 +57,7 @@ $lang_s2_blog = array(
 'Edit blog perm'			=> 'Редактировать блог',
 
 'Blog URL'					=> 'URL блога',
-'Blog URL label'			=> 'Часть URL для блога (без слешей). Например, «blog».',
+'Blog URL label'			=> 'Часть URL для блога (без слешей в начале и в конце). Например, «blog».',
 'Blog title'				=> 'Название блога',
 'Blog title label'			=> 'Выводится в теге &lt;title&gt;, доступно в шаблонах',
 'Blog crumbs'				=> 'Начало «хлебных крошек»',
