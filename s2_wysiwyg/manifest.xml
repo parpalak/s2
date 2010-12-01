@@ -41,11 +41,11 @@ s2_add_js_header('SetDocumentPath("'.S2_PATH.s2_path_from_id($id).'"); tinyMCE.e
 s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "wText");');
 		]]></hook>
 
-		<hook id="fn_output_article_form_pre_parag_btn,fn_s2_blog_post_form_after_labels" priority="9"><![CDATA[
+		<hook id="fn_output_article_form_pre_parag_btn,fn_s2_blog_post_form_pre_parag_btn" priority="9"><![CDATA[
 ob_start();
 		]]></hook>
 
-		<hook id="fn_output_article_form_pre_save,fn_s2_blog_post_form_after_clear" priority="1"><![CDATA[
+		<hook id="fn_output_article_form_pre_template,fn_s2_blog_post_form_pre_labels" priority="1"><![CDATA[
 ob_end_clean();
 		]]></hook>
 
