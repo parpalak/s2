@@ -571,6 +571,8 @@ function s2_blog_last_posts_array ()
 		$posts[$row['id']] = $row;
 		$ids[] = $row['id'];
 	}
+	if (!count($ids))
+		return array();
 
 	$ids = implode(', ', $ids);
 	$see_also = array();
@@ -651,6 +653,8 @@ function s2_blog_last_posts ()
 function s2_blog_last_post ()
 {
 	$posts = s2_blog_last_posts_array();
+	if (!count($posts))
+		return '';
 
 	$html = '<h2 class="preview">%1$s<a href="%2$s">%3$s</a></h3>'."\n".
 		'<div class="preview time">%5$s</div>'."\n".
@@ -716,7 +720,7 @@ function s2_blog_recent_comments ()
 	while ($row = $s2_db->fetch_assoc($result))
 		$output .= '<li><a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#'.$row['count'].'">'.$row['title'].'</a>, <em>'.$row['nick'].'</em></li>';
 
-	return '<ul>'.$output.'</ul>';
+	return $output ? '<ul>'.$output.'</ul>' : '';
 }
 
 function s2_blog_navigation ($cur_url)
