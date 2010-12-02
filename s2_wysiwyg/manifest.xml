@@ -15,7 +15,7 @@
 <extension for="S2" engine="1.0">
 	<id>s2_wysiwyg</id>
 	<title>WYSIWYG</title>
-	<version>1.0a</version>
+	<version>1.0a1</version>
 	<description>Adds TinyMCE WYSIWYG editor to the article edit form.</description>
 	<author>Roman Parpalak</author>
 
