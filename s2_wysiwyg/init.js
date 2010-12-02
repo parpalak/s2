@@ -13,6 +13,7 @@ tinyMCE.init({
 	mode: "exact",
 	elements : "wText",
 	theme : "advanced",
+	skin : "s2",
 	gecko_spellcheck : true,
 	convert_fonts_to_spans : true,
 	language : "en",
