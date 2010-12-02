@@ -1203,7 +1203,7 @@ function Preview ()
 	if (!eTextarea)
 		return;
 
-	var s = str_replace('<!-- s2_text -->', eTextarea.value, template);alert(s);
+	var s = str_replace('<!-- s2_text -->', eTextarea.value, template);
 	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);
 	window.frames['preview_frame'].document.open();
 	window.frames['preview_frame'].document.write(s);
