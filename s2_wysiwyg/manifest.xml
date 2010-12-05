@@ -50,7 +50,7 @@ ob_end_clean();
 		]]></hook>
 
 		<hook id="fn_toolbar_start"><![CDATA[
-return '';
+return '<hr />';
 		]]></hook>
 
 		<hook id="fn_output_article_form_pre_text,fn_s2_blog_post_form_pre_text"><![CDATA[
