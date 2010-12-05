@@ -484,7 +484,7 @@ function parse_page_url ($request_uri)
 		$query = array (
 			'SELECT'	=> 'title, url, ('.$raw_query1.') IS NOT NULL AS children_exist, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'parent_id = '.$id.' AND published=1',
+			'WHERE'		=> 'parent_id = '.$id.' AND published = 1',
 			'ORDER BY'	=> 'priority'
 		);
 		($hook = s2_hook('fn_parse_page_url_pre_get_children')) ? eval($hook) : null;
