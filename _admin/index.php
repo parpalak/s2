@@ -111,7 +111,18 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 		<dt id="list_tab"><?php echo $lang_admin['Site']; ?></dt>
 		<dd>
 			<div class="reducer" id="tree_div">
-				<div id="tree_panel" class="l-float">
+				<div id="keytable" class="r-float">
+					<div class="tagswitcher"><img class="closed" src="i/1.gif" alt="<?php echo $lang_admin['Show tags']; ?>" onclick="return SwitchTags(this);"></div>
+					<div id="tag_values"><?php echo $lang_admin['Choose tag']; ?></div>
+					<div id="tag_names"><ul id="tag_list"></ul></div>
+				</div>
+<?php
+
+	$padding = 2.5;
+	($hook = s2_hook('ai_pre_tree_col')) ? eval($hook) : null;
+
+?>
+				<div class="l-float no-border" style="padding-bottom: <?php echo $padding; ?>em;">
 					<div class="toolbar">
 						<img class="expand" src="i/1.gif" onclick="OpenAll(); return false;" alt="<?php echo $lang_admin['Expand']; ?>" />
 						<img class="collapse" src="i/1.gif" onclick="CloseAll(); return false;" alt="<?php echo $lang_admin['Collapse']; ?>" />
@@ -120,11 +131,6 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 					</div>
 					<?php s2_context_buttons(); ?>
 					<div id="tree" class="treetree"></div>
-				</div>
-				<div id="keytable" class="r-float">
-					<div class="tagswitcher"><img class="closed" src="i/1.gif" alt="<?php echo $lang_admin['Show tags']; ?>" onclick="return SwitchTags(this);"></div>
-					<div id="tag_values"><?php echo $lang_admin['Choose tag']; ?></div>
-					<div id="tag_names"><ul id="tag_list"></ul></div>
 				</div>
 			</div>
 		</dd>

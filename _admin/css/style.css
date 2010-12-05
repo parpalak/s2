@@ -4,7 +4,6 @@
 .tabsheets dd .reducer,
 .r-float,
 .l-float,
-.border,
 .text_wrapper,
 #tag_values,
 .tagswitcher,
@@ -24,8 +23,8 @@ div.input.text input,
 
 html,
 .tabsheets,
-.border,
 .r-float,
+.l-float,
 .tabsheets dd .no-scroll {
 	overflow: hidden;
 	}
@@ -42,8 +41,7 @@ body {
 .tabsheets dd .reducer form[name="artform"],
 .tabsheets dd .reducer form[name="commform"],
 .r-float,
-.l-float,
-.border {
+.l-float {
 	height: 100%;
 	}
 
@@ -323,21 +321,11 @@ ul .but_panel .delete {
 
 /* Tags */
 
-#tree_panel {
-	padding-bottom: 30px;
-	float: left;
-	width: 100%;
-	margin-right: -30px;
-	padding-right: 30px;
-	}
-
 #keytable {
-	float: right;
 	width: 16px; /**/
 	border: 0;
 	padding: 0;
 	overflow: hidden;
-	background: #eee;
 	}
 	#keytable div {
 		float: left;
@@ -530,7 +518,7 @@ table.sort {
 
 /*===========================[Editor styles]==================================*/
 
-.border,
+.l-float,
 .r-float {
 	border: 1px solid #eee;
 	border-radius: 4px;
@@ -539,18 +527,10 @@ table.sort {
 	border-color: #fff #aaa #aaa #fff;
 	padding: 5px;
 	}
-
-.l-float {
-	float: left;
-	width: 100%;
-	margin-right: -320px;
-	padding-right: 320px;
-	}
-
-.pad-1 {
-	margin-right: -160px;
-	padding-right: 160px;
-	}
+	.l-float.no-border {
+		border: none;
+		padding: 0;
+		}
 
 .r-float {
 	float: right;

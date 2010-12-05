@@ -211,33 +211,6 @@ function s2_output_comment_form ($comment, $type)
 <div class="text_wrapper" style="padding-bottom: 2.167em">
 	<?php echo s2_comment_menu_links(); ?>
 	<form name="commform" action="" onsubmit="setTimeout('SaveComment(\'<?php echo $type; ?>\');', 0); return false;">
-		<div class="l-float pad-1">
-			<div class="border">
-				<table class="fields">
-<?php ($hook = s2_hook('fn_output_comment_form_pre_name')) ? eval($hook) : null; ?>
-					<tr>
-						<td class="label"><?php echo $lang_admin['Name:']; ?></td>
-						<td><input type="text" name="comment[nick]" size="100" maxlength="255" value="<?php echo s2_htmlencode($comment['nick']); ?>" /></td>
-					</tr>
-<?php ($hook = s2_hook('fn_output_comment_form_pre_email')) ? eval($hook) : null; ?>
-					<tr>
-						<td class="label"><?php echo $lang_admin['Email:']; ?></td>
-						<td><input type="text" name="comment[email]" size="100" maxlength="255" value="<?php echo $comment['email']; ?>" /></td>
-					</tr>
-<?php ($hook = s2_hook('fn_output_comment_form_after_email')) ? eval($hook) : null; ?>
-				</table>
-				<input type="hidden" name="comment[id]" value="<?php echo $comment['id']; ?>" />
-<?php
-
-	$padding = 4.3;
-	($hook = s2_hook('fn_output_comment_form_pre_text')) ? eval($hook) : null;
-
-?>
-				<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
-					<textarea id="commtext" name="comment[text]"><?php echo s2_htmlencode($comment['text']); ?></textarea>
-				</div>
-			</div>
-		</div>
 		<div class="r-float">
 			<label for="eml"><input type="checkbox" id="eml" name="comment[show_email]" value="1"<?php if ($comment['show_email']) echo ' checked="checked"'?> />
 			<?php echo $lang_admin['Show email']; ?></label>
@@ -247,6 +220,31 @@ function s2_output_comment_form ($comment, $type)
 			<hr />
 <?php ($hook = s2_hook('fn_output_comment_form_pre_submit')) ? eval($hook) : null; ?>
 			<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
+		</div>
+		<div class="l-float">
+			<table class="fields">
+<?php ($hook = s2_hook('fn_output_comment_form_pre_name')) ? eval($hook) : null; ?>
+				<tr>
+					<td class="label"><?php echo $lang_admin['Name:']; ?></td>
+					<td><input type="text" name="comment[nick]" size="100" maxlength="255" value="<?php echo s2_htmlencode($comment['nick']); ?>" /></td>
+				</tr>
+<?php ($hook = s2_hook('fn_output_comment_form_pre_email')) ? eval($hook) : null; ?>
+				<tr>
+					<td class="label"><?php echo $lang_admin['Email:']; ?></td>
+					<td><input type="text" name="comment[email]" size="100" maxlength="255" value="<?php echo $comment['email']; ?>" /></td>
+				</tr>
+<?php ($hook = s2_hook('fn_output_comment_form_after_email')) ? eval($hook) : null; ?>
+			</table>
+			<input type="hidden" name="comment[id]" value="<?php echo $comment['id']; ?>" />
+<?php
+
+	$padding = 4.3;
+	($hook = s2_hook('fn_output_comment_form_pre_text')) ? eval($hook) : null;
+
+?>
+			<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
+				<textarea id="commtext" name="comment[text]"><?php echo s2_htmlencode($comment['text']); ?></textarea>
+			</div>
 		</div>
 	</form>
 </div>

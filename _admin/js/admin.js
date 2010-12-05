@@ -1054,8 +1054,6 @@ function SwitchTags (eItem)
 		document.getElementById('keytable').style.width = '16px';
 		document.getElementById('tag_values').style.display = 'none';
 		document.getElementById('tag_names').style.display = 'none';
-		document.getElementById('tree_panel').style.marginRight = '-30px';
-		document.getElementById('tree_panel').style.paddingRight = '30px';
 		eItem.className = 'closed';
 		eItem.alt = S2_LANG_SHOW_TAGS;
 	}
@@ -1065,8 +1063,6 @@ function SwitchTags (eItem)
 		document.getElementById('keytable').style.width = '416px';
 		document.getElementById('tag_values').style.display = 'block';
 		document.getElementById('tag_names').style.display = 'block';
-		document.getElementById('tree_panel').style.marginRight = '-430px';
-		document.getElementById('tree_panel').style.paddingRight = '430px';
 		eItem.className = 'opened';
 		eItem.alt = S2_LANG_HIDE_TAGS;
 	}
