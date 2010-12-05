@@ -296,45 +296,6 @@ function s2_blog_edit_post_form ($id)
 
 ?>
 <form name="artform" action="" onsubmit="setTimeout('SaveArticle(\'save_blog\');', 0); return false;">
-	<div class="l-float">
-		<div class="border">
-			<table class="fields">
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_title')) ? eval($hook) : null; ?>
-				<tr>
-					<td class="label"><?php echo $lang_admin['Title']; ?></td>
-					<td><input type="text" name="page[title]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['title']); ?>" /></td>
-				</tr>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_title')) ? eval($hook) : null; ?>
-			</table>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_fields1')) ? eval($hook) : null; ?>
-			<table class="fields">
-				<tr>
-					<td class="label"><?php echo $lang_admin['Create time']; ?></td>
-					<td><nobr>
-						<?php echo s2_get_time_input('cr_time', $cr_time); ?>
-						<a href="#" class="js" onclick="return SetTime(document.artform, 'cr_time');"><?php echo $lang_admin['Now']; ?></a>
-					</nobr></td>
-					<td class="label"><?php echo $lang_admin['Modify time']; ?></td>
-					<td><nobr>
-						<?php echo s2_get_time_input('m_time', $m_time); ?>
-						<a href="#" class="js" onclick="return SetTime(document.artform, 'm_time');"><?php echo $lang_admin['Now']; ?></a>
-					</nobr></td>
-				</tr>
-			</table>
-<?php
-
-	($hook = s2_hook('fn_s2_blog_post_form_after_fields2')) ? eval($hook) : null;
-
-	s2_toolbar();
-	$padding = 8;
-	($hook = s2_hook('fn_s2_blog_post_form_pre_text')) ? eval($hook) : null;
-
-?>
-			<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
-				<textarea id="wText" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
-			</div>
-		</div>
-	</div>
 <?php ($hook = s2_hook('fn_s2_blog_post_form_pre_tag_col')) ? eval($hook) : null; ?>
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
@@ -411,6 +372,44 @@ function s2_blog_edit_post_form ($id)
 		<br />
 		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo $page['path']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
 <?php ($hook = s2_hook('fn_s2_blog_post_form_after_prv')) ? eval($hook) : null; ?>
+	</div>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_cols')) ? eval($hook) : null; ?>
+	<div class="l-float">
+		<table class="fields">
+<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_title')) ? eval($hook) : null; ?>
+			<tr>
+				<td class="label"><?php echo $lang_admin['Title']; ?></td>
+				<td><input type="text" name="page[title]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['title']); ?>" /></td>
+			</tr>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_title')) ? eval($hook) : null; ?>
+		</table>
+<?php ($hook = s2_hook('fn_s2_blog_post_form_after_fields1')) ? eval($hook) : null; ?>
+		<table class="fields">
+			<tr>
+				<td class="label"><?php echo $lang_admin['Create time']; ?></td>
+				<td><nobr>
+					<?php echo s2_get_time_input('cr_time', $cr_time); ?>
+					<a href="#" class="js" onclick="return SetTime(document.artform, 'cr_time');"><?php echo $lang_admin['Now']; ?></a>
+				</nobr></td>
+				<td class="label"><?php echo $lang_admin['Modify time']; ?></td>
+				<td><nobr>
+					<?php echo s2_get_time_input('m_time', $m_time); ?>
+					<a href="#" class="js" onclick="return SetTime(document.artform, 'm_time');"><?php echo $lang_admin['Now']; ?></a>
+				</nobr></td>
+			</tr>
+		</table>
+<?php
+
+	($hook = s2_hook('fn_s2_blog_post_form_after_fields2')) ? eval($hook) : null;
+
+	s2_toolbar();
+	$padding = 8;
+	($hook = s2_hook('fn_s2_blog_post_form_pre_text')) ? eval($hook) : null;
+
+?>
+		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
+			<textarea id="wText" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
+		</div>
 	</div>
 </form>
 <?
