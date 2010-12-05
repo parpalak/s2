@@ -353,17 +353,17 @@ function s2_output_article_form ($id)
 				</tr>
 <?php ($hook = s2_hook('fn_output_article_form_pre_mkeys')) ? eval($hook) : null; ?>
 				<tr>
-					<td class="label"><?php echo $lang_admin['Meta keywords']; ?></td>
+					<td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta keywords']; ?></td>
 					<td><input type="text" name="page[meta_keys]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_keys']); ?>" /></td>
 				</tr>
 <?php ($hook = s2_hook('fn_output_article_form_pre_mdesc')) ? eval($hook) : null; ?>
 				<tr>
-					<td class="label"><?php echo $lang_admin['Meta descr']; ?></td>
+					<td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta descr']; ?></td>
 					<td><input type="text" name="page[meta_desc]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_desc']); ?>" /></td>
 				</tr>
 <?php ($hook = s2_hook('fn_output_article_form_pre_cite')) ? eval($hook) : null; ?>
 				<tr>
-					<td class="label"><?php echo $lang_admin['Cite']; ?></td>
+					<td class="label" title="<?php echo $lang_admin['Excerpt help']; ?>"><?php echo $lang_admin['Excerpt']; ?></td>
 					<td><input type="text" name="page[excerpt]" size="100" value="<?php echo s2_htmlencode($page['excerpt']); ?>" /></td>
 				</tr>
 <?php ($hook = s2_hook('fn_output_article_form_after_cite')) ? eval($hook) : null; ?>
@@ -376,7 +376,7 @@ function s2_output_article_form ($id)
 						<?php echo s2_get_time_input('cr_time', $cr_time); ?>
 						<a href="#" class="js" onclick="return SetTime(document.artform, 'cr_time');"><?php echo $lang_admin['Now']; ?></a>
 					</nobr></td>
-					<td class="label"><?php echo $lang_admin['Modify time']; ?></td>
+					<td class="label" title="<?php echo $lang_admin['Modify time help']; ?>"><?php echo $lang_admin['Modify time']; ?></td>
 					<td><nobr>
 						<?php echo s2_get_time_input('m_time', $m_time); ?>
 						<a href="#" class="js" onclick="return SetTime(document.artform, 'm_time');"><?php echo $lang_admin['Now']; ?></a>
