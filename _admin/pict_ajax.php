@@ -239,3 +239,5 @@ elseif ($action == 'upload')
 <?
 
 }
+
+($hook = s2_hook('prq_custom_action')) ? eval($hook) : null;

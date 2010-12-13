@@ -202,5 +202,6 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 <?php ($hook = s2_hook('ai_last_tab')) ? eval($hook) : null; ?>
 	</dl>
 	<script type="text/javascript">Make_Tabsheet();</script>
+<?php ($hook = s2_hook('ai_after_tabs')) ? eval($hook) : null; ?>
 </body>
 </html>
