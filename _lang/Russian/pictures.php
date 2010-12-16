@@ -6,7 +6,7 @@ $lang_pictures = array(
 'Pictures'						=> 'Картинки',
 
 'Upload file'					=> 'Загрузка файла',
-'Upload limit'					=> '<small title="Параметры upload_max_filesize и post_max_size в php.ini">Каждый файл до %1$s, всего до %2$s.</small>',
+'Upload limit'					=> '<small title="Параметры upload_max_filesize и post_max_size в php.ini">Каждый файл до&nbsp;%1$s, всего до&nbsp;%2$s за&nbsp;раз.</small>',
 'Upload'						=> 'Закачать',
 'Upload failed'					=> 'При загрузке файлов возникли следующие ошибки:\n\n%s',
 'Upload file error'				=> '%1$s: %2$s',
