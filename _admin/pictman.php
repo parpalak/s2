@@ -9,7 +9,7 @@
  * @package S2
  */
 
-define(S2_ROOT, '../');
+define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';

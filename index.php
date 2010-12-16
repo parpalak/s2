@@ -11,7 +11,7 @@
 list($usec, $sec) = explode(' ', microtime());
 $s2_start = ((float)$usec + (float)$sec);
 
-define(S2_ROOT, './');
+define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
 
 ($hook = s2_hook('idx_start')) ? eval($hook) : null;
