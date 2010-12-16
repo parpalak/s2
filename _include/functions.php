@@ -64,6 +64,23 @@ function s2_number_format ($number, $trailing_zero = false, $decimal_count = fal
 	return $result;
 }
 
+function s2_return_bytes ($val)
+{
+	$val = trim($val);
+	$last = strtolower($val[strlen($val) - 1]);
+	switch($last)
+	{
+		case 'g':
+			$val *= 1024;
+		case 'm':
+			$val *= 1024;
+		case 'k':
+			$val *= 1024;
+	}
+
+	return $val;
+}
+
 function s2_frendly_filesize ($size)
 {
 	global $lang_common, $lang_filesize;

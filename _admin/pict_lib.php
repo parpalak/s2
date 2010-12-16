@@ -258,23 +258,6 @@ function s2_make_thumbnail ($filename, $max_size = 100)
 // Displaying HTML form for pictures uploading
 //
 
-function s2_return_bytes ($val)
-{
-	$val = trim($val);
-	$last = strtolower($val[strlen($val) - 1]);
-	switch($last)
-	{
-		case 'g':
-			$val *= 1024;
-		case 'm':
-			$val *= 1024;
-		case 'k':
-			$val *= 1024;
-	}
-
-	return $val;
-}
-
 function s2_upload_form ()
 {
 	global $session_id, $lang_pictures;
