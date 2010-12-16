@@ -62,7 +62,7 @@ if (!$return)
 {
 	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/articles.php';
-	parse_page_url($request_uri);
+	s2_parse_page_url($request_uri);
 }
 
 s2_no_cache(false);

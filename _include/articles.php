@@ -343,7 +343,7 @@ function s2_process_tags ($id)
 }
 
 // Processes site pages
-function parse_page_url ($request_uri)
+function s2_parse_page_url ($request_uri)
 {
 	global $page, $s2_db, $template, $lang_common;
 
@@ -359,6 +359,8 @@ function parse_page_url ($request_uri)
 
 	$template_id = '';
 
+	($hook = s2_hook('fn_s2_parse_page_url_start')) ? eval($hook) : null;
+
 	// Walking through the page parents
 	// 1. We ensure all of them are published
 	// 2. We build "bread crumbs"
@@ -372,7 +374,7 @@ function parse_page_url ($request_uri)
 			'FROM'		=> 'articles',
 			'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
 		);
-		($hook = s2_hook('fn_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$match_num = $s2_db->num_rows($result);
@@ -383,7 +385,7 @@ function parse_page_url ($request_uri)
 
 		$row = $s2_db->fetch_assoc($result);
 
-		($hook = s2_hook('fn_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
 
 		$bread_crumbs_titles[] = s2_htmlencode($row['title']);
 		$parent_id = $row['id'];
@@ -409,7 +411,7 @@ function parse_page_url ($request_uri)
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
 	);
-	($hook = s2_hook('fn_parse_page_url_pre_get_page')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_parse_page_url_pre_get_page')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	// Error handling
@@ -487,7 +489,7 @@ function parse_page_url ($request_uri)
 			'WHERE'		=> 'parent_id = '.$id.' AND published = 1',
 			'ORDER BY'	=> 'priority'
 		);
-		($hook = s2_hook('fn_parse_page_url_pre_get_children')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_parse_page_url_pre_get_children')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$subarticles = $subsections = $menu_subsections = $menu_subarticles = array();
@@ -502,7 +504,7 @@ function parse_page_url ($request_uri)
 				);
 				$menu_subsections[] = '<li><a href="'.$current_path.'/'.urlencode($row['url']).'/">'.s2_htmlencode($row['title']).'</a></li>';
 
-				($hook = s2_hook('fn_parse_page_url_add_subsection')) ? eval($hook) : null;
+				($hook = s2_hook('fn_s2_parse_page_url_add_subsection')) ? eval($hook) : null;
 			}
 			else
 			{
@@ -515,7 +517,7 @@ function parse_page_url ($request_uri)
 				);
 				$menu_subarticles[] = '<li><a href="'.$current_path.'/'.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
 
-				($hook = s2_hook('fn_parse_page_url_add_subarticle')) ? eval($hook) : null;
+				($hook = s2_hook('fn_s2_parse_page_url_add_subarticle')) ? eval($hook) : null;
 			}
 		}
 
@@ -581,7 +583,7 @@ function parse_page_url ($request_uri)
 			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND (SELECT id FROM '.$s2_db->prefix.'articles i WHERE i.parent_id = a.id AND i.published = 1 LIMIT 1) IS NULL',
 			'ORDER BY'	=> 'priority'
 		);
-		($hook = s2_hook('fn_parse_page_url_pre_get_neighbours')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_parse_page_url_pre_get_neighbours')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$menu_articles = array();
@@ -597,7 +599,7 @@ function parse_page_url ($request_uri)
 			if ($id == $row['id'])
 				$curr_item = $i;
 
-			($hook = s2_hook('fn_parse_page_url_add_neighbour')) ? eval($hook) : null;
+			($hook = s2_hook('fn_s2_parse_page_url_add_neighbour')) ? eval($hook) : null;
 
 			$i++;
 		}
@@ -625,7 +627,7 @@ function parse_page_url ($request_uri)
 			'WHERE'		=> 'article_id = '.$id.' AND shown = 1',
 			'ORDER BY'	=> 'time'
 		);
-		($hook = s2_hook('fn_parse_page_url_pre_get_comm_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_parse_page_url_pre_get_comm_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$comments = '';
@@ -636,7 +638,7 @@ function parse_page_url ($request_uri)
 			$name = '<strong>'.($row['show_email'] ? s2_js_mailto($nick, $row['email']) : $nick).'</strong>';
 			$link = '<a name="'.$i.'" href="#'.$i.'">#'.$i.'</a>. ';
 
-			($hook = s2_hook('fn_parse_page_url_pre_comment_merge')) ? eval($hook) : null;
+			($hook = s2_hook('fn_s2_parse_page_url_pre_comment_merge')) ? eval($hook) : null;
 
 			$comments .= '<div class="reply_info'.($row['good'] ? ' good' : '').'">'.$link.sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name).'</div>'."\n".
 				'<div class="reply'.($row['good'] ? ' good' : '').'">'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</div>';
@@ -645,6 +647,8 @@ function parse_page_url ($request_uri)
 		if ($comments)
 			$page['comments'] = '<h2 class="comment">'.$lang_common['Comments'].'</h2>'.$comments;
 	}
+
+	($hook = s2_hook('fn_s2_parse_page_url_end')) ? eval($hook) : null;
 }
 
 define('S2_ARTICLES_FUNCTIONS_LOADED', 1);
