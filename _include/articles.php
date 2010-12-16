@@ -156,7 +156,7 @@ function s2_last_artilce_comments ()
 	);
 	$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
 
-	$query = array (
+	$query = array(
 		'SELECT'	=> 'time, url, title, nick, parent_id, ('.$raw_query1.') AS count',
 		'FROM'		=> 'articles AS a',
 		'JOINS'		=> array(
@@ -207,7 +207,7 @@ function s2_articles_by_tag ($tag_id)
 	);
 	$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
-	$query = array (
+	$query = array(
 		'SELECT'	=> 'a.id, url, title, parent_id, ('.$raw_query1.') IS NOT NULL AS children_exist',
 		'FROM'		=> 'articles AS a',
 		'JOINS'		=> array(
@@ -245,7 +245,7 @@ function s2_process_tags ($id)
 {
 	global $s2_db, $lang_common;
 
-	$query = array (
+	$query = array(
 		'SELECT'	=> 't.tag_id as tag_id, name, t.url as url',
 		'FROM'		=> 'tags AS t',
 		'JOINS'		=> array(
@@ -278,7 +278,7 @@ function s2_process_tags ($id)
 	);
 	$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
-	$query = array (
+	$query = array(
 		'SELECT'	=> 'title, tag_id, parent_id, url, a.id AS id, ('.$raw_query1.') IS NOT NULL AS children_exist',
 		'FROM'		=> 'articles AS a',
 		'JOINS'		=> array(
@@ -369,7 +369,7 @@ function s2_parse_page_url ($request_uri)
 	{
 		$parent_path .= urlencode($request_array[$i]).'/';
 
-		$query = array (
+		$query = array(
 			'SELECT'	=> 'id, title, template',
 			'FROM'		=> 'articles',
 			'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
@@ -406,7 +406,7 @@ function s2_parse_page_url ($request_uri)
 	);
 	$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
-	$query = array (
+	$query = array(
 		'SELECT'	=> 'id, title, meta_keys, meta_desc, pagetext, create_time, commented, template, children_preview, ('.$raw_query1.') IS NOT NULL AS children_exist',
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
@@ -483,7 +483,7 @@ function s2_parse_page_url ($request_uri)
 		);
 		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
-		$query = array (
+		$query = array(
 			'SELECT'	=> 'title, url, ('.$raw_query1.') IS NOT NULL AS children_exist, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
 			'WHERE'		=> 'parent_id = '.$id.' AND published = 1',
@@ -577,7 +577,7 @@ function s2_parse_page_url ($request_uri)
 		// It's an article. We have to fetch other articles in the parent section
 
 		// Fetching "brothers"
-		$query = array (
+		$query = array(
 			'SELECT'	=> 'title, url, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
 			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND (SELECT id FROM '.$s2_db->prefix.'articles i WHERE i.parent_id = a.id AND i.published = 1 LIMIT 1) IS NULL',
