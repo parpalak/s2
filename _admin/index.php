@@ -19,9 +19,9 @@ require 'comments.php';
 ($hook = s2_hook('ai_start')) ? eval($hook) : null;
 
 s2_no_cache();
-s2_cleanup_expired();
-
 header('Content-Type: text/html; charset=utf-8');
+
+s2_cleanup_expired();
 
 $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
 
@@ -45,7 +45,7 @@ if ($session_id == '')
 		header('Location: '.$redirect_url);
 	}
 
-	// We've told the user everything we wanted.
+	// We've already told the user everything we want to.
 	die();
 }
 
