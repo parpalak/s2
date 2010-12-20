@@ -1,0 +1,39 @@
+#s2_attachment_col {
+	width: 200px;
+	}
+	#s2_attachment_col ul {
+		padding: 0;
+		margin: 0;
+	}
+	#s2_attachment_col li {
+		padding: 0;
+		margin: 0;
+		list-style-type: none;
+		position: relative;
+		min-height: 16px;
+		}
+	#s2_attachment_col li:hover {
+		background: #ffc;
+		}
+	#s2_attachment_col li:hover .buttons {
+		display: block;
+		}
+	#s2_attachment_col li .buttons {
+		float: right;
+		display: none;
+		}
+		#s2_attachment_col li .buttons img {
+			background-image: url(../../_admin/i/icons.png);
+			background-color: #eee;
+			width: 16px;
+			height: 16px;
+			}
+		#s2_attachment_col li .buttons img:hover {
+			background-color: #fff;
+			}
+			#s2_attachment_col .buttons img.delete {
+				background-position: 0 -32px;
+				}
+			#s2_attachment_col .buttons img.rename {
+				background-position: -32px -16px;
+				}
