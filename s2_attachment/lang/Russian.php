@@ -4,7 +4,6 @@ $lang_s2_attachment = array(
 
 'Attached files'			=> 'Связанные файлы',
 
-'Upload'					=> 'Загрузить',
 'Delete'					=> 'Удалить',
 'Rename'					=> 'Переименовать',
 'New filename'				=> 'Новое название файла:',
