@@ -51,10 +51,10 @@ xmlhttp = getHTTPRequestObject();
 function unknown_error (sError, iStatus)
 {
 	if (sError.indexOf('</body>') >= 0 && sError.indexOf('</html>') >= 0)
-		window.open('javascript:document.write(\'' + sError.replace(/\\/g, "\\\\").replace(/\'/g, '\\\'') + '\'); document.close();', 's2_error', 'width=500,height=300');
+		DisplayError(sError);
 	else
-		alert(S2_LANG_UNKNOWN_ERROR + ' ' + iStatus + '\n' +
-			S2_LANG_SERVER_RESPONSE + '\n' + sError);
+		DisplayError(S2_LANG_UNKNOWN_ERROR + ' ' + iStatus + '\n' +
+				S2_LANG_SERVER_RESPONSE + '\n' + sError);
 }
 
 var after_code = '';
@@ -134,4 +134,18 @@ function POSTSyncRequest (sUrl, sParam)
 	SetWait(false);
 
 	return {'text': xmlhttp.responseText, 'status': xmlhttp.status};
+}
+
+function DisplayError (sError)
+{
+	var eDiv = document.createElement('DIV');
+	document.body.appendChild(eDiv);
+	eDiv.setAttribute('id', 'error_dialog');
+	eDiv.innerHTML = '<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div><input type="button" onclick="CloseError();" value="Ok"></div>';
+}
+
+function CloseError ()
+{
+	var eDiv = document.getElementById('error_dialog');
+	eDiv.parentNode.removeChild(eDiv);
 }

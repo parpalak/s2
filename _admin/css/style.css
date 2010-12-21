@@ -13,7 +13,8 @@
 .fields input,
 div.input.text input,
 .r-float input[type="text"],
-.extension  p.description {
+.extension  p.description,
+#error_dialog .error_text {
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -130,6 +131,57 @@ hr {
 	border: 0;
 	margin: 0;
 	}
+
+#error_dialog {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 5000;
+	text-align: center;
+	}
+	#error_dialog .error_back {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 5001;
+		background: #000;
+		-moz-opacity: 0.6;
+		opacity: 0.6;
+		filter: alpha(opacity=60);
+		}
+	#error_dialog .error_window {
+		-moz-border-radius: 10px;
+		-webkit-border-radius: 10px;
+		border-radius: 10px;
+		padding: 20px 20px 55px;
+		text-align: left;
+		margin: 5% auto 0;
+		height: 50%;
+		width: 50%;
+		background: #eee;
+		position: relative;
+		z-index: 5002;
+		}
+	#error_dialog .error_text {
+		border: 1px solid #eee;
+		border-color: #aaa #fff #fff #aaa;
+		padding: 0 3px;
+		background: #fff;
+		overflow: auto;
+		height: 100%;
+		}
+	#error_dialog > input {
+		font-size: 2em;
+		padding-left: 2em;
+		padding-right: 2em;
+		position: relative;
+		top: -48px;
+		z-index: 5002;
+		}
 
 /*=======================[Site map tab]=======================================*/
 
@@ -521,9 +573,9 @@ table.sort {
 .l-float,
 .r-float {
 	border: 1px solid #eee;
-	border-radius: 4px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	border-color: #fff #aaa #aaa #fff;
 	padding: 5px;
 	}
