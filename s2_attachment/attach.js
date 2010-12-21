@@ -18,14 +18,16 @@ function s2_attachment_file_uploaded ()
 	if (!s2_attachment_was_upload)
 		return;
 
-	var html = window.frames['s2_attachment_result'].document.getElementsByTagName('html')[0].innerHTML;
-	if (html.indexOf('S2-State-Success') >= 0)
+	var head = window.frames['s2_attachment_result'].document.getElementsByTagName('head')[0].innerHTML,
+		body = window.frames['s2_attachment_result'].document.getElementsByTagName('body')[0].innerHTML;
+
+	if (head.indexOf('S2-State-Success') >= 0 && head.indexOf('s2_attachment-State-Success') >= 0)
 	{
 		document.getElementById('s2_attachment_list').innerHTML = window.frames['s2_attachment_result'].document.getElementsByTagName('body')[0].innerHTML;
 		document.getElementById('s2_attachment_file_upload_input').innerHTML = '<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" />';
 	}
-	else
-		window.open('javascript:document.write(\'' + html.replace(/\\/g, "\\\\").replace(/\'/g, '\\\'') + '\'); document.close();', 's2_error', 'width=500,height=300');
+	else if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
+		DisplayError(body);
 }
 
 function s2_attachment_delete_file (iId, esWarning)
