@@ -15,9 +15,9 @@ div.input.text input,
 .r-float input[type="text"],
 .extension  p.description,
 #error_dialog .error_text {
-	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 	}
 
 /*===========================[General styles for height: 100%]================*/
