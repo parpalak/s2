@@ -59,11 +59,11 @@ function unknown_error (sError, iStatus)
 
 var after_code = '';
 
-function GETSyncRequest (sUrl)
+function GETSyncRequest (sRequestUrl)
 {
 	SetWait(true);
 
-	xmlhttp.open("GET", sUrl, false);
+	xmlhttp.open("GET", sRequestUrl, false);
 	xmlhttp.send(null);
 
 	if (xmlhttp.status == '408')
