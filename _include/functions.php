@@ -51,7 +51,7 @@ function s2_month ($month)
 }
 
 //
-// Output integers using current language settings
+// Outputs integers using current language settings
 //
 function s2_number_format ($number, $trailing_zero = false, $decimal_count = false)
 {
@@ -97,6 +97,53 @@ function s2_frendly_filesize ($size)
 	}
 
 	return sprintf($lang_common['Filesize format'], s2_number_format($size), $lang_filesize[$i]);
+}
+
+//
+// Workaround for processing multipart/mixed data
+// Opera sends multiple files in this format, and PHP doesn't understand it
+//
+function s2_process_multipart_mixed (&$src, &$dest)
+{
+	$separator_len = strpos($src, "\r\n");
+	$separator = substr($src, 0, $separator_len);
+	$start = $separator_len + 2;
+
+	$i = 0;
+	while (false !== ($next = strpos($src, "\r\n".$separator, $start)))
+	{
+		$file_start = 4 + strpos($src, "\r\n\r\n", $start);
+
+		$headers = substr($src, $start, $file_start - $start);
+		$filename = 'unknown';
+		if (preg_match('#filename="([^"]*)"#', $headers, $matches))
+			$filename = $matches[1];
+		$content_type = '';
+		if (preg_match('#Content-Type:\s*(\S*)#i', $headers, $matches))
+			$content_type = $matches[1];
+
+		$tmp_filename = tempnam(sys_get_temp_dir(), 'php');
+		$f = fopen($tmp_filename, 'wb');
+		while ($length = min(20480, $next - $file_start))
+		{
+			$data = substr($src, $file_start, $length);
+			fwrite($f, $data);
+			$file_start += $length;
+		}
+		fclose($f);
+
+		$dest['name'][$i] = $filename;
+		$dest['type'][$i] = $content_type;
+		$dest['tmp_name'][$i] = $tmp_filename;
+		$dest['error'][$i] =  0;
+		$dest['size'][$i] = filesize($tmp_filename);
+
+		$i++;
+
+		$start = $next + $separator_len + 2;
+	}
+
+	unset($src);
 }
 
 //
@@ -256,16 +303,22 @@ function s2_remove_bad_characters()
 
 	($hook = s2_hook('fn_remove_bad_characters_start')) ? eval($hook) : null;
 
-	function _s2_remove_bad_characters($array)
+	function _s2_remove_bad_characters(&$array)
 	{
 		global $bad_utf8_chars;
-		return is_array($array) ? array_map('_s2_remove_bad_characters', $array) : str_replace($bad_utf8_chars, '', $array);
+		if (is_array($array))
+			foreach (array_keys($array) as $key)
+				_s2_remove_bad_characters($array[$key]);
+		else
+			$array = str_replace($bad_utf8_chars, '', $array);
 	}
 
-	$_GET = _s2_remove_bad_characters($_GET);
-	$_POST = _s2_remove_bad_characters($_POST);
-	$_COOKIE = _s2_remove_bad_characters($_COOKIE);
-	$_REQUEST = _s2_remove_bad_characters($_REQUEST);
+	_s2_remove_bad_characters($_GET);
+	// Check if we expect binary data in $_POST
+	if (!defined('S2_NO_POST_BAD_CHARS'))
+		_s2_remove_bad_characters($_POST);
+	_s2_remove_bad_characters($_COOKIE);
+	_s2_remove_bad_characters($_REQUEST);
 }
 
 // Clean version string from trailing '.0's

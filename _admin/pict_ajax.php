@@ -11,6 +11,7 @@
 
 define('S2_ROOT', '../');
 
+define('S2_NO_POST_BAD_CHARS', 1);
 require S2_ROOT.'_include/common.php';
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';
@@ -200,11 +201,27 @@ elseif ($action == 'upload')
 	$errors = array();
 	clearstatcache();
 
+	$check_uploaded = true;
+
+	// A workaround for multipart/mixed data
+	if (!isset($_FILES['pictures']) && isset($_POST['pictures'][0]))
+	{
+		s2_process_multipart_mixed($_POST['pictures'][0], $_FILES['pictures']);
+		$check_uploaded = false;
+	}
+
 	foreach ($_FILES['pictures']['name'] as $i => $filename)
 	{
 		if ($_FILES['pictures']['error'][$i] !== UPLOAD_ERR_OK)
 		{
 			$error_message = isset($lang_pictures[$_FILES['pictures']['error'][$i]]) ? $lang_pictures[$_FILES['pictures']['error'][$i]] : $lang_pictures['Unknown error'];
+			$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
+			continue;
+		}
+
+		if ($check_uploaded && !is_uploaded_file($_FILES['pictures']['tmp_name'][$i]))
+		{
+			$error_message = $lang_pictures['Is upload file error'];
 			$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
 			continue;
 		}
@@ -219,7 +236,7 @@ elseif ($action == 'upload')
 
 		$uploadfile = S2_IMG_PATH.$path.'/'.$filename;
 
-		if (!move_uploaded_file($_FILES['pictures']['tmp_name'][$i], $uploadfile))
+		if (!rename($_FILES['pictures']['tmp_name'][$i], $uploadfile))
 			$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
 	}
 
