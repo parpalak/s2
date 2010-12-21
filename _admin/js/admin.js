@@ -215,6 +215,12 @@ function HideTip (e)
 	window.status = window.defaultStatus;
 }
 
+function Logout ()
+{
+	GETSyncRequest(sUrl + 'action=logout');
+	document.location.reload();
+}
+
 // Search field events handler
 
 var search_timer, search_string;
@@ -851,7 +857,7 @@ function EditArticle (iId)
 			return false;
 
 		document.getElementById('form_div').innerHTML = Response.text;
-		CommitChanges(document.artform)
+		CommitChanges(document.artform);
 		eTextarea = document.getElementById('wText');
 
 		sCurrTextId = sURI;
@@ -876,12 +882,6 @@ function LoadComments (iId)
 }
 
 //=======================[Editor button handlers]===============================
-
-function Logout ()
-{
-	GETSyncRequest(sUrl + 'action=logout');
-	document.location.reload();
-}
 
 function ClearForm()
 {
