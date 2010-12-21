@@ -89,13 +89,17 @@ function DeleteRecord (eItem, iId, sWarning)
 
 function CreateBlankRecord ()
 {
+	if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
+		return false;
+
 	var Response = GETSyncRequest(sUrl + 'action=create_blog_post');
 	if (Response.status != '200')
 		return false;
 
-	document.getElementById('form_div').innerHTML = Response.text;
-	SelectTab(document.getElementById('edit_tab'), true);
-	eTextarea = document.getElementById("wText");
+	// We've just asked about saving changes. User doesn't want to.
+	CommitChanges(document.artform);
+
+	EditRecord(Response.text);
 
 	return false;
 }

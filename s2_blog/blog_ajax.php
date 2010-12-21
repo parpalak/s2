@@ -169,7 +169,7 @@ elseif ($action == 'create_blog_post')
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	require $ext_info['path'].'/blog_lib.php';
 
-	s2_blog_edit_post_form($s2_db->insert_id());
+	echo $s2_db->insert_id();
 }
 
 elseif ($action == 'delete_blog_post')
