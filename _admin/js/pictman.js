@@ -618,7 +618,10 @@ function FileUploaded ()
 	{
 		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
 		if (Response.status == '200')
+		{
 			eFilePanel.innerHTML = Response.text;
+			document.getElementById('file_upload_input').innerHTML = '<input name="pictures[]" multiple="true" min="1" max="999" size="20" type="file" />';
+		}
 	}
 	else
 		window.open('javascript:document.write(\'' + html.replace(/\\/g, "\\\\").replace(/\'/g, '\\\'') + '\'); document.close();', 's2_error', 'width=500,height=300');
