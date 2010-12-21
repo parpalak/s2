@@ -613,8 +613,9 @@ function FileUploaded ()
 	if (!was_upload)
 		return;
 
-	var html = window.frames['submit_result'].document.getElementsByTagName('html')[0].innerHTML;
-	if (html.indexOf('S2-State-Success') >= 0)
+	var head = window.frames['submit_result'].document.getElementsByTagName('head')[0].innerHTML,
+		body = window.frames['submit_result'].document.getElementsByTagName('body')[0].innerHTML;
+	if (head.indexOf('S2-State-Success') >= 0 && !body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
 	{
 		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
 		if (Response.status == '200')
@@ -624,7 +625,7 @@ function FileUploaded ()
 		}
 	}
 	else
-		DisplayError(html);
+		DisplayError(body);
 }
 
 // Tooltips

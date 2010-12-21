@@ -194,11 +194,19 @@ elseif ($action == 'upload')
 	($hook = s2_hook('prq_action_upload_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
-	$path = $_POST['dir'];
+	$errors = array();
+
+	if (!isset($_POST['dir']))
+	{
+		$errors[] = $lang_pictures['No POST data'];
+		$path = '';
+	}
+	else
+		$path = $_POST['dir'];
+
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
-	$errors = array();
 	clearstatcache();
 
 	$check_uploaded = true;
@@ -210,34 +218,39 @@ elseif ($action == 'upload')
 		$check_uploaded = false;
 	}
 
-	foreach ($_FILES['pictures']['name'] as $i => $filename)
+	if (!isset($_FILES['pictures']))
+		$errors[] = $lang_pictures['Empty files'];
+	else
 	{
-		if ($_FILES['pictures']['error'][$i] !== UPLOAD_ERR_OK)
+		foreach ($_FILES['pictures']['name'] as $i => $filename)
 		{
-			$error_message = isset($lang_pictures[$_FILES['pictures']['error'][$i]]) ? $lang_pictures[$_FILES['pictures']['error'][$i]] : $lang_pictures['Unknown error'];
-			$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
-			continue;
+			if ($_FILES['pictures']['error'][$i] !== UPLOAD_ERR_OK)
+			{
+				$error_message = isset($lang_pictures[$_FILES['pictures']['error'][$i]]) ? $lang_pictures[$_FILES['pictures']['error'][$i]] : $lang_pictures['Unknown error'];
+				$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
+				continue;
+			}
+
+			if ($check_uploaded && !is_uploaded_file($_FILES['pictures']['tmp_name'][$i]))
+			{
+				$error_message = $lang_pictures['Is upload file error'];
+				$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
+				continue;
+			}
+
+			$filename = strtolower(basename($filename));
+			while (strpos($filename, '..') !== false)
+				$filename = str_replace('..', '', $filename);
+
+			// Processing name collisions
+			while (is_file(S2_IMG_PATH.$path.'/'.$filename))
+				$filename = preg_replace_callback('#(?:|_copy|_copy\((\d+)\))(?=(?:\.[^\.]*)?$)#', create_function('$m', 'if ($m[0] == \'\') return \'_copy\'; elseif ($m[0] == \'_copy\') return \'_copy(2)\'; else return \'_copy(\'.($m[1]+1).\')\';'), $filename, 1);
+
+			$uploadfile = S2_IMG_PATH.$path.'/'.$filename;
+
+			if (!rename($_FILES['pictures']['tmp_name'][$i], $uploadfile))
+				$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
 		}
-
-		if ($check_uploaded && !is_uploaded_file($_FILES['pictures']['tmp_name'][$i]))
-		{
-			$error_message = $lang_pictures['Is upload file error'];
-			$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
-			continue;
-		}
-
-		$filename = strtolower(basename($filename));
-		while (strpos($filename, '..') !== false)
-			$filename = str_replace('..', '', $filename);
-
-		// Processing name collisions
-		while (is_file(S2_IMG_PATH.$path.'/'.$filename))
-			$filename = preg_replace_callback('#(?:|_copy|_copy\((\d+)\))(?=(?:\.[^\.]*)?$)#', create_function('$m', 'if ($m[0] == \'\') return \'_copy\'; elseif ($m[0] == \'_copy\') return \'_copy(2)\'; else return \'_copy(\'.($m[1]+1).\')\';'), $filename, 1);
-
-		$uploadfile = S2_IMG_PATH.$path.'/'.$filename;
-
-		if (!rename($_FILES['pictures']['tmp_name'][$i], $uploadfile))
-			$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
 	}
 
 	$error_message = empty($errors) ? '' : ' alert(\''.sprintf($lang_pictures['Upload failed'], implode('\n', $errors)).'\');';
