@@ -87,7 +87,6 @@ if (bIE)
 if (bFF)
 	addEventListener('load', Init, true);
 
-var eTextarea;
 var sCurrTextId = ''; // A unique string for the document currently loaded to the editor
 
 var ua = navigator.userAgent.toLowerCase();
@@ -858,7 +857,6 @@ function EditArticle (iId)
 
 		document.getElementById('form_div').innerHTML = Response.text;
 		CommitChanges(document.artform);
-		eTextarea = document.getElementById('wText');
 
 		sCurrTextId = sURI;
 	}
@@ -987,6 +985,7 @@ function set_selection (e, start_pos, end_pos)
 
 function InsertTag (sOpenTag, sCloseTag, selection)
 {
+	eTextarea = document.artform['page[text]'];
 	if (selection == null)
 		selection = get_selection(eTextarea);
 
@@ -1003,7 +1002,7 @@ var slEditorSelection = null;
 
 function GetImage ()
 {
-	slEditorSelection = get_selection(eTextarea);
+	slEditorSelection = get_selection(document.artform['page[text]']);
 	LoadPictureManager();
 	SelectTab(document.getElementById('pict_tab'), true);
 	return false;
@@ -1011,10 +1010,10 @@ function GetImage ()
 
 function Paragraph ()
 {
-	var Response = POSTSyncRequest(sUrl + 'action=smart_paragraph', 'data=' + encodeURIComponent(eTextarea.value));
+	var Response = POSTSyncRequest(sUrl + 'action=smart_paragraph', 'data=' + encodeURIComponent(document.artform['page[text]'].value));
 
 	if (Response.status == '200')
-		eTextarea.value = Response.text;
+		document.artform['page[text]'].value = Response.text;
 }
 
 //=======================[Comment management]===================================
@@ -1206,7 +1205,7 @@ function LoadPictureManager ()
 
 function ReturnImage(s, w, h)
 {
-	if (!document.artform || !eTextarea)
+	if (!document.artform || !document.artform['page[text]'])
 		return;
 
 	SelectTab(document.getElementById('edit_tab'), true);
@@ -1218,10 +1217,10 @@ function ReturnImage(s, w, h)
 
 function Preview ()
 {
-	if (!eTextarea)
+	if (!document.artform['page[text]'])
 		return;
 
-	var s = str_replace('<!-- s2_text -->', eTextarea.value, template);
+	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
 	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);
 	window.frames['preview_frame'].document.open();
 	window.frames['preview_frame'].document.write(s);

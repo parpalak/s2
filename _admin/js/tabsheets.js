@@ -75,8 +75,8 @@ function OnSwitch (eTab)
 	}
 	else if (sType == 'edit_tab')
 	{
-		if (eTextarea && iEditorScrollTop)
-			eTextarea.scrollTop = iEditorScrollTop;
+		if (document.artform && document.artform['page[text]'] && iEditorScrollTop)
+			document.artform['page[text]'].scrollTop = iEditorScrollTop;
 	}
 	else if (sType == 'list_tab')
 	{
@@ -134,8 +134,8 @@ function SelectTab(eTab, bAddToHistory)
 			break;
 	}
 
-	if (eTextarea && eTextarea.scrollTop)
-		iEditorScrollTop = eTextarea.scrollTop;
+	if (document.artform && document.artform['page[text]'] && document.artform['page[text]'].scrollTop)
+		iEditorScrollTop = document.artform['page[text]'].scrollTop;
 
 	if (window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop)
 		iPreviewScrollTop = window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop;

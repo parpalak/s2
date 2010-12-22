@@ -7,7 +7,7 @@
 .text_wrapper,
 #tag_values,
 .tagswitcher,
-#wText,
+#arttext,
 #commtext,
 #kText,
 .fields input,
@@ -640,7 +640,7 @@ div.input.text input,
 
 .fields input[type="text"],
 div.input.text input,
-#wText,
+#arttext,
 #commtext,
 #kText,
 #search_field {
@@ -657,7 +657,7 @@ div.input.text input,
 	width: 3em;
 	}
 
-#wText,
+#arttext,
 #commtext,
 #kText {
 	height: 100%;
