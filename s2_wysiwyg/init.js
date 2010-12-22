@@ -11,7 +11,7 @@
 
 tinyMCE.init({
 	mode: "exact",
-	elements : "wText",
+	elements : "arttext",
 	theme : "advanced",
 	skin : "s2",
 	gecko_spellcheck : true,
