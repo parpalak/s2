@@ -408,7 +408,7 @@ function s2_blog_edit_post_form ($id)
 
 ?>
 		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
-			<textarea id="wText" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
+			<textarea id="arttext" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
 		</div>
 	</div>
 </form>

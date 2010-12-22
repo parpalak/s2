@@ -62,7 +62,6 @@ function EditRecord (iId)
 
 		document.getElementById('form_div').innerHTML = Response.text;
 		CommitChanges(document.artform);
-		eTextarea = document.getElementById("wText");
 
 		sCurrTextId = sURI;
 	}
