@@ -921,45 +921,89 @@ function TagSelection (sTag)
 	return InsertTag('<' + sTag + '>', '</' + sTag + '>');
 }
 
-function InsertTag(sOpenTag, sCloseTag)
+function get_selection (e)
 {
-	if (typeof(eTextarea.selectionStart) != 'undefined')
+	// Mozilla and DOM 3.0
+	if ('selectionStart' in e)
 	{
-		var iStart = eTextarea.selectionStart, iEnd = eTextarea.selectionEnd;
-		var s = new String(eTextarea.value);
+		var l = e.selectionEnd - e.selectionStart;
+		return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr(e.selectionStart, l) };
+	}
+	// IE
+	else if (document.selection)
+	{
+		e.focus();
+		var r = document.selection.createRange();
+		var tr = e.createTextRange();
+		var tr2 = tr.duplicate();
+		tr2.moveToBookmark(r.getBookmark());
+		tr.setEndPoint('EndToStart', tr2);
+		if (r == null || tr == null)
+			return { start: e.value.length, end: e.value.length, length: 0, text: '' };
 
-		var s1 = s.substring(0, iStart);
-		var s2 = s.substring(iStart, iEnd);
-		var s3 = s.substring(iEnd);
-		var old_top = eTextarea.scrollTop;
-		eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
-		eTextarea.setSelectionRange(iStart, iEnd + sOpenTag.length + sCloseTag.length);
-		eTextarea.scrollTop = old_top; 
-		eTextarea.focus();
+		//for some reason IE doesn't always count the \n and \r in the length
+		var text_part = r.text.replace(/[\r\n]/g, '.'); 
+		var text_whole = e.value.replace(/[\r\n]/g, '.');
+		var the_start = text_whole.indexOf(text_part, tr.text.length);
+
+		return { start: the_start, end: the_start + text_part.length, length: text_part.length, text: r.text };
 	}
-	else if (document.selection && document.selection.type == 'Text')
-	{
-		var old_top = eTextarea.scrollTop;
-		var eSelect = document.selection.createRange();
-		eSelect.text = sOpenTag + eSelect.text + sCloseTag;
-		eSelect.select();
-		eTextarea.scrollTop = old_top; 
-	}
+	//Browser not supported
 	else
-		eTextarea.value = eTextarea.value + sOpenTag + sCloseTag;
+		return { start: e.value.length, end: e.value.length, length: 0, text: '' };
+}
+
+function set_selection (e, start_pos, end_pos)
+{
+	// Mozilla and DOM 3.0
+	if ('selectionStart' in e)
+	{
+		e.focus();
+		e.selectionStart = start_pos;
+		e.selectionEnd = end_pos;
+	}
+	// IE
+	else if (document.selection)
+	{
+		e.focus();
+		var tr = e.createTextRange();
+
+		//Fix IE from counting the newline characters as two seperate characters
+		var stop_it = start_pos;
+		for (i = 0; i < stop_it; i++)
+			if (e.value[i].search(/[\r\n]/) != -1)
+				start_pos = start_pos - .5;
+		stop_it = end_pos;
+		for (i = 0; i < stop_it; i++)
+			if (e.value[i].search(/[\r\n]/) != -1)
+				end_pos = end_pos - .5;
+
+		tr.moveEnd('textedit', -1);
+		tr.moveStart('character', start_pos);
+		tr.moveEnd('character', end_pos - start_pos);
+		tr.select();
+	}
+}
+
+function InsertTag (sOpenTag, sCloseTag, selection)
+{
+	if (selection == null)
+		selection = get_selection(eTextarea);
+
+	var replace_str = sOpenTag + selection.text + sCloseTag;
+	var start_pos = selection.start;
+	var end_pos = start_pos + replace_str.length;
+	eTextarea.value = eTextarea.value.substr(0, start_pos) + replace_str + eTextarea.value.substr(selection.end, eTextarea.value.length);
+	set_selection(eTextarea, start_pos, end_pos);
 
 	return false;
 }
 
-var iSelStart = iSelEnd = -10;
+var slEditorSelection = null;
 
 function GetImage ()
 {
-	if (typeof(eTextarea.selectionStart) != 'undefined')
-	{
-		iSelStart = eTextarea.selectionStart;
-		iSelEnd = eTextarea.selectionEnd;
-	}
+	slEditorSelection = get_selection(eTextarea);
 	LoadPictureManager();
 	SelectTab(document.getElementById('pict_tab'), true);
 	return false;
@@ -1166,29 +1210,8 @@ function ReturnImage(s, w, h)
 		return;
 
 	SelectTab(document.getElementById('edit_tab'), true);
-
-	var sOpenTag ='<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
-
-	if (iSelStart >= 0)
-	{
-		var s = new String(eTextarea.value);
-		var s1 = s.substring(0, iSelStart);
-		var s2 = s.substring(iSelStart, iSelEnd);
-		var s3 = s.substring(iSelEnd);
-		var old_top = eTextarea.scrollTop;
-		eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
-		eTextarea.setSelectionRange(iSelStart, iSelEnd + sOpenTag.length + sCloseTag.length);
-		eTextarea.scrollTop = old_top; 
-		eTextarea.focus();
-	}
-	else if (document.selection)
-	{
-		var eSelect = document.selection.createRange();
-		eSelect.text = sOpenTag + eSelect.text + sCloseTag;
-		eSelect.select();
-	}
-	else
-		eTextarea.value = eTextarea.value + sOpenTag + sCloseTag;
+	var sOpenTag = '<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
+	InsertTag(sOpenTag, sCloseTag, slEditorSelection);
 }
 
 //=======================[Preview]==============================================
