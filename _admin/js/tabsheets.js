@@ -88,6 +88,7 @@ function OnSwitch (eTab)
 	}
 	else if (sType == 'pict_tab')
 	{
+		LoadPictureManager('edit_tab');
 	}
 	else if (sType == 'admin-user_tab')
 	{

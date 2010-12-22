@@ -960,7 +960,8 @@ function GetImage ()
 		iSelStart = eTextarea.selectionStart;
 		iSelEnd = eTextarea.selectionEnd;
 	}
-	ShowPictMan('edit_tab');
+	LoadPictureManager();
+	SelectTab(document.getElementById('pict_tab'), true);
 	return false;
 }
 
@@ -1148,48 +1149,46 @@ function DeleteArticleFromTag (iId)
 
 //=======================[Inserting pictures]===================================
 
-var eSrcInput = eWidthInput = eHeightInput = null, bPictManLoaded = false, sReturnTab = '';
+var bPictureManagerLoaded = false;
 
-function ShowPictMan (sTab)
+function LoadPictureManager ()
 {
-	if (!bPictManLoaded)
-	{
-		var wnd = window.open('pictman.php', 'pict_frame', '', 'True');
-		bPictManLoaded = true;
-	}
-	sReturnTab = sTab;
-	SelectTab(document.getElementById('pict_tab'), true);
+	if (bPictureManagerLoaded)
+		return;
+
+	var wnd = window.open('pictman.php', 'pict_frame', '', 'True');
+	bPictureManagerLoaded = true;
 }
 
 function ReturnImage(s, w, h)
 {
-	SelectTab(document.getElementById(sReturnTab), true);
+	if (!document.artform || !eTextarea)
+		return;
 
-	if (sReturnTab == 'edit_tab')
+	SelectTab(document.getElementById('edit_tab'), true);
+
+	var sOpenTag ='<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
+
+	if (iSelStart >= 0)
 	{
-		var sOpenTag ='<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
-
-		if (iSelStart >= 0)
-		{
-			var s = new String(eTextarea.value);
-			var s1 = s.substring(0, iSelStart);
-			var s2 = s.substring(iSelStart, iSelEnd);
-			var s3 = s.substring(iSelEnd);
-			var old_top = eTextarea.scrollTop;
-			eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
-			eTextarea.setSelectionRange(iSelStart, iSelEnd + sOpenTag.length + sCloseTag.length);
-			eTextarea.scrollTop = old_top; 
-			eTextarea.focus();
-		}
-		else if (document.selection)
-		{
-			var eSelect = document.selection.createRange();
-			eSelect.text = sOpenTag + eSelect.text + sCloseTag;
-			eSelect.select();
-		}
-		else
-			eTextarea.value = eTextarea.value + sOpenTag + sCloseTag;
+		var s = new String(eTextarea.value);
+		var s1 = s.substring(0, iSelStart);
+		var s2 = s.substring(iSelStart, iSelEnd);
+		var s3 = s.substring(iSelEnd);
+		var old_top = eTextarea.scrollTop;
+		eTextarea.value = s1 + sOpenTag + s2 + sCloseTag + s3;
+		eTextarea.setSelectionRange(iSelStart, iSelEnd + sOpenTag.length + sCloseTag.length);
+		eTextarea.scrollTop = old_top; 
+		eTextarea.focus();
 	}
+	else if (document.selection)
+	{
+		var eSelect = document.selection.createRange();
+		eSelect.text = sOpenTag + eSelect.text + sCloseTag;
+		eSelect.select();
+	}
+	else
+		eTextarea.value = eTextarea.value + sOpenTag + sCloseTag;
 }
 
 //=======================[Preview]==============================================
