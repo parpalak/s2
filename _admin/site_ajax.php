@@ -257,7 +257,7 @@ elseif ($action == 'load_tree')
 elseif ($action == 'search')
 {
 	$required_rights = array('view');
-	($hook = s2_hook('rq_action_load_tree_start')) ? eval($hook) : null;
+	($hook = s2_hook('rq_action_search_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
 	if (!isset($_GET['s']))
