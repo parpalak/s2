@@ -46,7 +46,8 @@ function getHTTPRequestObject()
 	return xmlHttpRequest;
 }
 
-xmlhttp = getHTTPRequestObject();
+xmlhttp_sync = getHTTPRequestObject();
+xmlhttp_async = getHTTPRequestObject();
 
 function unknown_error (sError, iStatus)
 {
@@ -59,12 +60,38 @@ function unknown_error (sError, iStatus)
 
 var after_code = '';
 
-function GETSyncRequest (sRequestUrl)
+function AjaxRequest (sRequestUrl, sParam, fCallback)
 {
-	SetWait(true);
+	var xmlhttp;
 
-	xmlhttp.open("GET", sRequestUrl, false);
-	xmlhttp.send(null);
+	if (fCallback == null)
+	{
+		SetWait(true);
+		xmlhttp = xmlhttp_sync;
+	}
+	else
+		xmlhttp = xmlhttp_async;
+
+	if (sParam == '')
+	{
+		xmlhttp.open('GET', sRequestUrl, fCallback != null);
+		if (fCallback != null)
+			xmlhttp.onreadystatechange = fCallback;
+		xmlhttp.send(null);
+	}
+	else
+	{
+		xmlhttp.open('POST', sRequestUrl, fCallback != null);
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlhttp.setRequestHeader("Content-length", sParam.length);
+		xmlhttp.setRequestHeader("Connection", "close");
+		if (fCallback != null)
+			xmlhttp.onreadystatechange = fCallback;
+		xmlhttp.send(sParam);
+	}
+
+	if (fCallback != null)
+		return;
 
 	if (xmlhttp.status == '408')
 	{
@@ -96,44 +123,19 @@ function GETSyncRequest (sRequestUrl)
 	return {'text': xmlhttp.responseText, 'status': xmlhttp.status};
 }
 
-function POSTSyncRequest (sUrl, sParam)
+function GETSyncRequest (sRequestUrl)
 {
-	SetWait(true);
+	return AjaxRequest(sRequestUrl, '');
+}
 
-	xmlhttp.open('POST', sUrl, false);
-	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xmlhttp.setRequestHeader("Content-length", sParam.length);
-	xmlhttp.setRequestHeader("Connection", "close");
-	xmlhttp.send(sParam);
+function GETAsyncRequest (sRequestUrl, fCallback)
+{
+	AjaxRequest(sRequestUrl, '', fCallback);
+}
 
-	if (xmlhttp.status == '408')
-	{
-		if (confirm(S2_LANG_EXPIRED_SESSION))
-			document.location.reload();
-	}
-	else if (xmlhttp.status == '404')
-	{
-		alert(S2_LANG_404);
-	}
-	else if (xmlhttp.status == '403')
-	{
-		alert(S2_LANG_403);
-	}
-	else if (xmlhttp.status == '200')
-	{
-		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
-		if (exec_code)
-			eval(exec_code);
-		after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
-		if (after_code)
-			setTimeout('eval(after_code);', 0);
-	}
-	else
-		unknown_error(xmlhttp.responseText, xmlhttp.status)
-
-	SetWait(false);
-
-	return {'text': xmlhttp.responseText, 'status': xmlhttp.status};
+function POSTSyncRequest (sRequestUrl, sParam)
+{
+	return AjaxRequest(sRequestUrl, sParam);
 }
 
 function DisplayError (sError)
