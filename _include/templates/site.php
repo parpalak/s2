@@ -10,6 +10,7 @@
 
 <body class="site">
 	<div id="crumbs"><!-- s2_crumbs --></div>
+<!-- s2_search_field -->
 	<div id="header"><!-- s2_site_title --></div>
 
 	<div id="center">

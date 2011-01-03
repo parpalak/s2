@@ -195,8 +195,9 @@ body {
 	}
 
 #crumbs {
-	line-height: 1.75;
-	padding: 0 10%;
+	line-height: 2;
+	padding: 0 0 0 10%;
+	width: 50%;
 	}
 
 #center {
@@ -361,3 +362,16 @@ img[align="left"] {
 img[align="right"] {
 	margin-left: 1.5em;
 	}
+
+.s2_search_form {
+	width: 30%;
+	position: absolute;
+	top: 0.2em;
+	right: -1px;
+	}
+	.s2_search_form input {
+		width: 70%;
+		}
+		.s2_search_form .inactive {
+			color: #999;
+			}
