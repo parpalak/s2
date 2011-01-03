@@ -260,7 +260,7 @@ define('BLOG_KEYWORDS', BLOG_BASE.urlencode(S2_TAGS_URL).'/');
 		]]></hook>
 
 		<hook id="idx_get_content"><![CDATA[
-if (strpos($request_uri, S2_BLOG_URL) === 1)
+if (substr($request_uri, 0, 1 + strlen(S2_BLOG_URL)) == '/'.S2_BLOG_URL)
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
@@ -611,7 +611,7 @@ $output .= s2_show_comments('s2_blog_new');
 		]]></hook>
 
 		<hook id="fn_preload_editor_start"><![CDATA[
-if (strpos($_GET['path'], S2_BLOG_URL) === 1)
+if (substr($_GET['path'], 0, 1 + strlen(S2_BLOG_URL)) == '/'.S2_BLOG_URL)
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	require $ext_info['path'].'/blog_lib.php';
