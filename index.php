@@ -105,7 +105,7 @@ $replace['<!-- s2_text -->'] = isset($page['text']) ? $page['text'] : '';
 $replace['<!-- s2_subarticles -->'] = isset($page['subcontent']) ? $page['subcontent'] : '';
 $replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
 
-if (S2_ENABLED_COMMENTS && $page['commented'])
+if (S2_ENABLED_COMMENTS && isset($page['commented']) && $page['commented'])
 	$replace['<!-- s2_comment_form -->'] = '<h2 class="comment form">'.$lang_common['Post a comment'].'</h2>'."\n".s2_comment_form($page['id']);
 else
 	$replace['<!-- s2_comment_form -->'] = '';
