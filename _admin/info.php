@@ -27,7 +27,7 @@ function s2_count_articles ($id)
 	return $n ? $n : 1;
 }
 
-function s2_get_couners ()
+function s2_get_counters ()
 {
 	global $s2_db, $lang_admin;
 
@@ -132,7 +132,7 @@ function s2_stat_info()
 
 	($hook = s2_hook('fn_stat_info_pre_output_merge')) ? eval($hook) : null;
 
-	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Already published'].'</span>'.s2_get_couners().'</div>';
+	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Already published'].'</span>'.s2_get_counters().'</div>';
 	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Server load'].'</span>'.$server_load.'</div>';
 	$output .= '<div class="input"><span class="subhead">'.$lang_admin['S2 version'].'</span>'.implode('<br />', $version).'</div>';
 	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Environment'].'</span>'.implode('<br />', $environment).'</div>';
