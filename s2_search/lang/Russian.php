@@ -6,7 +6,7 @@ $lang_s2_search = array(
 'Search button'				=> 'Искать',
 
 'Found'						=> 'Найдено страниц: %d',
-'Not found'					=> 'Ничего не найдено',
+'Not found'					=> 'Ничего не найдено.',
 
 'Crumbs'					=> '<a href="%2$s">%1$s</a> &rarr; %3$s',
 'Reindex'					=> 'проиндексировать заново',

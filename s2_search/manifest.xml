@@ -48,7 +48,7 @@ echo '<script type="text/javascript" src="'.$ext_info['url'].'/admin.js"></scrip
 include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 require $ext_info['path'].'/finder.class.php';
 $s2_search_reindex = '<a href="#" onclick="return s2_search.reindex();" class="js">'.$lang_s2_search['Reindex'].'</a><span id="s2_search_progress"></span>';
-$counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(filesize(S2_CACHE_DIR.s2_search_finder::index_name)), $s2_search_reindex);
+$counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(is_file(S2_CACHE_DIR.s2_search_finder::index_name) ? filesize(S2_CACHE_DIR.s2_search_finder::index_name) : 0), $s2_search_reindex);
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[

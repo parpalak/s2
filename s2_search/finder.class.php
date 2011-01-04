@@ -425,6 +425,13 @@ if (defined('DEBUG'))
 //if (defined('DEBUG'))
 //	echo 'Индексация: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
+		if (!is_file(S2_CACHE_DIR.self::index_name))
+		{
+			if (defined('DEBUG'))
+				echo 'Can\'t find index file. Try to rebuild search index.';
+			return false;
+		}
+
 		list(
 			self::$fulltext_index,
 			self::$excluded_words,
