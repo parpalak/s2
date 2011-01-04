@@ -231,8 +231,11 @@ function s2_path_from_id ($id, $visible_for_all = false)
 {
 	global $s2_db;
 
-	if ($id <= 0)
+	if ($id < 0)
 		return false;
+
+	if ($id == S2_ROOT_ID)
+		return '';
 
 	$query = array(
 		'SELECT'	=> 'url, parent_id',
