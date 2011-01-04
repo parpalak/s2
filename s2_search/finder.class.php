@@ -265,7 +265,7 @@ class s2_search_finder
 				'title'		=> $article['title'],
 				'descr'		=> $article['meta_desc'],
 				'time'		=> $article['create_time'],
-				'url'		=> $url.$article['url'],
+				'url'		=> $url.$article['url'].($article['is_children'] ? '/' : ''),
 			);
 		}
 
@@ -381,7 +381,7 @@ class s2_search_finder
 				'title'		=> $article['title'],
 				'descr'		=> $article['meta_desc'],
 				'time'		=> $article['create_time'],
-				'url'		=> S2_BASE_URL.$parent_path.'/'.$article['url'],
+				'url'		=> S2_BASE_URL.$parent_path.'/'.$article['url'].($article['is_children'] ? '/' : ''),
 			)
 		);
 
