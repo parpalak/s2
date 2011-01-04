@@ -24,6 +24,7 @@ class s2_search_finder
 	const buffer_pointer = 's2_search_pointer.txt';
 
 	protected static $fulltext_index = array();
+	protected static $excluded_words = array();
 	protected static $keyword_1_index = array();
 	protected static $keyword_base_index = array();
 	protected static $keyword_n_index = array();
@@ -146,7 +147,7 @@ class s2_search_finder
 
 		// Fulltext index
 		$words = self::str_to_array($title.' '.str_replace(', ', ' ', $keywords).' '.$contents);
- 
+
 		$i = 0;
 		foreach ($words as $word)
 		{
@@ -154,6 +155,9 @@ class s2_search_finder
 				continue;
 
 			$i++;
+
+			if (isset(self::$excluded_words[$word]))
+				continue;
 
 			/// Build reverse index
 
@@ -197,6 +201,7 @@ class s2_search_finder
 			if (count($stat) > $threshold || empty($word))
 			{
 				unset (self::$fulltext_index[$word]);
+				self::$excluded_words[$word] = 1;
 				continue;
 			}
 
@@ -211,6 +216,7 @@ class s2_search_finder
 			S2_CACHE_DIR.self::index_name,
 			serialize(array(
 				self::$fulltext_index,
+				self::$excluded_words,
 				self::$keyword_1_index,
 				self::$keyword_base_index,
 				self::$keyword_n_index,
@@ -221,6 +227,7 @@ class s2_search_finder
 			S2_CACHE_DIR.self::index_name.'.php',
 			"<?php\n\n".'return '.var_export(array(
 				self::$fulltext_index,
+				self::$excluded_words,
 				self::$keyword_1_index,
 				self::$keyword_base_index,
 				self::$keyword_n_index,
@@ -268,7 +275,7 @@ class s2_search_finder
 	public static function index ()
 	{
 		self::$fulltext_index = array();
-		self::$fulltext_index = array();
+		self::$excluded_words = array();
 		self::$keyword_1_index = array();
 		self::$keyword_base_index = array();
 		self::$keyword_n_index = array();
@@ -326,6 +333,87 @@ class s2_search_finder
 		file_put_contents(S2_CACHE_DIR.self::process_state, '');
 	}
 
+	protected static function remove_chapter ($chapter)
+	{
+		foreach (self::$fulltext_index as $word => $data)
+		{
+			if (isset($data[$chapter]))
+			{
+				unset($data[$chapter]);
+				self::$fulltext_index[$word] = $data;
+			}
+		}
+	}
+
+	protected static function get_chapter ($chapter)
+	{
+		global $s2_db;
+
+		$subquery = array(
+			'SELECT'	=> 'count(*)',
+			'FROM'		=> 'articles AS a2',
+			'WHERE'		=> 'a2.parent_id = a.id',
+			'LIMIT'		=> '1'
+		);
+		$child_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+		$query = array(
+			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
+			'FROM'		=> 'articles AS a',
+			'WHERE'		=> 'id = '.$s2_db->escape($chapter).' AND published = 1',
+		);
+		($hook = s2_hook('s2_search_get_chapter_pre_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		$article = $s2_db->fetch_assoc($result);
+		if (!$article)
+			return false;
+
+		$parent_path = s2_path_from_id($article['parent_id'], true);
+		if ($parent_path === false)
+			return false;
+
+		return array(
+			$article['title'],
+			$article['pagetext'],
+			$article['meta_keys'],
+			array(
+				'title'		=> $article['title'],
+				'descr'		=> $article['meta_desc'],
+				'time'		=> $article['create_time'],
+				'url'		=> S2_BASE_URL.$parent_path.'/'.$article['url'],
+			)
+		);
+
+	}
+
+	public static function refresh ($chapter)
+	{
+		self::$fulltext_index = array();
+		self::$excluded_words = array();
+		self::$keyword_1_index = array();
+		self::$keyword_base_index = array();
+		self::$keyword_n_index = array();
+		self::$table_of_contents = array();
+
+		self::read_index();
+		self::remove_chapter($chapter);
+
+		$data = ($hook = s2_hook('s2_search_refresh_get_chapter')) ? eval($hook) : null;
+		if (!$data)
+			$data = self::get_chapter($chapter);
+
+		if ($data)
+		{
+			self::add_to_index($chapter, self::htmlstr_to_str($data[0]), self::htmlstr_to_str($data[1]), $data[2]);
+			self::$table_of_contents[$chapter] = $data[3];
+		}
+		else
+			unset(self::$table_of_contents[$chapter]);
+
+		self::save_index();    
+	}
+
 	protected static function read_index ()
 	{
 		if (count(self::$fulltext_index))
@@ -339,13 +427,14 @@ if (defined('DEBUG'))
 
 		list(
 			self::$fulltext_index,
+			self::$excluded_words,
 			self::$keyword_1_index,
 			self::$keyword_base_index,
 			self::$keyword_n_index,
 			self::$table_of_contents,
 		) = unserialize(file_get_contents(S2_CACHE_DIR.self::index_name));
 
-		//list(self::$fulltext_index, self::$keyword_1_index, self::$keyword_n_index, self::$table_of_contents) = include S2_CACHE_DIR.self::index_name.'.php';
+		//list(self::$fulltext_index, self::$excluded_words, self::$keyword_1_index, self::$keyword_n_index, self::$table_of_contents) = include S2_CACHE_DIR.self::index_name.'.php';
 if (defined('DEBUG'))
 	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
