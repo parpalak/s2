@@ -315,6 +315,8 @@ elseif ($action == 'save')
 		die($lang_admin['Not saved correct']);
 
 	s2_check_form_controls($id);
+
+	($hook = s2_hook('rq_action_save_article_end')) ? eval($hook) : null;
 }
 
 elseif ($action == 'preview')
