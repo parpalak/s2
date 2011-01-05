@@ -12,7 +12,7 @@ $lang_common = array(
 // Page content
 'In this section'			=> 'В этом разделе',
 'Read in this section'		=> 'Читайте в этом разделе',
-'More in this section'		=> 'Еще в разделе «%s»',
+'More in this section'		=> 'Еще в разделе <nobr>«%s»</nobr>',
 'Crumbs separator'			=> ' &rarr; ',
 'Subsections'				=> 'Подразделы',
 'With this tag'				=> 'По теме «%s»',
