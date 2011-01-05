@@ -105,13 +105,9 @@ function s2_comment_error ($errors)
 
 	header('Content-Type: text/html; charset=utf-8');
 
+	ob_start();
+
 ?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php echo $lang_common['Error']; ?></title>
-</head>
-<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
-	<h1><?php echo $lang_common['Error']; ?></h1>
 	<p><?php echo $lang_comment_errors['Error message']; ?></p>
 	<ul>
 <?php
@@ -134,11 +130,22 @@ function s2_comment_error ($errors)
 	if (S2_ENABLED_COMMENTS)
 		echo "\t".'<p>'.$lang_comments['Go back'].'</p>'."\n";
 
-?>
-</body>
-<?php
+	$text = ob_get_clean();
 
-	exit();
+	$template = s2_get_service_template();
+	$replace = array(
+		'<!-- s2_head_title -->'	=> $lang_common['Error'],
+		'<!-- s2_title -->'			=> '<h1>'.$lang_common['Error'].'</h1>',
+		'<!-- s2_text -->'			=> $text,
+		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+	);
+
+	($hook = s2_hook('cmnt_pre_sent_comment_output')) ? eval($hook) : null;
+
+	foreach ($replace as $what => $to)
+		$template = str_replace($what, $to, $template);
+
+	die($template);
 }
 
 function s2_check_comment_question ($key, $answer)

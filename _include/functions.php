@@ -530,7 +530,7 @@ function error()
 <head>
 <title>Error - <?php echo s2_htmlencode(S2_SITE_NAME) ?></title>
 </head>
-<body style="margin: 40px; font: 85%/130% verdana, arial, sans-serif; color: #333;">
+<body style="margin: 40px; font: 87.5%/130% Verdana, Arial, sans-serif; color: #333;">
 <h1><?php echo (isset($lang_common['Error encountered']) ? $lang_common['Error encountered'] : 'An error was encountered'); ?></h1>
 <hr />
 <?php
