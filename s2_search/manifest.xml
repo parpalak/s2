@@ -16,7 +16,7 @@
 	<id>s2_search</id>
 	<title>Search</title>
 	<version>1.0a</version>
-	<description>Full-text search with russian morphology. Designed for small sites.</description>
+	<description>Full-text search with Russian morphology. Designed for small sites.</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0a1</minversion>
