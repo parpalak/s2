@@ -618,7 +618,7 @@ if (defined('DEBUG'))
 		foreach(self::$keys as $chapter => $weight)
 		{
 			echo '<p><a class="title" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['title'].'</a><br />'.
-				self::$table_of_contents[$chapter]['descr'].'<br />'.
+				(trim(self::$table_of_contents[$chapter]['descr']) ? self::$table_of_contents[$chapter]['descr'].'<br />' : '').
 				'<small><a class="url" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['url'].'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small></p>';
 		}
 	}
