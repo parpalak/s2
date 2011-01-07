@@ -29,7 +29,8 @@ ob_start();
 	</form>
 <?php
 
-s2_search_finder::find($s2_search_q);
+if ($s2_search_q !== '')
+	s2_search_finder::find($s2_search_q);
 
 ?>
 </div>
