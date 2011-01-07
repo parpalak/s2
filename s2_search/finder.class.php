@@ -258,8 +258,6 @@ class s2_search_finder
 
 		while ($article = $s2_db->fetch_assoc($result))
 		{
-			self::walk_site($article['id'], $url.$article['url'].'/');
-
 			self::buffer_chapter($article['id'], $article['title'], $article['pagetext'], $article['meta_keys']);
 			self::$table_of_contents[$article['id']] = array(
 				'title'		=> $article['title'],
@@ -267,6 +265,10 @@ class s2_search_finder
 				'time'		=> $article['create_time'],
 				'url'		=> $url.$article['url'].($article['is_children'] ? '/' : ''),
 			);
+
+			$article['pagetext'] = '';
+
+			self::walk_site($article['id'], $url.$article['url'].'/');
 		}
 
 		($hook = s2_hook('s2_search_walk_site_end')) ? eval($hook) : null;
