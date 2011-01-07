@@ -263,12 +263,12 @@ class s2_search_finder
 				'title'		=> $article['title'],
 				'descr'		=> $article['meta_desc'],
 				'time'		=> $article['create_time'],
-				'url'		=> $url.$article['url'].($article['is_children'] ? '/' : ''),
+				'url'		=> $url.urlencode($article['url']).($article['is_children'] ? '/' : ''),
 			);
 
 			$article['pagetext'] = '';
 
-			self::walk_site($article['id'], $url.$article['url'].'/');
+			self::walk_site($article['id'], $url.urlencode($article['url']).'/');
 		}
 
 		($hook = s2_hook('s2_search_walk_site_end')) ? eval($hook) : null;
@@ -383,7 +383,7 @@ class s2_search_finder
 				'title'		=> $article['title'],
 				'descr'		=> $article['meta_desc'],
 				'time'		=> $article['create_time'],
-				'url'		=> S2_BASE_URL.$parent_path.'/'.$article['url'].($article['url'] && $article['is_children'] ? '/' : ''),
+				'url'		=> S2_BASE_URL.$parent_path.'/'.urlencode($article['url']).($article['url'] && $article['is_children'] ? '/' : ''),
 			)
 		);
 
@@ -556,6 +556,15 @@ if (defined('DEBUG'))
 		}
 	}
 
+	protected static function display_url ($s)
+	{
+		$a = explode('/', $s);
+		foreach ($a as $k => $v)
+			$a[$k] = urldecode($v);
+
+		return implode('/', $a);
+	}
+
 	public static function find ($search_string)
 	{
 		global $lang_s2_search;
@@ -621,7 +630,7 @@ if (defined('DEBUG'))
 		{
 			echo '<p><a class="title" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['title'].'</a><br />'.
 				(trim(self::$table_of_contents[$chapter]['descr']) ? self::$table_of_contents[$chapter]['descr'].'<br />' : '').
-				'<small><a class="url" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['url'].'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small></p>';
+				'<small><a class="url" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::display_url(self::$table_of_contents[$chapter]['url']).'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small></p>';
 		}
 	}
 }
