@@ -8,8 +8,8 @@
  * @package s2_wysiwyg
  */
 
-
-tinyMCE.init({
+var s2_wysiwyg_params = [
+{
 	mode: "exact",
 	elements : "arttext",
 	theme : "advanced",
@@ -30,7 +30,33 @@ tinyMCE.init({
 	remove_trailing_nbsp : true,
 	relative_urls : false,
 	remove_script_host : true
-});
+},
+
+{
+	mode: "exact",
+	elements : "arttext",
+	theme : "advanced",
+	skin : "s2",
+	gecko_spellcheck : true,
+	convert_fonts_to_spans : true,
+	language : "en",
+	plugins : "save",
+	theme_advanced_buttons1 : 'newdocument,save,|,undo,redo,|,bold,italic,|,link,unlink,image,|,formatselect,blockquote,bullist,numlist,',
+	theme_advanced_buttons2 : '',
+	theme_advanced_buttons3 : '',
+	theme_advanced_toolbar_location : "top",
+	theme_advanced_toolbar_align : "left",
+	theme_advanced_path_location : "bottom",
+	theme_advanced_blockformats : "p,h2,h3,h4,pre",
+	extended_valid_elements : "hr[class|width|size|noshade],br[clear],span[class|align|style],small,big,code[class],samp,kbd,s",
+	file_browser_callback : "fileBrowserCallBack",
+	remove_trailing_nbsp : true,
+	relative_urls : false,
+	remove_script_host : true
+}
+];
+
+tinyMCE.init(s2_wysiwyg_params[s2_wysiwyg_type]);
 
 function SetDocumentPath (s)
 {

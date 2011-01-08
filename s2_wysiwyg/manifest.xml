@@ -22,9 +22,40 @@
 	<minversion>1.0a1</minversion>
 	<maxtestedon>1.0a1</maxtestedon>
 
+	<install><![CDATA[
+$s2_wysiwys_config = array(
+	'S2_WYSIWYG_TYPE'		=> '0',
+);
+
+foreach ($s2_wysiwys_config as $conf_name => $conf_value)
+{
+	if (defined($conf_name))
+		continue;
+
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
+	);
+
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+}
+	]]></install>
+
+	<uninstall><![CDATA[
+$query = array(
+	'DELETE'	=> 'config',
+	'WHERE'		=> 'name in (\'S2_WYSIWYG_TYPE\')',
+);
+$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	]]></uninstall>
+
 	<hooks>
 		<hook id="ai_head_end"><![CDATA[
 ?>
+<script type="text/javascript">
+	var s2_wysiwyg_type = <?php echo S2_WYSIWYG_TYPE; ?>;
+</script>
 <script type="text/javascript" src="<?php echo $ext_info['url']; ?>/tiny_mce/tiny_mce.js"></script>
 <script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>
 <?php
@@ -60,6 +91,19 @@ $padding -= 2.4;
 		<hook id="fn_s2_blog_post_form_pre_output"><![CDATA[
 s2_add_js_header('SetDocumentPath("'.BLOG_BASE.date('Y/m/d/', $page['create_time']).'"); tinyMCE.execCommand("mceRemoveControl", false, "arttext");');
 s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext");');
+		]]></hook>
+
+		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+$fieldset = array(
+	'S2_WYSIWYG_TYPE' => s2_get_checkbox('S2_WYSIWYG_TYPE', $options['S2_WYSIWYG_TYPE'], $lang_s2_wysiwyg['WYSIWYG type'], $lang_s2_wysiwyg['WYSIWYG type label']),
+);
+($hook = s2_hook('s2_wysiwyg_opt_pre_fs_merge')) ? eval($hook) : null;
+$output .= '<fieldset><legend>'.$lang_s2_wysiwyg['WYSIWYG'].'</legend>'.implode('', $fieldset).'</fieldset>';
+		]]></hook>
+
+		<hook id="opt_start"><![CDATA[
+$s2_const_types['S2_WYSIWYG_TYPE'] = 'int';
 		]]></hook>
 
 	</hooks>
