@@ -2,7 +2,7 @@
 /**
  * Processes ajax queries for blog administrating.
  *
- * @copyright (C) 2007-2010 Roman Parpalak
+ * @copyright (C) 2007-2011 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  */
