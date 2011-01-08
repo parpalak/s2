@@ -2,7 +2,7 @@
 /**
  * Displays information about S2 and environment in the admin panel
  *
- * @copyright (C) 2007-2010 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2007-2011 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -115,7 +115,7 @@ function s2_stat_info()
 
 	$version = array(
 		'<a href="http://s2cms.ru/" target="_blank">S2 '.S2_VERSION.' &uarr;</a>',
-		'© 2007–2010 Roman Parpalak',
+		'© 2007–2011 Roman Parpalak',
 	);
 
 	$environment = array(
