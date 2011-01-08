@@ -63,7 +63,7 @@ $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		<hook id="ai_after_js_init"><![CDATA[
 ?>
-var sPictUrl = '<?php echo S2_PATH; ?>/_admin/pictman.php';
+var s2_wysiwyg_pict_url = '<?php echo S2_PATH; ?>/_admin/pictman.php';
 <?php
 		]]></hook>
 

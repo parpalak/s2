@@ -63,26 +63,26 @@ function SetDocumentPath (s)
 	tinyMCE.settings.document_base_url = s;
 }
 
-var wFileBrowser = wImage = null;
+var s2_wysiwyg_wFileBrowser = s2_wysiwyg_wImage = null;
 
 function fileBrowserCallBack(field_name, url, type, win)
 {
 	if (type != "image")
 		return;
-	wImage = win;
-	wFileBrowser = window.open(sPictUrl, 's2_wysiwyg_imagewindow', 'scrollbars=yes,toolbar=yes,width=750,height=500', 'True');
+	s2_wysiwyg_wImage = win;
+	s2_wysiwyg_wFileBrowser = window.open(s2_wysiwyg_pict_url, 's2_wysiwyg_imagewindow', 'scrollbars=yes,toolbar=yes,width=750,height=500', 'True');
 }
 
 function ReturnImage(s, w, h)
 {
-	wFileBrowser.close();
+	s2_wysiwyg_wFileBrowser.close();
 
-	if (!wImage || wImage.closed)
+	if (!s2_wysiwyg_wImage || s2_wysiwyg_wImage.closed)
 		return;
 
-	wImage.document.forms[0].elements['src'].value = s;
-	wImage.document.forms[0].elements['width'].value = w;
-	wImage.document.forms[0].elements['height'].value = h;
+	s2_wysiwyg_wImage.document.forms[0].elements['src'].value = s;
+	s2_wysiwyg_wImage.document.forms[0].elements['width'].value = w;
+	s2_wysiwyg_wImage.document.forms[0].elements['height'].value = h;
 }
 
 add_hook('fn_tab_switch_start', 'if (sType == "view_tab") tinyMCE.triggerSave();');
