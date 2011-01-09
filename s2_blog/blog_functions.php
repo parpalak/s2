@@ -468,7 +468,7 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 		$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
 		$prev_month = $prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR) ? '<a class="nav_mon" href="'.BLOG_BASE.date('Y/m', $prev_time).'/" title="'.s2_month(date('m', $prev_time)).date(', Y', $prev_time).'">&larr;</a>' : '&larr;';
 
-		$header = '<tr><th>'.$prev_month.'</th><th align="center" colspan="5">'
+		$header = '<tr class="nav"><th>'.$prev_month.'</th><th align="center" colspan="5">'
 			.$month_name.', <a href="'.BLOG_BASE.$year.'/">'.$year.'</a></th><th>'.$next_month.'</th></tr>';
 	}
 
