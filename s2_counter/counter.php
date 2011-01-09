@@ -20,7 +20,12 @@ $data = explode("\n", $data);
 if (count($data) < 3)
 	die;
 
-$image = imagecreatefrompng('pattern.png');
+$filename = 'data/pattern.png';
+if (!is_file($filename))
+	if (!copy('pattern.png', $filename))
+		$filename = 'pattern.png';
+
+$image = imagecreatefrompng($filename);
 $black = imagecolorallocate($image, 0, 0, 0);
 
 imagestring($image, 1, 86 - 5*strlen(trim($data[0])),  2, trim($data[0]), $black);
