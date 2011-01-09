@@ -455,7 +455,7 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 	{
 		if ($start_time < time())
 			$month_name = '<a href="'.BLOG_BASE.date('Y/m', $start_time).'/">'.$month_name.'</a>';
-		$header = '<tr><th colspan="7" align="center">'.$month_name.'</th></tr>';
+		$header = '<tr class="nav"><th colspan="7" align="center">'.$month_name.'</th></tr>';
 	}
 	else
 	{
