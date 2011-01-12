@@ -212,7 +212,7 @@ function s2_bbcode_to_html ($s)
 	while (preg_match ('/\[Q\s*?\].*?\[\/Q\s*?\]/uis', $s))
 		$s = preg_replace('/\s*\[Q\s*?\]\s*(.*?)\s*\[\/Q\s*?\]\s*/uis', '<blockquote>\\1</blockquote>', $s);
 
-	$s = preg_replace('#(https?://\S{2,}?)(?=[\s:\),\'\><\]]|[\.;](?:\s|$)|$)#ue', '\'<noindex><a href="\\1" rel="nofollow">\'.((utf8_strlen(\'\\1\') > 55) ? utf8_substr(\'\\1\', 0 , 42).\' … \'.utf8_substr(\'\\1\', -10) : \'\\1\').\'</a></noindex>\'', $s);
+	$s = preg_replace('#(https?://\S{2,}?)(?=[\s\),\'\><\]]|[\.;:](?:\s|$)|$)#ue', '\'<noindex><a href="\\1" rel="nofollow">\'.((utf8_strlen(\'\\1\') > 55) ? utf8_substr(\'\\1\', 0 , 42).\' … \'.utf8_substr(\'\\1\', -10) : \'\\1\').\'</a></noindex>\'', $s);
 	$s = str_replace("\n", '<br />', $s);
 	return $s;
 }
