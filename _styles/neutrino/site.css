@@ -341,19 +341,44 @@ body {
 	#content ul.back_forward li {
 		behavior: none;
 		float: left;
-		margin: 0 2%;
 		text-indent: 0;
 		padding: 0;
-		width: 46%;
+		position: relative;
+		z-index: 10;
 		}
 		#content ul.back_forward li.up {
 			text-align: center;
-			margin: 0;
 			width: 100%;
+			margin: 0 0 1.4em;
 			}
 		#content ul.back_forward li.back {
+			margin: 0 3% 0 0;
 			text-align: right;
+			width: 47%;
 			}
+		#content ul.back_forward li.forward {
+			margin: 0 0 0 3%;
+			width: 47%;
+			}
+			#content ul.back_forward li.back .arrow {
+				float: right;
+				margin-left: 0.6em;
+				}
+			#content ul.back_forward li.forward .arrow {
+				float: left;
+				margin-right: 0.6em;
+				}
+			#content ul.back_forward li.up .arrow {
+				position: absolute;
+				display: block;
+				top: 1.3em;
+				left: 0;
+				right: 0;
+				z-index: 1;
+				}
+			* html #content ul.back_forward li.up .arrow {
+				width: 100%;
+				}
 
 img[align="left"] {
 	margin-right: 1.5em;

@@ -609,9 +609,10 @@ function s2_parse_page_url ($request_uri)
 
 		if ($curr_item != -1)
 			$page['back_forward'] = '<ul class="back_forward">'.
-				'<li class="up"><a href="./">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a> &uarr;</li>'.
-				(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back">&larr; ', $menu_articles[$curr_item - 1]) : '<li class="back">&larr; </li>').
-				(isset($menu_articles[$curr_item + 1]) ? str_replace('</li>', ' &rarr;</li>', $menu_articles[$curr_item + 1]) : '<li> &rarr;</li>').'</ul>';
+				'<li class="up"><span class="arrow">&uarr;</span> <a href="./">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a></li>'.
+				(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back"><span class="arrow">&larr;</span> ', $menu_articles[$curr_item - 1]) : '<li class="back"><span class="arrow">&larr;</span> </li>').
+				(isset($menu_articles[$curr_item + 1]) ? str_replace('<li>', '<li class="forward"><span class="arrow">&rarr;</span> ', $menu_articles[$curr_item + 1]) : '<li class="forward"><span class="arrow">&rarr;</span> </li>').
+				'</ul>';
 	}
 
 	// Tags
