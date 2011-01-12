@@ -206,7 +206,7 @@ function s2_blog_get_posts ($sub_query, $desc = '')
 	$query = array(
 		'SELECT'	=> 'create_time, title, text, url, p.id as id, commented, favorite, ('.$raw_query2.') AS comment_count',
 		'FROM'		=> 's2_blog_posts AS p, ('.$sub_query.') AS temp',
-		'WHERE'		=> 'temp.id = p.id',
+		'WHERE'		=> 'temp.id = p.id AND p.published = 1',
 		'ORDER BY'	=> 'create_time '.$desc
 	);
 	($hook = s2_hook('fn_s2_blog_get_posts_pre_get_posts_qr')) ? eval($hook) : null;
