@@ -28,6 +28,11 @@ function s2_typo_store ($matches)
 	}
 }
 
+function s2_typo_replace_q ($matches)
+{
+	return str_replace('"', '¬', $matches[0]);
+}
+
 //
 // This function makes everything :)
 //
@@ -39,18 +44,18 @@ function s2_typo_make ($contents, $soft = 0)
 	$nbsp = $soft ? "\xc2\xa0" : '&nbsp;';
 
 	// Escape sensitive data
-	$contents = preg_replace_callback('#<(script|style|textarea|pre|code).*?</\1>#s', 's2_typo_store', $contents);
-	$contents = preg_replace('#<([^>]*)>#es', "'<'.str_replace ('\\\"', '¬','\\1').'>'", $contents); 
+	$contents = preg_replace_callback('#<(script|style|textarea|pre|code|kbd).*?</\\1>#s', 's2_typo_store', $contents);
+	$contents = preg_replace_callback('#<[^>]*>#sS', 's2_typo_replace_q', $contents); 
 
 	$contents = "\n".str_replace(array('&quot;'), array('"'), $contents);
 
 	// Qutation marks
-	$contents = preg_replace ('#(?<=[¬(\s">]|^)"([^"]*[^\s"(])"#S', '«\\1»', $contents);
+	$contents = preg_replace ('#(?<=[(\s">]|¬|^)"([^"]*[^\s"(])"#S', '«\\1»', $contents);
 
 	// Nested quotation marks
 	if (strpos($contents, '"') !== false)
 	{
-		$contents = preg_replace('#(?<=[¬(\s">]|^)"([^"]*[^\s"(])"#S', '«\\1»', $contents);
+		$contents = preg_replace('#(?<=[(\s">]|¬|^)"([^"]*[^\s"(])"#S', '«\\1»', $contents);
 		while (preg_match('#«([^«»]*)«([^»]*)»#u', $contents, $regs))
 			$contents = str_replace ($regs[0], '«'.$regs[1].'„'.$regs[2].'“', $contents);
 	}
@@ -100,8 +105,8 @@ function s2_typo_make ($contents, $soft = 0)
 	$contents = str_replace(array_keys($replace), array_values($replace), $contents);
 
 	// Put sensitive data back
-	while (preg_match('#¬ (\d*) ¬#', $contents))
-		$contents = preg_replace_callback ('#(¬) (\d*) ¬#', 's2_typo_store', $contents);
+	while (preg_match('#¬ (\d*) ¬#S', $contents))
+		$contents = preg_replace_callback ('#(¬) (\d*) ¬#S', 's2_typo_store', $contents);
 
 	$contents = str_replace ('¬', '"', $contents); 
 

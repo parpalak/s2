@@ -16,12 +16,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_typo</id>
 	<title>Russian typography</title>
-	<version>1.0a</version>
+	<version>1.0a1</version>
 	<description>Converts '""' quotation marks to '«»' and '„“' and puts non-breaking space characters according to Russian typography conventions.</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0dev</minversion>
-	<maxtestedon>1.0a</maxtestedon>
+	<maxtestedon>1.0a1</maxtestedon>
 
 	<hooks>
 
