@@ -203,14 +203,14 @@ function s2_bbcode_to_html ($s)
 	$s = str_replace("''", '"', $s);
 	$s = str_replace("\r", '', $s);
 
-	$s = preg_replace('#\[I\](.*?)\[/I\]#isu', '<em>\1</em>', $s);
-	$s = preg_replace('#\[B\](.*?)\[/B\]#isu', '<strong>\1</strong>', $s);
+	$s = preg_replace('#\[I\](.*?)\[/I\]#isS', '<em>\1</em>', $s);
+	$s = preg_replace('#\[B\](.*?)\[/B\]#isS', '<strong>\1</strong>', $s);
 
-	while (preg_match ('/\[Q\s*?=\s*?([^\]]*)\s*?\].*?\[\/Q.*?\]/uis', $s))
-		$s = preg_replace('/\s*\[Q\s*?=\s*?([^\]]*)\s*?\]\s*(.*?)\s*\[\/Q.*?\]\s*/uis', '<blockquote><strong>\\1</strong> '.$lang_common['Wrote'].'<br/><br/><em>\\2</em></blockquote>', $s);
+	while (preg_match ('/\[Q\s*=\s*([^\]]*)\].*?\[\/Q\]/isS', $s))
+		$s = preg_replace('/\s*\[Q\s*=\s*([^\]]*)\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote><strong>\\1</strong> '.$lang_common['Wrote'].'<br/><br/><em>\\2</em></blockquote>', $s);
 
-	while (preg_match ('/\[Q\s*?\].*?\[\/Q\s*?\]/uis', $s))
-		$s = preg_replace('/\s*\[Q\s*?\]\s*(.*?)\s*\[\/Q\s*?\]\s*/uis', '<blockquote>\\1</blockquote>', $s);
+	while (preg_match ('/\[Q\].*?\[\/Q\]/isS', $s))
+		$s = preg_replace('/\s*\[Q\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote>\\1</blockquote>', $s);
 
 	$s = preg_replace('#(https?://\S{2,}?)(?=[\s\),\'\><\]]|[\.;:](?:\s|$)|$)#ue', '\'<noindex><a href="\\1" rel="nofollow">\'.((utf8_strlen(\'\\1\') > 55) ? utf8_substr(\'\\1\', 0 , 42).\' … \'.utf8_substr(\'\\1\', -10) : \'\\1\').\'</a></noindex>\'', $s);
 	$s = str_replace("\n", '<br />', $s);
