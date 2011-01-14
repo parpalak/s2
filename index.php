@@ -30,7 +30,7 @@ if (strpos($request_uri, '?') !== false)
 //
 if (substr($request_uri, -3) == '---')
 {
-	header('Location: '.S2_BASE_URL.'/_admin/?path='.urlencode(substr($request_uri, 0, -3)));
+	header('Location: '.S2_BASE_URL.'/_admin/index.php?path='.urlencode(substr($request_uri, 0, -3)));
 	die;
 }
 
