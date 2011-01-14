@@ -236,7 +236,7 @@ if (!S2_PREMODERATION)
 	$query = array(
 		'SELECT'	=> 'id, nick, email, ip, time',
 		'FROM'		=> 'art_comments',
-		'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email <> \''.$s2_db->escape($email).'\''
+		'WHERE'		=> 'article_id = '.$id.' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($email).'\''
 	);
 	($hook = s2_hook('cmnt_pre_get_subscribers_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
