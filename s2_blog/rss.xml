@@ -23,9 +23,8 @@
 		<chart cid="0">
 			<comparing>
 				<recalculate>false</recalculate>
-				<width>3</width>
+				<width>2</width>
 				<bullet>round_outline</bullet>
-				<smoothed>true</smoothed>
 			</comparing>
 
 			<graphs>
