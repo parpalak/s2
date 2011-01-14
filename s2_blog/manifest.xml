@@ -798,7 +798,8 @@ if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
 		<hook id="idx_pre_meta_merge"><![CDATA[
 if (!isset($lang_s2_blog))
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-$meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.S2_BASE_URL.'/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml" />';
+if (defined('S2_BLOG_HANDLED'))
+	$meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.S2_BASE_URL.'/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml" />';
 		]]></hook>
 
 		<hook id="fn_s2_count_rss_count_start"><![CDATA[
