@@ -463,7 +463,7 @@ function s2_blog_toggle_hide_comment ($id)
 			$query = array(
 				'SELECT'	=> 'id, nick, email, ip, time',
 				'FROM'		=> 's2_blog_comments',
-				'WHERE'		=> 'post_id = '.$comment['post_id'].' and subscribed = 1 and email <> \''.$s2_db->escape($comment['email']).'\''
+				'WHERE'		=> 'post_id = '.$comment['post_id'].' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($comment['email']).'\''
 			);
 			($hook = s2_hook('fn_s2_blog_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
 			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);

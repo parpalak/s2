@@ -669,7 +669,7 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 	$query = array(
 		'SELECT'	=> 'id, nick, email, ip, time',
 		'FROM'		=> 's2_blog_comments',
-		'WHERE'		=> 'post_id = '.$id.' and subscribed = 1 and email <> \''.$s2_db->escape($email).'\''
+		'WHERE'		=> 'post_id = '.$id.' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($email).'\''
 	);
 		]]></hook>
 
