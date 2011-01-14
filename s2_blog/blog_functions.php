@@ -656,7 +656,7 @@ function s2_blog_last_post ()
 	if (!count($posts))
 		return '';
 
-	$html = '<h2 class="preview">%1$s<a href="%2$s">%3$s</a></h3>'."\n".
+	$html = '<h2 class="preview">%1$s<a href="%2$s">%3$s</a></h2>'."\n".
 		'<div class="preview time">%5$s</div>'."\n".
 		'<div class="post body">%6$s</div>'."\n";
 
