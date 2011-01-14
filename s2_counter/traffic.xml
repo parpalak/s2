@@ -59,9 +59,8 @@
 					<data_sources>
 						<close>index2</close>
 					</data_sources>
-					<width>3</width>
+					<width>2</width>
 					<bullet>round_outline</bullet>
-					<smoothed>true</smoothed>
 
 					<legend>
 						<date key="true" title="true"><![CDATA[{close}]]></date>
@@ -75,9 +74,8 @@
 					<data_sources>
 						<close>index1</close>
 					</data_sources>
-					<width>3</width>
+					<width>2</width>
 					<bullet>round_outline</bullet>
-					<smoothed>true</smoothed>
 
 					<legend>
 						<date key="true" title="true"><![CDATA[{close}]]></date>

@@ -58,9 +58,8 @@
 					<data_sources>
 						<close>close</close>
 					</data_sources>
-					<width>3</width>
+					<width>2</width>
 					<bullet>round_outline</bullet>
-					<smoothed>true</smoothed>
 
 					<legend>
 						<date key="true" title="true"><![CDATA[<b>{close}</b>]]></date>
