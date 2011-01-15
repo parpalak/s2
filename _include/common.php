@@ -89,6 +89,6 @@ if (!defined('S2_HOOKS_LOADED'))
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
-	generate_hooks_cache();
+	s2_generate_hooks_cache();
 	require S2_CACHE_DIR.'cache_hooks.php';
 }

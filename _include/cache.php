@@ -11,29 +11,26 @@
 
 
 // Delete every .php file in the cache directory
-function s2_clear_cache()
+function s2_clear_cache ()
 {
+	$file_list = array('cache_config.php', 'cache_hooks.php');
+
 	$return = ($hook = s2_hook('fn_clear_cache_start')) ? eval($hook) : null;
 	if ($return != null)
 		return;
 
-	$d = dir(S2_CACHE_DIR);
-	while (($entry = $d->read()) !== false)
-	{
-		if (substr($entry, -4) == '.php')
-			@unlink(S2_CACHE_DIR.$entry);
-	}
-	$d->close();
+	foreach ($file_list as $entry)
+		@unlink(S2_CACHE_DIR.$entry);
 }
 
 //
 // Generate the config cache PHP script
 //
-function s2_generate_config_cache()
+function s2_generate_config_cache ()
 {
 	global $s2_db;
 
-	$return = ($hook = s2_hook('ch_fn_generate_config_cache_start')) ? eval($hook) : null;
+	$return = ($hook = s2_hook('fn_generate_config_cache_start')) ? eval($hook) : null;
 	if ($return != null)
 		return;
 
@@ -43,7 +40,7 @@ function s2_generate_config_cache()
 		'FROM'		=> 'config AS c'
 	);
 
-	($hook = s2_hook('ch_fn_generate_config_cache_qr_get_config')) ? eval($hook) : null;
+	($hook = s2_hook('fn_generate_config_cache_qr_get_config')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$output = '';
@@ -53,7 +50,7 @@ function s2_generate_config_cache()
 	// Output config as PHP code
 	$fh = @fopen(S2_CACHE_DIR.'cache_config.php', 'wb');
 	if (!$fh)
-		error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \'_cache\'.', __FILE__, __LINE__);
+		error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
 
 	fwrite($fh, '<?php'."\n\n".'define(\'S2_CONFIG_LOADED\', 1);'."\n\n".$output."\n");
 
@@ -63,11 +60,11 @@ function s2_generate_config_cache()
 //
 // Generate the hooks cache PHP script
 //
-function generate_hooks_cache()
+function s2_generate_hooks_cache ()
 {
 	global $s2_db;
 
-	$return = ($hook = s2_hook('ch_fn_generate_hooks_cache_start')) ? eval($hook) : null;
+	$return = ($hook = s2_hook('fn_generate_hooks_cache_start')) ? eval($hook) : null;
 	if ($return != null)
 		return;
 
@@ -85,7 +82,7 @@ function generate_hooks_cache()
 		'ORDER BY'	=> 'eh.priority, eh.installed'
 	);
 
-	($hook = s2_hook('ch_fn_generate_hooks_cache_qr_s2_hooks')) ? eval($hook) : null;
+	($hook = s2_hook('fn_generate_hooks_cache_qr_s2_hooks')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$output = array();
@@ -119,7 +116,7 @@ function generate_hooks_cache()
 	// Output hooks as PHP code
 	$fh = @fopen(S2_CACHE_DIR.'cache_hooks.php', 'wb');
 	if (!$fh)
-		error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \'_cache\'.', __FILE__, __LINE__);
+		error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
 
 	fwrite($fh, '<?php'."\n\n".'if (!defined(\'S2_HOOKS_LOADED\'))'."\n\t".'define(\'S2_HOOKS_LOADED\', 1);'."\n\n".'$s2_hooks = '.var_export($output, true).';');
 

@@ -349,7 +349,7 @@ function s2_install_extension ($id)
 
 	s2_clear_cache();
 
-	generate_hooks_cache();
+	s2_generate_hooks_cache();
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
 
@@ -442,7 +442,7 @@ function s2_flip_extension ($id)
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
-	generate_hooks_cache();
+	s2_generate_hooks_cache();
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
 
@@ -525,7 +525,7 @@ function s2_uninstall_extension ($id)
 
 	s2_clear_cache();
 
-	generate_hooks_cache();
+	s2_generate_hooks_cache();
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
 
