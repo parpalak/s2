@@ -64,7 +64,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 
 	s2_clear_cache();
 
-	generate_hooks_cache();
+	s2_generate_hooks_cache();
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
 
