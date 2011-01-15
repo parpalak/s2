@@ -18,7 +18,7 @@ class s2_search_finder
 	const KEYWORD_WEIGHT = 30;
 	const TITLE_WEIGHT = 20;
 
-	const index_name = 's2_search_index.arr';
+	const index_name = 's2_search_index.php';
 	const process_state = 's2_search_state.txt';
 	const buffer_name = 's2_search_buffer.txt';
 	const buffer_pointer = 's2_search_pointer.txt';
@@ -212,28 +212,15 @@ class s2_search_finder
 
 	protected static function save_index ()
 	{
-		file_put_contents(
-			S2_CACHE_DIR.self::index_name,
-			serialize(array(
+		$data = serialize(array(
 				self::$fulltext_index,
 				self::$excluded_words,
 				self::$keyword_1_index,
 				self::$keyword_base_index,
 				self::$keyword_n_index,
 				self::$table_of_contents,
-			))
-		);    
-		file_put_contents(
-			S2_CACHE_DIR.self::index_name.'.php',
-			"<?php\n\n".'return '.var_export(array(
-				self::$fulltext_index,
-				self::$excluded_words,
-				self::$keyword_1_index,
-				self::$keyword_base_index,
-				self::$keyword_n_index,
-				self::$table_of_contents,
-			), true).';'
-		);
+			));
+		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.$data);
 	}
   
 	protected static function walk_site ($parent_id, $url)
@@ -315,6 +302,8 @@ class s2_search_finder
 			{
 				self::cleanup_index();
 				self::save_index();    
+				file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
+				file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '');
 				file_put_contents(S2_CACHE_DIR.self::process_state, '');
 				die('stop');
 			}
@@ -441,9 +430,8 @@ if (defined('DEBUG'))
 			self::$keyword_base_index,
 			self::$keyword_n_index,
 			self::$table_of_contents,
-		) = unserialize(file_get_contents(S2_CACHE_DIR.self::index_name));
+		) = unserialize(file_get_contents(S2_CACHE_DIR.self::index_name, NULL, NULL, 8));
 
-		//list(self::$fulltext_index, self::$excluded_words, self::$keyword_1_index, self::$keyword_n_index, self::$table_of_contents) = include S2_CACHE_DIR.self::index_name.'.php';
 if (defined('DEBUG'))
 	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
