@@ -33,7 +33,12 @@ var s2_search = {
 			document.getElementById('s2_search_progress').innerHTML = ': ' + response.substr(3) + '%...';
 		}
 		else
-			document.getElementById('s2_search_progress').innerHTML = ': 100%';
+		{
+			if (response == 'stop')
+				document.getElementById('s2_search_progress').innerHTML = ': 100%';
+			else if (response)
+				DisplayError(response);
+		}
 	},
 
 	refresh_index: function (sChapter)
