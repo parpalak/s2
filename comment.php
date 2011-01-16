@@ -27,10 +27,12 @@ if (isset($_GET['go']))
 		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
-	($hook = s2_hook('cmnt_pre_sent_comment_output')) ? eval($hook) : null;
+	($hook = s2_hook('cmnt_go_pre_tpl_replace')) ? eval($hook) : null;
 
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
+
+	($hook = s2_hook('cmnt_go_pre_output')) ? eval($hook) : null;
 
 	die($template);
 }
@@ -87,10 +89,12 @@ if (isset($_GET['unsubscribe']))
 		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
-	($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+	($hook = s2_hook('cmnt_unsubscribed_pre_tpl_replace')) ? eval($hook) : null;
 
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
+
+	($hook = s2_hook('cmnt_unsubscribed_pre_output')) ? eval($hook) : null;
 
 	die($template);
 }
@@ -153,7 +157,7 @@ if (isset($_POST['preview']))
 
 	$name = '<strong>'.($show_email ? s2_js_mailto(s2_htmlencode($name), $email) : s2_htmlencode($name)).'</strong>';
 
-	($hook = s2_hook('cmnt_pre_comment_merge')) ? eval($hook) : null;
+	($hook = s2_hook('cmnt_preview_pre_comment_merge')) ? eval($hook) : null;
 
 	$comments = "\t\t\t\t".'<div class="reply_info">'.sprintf($lang_common['Comment info format'], s2_date_time(time()), $name).'</div>'."\n".
 		"\t\t\t\t".'<div class="reply">'.s2_bbcode_to_html(s2_htmlencode($text)).'</div>'."\n";
@@ -163,8 +167,12 @@ if (isset($_POST['preview']))
 		.$replace['<!-- s2_text -->'];
 	$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
+	($hook = s2_hook('cmnt_preview_pre_tpl_replace')) ? eval($hook) : null;
+
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
+
+	($hook = s2_hook('cmnt_preview_pre_output')) ? eval($hook) : null;
 
 	die($template);
 }
@@ -205,10 +213,12 @@ if (!empty($errors))
 	$replace['<!-- s2_text -->'] = $error_text.'<p>'.$lang_comments['Fix error'].'</p>'.$replace['<!-- s2_text -->'];
 	$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
-	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
+	($hook = s2_hook('cmnt_pre_error_tpl_replace')) ? eval($hook) : null;
 
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
+
+	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
 
 	die($template);
 }
@@ -262,7 +272,7 @@ $query = array(
 ($hook = s2_hook('cmnt_pre_get_moderators_qr')) ? eval($hook) : null;
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 while ($mrow = $s2_db->fetch_assoc($result))
-	s2_mail_comment($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, '---');
+	s2_mail_comment($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, $lang_comments['Moderator mail']);
 
 if (!S2_PREMODERATION)
 {
