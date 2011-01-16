@@ -599,14 +599,22 @@ if (defined('DEBUG'))
 			$string = strip_tags($string);
 			$string = str_replace('ё', 'е', $string);
 			$lines = preg_split('#(?<=[\.?!:])[\s]+#s', $string);
-			$reserved_line = $lines[0].' '.$lines[0];
+			$reserved_line = $lines[0].(isset($lines[1]) ? ' '.$lines[1] : '');
 
 			// Remove the sentences without stems
 			$found_words = $found_stems_lines = $lines_weight = array();
 			for ($i = count($lines); $i-- ;)
 			{
 				// Check every sentence for the query words
-				if (!preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $lines[$i], $matches))
+				preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $lines[$i], $matches);
+				foreach ($matches[0] as $k => $word)
+					if ($matches[1][$k] != s2_search_stemmer::stem_word($word))
+					{
+						unset($matches[0][$k]);
+						unset($matches[1][$k]);
+					}
+
+				if (!count($matches[0]))
 				{
 					unset($lines[$i]);
 					continue;
