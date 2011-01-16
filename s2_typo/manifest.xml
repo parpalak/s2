@@ -25,7 +25,7 @@
 
 	<hooks>
 
-		<hook id="idx_template_after_replace"><![CDATA[
+		<hook id="idx_template_after_replace, cmnt_preview_pre_output"><![CDATA[
 require $ext_info['path'].'/functions.php';
 $template = s2_typo_make($template);
 		]]></hook>
