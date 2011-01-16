@@ -148,6 +148,7 @@ elseif ($action == 'save_blog')
 		else
 			s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className=""; e.title="";');
 	}
+	s2_add_js_header_delayed('s2_search ? s2_search.refresh_index("s2_blog_'.$id.'") : null;');
 }
 
 elseif ($action == 'create_blog_post')
