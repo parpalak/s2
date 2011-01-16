@@ -132,7 +132,7 @@ class s2_search_finder
 	protected static function add_word_to_fulltext ($chapter, $position, $word)
 	{
 		$word = s2_search_stemmer::stem_word($word);
-		self::$fulltext_index[$word][$chapter][] = $position; 
+		self::$fulltext_index[$word][$chapter] = (isset(self::$fulltext_index[$word][$chapter]) ? '|' : '').$position; 
 	}
 
 	protected static function add_to_index ($chapter, $title, $contents, $keywords)
@@ -192,9 +192,10 @@ class s2_search_finder
 
 	protected static function cleanup_index ()
 	{
-		ksort(self::$fulltext_index);
+		$threshold = count(self::$table_of_contents) * 0.3;
+		if ($threshold < 20)
+			$threshold = 20;
 
-		$threshold = count(self::$table_of_contents) * 0.5;
 		foreach (self::$fulltext_index as $word => $stat)
 		{
 			// Drop fulltext frequent or empty items
@@ -205,7 +206,6 @@ class s2_search_finder
 				continue;
 			}
 
-			arsort($stat);
 			self::$fulltext_index[$word] = $stat;
 		}
 	}
@@ -503,6 +503,7 @@ if (defined('DEBUG'))
 
 				foreach (self::$fulltext_index[$search_word] as $chapter => $entries)
 				{
+					$entries = explode('|', $entries);
 					// Remember chapters and positions
 					foreach ($entries as $position)
 						$curr_positions[$chapter][] = $position;
@@ -719,9 +720,7 @@ if (defined('DEBUG'))
 	{
 		global $lang_s2_search;
 
-		s2_search_stemmer::stem_caching(1);
 		self::read_index();
-		s2_search_stemmer::stem_caching(0);
 
 if (defined('DEBUG'))
 	$start_time = microtime(true);
