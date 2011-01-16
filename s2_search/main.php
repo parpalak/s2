@@ -8,7 +8,8 @@
  */
 
 
-$s2_search_q = isset($_GET['q']) ? $_GET['q'] : '';
+$s2_search_query = isset($_GET['q']) ? $_GET['q'] : '';
+$s2_search_page = isset($_GET['p']) ? (int) $_GET['p'] : 1;
 
 $template = s2_get_template('service.php');
 
@@ -24,13 +25,13 @@ ob_start();
 			<input type="submit" name="search" value="<?php echo $lang_s2_search['Search button']; ?>" />
 		</div>
 		<div class="wrap">
-			<input type="text" name="q" value="<?php echo $s2_search_q; ?>" />
+			<input type="text" name="q" value="<?php echo $s2_search_query; ?>" />
 		</div>
 	</form>
 <?php
 
-if ($s2_search_q !== '')
-	s2_search_finder::find($s2_search_q);
+if ($s2_search_query !== '')
+	s2_search_finder::find($s2_search_query, $s2_search_page);
 
 ?>
 </div>
@@ -39,12 +40,12 @@ if ($s2_search_q !== '')
 $page['text'] = ob_get_clean();
 $page['title'] = $lang_s2_search['Search'];
 
-$s2_search_query = array(
+$s2_search_queryuery = array(
 	'SELECT'	=> 'title',
 	'FROM'		=> 'articles',
 	'WHERE'		=> 'parent_id = '.S2_ROOT_ID,
 );
 ($hook = s2_hook('s2_search_pre_crumbs_fetch_qr')) ? eval($hook) : null;
-$s2_search_result = $s2_db->query_build($s2_search_query) or error(__FILE__, __LINE__);
+$s2_search_result = $s2_db->query_build($s2_search_queryuery) or error(__FILE__, __LINE__);
 list($s2_search_main) = $s2_db->fetch_row($s2_search_result);
 $page['path'] = sprintf($lang_s2_search['Crumbs'], $s2_search_main, S2_PATH.'/', $lang_s2_search['Search']);

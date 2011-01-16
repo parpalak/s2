@@ -277,7 +277,7 @@ class s2_search_finder
 		{
 			file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
 			file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '0');
-			self::walk_site(0, S2_BASE_URL);
+			self::walk_site(0, '');
 
 			($hook = s2_hook('s2_search_index_after_walk')) ? eval($hook) : null;
 
@@ -340,6 +340,10 @@ class s2_search_finder
 	{
 		global $s2_db;
 
+		$data = ($hook = s2_hook('s2_search_get_chapter_start')) ? eval($hook) : null;
+		if ($data)
+			return $data;
+
 		$subquery = array(
 			'SELECT'	=> 'count(*)',
 			'FROM'		=> 'articles AS a2',
@@ -351,7 +355,7 @@ class s2_search_finder
 		$query = array(
 			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
 			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'id = '.$s2_db->escape($chapter).' AND published = 1',
+			'WHERE'		=> 'id = \''.$s2_db->escape($chapter).'\' AND published = 1',
 		);
 		($hook = s2_hook('s2_search_get_chapter_pre_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -512,7 +516,7 @@ if (defined('DEBUG'))
 
 			foreach ($curr_positions as $chapter => $positions)
 				if (isset($prev_positions[$chapter]))
-					self::$keys[$chapter]['neighbour_'.$word] = self::neighbour_weight(self::compare_arrays($positions, $prev_positions[$chapter])) * $word_weight;
+					self::$keys[$chapter]['*n_'.$word] = self::neighbour_weight(self::compare_arrays($positions, $prev_positions[$chapter])) * $word_weight;
 
 			$prev_positions = $curr_positions;
 		}
@@ -553,7 +557,157 @@ if (defined('DEBUG'))
 		return implode('/', $a);
 	}
 
-	public static function find ($search_string)
+	protected static function get_snippets ($output)
+	{
+		global $s2_db;
+
+		$ids = array_keys($output);
+		$articles = array();
+
+		$result = ($hook = s2_hook('s2_search_get_snippets_start')) ? eval($hook) : null;
+		if ($result)
+			return $output;
+
+		foreach ($ids as $k => $v)
+			$ids[$k] = (int) $v;
+
+		if (count($ids))
+		{
+			// Obtaining articles text
+			$query = array(
+				'SELECT'	=> 'id, pagetext',
+				'FROM'		=> 'articles AS a',
+				'WHERE'		=> 'id IN ('.implode(', ', $ids).') AND published = 1',
+			);
+			($hook = s2_hook('s2_search_get_chapter_pre_qr')) ? eval($hook) : null;
+			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+			while ($article = $s2_db->fetch_assoc($result))
+				$articles[$article['id']] = $article['pagetext'];
+		}
+
+		foreach ($articles as $id => $string)
+		{
+			// Stems of the words found in the $id chapter
+			$stems = array();
+			foreach (array_keys(self::$keys[$id]) as $word)
+				// Excluding neighbours weight
+				if (0 !== strpos($word, '*n_'))
+					$stems[] = s2_search_stemmer::stem_word($word);
+
+			// Text cleanup
+			$string = strip_tags($string);
+			$string = str_replace('ё', 'е', $string);
+			$lines = preg_split('#(?<=[\.?!:])[\s]+#s', $string);
+			$reserved_line = $lines[0].' '.$lines[0];
+
+			// Remove the sentences without stems
+			$found_words = $found_stems_lines = $lines_weight = array();
+			for ($i = count($lines); $i-- ;)
+			{
+				// Check every sentence for the query words
+				if (!preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $lines[$i], $matches))
+				{
+					unset($lines[$i]);
+					continue;
+				}
+
+				$stem_weight = array();
+
+				foreach ($matches[0] as $word)
+					$found_words[$i][] = $word;
+
+				foreach ($matches[1] as $stem)
+				{
+					$found_stems_lines[$i][utf8_strtolower($stem)] = 1;
+					if (isset($stem_weight[$stem]))
+						$stem_weight[$stem] ++;
+					else
+						$stem_weight[$stem] = 1;
+				}
+				$lines_weight[$i] = array_sum($stem_weight);
+			}
+
+			// Finding the best matches for the snippet
+			arsort($lines_weight);
+
+			// Small array rearrangement
+			$lines_with_weight = array();
+			foreach ($lines_weight as $line_num => $weight)
+				$lines_with_weight[$weight][] = $line_num;
+
+			$i = 0;
+			$snippet = $found_stems = array();
+			foreach ($lines_with_weight as $weight => $line_num_array)
+			{
+				while (count($line_num_array))
+				{
+					$i++;
+					// We take only 3 sentences with non-zero weight
+					if ($i > 3 || !$weight)
+						break 2;
+
+					// Choose the best line with the weight given
+					$result_weight = array();
+					$max = 0;
+					$max_index = -1;
+					foreach ($line_num_array as $line_index => $line_num)
+					{
+						$future_found_stems = $found_stems;
+						foreach ($found_stems_lines[$line_num] as $stem => $weight)
+							$future_found_stems[$stem] = 1;
+
+						if ($max < count($future_found_stems))
+						{
+							$max = count($future_found_stems);
+							$max_index = $line_index;
+						}
+					}
+
+					$line_num = $line_num_array[$max_index];
+					unset($line_num_array[$max_index]);
+
+					foreach ($found_stems_lines[$line_num] as $stem => $weight)
+						$found_stems[$stem] = 1;
+
+					// Highlighting
+					$replace = array();
+					foreach ($found_words[$line_num] as $word)
+						$replace[$word] = '<i>'.$word.'</i>';
+
+					$snippet[$line_num] = strtr($lines[$line_num], $replace);
+
+					// If we have found all stems, we do not need any more sentence
+					if ($max == count($stems))
+						break 2;
+				}
+			}
+
+			// Sort sentences in the snippet according to the text order
+			ksort($snippet);
+
+			if ((count($found_stems) * 1.0 / count($stems) > 0.6))
+				$output[$id]['descr'] = str_replace('.... ', '... ', implode('... ', $snippet));
+			elseif(!$output[$id]['descr'])
+				$output[$id]['descr'] = $reserved_line;
+		}
+
+		return $output;
+	}
+
+	protected static function paging ($page, $total_pages, $link)
+	{
+		global $lang_s2_search;
+
+		$str = '';
+		for ($i = 1; $i <= $total_pages; $i++)
+			$str .= ($i == $page ? '<span class="current">'.$i.'</span>' : '<a href="'.$link.'&amp;p='.$i.'">'.$i.'</a>');
+
+		$str = ($page <= 1 || $page > $total_pages ? '<span class="nav">&larr;</span>' : '<a href="'.$link.'&amp;p='.($page - 1).'">&larr;</a>').$str.($page == $total_pages ? '<span class="nav">&rarr;</span>' : '<a href="'.$link.'&amp;p='.($page + 1).'">&rarr;</a>');
+		return '<div class="paging">'.$str.'</div>';
+	}
+
+	public static function find ($search_string, $page)
 	{
 		global $lang_s2_search;
 
@@ -599,11 +753,12 @@ if (defined('DEBUG') && defined('MORE_DEBUG'))
 	print_r(self::$keys);
 	echo '</pre>';
 }
+		$results = array();
 		foreach (self::$keys as $chapter => $stat)
-			self::$keys[$chapter] = array_sum($stat);
+			$results[$chapter] = array_sum($stat);
 
 		// Order by weight
-		arsort(self::$keys);
+		arsort($results);
 
 if (defined('DEBUG'))
 {
@@ -612,13 +767,43 @@ if (defined('DEBUG'))
 	echo '</pre>';
 	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '<br>';
 }
-		echo '<p>', ($item_num = count(self::$keys)) ? sprintf($lang_s2_search['Found'], $item_num) : $lang_s2_search['Not found'], '</p>';
-
-		foreach(self::$keys as $chapter => $weight)
+		$item_num = count($results);
+		if ($item_num)
 		{
-			echo '<p><a class="title" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['title'].'</a><br />'.
-				(trim(self::$table_of_contents[$chapter]['descr']) ? self::$table_of_contents[$chapter]['descr'].'<br />' : '').
-				'<small><a class="url" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::display_url(self::$table_of_contents[$chapter]['url']).'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small></p>';
+			echo '<p>'.sprintf($lang_s2_search['Found'], $item_num).'</p>';
+
+			$total_pages = ceil($item_num / 10.0);
+			if ($page < 1 || $page > $total_pages)
+				$page = 1;
+
+			$i = 0;
+			$output = array();
+			foreach ($results as $chapter => $weight)
+			{
+				$i++;
+				if ($i <= ($page - 1) * 10)
+					continue;
+				if ($i > $page * 10)
+					break;
+
+				$output[$chapter]['title'] = '<a class="title" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['title'].'</a>';
+				$output[$chapter]['descr'] = trim(self::$table_of_contents[$chapter]['descr']);
+				$output[$chapter]['info'] = '<small><a class="url" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::display_url(S2_BASE_URL.self::$table_of_contents[$chapter]['url']).'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small>';
+			}
+
+if (defined('DEBUG'))
+	echo 'Страница: ', - $start_time + ($start_time = microtime(true)), '<br>';
+			$output = self::get_snippets($output);
+if (defined('DEBUG'))
+	echo 'Сниппеты: ', - $start_time + ($start_time = microtime(true)), '<br>';
+
+			foreach ($output as $chapter_info)
+				echo '<p>'.implode('<br />', $chapter_info).'<p>';
+
+			echo self::paging($page, $total_pages, '?q='.urlencode($search_string));
 		}
+		else
+			echo '<p>'.$lang_s2_search['Not found'].'</p>';
+
 	}
 }
