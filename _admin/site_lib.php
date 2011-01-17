@@ -589,10 +589,13 @@ function s2_get_user_list ($cur_login, $is_admin = false)
 // if the article is specified in GET parameters
 function s2_preload_editor ()
 {
-	global $s2_db;
+	global $s2_db, $lang_admin;
 
 	if (!isset($_GET['path']))
+	{
+		echo $lang_admin['Empty editor info'];
 		return;
+	}
 
 	$return = ($hook = s2_hook('fn_preload_editor_start')) ? eval($hook) : null;
 	if ($return)
