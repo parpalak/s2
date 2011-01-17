@@ -609,11 +609,16 @@ if (defined('DEBUG'))
 				// Check every sentence for the query words
 				preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $lines[$i], $matches);
 				foreach ($matches[0] as $k => $word)
-					if ($matches[1][$k] != s2_search_stemmer::stem_word($word))
+				{
+					$stem = utf8_strtolower($matches[1][$k]);
+					if ($stem != s2_search_stemmer::stem_word(utf8_strtolower($word)))
 					{
 						unset($matches[0][$k]);
 						unset($matches[1][$k]);
 					}
+					else
+						$matches[1][$k] = $stem;
+				}
 
 				if (!count($matches[0]))
 				{
@@ -628,7 +633,7 @@ if (defined('DEBUG'))
 
 				foreach ($matches[1] as $stem)
 				{
-					$found_stems_lines[$i][utf8_strtolower($stem)] = 1;
+					$found_stems_lines[$i][$stem] = 1;
 					if (isset($stem_weight[$stem]))
 						$stem_weight[$stem] ++;
 					else
