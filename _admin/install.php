@@ -112,8 +112,8 @@ if (!isset($_POST['form_sent']))
 		if (count($db_extensions) > 2)
 			$dual_mysql = true;
 	}
-	if (function_exists('sqlite_open'))
-		$db_extensions[] = array('sqlite', 'SQLite');
+//	if (function_exists('sqlite_open'))
+//		$db_extensions[] = array('sqlite', 'SQLite');
 	if (function_exists('pg_connect'))
 		$db_extensions[] = array('pgsql', 'PostgreSQL');
 
@@ -187,7 +187,7 @@ body {
 		<div class="info-box">
 			<p><?php echo $lang_install['Part1 intro'] ?></p>
 			<ul class="spaced">
-				<li><span><strong><?php echo $lang_install['Database type'] ?></strong> <?php echo $lang_install['Database type info']; if ($dual_mysql) echo ' '.$lang_install['Mysql type info']; if ($mysql_innodb) echo ' '.$lang_install['MySQL InnoDB info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Database type'] ?></strong> <?php echo $lang_install['Database type info']; if ($dual_mysql) echo '<br />'.$lang_install['Mysql type info']; if ($mysql_innodb) echo '<br />'.$lang_install['MySQL InnoDB info'] ?></span></li>
 				<li><span><strong><?php echo $lang_install['Database server'] ?></strong> <?php echo $lang_install['Database server info'] ?></span></li>
 				<li><span><strong><?php echo $lang_install['Database name'] ?></strong> <?php echo $lang_install['Database name info'] ?></span></li>
 				<li><span><strong><?php echo $lang_install['Database user pass'] ?></strong> <?php echo $lang_install['Database username info'] ?></span></li>
