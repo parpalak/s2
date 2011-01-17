@@ -698,10 +698,22 @@ if (defined('DEBUG'))
 			}
 
 			// Sort sentences in the snippet according to the text order
+			$snippet_str = '';
 			ksort($snippet);
+			$previous_line_num = -1;
+			foreach ($snippet as $line_num => $line)
+			{
+				if ($previous_line_num == -1)
+					$snippet_str = $line;
+				else
+					$snippet_str .= ($previous_line_num + 1 == $line_num ? ' ' : '... ').$line;
+				$previous_line_num = $line_num;
+			}
+			$snippet_str = str_replace('.... ', '... ', $snippet_str);
+
 
 			if ((count($found_stems) * 1.0 / count($stems) > 0.6))
-				$output[$id]['descr'] = str_replace('.... ', '... ', implode('... ', $snippet));
+				$output[$id]['descr'] = $snippet_str;
 			elseif(!$output[$id]['descr'])
 				$output[$id]['descr'] = $reserved_line;
 		}
