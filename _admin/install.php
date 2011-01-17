@@ -869,7 +869,7 @@ else
 		'S2_FAVORITE_URL'			=> "'favorite'",
 		'S2_TAGS_URL'				=> "'tags'",
 		'S2_COMPRESS'				=> "'1'",
-		'S2_STYLE'					=> "'neutrino'",
+		'S2_STYLE'					=> "'zeta'",
 		'S2_LANGUAGE'				=> "'".$s2_db->escape($default_lang)."'",
 		'S2_SHOW_COMMENTS'			=> "'1'",
 		'S2_ENABLED_COMMENTS'		=> "'1'",
