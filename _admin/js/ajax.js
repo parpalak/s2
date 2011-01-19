@@ -74,16 +74,7 @@ function CheckStatus (xmlhttp)
 			setTimeout('eval(after_code);', 0);
 	}
 	else
-		unknown_error(xmlhttp.responseText, xmlhttp.status)
-}
-
-function unknown_error (sError, iStatus)
-{
-	if (sError.indexOf('</body>') >= 0 && sError.indexOf('</html>') >= 0)
-		DisplayError(sError);
-	else
-		DisplayError(S2_LANG_UNKNOWN_ERROR + ' ' + iStatus + '\n' +
-				S2_LANG_SERVER_RESPONSE + '\n' + sError);
+		UnknownError(xmlhttp.responseText, xmlhttp.status)
 }
 
 var after_code = '';
@@ -161,4 +152,13 @@ function CloseError ()
 {
 	var eDiv = document.getElementById('error_dialog');
 	eDiv.parentNode.removeChild(eDiv);
+}
+
+function UnknownError (sError, iStatus)
+{
+	if (sError.indexOf('</body>') >= 0 && sError.indexOf('</html>') >= 0)
+		DisplayError(sError);
+	else
+		DisplayError(S2_LANG_UNKNOWN_ERROR + ' ' + iStatus + '<br />' +
+				S2_LANG_SERVER_RESPONSE + '<br />' + sError);
 }
