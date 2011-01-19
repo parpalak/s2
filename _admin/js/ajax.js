@@ -69,15 +69,15 @@ function CheckStatus (xmlhttp)
 		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
 		if (exec_code)
 			eval(exec_code);
-		after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
+		var after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
 		if (after_code)
-			setTimeout('eval(after_code);', 0);
+			setTimeout(function () {eval(after_code);}, 0);
 	}
 	else
 		UnknownError(xmlhttp.responseText, xmlhttp.status)
 }
 
-var after_code = '';
+//var after_code = '';
 
 function AjaxRequest (sRequestUrl, sParam, fCallback)
 {
