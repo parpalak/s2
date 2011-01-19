@@ -77,8 +77,6 @@ function CheckStatus (xmlhttp)
 		UnknownError(xmlhttp.responseText, xmlhttp.status)
 }
 
-//var after_code = '';
-
 function AjaxRequest (sRequestUrl, sParam, fCallback)
 {
 	var xmlhttp;
