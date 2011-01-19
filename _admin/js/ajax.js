@@ -49,6 +49,34 @@ function getHTTPRequestObject()
 xmlhttp_sync = getHTTPRequestObject();
 xmlhttp_async = getHTTPRequestObject();
 
+function CheckStatus (xmlhttp)
+{
+	if (xmlhttp.status == '408')
+	{
+		if (confirm(S2_LANG_EXPIRED_SESSION))
+			document.location.reload();
+	}
+	else if (xmlhttp.status == '404')
+	{
+		alert(S2_LANG_404);
+	}
+	else if (xmlhttp.status == '403')
+	{
+		alert(S2_LANG_403);
+	}
+	else if (xmlhttp.status == '200')
+	{
+		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
+		if (exec_code)
+			eval(exec_code);
+		after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
+		if (after_code)
+			setTimeout('eval(after_code);', 0);
+	}
+	else
+		unknown_error(xmlhttp.responseText, xmlhttp.status)
+}
+
 function unknown_error (sError, iStatus)
 {
 	if (sError.indexOf('</body>') >= 0 && sError.indexOf('</html>') >= 0)
@@ -76,7 +104,10 @@ function AjaxRequest (sRequestUrl, sParam, fCallback)
 	{
 		xmlhttp.open('GET', sRequestUrl, fCallback != null);
 		if (fCallback != null)
-			xmlhttp.onreadystatechange = fCallback;
+			xmlhttp.onreadystatechange = function() {
+				CheckStatus(xmlhttp);
+				fCallback();
+			};
 		xmlhttp.send(null);
 	}
 	else
@@ -86,37 +117,17 @@ function AjaxRequest (sRequestUrl, sParam, fCallback)
 		xmlhttp.setRequestHeader("Content-length", sParam.length);
 		xmlhttp.setRequestHeader("Connection", "close");
 		if (fCallback != null)
-			xmlhttp.onreadystatechange = fCallback;
+			xmlhttp.onreadystatechange = function() {
+				CheckStatus(xmlhttp);
+				fCallback();
+			};
 		xmlhttp.send(sParam);
 	}
 
 	if (fCallback != null)
 		return;
 
-	if (xmlhttp.status == '408')
-	{
-		if (confirm(S2_LANG_EXPIRED_SESSION))
-			document.location.reload();
-	}
-	else if (xmlhttp.status == '404')
-	{
-		alert(S2_LANG_404);
-	}
-	else if (xmlhttp.status == '403')
-	{
-		alert(S2_LANG_403);
-	}
-	else if (xmlhttp.status == '200')
-	{
-		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
-		if (exec_code)
-			eval(exec_code);
-		after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
-		if (after_code)
-			setTimeout('eval(after_code);', 0);
-	}
-	else
-		unknown_error(xmlhttp.responseText, xmlhttp.status)
+	CheckStatus(xmlhttp);
 
 	SetWait(false);
 
