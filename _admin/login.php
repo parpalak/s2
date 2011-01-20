@@ -95,7 +95,7 @@ function s2_update_challenge_time ($challenge)
 
 function s2_test_user_rights ($challenge, $permissions)
 {
-	global $s2_db;
+	global $s2_db, $lang_admin;
 
 	// If the challenge exists and isn't expired
 	$query = array(
@@ -110,7 +110,7 @@ function s2_test_user_rights ($challenge, $permissions)
 	{
 		// Most likely the challenge was removed when another user tried to login
 		header('X-S2-Status: Lost');
-		die('Forbidden (unknown session ID)');
+		die($lang_admin['Lost session']);
 	}
 
 	list($login, $time) = $s2_db->fetch_row($result);
@@ -118,7 +118,7 @@ function s2_test_user_rights ($challenge, $permissions)
 	if (time() > $time + S2_EXPIRE_LOGIN_TIMEOUT)
 	{
 		header('X-S2-Status: Expired');
-		die('Forbidden (session timeout)');
+		die($lang_admin['Expired session']);
 	}
 
 	// Ok, we keep it fresh
@@ -136,7 +136,7 @@ function s2_test_user_rights ($challenge, $permissions)
 	if (!$s2_db->num_rows($result))
 	{
 		header('X-S2-Status: Forbidden');
-		die('Forbidden (you don\'t have permission to perform this action)');
+		die($lang_admin['No permission']);
 	}
 
 	return $login;

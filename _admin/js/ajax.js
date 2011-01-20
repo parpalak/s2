@@ -58,32 +58,21 @@ function CheckStatus (xmlhttp)
 	}
 
 	var s2_status = xmlhttp.getResponseHeader('X-S2-Status');
-	var result = false;
 
-	if (s2_status == 'Expired')
+	if (s2_status == 'Expired' || s2_status == 'Lost' || s2_status == 'Forbidden')
 	{
-		alert(S2_LANG_EXPIRED_SESSION);
-	}
-	else if (s2_status == 'Lost')
-	{
-		alert(S2_LANG_OTHER_USER);
-	}
-	else if (s2_status == 'Forbidden')
-	{
-		alert(S2_LANG_FORBIDDEN);
-	}
-	else
-	{
-		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
-		if (exec_code)
-			eval(exec_code);
-		var after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
-		if (after_code)
-			setTimeout(function () {eval(after_code);}, 0);
-		result = true;
+		alert(xmlhttp.responseText);
+		return false
 	}
 
-	return result;
+	var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
+	if (exec_code)
+		eval(exec_code);
+	var after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
+	if (after_code)
+		setTimeout(function () {eval(after_code);}, 0);
+
+	return true;
 }
 
 function AjaxRequest (sRequestUrl, sParam, fCallback)

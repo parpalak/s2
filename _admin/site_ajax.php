@@ -683,7 +683,7 @@ elseif ($action == 'user_set_password')
 	else
 	{
 		header('X-S2-Status: Forbidden');
-		echo 'Forbidden (you don\'t have permission to perform this action)';
+		die($lang_admin['No permission']);
 	}
 }
 
