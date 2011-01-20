@@ -87,29 +87,25 @@ function AjaxRequest (sRequestUrl, sParam, fCallback)
 	else
 		xmlhttp = xmlhttp_async;
 
-	if (sParam == '')
+	xmlhttp.open(sParam == '' ? 'GET' : 'POST', sRequestUrl, fCallback != null);
+
+	if (sParam != '')
 	{
-		xmlhttp.open('GET', sRequestUrl, fCallback != null);
-		if (fCallback != null)
-			xmlhttp.onreadystatechange = function() {
-				CheckStatus(xmlhttp);
-				fCallback();
-			};
-		xmlhttp.send(null);
-	}
-	else
-	{
-		xmlhttp.open('POST', sRequestUrl, fCallback != null);
 		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		xmlhttp.setRequestHeader("Content-length", sParam.length);
 		xmlhttp.setRequestHeader("Connection", "close");
-		if (fCallback != null)
-			xmlhttp.onreadystatechange = function() {
-				CheckStatus(xmlhttp);
-				fCallback();
-			};
-		xmlhttp.send(sParam);
 	}
+
+	if (fCallback != null)
+		xmlhttp.onreadystatechange = function()
+		{
+			if (xmlhttp.readyState != 4)
+				return;
+			if (CheckStatus(xmlhttp))
+				fCallback(xmlhttp);
+		};
+
+	xmlhttp.send(sParam == '' ? null : sParam);
 
 	if (fCallback != null)
 		return;
