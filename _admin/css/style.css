@@ -653,12 +653,6 @@ textarea {
 	-webkit-box-shadow: inset 2px 3px 3px -3px #ccc;
 	box-shadow: inset 2px 3px 3px -3px #ccc;
 	}
-input[type="text"]:focus,
-textarea:focus {
-	-moz-box-shadow: 0 0 0 1px #ea4, inset 2px 3px 3px -3px #ccc;
-	-webkit-box-shadow: 0 0 0 1px #ea4, inset 2px 3px 3px -3px #ccc;
-	box-shadow: 0 0 0px 1px #ea4, inset 2px 3px 3px -3px #ccc;
-	}
 
 .r-float input[type="text"],
 div.input.text input,
