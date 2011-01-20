@@ -554,7 +554,7 @@ table.sort {
 			background-color: #fff;
 			margin: 0;
 			}
-		table.sort img:active {
+		table.sort img:active:hover {
 			border: 1px #E4BB50 solid;
 			border-color: #aaa #fff #fff #aaa;
 			background-color: #fff;
@@ -746,7 +746,7 @@ div.input.text input,
 		.toolbar img:hover {
 			border-color: #fff #aaa #aaa #fff;
 			}
-		.toolbar img:active {
+		.toolbar img:active:hover {
 			border-color: #aaa #fff #fff #aaa;
 			}
 
