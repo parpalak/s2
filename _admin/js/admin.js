@@ -1217,7 +1217,7 @@ function ReturnImage(s, w, h)
 
 function Preview ()
 {
-	if (!document.artform['page[text]'])
+	if (!document.artform || !document.artform['page[text]'])
 		return;
 
 	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
