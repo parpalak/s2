@@ -55,7 +55,7 @@ echo '<script type="text/javascript" src="'.$ext_info['url'].'/draw_chart.js"></
 		<hook id="fn_stat_info_end"><![CDATA[
 $output .= '<fieldset><legend>Traffic</legend><div id="s2_counter_hits"><strong>You need to upgrade your Flash Player in order to view graphs.</strong></div></fieldset>';
 $output .= '<fieldset><legend>RSS readers</legend><div id="s2_counter_rss"><strong>You need to upgrade your Flash Player in order to view graphs.</strong></div></fieldset>';
-s2_add_js_header_delayed('s2_counter_draw_chart();');
+s2_add_js_header_delayed('s2_counter.draw_chart();');
 		]]></hook>
 
 	</hooks>
