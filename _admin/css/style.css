@@ -196,6 +196,9 @@ hr {
 	background: #00c;
 	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	border: 1px dotted #ff3;
+	-moz-box-shadow: 3px 3px 2px #999;
+	-webkit-box-shadow: 3px 3px 2px #999;
+	box-shadow: 3px 3px 2px #999;
 	padding: 1px 2px;
 	margin: 0;
 	position: absolute;
@@ -376,6 +379,9 @@ ul .but_panel .delete {
 #keytable {
 	width: 16px; /**/
 	border: 0;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
 	padding: 0;
 	overflow: hidden;
 	}
@@ -577,11 +583,17 @@ table.sort {
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
 	border-color: #fff #aaa #aaa #fff;
+	-moz-box-shadow: inset 1px 1px 1px #f6f6f6, inset -1px -1px 1px #ddd;
+	-webkit-box-shadow: inset 1px 1px 1px #f6f6f6, inset -1px -1px 1px #ddd;
+	box-shadow: inset 1px 1px 1px #f6f6f6, inset -1px -1px 1px #ddd;
 	padding: 5px;
 	}
 	.l-float.no-border {
 		border: none;
 		padding: 0;
+		-moz-box-shadow: none;
+		-webkit-box-shadow: none;
+		box-shadow: none;
 		}
 
 .r-float {
@@ -609,9 +621,6 @@ table.sort {
 	.r-float select {
 		font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 		}
-	.r-float input[type="text"] {
-		width: 100%;
-		}
 
 table.fields {
 	width: 100%;
@@ -633,6 +642,24 @@ table.fields {
 			white-space: nowrap;
 			}
 
+input[type="text"],
+textarea {
+	border: 1px solid #ccc;
+	border-color: #aaa #ccc #ccc #aaa;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	-moz-box-shadow: inset 2px 3px 3px -3px #ccc;
+	-webkit-box-shadow: inset 2px 3px 3px -3px #ccc;
+	box-shadow: inset 2px 3px 3px -3px #ccc;
+	}
+input[type="text"]:focus,
+textarea:focus {
+	-moz-box-shadow: 0 0 0 1px #ea4, inset 2px 3px 3px -3px #ccc;
+	-webkit-box-shadow: 0 0 0 1px #ea4, inset 2px 3px 3px -3px #ccc;
+	box-shadow: 0 0 0px 1px #ea4, inset 2px 3px 3px -3px #ccc;
+	}
+
 .r-float input[type="text"],
 div.input.text input,
 .fields input[type="text"] {
@@ -640,16 +667,15 @@ div.input.text input,
 	font: 1em Arial, Helvetica, sans-serif;
 	}
 
-.fields input[type="text"],
+.r-float input[type="text"],
 div.input.text input,
+.fields input[type="text"],
 #arttext,
 #commtext,
 #kText,
 #search_field {
 	width: 100%;
 	margin: 0;
-	border: 1px solid #ccc;
-	border-color: #aaa #ccc #ccc #aaa;
 	}
 
 .fields input.char-2 {
