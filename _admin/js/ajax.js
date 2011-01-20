@@ -51,20 +51,28 @@ xmlhttp_async = getHTTPRequestObject();
 
 function CheckStatus (xmlhttp)
 {
-	if (xmlhttp.status == '408')
+	if (xmlhttp.status != 200)
 	{
-		if (confirm(S2_LANG_EXPIRED_SESSION))
-			document.location.reload();
+		UnknownError(xmlhttp.responseText, xmlhttp.status);
+		return false;
 	}
-	else if (xmlhttp.status == '404')
+
+	var s2_status = xmlhttp.getResponseHeader('X-S2-Status');
+	var result = false;
+
+	if (s2_status == 'Expired')
 	{
-		alert(S2_LANG_404);
+		alert(S2_LANG_EXPIRED_SESSION);
 	}
-	else if (xmlhttp.status == '403')
+	else if (s2_status == 'Lost')
 	{
-		alert(S2_LANG_403);
+		alert(S2_LANG_OTHER_USER);
 	}
-	else if (xmlhttp.status == '200')
+	else if (s2_status == 'Forbidden')
+	{
+		alert(S2_LANG_FORBIDDEN);
+	}
+	else
 	{
 		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
 		if (exec_code)
@@ -72,9 +80,10 @@ function CheckStatus (xmlhttp)
 		var after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
 		if (after_code)
 			setTimeout(function () {eval(after_code);}, 0);
+		result = true;
 	}
-	else
-		UnknownError(xmlhttp.responseText, xmlhttp.status)
+
+	return result;
 }
 
 function AjaxRequest (sRequestUrl, sParam, fCallback)
@@ -116,11 +125,11 @@ function AjaxRequest (sRequestUrl, sParam, fCallback)
 	if (fCallback != null)
 		return;
 
-	CheckStatus(xmlhttp);
+	var no_error = CheckStatus(xmlhttp);
 
 	SetWait(false);
 
-	return {'text': xmlhttp.responseText, 'status': xmlhttp.status};
+	return {'text': xmlhttp.responseText, 'status': (no_error ? '200' : '-1')};
 }
 
 function GETSyncRequest (sRequestUrl)

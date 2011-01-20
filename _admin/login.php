@@ -109,8 +109,7 @@ function s2_test_user_rights ($challenge, $permissions)
 	if ($s2_db->num_rows($result) != 1)
 	{
 		// Most likely the challenge was removed when another user tried to login
-		// We use 408 status code to denote the expired login timeout
-		header('HTTP/1.1 408');
+		header('X-S2-Status: Lost');
 		die('Forbidden (unknown session ID)');
 	}
 
@@ -118,9 +117,8 @@ function s2_test_user_rights ($challenge, $permissions)
 
 	if (time() > $time + S2_EXPIRE_LOGIN_TIMEOUT)
 	{
-		// We use 408 status code to denote the expired login timeout
-		header('HTTP/1.1 408');
-		die('Forbidden (time limit has expired)');
+		header('X-S2-Status: Expired');
+		die('Forbidden (session timeout)');
 	}
 
 	// Ok, we keep it fresh
@@ -137,8 +135,7 @@ function s2_test_user_rights ($challenge, $permissions)
 
 	if (!$s2_db->num_rows($result))
 	{
-		// We use 403 status code to denote that the user has not enough permissions
-		header('HTTP/1.1 403');
+		header('X-S2-Status: Forbidden');
 		die('Forbidden (you don\'t have permission to perform this action)');
 	}
 

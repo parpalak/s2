@@ -682,7 +682,7 @@ elseif ($action == 'user_set_password')
 	}
 	else
 	{
-		header('HTTP/1.1 403');
+		header('X-S2-Status: Forbidden');
 		echo 'Forbidden (you don\'t have permission to perform this action)';
 	}
 }
