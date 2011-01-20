@@ -71,9 +71,11 @@ body {
 	z-index: 1;
 	top: 0;
 	right: 0;
-	padding: 0.091em 3px;
+	padding: 0.0em 3px;
 	background: #fff;
 	border-left: 1px solid #ccc;
+	height: 28px;
+	line-height: 13px;
 	}
 
 #loading {

@@ -3,7 +3,7 @@
 $lang_admin = array(
 
 // Common admin panel
-'Welcome'					=> 'Привет, <strong>%s</strong>.',
+'Welcome'					=> 'Привет, %s.',
 'Logout'					=> 'Выйти?',
 'Logout info'				=> 'Выход из системы здесь',
 'Delete from list'			=> 'Удалить статью из этого списка',
