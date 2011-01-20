@@ -12,19 +12,6 @@
 	margin: 0;
 	padding: 0;
 	width: auto;
-	border: none;
-}
-
-.tabsheets > dt,
-.tabsheets > dd {
-	background: #eee;
-	color: #000;
-	border: 1px solid #eee;
-	border-color: #fff #aaa #aaa #fff;
-}
-
-.tabsheets > dd {
-	border-width: 0;
 }
 
 .tabsheets {
@@ -34,37 +21,50 @@
 .tabsheets > dt {
 	float: left;
 	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
-	padding: 4px 6px 8px 26px;
+	padding: 3px 6px 8px 26px;
 	cursor: default;
 	white-space: nowrap;
 	margin-top: 1px;
 	position: relative;
 	top: 7px;
 	z-index: 1;
-	background: url('../i/tab_icons.png') transparent no-repeat;
+	border: 1px solid #eee;
+	border-color: #fff #aaa #aaa #fff;
+	background: url('../i/tab_icons.png') #eee no-repeat;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
+	-moz-box-shadow: inset 0 -6px 1px #ddd;
+	-webkit-box-shadow: inset 0 -6px 1px #ddd;
+	box-shadow: inset 0 -6px 1px #ddd;
 }
 
 .tabsheets > dt.active {
-	background-color: #fff;
+	background-color: #fdfdfd;
 	margin-top: 0;
+	z-index: 2;
+	-moz-box-shadow: 0 0 4px #999;
+	-webkit-box-shadow: 0 0 4px #999;
+	box-shadow: 0 0 4px #999;
 }
 
 .tabsheets > dd {
+	display: block;
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	display: block;
 	left: 0;
 	padding: 29px 0 0;
+	background: #e2e4ee;
+}
+.tabsheets .tabsheets > dd {
+	background: #eee;
 }
 
 .tabsheets > dd .reducer {
 	position: relative;
-	z-index: 2;
-	border-top: 1px solid #fff;
+	z-index: 3;
+	border-top: 1px solid #fdfdfd;
 	background: #eee;
 	overflow: auto;
 	height: 100%;
@@ -90,14 +90,14 @@
 	display: block;
 }
 
-#list_tab { background-position: 4px -137px; }
-#edit_tab { background-position: 4px -57px; }
-#view_tab { background-position: 4px 3px; }
-#pict_tab { background-position: 4px -77px; }
-#comm_tab { background-position: 4px -97px; }
-#tag_tab { background-position: 4px -197px; }
-#admin_tab { background-position: 4px -177px; }
-#admin-stat_tab { background-position: 4px -157px; }
-#admin-opt_tab { background-position: 4px -117px; }
-#admin-user_tab { background-position: 4px -17px; }
-#admin-ext_tab { background-position: 4px -37px; }
+#list_tab { background-position: 4px -138px; }
+#edit_tab { background-position: 4px -58px; }
+#view_tab { background-position: 4px 2px; }
+#pict_tab { background-position: 4px -78px; }
+#comm_tab { background-position: 4px -98px; }
+#tag_tab { background-position: 4px -198px; }
+#admin_tab { background-position: 4px -178px; }
+#admin-stat_tab { background-position: 4px -158px; }
+#admin-opt_tab { background-position: 4px -118px; }
+#admin-user_tab { background-position: 4px -18px; }
+#admin-ext_tab { background-position: 4px -38px; }
