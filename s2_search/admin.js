@@ -21,12 +21,9 @@ var s2_search = {
 		return false;
 	},
 
-	reindex_callback: function ()
+	reindex_callback: function (xmlhttp)
 	{
-		if (xmlhttp_async.readyState != 4)
-			return;
-
-		var response = xmlhttp_async.responseText;
+		var response = xmlhttp.responseText;
 		if (response.indexOf('go_') == 0)
 		{
 			setTimeout(s2_search.reindex_query, 50);
@@ -49,9 +46,6 @@ var s2_search = {
 
 	refresh_callback: function ()
 	{
-		if (xmlhttp_async.readyState != 4)
-			return;
-
 		window.status = window.defaultStatus;
 	}
 }
