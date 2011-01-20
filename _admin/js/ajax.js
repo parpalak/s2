@@ -10,27 +10,7 @@
 
 function getHTTPRequestObject() 
 {
-	var xmlHttpRequest;
-	/*@cc_on
-	@if (@_jscript_version >= 5)
-	try
-	{
-		xmlHttpRequest = new ActiveXObject("Msxml2.XMLHTTP");
-	}
-	catch (exception1)
-	{
-		try
-		{
-			xmlHttpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-		}
-		catch (exception2)
-		{
-			xmlHttpRequest = false;
-		}
-	}
-	@else
-		xmlhttpRequest = false;
-	@end @*/
+	var xmlHttpRequest = false;
 
 	if (!xmlHttpRequest && typeof XMLHttpRequest != 'undefined')
 	{
