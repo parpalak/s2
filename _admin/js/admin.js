@@ -552,6 +552,7 @@ var drag_html = '';
 
 function StartDrag ()
 {
+	RejectName();
 	ReleaseItem();
 
 	sourceElement.className = 'source';
