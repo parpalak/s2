@@ -334,9 +334,11 @@ hr {
 
 .treetree .but_panel {
 	position: relative;
-	color: #fff;
-	background: #0079f1;
-	border: 1px solid #198dff;
+	background: #d2e5fc;
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
+	background: -moz-linear-gradient(#dcebfc, #c1dbfc);
+	background: linear-gradient(#dcebfc, #c1dbfc);
+	border: 1px solid #7da2ce;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
 	border-radius: 2px;
