@@ -38,13 +38,13 @@
 	-moz-border-radius-topright: 4px;
 	border-top-left-radius: 4px;
 	border-top-right-radius: 4px;
-	-moz-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.4), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
-	-webkit-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.4), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
-	box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.4), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
+	-moz-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
+	-webkit-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
+	box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
 }
 
 .tabsheets > dt.active {
-	background-color: #f3f3f3;
+	background-color: #eee;
 	border-bottom: 0;
 	z-index: 5;
 	-moz-box-shadow: inset 1px 10px 2px rgba(255, 255, 255, 0.6), 0 -2px 2px #c6c6c6;
@@ -64,18 +64,18 @@
 	background: -moz-linear-gradient(#e2e4ee, #000);
 	background: linear-gradient(#e2e4ee, #000);
 }
-.tabsheets .tabsheets > dd {
+.tabsheets .tabsheets > dd,
+.tabsheets > dd .reducer {
 	background: #eee;
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#eee), to(#e7e7e7)) fixed;
+	background: -moz-linear-gradient(#eee, #e7e7e7) fixed;
+	background: linear-gradient(#eee, #e7e7e7) fixed;
 }
 
 .tabsheets > dd .reducer {
 	position: relative;
 	z-index: 3;
 	border-top: 1px solid #fdfdfd;
-	background: #f3f3f3;
-	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#f3f3f3), to(#e7e7e7)) fixed;
-	background: -moz-linear-gradient(#f3f3f3, #e7e7e7) fixed;
-	background: linear-gradient(#f3f3f3, #e7e7e7) fixed;
 	overflow: auto;
 	height: 100%;
 	padding: 0.833em;
