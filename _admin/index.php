@@ -114,7 +114,7 @@ var template = '<?php echo str_replace(array("\n", "\r", '\'', '</script>'), arr
 			<div class="reducer" id="tree_div">
 				<div id="keytable" class="r-float">
 					<div class="tagswitcher"><img class="closed" src="i/1.gif" alt="<?php echo $lang_admin['Show tags']; ?>" onclick="return SwitchTags(this);"></div>
-					<div id="tag_values"><?php echo $lang_admin['Choose tag']; ?></div>
+					<div id="tag_values"><p><?php echo $lang_admin['Choose tag']; ?></p></div>
 					<div id="tag_names"><ul id="tag_list"></ul></div>
 				</div>
 <?php

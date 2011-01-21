@@ -426,6 +426,9 @@ ul .but_panel .delete {
 	border-color: #aaa transparent #fff #aaa;
 	display: none;
 	}
+	#tag_values p {
+		margin: 0.5em 10px;
+		}
 	#tag_values img {
 		height: 16px;
 		width: 16px;
