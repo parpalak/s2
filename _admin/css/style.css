@@ -405,13 +405,12 @@ ul .but_panel .delete {
 		min-height: 100%;
 		}
 		#tag_names ul li {
-			border: 1px solid #eee;
-			border-width: 1px 1px 1px 0;
-			border-left-width: 0;
-			background: #eee;
+			border: 1px solid transparent;
+			border-width: 1px;
 			padding: 0 10px;
 			}
 			#tag_names ul li.cur_tag {
+				background: #eee;
 				padding-left: 12px;
 				margin-left: -1px;
 				border-top-color: #aaa;
@@ -420,6 +419,7 @@ ul .but_panel .delete {
 				}
 
 #tag_values {
+	background: #eee;
 	width: 200px;
 	padding: 0;
 	border: 1px solid #fff;
@@ -579,21 +579,15 @@ table.sort {
 .l-float,
 .r-float {
 	border: 1px solid #eee;
+	border-color: #fff #aaa #aaa #fff;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-	border-color: #fff #aaa #aaa #fff;
-	-moz-box-shadow: inset 1px 1px 1px #f6f6f6, inset -1px -1px 1px #ddd;
-	-webkit-box-shadow: inset 1px 1px 1px #f6f6f6, inset -1px -1px 1px #ddd;
-	box-shadow: inset 1px 1px 1px #f6f6f6, inset -1px -1px 1px #ddd;
 	padding: 5px;
 	}
 	.l-float.no-border {
 		border: none;
 		padding: 0;
-		-moz-box-shadow: none;
-		-webkit-box-shadow: none;
-		box-shadow: none;
 		}
 
 .r-float {
@@ -690,38 +684,46 @@ div.input.text input,
 .bitbtn {
 	font: 0.917em/1.2 Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	padding: 1px 2px 2px 20px;
-	height: 23px;
+	height: 22px;
 	min-width: 120px;
-	background-position: 1px 1px;
+	margin-bottom: 1px;
+	background-position: 1px 3px;
 	background-repeat: no-repeat;
 	background-color: #f2f2f2;
-	border: 2px solid #ccc;
-	border-color: #fff #aaa #aaa #fff;
-	-moz-border-top-colors: #ddd #fff;
-	-moz-border-left-colors: #ddd #fff;
-	-moz-border-right-colors: #999 #ccc;
-	-moz-border-bottom-colors: #999 #ccc;
+	border: 1px solid #777;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	-moz-box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 0, 0, 0.1);
+	-webkit-box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 0, 0, 0.1);
+	box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 0, 0, 0.1);
 	background-image: url(../i/button_icons.png);
 	}
+	.bitbtn:hover {
+		background-color: #eaedf2;
+		border: 1px solid #778;
+		-moz-box-shadow: inset 0px 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
+		-webkit-box-shadow: inset 0px 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
+		box-shadow: inset 0px 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
+		}
 	.bitbtn:active {
-		border-color: #aaa #fff #fff #aaa;
-		-moz-border-top-colors: #999 #ccc;
-		-moz-border-left-colors: #999 #ccc;
-		-moz-border-right-colors: #ddd #fff;
-		-moz-border-bottom-colors: #ddd #fff;
+		border-color: #555;
+		-moz-box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
+		-webkit-box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
+		box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
 		}
 
-.bitbtn.save { background-position: 1px -35px; }
-.bitbtn.reset { background-position: 1px -17px; }
-.bitbtn.new { background-position: 1px 1px; }
-.bitbtn.parag { background-position: 1px -53px; }
-.bitbtn.savetag { background-position: 1px -161px; }
-.bitbtn.resettag { background-position: 1px -143px; }
-.enabled .bitbtn.flip_ext { background-position: 1px -89px; }
-.disabled .bitbtn.flip_ext { background-position: 1px -71px; }
-.bitbtn.uninst_ext { background-position: 1px -125px; }
-.bitbtn.inst_ext { background-position: 1px -107px; }
-.bitbtn.add_user { background-position: 1px -179px; }
+.bitbtn.save { background-position: 1px -34px; }
+.bitbtn.reset { background-position: 1px -16px; }
+.bitbtn.new { background-position: 1px 2px; }
+.bitbtn.parag { background-position: 1px -52px; }
+.bitbtn.savetag { background-position: 1px -160px; }
+.bitbtn.resettag { background-position: 1px -142px; }
+.enabled .bitbtn.flip_ext { background-position: 1px -88px; }
+.disabled .bitbtn.flip_ext { background-position: 1px -70px; }
+.bitbtn.uninst_ext { background-position: 1px -124px; }
+.bitbtn.inst_ext { background-position: 1px -106px; }
+.bitbtn.add_user { background-position: 1px -178px; }
 
 /*=======================[Toolbar]============================================*/
 
@@ -733,8 +735,15 @@ div.input.text input,
 		padding: 2px;
 		height: 16px;
 		width: 16px;
-		border: #eee solid 1px;
-		background: url(../i/toolbar.png) transparent;
+		border: transparent solid 1px;
+		background-image: url(../i/toolbar.png);
+		background-color: transparent;
+		-webkit-background-origin: padding-box;
+		-moz-background-origin: padding;
+		background-origin: padding-box;
+		-webkit-background-clip: padding-box;
+		-moz-background-clip: padding;
+		background-clip: padding-box;
 		vertical-align: top;
 		}
 		.toolbar img:hover {
