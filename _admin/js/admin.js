@@ -392,6 +392,9 @@ function CloseAll ()
 	for (i = aLi.length; i-- ;)
 		if (aLi[i].className.indexOf('ExpandOpen') != -1)
 			aLi[i].className = str_replace('ExpandOpen', 'ExpandClosed', aLi[i].className);
+
+	var eLi = document.getElementById('1').parentNode.parentNode;
+	eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
 }
 
 function OpenAll ()
@@ -431,6 +434,7 @@ function RefreshTree ()
 	ResetSearchField();
 	SaveExpand()
 	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
+	ExpandSavedItem('1');
 	LoadExpand();
 }
 
