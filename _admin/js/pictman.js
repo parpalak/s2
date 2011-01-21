@@ -71,7 +71,7 @@ function InitMovableDivs ()
 	if (buttonPanel == null)
 	{
 		buttonPanel = document.createElement("SPAN");
-		buttonPanel.setAttribute("id", "buttons");
+		buttonPanel.setAttribute("id", "context_buttons");
 		buttonPanel.innerHTML = '<img class="add" src="i/1.gif" onclick="return CreateSubFolder();" alt="' + S2_LANG_CREATE_SUBFOLDER + '" /><img src="i/1.gif" class="delete" onclick="return DeleteFolder();" alt="' + S2_LANG_DELETE + '" />';
 	}
 }
@@ -376,6 +376,8 @@ function MouseDown (e)
 		sourceElement = t;
 	else if (t.nodeName == "SPAN" && t.getAttribute("fname"))
 		sourceFElement = t;
+	else if (t.nodeName == "LI" && t.firstChild.getAttribute("fname"))
+		sourceFElement = t.firstChild;
 	else
 		return;
 
