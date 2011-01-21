@@ -62,6 +62,8 @@
 		margin: 0 0 0 10px;
 		height: 90px;
 		width: 82px;
+		text-wrap: suppress;
+		word-wrap: break-word;
 		}
 		#files li input {
 			width: 76px;
