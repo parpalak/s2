@@ -113,7 +113,7 @@ function s2_get_files ($dir)
 
 		$fsize = '';
 
-		$preview = '<img src="i/file.png" vspace="16" align="center" alt="" />';
+		$preview = '<img src="i/file.png" vspace="16" hspace="16" align="center" alt="" />';
 		if (strpos($item, '.') !== false && in_array(end(explode('.', $item)), $allowed_extensions))
 		{
 			($hook = s2_hook('fn_get_files_pre_get_file_info')) ? eval($hook) : null;
@@ -152,9 +152,12 @@ function s2_get_files ($dir)
 			$v = (int)(($max_size - $dy)/2);
 			$v = $v > 0 ? ' vspace="'.$v.'"' : '';
 
+			$h = (int)(($max_size - $dx)/2);
+			$h = $h > 0 ? ' hspace="'.$h.'"' : '';
+
 			($hook = s2_hook('fn_get_files_pre_view_merge')) ? eval($hook) : null;
 			if ($display_preview)
-				$preview = '<img src="pict_ajax.php?action=preview&file='.$dir.'/'.$item.'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.' alt="" />';
+				$preview = '<img src="pict_ajax.php?action=preview&file='.$dir.'/'.$item.'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.$h.' alt="" />';
 		}
 
 		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.$dir.'/'.$item.'\');" alt="'.$lang_pictures['Delete'].'" />';

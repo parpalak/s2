@@ -192,10 +192,13 @@ hr {
 	}
 
 #dragged {
-	color: #fff;
-	background: #00c;
 	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
-	border: 1px dotted #ff3;
+	color: #fff;
+	background: #0079f1;
+	border: 1px solid #49a4ff;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
 	-moz-box-shadow: 3px 3px 2px #999;
 	-webkit-box-shadow: 3px 3px 2px #999;
 	box-shadow: 3px 3px 2px #999;
@@ -206,29 +209,38 @@ hr {
 	visibility: hidden;
 	}
 
-.over_top {
-	border-top: 0.5em solid #007;
-	position: relative;
-	top: 0.25em;
-	}
-
-.over_bottom {
-	border-bottom: 0.5em solid #007;
-	position: relative;
-	top: -0.25em;
-	}
-
-.over_far {
-	background: #FFF4D7;
-	border: 1px solid #fa0;
-	color: #000;
-	}
-
 #tree {
 	background: #fff;
 	border: 1px solid #eee;
 	border-color: #aaa #fff #fff #aaa;
 	position: relative;
+	}
+
+.treetree .over_top,
+.treetree .over_bottom
+ {
+	display: inline;
+	padding: 0 1px;
+	border-top: 0.5em solid #007;
+	border-bottom: 0;
+	position: relative;
+	top: 0.25em;
+	}
+
+.treetree .over_bottom {
+	border-top: 0;
+	border-bottom: 0.5em solid #007;
+	top: -0.25em;
+	}
+
+.treetree .over_far {
+	padding: 0;
+	color: #000;
+	background: #c2e1ff;
+	border: 1px solid #49a4ff;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
 	}
 
 .treetree ul {
@@ -287,6 +299,8 @@ hr {
 
 .treetree span {
 	line-height: 1.333em;
+	display: inline-block;
+	padding: 1px;
 	}
 	.treetree div > span {
 		background: #fff;
@@ -320,10 +334,13 @@ hr {
 
 .treetree .but_panel {
 	position: relative;
-	padding: 0 0 2px;
 	color: #fff;
-	background: #007;
-	border: 1px dotted #ff8;
+	background: #0079f1;
+	border: 1px solid #198dff;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	padding: 0;
 	}
 	.but_panel #context_buttons {
 		margin-left: 2em;
@@ -334,7 +351,6 @@ hr {
 		height: 16px;
 		margin-left: 4px;
 		vertical-align: top;
-		margin-top: 1px;
 		color: #000;
 		background: url(../i/icons.png);
 		}
@@ -363,8 +379,9 @@ hr {
 		border: 1px solid #aaa;
 		font-family: Verdana, Arial, Helvetica, sans-serif;
 		font-size: 100%;
-		padding: 0 0 2px;
-		margin: 0px 0 -1px -1px;
+		margin: -1px -2px;
+		padding: 1px;
+		height: 14px;
 		}
 
 ul .but_panel .delete {
@@ -379,9 +396,6 @@ ul .but_panel .delete {
 #keytable {
 	width: 16px; /**/
 	border: 0;
-	-moz-box-shadow: none;
-	-webkit-box-shadow: none;
-	box-shadow: none;
 	padding: 0;
 	overflow: hidden;
 	}

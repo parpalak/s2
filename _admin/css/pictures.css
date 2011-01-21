@@ -33,13 +33,13 @@
 
 #files span {
 	display: block;
-	vertical-align: middle;
+	position: relative;
 	width: 80px;
 	height: 80px;
 	border: 1px solid #fff;
 	text-align: center;
-	margin: 0 0 4px;
-	padding: 0px;
+	margin: 0 0 5px;
+	padding: 0;
 	background: #fff;
 	}
 	#files span[fsize] {
@@ -59,8 +59,9 @@
 	#files li {
 		float: left;
 		padding: 10px;
-		margin: 0 0 0 20px;
+		margin: 0 0 0 10px;
 		height: 90px;
+		width: 82px;
 		}
 		#files li input {
 			width: 76px;
@@ -82,15 +83,20 @@
 	}
 
 #files .but_panel {
-	background: #eee;
+	-moz-box-shadow: 0 0 3px 1px #7cc;
+	-webkit-box-shadow: 0 0 3px 1px #7cc;
+	box-shadow: 0 0 4px #7cc;
+	background: #c2e1ff;
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#e2f1ff), to(#c2e1ff));
+	background: -moz-linear-gradient(#e2f1ff, #c2e1ff);
+	background: linear-gradient(#e2f1ff, #c2e1ff);
 	border-color: #7cc;
 	}
 	#files .but_panel .delete {
 		display: block;
-		float: right;
-		margin-bottom: -16px;
-		margin-left: -16px;
-		position: relative;
+		position: absolute;
+		right: 0;
+		top: 0;
 		z-index: 1;
 		height: 16px;
 		width: 16px;
