@@ -347,6 +347,9 @@ hr {
 	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
 	background: -moz-linear-gradient(#dcebfc, #c1dbfc);
 	background: linear-gradient(#dcebfc, #c1dbfc);
+	-moz-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+	-webkit-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 	border: 1px solid #7da2ce;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
