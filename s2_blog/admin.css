@@ -1,6 +1,6 @@
 #blog_tab {
 	background-image: url('i/icons.png');
-	background-position: 4px -33px;
+	background-position: 4px -34px;
 	}
 
 table.sort .buttons .favorite {
@@ -20,5 +20,5 @@ table.sort .buttons .notfavorite {
 
 .bitbtn.add_post {
 	background-image: url(i/icons.png);
-	background-position: 1px -56px;
+	background-position: 1px -55px;
 	}
