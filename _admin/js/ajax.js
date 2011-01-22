@@ -117,13 +117,11 @@ function DisplayError (sError)
 	var eDiv = document.createElement('DIV');
 	document.body.appendChild(eDiv);
 	eDiv.setAttribute('id', 'error_dialog');
-	eDiv.innerHTML = '<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div><input type="button" onclick="CloseError();" value="Ok"></div>';
-}
+	eDiv.innerHTML = '<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div><input type="button" id="close_error_button" value="Ok"></div>';
 
-function CloseError ()
-{
-	var eDiv = document.getElementById('error_dialog');
-	eDiv.parentNode.removeChild(eDiv);
+	var eButton = document.getElementById('close_error_button');
+	eButton.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
+	setTimeout(function () { eButton.focus() }, 40);
 }
 
 function UnknownError (sError, iStatus)
