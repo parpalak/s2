@@ -222,7 +222,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 		$children = (!$search || $article['child_num']) ? s2_get_child_branches($article['id'], false, $search) : '';
 
 		// File or folder
-		$item_type = $search ? ($article['child_num'] ? 'ExpandOpen' : 'ExpandLeaf') : ($children ? 'ExpandClosed' : 'ExpandLeaf');
+		$item_type = $search ? ($article['child_num'] ? 'ExpandOpen' : 'ExpandLeaf') : ($children ? ($id != S2_ROOT_ID ? 'ExpandClosed' : 'ExpandOpen') : 'ExpandLeaf');
 
 		($hook = s2_hook('fn_get_child_branches_after_get_branch')) ? eval($hook) : null;
 
