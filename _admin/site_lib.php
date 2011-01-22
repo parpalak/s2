@@ -192,7 +192,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 				$condition[] = 'title LIKE \'%'.$s2_db->escape($word).'%\' OR pagetext LIKE \'%'.$s2_db->escape($word).'%\'';
 		if (count($condition))
 		{
-			$query['WHERE'] = '('.implode(' OR ', $condition).')';
+			$query['SELECT'] .= ', ('.implode(' OR ', $condition).') as found';
 
 			$subquery = array(
 				'SELECT'	=> 'count(*)',
@@ -219,11 +219,16 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 		$comments = $article['comment_num'] ? ' comments="'.$article['comment_num'].'"' : '';
 		$span = '<div><span class="additional">'.s2_date($article['create_time']).'</span><span id="'.$article['id'].'"'.$strike.$comments.'>'.$article['title'].'</span></div>';
 
-		// We do not display childrens in search results
-		$children = !$search ? s2_get_child_branches($article['id'], false) : '';
+		$children = (!$search || $article['child_num']) ? s2_get_child_branches($article['id'], false, $search) : '';
+
+		// File or folder
+		$item_type = $search ? ($article['child_num'] ? 'ExpandOpen' : 'ExpandLeaf') : ($children ? 'ExpandClosed' : 'ExpandLeaf');
 
 		($hook = s2_hook('fn_get_child_branches_after_get_branch')) ? eval($hook) : null;
-		$output .= '<li class="'.($children || $search && $article['child_num'] ? 'ExpandClosed' : 'ExpandLeaf').(!$i ? ' IsLast' : '' ).($search ? ' Search' : '').'">'.$expand.$span.$children.'</li>';
+
+		if ($search && (!$children && !$article['found']))
+			continue;
+		$output .= '<li class="'.$item_type.(!$i ? ' IsLast' : '' ).($search ? ' Search'.($article['found'] ? ' Match' : '') : '').'">'.$expand.$span.$children.'</li>';
 	}
 
 	($hook = s2_hook('fn_get_child_branches_end')) ? eval($hook) : null;

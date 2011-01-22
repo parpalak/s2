@@ -141,7 +141,7 @@ elseif ($action == 'delete')
 
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
-	$id = (int)$_GET['id'];
+	$id = (int) $_GET['id'];
 
 	$query = array(
 		'SELECT'	=> 'priority, parent_id',
@@ -251,19 +251,7 @@ elseif ($action == 'load_tree')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 
-	echo s2_get_child_branches((int)$_GET['id']);
-}
-
-elseif ($action == 'search')
-{
-	$required_rights = array('view');
-	($hook = s2_hook('rq_action_search_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
-
-	if (!isset($_GET['s']))
-		die('Error in GET parameters.');
-
-	echo s2_get_child_branches(0, true, trim($_GET['s']));
+	echo s2_get_child_branches((int)$_GET['id'], true, trim($_GET['search']));
 }
 
 //=======================[Pages editor]=========================================

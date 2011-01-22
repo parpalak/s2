@@ -254,7 +254,8 @@ hr {
 		background-repeat : repeat-y;
 		margin-left: 18px;
 		}
-		.treetree ul li.IsLast {
+		.treetree ul li.IsLast,
+		.treetree ul li:last-child {
 			background-position: -72px -27px;
 			background-repeat: no-repeat;
 			}
@@ -289,13 +290,21 @@ hr {
 				.treetree ul li.ExpandLeaf > div:first-child {
 					background-position: -36px 0;
 					}
-				.treetree ul li.Search > div:first-child {
-					width: 18px;
-					background-position: -18px -18px;
+ 				.treetree ul li.ExpandLeaf.Search {
+					display: none;
 					}
-					.treetree ul li.Search.ExpandLeaf > div:first-child {
-						background-position: -54px 0;
-						}
+ 				.treetree ul li.ExpandLeaf.Search.Match {
+					display: list-item;
+					}
+ 				.treetree ul li.ExpandOpen.Search > div, 
+ 				.treetree ul li.ExpandClosed.Search > div {
+					color: #999;
+					}
+ 				.treetree ul li.ExpandLeaf.Search.Match > div,
+ 				.treetree ul li.ExpandOpen.Search.Match > div,
+ 				.treetree ul li.ExpandClosed.Search.Match > div {
+					color: #03a;
+					}
 
 .treetree span {
 	line-height: 1.333em;
@@ -386,7 +395,9 @@ hr {
 		height: 14px;
 		}
 
-ul .but_panel .delete {
+ul .but_panel .delete,
+.Search .but_panel .add,
+.Search .but_panel .delete {
 	display: none;
 	}
 	ul ul .but_panel .delete {

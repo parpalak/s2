@@ -98,6 +98,11 @@ function Init ()
 {
 	InitMovableDivs();
 
+	// Init searching
+	var search_func = InitSearch();
+	GetSearchString = search_func[0];
+	ResetSearchField = search_func[1];
+
 	var keyboard_event = isIE || isSafari ? 'keydown' : 'keypress';
 	if (bIE)
 	{
@@ -122,29 +127,6 @@ function Init ()
 		// Tooltips
 		document.addEventListener('mouseover', ShowTip, false);
 		document.addEventListener('mouseout', HideTip, false);
-	}
-
-	// Search field help message.
-	// It appears when the field is empty.
-	var search_field = document.getElementById('search_field');
-	search_field.onkeypress = SearchKeyPress;
-	search_field.onblur = function ()
-	{
-		var search_field = document.getElementById('search_field');
-		if (search_field.value == '')
-		{
-			search_field.className = 'inactive';
-			search_field.value = search_field.defaultValue;
-		}
-	}
-	search_field.onfocus = function ()
-	{
-		var search_field = document.getElementById('search_field');
-		if (search_field.className == 'inactive')
-		{
-			search_field.className = '';
-			search_field.value = '';
-		}
 	}
 
 	var eTagValues = document.getElementById('tag_values');
@@ -221,40 +203,81 @@ function Logout ()
 
 // Search field events handler
 
-var search_timer, search_string;
+var ResetSearchField, GetSearchString;
 
-function ResetSearchField ()
+function InitSearch ()
 {
-	var search_field = document.getElementById('search_field');
-	search_field.value = search_field.defaultValue;
-	search_field.className = 'inactive';
-}
+	var search_string = '';
+	var eInput = document.getElementById('search_field');
 
-function SearchKeyPress (e)
-{
-	e = e || window.event;
-	var key = e.keyCode || e.which;
-
-	clearTimeout(search_timer);
-	if (key == 13)
+	// Search field help message.
+	// It appears when the field is empty.
+	eInput.onblur = function ()
 	{
-		search_string = document.getElementById('search_field').value;
-		DoSearch();
+		if (eInput.value == '')
+		{
+			eInput.className = 'inactive';
+			eInput.value = eInput.defaultValue;
+		}
 	}
-	else
+	eInput.onfocus = function ()
 	{
-		setTimeout("search_string = document.getElementById('search_field').value", 0);
-		search_timer = setTimeout(DoSearch, 250);
+		if (eInput.className == 'inactive')
+		{
+			eInput.className = '';
+			eInput.value = '';
+		}
 	}
-}
 
-function DoSearch ()
-{
-	var Response = GETSyncRequest(sUrl + 'action=search&s=' + encodeURIComponent(search_string));
-	if (Response.status != '200')
-		return;
+	var DoSearch = function ()
+	{
+		GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (xmlhttp) {
+			document.getElementById('tree').innerHTML = '<ul>' + xmlhttp.responseText + '</ul>';
+			SetWait(false);
+		});
+	}
 
-	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
+	var search_timer;
+
+	eInput.onkeydown = eInput.onkeypress = function (e)
+	{
+		e = e || window.event;
+		var key = e.keyCode || e.which;
+
+		if (key == 13)
+		{
+			// Immediate search on enter press
+			clearTimeout(search_timer);
+			search_string = eInput.value;
+			DoSearch();
+		}
+		else 
+			// We have to wait a little for eInput.value to change
+			setTimeout(function ()
+			{
+				if (search_string == eInput.value)
+					return;
+
+				search_string = eInput.value;
+				SetWait(true);
+				clearTimeout(search_timer);
+				search_timer = setTimeout(DoSearch, 250);
+			}, 0);
+	}
+
+	return [
+	// Get search string
+	(function ()
+	{
+		return search_string;
+	}),
+	// Cancel search mode
+	(function ()
+	{
+		eInput.value = eInput.defaultValue;
+		eInput.className = 'inactive';
+		search_string = '';
+	})];
 }
 
 // Turning animated icon on or off
@@ -426,14 +449,14 @@ function OpenById (sId)
 
 function RefreshTree ()
 {
-	var Response = GETSyncRequest(sUrl + 'action=load_tree&id=0');
+	ResetSearchField && ResetSearchField();
+
+	var Response = GETSyncRequest(sUrl + 'action=load_tree&id=0&search=');
 	if (Response.status != '200')
 		return;
 
-	ResetSearchField();
 	SaveExpand()
 	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
-	ExpandSavedItem('1');
 	LoadExpand();
 }
 
@@ -657,24 +680,18 @@ function MouseDown (e)
 
 	if (bIE)
 	{
-		if (t.parentNode.parentNode.parentNode.parentNode.id != 'tree')
-		{
-			document.attachEvent('onmouseover', MouseIn);
-			document.attachEvent('onmouseout', MouseOut);
-			document.attachEvent('onmousemove', MouseMove);
-		}
+		document.attachEvent('onmouseover', MouseIn);
+		document.attachEvent('onmouseout', MouseOut);
+		document.attachEvent('onmousemove', MouseMove);
 		document.attachEvent('onmouseup', MouseUp);
 		window.event.returnValue = false;
 		t.unselectable = true;
 	}
 	if (bFF)
 	{
-		if (t.parentNode.parentNode.parentNode.parentNode.id != 'tree')
-		{
-			document.addEventListener('mouseover', MouseIn, false);
-			document.addEventListener('mouseout', MouseOut, false);
-			document.addEventListener('mousemove', MouseMove, false);
-		}
+		document.addEventListener('mouseover', MouseIn, false);
+		document.addEventListener('mouseout', MouseOut, false);
+		document.addEventListener('mousemove', MouseMove, false);
 		document.addEventListener('mouseup', MouseUp, false);
 		e.preventDefault();
 	}
@@ -754,38 +771,46 @@ function MouseUp (e)
 
 function MouseIn (e)
 {
+	if (sourceElement == null ||
+		sourceElement.id == '1' ||
+		GetSearchString())
+		return;
+
 	var t = window.event ? window.event.srcElement : e.target;
 
-	if (t.nodeName == 'SPAN' && sourceElement != null && !isNaN(parseInt(t.id)) && t != acceptorElement && t != sourceElement)
+	if (t.nodeName != 'SPAN' ||
+		isNaN(parseInt(t.id)) ||
+		t == acceptorElement ||
+		t == sourceElement)
+		return;
+
+	acceptorElement = t;
+	if (far)
 	{
-		acceptorElement = t;
-		if (far)
+		t.className = 'over_far';
+		draggableDiv.innerHTML = drag_html + '<br />' +
+			str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
+	}
+	else
+	{
+		if (t.parentNode.parentNode.parentNode != sourceParent)
 		{
+			far = 1;
 			t.className = 'over_far';
 			draggableDiv.innerHTML = drag_html + '<br />' +
 				str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
 		}
 		else
 		{
-			if (t.parentNode.parentNode.parentNode != sourceParent)
+			if (mouseStartY > mouseY)
 			{
-				far = 1;
-				t.className = 'over_far';
-				draggableDiv.innerHTML = drag_html + '<br />' +
-					str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
+				draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_UP;
+				t.className = 'over_top';
 			}
 			else
 			{
-				if (mouseStartY > mouseY)
-				{
-					draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_UP;
-					t.className = 'over_top';
-				}
-				else
-				{
-					draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_DOWN;
-					t.className = 'over_bottom';
-				}
+				draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_DOWN;
+				t.className = 'over_bottom';
 			}
 		}
 	}
