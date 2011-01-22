@@ -27,6 +27,7 @@ $lang_admin = array(
 'Expand'					=> 'Раскрыть всё',
 'Collapse'					=> 'Закрыть всё',
 'Refresh'					=> 'Обновить',
+'Search'					=> 'Поиск',
 'Create subarticle'			=> 'Создать статью в этом разделе',
 
 // Editor tab

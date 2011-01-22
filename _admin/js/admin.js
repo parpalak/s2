@@ -128,14 +128,13 @@ function Init ()
 	// It appears when the field is empty.
 	var search_field = document.getElementById('search_field');
 	search_field.onkeypress = SearchKeyPress;
-	ResetSearchField();
 	search_field.onblur = function ()
 	{
 		var search_field = document.getElementById('search_field');
 		if (search_field.value == '')
 		{
 			search_field.className = 'inactive';
-			search_field.value = S2_LANG_SEARCH;
+			search_field.value = search_field.defaultValue;
 		}
 	}
 	search_field.onfocus = function ()
@@ -227,7 +226,7 @@ var search_timer, search_string;
 function ResetSearchField ()
 {
 	var search_field = document.getElementById('search_field');
-	search_field.value = S2_LANG_SEARCH;
+	search_field.value = search_field.defaultValue;
 	search_field.className = 'inactive';
 }
 
