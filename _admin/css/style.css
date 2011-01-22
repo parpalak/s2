@@ -309,11 +309,11 @@ hr {
 		width: 16em;
 		margin-left: -16em;
 		text-align: right;
-		color: #ccc;
+		color: #ddd;
 		float: right;
 		}
 	.treetree li div:hover span.additional {
-		color: #bb5;
+		color: #999;
 		}
 .treetree  div {
 	cursor: default;
