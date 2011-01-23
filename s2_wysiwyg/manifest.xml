@@ -72,6 +72,10 @@ s2_add_js_header('SetDocumentPath("'.S2_PATH.s2_path_from_id($id).'"); tinyMCE.e
 s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext");');
 		]]></hook>
 
+		<hook id="fn_preload_editor_end, blfn_preload_editor_end"><![CDATA[
+echo '<script type="text/javascript">SetDocumentPath("'.$_GET['path'].'");</script>';
+		]]></hook>
+
 		<hook id="fn_output_article_form_pre_parag_btn,fn_s2_blog_post_form_pre_parag_btn" priority="9"><![CDATA[
 ob_start();
 		]]></hook>
@@ -89,8 +93,11 @@ $padding -= 2.4;
 		]]></hook>
 
 		<hook id="fn_s2_blog_post_form_pre_output"><![CDATA[
-s2_add_js_header('SetDocumentPath("'.BLOG_BASE.date('Y/m/d/', $page['create_time']).'"); tinyMCE.execCommand("mceRemoveControl", false, "arttext");');
-s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext");');
+if (isset($_GET['action']) && $_GET['action'] == 'edit_blog_post')
+{
+	s2_add_js_header('SetDocumentPath("'.BLOG_BASE.date('Y/m/d/', $page['create_time']).'"); tinyMCE.execCommand("mceRemoveControl", false, "arttext");');
+	s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext");');
+}
 		]]></hook>
 
 		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
