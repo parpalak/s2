@@ -255,7 +255,7 @@ function InitSearch ()
 			// We have to wait a little for eInput.value to change
 			setTimeout(function ()
 			{
-				if (search_string == eInput.value)
+				if (search_string == eInput.value || eInput.className == 'inactive')
 					return;
 
 				search_string = eInput.value;
