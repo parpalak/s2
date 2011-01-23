@@ -486,16 +486,14 @@ var RejectName = function () {};
 function EditItemName (eSpan)
 {
 	var sSavedName = eSpan.firstChild.nodeValue;
-	var iWidth = eSpan.offsetWidth - eSpan.lastChild.offsetWidth;
 
 	RejectName = function ()
 	{
-		if (sSavedName == '')
-			return;
-
 		eSpan.firstChild.nodeValue = sSavedName;
 		RejectName = function () {};
 		eSpan.removeChild(eInput);
+		HighlightItem(eSpan);
+		eSpan = null;
 	}
 
 	var KeyDown = function (e)
@@ -503,15 +501,13 @@ function EditItemName (eSpan)
 		e = e || window.event;
 		var iCode = e.keyCode || e.which;
 
-		// Enter
 		if (iCode == 13)
 		{
-			//var eSpan = eInput.parentNode;
+			// Enter
 			var sTitle = eInput.value;
 
 			SaveExpand();
-			var Response = POSTSyncRequest(sUrl + 'action=rename&id=' + buttonPanel.parentNode.id, 'title=' + encodeURIComponent(sTitle));
-			ReleaseItem();
+			var Response = POSTSyncRequest(sUrl + 'action=rename&id=' + eSpan.id, 'title=' + encodeURIComponent(sTitle));
 			if (Response.status == '200')
 			{
 				if (Response.text != '')
@@ -521,12 +517,23 @@ function EditItemName (eSpan)
 					eSpan.firstChild.nodeValue = sTitle;
 					RejectName = function () {};
 					eSpan.removeChild(eInput);
+					HighlightItem(eSpan);
+					eSpan = null;
 				}
 			}
 		}
-		// Escape
-		if (iCode == 27)
+		else if (iCode == 27)
+			// Escape
 			RejectName();
+		else
+			// It's a hack that allows to make the input as wide as the text contained
+			// '___' makes it a bit larger.
+			// str_replace changes usual spaces to non-breaking ones.
+			setTimeout(function ()
+			{
+				if (eSpan)
+					eSpan.firstChild.nodeValue = '___' + str_replace(' ', ' ', eInput.value);
+			}, 0);
 	}
 
 	var eInput = document.createElement('INPUT');
@@ -537,12 +544,12 @@ function EditItemName (eSpan)
 	else
 		eInput.onkeypress = KeyDown;
 	eInput.value = sSavedName;
-	eInput.style.width = iWidth + 'px';
 
 	eSpan.insertBefore(eInput, eSpan.childNodes[1]);
 	eInput.focus();
 	eInput.select();
-	eSpan.firstChild.nodeValue = '';
+	eSpan.firstChild.nodeValue += '___';
+	ReleaseItem();
 }
 
 //=======================[Drag & drop]==========================================

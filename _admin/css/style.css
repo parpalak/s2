@@ -312,6 +312,7 @@ hr {
 	padding: 1px;
 	}
 	.treetree div > span {
+		position: relative;
 		background: #fff;
 		}
 	.treetree span.additional {
@@ -342,7 +343,6 @@ hr {
 	}
 
 .treetree .but_panel {
-	position: relative;
 	background: #d2e5fc;
 	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
 	background: -moz-linear-gradient(#dcebfc, #c1dbfc);
@@ -387,16 +387,19 @@ hr {
 			background-color: #fff;
 			outline: #eee outset 1px;
 			}
-	.but_panel input {
-		background: #fff;
-		color: #000;
-		border: 1px solid #aaa;
-		font-family: Verdana, Arial, Helvetica, sans-serif;
-		font-size: 100%;
-		margin: -1px -2px;
-		padding: 1px;
-		height: 14px;
-		}
+.treetree > ul input {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	background: #fff;
+	color: #000;
+	border: 1px solid #aaa;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 100%;
+	margin: -1px -2px;
+	padding: 1px;
+	height: 14px;
+	}
 
 ul .but_panel .delete,
 .Search .but_panel .add,
