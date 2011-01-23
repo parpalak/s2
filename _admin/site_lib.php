@@ -632,8 +632,12 @@ function s2_preload_editor ()
 		$id = $s2_db->result($result);
 	}
 
+	($hook = s2_hook('fn_preload_editor_pre_output')) ? eval($hook) : null;
+
 	s2_output_article_form($id);
 	echo '<script type="text/javascript">document.location.hash = "#edit"; curr_md5 = hex_md5(StringFromForm(document.artform)); sCurrTextId = sUrl + "action=load&id='.$id.'";</script>';
+
+	($hook = s2_hook('fn_preload_editor_end')) ? eval($hook) : null;
 }
 
 function s2_toolbar ()
