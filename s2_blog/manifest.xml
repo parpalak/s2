@@ -638,6 +638,8 @@ if (substr($_GET['path'], 0, 1 + strlen(S2_BLOG_URL)) == '/'.S2_BLOG_URL)
 		echo '<script type="text/javascript">document.location.hash = "#edit"; curr_md5 = hex_md5(StringFromForm(document.artform)); sCurrTextId = sUrl + "action=edit_blog_post&id='.$row['id'].'";</script>';
 	}
 
+	($hook = s2_hook('blfn_preload_editor_end')) ? eval($hook) : null;
+
 	return true;
 }
 		]]></hook>
