@@ -239,7 +239,7 @@ function InitSearch ()
 
 	var search_timer;
 
-	eInput.onkeydown = eInput.onkeypress = function (e)
+	var KeyDown = function (e)
 	{
 		e = e || window.event;
 		var key = e.keyCode || e.which;
@@ -264,6 +264,10 @@ function InitSearch ()
 				search_timer = setTimeout(DoSearch, 250);
 			}, 0);
 	}
+	if (isIE || isSafari)
+		eInput.onkeydown = KeyDown;
+	else
+		eInput.onkeypress = KeyDown;
 
 	return [
 	// Get search string
@@ -477,59 +481,62 @@ function ReleaseItem ()
 	}
 }
 
-var sSavedName = '', eInput;
-
-function RejectName ()
-{
-	if (sSavedName == '')
-		return;
-
-	var eSpan = eInput.parentNode;
-	eSpan.firstChild.nodeValue = sSavedName;
-	sSavedName = '';
-	eSpan.removeChild(eInput);
-}
-
-function RenameKeyPress (e)
-{
-	var iCode = (e ? e : window.event).keyCode;
-
-	// Enter
-	if (iCode == 13)
-	{
-		var eSpan = eInput.parentNode;
-		var sTitle = eInput.value;
-
-		SaveExpand();
-		var Response = POSTSyncRequest(sUrl + 'action=rename&id=' + buttonPanel.parentNode.id, 'title=' + encodeURIComponent(sTitle));
-		ReleaseItem();
-		if (Response.status == '200')
-		{
-			if (Response.text != '')
-				alert(Response.text);
-			else
-			{
-				eSpan.firstChild.nodeValue = sTitle;
-				sSavedName = '';
-				eSpan.removeChild(eInput);
-			}
-		}
-	}
-	// Escape
-	if (iCode == 27)
-		RejectName();
-}
+var RejectName = function () {};
 
 function EditItemName (eSpan)
 {
-	sSavedName = eSpan.firstChild.nodeValue;
+	var sSavedName = eSpan.firstChild.nodeValue;
 	var iWidth = eSpan.offsetWidth - eSpan.lastChild.offsetWidth;
 
-	eInput = document.createElement('INPUT');
+	RejectName = function ()
+	{
+		if (sSavedName == '')
+			return;
+
+		eSpan.firstChild.nodeValue = sSavedName;
+		RejectName = function () {};
+		eSpan.removeChild(eInput);
+	}
+
+	var KeyDown = function (e)
+	{
+		e = e || window.event;
+		var iCode = e.keyCode || e.which;
+
+		// Enter
+		if (iCode == 13)
+		{
+			//var eSpan = eInput.parentNode;
+			var sTitle = eInput.value;
+
+			SaveExpand();
+			var Response = POSTSyncRequest(sUrl + 'action=rename&id=' + buttonPanel.parentNode.id, 'title=' + encodeURIComponent(sTitle));
+			ReleaseItem();
+			if (Response.status == '200')
+			{
+				if (Response.text != '')
+					alert(Response.text);
+				else
+				{
+					eSpan.firstChild.nodeValue = sTitle;
+					RejectName = function () {};
+					eSpan.removeChild(eInput);
+				}
+			}
+		}
+		// Escape
+		if (iCode == 27)
+			RejectName();
+	}
+
+	var eInput = document.createElement('INPUT');
 	eInput.setAttribute('type', 'text');
 	eInput.onblur = RejectName;
-	eInput.onkeypress = RenameKeyPress;
-	eInput.setAttribute('value', sSavedName);
+	if (isIE || isSafari)
+		eInput.onkeydown = KeyDown;
+	else
+		eInput.onkeypress = KeyDown;
+	eInput.value = sSavedName;
 	eInput.style.width = iWidth + 'px';
 
 	eSpan.insertBefore(eInput, eSpan.childNodes[1]);
@@ -717,8 +724,7 @@ function MouseUp (e)
 	if (dragging)
 		StopDrag();
 
-	if (sSavedName)
-		RejectName();
+	RejectName();
 
 	if (bMouseInTagvalues)
 	{
