@@ -819,11 +819,13 @@ function MouseIn (e)
 			{
 				draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_UP;
 				t.className = 'over_top';
+				t.parentNode.parentNode.firstChild.className = 'over_top';
 			}
 			else
 			{
 				draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_DOWN;
 				t.className = 'over_bottom';
+				t.parentNode.parentNode.firstChild.className = 'over_bottom';
 			}
 		}
 	}
@@ -836,6 +838,7 @@ function MouseOut(e)
 	if (sourceElement != null && t == acceptorElement && t != sourceElement)
 	{
 		t.className = '';
+		t.parentNode.parentNode.firstChild.className = '';
 		acceptorElement = null;
 		draggableDiv.innerHTML = drag_html;
 	}

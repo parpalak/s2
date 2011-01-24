@@ -216,21 +216,18 @@ hr {
 	position: relative;
 	}
 
-.treetree .over_top,
-.treetree .over_bottom
- {
-	display: inline;
-	padding: 0 1px;
-	border-top: 0.5em solid #007;
-	border-bottom: 0;
-	position: relative;
-	top: 0.25em;
+.treetree span.over_top {
+	border-top: 0.5em solid #0079f1;
+}
+.treetree div.over_top {
+	margin-top: 0.5em;
 	}
 
-.treetree .over_bottom {
-	border-top: 0;
-	border-bottom: 0.5em solid #007;
-	top: -0.25em;
+.treetree span.over_bottom {
+	border-bottom: 0.5em solid #0079f1;
+	}
+.treetree div.over_bottom {
+	margin-bottom: 0.5em;
 	}
 
 .treetree .over_far {
