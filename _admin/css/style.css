@@ -477,12 +477,26 @@ ul .but_panel .delete,
 	width: 16px;
 	}
 	.tagswitcher img {
-		background: url(../i/tag.gif) -4px 50% no-repeat #aaa;
+		background: url(../i/tag.gif) -4px 50% no-repeat #ccc;
+		background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#d4d4d4), to(#cbcbcb));
+		background: url(../i/tag.gif) -4px 50% no-repeat, -moz-linear-gradient(#e4e4e4, #dbdbdb);
+		background: url(../i/tag.gif) -4px 50% no-repeat, linear-gradient(#e4e4e4, #dbdbdb);
+		-webkit-border-top-left-radius: 4px;
+		-webkit-border-bottom-left-radius: 4px;
+		-moz-border-radius-topleft: 4px;
+		-moz-border-radius-bottomleft: 4px;
+		border-top-left-radius: 4px;
+		border-bottom-left-radius: 4px;
+		border: 1px solid #aaa;
+		border-width: 1px 0 1px 1px;
+		-moz-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+		-webkit-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 		position: absolute;
 		top: 50%;
 		height: 10px;
 		width: 10px;
-		padding: 30px 3px;
+		padding: 30px 3px 30px 2px;
 		margin-top: -35px;
 		cursor: pointer;
 		cursor: hand;
@@ -490,9 +504,21 @@ ul .but_panel .delete,
 		.tagswitcher img.closed {
 			background-position: 6px 50%;
 			}
+		.tagswitcher img:hover{
+			background: url(../i/tag.gif) -4px 50% no-repeat #d2e5fc;
+			background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
+			background: url(../i/tag.gif) -4px 50% no-repeat, -moz-linear-gradient(#dcebfc, #c1dbfc);
+			background: url(../i/tag.gif) -4px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
+			border: 1px solid #7da2ce;
+			}
+		.tagswitcher img.closed:hover{
+			background: url(../i/tag.gif) 6px 50% no-repeat #d2e5fc;
+			background: url(../i/tag.gif) 6px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
+			background: url(../i/tag.gif) 6px 50% no-repeat, -moz-linear-gradient(#dcebfc, #c1dbfc);
+			background: url(../i/tag.gif) 6px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
+			}
 
-#tag_values ul li:hover,
-.tagswitcher img:hover{
+#tag_values ul li:hover {
 	background-color: #fafac0;
 	}
 

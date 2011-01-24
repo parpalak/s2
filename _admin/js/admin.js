@@ -1194,8 +1194,8 @@ function TagvaluesMouseIn ()
 	draggableDiv.innerHTML = drag_html + '<br />' +
 		str_replace('%s', aName[aName.length - 2], S2_LANG_ADD_TO_TAG);
 
-	document.getElementById('tag_values').style.backgroundColor = '#ddf';
-	eCurrentTag.style.backgroundColor = '#ddf';
+	document.getElementById('tag_values').style.backgroundColor = '#d2e5fc';
+	eCurrentTag.style.backgroundColor = '#d2e5fc';
 }
 
 function TagvaluesMouseOut ()
