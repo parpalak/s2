@@ -727,6 +727,22 @@ if (defined('DEBUG'))
 		return $output;
 	}
 
+	protected static function s2_search_rus_plural ($number, $many, $one, $two)
+	{
+		$number = abs((int) $number);
+
+		if ($number % 100 == 1 || $number % 100 > 20 && $number % 10 == 1)
+			return $one;
+		if ($number % 100 == 2 || $number % 100 > 20 && $number % 10 == 2)
+			return $two;
+		if ($number % 100 == 3 || $number % 100 > 20 && $number % 10 == 3)
+			return $two;
+		if ($number % 100 == 4 || $number % 100 > 20 && $number % 10 == 4)
+			return $two;
+
+		return $many;
+	}
+
 	protected static function paging ($page, $total_pages, $link)
 	{
 		global $lang_s2_search;
@@ -800,7 +816,13 @@ if (defined('DEBUG'))
 		$item_num = count($results);
 		if ($item_num)
 		{
-			echo '<p>'.sprintf($lang_s2_search['Found'], $item_num).'</p>';
+			if (substr(S2_LANGUAGE, 0, 7) == 'Russian')
+				// Well... Not pretty much. But it's nice to see phrases in human language.
+				// Feel free to suggest the code for other languages.
+				$result_num_str = sprintf(self::s2_search_rus_plural($item_num, 'Найдено %d страниц.', 'Найдена %d страница.', 'Найдены %d страницы.'), $item_num);
+			else
+				$result_num_str = sprintf($lang_s2_search['Found'], $item_num);
+			echo '<p>'.$result_num_str.'</p>';
 
 			$total_pages = ceil($item_num / 10.0);
 			if ($page < 1 || $page > $total_pages)
