@@ -597,9 +597,15 @@ if (defined('DEBUG'))
 					$stems[] = s2_search_stemmer::stem_word($word);
 
 			// Text cleanup
+			$string = str_replace("\r", '', $string);
+			$string = str_replace('</p>', "</p>\r", $string);
+			$string = str_replace('</code>', "</code>\r", $string);
+			$string = str_replace('</ol>', "</ol>\r", $string);
+			$string = str_replace('</ul>', "</ul>\r", $string);
+			$string = str_replace('</blockquote>', "</blockquote>\r", $string);
 			$string = strip_tags($string);
 			$string = str_replace('ё', 'е', $string);
-			$lines = preg_split('#(?<=[\.?!:])[\s]+#s', $string);
+			$lines = preg_split('#((?<=[\.?!:;])[ \n\t]+|\r)#s', $string);
 			$reserved_line = $lines[0].(isset($lines[1]) ? ' '.$lines[1] : '');
 
 			// Remove the sentences without stems
