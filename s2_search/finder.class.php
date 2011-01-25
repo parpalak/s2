@@ -598,6 +598,8 @@ if (defined('DEBUG'))
 
 			// Text cleanup
 			$string = str_replace("\r", '', $string);
+			$string = str_replace('<br>', "<br>\r", $string);
+			$string = str_replace('<br />', "<br />\r", $string);
 			$string = str_replace('</p>', "</p>\r", $string);
 			$string = str_replace('</code>', "</code>\r", $string);
 			$string = str_replace('</ol>', "</ol>\r", $string);
