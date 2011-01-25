@@ -821,7 +821,7 @@ if (defined('DEBUG'))
 			if (substr(S2_LANGUAGE, 0, 7) == 'Russian')
 				// Well... Not pretty much. But it's nice to see phrases in human language.
 				// Feel free to suggest the code for other languages.
-				$result_num_str = sprintf(self::s2_search_rus_plural($item_num, 'Найдено %d страниц.', 'Найдена %d страница.', 'Найдены %d страницы.'), $item_num);
+				$result_num_str = sprintf(self::s2_search_rus_plural($item_num, 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $item_num);
 			else
 				$result_num_str = sprintf($lang_s2_search['Found'], $item_num);
 			echo '<p>'.$result_num_str.'</p>';
