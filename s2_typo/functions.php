@@ -112,8 +112,8 @@ function s2_typo_make ($contents, $soft = 0)
 
 	// Move quotation marks outside links
 	$contents = preg_replace(
-		'#<a\s+href([^>]*)>\s*«(.*?)»\s*</a>#s',
-		'«<a href\\1>\\2</a>»',
+		'#<a ([^>]*)>\\s*«([^»<]*)»\\s*</a>#Ssu',
+		'«<a \\1>\\2</a>»',
 		$contents
 		);
 
