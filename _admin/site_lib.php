@@ -423,7 +423,7 @@ function s2_output_article_form ($id)
 			</tr>
 <?php ($hook = s2_hook('fn_output_article_form_pre_mdesc')) ? eval($hook) : null; ?>
 			<tr>
-				<td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta descr']; ?></td>
+				<td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta description']; ?></td>
 				<td><input type="text" name="page[meta_desc]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_desc']); ?>" /></td>
 			</tr>
 <?php ($hook = s2_hook('fn_output_article_form_pre_cite')) ? eval($hook) : null; ?>
