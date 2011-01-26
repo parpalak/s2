@@ -87,22 +87,22 @@ body {
 	background: #FFF4D7 url('../i/loading.gif') 50% 50% no-repeat;
 	}
 
-a img {
+a > img {
 	border: 0;
 	}
 
-p.js {
+.p-js {
 	margin:  0 0 1em;
 	}
-	p.js a {
-	margin-right: 1em;
+	.p-js > a {
+		margin-right: 1em;
 		}
 
-a.js,
-a.js:active,
-a.js:hover,
-a.js:visited,
-table.sort a.js {
+.js,
+.js:active,
+.js:hover,
+.js:visited,
+.sort .js {
 	text-decoration: none;
 	border-bottom: 1px dashed #05c;
 	color: #05c;
@@ -110,7 +110,7 @@ table.sort a.js {
 	display: inline;
 	padding: 2px 0 0;
 	}
-	a.js.curr {
+	.js.curr {
 		background: #fff;
 		border-bottom: none;
 		color: #000;
@@ -244,15 +244,18 @@ hr {
 	padding: 0;
 	margin: 0;
 	}
-	.treetree ul li {
+	.treetree li {
 		list-style-type: none;
 		background-image : url(../i/tree_icons.gif);
 		background-position: -72px 0;
 		background-repeat : repeat-y;
 		margin-left: 18px;
 		}
-		.treetree ul li.IsLast,
-		.treetree ul li:last-child {
+		.treetree li.IsLast {
+			background-position: -72px -27px;
+			background-repeat: no-repeat;
+			}
+		.treetree li:last-child {
 			background-position: -72px -27px;
 			background-repeat: no-repeat;
 			}
@@ -265,11 +268,11 @@ hr {
 			background: none;
 			}
 
-		.treetree ul li > div {
+		.treetree li > div {
 			margin-left: 18px;
 			min-height: 18px;
 			}
-			.treetree ul li > div:first-child {
+			.treetree li > div:first-child {
 				width: 36px;
 				height: 18px;
 				float: left;
@@ -278,58 +281,46 @@ hr {
 				background-position: -36px 0;
 				background-repeat : no-repeat;
 				}
-				.treetree ul li.ExpandOpen > div:first-child {
+				.treetree .ExpandOpen > div:first-child {
 					background-position: 0 -18px;
 					}
-				.treetree ul li.ExpandClosed > div:first-child {
+				.treetree .ExpandClosed > div:first-child {
 					background-position: 0 0;
 					}
-				.treetree ul li.ExpandLeaf > div:first-child {
+				.treetree .ExpandLeaf > div:first-child {
 					background-position: -36px 0;
 					}
- 				.treetree ul li.ExpandLeaf.Search {
-					display: none;
-					}
- 				.treetree ul li.ExpandLeaf.Search.Match {
-					display: list-item;
-					}
- 				.treetree ul li.ExpandOpen.Search > div, 
- 				.treetree ul li.ExpandClosed.Search > div {
+ 				.treetree .ExpandOpen.Search, 
+ 				.treetree .ExpandClosed.Search {
 					color: #999;
 					}
- 				.treetree ul li.ExpandLeaf.Search.Match > div,
- 				.treetree ul li.ExpandOpen.Search.Match > div,
- 				.treetree ul li.ExpandClosed.Search.Match > div {
+ 				.treetree .ExpandLeaf.Search.Match,
+ 				.treetree .ExpandOpen.Search.Match,
+ 				.treetree .ExpandClosed.Search.Match {
 					color: #03a;
 					}
 
-.treetree span {
+.treetree > ul span {
 	line-height: 1.333em;
 	display: inline-block;
 	padding: 1px;
+	position: relative;
 	}
-	.treetree div > span {
-		position: relative;
-		background: #fff;
-		}
-	.treetree span.additional {
+	.treetree .additional {
 		width: 16em;
 		margin-left: -16em;
 		text-align: right;
 		color: #ddd;
 		float: right;
 		}
-	.treetree li div:hover span.additional {
+	.treetree div:hover .additional {
 		color: #999;
 		}
-.treetree  div {
-	cursor: default;
-	}
 
-.treetree .ExpandOpen ul {
+.ExpandOpen ul {
 	display: block;
 	}
-.treetree .ExpandClosed ul {
+.ExpandClosed ul {
 	display: none;
 	}
 

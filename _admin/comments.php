@@ -19,7 +19,7 @@ function s2_comment_menu_links ($mode = false)
 	);
 
 	($hook = s2_hook('fn_comment_menu_links_end')) ? eval($hook) : null;
-	return '<p class="js">'.implode('', $output).'</p>';
+	return '<p class="p-js">'.implode('', $output).'</p>';
 }
 
 // Displays the comments tables
