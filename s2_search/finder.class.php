@@ -590,11 +590,11 @@ if (defined('DEBUG'))
 		foreach ($articles as $id => $string)
 		{
 			// Stems of the words found in the $id chapter
-			$stems = array();
+			$stems = $full_words = array();
 			foreach (array_keys(self::$keys[$id]) as $word)
 				// Excluding neighbours weight
 				if (0 !== strpos($word, '*n_'))
-					$stems[] = s2_search_stemmer::stem_word($word);
+					$full_words[$stems[] = s2_search_stemmer::stem_word($word)] = $word;
 
 			// Text cleanup
 			$string = str_replace("\r", '', $string);
@@ -619,7 +619,9 @@ if (defined('DEBUG'))
 				foreach ($matches[0] as $k => $word)
 				{
 					$stem = utf8_strtolower($matches[1][$k]);
-					if ($stem != s2_search_stemmer::stem_word(utf8_strtolower($word)))
+					$word = utf8_strtolower($word);
+					$stemmed_word = s2_search_stemmer::stem_word($word);
+					if ($stem != $word && $stem != $stemmed_word && $stemmed_word != $full_words[$stem])
 					{
 						unset($matches[0][$k]);
 						unset($matches[1][$k]);
