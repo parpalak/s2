@@ -159,7 +159,6 @@ function RejectName ()
 		eItem.childNodes[2].nodeValue = sSavedName;
 		sSavedName = "";
 		eItem.removeChild(eInput);
-//		eItem.firstChild.onmousedown = MouseDown;
 	}
 }
 
@@ -176,9 +175,9 @@ function EditItemName (eItem)
 		{
 			var iCode = (e ? e : window.event).keyCode;
 
-			// Enter
 			if (iCode == 13)
 			{
+				// Enter
 				SaveExpand();
 				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + encodeURIComponent(eItem.getAttribute("path")) + "&name=" + encodeURIComponent(eInput.value));
 
@@ -226,7 +225,6 @@ function EditItemName (eItem)
 		eInput.select();
 		eItem.firstChild.nodeValue += '___';
 		ReleaseItem();
-		//eItem.onmousedown = null;
 	}
 
 	if (eItem.nodeName == "LI")
@@ -530,7 +528,6 @@ function MouseOut(e)
 {
 	var t = window.event ? window.event.srcElement : e.target;
 
-//	if ((sourceElement != null) && (t == acceptorElement) && (t != sourceElement) || (sourceFElement != null))
 	if (t == acceptorElement)
 	{
 		t.className = "";
