@@ -207,7 +207,10 @@ function EditItemName (eItem)
 			}
 			// Escape
 			else if (iCode == 27)
+			{
 				RejectName();
+				HighlightItem(eItem);
+			}
 			else
 				setTimeout(function ()
 				{
