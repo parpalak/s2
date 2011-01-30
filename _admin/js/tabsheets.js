@@ -7,42 +7,47 @@
 
 function Make_Tabsheet ()
 {
-	var i, j, eDD, eDT, aeDL_child, eToSwitch = false, bActivated;
+	var eToSwitch = false;
 	var aeDl = document.getElementsByTagName("DL");
 	var sActiveTab = document.location.hash + '_tab';
 
 	if (sActiveTab.indexOf('-') != -1)
 		sActiveTab += sActiveTab.split('-')[0] + '_tab';
 
-	for (i = aeDl.length; i-- ;)
+	for (var i = aeDl.length; i-- ;)
 	{
 		if (aeDl[i].className == "tabsheets")
 		{
-			aeDL_child = aeDl[i].childNodes;
-			bActivated = false;
-			for (j = aeDL_child.length; j-- ;)
+			var aeDL_child = aeDl[i].childNodes;
+			var bActivated = false;
+			for (var j = aeDL_child.length; j-- ;)
 			{
 				if (aeDL_child[j].nodeName == "DT")
 				{
-					eDT = aeDL_child[j];
-//					eDT.unselectable = true
-					eDT.onmousedown = Switch_sheet;
-					eDD = eDT;
-					while (eDD.nextSibling)
+					var eDT = aeDL_child[j];
+					eDT.unselectable = true;
+					eDT.onmousedown = function (e)
 					{
-						eDD = eDD.nextSibling;
+						var eTab = e ? e.target : window.event.srcElement;
+						SelectTab(eTab, true);
+						return false;
+					}
+
+					var eDD = eDT;
+					while (eDD = eDD.nextSibling)
+					{
 						if (eDD.nodeName == "DD")
 						{
-							if (bActivated || (-1 == sActiveTab.indexOf(eDT.getAttribute('id')) && j > 4))
+							if (bActivated || (-1 == sActiveTab.indexOf(eDT.id) && j > 4))
 								eDD.className = "inactive";
 							else
 							{
 								eDT.className = "active";
-								if (-1 == eDT.getAttribute('id').indexOf('-'))
+								if (-1 == eDT.id.indexOf('-'))
 								{
 									eToSwitch = eDT;
 									if (sActiveTab == '_tab')
-										SetPage(eDT.getAttribute('id'));
+										SetPage(eDT.id);
 								}
 								bActivated = true;
 							}
@@ -63,7 +68,7 @@ var iPreviewScrollTop = 0;
 
 function OnSwitch (eTab)
 {
-	var sType = eTab.getAttribute('id');
+	var sType = eTab.id;
 
 	(hook = hooks['fn_tab_switch_start']) ? eval(hook) : null;
 
@@ -153,18 +158,7 @@ function SelectTab(eTab, bAddToHistory)
 		eTab.className = "active";
 	}
 	if (bAddToHistory)
-		SetPage(eTab.getAttribute('id'));
+		SetPage(eTab.id);
 
 	OnSwitch(eTab);
-}
-
-function Switch_sheet (e)
-{
-	var eTab = e ? e.target : window.event.srcElement
-
-	if (eTab.nodeType == 3)
-		eTab = eTab.parentNode;
-
-	SelectTab(eTab, true);
-	return false
 }
