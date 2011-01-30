@@ -99,9 +99,7 @@ function Init ()
 	InitMovableDivs();
 
 	// Init searching
-	var search_func = InitSearch();
-	GetSearchString = search_func[0];
-	ResetSearchField = search_func[1];
+	Search.init();
 
 	var keyboard_event = isIE || isSafari ? 'keydown' : 'keypress';
 	if (bIE)
@@ -203,86 +201,94 @@ function Logout ()
 
 // Search field events handler
 
-var ResetSearchField, GetSearchString;
-
-function InitSearch ()
+Search = (function ()
 {
 	var search_string = '';
-	var eInput = document.getElementById('search_field');
+	var eInput;
 
-	// Search field help message.
-	// It appears when the field is empty.
-	eInput.onblur = function ()
+	return
 	{
-		if (eInput.value == '')
+		init: (function ()
 		{
-			eInput.className = 'inactive';
-			eInput.value = eInput.defaultValue;
-		}
-	}
-	eInput.onfocus = function ()
-	{
-		if (eInput.className == 'inactive')
-		{
-			eInput.className = '';
-			eInput.value = '';
-		}
-	}
+			eInput = document.getElementById('search_field');
 
-	var DoSearch = function ()
-	{
-		GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (xmlhttp) {
-			document.getElementById('tree').innerHTML = '<ul>' + xmlhttp.responseText + '</ul>';
-			SetWait(false);
-		});
-	}
-
-	var search_timer;
-
-	var KeyDown = function (e)
-	{
-		e = e || window.event;
-		var key = e.keyCode || e.which;
-
-		if (key == 13)
-		{
-			// Immediate search on enter press
-			clearTimeout(search_timer);
-			search_string = eInput.value;
-			DoSearch();
-		}
-		else 
-			// We have to wait a little for eInput.value to change
-			setTimeout(function ()
+			// Search field help message.
+			// It appears when the field is empty.
+			eInput.onblur = function ()
 			{
-				if (search_string == eInput.value || eInput.className == 'inactive')
-					return;
+				if (eInput.value == '')
+				{
+					eInput.className = 'inactive';
+					eInput.value = eInput.defaultValue;
+				}
+			}
+			eInput.onfocus = function ()
+			{
+				if (eInput.className == 'inactive')
+				{
+					eInput.className = '';
+					eInput.value = '';
+				}
+			}
 
-				search_string = eInput.value;
-				SetWait(true);
-				clearTimeout(search_timer);
-				search_timer = setTimeout(DoSearch, 250);
-			}, 0);
+			var DoSearch = function ()
+			{
+				GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (xmlhttp) {
+					document.getElementById('tree').innerHTML = '<ul>' + xmlhttp.responseText + '</ul>';
+					SetWait(false);
+				});
+			}
+
+			var search_timer;
+
+			var KeyDown = function (e)
+			{
+				e = e || window.event;
+				var key = e.keyCode || e.which;
+
+				if (key == 13)
+				{
+					// Immediate search on enter press
+					clearTimeout(search_timer);
+					search_string = eInput.value;
+					DoSearch();
+				}
+				else 
+					// We have to wait a little for eInput.value to change
+					setTimeout(function ()
+					{
+						if (search_string == eInput.value || eInput.className == 'inactive')
+							return;
+
+						search_string = eInput.value;
+						SetWait(true);
+						clearTimeout(search_timer);
+						search_timer = setTimeout(DoSearch, 250);
+					}, 0);
+			}
+			if (isIE || isSafari)
+				eInput.onkeydown = KeyDown;
+			else
+				eInput.onkeypress = KeyDown;
+		}),
+
+		// Get search string
+		string : (function ()
+		{
+			return search_string;
+		}),
+
+		// Cancel search mode
+		reset : (function ()
+		{
+			if (!eInput)
+				return;
+			eInput.value = eInput.defaultValue;
+			eInput.className = 'inactive';
+			search_string = '';
+		})
 	}
-	if (isIE || isSafari)
-		eInput.onkeydown = KeyDown;
-	else
-		eInput.onkeypress = KeyDown;
-
-	return [
-	// Get search string
-	(function ()
-	{
-		return search_string;
-	}),
-	// Cancel search mode
-	(function ()
-	{
-		eInput.value = eInput.defaultValue;
-		eInput.className = 'inactive';
-		search_string = '';
-	})];
-}
+}())
 
 // Turning animated icon on or off
 
@@ -453,7 +459,7 @@ function OpenById (sId)
 
 function RefreshTree ()
 {
-	ResetSearchField && ResetSearchField();
+	Search.reset();
 
 	var Response = GETSyncRequest(sUrl + 'action=load_tree&id=0&search=');
 	if (Response.status != '200')
@@ -786,7 +792,7 @@ function MouseIn (e)
 {
 	if (sourceElement == null ||
 		sourceElement.id == '1' ||
-		GetSearchString())
+		Search.string())
 		return;
 
 	var t = window.event ? window.event.srcElement : e.target;
