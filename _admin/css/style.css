@@ -240,6 +240,9 @@ hr {
 	border-radius: 2px;
 	}
 
+.treetree {
+	cursor: default;
+	}
 .treetree ul {
 	padding: 0;
 	margin: 0;

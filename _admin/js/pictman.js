@@ -97,7 +97,7 @@ function HighlightItem (item)
 	{
 		item.className = "but_panel";
 		item.appendChild(buttonPanel);
-		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + item.getAttribute("path"));
+		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(item.getAttribute("path")));
 		if (Response.status != "200")
 			return;
 
@@ -163,80 +163,99 @@ function RejectName ()
 	}
 }
 
-function KeyPress (e)
+function EditItemName (eItem)
 {
-	var iCode = (e ? e : window.event).keyCode;
-
-	// Enter
-	if (iCode == 13)
+	if (eItem.nodeName == "SPAN" && eItem.getAttribute("path"))
 	{
-		var eItem = eInput.parentNode;
+		sSavedName = eItem.firstChild.nodeValue;
 
-		if (eItem.nodeName == "SPAN")
+		eInput = document.createElement("INPUT");
+		eInput.setAttribute("type", "text");
+		eInput.onblur = RejectName;
+		eInput.onkeypress = function (e)
 		{
-			SaveExpand();
-			var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + buttonPanel.parentNode.getAttribute("path")+ "&name=" + eInput.value);
-			ReleaseItem();
+			var iCode = (e ? e : window.event).keyCode;
 
-			if (Response.status == '200')
+			// Enter
+			if (iCode == 13)
 			{
-				var a = Response.text.split('|');
-				eItem.parentNode.parentNode.parentNode.innerHTML = a[0];
-				eFilePanel.innerHTML = a[1];
-				//SetCallbacks();
-				LoadExpand();
+				SaveExpand();
+				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + eItem.getAttribute("path")+ "&name=" + eInput.value);
+
+				if (Response.status == '200')
+				{
+					var a = Response.text.split('|');
+					var eUl = eItem.parentNode.parentNode.parentNode;
+					eUl.innerHTML = a[0];
+					eFilePanel.innerHTML = a[1];
+					LoadExpand();
+
+					var eSpan = null;
+					for (var i = eUl.childNodes.length; i-- ;)
+						if (eUl.childNodes[i].childNodes[1].lastChild.getAttribute('selected'))
+						{
+							eSpan = eUl.childNodes[i].childNodes[1].lastChild;
+							break;
+						}
+
+					if (eSpan != null)
+						HighlightItem(eSpan);
+				}
+				else
+					HighlightItem(eItem);
+				sSavedName = "";
 			}
-			sSavedName = "";
+			// Escape
+			else if (iCode == 27)
+				RejectName();
+			else
+				setTimeout(function ()
+				{
+					if (sSavedName)
+						eItem.firstChild.nodeValue = '___' + str_replace(' ', ' ', eInput.value);
+				}, 0);
 		}
-		if (eItem.nodeName == "LI")
+
+		eInput.value = sSavedName;
+
+		eItem.insertBefore(eInput, eItem.childNodes[1]);
+		eInput.focus();
+		eInput.select();
+		eItem.firstChild.nodeValue += '___';
+		ReleaseItem();
+		//eItem.onmousedown = null;
+	}
+
+	if (eItem.nodeName == "LI")
+	{
+		sSavedName = eItem.childNodes[1].nodeValue;
+		eItem.childNodes[1].nodeValue = "";
+
+		eInput = document.createElement("INPUT");
+		eInput.setAttribute("type", "text");
+		eInput.onblur = RejectName;
+		eInput.onkeypress = function (e)
 		{
-			var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + eItem.firstChild.getAttribute("fname") + "&name=" + eInput.value);
-			if (Response.status == '200')
-				eFilePanel.innerHTML = Response.text;
-			sSavedName = "";
+			var iCode = (e ? e : window.event).keyCode;
+
+			if (iCode == 13)
+			{
+				// Enter
+				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + eItem.firstChild.getAttribute("fname") + "&name=" + eInput.value);
+				if (Response.status == '200')
+					eFilePanel.innerHTML = Response.text;
+				sSavedName = "";
+			}
+			if (iCode == 27)
+				// Escape
+				RejectName();
 		}
-	}
-	// Escape
-	if (iCode == 27)
-		RejectName();
-}
-
-function EditItemName (item)
-{
-	if (item.nodeName == "SPAN" && item.getAttribute("path"))
-	{
-		sSavedName = item.firstChild.nodeValue;
-		var iWidth = item.offsetWidth - item.lastChild.offsetWidth + 20;
-
-		eInput = document.createElement("INPUT");
-		eInput.setAttribute("type", "text");
-		eInput.onblur = RejectName;
-		eInput.onkeypress = KeyPress;
-		eInput.setAttribute("value", sSavedName);
-		eInput.style.width = iWidth + "px";
-
-		item.insertBefore(eInput, item.childNodes[1]);
-		eInput.focus();
-		eInput.select();
-		item.firstChild.nodeValue = "";
-		//item.onmousedown = null;
-	}
-
-	if (item.nodeName == "LI")
-	{
-		sSavedName = item.childNodes[1].nodeValue;
-		item.childNodes[1].nodeValue = "";
-
-		eInput = document.createElement("INPUT");
-		eInput.setAttribute("type", "text");
-		eInput.onblur = RejectName;
-		eInput.onkeypress = KeyPress;
 		eInput.setAttribute("value", sSavedName);
 
-		item.insertBefore(eInput, item.childNodes[1]);
+		eItem.insertBefore(eInput, eItem.childNodes[1]);
 		eInput.focus();
 		eInput.select();
-		item.firstChild.onmousedown = null;
+		eItem.firstChild.onmousedown = null;
 	}
 
 }
@@ -559,7 +578,7 @@ function CreateSubFolder ()
 
 	SetItemChildren(eSpan, Response.text);
 
-	eSpan = null;
+	var eSpan = null;
 	var eUl = eLi.lastChild;
 	for (var i = eUl.childNodes.length; i-- ;)
 		if (eUl.childNodes[i].childNodes[1].lastChild.getAttribute('selected'))

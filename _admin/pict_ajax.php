@@ -112,7 +112,7 @@ elseif ($action == 'rename_folder')
 	$parent_path = s2_dirname($path);
 	rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name);
 
-	echo s2_walk_dir($parent_path), '|', s2_get_files($parent_path.'/'.$folder_name);
+	echo s2_walk_dir($parent_path, $folder_name), '|', s2_get_files($parent_path.'/'.$folder_name);
 }
 
 elseif ($action == 'rename_file')
