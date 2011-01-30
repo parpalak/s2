@@ -201,7 +201,7 @@ function Logout ()
 
 // Search field events handler
 
-Search = (function ()
+var Search = (function ()
 {
 	var search_string = '';
 	var eInput;
