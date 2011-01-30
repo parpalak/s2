@@ -87,6 +87,10 @@ function s2_show_comments ($mode, $id = 0)
 	$article_titles = $comments_tables = array();
 	while ($row = $s2_db->fetch_assoc($result))
 	{
+		// Do not show anyone hidden comments
+		if (!$row['shown'] && !$show_hidden)
+			continue;
+
 		// Preparing row style
 		$class = array();
 		if (!$row['shown'])
