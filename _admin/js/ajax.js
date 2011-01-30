@@ -26,8 +26,8 @@ function getHTTPRequestObject()
 	return xmlHttpRequest;
 }
 
-xmlhttp_sync = getHTTPRequestObject();
-xmlhttp_async = getHTTPRequestObject();
+var xmlhttp_sync = getHTTPRequestObject();
+var xmlhttp_async = getHTTPRequestObject();
 
 function CheckStatus (xmlhttp)
 {

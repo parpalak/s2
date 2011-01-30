@@ -180,7 +180,7 @@ function EditItemName (eItem)
 			if (iCode == 13)
 			{
 				SaveExpand();
-				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + eItem.getAttribute("path")+ "&name=" + eInput.value);
+				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + encodeURIComponent(eItem.getAttribute("path")) + "&name=" + encodeURIComponent(eInput.value));
 
 				if (Response.status == '200')
 				{
@@ -241,7 +241,7 @@ function EditItemName (eItem)
 			if (iCode == 13)
 			{
 				// Enter
-				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + eItem.firstChild.getAttribute("fname") + "&name=" + eInput.value);
+				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + encodeURIComponent(eItem.firstChild.getAttribute("fname")) + "&name=" + encodeURIComponent(eInput.value));
 				if (Response.status == '200')
 					eFilePanel.innerHTML = Response.text;
 				sSavedName = "";
@@ -326,7 +326,7 @@ function StopDrag ()
 	{
 		if (sourceFElement)
 		{
-			var Response = GETSyncRequest(sUrl + "action=move_file&spath=" + sourceFElement.getAttribute("fname") + "&dpath=" + acceptorElement.getAttribute("path"));
+			var Response = GETSyncRequest(sUrl + "action=move_file&spath=" + encodeURIComponent(sourceFElement.getAttribute("fname")) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute("path")));
 			if (Response.status == '200')
 				eFilePanel.innerHTML = Response.text;
 			acceptorElement.className = "";
@@ -351,7 +351,7 @@ function StopDrag ()
 				eItem = eItem.parentNode;
 			}
 
-			var Response = GETSyncRequest(sUrl + "action=drag&spath=" + sourceElement.getAttribute("path") + "&dpath=" + acceptorElement.getAttribute("path"));
+			var Response = GETSyncRequest(sUrl + "action=drag&spath=" + encodeURIComponent(sourceElement.getAttribute("path")) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute("path")));
 
 			if (Response.status == '200')
 			{
@@ -545,7 +545,7 @@ function DeleteFolder ()
 		return false;
 
 	ReleaseItem();
-	var Response = GETSyncRequest(sUrl + "action=delete_folder&path=" + eSpan.getAttribute('path'));
+	var Response = GETSyncRequest(sUrl + "action=delete_folder&path=" + encodeURIComponent(eSpan.getAttribute('path')));
 	if (Response.status != '200')
 		return false;
 
@@ -561,7 +561,7 @@ function DeleteFile (sName)
 	if (!confirm(str_replace('%s', sPicturePrefix + sName, S2_LANG_DELETE_FILE)))
 		return;
 
-	var Response = GETSyncRequest(sUrl + "action=delete_file&path=" + sName);
+	var Response = GETSyncRequest(sUrl + "action=delete_file&path=" + encodeURIComponent(sName));
 	if (Response.status == '200')
 		eFilePanel.innerHTML = Response.text;
 }
@@ -572,7 +572,7 @@ function CreateSubFolder ()
 	var eLi = eSpan.parentNode.parentNode;
 
 	ReleaseItem();
-	var Response = GETSyncRequest(sUrl + "action=create_subfolder&path=" + eSpan.getAttribute('path'));
+	var Response = GETSyncRequest(sUrl + "action=create_subfolder&path=" + encodeURIComponent(eSpan.getAttribute('path')));
 	if (Response.status != '200')
 		return false;
 
