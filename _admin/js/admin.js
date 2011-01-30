@@ -124,8 +124,21 @@ function Init ()
 	Event.add(document.getElementById('tree'), 'mousedown', MouseDown);
 
 	// Tooltips
-	Event.add(document, 'mouseover', ShowTip);
-	Event.add(document, 'mouseout', HideTip);
+	Event.add(document, 'mouseover', function (e)
+	{
+		var eItem = window.event ? window.event.srcElement : e.target;
+		var title = eItem.title;
+
+		if (!title && eItem.nodeName == 'IMG')
+			title = eItem.title = eItem.alt;
+
+		if (title)
+			window.status = title;
+	});
+	Event.add(document, 'mouseout', function (e)
+	{
+		window.status = window.defaultStatus;
+	});
 
 	var eTagValues = document.getElementById('tag_values');
 	eTagValues.onmouseover = TagvaluesMouseIn;
@@ -169,28 +182,6 @@ function SaveHandler (e)
 
 		return false;
 	}
-}
-
-// Tooltips
-
-function ShowTip (e)
-{
-	var eItem = window.event ? window.event.srcElement : e.target;
-	var title = eItem.getAttribute('title');
-
-	if (!title && eItem.nodeName == "IMG")
-	{
-		title = eItem.getAttribute('alt');
-		eItem.setAttribute('title', title);
-	}
-
-	if (title)
-		window.status = title;
-}
-
-function HideTip (e)
-{
-	window.status = window.defaultStatus;
 }
 
 function Logout ()
