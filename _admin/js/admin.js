@@ -206,7 +206,7 @@ var Search = (function ()
 	var search_string = '';
 	var eInput;
 
-	return
+	return (
 	{
 		init: (function ()
 		{
@@ -287,7 +287,7 @@ var Search = (function ()
 			eInput.className = 'inactive';
 			search_string = '';
 		})
-	}
+	})
 }())
 
 // Turning animated icon on or off
