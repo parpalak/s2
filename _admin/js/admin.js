@@ -79,13 +79,29 @@ function StringFromForm (aeItem)
 
 // Initialization
 
-var bIE = document.attachEvent != null;
-var bFF = !document.attachEvent && document.addEventListener;
+var Event = (function ()
+{
+	var bIE = document.attachEvent != null;
+	var bFF = !document.attachEvent && document.addEventListener;
 
-if (bIE)
-	attachEvent('onload', Init);
-if (bFF)
-	addEventListener('load', Init, true);
+	bIE && attachEvent('onload', Init);
+	bFF && addEventListener('load', Init, true);
+
+	return (
+	{
+		add : (function (eItem, type, handler, use_capture)
+		{
+			bFF && eItem.addEventListener(type, handler, use_capture ? true : false);
+			bIE && eItem.attachEvent('on' + type, handler);
+		}),
+
+		remove : (function (eItem, type, handler, use_capture)
+		{
+			bFF && eItem.removeEventListener(type, handler, use_capture ? true : false);
+			bIE && eItem.detachEvent('on' + type, handler);
+		}),
+	});
+}())
 
 var sCurrTextId = ''; // A unique string for the document currently loaded to the editor
 
@@ -97,35 +113,19 @@ var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
 function Init ()
 {
 	InitMovableDivs();
-
-	// Init searching
 	Search.init();
 
 	var keyboard_event = isIE || isSafari ? 'keydown' : 'keypress';
-	if (bIE)
-	{
-		// Ctrl + S
-		document.attachEvent('on' + keyboard_event, SaveHandler);
 
-		// Mouse events in the tree
-		document.getElementById('tree').attachEvent('onmousedown', MouseDown);
+	// Ctrl + S
+	Event.add(document, keyboard_event, SaveHandler, true);
 
-		// Tooltips
-		document.attachEvent('onmouseover', ShowTip);
-		document.attachEvent('onmouseout', HideTip);
-	}
-	if (bFF)
-	{
-		// Ctrl + S
-		document.addEventListener(keyboard_event, SaveHandler, true);
+	// Mouse events in the tree
+	Event.add(document.getElementById('tree'), 'mousedown', MouseDown);
 
-		// Mouse events in the tree
-		document.getElementById('tree').addEventListener('mousedown', MouseDown, false);
-
-		// Tooltips
-		document.addEventListener('mouseover', ShowTip, false);
-		document.addEventListener('mouseout', HideTip, false);
-	}
+	// Tooltips
+	Event.add(document, 'mouseover', ShowTip);
+	Event.add(document, 'mouseout', HideTip);
 
 	var eTagValues = document.getElementById('tag_values');
 	eTagValues.onmouseover = TagvaluesMouseIn;
@@ -698,23 +698,14 @@ function MouseDown (e)
 	mouseStartX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseStartY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
-	if (bIE)
-	{
-		document.attachEvent('onmouseover', MouseIn);
-		document.attachEvent('onmouseout', MouseOut);
-		document.attachEvent('onmousemove', MouseMove);
-		document.attachEvent('onmouseup', MouseUp);
-		window.event.returnValue = false;
-		t.unselectable = true;
-	}
-	if (bFF)
-	{
-		document.addEventListener('mouseover', MouseIn, false);
-		document.addEventListener('mouseout', MouseOut, false);
-		document.addEventListener('mousemove', MouseMove, false);
-		document.addEventListener('mouseup', MouseUp, false);
-		e.preventDefault();
-	}
+	Event.add(document, 'mouseover', MouseIn);
+	Event.add(document, 'mouseout', MouseOut);
+	Event.add(document, 'mousemove', MouseMove);
+	Event.add(document, 'mouseup', MouseUp);
+
+	e.preventDefault && e.preventDefault();
+	window.event && (window.event.returnValue = false);
+	t.unselectable = true;
 }
 
 function MouseMove (e)
@@ -770,20 +761,10 @@ function MouseUp (e)
 	}
 	sourceElement = null;
 
-	if (bIE)
-	{
-		document.detachEvent('onmouseover', MouseIn);
-		document.detachEvent('onmouseout', MouseOut);
-		document.detachEvent('onmousemove', MouseMove);
-		document.detachEvent('onmouseup', MouseUp);
-	}
-	if (bFF)
-	{
-		document.removeEventListener('mouseover', MouseIn, false);
-		document.removeEventListener('mouseout', MouseOut, false);
-		document.removeEventListener('mousemove', MouseMove, false);
-		document.removeEventListener('mouseup', MouseUp, false);
-	}
+	Event.remove(document, 'mouseover', MouseIn);
+	Event.remove(document, 'mouseout', MouseOut);
+	Event.remove(document, 'mousemove', MouseMove);
+	Event.remove(document, 'mouseup', MouseUp);
 }
 
 // Rollovers
