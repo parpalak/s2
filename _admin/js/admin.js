@@ -283,22 +283,10 @@ var Search = (function ()
 }())
 
 // Turning animated icon on or off
-
 function SetWait (bWait)
 {
-	var eAni = document.getElementById('loading');
-	var eTree = document.getElementById('tree_div');
-
-	if (bWait)
-	{
-		eAni.style.display = 'block';
-		eTree.style.cursor = 'wait';
-	}
-	else
-	{
-		eAni.style.display = 'none';
-		eTree.style.cursor = 'default';
-	}
+	document.getElementById('loading').style.display = bWait ? 'block' : 'none';
+	document.getElementsByTagName('body')[0].style.cursor = bWait ? 'progress' : 'default';
 }
 
 // Handling "back" and "forward" browser buttons
