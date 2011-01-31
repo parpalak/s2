@@ -87,6 +87,10 @@ body {
 	background: #FFF4D7 url('../i/loading.gif') 50% 50% no-repeat;
 	}
 
+a, a:visited {
+	color: #05c;
+	}
+
 a > img {
 	border: 0;
 	}
@@ -523,91 +527,94 @@ ul .but_panel .delete,
  * See http://htmlcoder.visions.ru/JavaScript/?22 for details.
  */
 
-table.sort {
+.sort {
 	background: #fff;
 	border-collapse: collapse;
 	margin: 1em 0;
 	}
 
-	table.sort tr.hidden {
+	.sort .hidden {
 		background: #f5f5f5;
 		color: #666;
 		}
-	table.sort tr.hidden td {
+	.sort .hidden td {
 		text-decoration: line-through;
 		}
-	table.sort tr.good {
+	.sort .good {
 		background: #e8ffe8;
 		}
-	table.sort tr.hidden.good {
+	.sort .hidden.good {
 		background: #c0f3c0;
 		}
 
-	table.sort tbody tr:hover {
+	.sort tbody tr:hover {
 		background: #fafad0;
 		}
 
-	table.sort td {
+	.sort td {
 		border: 1px solid #eee;
 		border-width: 1px 0;
+		padding: 2px 0;
+		text-align: center;
 		}
-		table.sort thead td {
-			background: #ccc;
+		.sort thead td {
+			background: #ddd;
+			color: #840;
 			cursor: pointer;
 			cursor: hand;
 			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
-			text-align: center;
 			vertical-align: middle;
 			}
-			table.sort thead td span {
+			.sort thead td span {
 				margin-right: 0.5em;
 				font-weight: bold;
 				}
-			table.sort thead td.curcol {
-				background: #68c;
+			.sort thead td.curcol {
+				background: #7da2ce;
 				color: #fff;
 				}
-		table.sort tbody td {
-			text-align: center;
+		.sort td.content {
+			text-align: left;
 			}
-			table.sort tbody td.content {
-				text-align: left;
+			#comm_div .content a {
+				display: inline;
+				padding: 0;
 				}
 
-	table.sort a {
+	.sort a {
 		display: block;
 		padding: 3px 0.5em;
 		}
 
-	table.sort .buttons {
+	.sort .buttons {
 		white-space: nowrap;
 		}
-		table.sort .buttons img,
-		table.sort img.buttons {
+		.sort .buttons img,
+		.sort img.buttons {
 			width: 16px;
 			height: 16px;
 			background: url(../i/icons.png);
 			}
-		table.sort .buttons .hide { background-position: -16px -16px; }
-		table.sort .buttons .show { background-position: -16px 0; }
-		table.sort .buttons .mark { background-position: -48px 0; }
-		table.sort .buttons .unmark { background-position: -48px -16px; }
-		table.sort .buttons .delete { background-position: 0 -32px; }
-		table.sort .buttons .edit { background-position: -32px -32px; }
-		table.sort .buttons .rename { background-position: -32px -16px; }
-		table.sort .buttons.yes { background-position: 0 0; }
-		table.sort .buttons.no { background-position: 0 -16px; }
-	table.sort img {
+		.sort .buttons .hide { background-position: -16px -16px; }
+		.sort .buttons .show { background-position: -16px 0; }
+		.sort .buttons .mark { background-position: -48px 0; }
+		.sort .buttons .unmark { background-position: -48px -16px; }
+		.sort .buttons .delete { background-position: 0 -32px; }
+		.sort .buttons .edit { background-position: -32px -32px; }
+		.sort .buttons .rename { background-position: -32px -16px; }
+		.sort .buttons.yes { background-position: 0 0; }
+		.sort .buttons.no { background-position: 0 -16px; }
+	.sort img {
 		border: none;
 		margin: 1px;
 		}
-		table.sort img:hover {
+		.sort img:hover {
 			border: 1px #E4BB50 solid;
 			border-color: #fff #aaa #aaa #fff;
 			background-color: #fff;
 			margin: 0;
 			}
-		table.sort img:active:hover {
+		.sort img:active:hover {
 			border: 1px #E4BB50 solid;
 			border-color: #aaa #fff #fff #aaa;
 			background-color: #fff;
