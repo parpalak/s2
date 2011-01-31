@@ -139,8 +139,11 @@ function s2_show_comments ($mode, $id = 0)
 			$ip = '';
 		}
 
+		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
+			require S2_ROOT.'_include/comments.php';
+
 		($hook = s2_hook('fn_show_comments_pre_table_row_merge')) ? eval($hook) : null;
-		$comments_tables[$row['article_id']][] = '<tr'.$class.'><td>'.s2_htmlencode($row['nick']).'</td><td class="content">'.s2_htmlencode($row['text']).'</td><td>'.date("Y/m/d, H:i", $row['time']).'</td><td>'.$ip.'</td><td>'.$email.'</td><td>'.$buttons.'</td></tr>';
+		$comments_tables[$row['article_id']][] = '<tr'.$class.'><td>'.s2_htmlencode($row['nick']).'</td><td class="content">'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</td><td>'.date("Y/m/d, H:i", $row['time']).'</td><td>'.$ip.'</td><td>'.$email.'</td><td>'.$buttons.'</td></tr>';
 		$article_titles[$row['article_id']] = $row['title'];
 	}
 
