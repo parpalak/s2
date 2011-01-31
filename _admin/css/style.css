@@ -246,6 +246,9 @@ hr {
 
 .treetree {
 	cursor: default;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
 	}
 .treetree ul {
 	padding: 0;
@@ -559,6 +562,9 @@ ul .but_panel .delete,
 		}
 		.sort thead td {
 			background: #ddd;
+			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#e2e2e2), to(#d6d6d6));
+			background: -moz-linear-gradient(#e2e2e2, #d6d6d6);
+			background: linear-gradient(#e2e2e2, #d6d6d6);
 			color: #840;
 			cursor: pointer;
 			cursor: hand;
@@ -570,7 +576,10 @@ ul .but_panel .delete,
 				font-weight: bold;
 				}
 			.sort thead td.curcol {
-				background: #7da2ce;
+				background: #2491fe;
+				background: -webkit-gradient(linear, 0 0, 0 bottom, from(#2491fe), to(#41a0ff));
+				background: -moz-linear-gradient(#2491fe, #41a0ff);
+				background: linear-gradient(#2491fe, #41a0ff);
 				color: #fff;
 				}
 		.sort td.content {
@@ -935,10 +944,20 @@ div.input {
 	margin: 1em 0 0.5em;
 	}
 
+fieldset {
+	border: 1px solid #ccc;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+
 .extension,
 .info-box {
 	margin: 1em 0;
 	border: 1px solid #ccc;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	padding: 1em 1em 0;
 	overflow: hidden;
 	}
