@@ -364,8 +364,6 @@ function InitMovableDivs ()
 
 function MoveDraggableDiv(x, y)
 {
-	draggableDiv.style.width = 'auto';
-
 	draggableDiv.style.left = x + 10 + 'px';
 	draggableDiv.style.top = y + 0 + 'px';
 }
@@ -587,22 +585,6 @@ function SetParentChildren (eParentUl, str)
 
 var drag_html = '';
 
-function StartDrag ()
-{
-	RejectName();
-	ReleaseItem();
-
-	sourceElement.className = 'source';
-	dragging = true;
-
-	drag_html = '<strong>' + sourceElement.innerHTML + '</strong>';
-	draggableDiv.innerHTML = drag_html;
-	draggableDiv.style.visibility = 'visible';
-
-	sourceParent = sourceElement.parentNode.parentNode.parentNode;
-	far = 0;
-}
-
 function StopDrag()
 {
 	dragging = false;
@@ -706,7 +688,24 @@ function MouseMove (e)
 	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
 	if (!dragging && (Math.abs(mouseStartY - mouseY) > 5 || Math.abs(mouseStartX - mouseX) > 5))
-		StartDrag();
+	{
+		dragging = true;
+
+		clearTimeout(idTimer);
+		bIntervalPassed = true;
+
+		RejectName();
+		ReleaseItem();
+
+		sourceElement.className = 'source';
+
+		drag_html = '<strong>' + sourceElement.innerHTML + '</strong>';
+		draggableDiv.innerHTML = drag_html;
+		draggableDiv.style.visibility = 'visible';
+
+		sourceParent = sourceElement.parentNode.parentNode.parentNode;
+		far = 0;
+	}
 
 	MoveDraggableDiv(mouseX, mouseY);
 }
@@ -729,11 +728,17 @@ function MouseUp (e)
 	else if (!bIntervalPassed)
 	{
 		// Double click
-		if (!is_drop)
-			var wnd = window.open(sUrl + 'action=preview&id=' + sourceElement.id, 'previewwindow1', 'scrollbars=yes,toolbar=yes', 'True');
-
 		clearTimeout(idTimer);
 		bIntervalPassed = true;
+
+		if (!is_drop)
+		{
+			var sJob = sUrl + 'action=preview&id=' + sourceElement.id;
+			setTimeout(function()
+			{
+				var wnd = window.open(sJob, 's2_preview_window', 'scrollbars=yes,toolbar=yes', 'True');
+			}, 0);
+		}
 	}
 	else
 	{
@@ -741,14 +746,20 @@ function MouseUp (e)
 		var sJob = '';
 		if (sourceElement == buttonPanel.parentNode)
 			// Highlighted item
-			sJob = !is_drop ? ' EditItemName(document.getElementById("' + sourceElement.id + '"));' : '';
+			sJob = !is_drop ? sourceElement.id : '';
 		else
 		{
 			ReleaseItem();
 			HighlightItem(sourceElement);
 		}
+
 		bIntervalPassed = false;
-		idTimer = setTimeout('bIntervalPassed = true;' + sJob, 400);
+		idTimer = setTimeout(function ()
+		{
+			bIntervalPassed = true;
+			if (sJob)
+				EditItemName(document.getElementById(sJob));
+		}, 400);
 	}
 	sourceElement = null;
 
