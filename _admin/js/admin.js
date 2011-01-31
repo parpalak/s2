@@ -89,17 +89,17 @@ var Event = (function ()
 
 	return (
 	{
-		add : (function (eItem, type, handler, use_capture)
+		add: function (eItem, type, handler, use_capture)
 		{
 			bFF && eItem.addEventListener(type, handler, use_capture ? true : false);
 			bIE && eItem.attachEvent('on' + type, handler);
-		}),
+		},
 
-		remove : (function (eItem, type, handler, use_capture)
+		remove: function (eItem, type, handler, use_capture)
 		{
 			bFF && eItem.removeEventListener(type, handler, use_capture ? true : false);
 			bIE && eItem.detachEvent('on' + type, handler);
-		}),
+		}
 	});
 }())
 
@@ -113,6 +113,7 @@ var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
 function Init ()
 {
 	InitMovableDivs();
+	Drag.init();
 	Search.init();
 
 	var keyboard_event = isIE || isSafari ? 'keydown' : 'keypress';
@@ -199,7 +200,7 @@ var Search = (function ()
 
 	return (
 	{
-		init: (function ()
+		init: function ()
 		{
 			eInput = document.getElementById('search_field');
 
@@ -261,23 +262,23 @@ var Search = (function ()
 				eInput.onkeydown = KeyDown;
 			else
 				eInput.onkeypress = KeyDown;
-		}),
+		},
 
 		// Get search string
-		string : (function ()
+		string: function ()
 		{
 			return search_string;
-		}),
+		},
 
 		// Cancel search mode
-		reset : (function ()
+		reset: function ()
 		{
 			if (!eInput)
 				return;
 			eInput.value = eInput.defaultValue;
 			eInput.className = 'inactive';
 			search_string = '';
-		})
+		}
 	})
 }())
 
@@ -344,17 +345,55 @@ function IsChanged (eForm)
 
 // Creating the button panel and div for drag
 
-var draggableDiv = null, buttonPanel = null;
+var buttonPanel = null;
+
+var Drag = (function ()
+{
+	var draggableDiv = null;
+	var drag_html = '';
+
+	return (
+	{
+		init: function ()
+		{
+			if (draggableDiv == null)
+			{
+				draggableDiv = document.createElement('DIV');
+				document.body.appendChild(draggableDiv);
+				draggableDiv.id = 'dragged';
+				Drag.move(-99, -99);
+			}
+		},
+
+		move: function (x, y)
+		{
+			draggableDiv.style.left = x + 10 + 'px';
+			draggableDiv.style.top = y + 0 + 'px';
+		},
+
+		hide: function ()
+		{
+			draggableDiv.style.visibility = 'hidden';
+			drag_html = '';
+			Drag.move(-99, -99);
+		},
+
+		show: function (s)
+		{
+			draggableDiv.style.visibility = 'visible';
+			drag_html = s;
+			draggableDiv.innerHTML = s;
+		},
+
+		set_hint: function (s)
+		{
+			draggableDiv.innerHTML = drag_html + (s ? '<br />' + s : '');
+		}
+	});
+}())
 
 function InitMovableDivs ()
 {
-	if (draggableDiv == null)
-	{
-		draggableDiv = document.createElement('DIV');
-		document.body.appendChild(draggableDiv);
-		draggableDiv.setAttribute('id', 'dragged');
-		MoveDraggableDiv(-99, -99);
-	}
 	if (buttonPanel == null)
 	{
 		buttonPanel = document.getElementById('context_buttons');
@@ -362,11 +401,6 @@ function InitMovableDivs ()
 	}
 }
 
-function MoveDraggableDiv(x, y)
-{
-	draggableDiv.style.left = x + 10 + 'px';
-	draggableDiv.style.top = y + 0 + 'px';
-}
 
 //=======================[Expanding the tree]===================================
 
@@ -583,15 +617,11 @@ function SetParentChildren (eParentUl, str)
 	}
 }
 
-var drag_html = '';
-
 function StopDrag()
 {
 	dragging = false;
 	sourceElement.className = '';
-	MoveDraggableDiv(-99, -99);
-	draggableDiv.style.visibility = 'hidden';
-	drag_html = '';
+	Drag.hide();
 
 	if (acceptorElement)
 	{
@@ -699,15 +729,13 @@ function MouseMove (e)
 
 		sourceElement.className = 'source';
 
-		drag_html = '<strong>' + sourceElement.innerHTML + '</strong>';
-		draggableDiv.innerHTML = drag_html;
-		draggableDiv.style.visibility = 'visible';
+		Drag.show('<strong>' + sourceElement.innerHTML + '</strong>');
 
 		sourceParent = sourceElement.parentNode.parentNode.parentNode;
 		far = 0;
 	}
 
-	MoveDraggableDiv(mouseX, mouseY);
+	Drag.move(mouseX, mouseY);
 }
 
 var idTimer, bIntervalPassed = true;
@@ -790,8 +818,7 @@ function MouseIn (e)
 	if (far)
 	{
 		t.className = 'over_far';
-		draggableDiv.innerHTML = drag_html + '<br />' +
-			str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
+		Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE));
 	}
 	else
 	{
@@ -799,20 +826,19 @@ function MouseIn (e)
 		{
 			far = 1;
 			t.className = 'over_far';
-			draggableDiv.innerHTML = drag_html + '<br />' +
-				str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE);
+			Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE));
 		}
 		else
 		{
 			if (mouseStartY > mouseY)
 			{
-				draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_UP;
+				Drag.set_hint(S2_LANG_MOVE_UP);
 				t.className = 'over_top';
 				t.parentNode.parentNode.firstChild.className = 'over_top';
 			}
 			else
 			{
-				draggableDiv.innerHTML = drag_html + '<br />' + S2_LANG_MOVE_DOWN;
+				Drag.set_hint(S2_LANG_MOVE_DOWN);
 				t.className = 'over_bottom';
 				t.parentNode.parentNode.firstChild.className = 'over_bottom';
 			}
@@ -829,7 +855,7 @@ function MouseOut(e)
 		t.className = '';
 		t.parentNode.parentNode.firstChild.className = '';
 		acceptorElement = null;
-		draggableDiv.innerHTML = drag_html;
+		Drag.set_hint('');
 	}
 }
 
@@ -1180,8 +1206,7 @@ function TagvaluesMouseIn ()
 
 	bMouseInTagvalues = true;
 	var aName = eCurrentTag.innerHTML.split(' (');
-	draggableDiv.innerHTML = drag_html + '<br />' +
-		str_replace('%s', aName[aName.length - 2], S2_LANG_ADD_TO_TAG);
+	Drag.set_hint(str_replace('%s', aName[aName.length - 2], S2_LANG_ADD_TO_TAG));
 
 	document.getElementById('tag_values').style.backgroundColor = '#d2e5fc';
 	eCurrentTag.style.backgroundColor = '#d2e5fc';
@@ -1191,7 +1216,7 @@ function TagvaluesMouseOut ()
 {
 	bMouseInTagvalues = false;
 	if (sourceElement)
-		draggableDiv.innerHTML = drag_html;
+		Drag.set_hint('');
 
 	document.getElementById('tag_values').style.backgroundColor = '';
 
