@@ -613,6 +613,7 @@ else
 			'url_idx'			=> array('url'),
 			'create_time_idx'	=> array('create_time'),
 			'parent_id_idx'		=> array('parent_id')
+			'template_idx'		=> array('template')
 		)
 	);
 

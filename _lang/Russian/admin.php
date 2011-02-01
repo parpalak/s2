@@ -36,6 +36,7 @@ $lang_admin = array(
 'Editor'					=> 'Редактор',
 'Template'					=> 'Шаблон:',
 'Title'						=> 'Заголовок:',
+'Add template info'			=> 'Имя файла с новым шаблоном:',
 'Meta keywords'				=> 'Meta-keywords:',
 'Meta description'			=> 'Meta-description:',
 'Meta help'					=> 'Информацию из мета-тегов могут использовать поисковики',
@@ -203,5 +204,6 @@ $lang_templates = array(
 'site.php'			=> 'Обычная страница',
 'mainpage.php'		=> 'Главная страница',
 'back_forward.php'	=> 'Страница без меню',
+'+'					=> '— другой шаблон —',
 
 );

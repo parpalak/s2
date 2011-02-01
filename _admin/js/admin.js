@@ -962,6 +962,54 @@ function SaveArticle (sAction)
 	return false;
 }
 
+function ChangeTemplate (eSelect, sHelp)
+{
+	if (eSelect[eSelect.selectedIndex].value == '+')
+	{
+		// Adding new template
+		// Ask for the filename
+		var filename = prompt(sHelp, 'site.php');
+		if (typeof(filename) != 'string')
+		{
+			// Cancel button
+
+			eSelect.value = eSelect.getAttribute('data-prev-value');
+			return;
+		}
+		else
+		{
+			// Ok button
+
+			var isItem = false;
+			for (var i = eSelect.length; i-- ;)
+				if (eSelect[i] == filename)
+				{
+					isItem = true;
+					break;
+				}
+
+			if (!is_item)
+			{
+				// Add new item to the dropdown list
+				var eOption = document.createElement('OPTION');
+				eOption.setAttribute('value', filename);
+				eOption.appendChild(document.createTextNode(filename));
+
+				var eLastOption = eSelect.lastChild;
+				while (eLastOption.nodeName != 'OPTION')
+					eLastOption = eLastOption.previousSibling;
+
+				eSelect.insertBefore(eOption, eLastOption);
+			}
+
+			eSelect.value = filename;
+		}
+	}
+
+	// Remember the current item
+	eSelect.setAttribute('data-prev-value', eSelect[eSelect.selectedIndex].value);
+}
+
 function TagSelection (sTag)
 {
 	return InsertTag('<' + sTag + '>', '</' + sTag + '>');

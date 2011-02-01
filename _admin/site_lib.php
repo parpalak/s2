@@ -344,6 +344,21 @@ function s2_output_article_form ($id)
 	$cr_time = s2_array_from_time($page['create_time']);
 	$m_time = s2_array_from_time($page['modify_time']);
 
+	$query = array(
+		'SELECT'	=> 'DISTINCT template',
+		'FROM'		=> 'articles'
+	);
+	($hook = s2_hook('fn_output_article_form_pre_get_tpl_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$templates = $lang_templates;
+	$add_option = $templates['+'];
+	unset($templates['+']);
+	while ($row = $s2_db->fetch_row($result))
+		if (!isset($templates[$row[0]]))
+			$templates[$row[0]] = $row[0];
+	$templates['+'] = $add_option;
+
 	($hook = s2_hook('fn_output_article_form_pre_output')) ? eval($hook) : null;
 
 ?>
@@ -364,11 +379,11 @@ function s2_output_article_form ($id)
 		<hr />
 <?php ($hook = s2_hook('fn_output_article_form_pre_template')) ? eval($hook) : null; ?>
 		<label><?php echo $lang_admin['Template']; ?><br />
-		<select name="page[template]">
+		<select name="page[template]" data-prev-value="<?php echo s2_htmlencode($page['template']); ?>" onchange="ChangeTemplate(this, '<?php echo $lang_admin['Add template info']; ?>');">
 <?php
 
-	foreach ($lang_templates as $n => $v)
-		echo "\t\t\t".'<option value="'.$n.'"'.($page['template'] == $n ? ' selected' : '').'>'.$v.'</option>'."\n";
+	foreach ($templates as $filename => $template)
+		echo "\t\t\t".'<option value="'.s2_htmlencode($filename).'"'.($page['template'] == $filename ? ' selected="selected"' : '').'>'.$template.'</option>'."\n";
 
 ?>
 		</select></label>
