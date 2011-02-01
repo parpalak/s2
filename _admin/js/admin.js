@@ -982,13 +982,13 @@ function ChangeTemplate (eSelect, sHelp)
 
 			var isItem = false;
 			for (var i = eSelect.length; i-- ;)
-				if (eSelect[i] == filename)
+				if (eSelect[i].value == filename)
 				{
 					isItem = true;
 					break;
 				}
 
-			if (!is_item)
+			if (!isItem)
 			{
 				// Add new item to the dropdown list
 				var eOption = document.createElement('OPTION');
