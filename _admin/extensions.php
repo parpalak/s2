@@ -284,7 +284,11 @@ function s2_install_extension ($id)
 
 		// Run the author supplied install code
 		if (isset($ext_data['extension']['install']) && trim($ext_data['extension']['install']) != '')
-			eval($ext_data['extension']['install']);
+		{
+			$return = eval($ext_data['extension']['install']);
+			if (is_string($return))
+				return '<div class="info-box"><p class="important">'.$return.'</p></div>';
+		}
 
 		// Update the existing extension
 		$query = array(
@@ -309,7 +313,11 @@ function s2_install_extension ($id)
 	{
 		// Run the author supplied install code
 		if (isset($ext_data['extension']['install']) && trim($ext_data['extension']['install']) != '')
-			eval($ext_data['extension']['install']);
+		{
+			$return = eval($ext_data['extension']['install']);
+			if (is_string($return))
+				return '<div class="info-box"><p class="important">'.$return.'</p></div>';
+		}
 
 		// Add the new extension
 		$query = array(
