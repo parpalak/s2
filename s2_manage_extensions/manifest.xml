@@ -15,7 +15,7 @@
 <extension for="S2" engine="1.0">
 	<id>s2_manage_extensions</id>
 	<title>Manage Extensions</title>
-	<version>1.0a</version>
+	<version>1.0a1</version>
 	<description>Adds the "Refresh hooks" button to the extension list. It can be useful for extension developers.</description>
 	<author>Roman Parpalak</author>
 
