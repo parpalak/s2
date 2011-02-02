@@ -313,9 +313,11 @@ hr {
 	line-height: 1.333em;
 	display: inline-block;
 	padding: 1px;
-	position: relative;
 	}
-	.treetree .additional {
+	.treetree div > span {
+		position: relative;
+		}
+	.treetree span.additional {
 		width: 16em;
 		margin-left: -16em;
 		text-align: right;
