@@ -15,6 +15,11 @@ function str_replace(substr, newsubstr, str)
 	return str;
 }
 
+var ua = navigator.userAgent.toLowerCase();
+var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
+var isSafari = ua.indexOf('safari') != -1;
+var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
+
 var bIE = document.attachEvent != null;
 var bFF = !document.attachEvent && document.addEventListener;
 
@@ -171,7 +176,8 @@ function EditItemName (eItem)
 		eInput = document.createElement("INPUT");
 		eInput.setAttribute("type", "text");
 		eInput.onblur = RejectName;
-		eInput.onkeypress = function (e)
+
+		var KeyDown = function (e)
 		{
 			var iCode = (e ? e : window.event).keyCode;
 
@@ -218,6 +224,10 @@ function EditItemName (eItem)
 				}, 0);
 		}
 
+		if (isIE || isSafari)
+			eInput.onkeydown = KeyDown;
+		else
+			eInput.onkeypress = KeyDown;
 		eInput.value = sSavedName;
 
 		eItem.insertBefore(eInput, eItem.childNodes[1]);
@@ -235,7 +245,7 @@ function EditItemName (eItem)
 		eInput = document.createElement("INPUT");
 		eInput.setAttribute("type", "text");
 		eInput.onblur = RejectName;
-		eInput.onkeypress = function (e)
+		var KeyDown = function (e)
 		{
 			var iCode = (e ? e : window.event).keyCode;
 
@@ -251,6 +261,11 @@ function EditItemName (eItem)
 				// Escape
 				RejectName();
 		}
+
+		if (isIE || isSafari)
+			eInput.onkeydown = KeyDown;
+		else
+			eInput.onkeypress = KeyDown;
 		eInput.setAttribute("value", sSavedName);
 
 		eItem.insertBefore(eInput, eItem.childNodes[1]);
