@@ -507,6 +507,7 @@ function EditItemName (eSpan)
 	RejectName = function ()
 	{
 		eSpan.firstChild.nodeValue = sSavedName;
+		eInput.onblur = null;
 		RejectName = function () {};
 		eSpan.removeChild(eInput);
 		HighlightItem(eSpan);
@@ -515,6 +516,9 @@ function EditItemName (eSpan)
 
 	var KeyDown = function (e)
 	{
+		if (!eSpan)
+			return;
+
 		e = e || window.event;
 		var iCode = e.keyCode || e.which;
 
@@ -532,6 +536,7 @@ function EditItemName (eSpan)
 				else
 				{
 					eSpan.firstChild.nodeValue = sTitle;
+					eInput.onblur = null;
 					RejectName = function () {};
 					eSpan.removeChild(eInput);
 					HighlightItem(eSpan);
