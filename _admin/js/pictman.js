@@ -634,6 +634,7 @@ function Init ()
 
 function SetWait (bWait)
 {
+	document.getElementsByTagName('body')[0].style.cursor = bWait ? 'progress' : 'default';
 }
 
 var was_upload = false;
