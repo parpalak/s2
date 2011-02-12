@@ -198,7 +198,7 @@ if (!$s2_db->table_exists('s2_blog_post_tag'))
 
 // Add extension options to the config table
 $s2_blog_config = array(
-	'S2_BLOG_URL'		=> 'blog',
+	'S2_BLOG_URL'		=> '/blog',
 	'S2_BLOG_TITLE'		=> 'My blog',
 	'S2_BLOG_CRUMBS'	=> '<a href="/">Main page</a> &rarr; ',
 );
@@ -255,12 +255,12 @@ $s2_db->drop_field('tags', 's2_blog_important');
 	<hooks>
 
 		<hook id="rq_start,ai_start,idx_start"><![CDATA[
-define('BLOG_BASE', S2_PATH.'/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/');
+define('BLOG_BASE', S2_PATH.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/');
 define('BLOG_KEYWORDS', BLOG_BASE.urlencode(S2_TAGS_URL).'/');
 		]]></hook>
 
 		<hook id="idx_get_content"><![CDATA[
-if (substr($request_uri, 0, 1 + strlen(S2_BLOG_URL)) == '/'.S2_BLOG_URL)
+if (substr($request_uri, 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
@@ -611,12 +611,12 @@ $output .= s2_show_comments('s2_blog_new');
 		]]></hook>
 
 		<hook id="fn_preload_editor_start"><![CDATA[
-if (substr($_GET['path'], 0, 1 + strlen(S2_BLOG_URL)) == '/'.S2_BLOG_URL)
+if (substr($_GET['path'], 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	require $ext_info['path'].'/blog_lib.php';
 
-	$path = substr($_GET['path'], strlen(S2_BLOG_URL) + 1);
+	$path = substr($_GET['path'], strlen(S2_BLOG_URL));
 	$path = explode('/', $path);   //   []/[2006]/[12]/[31]/[newyear]
 	if (count($path) < 5)
 		return true;
@@ -655,7 +655,7 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 
 		<hook id="cmnt_pre_path_check"><![CDATA[
 if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
-	$path = '/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $row['create_time']);
+	$path = str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $row['create_time']);
 		]]></hook>
 
 		<hook id="cmnt_pre_save_comment_qr"><![CDATA[
@@ -756,7 +756,7 @@ if (defined('S2_BLOG_HANDLED') || isset($_GET['type']) && $_GET['type'] == 's2_b
 		]]></hook>
 
 		<hook id="idx_pre_rss"><![CDATA[
-if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+if ($request_uri == S2_BLOG_URL.'/rss.xml')
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
@@ -770,18 +770,18 @@ if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
 		]]></hook>
 
 		<hook id="fn_do_rss_pre_output"><![CDATA[
-if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+if ($request_uri == S2_BLOG_URL.'/rss.xml')
 {
 	global $lang_s2_blog;
 
 	$rss_title = S2_BLOG_TITLE;
-	$rss_link = S2_BASE_URL.'/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/';
+	$rss_link = S2_BASE_URL.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/';
 	$rss_description = sprintf($lang_s2_blog['RSS description'], S2_BLOG_TITLE);
 }
 		]]></hook>
 
 		<hook id="fn_do_rss_pre_get_articles"><![CDATA[
-if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+if ($request_uri == S2_BLOG_URL.'/rss.xml')
 {
 	$s2_blog_posts = s2_blog_last_posts_array();
 	$s2_blog_items = array();
@@ -791,7 +791,7 @@ if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
 			'text'			=> $s2_blog_post['text'].(!empty($s2_blog_post['tags']) ? '<p>'.sprintf($lang_s2_blog['Tags:'], $s2_blog_post['tags']).'</p>' : ''),
 			'time'			=> $s2_blog_post['create_time'],
 			'modify_time'	=> $s2_blog_post['modify_time'],
-			'rel_path'		=> '/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $s2_blog_post['create_time']).urlencode($s2_blog_post['url']),
+			'rel_path'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $s2_blog_post['create_time']).urlencode($s2_blog_post['url']),
 		);
 	return $s2_blog_items;
 }
@@ -806,7 +806,7 @@ if (defined('S2_BLOG_HANDLED'))
 
 		<hook id="fn_s2_count_rss_count_start"><![CDATA[
 global $request_uri;
-if ($request_uri == '/'.S2_BLOG_URL.'/rss.xml')
+if ($request_uri == S2_BLOG_URL.'/rss.xml')
 	$filename = '/data/rss_s2_blog.txt';
 		]]></hook>
 
@@ -826,7 +826,7 @@ while ($s2_blog_post = $s2_db->fetch_assoc($result))
 		'title'		=> $s2_blog_post['title'],
 		'descr'		=> '',
 		'time'		=> $s2_blog_post['create_time'],
-		'url'		=> '/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'],
+		'url'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'],
 	);
 }
 		]]></hook>
@@ -853,7 +853,7 @@ if (substr($chapter, 0, 8) == 's2_blog_')
 			'title'		=> $s2_blog_post['title'],
 			'descr'		=> '',
 			'time'		=> $s2_blog_post['create_time'],
-			'url'		=> '/'.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'],
+			'url'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'],
 		)
 	);
 }
