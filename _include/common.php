@@ -10,7 +10,7 @@
 require S2_ROOT.'_include/functions.php';
 require S2_ROOT.'_include/utf8/utf8.php';
 
-define('S2_VERSION', '1.0a2');
+define('S2_VERSION', '1.0a3');
 
 // Uncomment these lines for debug
 //define('S2_DEBUG', 1);
