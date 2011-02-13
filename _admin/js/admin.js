@@ -24,6 +24,7 @@ function add_hook (hook, code)
 
 function str_replace (substr, newsubstr, str)
 {
+	newsubstr = newsubstr.replace(/\$/g, '$$$$');
 	while (str.indexOf(substr) >= 0)
 		str = str.replace(substr, newsubstr);
 	return str;
