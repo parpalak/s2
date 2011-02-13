@@ -217,6 +217,8 @@ function s2_get_service_template ($template_id = 'service.php', $path = false)
 		sprintf($lang_common['Copyright 1'], $link, date('Y'))).' '.
 		sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
 
+	($hook = s2_hook('fn_get_service_template_pre_replace')) ? eval($hook) : null;
+
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
 
