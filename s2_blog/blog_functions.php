@@ -475,7 +475,7 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 	// Titles
 	$output = '<table class="cal">'.$header.'<tr>';
 	for ($i = 0; $i < 7; $i++)
-		$output .= '<th'.($i % 7 == 5 || $i % 7 == 6 ? ' class="sun"' : '').'>'.$lang_s2_blog_days[$i].'</td>';
+		$output .= '<th'.($i % 7 == 5 || $i % 7 == 6 ? ' class="sun"' : '').'>'.$lang_s2_blog_days[$i].'</th>';
 	$output .= '</tr><tr>';
 
 	// Empty cells before
