@@ -71,6 +71,7 @@ $template = $return ? $return : s2_get_template('site.php');
 
 ob_start();
 include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
+($hook = s2_hook('ai_pre_get_tpl_styles')) ? eval($hook) : null;
 $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 
 ?>
