@@ -200,7 +200,7 @@ if (!$s2_db->table_exists('s2_blog_post_tag'))
 $s2_blog_config = array(
 	'S2_BLOG_URL'		=> '/blog',
 	'S2_BLOG_TITLE'		=> 'My blog',
-	'S2_BLOG_CRUMBS'	=> '<a href="/">Main page</a> &rarr; ',
+	'S2_BLOG_CRUMBS'	=> '<a href="/">Main page</a>',
 );
 
 foreach ($s2_blog_config as $conf_name => $conf_value)

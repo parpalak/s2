@@ -61,7 +61,7 @@ $lang_s2_blog = array(
 'Blog title'				=> 'Название блога',
 'Blog title label'			=> 'Выводится в теге &lt;title&gt;, доступно в шаблонах',
 'Blog crumbs'				=> 'Начало «хлебных крошек»',
-'Blog crumbs label'			=> 'Первая часть «хлебных крошек» в блоге. Например, «&lt;a href="/"&gt;Главная&lt;/a&gt; &amp;rarr; ».',
+'Blog crumbs label'			=> 'Первая часть «хлебных крошек» в блоге. Например, «&lt;a href="/"&gt;Главная&lt;/a&gt;».',
 
 'Blog posts now'			=> 'Записей в блоге: %s',
 'Blog comments now'			=> 'Комментариев в блоге: %s',
