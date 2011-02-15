@@ -259,7 +259,7 @@ define('BLOG_BASE', S2_PATH.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_U
 define('BLOG_KEYWORDS', BLOG_BASE.urlencode(S2_TAGS_URL).'/');
 		]]></hook>
 
-		<hook id="idx_get_content"><![CDATA[
+		<hook id="idx_get_content" priority="9"><![CDATA[
 if (substr($request_uri, 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
