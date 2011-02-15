@@ -13,7 +13,7 @@ $lang_s2_blog = array(
 'Articles by tag'			=> 'Статьи по этой теме:',
 'Year'						=> '%s год',
 
-'Navigation'				=> 'Записи:',
+'Navigation'				=> 'Записи',
 'Nav last'					=> 'Последние 10',
 'Nav favorite'				=> 'Избранные',
 'Nav tags'					=> 'По <a href="%s">ключевым словам</a>:',
