@@ -182,7 +182,7 @@ function s2_save_options ($opt)
 			$value = $opt[$name];
 		}
 
-		if ($name == 'S2_WEBMASTER_EMAIL' && !is_valid_email($value))
+		if ($name == 'S2_WEBMASTER_EMAIL' && $value != '' && !is_valid_email($value))
 		{
 			$return .= '<p style="color: red;">'.$lang_admin_opt['Invalid webmaster email'].'</p>';
 			continue;
