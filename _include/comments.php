@@ -73,7 +73,7 @@ function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subs
 						<?php echo $lang_common['Your comment']; ?><br />
 						<textarea cols="50" rows="10" name="<?php echo s2_field_name('text'); ?>"><?php echo s2_htmlencode($text); ?></textarea>
 						<br />
-						<small class="comment-syntax"><?php echo $lang_common['Comment syntax info']; ?></small>
+						<small class="comment-syntax"><?php ($hook = s2_hook('fn_comment_form_pre_syntax_info')) ? eval($hook) : null; echo $lang_common['Comment syntax info']; ?></small>
 					</p>
 					<p id="qsp">
 						<?php printf($lang_common['Comment question'], '&#x003'.$a.';&#x003'.$b.';&#x002b;&#x003'.$c.';'); ?><br />
