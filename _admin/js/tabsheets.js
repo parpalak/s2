@@ -76,7 +76,18 @@ function OnSwitch (eTab)
 	{
 		Preview();
 		if (iPreviewScrollTop)
-			window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop = iPreviewScrollTop;
+		{
+			var try_num = 20;
+			var repeater = function ()
+			{
+				if (!iPreviewScrollTop)
+					return;
+				window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop = iPreviewScrollTop;
+				if (try_num-- > 0 && !window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop)
+					setTimeout(repeater, 50);
+			}
+			setTimeout(repeater, 50);
+		}
 	}
 	else if (sType == 'edit_tab')
 	{
