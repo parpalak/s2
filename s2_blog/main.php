@@ -94,7 +94,7 @@ else
 	// []/[2006]/[12]/[31]/[newyear]
 	$s2_blog_path[1] = (int) $s2_blog_path[1];
 	if ($s2_blog_path[1] < S2_START_YEAR || $s2_blog_path[1] > (int) date('Y'))
-		error_404();
+		return false;
 
 	if (count($s2_blog_path) == 2) $s2_blog_path[2] = '';
 	if (count($s2_blog_path) == 3) $s2_blog_path[3] = '';
@@ -179,3 +179,5 @@ if (strpos($template, '<!-- s2_menu -->') !== false)
 	$page['menu']['s2_blog_navigation'] = '<div class="header">'.$lang_s2_blog['Navigation'].'</div>'.s2_blog_navigation($request_uri);
 
 define('S2_BLOG_HANDLED', 1);
+
+return true;

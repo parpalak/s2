@@ -265,9 +265,7 @@ if (substr($request_uri, 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
 		include $ext_info['path'].'/blog_functions.php';
-	include $ext_info['path'].'/main.php';
-
-	return true;
+	return include $ext_info['path'].'/main.php';
 }
 		]]></hook>
 
