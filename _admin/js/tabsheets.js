@@ -86,7 +86,7 @@ function OnSwitch (eTab)
 				if (try_num-- > 0 && !window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop)
 					setTimeout(repeater, 50);
 			}
-			setTimeout(repeater, 50);
+			repeater();
 		}
 	}
 	else if (sType == 'edit_tab')
