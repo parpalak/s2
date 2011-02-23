@@ -580,8 +580,14 @@ $counters[] = sprintf($lang_s2_blog['Blog posts now'], $s2_db->result($result));
 
 $query = array(
 	'SELECT'	=> 'count(*)',
-	'FROM'		=> 's2_blog_comments',
-	'WHERE'		=> 'shown = 1'
+	'FROM'		=> 's2_blog_comments AS c',
+	'JOINS'		=> array(
+		array(
+			'INNER JOIN'	=> 's2_blog_posts AS p',
+			'ON'			=> 'p.id = c.post_id'
+		)
+	),
+	'WHERE'		=> 'c.shown = 1 AND p.published = 1'
 );
 ($hook = s2_hook('blfn_get_counters_pre_get_comm_qr')) ? eval($hook) : null;
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
