@@ -35,8 +35,14 @@ function s2_get_counters ()
 
 	$query = array(
 		'SELECT'	=> 'count(*)',
-		'FROM'		=> 'art_comments',
-		'WHERE'		=> 'shown = 1'
+		'FROM'		=> 'art_comments AS c',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 'articles AS a',
+				'ON'			=> 'a.id = c.article_id'
+			)
+		),
+		'WHERE'		=> 'c.shown = 1 AND a.published = 1'
 	);
 	($hook = s2_hook('fn_get_counters_pre_get_comm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
