@@ -723,6 +723,38 @@ function s2_blog_recent_comments ()
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
 
+function s2_blog_recent_discussions ()
+{
+	global $s2_db;
+
+	if (!S2_SHOW_COMMENTS)
+		return '';
+
+	$subquery1 = array(
+		'SELECT'	=> 'c.post_id AS post_id, count(c.post_id) AS comment_num',
+		'FROM'		=> 's2_blog_comments AS c',
+		'WHERE'		=> 'c.shown = 1 AND c.time > '.((intval(time() / 86400) - 31)*86400),
+		'GROUP BY'	=> 'c.post_id',
+		'ORDER BY'	=> 'comment_num DESC',
+	);
+	$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
+
+	$query = array(
+		'SELECT'	=> 'create_time, url, title',
+		'FROM'		=> 's2_blog_posts AS p, ('.$raw_query1.') AS c1',
+		'WHERE'		=> 'c1.post_id = p.id AND p.commented = 1 AND p.published = 1',
+		'LIMIT'		=> '10',
+	);
+	($hook = s2_hook('fn_s2_blog_recent_discussions_pre_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$output = '';
+	while ($row = $s2_db->fetch_assoc($result))
+		$output .= '<li><a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a></li>';
+
+	return $output ? '<ul>'.$output.'</ul>' : '';
+}
+
 function s2_blog_navigation ($cur_url)
 {
 	global $s2_db, $lang_s2_blog;

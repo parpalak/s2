@@ -10,6 +10,7 @@ $lang_s2_blog = array(
 'Tags'						=> 'Ключевые слова',
 'Tags:'						=> 'Ключевые слова: %s',
 'Last comments'				=> 'Последние комментарии в блоге',
+'Last discussions'			=> 'Обсуждаемое в блоге',
 'Articles by tag'			=> 'Статьи по этой теме:',
 'Year'						=> '%s год',
 

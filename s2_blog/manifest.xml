@@ -277,6 +277,13 @@ if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
 	$s2_blog_recent_comments = s2_blog_recent_comments();
 	$replace['<!-- s2_blog_last_comments -->'] = $s2_blog_recent_comments ? '<div class="header">'.$lang_s2_blog['Last comments'].'</div>'.$s2_blog_recent_comments : '';
 }
+if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
+{
+	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
+		include $ext_info['path'].'/blog_functions.php';
+	$s2_blog_last_discussions = s2_blog_recent_discussions();
+	$replace['<!-- s2_blog_last_discussions -->'] = $s2_blog_last_discussions ? '<div class="header">'.$lang_s2_blog['Last discussions'].'</div>'.$s2_blog_last_discussions : '';
+}
 if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 {
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
