@@ -119,6 +119,9 @@ $replace['<!-- s2_article_tags -->'] = !empty($page['article_tags']) ? $page['ar
 if (strpos($template, '<!-- s2_last_comments -->') !== false && ($last_comments = s2_last_artilce_comments()))
 	$replace['<!-- s2_last_comments -->'] = '<div class="header">'.$lang_common['Last comments'].'</div>'.$last_comments;
 
+if (strpos($template, '<!-- s2_last_discussions -->') !== false && ($last_discussions = s2_last_discussions()))
+	$replace['<!-- s2_last_discussions -->'] = '<div class="header">'.$lang_common['Last discussions'].'</div>'.$last_discussions;
+
 if (strpos($template, '<!-- s2_last_articles -->') !== false)
 	$replace['<!-- s2_last_articles -->'] = s2_last_articles();
 

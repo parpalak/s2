@@ -192,6 +192,49 @@ function s2_last_artilce_comments ()
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
 
+function s2_last_discussions ()
+{
+	if (!S2_SHOW_COMMENTS)
+		return '';
+
+	global $s2_db;
+
+	$subquery1 = array(
+		'SELECT'	=> 'c.article_id AS article_id, count(c.article_id) AS comment_num',
+		'FROM'		=> 'art_comments AS c',
+		'WHERE'		=> 'c.shown = 1 AND c.time > '.((intval(time() / 86400) - 31)*86400),
+		'GROUP BY'	=> 'c.article_id',
+		'ORDER BY'	=> 'comment_num DESC',
+	);
+	$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
+
+	$query = array(
+		'SELECT'	=> 'url, title, parent_id',
+		'FROM'		=> 'articles AS a, ('.$raw_query1.') AS c1',
+		'WHERE'		=> 'c1.article_id = a.id AND a.commented = 1 AND a.published = 1',
+		'LIMIT'		=> '10',
+	);
+	($hook = s2_hook('fn_last_discussions_pre_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$titles = $parent_ids = $urls = array();
+	while ($row = $s2_db->fetch_assoc($result))
+	{
+		$titles[] = $row['title'];
+		$parent_ids[] = $row['parent_id'];
+		$urls[] = urlencode($row['url']);
+	}
+
+	$urls = s2_get_group_url($parent_ids, $urls);
+
+	$output = '';
+	foreach ($urls as $k => $url)
+		$output .= '<li><a href="'.S2_PATH.$url.'">'.$titles[$k].'</a></li>';
+
+	($hook = s2_hook('fn_last_discussions_end')) ? eval($hook) : null;
+	return $output ? '<ul>'.$output.'</ul>' : '';
+}
+
 //
 // Returns the array of links to the articles with the tag specified
 //

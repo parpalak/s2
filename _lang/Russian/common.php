@@ -21,6 +21,7 @@ $lang_common = array(
 'Copyright 2'				=> '© %1$s, %2$s–%3$s.',
 'Powered by'				=> 'Сайт работает на движке %s.',
 'Last comments'				=> 'Последние комментарии на&nbsp;сайте',
+'Last discussions'			=> 'Обсуждаемое на&nbsp;сайте',
 
 'Favorite'					=> 'Избранное',
 
