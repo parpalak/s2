@@ -9,6 +9,8 @@
  */
 
 var s2_wysiwyg_params = [
+
+// "Advanced" editor
 {
 	mode: "exact",
 	elements : "arttext",
@@ -18,13 +20,13 @@ var s2_wysiwyg_params = [
 	convert_fonts_to_spans : true,
 	language : "en",
 	plugins : "table,preview,searchreplace,paste,fullscreen,visualchars,nonbreaking,save",
-	theme_advanced_buttons1 : 'newdocument,save,|,cut,copy,paste,pastetext,pasteword,|,undo,redo,|,link,unlink,anchor,|,image,hr,nonbreaking,|,visualchars,cleanup,|,charmap,removeformat',
+	theme_advanced_buttons1 : 'newdocument,save,|,cut,copy,paste,pastetext,pasteword,|,undo,redo,|,link,unlink,anchor,|,image,hr,charmap,nonbreaking,visualchars,|,cleanup,removeformat',
 	theme_advanced_buttons2 : "formatselect,|,bold,italic,underline,strikethrough,|,sup,sub,|,justifyleft,justifycenter,justifyright,justifyfull,|,bullist,numlist,outdent,indent,|,blockquote,|,forecolor,backcolor",
 	theme_advanced_buttons3 : "visualaid,tablecontrols,|,search,replace,|,fullscreen,code,preview",
 	theme_advanced_toolbar_location : "top",
 	theme_advanced_toolbar_align : "left",
 	theme_advanced_path_location : "bottom",
-	theme_advanced_blockformats : "p,h2,h3,h4,pre",
+	theme_advanced_blockformats : "p,h2,h3,h4,pre,code",
 	extended_valid_elements : "hr[class|width|size|noshade],br[clear],span[class|align|style],small,big,code[class],samp,kbd,s",
 	file_browser_callback : "fileBrowserCallBack",
 	remove_trailing_nbsp : true,
@@ -32,6 +34,7 @@ var s2_wysiwyg_params = [
 	remove_script_host : true
 },
 
+// "Simplified" editor
 {
 	mode: "exact",
 	elements : "arttext",
