@@ -4,7 +4,7 @@
 .s2Skin table td {vertical-align:middle}
 
 /* Containers */
-.s2Skin table {direction:ltr; background:transparent}
+.s2Skin table {direction:ltr; background:#F0F0EE}
 .s2Skin iframe {display:block; background:#FFF}
 .s2Skin .mceToolbar {height:26px}
 .s2Skin .mceLeft {text-align:left}
@@ -38,7 +38,7 @@
 .s2Skin td.mceRight table {margin:0 0 0 auto;}
 
 /* Button */
-.s2Skin .mceButton {display:block; border:1px solid transparent; width:20px; height:20px; margin-right:1px}
+.s2Skin .mceButton {display:block; border:1px solid #F0F0EE; width:20px; height:20px; margin-right:1px}
 .s2Skin a.mceButtonEnabled:hover {border:1px solid #0A246A; background-color:#B2BBD0}
 .s2Skin a.mceButtonActive, .s2Skin a.mceButtonSelected {border:1px solid #0A246A; background-color:#C2CBE0}
 .s2Skin .mceButtonDisabled .mceIcon {opacity:0.3; -ms-filter:'alpha(opacity=30)'; filter:alpha(opacity=30)}
@@ -60,14 +60,14 @@
 .s2Skin .mceListBoxMenu {overflow:auto; overflow-x:hidden}
 .s2Skin .mceOldBoxModel .mceListBox .mceText {height:22px}
 .s2Skin .mceOldBoxModel .mceListBox .mceOpen {width:11px; height:22px;}
-.s2Skin select.mceNativeListBox {font-family:'MS Sans Serif',sans-serif,Verdana,Arial; font-size:7pt; background:transparent; border:1px solid gray; margin-right:2px;}
+.s2Skin select.mceNativeListBox {font-family:'MS Sans Serif',sans-serif,Verdana,Arial; font-size:7pt; background:#F0F0EE; border:1px solid gray; margin-right:2px;}
 
 /* SplitButton */
 .s2Skin .mceSplitButton {width:32px; height:20px; direction:ltr}
 .s2Skin .mceSplitButton a, .s2Skin .mceSplitButton span {height:20px; display:block}
-.s2Skin .mceSplitButton a.mceAction {width:20px; border:1px solid transparent; border-right:0;}
+.s2Skin .mceSplitButton a.mceAction {width:20px; border:1px solid #F0F0EE; border-right:0;}
 .s2Skin .mceSplitButton span.mceAction {width:20px; background-image:url(../../img/icons.gif);}
-.s2Skin .mceSplitButton a.mceOpen {width:9px; background:url(../../img/icons.gif) -741px 0; border:1px solid transparent;}
+.s2Skin .mceSplitButton a.mceOpen {width:9px; background:url(../../img/icons.gif) -741px 0; border:1px solid #F0F0EE;}
 .s2Skin .mceSplitButton span.mceOpen {display:none}
 .s2Skin table.mceSplitButtonEnabled:hover a.mceAction, .s2Skin .mceSplitButtonHover a.mceAction, .s2Skin .mceSplitButtonSelected a.mceAction {border:1px solid #0A246A; border-right:0; background-color:#B2BBD0}
 .s2Skin table.mceSplitButtonEnabled:hover a.mceOpen, .s2Skin .mceSplitButtonHover a.mceOpen, .s2Skin .mceSplitButtonSelected a.mceOpen {background-color:#B2BBD0; border:1px solid #0A246A;}
