@@ -7,7 +7,7 @@
 			<color>6A3F9A</color>
 			<main_drop_down>false</main_drop_down>
 			<compare_list_box selected="true"></compare_list_box>
-			<file_name>data/rss_s2_blog.txt.log</file_name>
+			<file_name>data.php?file=rss_s2_blog.txt.log</file_name>
 			<csv>
 				<separator>^</separator>
 				<date_format>YYYY-MM-DD</date_format>
