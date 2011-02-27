@@ -16,7 +16,7 @@
 			<title>Site RSS subscribers</title>
 			<short>RSS - site</short>
 			<color>EAB303</color>
-			<file_name>data/rss_main.txt.log</file_name>
+			<file_name>data.php?file=rss_main.txt.log</file_name>
 			<main_drop_down selected="true"></main_drop_down>
 			<csv>
 				<separator>^</separator>

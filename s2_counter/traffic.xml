@@ -15,7 +15,7 @@
 			<title>Hits/hosts info</title>
 			<short>Hits/hosts</short>
 			<color>7f8da9</color>
-			<file_name>data/arch_info.txt</file_name>
+			<file_name>data.php?file=arch_info.txt</file_name>
 			<csv>
 				<separator>^</separator>
 				<date_format>YYYY-MM-DD</date_format>
