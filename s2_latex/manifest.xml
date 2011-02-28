@@ -37,14 +37,14 @@ include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 echo $lang_s2_latex['Comment syntax'];
 		]]></hook>
 
-		<hook id="fn_do_rss_pre_output" priority="8"><![CDATA[
+		<hook id="fn_do_rss_pre_output" priority="4"><![CDATA[
 require $ext_info['path'].'/functions.php';
 
 $rss_title = s2_latex_make($rss_title);
 $rss_description = s2_latex_make($rss_description);
 		]]></hook>
 
-		<hook id="fn_do_rss_loop_pre_output" priority="9"><![CDATA[
+		<hook id="fn_do_rss_loop_pre_output" priority="4"><![CDATA[
 $item['title'] = s2_latex_make($item['title']);
 $item['text'] = s2_latex_make($item['text']);
 		]]></hook>
