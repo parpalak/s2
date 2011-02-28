@@ -33,8 +33,8 @@ $template = s2_typo_make($template);
 		<hook id="fn_do_rss_pre_output" priority="9"><![CDATA[
 require $ext_info['path'].'/functions.php';
 
-$rss_title = s2_typo_make($rss_title);
-$rss_description = s2_typo_make($rss_description);
+$rss_title = s2_typo_make($rss_title, true);
+$rss_description = s2_typo_make($rss_description, true);
 		]]></hook>
 
 		<hook id="fn_do_rss_loop_pre_output" priority="9"><![CDATA[
