@@ -15,5 +15,11 @@ header('Pragma: no-chace');
 
 $filename = isset($_GET['file']) ? trim(preg_replace('#[^0-9a-z_\-\.]#', '', $_GET['file']), '.') : '';
 if (!$filename || !is_file('data/'.$filename))
-	die(' ');
+{
+	// "Empty" file
+	$now = time();
+	for ($i = 366; --$i ;)
+		echo date('Y-m-d', $now - 86400 * $i).'^0'."\n";
+	die;
+}
 echo file_get_contents('data/'.$filename);
