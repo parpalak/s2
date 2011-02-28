@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_counter
  */
- 
+
 if (!defined('S2_COUNTER_TOTAL_HITS_FNAME'))
 	define('S2_COUNTER_TOTAL_HITS_FNAME', '/data/total_hits.txt');
 
