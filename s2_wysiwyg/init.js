@@ -28,7 +28,7 @@ var s2_wysiwyg_params = [
 	theme_advanced_path_location : "bottom",
 	theme_advanced_blockformats : "p,h2,h3,h4,pre,code",
 	extended_valid_elements : "hr[class|width|size|noshade],br[clear],span[class|align|style],small,big,code[class],samp,kbd,s",
-	file_browser_callback : "fileBrowserCallBack",
+	file_browser_callback : "s2_wysiwyg_filebrowser_callback",
 	remove_trailing_nbsp : true,
 	relative_urls : false,
 	remove_script_host : true
@@ -52,7 +52,7 @@ var s2_wysiwyg_params = [
 	theme_advanced_path_location : "bottom",
 	theme_advanced_blockformats : "p,h2,h3,h4,pre",
 	extended_valid_elements : "hr[class|width|size|noshade],br[clear],span[class|align|style],small,big,code[class],samp,kbd,s",
-	file_browser_callback : "fileBrowserCallBack",
+	file_browser_callback : "s2_wysiwyg_filebrowser_callback",
 	remove_trailing_nbsp : true,
 	relative_urls : false,
 	remove_script_host : true
@@ -61,14 +61,14 @@ var s2_wysiwyg_params = [
 
 tinyMCE.init(s2_wysiwyg_params[s2_wysiwyg_type]);
 
-function SetDocumentPath (s)
+function s2_wysiwyg_set_path (s)
 {
 	tinyMCE.settings.document_base_url = s;
 }
 
 var s2_wysiwyg_wFileBrowser = s2_wysiwyg_wImage = null;
 
-function fileBrowserCallBack(field_name, url, type, win)
+function s2_wysiwyg_filebrowser_callback (field_name, url, type, win)
 {
 	if (type != "image")
 		return;
@@ -76,7 +76,7 @@ function fileBrowserCallBack(field_name, url, type, win)
 	s2_wysiwyg_wFileBrowser = window.open(s2_wysiwyg_pict_url, 's2_wysiwyg_imagewindow', 'scrollbars=yes,toolbar=yes,width=750,height=500', 'True');
 }
 
-function ReturnImage(s, w, h)
+function ReturnImage (s, w, h)
 {
 	s2_wysiwyg_wFileBrowser.close();
 
