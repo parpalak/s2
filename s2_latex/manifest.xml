@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * LaTeX
+ *
+ * Integrates site with latex.codecogs.com service
+ *
+ * @copyright (C) 2011 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_latex
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_latex</id>
+	<title>LaTeX</title>
+	<version>1.0a</version>
+	<description>Allows to write LaTeX formulae.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0a3</minversion>
+	<maxtestedon>1.0a3</maxtestedon>
+
+	<hooks>
+
+		<hook id="idx_template_pre_replace, fn_get_service_template_pre_replace"><![CDATA[
+$replace['<!-- s2_styles -->'] .= "\n".'<script type="text/javascript" src="'.$ext_info['url'].'/latexit.js"></script>'."\n".'<script type="text/javascript">var s2_latex_url = "'.$ext_info['url'].'";</script>';
+		]]></hook>
+
+		<hook id="ai_pre_get_tpl_styles"><![CDATA[
+echo "\n".'<script type="text/javascript" src="'.$ext_info['url'].'/latexit.js"></script>'."\n".'<script type="text/javascript">var s2_latex_url = "'.$ext_info['url'].'";</script>';
+		]]></hook>
+
+		<hook id="fn_comment_form_pre_syntax_info"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+echo $lang_s2_latex['Comment syntax'];
+		]]></hook>
+
+	</hooks>
+</extension>
