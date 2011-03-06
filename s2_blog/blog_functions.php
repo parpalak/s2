@@ -779,10 +779,21 @@ function s2_blog_navigation ($cur_url)
 			$s2_blog_navigation['favorite'] = '<a href="'.BLOG_BASE.urlencode(S2_FAVORITE_URL).'/">'.$lang_s2_blog['Nav favorite'].'</a>';
 
 		$query = array(
-			'SELECT'	=> 'name, url',
-			'FROM'		=> 'tags',
-			'WHERE'		=> 's2_blog_important = 1',
-			'ORDER BY'	=> 'name'
+			'SELECT'	=> 't.name, t.url, count(t.tag_id)',
+			'FROM'		=> 'tags AS t',
+			'JOINS'		=> array(
+				array(
+					'INNER JOIN'	=> 's2_blog_post_tag AS pt',
+					'ON'			=> 't.tag_id = pt.tag_id'
+				),
+				array(
+					'INNER JOIN'	=> 's2_blog_posts AS p',
+					'ON'			=> 'p.id = pt.post_id'
+				)
+			),
+			'WHERE'		=> 't.s2_blog_important = 1 AND p.published = 1',
+			'GROUP BY'	=> 't.tag_id',
+			'ORDER BY'	=> '2 DESC',
 		);
 		($hook = s2_hook('fn_s2_blog_navigation_pre_get_tags_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
