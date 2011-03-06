@@ -10,7 +10,7 @@
 function s2_latex_image ($matches)
 {
 	global $ext_info;
-	$formula = $matches[1];
+	$formula = str_replace(array('&nbsp;', '&lt;', '&gt;', '&amp;'), array(' ', '<', '>', '&'), $matches[1]);
 	return '<img class="s2_latex" border="0" style="vertical-align: middle;" src="'.S2_BASE_URL.'/_extensions/s2_latex/latex.php?type=gif&amp;latex='.rawurlencode($formula).'" alt="'.$formula.'" />';
 }
 
