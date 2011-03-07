@@ -7,6 +7,7 @@
  * @package s2_latex
  */
 
+
 define('S2_ROOT', '../../');
 require(S2_ROOT.'_include/common.php');
 

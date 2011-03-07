@@ -233,12 +233,14 @@ var LatexIT = (function ()
 			for (var i = aeItem.length; i-- ;)
 			{
 				if (latexmode)
-				{
 					LatexIT.process_item(aeItem[i]);
-				}
-				else if (aeItem[i].getAttribute("lang") == "latex" || aeItem[i].getAttribute("xml:lang") == "latex")
+				else
 				{
-					aeItem[i].innerHTML = LatexIT.pre(aeItem[i].innerHTML);
+					try
+					{
+						if (aeItem[i].getAttribute("lang") == "latex" || aeItem[i].getAttribute("xml:lang") == "latex")
+							aeItem[i].innerHTML = LatexIT.pre(aeItem[i].innerHTML);
+					catch (e) {}
 				}
 			} 
 		},
