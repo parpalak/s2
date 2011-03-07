@@ -182,7 +182,7 @@ function s2_get_template ($template_id, $path = false)
 		{
 			if ($url == $request_uri)
 				return '<span>'.$text.'</span>';
-			elseif (strpos($request_uri, $url) === 0)
+			elseif ($url && strpos($request_uri, $url) === 0)
 				return '<a class="current" href="'.$url.'">'.$text.'</a>';
 			else
 				return '<a href="'.$url.'">'.$text.'</a>';
