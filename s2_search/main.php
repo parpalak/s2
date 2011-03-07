@@ -25,7 +25,7 @@ ob_start();
 			<input type="submit" name="search" value="<?php echo $lang_s2_search['Search button']; ?>" />
 		</div>
 		<div class="wrap">
-			<input type="text" name="q" value="<?php echo $s2_search_query; ?>" />
+			<input id="s2_search_input_ext" type="text" name="q" value="<?php echo $s2_search_query; ?>" />
 		</div>
 	</form>
 <?php

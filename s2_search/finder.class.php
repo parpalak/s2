@@ -860,6 +860,35 @@ if (defined('DEBUG'))
 		}
 		else
 			echo '<p>'.$lang_s2_search['Not found'].'</p>';
+	}
 
+	public static function find_autosearch ($search_string)
+	{
+		self::read_index();
+
+		$output = array();
+		foreach (self::$table_of_contents as $chapter => $chapter_info)
+		{
+			if (strpos(utf8_strtolower($chapter_info['title']), utf8_strtolower($search_string)) !== false)
+			{
+				$output[] = '<a href="'.self::$table_of_contents[$chapter]['url'].'">'.
+					preg_replace('#('.preg_quote($search_string, '#').')#ui', '<em>\\1</em>', self::$table_of_contents[$chapter]['title']).'</a>';
+			}
+		}
+		echo implode('', $output);
+		return;
+
+		$results = self::find($search_string);
+		$item_num = count($results);
+		if ($item_num)
+		{
+			$output = array();
+			foreach ($results as $chapter => $weight)
+			{
+				$output[] = '<a href="'.self::$table_of_contents[$chapter]['url'].'">'.
+					self::$table_of_contents[$chapter]['title'].'</a>';
+			}
+			echo implode('', $output);
+		}
 	}
 }

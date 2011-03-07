@@ -5,6 +5,9 @@ $lang_s2_search = array(
 'Search'					=> 'Поиск',
 'Search button'				=> 'Искать',
 
+'Quick search'				=> 'Быстрый поиск',
+'Quick search label'		=> 'Начинать поиск по заголовкам во время набора.',
+
 'Found'						=> 'Найдено страниц: %d',
 'Not found'					=> 'Ничего не найдено.',
 
