@@ -76,6 +76,7 @@
 			{
 				location.href = new_url;
 			}, 0);
+			search_input.form.action = '';
 			hideResults();
 			stop_event = true;
 		}
@@ -227,6 +228,8 @@
 				hideResults();
 				return false;
 			}
+			if (!search_input.form.action)
+				return false;
 			return true;
 		};
 		search_input.setAttribute('autocomplete', 'off');
