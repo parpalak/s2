@@ -240,6 +240,7 @@ var LatexIT = (function ()
 					{
 						if (aeItem[i].getAttribute("lang") == "latex" || aeItem[i].getAttribute("xml:lang") == "latex")
 							aeItem[i].innerHTML = LatexIT.pre(aeItem[i].innerHTML);
+					}
 					catch (e) {}
 				}
 			} 
