@@ -34,14 +34,13 @@
 
 	function doSearch (str)
 	{
+		http_request.open('GET', s2_search_url + '/ajax.php?q=' + encodeURIComponent(str), true);
 		http_request.onreadystatechange = function ()
 		{
 			if (http_request.readyState == 4 && http_request.status == 200)
 				displayResults(http_request.responseText);
 		};
-		http_request.open('POST', s2_search_url + '/ajax.php?q=' + encodeURIComponent(str), true);
 		http_request.send(null);
-
 		last_search = str;
 	}
 
@@ -134,17 +133,18 @@
 
  		if (stop_event)
 		{
-			if (window.event)
+ 			if (window.event)
 			{
 				window.event.cancelBubble = true;
 				window.event.returnValue = false;
 			}
-			if (e.stopPropagation)
+			try
 			{
 				e.stopPropagation();
 				e.preventDefault();
 			}
-			return false;
+			catch (error) {}
+ 			return false;
 		}
 	}
 
@@ -189,6 +189,10 @@
 
 	function init ()
 	{
+		// We have nothing to do without Ajas support
+		if (!http_request)
+			return;
+
 		// Search field events
 		search_input = document.getElementById('s2_search_input');
 		if (!search_input)
@@ -212,6 +216,18 @@
 		search_input.onclick = function (e)
 		{
 			clearTimeout(blur_timer);
+		};
+		search_input.form.onsubmit = function (e)
+		{
+			if (eCurItem)
+			{
+				// IE <= 7 fixes
+				var new_url = eCurItem.href;
+				location.href = new_url;
+				hideResults();
+				return false;
+			}
+			return true;
 		};
 		search_input.setAttribute('autocomplete', 'off');
 
