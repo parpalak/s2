@@ -479,9 +479,10 @@ ul .but_panel .delete,
 		padding: 0.25em 0.5em;
 		}
 
-.tagswitcher {
+#keytable .tagswitcher {
 	position: relative;
 	width: 16px;
+	overflow: hidden;
 	}
 	.tagswitcher img {
 		background: url(../i/tag.gif) -4px 50% no-repeat #ccc;
@@ -516,7 +517,7 @@ ul .but_panel .delete,
 			background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
 			background: url(../i/tag.gif) -4px 50% no-repeat, -moz-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) -4px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
-			border: 1px solid #7da2ce;
+			border-color: #7da2ce;
 			}
 		.tagswitcher img.closed:hover{
 			background: url(../i/tag.gif) 6px 50% no-repeat #d2e5fc;
