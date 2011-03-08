@@ -14,10 +14,11 @@ require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
 
 ($hook = s2_hook('cmnt_start')) ? eval($hook) : null;
 
+header('X-Powered-By: S2/'.S2_VERSION);
+
 if (isset($_GET['go']))
 {
 	// Outputs "comment saved" message (used if the premoderation mode is enabled)
-	header('X-Powered-By: S2/'.S2_VERSION);
 	header('Content-Type: text/html; charset=utf-8');
 
 	$template = s2_get_service_template();
@@ -40,7 +41,6 @@ if (isset($_GET['go']))
 
 if (isset($_GET['unsubscribe']))
 {
-	header('X-Powered-By: S2/'.S2_VERSION);
 	header('Content-Type: text/html; charset=utf-8');
 
 	if (isset($_GET['id']) && isset($_GET['mail']))
@@ -150,7 +150,6 @@ $id = (int) $_POST[s2_field_name('id')];
 if (isset($_POST['preview']))
 {
 	// Handling "Preview" button
-	header('X-Powered-By: S2/'.S2_VERSION);
 	header('Content-Type: text/html; charset=utf-8');
 
 	$template = s2_get_service_template();
@@ -201,7 +200,6 @@ else
 
 if (!empty($errors))
 {
-	header('X-Powered-By: S2/'.S2_VERSION);
 	header('Content-Type: text/html; charset=utf-8');
 
 	$template = s2_get_service_template();
