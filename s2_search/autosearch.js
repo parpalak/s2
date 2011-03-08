@@ -258,7 +258,7 @@
 		// Add extension styles
 		var head = document.getElementsByTagName('head')[0],
 			style = document.createElement('style'),
-			rules = '#s2_search_tip { display: block; position: absolute; background: #fff; border: 1px solid #ccc; font-size: 0.85em; max-height: 25em; overflow: auto; overflow-x: hidden; -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); } #s2_search_tip a {display: block; padding: 2px; width: auto; outline: none;} #s2_search_tip a:hover {background: #ffd;} #s2_search_tip a.current {padding: 1px; border: 1px dotted #000;} #s2_search_tip em {background: #f2f2cc; text-decoration: inherit;}';
+			rules = '#s2_search_tip { display: block; position: absolute; background: #fff; border: 1px solid #ccc; font-size: 0.85em; max-height: 25em; overflow: auto; overflow-x: hidden; -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); } #s2_search_tip a {display: block; padding: 2px; width: auto; outline: none;} #s2_search_tip a:hover {background: #ffd;} #s2_search_tip a.current {padding: 1px; border: 1px dotted #000;} #s2_search_tip em {background: #f2f2cc; text-decoration: inherit; font-style: normal; }';
 
 		style.type = 'text/css';
 		if (style.styleSheet)
