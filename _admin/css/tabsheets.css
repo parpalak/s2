@@ -33,7 +33,6 @@
 	border-color: #fff #aaa #aaa #f2f2f2;
 	background: url('../i/tab_icons.png') #ddd no-repeat;
 	color: #333;
-	text-shadow: 0 1px 0 #fff;
 	-webkit-border-top-left-radius: 4px;
 	-webkit-border-top-right-radius: 4px;
 	-moz-border-radius-topleft: 4px;
@@ -51,6 +50,7 @@
 	top: 7px;
 	z-index: 5;
 	color: #000;
+	text-shadow: 0 1px 0 #fff;
 	-moz-box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
 	-webkit-box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
 	box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
