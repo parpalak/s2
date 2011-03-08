@@ -11,6 +11,8 @@
 define('S2_ROOT', '../../');
 require(S2_ROOT.'_include/common.php');
 
+header('X-Powered-By: S2/'.S2_VERSION);
+
 $formula = isset($_GET['latex']) ? trim($_GET['latex']) : '';
 $format = (isset($_GET['type']) && $_GET['type'] == 'svg' ) ? 'svg' : 'gif';
 
