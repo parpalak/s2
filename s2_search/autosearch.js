@@ -163,9 +163,9 @@
 		search_tips.style.display = 'block';
 
 		var mc = getBounds(search_input);
-		search_tips.style.top = document.documentElement.scrollTop + mc.bottom + 'px';
-		search_tips.style.left = mc.left + 'px';
-		search_tips.style.width = mc.width - 2 + 'px';
+		search_tips.style.top = document.documentElement.scrollTop + mc.bottom + shift_y + 'px';
+		search_tips.style.left = mc.left + shift_x + 'px';
+		search_tips.style.width = mc.width - 2 + delta_x + 'px';
 
 		search_tips.scrollTop = 0;
 	}
@@ -186,7 +186,7 @@
 		}, 20);
 	}
 
-	var search_input, search_timer, blur_timer;
+	var search_input, search_timer, blur_timer, shift_x = 0, shift_y = 0, delta_x = 0;
 
 	function init ()
 	{
@@ -194,13 +194,22 @@
 		if (!http_request)
 			return;
 
-		// Search field events
 		search_input = document.getElementById('s2_search_input');
 		if (!search_input)
 			search_input = document.getElementById('s2_search_input_ext');
 		if (!search_input)
 			return;
 
+		var position_info = search_input.getAttribute('data-s2_search-pos');
+		if (position_info)
+		{
+			position_info = position_info.split(/\s*,\s*/);
+			shift_x = position_info[0] ? parseInt(position_info[0]) : shift_x;
+			shift_y = position_info[1] ? parseInt(position_info[1]) : shift_y;
+			delta_x = position_info[2] ? parseInt(position_info[2]) : delta_x;
+		}
+
+		// Search field events
 		search_input.onkeydown = keyDown;
 		search_input.onkeyup = function (e)
 		{
