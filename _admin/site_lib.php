@@ -836,7 +836,7 @@ function s2_output_tag_form ($tag, $m_time)
 
 ?>
 		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
-			<textarea id="kText" name="tag[description]"><?php echo s2_htmlencode($tag['description'])?></textarea>
+			<textarea id="tagtext" name="tag[description]"><?php echo s2_htmlencode($tag['description'])?></textarea>
 		</div>
 	</div>
 </form>

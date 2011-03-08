@@ -9,7 +9,7 @@
 .tagswitcher,
 #arttext,
 #commtext,
-#kText,
+#tagtext,
 .fields input,
 div.input.text input,
 .r-float input[type="text"],
@@ -737,7 +737,7 @@ div.input.text input,
 .fields input[type="text"],
 #arttext,
 #commtext,
-#kText,
+#tagtext,
 #search_field {
 	width: 100%;
 	margin: 0;
@@ -752,7 +752,7 @@ div.input.text input,
 
 #arttext,
 #commtext,
-#kText {
+#tagtext {
 	height: 100%;
 	line-height: 1.2;
 	padding: 0.25em;
