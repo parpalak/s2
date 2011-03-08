@@ -641,7 +641,7 @@ function error()
 	{
 		// if no HTTP responce code is set we send 503
 		header('HTTP/1.1 503 Service Temporarily Unavailable');
-		header('Content-type: text/html; charset=utf-8');
+		header('Content-Type: text/html; charset=utf-8');
 	}
 
 /*
