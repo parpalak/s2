@@ -38,9 +38,9 @@ body {
 
 .tabsheets,
 .text_wrapper,
-.tabsheets dd .reducer form[name="tagform"],
-.tabsheets dd .reducer form[name="artform"],
-.tabsheets dd .reducer form[name="commform"],
+form[name="tagform"],
+form[name="artform"],
+form[name="commform"],
 .r-float,
 .l-float {
 	height: 100%;
@@ -48,7 +48,7 @@ body {
 
 .tags_list,
 #tree,
-#keytable div {
+#keytable > div {
 	overflow: auto;
 	height: 100%;
 	}
@@ -886,43 +886,43 @@ legend {
 	text-shadow: 0px 1px 0 #fff;
 	}
 
-div.input {
+.input {
 	width: auto;
 	margin-left: 20em;
 	margin-right: 0.5em;
 	position: relative;
 	padding: 0.416em 0;
 	}
-	div.input input,
-	div.input.select select {
+	.input input,
+	.input.select select {
 		position: absolute;
 		top: 0.25em;
 		left: 0;
 		}
-	div.input.select {
+	.input.select {
 		min-height: 1.5em;
 		}
-	div.input.select select {
+	.input.select select {
 		margin: 0;
 		font: 1em Arial, Helvetica, sans-serif;
 		}
-	div.input.checkbox input {
+	.input.checkbox input {
 		margin: 0.166em 0;
 		}
-	div.input.text label {
+	.input.text label {
 		padding: 0;
 		}
-	div.input.checkbox label {
+	.input.checkbox label {
 		margin-left: 1.583em;
 		}
-		div.input label small {
+		.input label small {
 			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 			color: #666;
 			margin: 1.636em 0 0 0.454em;
 			display: block;
 			}
-	div.input label span,
-	div.input .subhead {
+	.input label span,
+	.input .subhead {
 		display: block;
 		float: left;
 		text-align: right;
@@ -932,7 +932,7 @@ div.input {
 		font-weight: bold;
 		color: #555;
 		}
-		div.input label span em {
+		.input label span em {
 			color: #f00;
 			position: absolute;
 			right: 0;
