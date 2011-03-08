@@ -15,8 +15,14 @@ table.sort .buttons .notfavorite {
 .tags_list span {
 	color: #fff;
 	font-weight: bold;
-	background: #f00;
+	background: #093;
 	}
+	.tags_list span:not(:empty) {
+		-moz-border-radius: 4px;
+		-webkit-border-radius: 4px;
+		border-radius: 4px;
+		padding: 0 1px;
+		}
 
 .bitbtn.add_post {
 	background-image: url(i/icons.png);
