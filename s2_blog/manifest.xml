@@ -702,6 +702,7 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 		<hook id="cmnt_start"><![CDATA[
 if (isset($_GET['blog_unsubscribe']))
 {
+	header('X-Powered-By: S2/'.S2_VERSION);
 	header('Content-Type: text/html; charset=utf-8');
 
 	if (isset($_GET['id']) && isset($_GET['mail']))
