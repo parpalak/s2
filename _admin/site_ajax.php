@@ -19,6 +19,7 @@ require 'site_lib.php';
 
 s2_no_cache();
 
+header('X-Powered-By: S2/'.S2_VERSION);
 header('Content-Type: text/html; charset=utf-8');
 
 ob_start();

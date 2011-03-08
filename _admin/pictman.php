@@ -16,6 +16,7 @@ require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';
 require 'pict_lib.php';
 
+header('X-Powered-By: S2/'.S2_VERSION);
 header('Content-Type: text/html; charset=utf-8');
 
 s2_no_cache();

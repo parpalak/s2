@@ -90,6 +90,7 @@ if (isset($_POST['generate_config']))
 	exit;
 }
 
+header('X-Powered-By: S2/'.S2_VERSION);
 header('Content-Type: text/html; charset=utf-8');
 
 if (!isset($_POST['form_sent']))

@@ -19,6 +19,7 @@ require 'comments.php';
 ($hook = s2_hook('ai_start')) ? eval($hook) : null;
 
 s2_no_cache();
+header('X-Powered-By: S2/'.S2_VERSION);
 header('Content-Type: text/html; charset=utf-8');
 
 s2_cleanup_expired();
