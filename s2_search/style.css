@@ -3,19 +3,24 @@
 	padding: 1em;
 	background: #eee;
 	margin: 1em 0;
+	zoom: 1;
 	}
 
-.search-results form .button {
+.search-results .button {
 	float: right;
 	}
 
-.search-results form .wrap {
+.search-results .wrap {
 	overflow: hidden;
 	padding-right: 1em;
+	zoom: 1;
 	}
-	.search-results form .wrap input {
+	.search-results .wrap input {
 		width: 100%;
 		}
+		* html .search-results .wrap input {
+			position: absolute;
+			}
 
 .search-results a.title {
 	font-size: 1.2em;
