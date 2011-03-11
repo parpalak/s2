@@ -501,7 +501,7 @@ function s2_parse_page_url ($request_uri)
 	$page['meta_description'] = $row['meta_desc'];
 	$page['title'] = s2_htmlencode($row['title']);
 	$page['date'] = !$page['children_exist'] ? $row['create_time'] : '';
-	$page['commented'] = !$page['children_exist'] ? $row['commented'] : 0;
+	$page['commented'] = $row['commented'];
 	$page['children_preview'] = $row['children_preview'];
 	$page['id'] = $id;
 
