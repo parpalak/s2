@@ -157,7 +157,7 @@ function s2_get_files ($dir)
 
 			($hook = s2_hook('fn_get_files_pre_view_merge')) ? eval($hook) : null;
 			if ($display_preview)
-				$preview = '<img src="pict_ajax.php?action=preview&file='.$dir.'/'.$item.'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.$h.' alt="" />';
+				$preview = '<img src="pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.$h.' alt="" />';
 		}
 
 		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.$dir.'/'.$item.'\');" alt="'.$lang_pictures['Delete'].'" />';
