@@ -645,6 +645,16 @@ function UploadSubmit (eForm)
 	was_upload = true;
 }
 
+function UploadChange (eItem)
+{
+	var eForm = eItem.form;
+	setTimeout(function()
+	{
+		UploadSubmit(eForm);
+		eForm.submit();
+	}, 0);
+}
+
 function FileUploaded ()
 {
 	if (!was_upload)
@@ -658,7 +668,7 @@ function FileUploaded ()
 		if (Response.status == '200')
 		{
 			eFilePanel.innerHTML = Response.text;
-			document.getElementById('file_upload_input').innerHTML = '<input name="pictures[]" multiple="true" min="1" max="999" size="20" type="file" />';
+			document.getElementById('file_upload_input').innerHTML = document.getElementById('file_upload_input').innerHTML;
 		}
 	}
 	else
