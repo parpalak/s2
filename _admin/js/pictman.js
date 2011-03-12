@@ -578,7 +578,10 @@ function DeleteFile (sName)
 
 	var Response = GETSyncRequest(sUrl + "action=delete_file&path=" + encodeURIComponent(sName));
 	if (Response.status == '200')
+	{
 		eFilePanel.innerHTML = Response.text;
+		eFileInfo.innerHTML = '';
+	}
 }
 
 function CreateSubFolder ()
