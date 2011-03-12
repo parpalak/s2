@@ -48,12 +48,12 @@ var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
 <body>
 	<div id="tree_div">
 		<div class="treetree">
-			<ul>
-				<li class="ExpandOpen IsLast"><div></div><div><span path=""><?php echo $lang_pictures['Pictures'];?></span></div><ul><?php echo s2_walk_dir(''); ?></ul></li>
-			</ul>
 			<div id="fupload">
 				<?php s2_upload_form(); ?>
 			</div>
+			<ul>
+				<li class="ExpandOpen IsLast"><div></div><div><span path=""><?php echo $lang_pictures['Pictures'];?></span></div><ul><?php echo s2_walk_dir(''); ?></ul></li>
+			</ul>
 			<div id="finfo"></div>
 		</div>
 		<div id="file-wrap">
