@@ -630,6 +630,14 @@ function Init ()
 		document.addEventListener("mouseout", HideTip, false);
 		document.getElementById('tree_div').addEventListener('mousedown', MouseDown, false);
 	}
+
+	var aeItems = document.getElementById('tree_div').getElementsByTagName('span');
+	for (var i = aeItems.length; i-- ;)
+		if (typeof(aeItems[i].getAttribute('path')) == 'string' && aeItems[i].getAttribute('path') == '')
+		{
+			HighlightItem(aeItems[i]);
+			break;
+		}
 }
 
 function SetWait (bWait)
