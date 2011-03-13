@@ -10,3 +10,7 @@ div.input.checkbox input,
 .bitbtn {
 	min-width: 96px;
 	}
+
+	.toolbar img {
+		border: #eee solid 1px;
+		}
