@@ -203,6 +203,16 @@ var Search = (function ()
 	{
 		init: function ()
 		{
+			var DoSearch = function ()
+			{
+				GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (xmlhttp) {
+					document.getElementById('tree').innerHTML = '<ul>' + xmlhttp.responseText + '</ul>';
+					SetWait(false);
+				});
+			}
+
+			var search_timer;
+
 			eInput = document.getElementById('search_field');
 
 			// Search field help message.
@@ -223,17 +233,19 @@ var Search = (function ()
 					eInput.value = '';
 				}
 			}
-
-			var DoSearch = function ()
+			eInput.oninput = function ()
 			{
-				GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (xmlhttp) {
-					document.getElementById('tree').innerHTML = '<ul>' + xmlhttp.responseText + '</ul>';
-					SetWait(false);
-				});
+				setTimeout(function ()
+				{
+					if (search_string == eInput.value || eInput.className == 'inactive')
+						return;
+
+					search_string = eInput.value;
+					SetWait(true);
+					clearTimeout(search_timer);
+					search_timer = setTimeout(DoSearch, 250);
+				}, 0);
 			}
-
-			var search_timer;
-
 			var KeyDown = function (e)
 			{
 				e = e || window.event;
@@ -246,7 +258,7 @@ var Search = (function ()
 					search_string = eInput.value;
 					DoSearch();
 				}
-				else 
+				else
 					// We have to wait a little for eInput.value to change
 					setTimeout(function ()
 					{
