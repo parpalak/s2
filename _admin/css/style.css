@@ -260,7 +260,7 @@ hr {
 	}
 	.treetree li {
 		list-style-type: none;
-		background-image : url(../i/tree_icons.gif);
+		background-image : url(../i/tree_icons.png);
 		background-position: -72px 0;
 		background-repeat : repeat-y;
 		margin-left: 18px;
@@ -291,7 +291,7 @@ hr {
 				height: 18px;
 				float: left;
 				margin-left: 0;
-				background-image : url(../i/tree_icons.gif);
+				background-image : url(../i/tree_icons.png);
 				background-position: -36px 0;
 				background-repeat : no-repeat;
 				}
