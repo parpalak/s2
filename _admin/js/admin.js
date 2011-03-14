@@ -212,8 +212,22 @@ var Search = (function ()
 			}
 
 			var search_timer;
-
 			eInput = document.getElementById('search_field');
+
+			function NewSearch ()
+			{
+				// We have to wait a while for eInput.value to change
+				setTimeout(function ()
+				{
+					if (search_string == eInput.value || eInput.className == 'inactive')
+						return;
+
+					search_string = eInput.value;
+					SetWait(true);
+					clearTimeout(search_timer);
+					search_timer = setTimeout(DoSearch, 250);
+				}, 0);
+			}
 
 			// Search field help message.
 			// It appears when the field is empty.
@@ -233,19 +247,8 @@ var Search = (function ()
 					eInput.value = '';
 				}
 			}
-			eInput.oninput = function ()
-			{
-				setTimeout(function ()
-				{
-					if (search_string == eInput.value || eInput.className == 'inactive')
-						return;
+			eInput.oninput = NewSearch;
 
-					search_string = eInput.value;
-					SetWait(true);
-					clearTimeout(search_timer);
-					search_timer = setTimeout(DoSearch, 250);
-				}, 0);
-			}
 			var KeyDown = function (e)
 			{
 				e = e || window.event;
@@ -260,16 +263,7 @@ var Search = (function ()
 				}
 				else
 					// We have to wait a little for eInput.value to change
-					setTimeout(function ()
-					{
-						if (search_string == eInput.value || eInput.className == 'inactive')
-							return;
-
-						search_string = eInput.value;
-						SetWait(true);
-						clearTimeout(search_timer);
-						search_timer = setTimeout(DoSearch, 250);
-					}, 0);
+					NewSearch();
 			}
 			if (isIE || isSafari)
 				eInput.onkeydown = KeyDown;
