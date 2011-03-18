@@ -875,20 +875,7 @@ if (defined('DEBUG'))
 					preg_replace('#('.preg_quote($search_string, '#').')#ui', '<em>\\1</em>', self::$table_of_contents[$chapter]['title']).'</a>';
 			}
 		}
-		echo implode('', $output);
-		return;
 
-		$results = self::find($search_string);
-		$item_num = count($results);
-		if ($item_num)
-		{
-			$output = array();
-			foreach ($results as $chapter => $weight)
-			{
-				$output[] = '<a href="'.self::$table_of_contents[$chapter]['url'].'">'.
-					self::$table_of_contents[$chapter]['title'].'</a>';
-			}
-			echo implode('', $output);
-		}
+		echo implode('', $output);
 	}
 }
