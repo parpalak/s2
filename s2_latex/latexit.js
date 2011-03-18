@@ -139,11 +139,23 @@ String.prototype.split = function (separator, limit)
 
 var LatexIT = (function ()
 {
-	var ext = 'gif',
-		isFF = navigator.userAgent.indexOf("Firefox") != -1;
+	var verOffset = navigator.userAgent.indexOf('Firefox'),
+		ext = 'gif',
+		oldFF = false;
+
+	if (verOffset != -1)
+	{
+		var i, fullVersion = navigator.userAgent.substring(verOffset + 8);
+		if ((i = fullVersion.indexOf(';')) != -1)
+			fullVersion = fullVersion.substring(0, i);
+		if ((i = fullVersion.indexOf(' ')) != -1)
+			fullVersion = fullVersion.substring(0, i);
+		if (parseInt('' + fullVersion) < 4)
+			oldFF = true;
+	}
 
 	// FF 3 doesn't support svg in <img> and mistakes with <object> size
-	if (!isFF && document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1"))
+	if (!oldFF && document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1"))
 		ext = 'svg';
 
 	// Add extension styles
@@ -160,7 +172,6 @@ var LatexIT = (function ()
 
 	return ({
 		mode : ext,
-		isFirefox : isFF,
 
 		pre : function(txt)
 		{
