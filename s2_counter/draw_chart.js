@@ -19,6 +19,7 @@ var s2_counter = {
 		{
 			s2_counter.hits = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
 			s2_counter.hits.addVariable("path", "../_extensions/s2_counter/");
+			s2_counter.hits.addParam("wmode", "opaque");
 			var settings_file = "../_extensions/s2_counter/traffic.xml?" + Math.random();
 
 			(hook = hooks['fn_s2_counter_draw_chart_pre_hits']) ? eval(hook) : null;
@@ -31,6 +32,7 @@ var s2_counter = {
 		{
 			s2_counter.rss = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
 			s2_counter.rss.addVariable("path", "../_extensions/s2_counter/");
+			s2_counter.rss.addParam("wmode", "opaque");
 			settings_file = "../_extensions/s2_counter/rss.xml?" + Math.random();
 
 			(hook = hooks['fn_s2_counter_draw_chart_pre_rss']) ? eval(hook) : null;
