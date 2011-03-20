@@ -78,7 +78,8 @@ function s2_wysiwyg_filebrowser_callback (field_name, url, type, win)
 
 function ReturnImage (s, w, h)
 {
-	s2_wysiwyg_wFileBrowser.close();
+	if (s2_wysiwyg_wFileBrowser)
+		s2_wysiwyg_wFileBrowser.close();
 
 	if (!s2_wysiwyg_wImage || s2_wysiwyg_wImage.closed)
 		return;
