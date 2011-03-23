@@ -163,7 +163,7 @@ function s2_attachment_save_thumbnail ($filename, $save_to, $max_size = 100)
 //
 // Processes the placeholder
 //
-function s2_attachment_placeholder_content ($id)
+function s2_attachment_placeholder_content ($id, $max_picture_num)
 {
 	global $s2_db, $lang_s2_attachment;
 
@@ -176,13 +176,16 @@ function s2_attachment_placeholder_content ($id)
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$list_files = $list_pictures = '';
+	$picture_num = 0;
 	while ($row = $s2_db->fetch_assoc($result))
 	{
 		if ($row['is_picture'])
 		{
-			$list_pictures .= '<a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/'.$row['filename'].'" class="highslide" onclick="return hs.expand(this)"><img src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/micro/'.$row['filename'].'.png" alt="" /></a>';
+			$picture_num++;
+			$hidden_style = $max_picture_num && $max_picture_num < $picture_num ? ' style="display: none;"' : '';
+			$list_pictures .= '<a'.$hidden_style.' href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/'.$row['filename'].'" class="highslide" onclick="return hs.expand(this)"><img src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/micro/'.$row['filename'].'.png" alt="" /></a>';
 			if ($row['name'])
-				$list_pictures .= '<div class="highslide-caption">'.s2_htmlencode($row['name']).'</div>';
+				$list_pictures .= '<div'.$hidden_style.' class="highslide-caption">'.s2_htmlencode($row['name']).'</div>';
 		}
 		else
 		{

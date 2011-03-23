@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_attachment</id>
 	<title>Attachments</title>
-	<version>1.0a</version>
+	<version>1.0a1</version>
 	<description>Attaches files to every page.</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0a1</minversion>
-	<maxtestedon>1.0a1</maxtestedon>
+	<maxtestedon>1.0a3</maxtestedon>
 	<note type="uninstall" timing="pre">Warning! All the attached files will be deleted during the uninstall process. It is strongly recommended you to disable 'Attachments' extension instead or to upgrade it without uninstalling.</note>
 
 	<install><![CDATA[
@@ -112,7 +112,9 @@ require $ext_info['path'].'/ajax.php';
 		]]></hook>
 
 		<hook id="fn_s2_parse_page_url_end"><![CDATA[
-if (strpos($template, '<!-- s2_attachment_files -->') !== false || strpos($template, '<!-- s2_attachment_pictures -->') !== false)
+global $s2_attachment_matches;
+$s2_attachment_matches = array();
+if (strpos($template, '<!-- s2_attachment_files -->') !== false || preg_match('#<!-- s2_attachment_pictures(?:\\s*\\((.*?)\\)){0,1}\\s*-->#', $template, $s2_attachment_matches))
 {
 	global $lang_s2_attachment;
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
@@ -120,13 +122,14 @@ if (strpos($template, '<!-- s2_attachment_files -->') !== false || strpos($templ
 	if (!defined('S2_ATTACHMENT_FUNCTIONS_LOADED'))
 		require $ext_info['path'].'/functions.php';
 
-	list($page['s2_attachment_files'], $page['s2_attachment_pictures']) = s2_attachment_placeholder_content($id);
+	list($page['s2_attachment_files'], $page['s2_attachment_pictures']) = s2_attachment_placeholder_content($id, isset($s2_attachment_matches[1]) ? (int) $s2_attachment_matches[1] : 0);
 }
 		]]></hook>
 
 		<hook id="idx_template_pre_replace"><![CDATA[
 $replace['<!-- s2_attachment_files -->'] = !empty($page['s2_attachment_files']) ? $page['s2_attachment_files'] : '';
-$replace['<!-- s2_attachment_pictures -->'] = !empty($page['s2_attachment_pictures']) ? $page['s2_attachment_pictures'] : '';
+if (isset($s2_attachment_matches[0]))
+	$replace[$s2_attachment_matches[0]] = !empty($page['s2_attachment_pictures']) ? $page['s2_attachment_pictures'] : '';
 
 if (!empty($page['s2_attachment_pictures']))
 {
