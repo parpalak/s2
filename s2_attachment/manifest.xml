@@ -113,8 +113,14 @@ require $ext_info['path'].'/ajax.php';
 
 		<hook id="fn_s2_parse_page_url_end"><![CDATA[
 global $s2_attachment_matches;
+
 $s2_attachment_matches = array();
-if (strpos($template, '<!-- s2_attachment_files -->') !== false || preg_match('#<!-- s2_attachment_pictures(?:\\s*\\((.*?)\\)){0,1}\\s*-->#', $template, $s2_attachment_matches))
+$s2_attachment_is_pictures = preg_match_all('#<!-- s2_attachment_(?:pictures|gallery)(?:\\s*\\((.*?)\\)){0,1}\\s*-->#', $template, $s2_attachment_matches);
+$s2_attachment_pict_placeholders = array();
+foreach ($s2_attachment_matches[0] as $s2_attachment_index => $s2_attachment_placeholder)
+	$s2_attachment_pict_placeholders[$s2_attachment_placeholder] = (int) $s2_attachment_matches[1][$s2_attachment_index];
+
+if (strpos($template, '<!-- s2_attachment_files -->') !== false || $s2_attachment_is_pictures)
 {
 	global $lang_s2_attachment;
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
@@ -122,22 +128,23 @@ if (strpos($template, '<!-- s2_attachment_files -->') !== false || preg_match('#
 	if (!defined('S2_ATTACHMENT_FUNCTIONS_LOADED'))
 		require $ext_info['path'].'/functions.php';
 
-	list($page['s2_attachment_files'], $page['s2_attachment_pictures']) = s2_attachment_placeholder_content($id, isset($s2_attachment_matches[1]) ? (int) $s2_attachment_matches[1] : 0);
+	list($page['s2_attachment_files'], $page['s2_attachment_pictures']) = s2_attachment_placeholder_content($id, $s2_attachment_pict_placeholders);
 }
 		]]></hook>
 
 		<hook id="idx_template_pre_replace"><![CDATA[
 $replace['<!-- s2_attachment_files -->'] = !empty($page['s2_attachment_files']) ? $page['s2_attachment_files'] : '';
-if (isset($s2_attachment_matches[0]))
-	$replace[$s2_attachment_matches[0]] = !empty($page['s2_attachment_pictures']) ? $page['s2_attachment_pictures'] : '';
+if (isset($page['s2_attachment_pictures']))
+	foreach ($page['s2_attachment_pictures'] as $s2_attachment_placeholder => $s2_attachment_content)
+		$replace[$s2_attachment_placeholder] = $s2_attachment_content;
 
 if (!empty($page['s2_attachment_pictures']))
 {
 	ob_start();
 
 ?>
-<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/highslide/highslide-with-gallery.min.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo $ext_info['url']; ?>/highslide/highslide.css" />
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/highslide/highslide-with-gallery.min.js"></script>
 <script type="text/javascript">
 hs.graphicsDir = '<?php echo $ext_info['url']; ?>/highslide/graphics/';
 </script>

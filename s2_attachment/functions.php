@@ -163,7 +163,7 @@ function s2_attachment_save_thumbnail ($filename, $save_to, $max_size = 100)
 //
 // Processes the placeholder
 //
-function s2_attachment_placeholder_content ($id, $max_picture_num)
+function s2_attachment_placeholder_content ($id, $placeholder_limit)
 {
 	global $s2_db, $lang_s2_attachment;
 
@@ -175,17 +175,24 @@ function s2_attachment_placeholder_content ($id, $max_picture_num)
 	($hook = s2_hook('fn_s2_attachment_list_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$list_files = $list_pictures = '';
+	$list_files = '';
+	$list_pictures = array();
+	foreach ($placeholder_limit as $placeholder => $limit)
+		$list_pictures[$placeholder] = '';
+
 	$picture_num = 0;
 	while ($row = $s2_db->fetch_assoc($result))
 	{
 		if ($row['is_picture'])
 		{
 			$picture_num++;
-			$hidden_style = $max_picture_num && $max_picture_num < $picture_num ? ' style="display: none;"' : '';
-			$list_pictures .= '<a'.$hidden_style.' href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/'.$row['filename'].'" class="highslide" onclick="return hs.expand(this)"><img src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/micro/'.$row['filename'].'.png" alt="" /></a>';
-			if ($row['name'])
-				$list_pictures .= '<div'.$hidden_style.' class="highslide-caption">'.s2_htmlencode($row['name']).'</div>';
+			foreach ($placeholder_limit as $placeholder => $limit)
+			{
+				$hidden_style = $limit && $limit < $picture_num ? ' style="display: none;"' : '';
+				$list_pictures[$placeholder] .= '<a'.$hidden_style.' href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/'.$row['filename'].'" class="highslide" onclick="return hs.expand(this, '.(strpos($placeholder, 'gallery') !== false ? 's2_attachment_gallery' : 's2_attachment_pictures').')"><img src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/micro/'.$row['filename'].'.png" alt="" /></a>';
+				if ($row['name'])
+					$list_pictures[$placeholder] .= '<div'.$hidden_style.' class="highslide-caption">'.s2_htmlencode($row['name']).'</div>';
+			}
 		}
 		else
 		{
@@ -193,8 +200,10 @@ function s2_attachment_placeholder_content ($id, $max_picture_num)
 		}
 	}
 
-	if ($list_pictures)
-		$list_pictures = '<div class="highslide-gallery">'.$list_pictures.'</div>';
+	foreach ($list_pictures as $placeholder => $replace)
+		if ($replace)
+			$list_pictures[$placeholder] = '<div class="highslide-gallery">'.$replace.'</div>';
+
 	if ($list_files)
 		$list_files = '<div class="s2_attachment_files"><h2>'.$lang_s2_attachment['Attached files'].'</h2><ul>'.$list_files.'</ul></div>';
 
