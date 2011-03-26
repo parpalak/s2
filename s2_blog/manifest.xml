@@ -281,7 +281,7 @@ if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
 {
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
 		include $ext_info['path'].'/blog_functions.php';
-	$s2_blog_last_discussions = s2_blog_recent_discussions();
+	$s2_blog_last_discussions = s2_blog_recent_discussions($request_uri);
 	$replace['<!-- s2_blog_last_discussions -->'] = $s2_blog_last_discussions ? '<div class="header">'.$lang_s2_blog['Last discussions'].'</div>'.$s2_blog_last_discussions : '';
 }
 if (strpos($template, '<!-- s2_blog_last_post -->') !== false)

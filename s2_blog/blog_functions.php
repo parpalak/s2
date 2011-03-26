@@ -723,7 +723,7 @@ function s2_blog_recent_comments ()
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
 
-function s2_blog_recent_discussions ()
+function s2_blog_recent_discussions ($cur_url = '---')
 {
 	global $s2_db;
 
@@ -740,7 +740,7 @@ function s2_blog_recent_discussions ()
 	$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'create_time, url, title',
+		'SELECT'	=> 'create_time, url, title, c1.comment_num AS comment_num',
 		'FROM'		=> 's2_blog_posts AS p, ('.$raw_query1.') AS c1',
 		'WHERE'		=> 'c1.post_id = p.id AND p.commented = 1 AND p.published = 1',
 		'LIMIT'		=> '10',
@@ -750,8 +750,8 @@ function s2_blog_recent_discussions ()
 
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$output .= '<li><a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a></li>';
-
+		$output .= '<li title="'.$row['comment_num'].'"><a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a></li>';
+	$output = preg_replace('#<a href="'.$cur_url.'">(.*?)</a>#', '\\1', $output);
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
 
