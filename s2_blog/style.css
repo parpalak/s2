@@ -9,27 +9,35 @@ div.yc {
 		height: 14em;
 		}
 
-#content table.yc td {
+#content .yc td {
+	border: 0 none;
+	}
+#content .yc > tbody > tr > td {
 	vertical-align: top;
 	padding: 0 1em;
-	border: 0 none;
 	}
 
 table.cal {
 	margin: 1.5em 0 0 0;
 	border-collapse: collapse;
 	}
-	.cal td, .cal th, #content .cal tr td, #content .cal tr th {
+	.cal td, .cal th,
+	#content .cal td,
+	#content .cal th {
 		padding: 0;
 		width: 27px;
 		text-align: center;
 		line-height: 1.5;
 		}
+	.cal td {
+		color: #000;
+		}
  		.cal td.sun {
-			color: #e00;
+			color: #f33;
 			}
 		.cal td a {
 			display: block;
+			background: #eed;
 			}
 	.cal th {
 		font-weight: bold;
