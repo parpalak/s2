@@ -220,7 +220,10 @@
 				if (new_search.length >= 1)
 					search_timer = setTimeout(function () { doSearch(new_search); }, 250);
 				else
+				{
+					last_search = '';
 					hideResults();
+				}
 			}
 		};
 		search_input.onclick = function (e)
