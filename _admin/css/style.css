@@ -806,8 +806,11 @@ div.input.text input,
 
 .toolbar {
 	padding-bottom: 5px;
+	overflow: hidden;
 	}
 	.toolbar img {
+		display: block;
+		float: left;
 		margin: 0;
 		padding: 2px;
 		height: 16px;
@@ -825,10 +828,16 @@ div.input.text input,
 		}
 		.toolbar img:hover {
 			border-color: #fff #aaa #aaa #fff;
+			background-color: #f3f3f3;
 			}
 		.toolbar img:active:hover {
 			border-color: #aaa #fff #fff #aaa;
 			}
+	.toolbar .separator {
+		border: none;
+		background: none;
+		width: 4px;
+		}
 
 .toolbar .new { background-position: -88px -16px; }
 .toolbar .b { background-position: 2px -52px; }

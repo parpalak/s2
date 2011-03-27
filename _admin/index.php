@@ -128,7 +128,9 @@ var template = '<?php echo str_replace(array('\\', '\'', '</script>', "\n", "\r"
 				<div class="l-float no-border" style="padding-bottom: <?php echo $padding; ?>em;">
 					<div class="toolbar">
 						<img class="expand" src="i/1.gif" onclick="OpenAll(); return false;" alt="<?php echo $lang_admin['Expand']; ?>" />
+						<img class="separator" src="i/1.gif" alt="" />
 						<img class="collapse" src="i/1.gif" onclick="CloseAll(); return false;" alt="<?php echo $lang_admin['Collapse']; ?>" />
+						<img class="separator" src="i/1.gif" alt="" />
 						<img class="refresh" src="i/1.gif" onclick="RefreshTree(); return false;" alt="<?php echo $lang_admin['Refresh']; ?>" />
 						<input class="inactive" type="text" width="30" name="search" id="search_field" value="<?php echo $lang_admin['Search']?>" />
 					</div>
