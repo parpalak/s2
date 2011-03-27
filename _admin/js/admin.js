@@ -697,7 +697,7 @@ function MouseDown (e)
 		// Do not handle span child eventss
 		return;
 
-	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == 'CSS1Compat') ? 'HTML' : 'BODY')[0];
+	var oCanvas = document.getElementsByTagName('HTML')[0];
 	mouseStartX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseStartY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
@@ -713,7 +713,7 @@ function MouseDown (e)
 
 function MouseMove (e)
 {
-	var oCanvas = document.getElementsByTagName((document.compatMode && document.compatMode == 'CSS1Compat') ? 'HTML' : 'BODY')[0];
+	var oCanvas = document.getElementsByTagName('HTML')[0];
 	mouseX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
 	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
 
