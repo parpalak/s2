@@ -323,6 +323,7 @@ function renderCharMapHTML() {
 	}
 
 	html += '</tr></table></div>';
+	html = html.replace(/<tr height="20"><\/tr>/g, '');
 
 	return html;
 }
