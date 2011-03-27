@@ -72,10 +72,17 @@ var s2_wysiwyg_wFileBrowser = s2_wysiwyg_wImage = null;
 
 function s2_wysiwyg_filebrowser_callback (field_name, url, type, win)
 {
-	if (type != "image")
+	if (type != 'image')
 		return;
+
+	var eHtml = document.getElementsByTagName('HTML')[0],
+		height = eHtml.offsetHeight ? parseInt(0.8 * eHtml.offsetHeight) : 500,
+		width = eHtml.offsetWidth ? parseInt(0.8 * eHtml.offsetWidth) : 750,
+		top = eHtml.offsetHeight ? parseInt(0.1 * eHtml.offsetHeight) : 20,
+		left = eHtml.offsetWidth ? parseInt(0.1 * eHtml.offsetWidth) : 20;
+
 	s2_wysiwyg_wImage = win;
-	s2_wysiwyg_wFileBrowser = window.open(s2_wysiwyg_pict_url, 's2_wysiwyg_imagewindow', 'scrollbars=yes,toolbar=yes,width=750,height=500', 'True');
+	s2_wysiwyg_wFileBrowser = window.open(s2_wysiwyg_pict_url, 's2_wysiwyg_imagewindow', 'scrollbars=yes,toolbar=yes,top=' + top + ',left=' + left + ',width=' + width + ',height=' + height, 'True');
 }
 
 function ReturnImage (s, w, h)
