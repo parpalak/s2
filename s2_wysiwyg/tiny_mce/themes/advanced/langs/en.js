@@ -64,5 +64,7 @@ more_colors:"More colors",
 shortcuts_desc:'Accessibility Help',
 help_shortcut:'. Press ALT F10 for toolbar. Press ALT 0 for help.',
 rich_text_area:"Rich Text Area",
-toolbar:"Toolbar"
+toolbar:"Toolbar",
+
+charmap_delta_height:40
 });
