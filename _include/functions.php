@@ -178,14 +178,17 @@ function s2_get_template ($template_id, $path = false)
 		if (strpos($request_uri, '?') !== false)
 			$request_uri = substr($request_uri, 0, strpos($request_uri, '?'));
 
-		function _s2_check_link($url, $request_uri, $text)
+		if (!function_exists('_s2_check_link'))
 		{
-			if ($url == $request_uri)
-				return '<span>'.$text.'</span>';
-			elseif ($url && strpos($request_uri, $url) === 0)
-				return '<a class="current" href="'.$url.'">'.$text.'</a>';
-			else
-				return '<a href="'.$url.'">'.$text.'</a>';
+			function _s2_check_link($url, $request_uri, $text)
+			{
+				if ($url == $request_uri)
+					return '<span>'.$text.'</span>';
+				elseif ($url && strpos($request_uri, $url) === 0)
+					return '<a class="current" href="'.$url.'">'.$text.'</a>';
+				else
+					return '<a href="'.$url.'">'.$text.'</a>';
+			}
 		}
 		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.$request_uri.'\', \'\\2\')', $template);
 	}
