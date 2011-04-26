@@ -555,13 +555,11 @@ else
 			),
 			'excerpt'		=> array(
 				'datatype'		=> 'TEXT',
-				'allow_null'	=> false,
-				'default'		=> '\'\''
+				'allow_null'	=> true
 			),
 			'pagetext'		=> array(
 				'datatype'		=> 'LONGTEXT',
-				'allow_null'	=> false,
-				'default'		=> '\'\''
+				'allow_null'	=> true
 			),
 			'create_time'	=> array(
 				'datatype'		=> 'INT(10) UNSIGNED',
@@ -679,8 +677,7 @@ else
 			),
 			'text'			=> array(
 				'datatype'		=> 'TEXT',
-				'allow_null'	=> false,
-				'default'		=> '\'\''
+				'allow_null'	=> true
 			),
 		),
 		'PRIMARY KEY'	=> array('id'),
@@ -706,8 +703,7 @@ else
 			),
 			'description'	=> array(
 				'datatype'		=> 'TEXT',
-				'allow_null'	=> false,
-				'default'		=> '\'\''
+				'allow_null'	=> true
 			),
 			'modify_time'	=> array(
 				'datatype'		=> 'INT(10) UNSIGNED',
