@@ -548,6 +548,15 @@ elseif ($action == 'mark_comment')
 
 //=======================[User management]======================================
 
+elseif ($action == 'login')
+{
+	if ($session_id != '')
+		die();
+
+	// We have POST data. Process it! Handle errors if they are.
+	echo s2_ajax_login();
+}
+
 elseif ($action == 'logout')
 {
 	s2_logout($session_id);

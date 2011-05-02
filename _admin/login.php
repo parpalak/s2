@@ -42,7 +42,7 @@ function s2_get_challenge ()
 //
 // Removes outdated challenges and sessions from DB
 //
-function s2_cleanup_expired ()
+function s2_cleanup_expired_sessions ()
 {
 	global $s2_db;
 
@@ -203,45 +203,37 @@ function s2_login_success ($login, $challenge)
 	setcookie($s2_cookie_name, $challenge);
 }
 
-function s2_try_login()
+function s2_ajax_login()
 {
 	global $s2_db, $lang_admin;
 
-	$login = $_POST['login'];
+	$login = isset($_POST['login']) ? $_POST['login'] : '';
 	$challenge = isset($_POST['challenge']) ? $_POST['challenge'] : '';
 	$key = isset($_POST['key']) ? $_POST['key'] : '';
 
-	$redir = isset($_POST['redir']) ? $_POST['redir'] : '';
-
-	($hook = s2_hook('fn_try_login_start')) ? eval($hook) : null;
+	($hook = s2_hook('fn_ajax_login_start')) ? eval($hook) : null;
 
 	if (!$salt = s2_get_salt($challenge))
-	{
-		echo s2_get_login_form($lang_admin['Old login page']);
-		return false;
-	}
+		return $lang_admin['Old login page'];
 
-	do
-	{
-		// Getting user password
-		$pass = s2_get_password_hash($login);
-		if ($pass === false)
-			break;
+	if ($login == '')
+		return $lang_admin['Error login page'];
 
-		($hook = s2_hook('fn_try_login_pre_password_check')) ? eval($hook) : null;
+	// Getting user password
+	$pass = s2_get_password_hash($login);
+	if ($pass === false)
+		return $lang_admin['Error login page'];
 
-		// Verifying password
-		if ($key != md5($pass.';-)'.$salt))
-			break;
+	($hook = s2_hook('fn_ajax_login_pre_password_check')) ? eval($hook) : null;
 
-		// Everything is Ok.
-		s2_login_success($login, $challenge);
-		return $redir;
-	} while (0);
+	// Verifying password
+	if ($key != md5($pass.';-)'.$salt))
+		return $lang_admin['Error login page'];
 
-	echo s2_get_login_form($lang_admin['Error login page']);
+	// Everything is Ok.
+	s2_login_success($login, $challenge);
 
-	return false;
+	return 'OK';
 }
 
 function s2_logout ($challenge)
@@ -276,74 +268,59 @@ function s2_get_login_form ($message = '')
 	($hook = s2_hook('fn_get_login_form_pre_output')) ? eval($hook) : null;
 
 ?>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Pragma" content="no-cache" />
-<title>Login - S2</title>
-<style type="text/css">
-body {
-	color: #000;
-	backgroud: #fff;
-	}
-.table {
-	border: 0;
-	border-collapse: collapse;
-	width: 100%;
-	height: 100%;
-	}
-	.table tr td {
-		padding: 0;
-		}
-	.table table tr td {
-		background: #eef;
-		padding: 1px;
-		text-align: center;
-		}
-</style>
+<title><?php echo $lang_admin['Admin panel'], S2_SITE_NAME ? ' - '.S2_SITE_NAME : ''; ?></title>
+<link rel="stylesheet" type="text/css" href="css/style.css" />
 <script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
+var shake;
 function SendForm ()
 {
-	document.loginform.redir.value = document.location;
+	clearInterval(shake);
+
 	document.loginform.key.value = hex_md5(hex_md5(document.loginform.pass.value + 'Life is not so easy :-)') + ';-)<?php echo $salt ?>');
-	document.loginform.pass.value = '';
-	document.loginform.submit;
-	return true;
+	var Response = POSTSyncRequest('<?php echo S2_PATH; ?>/_admin/site_ajax.php?action=login', StringFromForm(document.loginform));
+
+	if (Response.status == '200' && Response.text == 'OK')
+		document.location.reload();
+	else
+	{
+		document.getElementById('message').innerHTML = Response.text;
+		var time = 0;
+		shake = setInterval(function () {
+			document.loginform.style.left = parseInt(-120.0 * Math.exp(-time/8.0) * Math.sin(3.14159 * time/5.0)) + 'px';
+			if (time++ > 50)
+				clearInterval(shake);
+		}, 30);
+	}
 }
 </script>
 </head>
-<body onload="document.loginform.login.focus();">
-	<table class="table">
-		<tr><td align="center">
-			<noscript><p><?php echo $lang_admin['Noscript']; ?></p></noscript>
-			<b style="color: red;"><?php echo $message; ?></b>
-			<form name="loginform" method="post" action="" onsubmit="SendForm();">
-			<table>
-				<tr>
-					<td><?php echo $lang_admin['Login']; ?></td>
-					<td>
-						<input type="text" name="login" size="30" maxlength="255" />
-					</td>
-				</tr>
-				<tr>
-					<td><?php echo $lang_admin['Password']; ?></td>
-					<td>
-						<script type="text/javascript">document.write('<input type="password" name="pass" size="30" maxlength="255" />');</script>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2">
-						<input type="submit" name="button" value="<?php echo $lang_admin['Log in'];; ?>" />
-						<input type="hidden" name="key" value="" />
-						<input type="hidden" name="redir" value="" />
-						<input type="hidden" name="challenge" value="<?php echo $challenge ?>" />
-					</td>
-				</tr>
-			</table>
-			</form>
-		</td></tr>
-	</table>
+<body id="login_wrap" onload="document.loginform.login.focus();">
+	<noscript><p><?php echo $lang_admin['Noscript']; ?></p></noscript>
+	<form name="loginform" method="post" action="" onsubmit="SendForm(); return false; ">
+		<p>
+		<label>
+			<span><?php echo $lang_admin['Login']; ?></span>
+			<input type="text" name="login" size="30" maxlength="255" />
+		</label>
+		<label>
+			<span><?php echo $lang_admin['Password']; ?></span>
+			<script type="text/javascript">document.write('<input type="password" name="pass" size="30" maxlength="255" />');</script>
+		</label>
+		</p>
+		<p>
+			<input type="submit" name="button" value="<?php echo $lang_admin['Log in'];; ?>" />
+			<input type="hidden" name="key" value="" />
+			<input type="hidden" name="challenge" value="<?php echo $challenge ?>" />
+		</p>
+	</form>
+	<p id="message"></p>
 </body>
 </html>
 <?php

@@ -22,7 +22,7 @@ s2_no_cache();
 header('X-Powered-By: S2/'.S2_VERSION);
 header('Content-Type: text/html; charset=utf-8');
 
-s2_cleanup_expired();
+s2_cleanup_expired_sessions();
 
 $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
 
@@ -32,21 +32,8 @@ if ($session_id == '')
 {
 	// New session
 
-	if (!isset($_POST['login']))
-	{
-		// A simple login page loading
-		echo s2_get_login_form();
-		die();
-	}
-
-	// We have POST data. Process it! Handle errors if they are.
-	if (($redirect_url = s2_try_login()) !== false)
-	{
-		// User logged in successfully. Let him go where he wants.
-		header('Location: '.$redirect_url);
-	}
-
-	// We've already told the user everything we want to.
+	// A simple login page loading
+	echo s2_get_login_form();
 	die();
 }
 

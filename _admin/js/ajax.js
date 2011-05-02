@@ -8,6 +8,27 @@
  * @package S2
  */
 
+function StringFromForm (aeItem)
+{
+	var sRequest = 'ajax=1', i, eItem;
+
+	for (i = aeItem.length; i-- ;)
+	{
+		eItem = aeItem[i];
+		if (eItem.nodeName == 'INPUT')
+		{
+			if (eItem.type == 'text' || eItem.type == 'hidden')
+				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+			if (eItem.type == 'checkbox' && eItem.checked)
+				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+		}
+		if (eItem.nodeName == 'TEXTAREA' || eItem.nodeName == 'SELECT')
+			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
+	}
+
+	return sRequest;
+}
+
 function getHTTPRequestObject() 
 {
 	var xmlHttpRequest = false;
@@ -61,7 +82,8 @@ function AjaxRequest (sRequestUrl, sParam, fCallback)
 
 	if (fCallback == null)
 	{
-		SetWait(true);
+		if (typeof SetWait == 'function')
+			SetWait(true);
 		xmlhttp = xmlhttp_sync;
 	}
 	else
@@ -92,7 +114,8 @@ function AjaxRequest (sRequestUrl, sParam, fCallback)
 
 	var no_error = CheckStatus(xmlhttp);
 
-	SetWait(false);
+	if (typeof SetWait == 'function')
+		SetWait(false);
 
 	return {'text': xmlhttp.responseText, 'status': (no_error ? '200' : '-1')};
 }

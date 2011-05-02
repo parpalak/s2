@@ -714,6 +714,7 @@ table.fields {
 			}
 
 input[type="text"],
+input[type="password"],
 textarea {
 	border: 1px solid #ccc;
 	border-color: #aaa #ccc #ccc #aaa;
@@ -1015,3 +1016,54 @@ legend {
 	.extension.disabled h3 {
 		text-decoration: line-through;
 		}
+
+/*=======================[Login screen]=======================================*/
+
+#login_wrap {
+	background: #fff;
+	width: 25em;
+	margin: -4em auto 0;
+	height: auto;
+	min-height: 0;
+	position: relative;
+	top: 50%;
+	line-height: 1.5;
+	}
+#login_wrap form {
+	position: relative;
+	text-align: center;
+	background: #eee;
+	background: -moz-linear-gradient(top, #F4F4F4 0%, #e5e5e5 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F4F4F4), color-stop(100%,#e5e5e5));
+	background: -o-linear-gradient(top, #F4F4F4 0%,#e5e5e5 100%);
+	background: linear-gradient(top, #F4F4F4 0%,#e5e5e5 100%);
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	border: 1px solid #ccc;
+	-moz-box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
+	-webkit-box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
+	box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
+	}
+	#login_wrap label {
+		text-align: left;
+		display: block;
+		padding: 0.2em 0;
+		}
+		#login_wrap label input {
+			width: 15em;
+			margin: 0;
+			}
+		#login_wrap label span {
+			display: block;
+			float: left;
+			width: 4em;
+			margin-right: 0.5em;
+			text-shadow: 0px 1px 0 #fff;
+			}
+	#login_wrap p {
+		margin: 1em;
+		}
+#login_wrap #message {
+	color: red;
+	}
