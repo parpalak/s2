@@ -279,7 +279,7 @@ function s2_js_mailto($name, $email)
 }
 
 // Attempts to fetch the provided URL using any available means
-function s2_get_remote_file ($url, $timeout, $head_only = false, $max_redirects = 10)
+function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redirects = 10)
 {
 	$result = null;
 	$parsed_url = parse_url($url);
