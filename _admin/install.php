@@ -47,9 +47,18 @@ s2_remove_bad_characters();
 //
 // Generate output to be used for config.php
 //
-function generate_config_file()
+function generate_config_file ()
 {
 	global $db_type, $db_host, $db_name, $db_username, $db_password, $db_prefix, $base_url, $s2_cookie_name;
+
+	foreach (array('', '/?', '/index.php', '/index.php?') as $prefix)
+	{
+		$url_prefix = $prefix;
+		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 4);
+		var_dump($content);
+		if (false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
+			break;
+	}
 
 	return '<?php'."\n\n".'$db_type = \''.$db_type."';\n".
 		'$db_host = \''.$db_host."';\n".
@@ -59,7 +68,8 @@ function generate_config_file()
 		'$db_prefix = \''.addslashes($db_prefix)."';\n".
 		'$p_connect = false;'."\n\n".
 		'define(\'S2_BASE_URL\', \''.$base_url.'\');'."\n".
-		'define(\'S2_PATH\', \''.preg_replace('#^[^:/]+://[^/]*#', '', $base_url).'\');'."\n\n".
+		'define(\'S2_PATH\', \''.preg_replace('#^[^:/]+://[^/]*#', '', $base_url).'\');'."\n".
+		'define(\'S2_URL_PREFIX\', \''.$url_prefix.'\');'."\n\n".
 		'$s2_cookie_name = '."'".$s2_cookie_name."';\n";
 }
 
@@ -134,7 +144,8 @@ if (!isset($_POST['form_sent']))
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>S2 Installation</title>
+<meta name="Generator" content="S2 <?php echo S2_VERSION; ?>" />
+<title><?php printf($lang_install['Install S2'], S2_VERSION) ?></title>
 <link rel="stylesheet" type="text/css" href="<?php echo S2_ROOT ?>_admin/css/style.css" />
 <style type="text/css">
 html {
@@ -954,7 +965,8 @@ else
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>S2 Installation</title>
+<meta name="Generator" content="S2 <?php echo S2_VERSION; ?>" />
+<title><?php printf($lang_install['Install S2'], S2_VERSION) ?></title>
 <link rel="stylesheet" type="text/css" href="<?php echo S2_ROOT ?>_admin/css/style.css" />
 <style type="text/css">
 html {
