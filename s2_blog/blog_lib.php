@@ -457,7 +457,7 @@ function s2_blog_toggle_hide_comment ($id)
 
 		if ($post = $s2_db->fetch_assoc($result))
 		{
-			$link = S2_BASE_URL.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $post['create_time']).urlencode($post['url']);
+			$link = S2_BASE_URL.S2_URL_PREFIX.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $post['create_time']).urlencode($post['url']);
 
 			// Fetching receivers' names and addresses
 			$query = array(
