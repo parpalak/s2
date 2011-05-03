@@ -36,10 +36,10 @@ function s2_do_rss ()
 	<channel>
 		<title><?php echo s2_htmlencode($rss_title); ?></title>
 		<link><?php echo $rss_link; ?></link>
-		<description><?php echo s2_htmlencode($rss_description) ?></description>
+		<description><?php echo s2_htmlencode($rss_description); ?></description>
 		<generator>S2 <?php echo S2_VERSION; ?></generator>
 		<ttl>10</ttl>
-		<atom:link href="<?php echo S2_BASE_URL.$request_uri; ?>" rel="self" type="application/rss+xml" />
+		<atom:link href="<?php echo S2_BASE_URL.S2_URL_PREFIX.$request_uri; ?>" rel="self" type="application/rss+xml" />
 <?php
 
 	$last_date = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
@@ -68,7 +68,7 @@ function s2_do_rss ()
 ?>
 		<item>
 			<title><?php echo s2_htmlencode($item['title']); ?></title>
-			<link><?php echo S2_BASE_URL.$item['rel_path']; ?></link>
+			<link><?php echo S2_BASE_URL.S2_URL_PREFIX.$item['rel_path']; ?></link>
 			<description><?php echo s2_htmlencode($item['text']); ?></description>
 <?php
 
@@ -84,7 +84,7 @@ function s2_do_rss ()
 ?>
 			<guid isPermaLink="true"><?php echo S2_BASE_URL.$item['rel_path']; ?></guid>
 			<pubDate><?php echo gmdate('D, d M Y H:i:s', $item['time']).' GMT'; ?></pubDate>
-			<comments><?php echo S2_BASE_URL.$item['rel_path'].'#comment'; ?></comments>
+			<comments><?php echo S2_BASE_URL.S2_URL_PREFIX.$item['rel_path'].'#comment'; ?></comments>
 		</item>
 <?php
 		$items .= ob_get_clean();

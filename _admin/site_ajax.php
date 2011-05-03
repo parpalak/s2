@@ -321,7 +321,7 @@ elseif ($action == 'preview')
 	if ($path === false)
 		echo $lang_admin['Preview not found'];
 	else
-		header('Location: '.S2_BASE_URL.$path);
+		header('Location: '.S2_BASE_URL.S2_URL_PREFIX.$path);
 }
 
 //=======================[Tag management]=======================================

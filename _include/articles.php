@@ -132,7 +132,7 @@ function s2_last_articles ()
 
 	$output = '';
 	foreach ($articles as $item)
-		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.S2_PATH.$item['rel_path'].'">'.$item['title'].'</a></h2>'.
+		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.S2_PATH.S2_URL_PREFIX.$item['rel_path'].'">'.$item['title'].'</a></h2>'.
 			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
 			 '<div class="preview cite">'.$item['text'].'</div>';
 
@@ -186,7 +186,7 @@ function s2_last_artilce_comments ()
 
 	$output = '';
 	foreach ($urls as $k => $url)
-		$output .= '<li><a href="'.S2_PATH.$url.'#'.$counts[$k].'">'.$titles[$k].'</a>, <em>'.$nicks[$k].'</em></li>';
+		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'#'.$counts[$k].'">'.$titles[$k].'</a>, <em>'.$nicks[$k].'</em></li>';
 
 	($hook = s2_hook('fn_last_article_comments_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul>' : '';
@@ -229,7 +229,7 @@ function s2_last_discussions ()
 
 	$output = '';
 	foreach ($urls as $k => $url)
-		$output .= '<li><a href="'.S2_PATH.$url.'">'.$titles[$k].'</a></li>';
+		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'">'.$titles[$k].'</a></li>';
 
 	($hook = s2_hook('fn_last_discussions_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul>' : '';
@@ -275,7 +275,7 @@ function s2_articles_by_tag ($tag_id)
 	$urls = s2_get_group_url($parent_ids, $urls);
 
 	foreach ($urls as $k => $v)
-		$urls[$k] = '<a href="'.S2_PATH.$v.'">'.$title[$k].'</a>';
+		$urls[$k] = '<a href="'.S2_PATH.S2_URL_PREFIX.$v.'">'.$title[$k].'</a>';
 
 	return $urls;
 }
@@ -364,7 +364,7 @@ function s2_process_tags ($id)
 	foreach ($urls as $k => $url)
 		$art_by_tags[$tag_ids[$k]][] = ($original_ids[$k] == $id) ?
 			'<li class="active"><span>'.s2_htmlencode($titles[$k]).'</span></li>' :
-			'<li><a href="'.S2_PATH.$urls[$k].'">'.s2_htmlencode($titles[$k]).'</a></li>';
+			'<li><a href="'.S2_PATH.S2_URL_PREFIX.$urls[$k].'">'.s2_htmlencode($titles[$k]).'</a></li>';
 
 	($hook = s2_hook('fn_process_tags_pre_art_by_tags_merge')) ? eval($hook) : null;
 
@@ -396,7 +396,7 @@ function s2_parse_page_url ($request_uri)
 
 	$bread_crumbs_links = $bread_crumbs_titles = array();
 
-	$parent_path = S2_PATH;
+	$parent_path = '';
 	$parent_id = S2_ROOT_ID;
 	$max = count($request_array) - 1 - (int) $was_end_slash;
 
@@ -435,7 +435,7 @@ function s2_parse_page_url ($request_uri)
 		if ($row['template'] != '')
 			$template_id = $row['template'];
 
-		$bread_crumbs_links[] = '<a href="'.$parent_path.'">'.s2_htmlencode($row['title']).'</a>';
+		$bread_crumbs_links[] = '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.s2_htmlencode($row['title']).'</a>';
 	}
 
 	// Path to the requested page (without trailing slash)
@@ -471,7 +471,7 @@ function s2_parse_page_url ($request_uri)
 
 	if (!$template_id)
 	{
-		$bread_crumbs_links[] = '<a href="'.$parent_path.'">'.s2_htmlencode($row['title']).'</a>';
+		$bread_crumbs_links[] = '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.s2_htmlencode($row['title']).'</a>';
 		error(sprintf($lang_common['Error no template'], implode('<br />', $bread_crumbs_links)));
 	}
 
@@ -480,14 +480,14 @@ function s2_parse_page_url ($request_uri)
 	{
 		// "file" - has no children
 		header('HTTP/1.1 301');
-		header('Location: '.S2_BASE_URL.substr($current_path, strlen(S2_PATH)));
+		header('Location: '.S2_BASE_URL.S2_URL_PREFIX.$current_path);
 		die;
 	}
 	if ($row['children_exist'] && !$was_end_slash)
 	{
 		// "folder" - has children
 		header('HTTP/1.1 301'); 
-		header('Location: '.S2_BASE_URL.substr($current_path, strlen(S2_PATH)).'/');
+		header('Location: '.S2_BASE_URL.S2_URL_PREFIX.$current_path.'/');
 		die;
 	}
 
@@ -545,7 +545,7 @@ function s2_parse_page_url ($request_uri)
 					'title' => s2_htmlencode($row['title']),
 					'url' => $current_path.'/'.urlencode($row['url']).'/'
 				);
-				$menu_subsections[] = '<li><a href="'.$current_path.'/'.urlencode($row['url']).'/">'.s2_htmlencode($row['title']).'</a></li>';
+				$menu_subsections[] = '<li><a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).'/">'.s2_htmlencode($row['title']).'</a></li>';
 
 				($hook = s2_hook('fn_s2_parse_page_url_add_subsection')) ? eval($hook) : null;
 			}
@@ -558,7 +558,7 @@ function s2_parse_page_url ($request_uri)
 					'excerpt' => $row['excerpt'],
 					'url' => $current_path.'/'.urlencode($row['url'])
 				);
-				$menu_subarticles[] = '<li><a href="'.$current_path.'/'.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
+				$menu_subarticles[] = '<li><a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
 
 				($hook = s2_hook('fn_s2_parse_page_url_add_subarticle')) ? eval($hook) : null;
 			}
@@ -580,7 +580,7 @@ function s2_parse_page_url ($request_uri)
 				$page['subcontent'] = '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>';
 
 				foreach ($subsections as $item)
-					$page['subcontent'] .= '<p class="subsection"><a href="'.$item['url'].'">'.$item['title'].'</a></p>';
+					$page['subcontent'] .= '<p class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></p>';
 			}
 		}
 
@@ -608,7 +608,7 @@ function s2_parse_page_url ($request_uri)
 						}
 
 				foreach ($subarticles as $item)
-					$page['subcontent'] .= '<h3 class="article"><a href="'.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
+					$page['subcontent'] .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
 						'<div class="article date">'.s2_date($item['time']).'</div>'."\n".
 						'<p class="article">'.$item['excerpt'].'</p>'."\n";
 			}
@@ -637,7 +637,7 @@ function s2_parse_page_url ($request_uri)
 			// A neighbour
 			$menu_articles[] = ($id == $row['id']) ?
 				'<li class="active"><span>'.s2_htmlencode($row['title']).'</span></li>' :
-				'<li><a href="'.$parent_path.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
+				'<li><a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
 
 			if ($id == $row['id'])
 				$curr_item = $i;

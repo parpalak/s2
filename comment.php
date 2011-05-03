@@ -225,7 +225,7 @@ if (!empty($errors))
 	die($template);
 }
 
-$link = S2_BASE_URL.$path.'/'.urlencode($row['url']);
+$link = S2_BASE_URL.S2_URL_PREFIX.$path.'/'.urlencode($row['url']);
 
 //
 // Everything is ok, save and send the comment

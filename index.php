@@ -19,9 +19,14 @@ require S2_ROOT.'_include/common.php';
 header('X-Powered-By: S2/'.S2_VERSION);
 
 // We create our own request URI with the path removed and only the parts to rewrite included
-$request_uri = substr(urldecode($_SERVER['REQUEST_URI']), strlen(S2_PATH));
-if (strpos($request_uri, '?') !== false)
-	$request_uri = substr($request_uri, 0, strpos($request_uri, '?'));
+if (isset($_SERVER['PATH_INFO']) && S2_URL_PREFIX != '')
+	$request_uri = $_SERVER['PATH_INFO'];
+else
+{
+	$request_uri = substr(urldecode($_SERVER['REQUEST_URI']), strlen(S2_URL_PREFIX.S2_PATH));
+	if (strpos($request_uri, '?') !== false)
+		$request_uri = substr($request_uri, 0, strpos($request_uri, '?'));
+}
 
 ($hook = s2_hook('idx_pre_redirect')) ? eval($hook) : null;
 
@@ -88,7 +93,7 @@ if (!empty($page['meta_description']))
 ($hook = s2_hook('idx_pre_meta_merge')) ? eval($hook) : null;
 $replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
 
-$replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.S2_BASE_URL.'/rss.xml" />';
+$replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.S2_BASE_URL.S2_URL_PREFIX.'/rss.xml" />';
 
 // Including the style
 ob_start();

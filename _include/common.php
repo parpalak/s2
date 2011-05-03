@@ -25,6 +25,8 @@ if (file_exists(S2_ROOT.'config.php'))
 
 if (!defined('S2_BASE_URL'))
 	error('The file \'config.php\' doesn\'t exist or is corrupt.<br />Do you want to <a href="'.preg_replace('#'.(S2_ROOT == '../' ? '/[a-z_\.]*' : '').'/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME']).'_admin/install.php">install S2</a>?');
+if (!defined('S2_URL_PREFIX'))
+	define('S2_URL_PREFIX', '');
 
 if (defined('S2_DEBUG'))
 	error_reporting(E_ALL);
