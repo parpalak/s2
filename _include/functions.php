@@ -279,7 +279,7 @@ function s2_js_mailto($name, $email)
 }
 
 // Attempts to fetch the provided URL using any available means
-function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redirects = 10)
+function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redirects = 10, $ignore_errors = false)
 {
 	$result = null;
 	$parsed_url = parse_url($url);
@@ -322,13 +322,13 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 		}
 
 		// Ignore everything except a 200 response code
-		if ($content !== false && $responce_code == '200')
+		if ($content !== false && ($responce_code == '200' || $ignore_errors))
 		{
 			if ($head_only)
 				$result['headers'] = explode("\r\n", str_replace("\r\n\r\n", "\r\n", trim($content)));
 			else
 			{
-				preg_match('#HTTP/1.[01] 200 OK#', $content, $match, PREG_OFFSET_CAPTURE);
+				preg_match('#HTTP/1.[01] \\d\\d\\d #', $content, $match, PREG_OFFSET_CAPTURE);
 				$last_content = substr($content, $match[0][1]);
 				$content_start = strpos($last_content, "\r\n\r\n");
 				if ($content_start !== false)
@@ -379,7 +379,7 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 			}
 
 			// Ignore everything except a 200 response code
-			if ($content !== false && preg_match('#^HTTP/1.[01] 200 OK#', $content))
+			if ($content !== false && ($ignore_errors || preg_match('#^HTTP/1.[01] 200 OK#', $content)))
 			{
 				if ($head_only)
 					$result['headers'] = explode("\r\n", trim($content));

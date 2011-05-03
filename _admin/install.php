@@ -54,8 +54,7 @@ function generate_config_file ()
 	foreach (array('', '/?', '/index.php', '/index.php?') as $prefix)
 	{
 		$url_prefix = $prefix;
-		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 4);
-		var_dump($content);
+		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 5, false, 10, true);
 		if (false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
 			break;
 	}
