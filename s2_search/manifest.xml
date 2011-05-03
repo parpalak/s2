@@ -75,7 +75,7 @@ if ($request_uri == '/search')
 else
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.S2_PATH.'/search"><input type="text" name="q" class="inactive" id="s2_search_input" onblur="if(this.value==\'\'){this.value=this.defaultValue; this.className=\'inactive\';}" onfocus="if(this.value==this.defaultValue){this.value=this.className=\'\';}" value="'.$lang_s2_search['Search'].'"/></form>';
+	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.S2_PATH.S2_URL_PREFIX.'/search"><input type="text" name="q" class="inactive" id="s2_search_input" onblur="if(this.value==\'\'){this.value=this.defaultValue; this.className=\'inactive\';}" onfocus="if(this.value==this.defaultValue){this.value=this.className=\'\';}" value="'.$lang_s2_search['Search'].'"/></form>';
 }
 
 if (S2_SEARCH_QUICK)
