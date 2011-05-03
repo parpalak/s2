@@ -68,7 +68,7 @@ var s2_wysiwyg_pict_url = '<?php echo S2_PATH; ?>/_admin/pictman.php';
 		]]></hook>
 
 		<hook id="rq_action_load_pre_output"><![CDATA[
-s2_add_js_header('s2_wysiwyg_set_path("'.S2_PATH.s2_path_from_id($id).'"); tinyMCE.execCommand("mceRemoveControl", false, "arttext");');
+s2_add_js_header('s2_wysiwyg_set_path("'.S2_PATH.S2_URL_PREFIX.s2_path_from_id($id).'"); tinyMCE.execCommand("mceRemoveControl", false, "arttext");');
 s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext");');
 		]]></hook>
 
