@@ -113,7 +113,7 @@
 #pict_tab { background-position: 4px -78px; }
 #comm_tab { background-position: 4px -98px; }
 #tag_tab { background-position: 4px -198px; }
-#admin_tab { background-position: 4px -178px; }
+#admin_tab { background-position: 4px -178px; margin-left: 2em;}
 #admin-stat_tab { background-position: 4px -158px; }
 #admin-opt_tab { background-position: 4px -118px; }
 #admin-user_tab { background-position: 4px -18px; }
