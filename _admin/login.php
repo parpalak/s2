@@ -214,7 +214,10 @@ function s2_ajax_login()
 	($hook = s2_hook('fn_ajax_login_start')) ? eval($hook) : null;
 
 	if (!$salt = s2_get_salt($challenge))
-		return $lang_admin['Old login page'];
+	{
+		list($challenge, $salt) = s2_get_challenge();
+		return 'OLD_SALT_'.$salt.'_'.$challenge;
+	}
 
 	if ($login == '')
 		return $lang_admin['Error login page'];
@@ -278,16 +281,23 @@ function s2_get_login_form ($message = '')
 <script type="text/javascript" src="js/md5.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
-var shake;
+var shake, salt = '<?php echo $salt ?>';
 function SendForm ()
 {
 	clearInterval(shake);
 
-	document.loginform.key.value = hex_md5(hex_md5(document.loginform.pass.value + 'Life is not so easy :-)') + ';-)<?php echo $salt ?>');
+	document.loginform.key.value = hex_md5(hex_md5(document.loginform.pass.value + 'Life is not so easy :-)') + ';-)' + salt);
 	var Response = POSTSyncRequest('<?php echo S2_PATH; ?>/_admin/site_ajax.php?action=login', StringFromForm(document.loginform));
 
 	if (Response.status == '200' && Response.text == 'OK')
 		document.location.reload();
+	else if (Response.text.substr(0, 9) == 'OLD_SALT_')
+	{
+		var params = Response.text.split('_');
+		salt = params[2];
+		document.loginform.challenge.value = params[3];
+		document.getElementById('message').innerHTML = '<?php echo $lang_admin['Old login page']; ?>';
+	}
 	else
 	{
 		document.getElementById('message').innerHTML = Response.text;
