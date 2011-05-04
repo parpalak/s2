@@ -191,6 +191,121 @@ hr {
 		z-index: 5002;
 		}
 
+/*=======================[Tabs styles]========================================*/
+/*
+ * The following style definitions are based on code by Vladimir Tokmakov.
+ * See http://www.artlebedev.ru/tools/technogrette/js/tabsheets/ for details.
+ */
+
+.tabsheets,
+.tabsheets > dt,
+.tabsheets > dd {
+	margin: 0;
+	padding: 0;
+	width: auto;
+	}
+
+.tabsheets {
+	position: relative;
+	}
+
+.tabsheets > dt {
+	float: left;
+	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	line-height: 13px;
+	height: 13px;
+	padding: 3px 6px 6px 26px;
+	cursor: default;
+	white-space: nowrap;
+	position: relative;
+	top: 8px;
+	z-index: 1;
+	border: 1px solid #aaa;
+	border-color: #fff #aaa #aaa #f2f2f2;
+	background: url('../i/tab_icons.png') #ddd no-repeat;
+	color: #333;
+	-webkit-border-top-left-radius: 4px;
+	-webkit-border-top-right-radius: 4px;
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-topright: 4px;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	-moz-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
+	-webkit-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
+	box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
+	cursor: pointer;
+	cursor: hand;
+	}
+
+.tabsheets > dt.active {
+	background-color: #eee;
+	border-bottom: 0;
+	top: 7px;
+	z-index: 5;
+	color: #000;
+	text-shadow: 0 1px 0 #fff;
+	-moz-box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
+	-webkit-box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
+	box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
+	cursor: default;
+	}
+
+.tabsheets > dd {
+	display: block;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	padding: 29px 0 0;
+	background: #e2e4ee;
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#e2e4ee), to(#000));
+	background: -moz-linear-gradient(#e2e4ee, #000);
+	background: linear-gradient(#e2e4ee, #000);
+	}
+
+.tabsheets .tabsheets > dd,
+.tabsheets > dd .reducer {
+	background: #eee;
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#eee), to(#e7e7e7)) fixed;
+	background: -moz-linear-gradient(#eee, #e7e7e7) fixed;
+	background: linear-gradient(#eee, #e7e7e7) fixed;
+	}
+
+.tabsheets > dd .reducer {
+	position: relative;
+	z-index: 3;
+	border-top: 1px solid #fdfdfd;
+	overflow: auto;
+	height: 100%;
+	padding: 0.833em;
+	}
+
+.tabsheets > dd.inactive {
+	display: none;
+	}
+	.tabsheets > dd.inactive iframe,
+	.tabsheets > dd.inactive select,
+	.tabsheets > dd.inactive textarea,
+	.tabsheets > dd.inactive input {
+		display: none ! important;
+		}
+
+.tabsheets > dd.active {
+	display: block;
+	}
+
+#list_tab { background-position: 4px -138px; margin-left: 0.833em; }
+#edit_tab { background-position: 4px -58px; }
+#view_tab { background-position: 4px 2px; }
+#pict_tab { background-position: 4px -78px; }
+#comm_tab { background-position: 4px -98px; }
+#tag_tab { background-position: 4px -198px; }
+#admin_tab { background-position: 4px -178px; margin-left: 2em;}
+#admin-stat_tab { background-position: 4px -158px; margin-left: 0.833em; }
+#admin-opt_tab { background-position: 4px -118px; }
+#admin-user_tab { background-position: 4px -18px; }
+#admin-ext_tab { background-position: 4px -38px; }
+
 /*=======================[Site map tab]=======================================*/
 
 /* Styles for the tree */
@@ -226,7 +341,7 @@ hr {
 
 .treetree span.over_top {
 	border-top: 0.5em solid #0079f1;
-}
+	}
 .treetree div.over_top {
 	margin-top: 0.5em;
 	}

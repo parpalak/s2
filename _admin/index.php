@@ -70,7 +70,6 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <title><?php echo $lang_admin['Admin panel'], S2_SITE_NAME ? ' - '.S2_SITE_NAME : ''; ?></title>
 <meta http-equiv="Pragma" content="no-cache" />
 <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
-<link rel="stylesheet" type="text/css" href="css/tabsheets.css" />
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
 <script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
