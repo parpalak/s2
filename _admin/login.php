@@ -302,10 +302,15 @@ function SendForm ()
 	else
 	{
 		document.getElementById('message').innerHTML = Response.text;
-		var time = 0;
+		var shift_form = function (time)
+		{
+			document.loginform.style.left = parseInt(-150.0 * Math.exp(-time/5.5) * Math.sin(3.14159 * time/4.0)) + 'px';
+		}
+		shift_form(1);
+		var time = 2;
 		shake = setInterval(function () {
-			document.loginform.style.left = parseInt(-120.0 * Math.exp(-time/8.0) * Math.sin(3.14159 * time/5.0)) + 'px';
-			if (time++ > 50)
+			shift_form(time);
+			if (++time > 32)
 				clearInterval(shake);
 		}, 30);
 	}
