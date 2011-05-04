@@ -611,7 +611,7 @@ function s2_preload_editor ()
 {
 	global $s2_db, $lang_admin;
 
-	if (!isset($_GET['path']))
+	if (empty($_GET['path']))
 	{
 		echo $lang_admin['Empty editor info'];
 		return;
