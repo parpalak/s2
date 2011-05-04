@@ -282,6 +282,7 @@ function s2_get_login_form ($message = '')
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
 var shake, salt = '<?php echo $salt ?>';
+
 function SendForm ()
 {
 	clearInterval(shake);
@@ -309,9 +310,26 @@ function SendForm ()
 		}, 30);
 	}
 }
+
+function init ()
+{
+	document.loginform.login.focus();
+
+	var login = '', password = '';
+	document.loginform.login.onkeyup =
+	document.loginform.pass.onkeyup = function (e)
+	{
+		if (login != document.loginform.login.value || password != document.loginform.pass.value)
+		{
+			document.getElementById('message').innerHTML = '';
+			login = document.loginform.login.value;
+			password = document.loginform.pass.value;
+		}
+	};
+}
 </script>
 </head>
-<body id="login_wrap" onload="document.loginform.login.focus();">
+<body id="login_wrap" onload="init();">
 	<noscript><p><?php echo $lang_admin['Noscript']; ?></p></noscript>
 	<form name="loginform" method="post" action="" onsubmit="SendForm(); return false; ">
 		<p>
