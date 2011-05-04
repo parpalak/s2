@@ -297,7 +297,7 @@ function SendForm ()
 		var params = Response.text.split('_');
 		salt = params[2];
 		document.loginform.challenge.value = params[3];
-		document.getElementById('message').innerHTML = '<?php echo $lang_admin['Old login page']; ?>';
+		setTimeout(SendForm, 0);
 	}
 	else
 	{
