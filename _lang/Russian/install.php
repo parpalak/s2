@@ -74,7 +74,7 @@ $lang_install = array(
 'Main Page'					=>	'Главная',
 'Section example'			=>	'Раздел 1',
 'Page example'				=>	'Страница 1',
-'Page text'					=>	'Если вы видите этот текст, установка движка S2 завершилась успешно. Теперь вы можете перейти в <a href="./---">панель управления</a> и настроить этот сайт.',
+'Page text'					=>	'Если вы видите этот текст, установка движка S2 завершилась успешно. Теперь вы можете перейти в <script type="text/javascript">document.write(\'<a href="\' + document.location.href + \'---">панель управления</a>\');</script> и настроить этот сайт.',
 
 
 // Installation completed form
