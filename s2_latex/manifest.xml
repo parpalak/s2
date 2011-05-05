@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_latex</id>
 	<title>LaTeX</title>
-	<version>1.0a</version>
+	<version>1.0a1</version>
 	<description>Allows to write LaTeX formulae.</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0a3</minversion>
-	<maxtestedon>1.0a3</maxtestedon>
+	<maxtestedon>1.0a4</maxtestedon>
 
 	<hooks>
 
