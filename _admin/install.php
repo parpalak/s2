@@ -10,7 +10,7 @@
  */
 
 
-define('S2_VERSION', '1.0a3');
+define('S2_VERSION', '1.0a4');
 define('S2_DB_REVISION', 1);
 define('MIN_PHP_VERSION', '4.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
