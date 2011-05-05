@@ -140,14 +140,17 @@ function SaveHandler (e)
 {
 	e = e || window.event;
 	var key = e.keyCode || e.which;
-	key = !isGecko ? (key == 83 ? 1 : 0) : (key == 115 ? 1 : 0);
+	key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
 	if (e.ctrlKey && key)
 	{
 		(hook = hooks['fn_save_handler_start']) ? eval(hook) : null;
 
 		if (e.preventDefault)
 			e.preventDefault();
+		if (e.stopPropagation)
+			e.stopPropagation();
 		e.returnValue = false;
+		e.cancelBubble = true;
 
 		if (document.artform && '#edit' == cur_page)
 			document.artform.onsubmit();
