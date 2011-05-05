@@ -266,11 +266,12 @@ hr {
 
 .tabsheets .tabsheets > dd,
 .tabsheets > dd .reducer {
-	background: #eee;
-	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#eee), to(#e7e7e7)) fixed;
-	background: -moz-linear-gradient(#eee, #e7e7e7) fixed;
-	background: -o-linear-gradient(#eee, #e7e7e7) fixed;
-	background: linear-gradient(#eee, #e7e7e7) fixed;
+	background-color: #eee;
+	background-attachment: fixed;
+	background-image: -webkit-gradient(linear, 0 0, 0 bottom, from(#eee), to(#e7e7e7));
+	background-image: -moz-linear-gradient(#eee, #e7e7e7);
+	background-image: -o-linear-gradient(#eee, #e7e7e7);
+	background-image: linear-gradient(#eee, #e7e7e7);
 	}
 
 .tabsheets > dd .reducer {
@@ -839,6 +840,8 @@ table.fields {
 input[type="text"],
 input[type="password"],
 textarea {
+	color: #000;
+	background: #fff;
 	border: 1px solid #ccc;
 	border-color: #aaa #ccc #ccc #aaa;
 	-moz-border-radius: 2px;
