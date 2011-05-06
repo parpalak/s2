@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Spoiler tag
+ *
+ * @copyright (C) 2011 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_spoiler
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_spoiler</id>
+	<title>Spoiler</title>
+	<version>1.0a</version>
+	<description>Adds spoiler tag support</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0a</minversion>
+	<maxtestedon>1.0a4</maxtestedon>
+
+	<hooks>
+
+		<hook id="idx_template_after_replace, cmnt_preview_pre_output"><![CDATA[
+include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+require $ext_info['path'].'/functions.php';
+$template = s2_spoiler_make($template);
+		]]></hook>
+
+	</hooks>
+
+</extension>
