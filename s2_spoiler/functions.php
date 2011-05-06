@@ -8,6 +8,24 @@
  */
 
 
+function s2_spoiler_store ($matches)
+{
+	static $stack = array();
+	static $i = 0;
+
+	if (count($matches) < 3)
+	{
+		$stack[$i] = $matches[0];
+		return '¬ '.($i++).' ¬';
+	}
+	else
+	{
+		$temp = $stack[$matches[2]];
+		unset($stack[$matches[2]]);
+		return $temp;
+	}
+}
+
 function s2_spoiler_markup ($matches)
 {
 	global $s2_spoiler_num, $lang_s2_spoiler;
@@ -28,9 +46,14 @@ function s2_spoiler_make ($contents, $soft = 0)
 {
 	global $s2_spoiler_num;
 
+	$contents = preg_replace_callback('#<(script|style|textarea|pre|code|kbd).*?</\\1>#s', 's2_spoiler_store', $contents);
+
 	$s2_spoiler_num = 0;
 	$contents = preg_replace_callback('#<spoiler(?:\\s+title="([^"]*)")?\\s*>(.*?)</spoiler>#s', 's2_spoiler_markup', $contents);
 	$contents = preg_replace_callback('#\\[spoiler(?:\\s+title="([^"]*)")?\s*\\](.*?)\\[/spoiler\\]#s', 's2_spoiler_markup', $contents);
+
+	while (preg_match('#¬ (\d*) ¬#S', $contents))
+		$contents = preg_replace_callback ('#(¬) (\d*) ¬#S', 's2_spoiler_store', $contents);
 
 	if ($s2_spoiler_num)
 	{
@@ -54,7 +77,7 @@ function s2_spoiler_flip (eItem)
 (function () {
 	var head = document.getElementsByTagName('head')[0],
 		style = document.createElement('style'),
-		rules = '.s2_spoiler {margin: 1em 0; } .s2_spoiler_body {display: none;} .s2_spoiler_head, .s2_spoiler_head_expand {display: inline-block; border-bottom: 1px dashed; cursor: pointer;} .s2_spoiler_head:before, .s2_spoiler_head_expand:before {position: absolute; left: -12px; margin-top: 6px; display: inline-block; content: "+"; border: 1px dotted #000; color: #000; line-height: 8px; font-size: 14px; width: 8px; text-align: center; cursor: pointer; } .s2_spoiler_head_expand:before {content: \'\\2212\'}';
+		rules = '.s2_spoiler {margin: 1em 0; } .s2_spoiler_body {display: none;} .s2_spoiler_head, .s2_spoiler_head_expand {display: inline-block; border-bottom: 1px dashed; cursor: pointer;} .s2_spoiler_head:before, .s2_spoiler_head_expand:before {position: absolute; margin-left: -12px; margin-top: 6px; display: inline-block; content: "+"; border: 1px dotted #000; color: #000; line-height: 8px; font-size: 14px; width: 8px; text-align: center; cursor: pointer; } .s2_spoiler_head_expand:before {content: \'\\2212\'}';
 
 	style.type = 'text/css';
 	if (style.styleSheet)
