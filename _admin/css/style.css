@@ -508,7 +508,6 @@ hr {
 				}
 		.but_panel span img:hover {
 			background-color: #fff;
-			outline: #eee outset 1px;
 			}
 .treetree > ul input {
 	position: absolute;
@@ -679,8 +678,8 @@ ul .but_panel .delete,
 		background: #c0f3c0;
 		}
 
-	.sort tbody tr:hover {
-		background: #fafad0;
+	.sort tbody tr:not(.good):hover {
+		background: #fafae0;
 		}
 
 	.sort td {
@@ -749,14 +748,17 @@ ul .but_panel .delete,
 		margin: 1px;
 		}
 		.sort img:hover {
-			border: 1px #E4BB50 solid;
-			border-color: #fff #aaa #aaa #fff;
-			background-color: #fff;
+			background-color: #d2e5fc;
+			-moz-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+			-webkit-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+			border: 1px solid #7da2ce;
+			-moz-border-radius: 2px;
+			-webkit-border-radius: 2px;
+			border-radius: 2px;
 			margin: 0;
 			}
 		.sort img:active:hover {
-			border: 1px #E4BB50 solid;
-			border-color: #aaa #fff #fff #aaa;
 			background-color: #fff;
 			margin: 0;
 			}
@@ -802,11 +804,15 @@ ul .but_panel .delete,
 		margin: 0 0 0.5em;
 		}
 		.r-float label.error {
-			outline: 2px solid #f66;
+			-moz-box-shadow: 0 0 0 2px #f66;
+			-webkit-box-shadow: 0 0 0 2px #f66;
+			box-shadow: 0 0 0 2px #f66;
 			background: #fdd;
 			}
 		.r-float label.ok {
-			outline: 2px solid #bfb;
+			-moz-box-shadow: 0 0 0 2px #bfb;
+			-webkit-box-shadow: 0 0 0 2px #bfb;
+			box-shadow: 0 0 0 2px #bfb;
 			background: #dfd;
 			}
 		.r-float label input[type="checkbox"] {
