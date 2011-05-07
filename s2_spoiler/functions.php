@@ -2,7 +2,7 @@
 /**
  * Functions for spoiler
  *
- * @copyright (C) 2010-2011 Roman Parpalak, based on code (C) by Dmitry Smirnov
+ * @copyright (C) 2011 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_spoiler
  */
@@ -39,9 +39,6 @@ function s2_spoiler_markup ($matches)
 	return '<div class="s2_spoiler" id="s2_spoiler_'.$s2_spoiler_num.'"><div class="s2_spoiler_head" onclick="s2_spoiler_flip(this);">'.$header.'</div><div class="s2_spoiler_body">'.$matches[2].'</div></div>';
 }
 
-//
-// This function makes everything :)
-//
 function s2_spoiler_make ($contents, $soft = 0)
 {
 	global $s2_spoiler_num;
