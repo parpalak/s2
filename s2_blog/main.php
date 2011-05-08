@@ -12,7 +12,7 @@ $s2_blog_path = explode('/', $s2_blog_path);   //   []/[2006]/[12]/[31]/[newyear
 
 $page['commented'] = 0;
 
-if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '')
+if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == 'skip')
 {
 	// Main page
 
@@ -22,14 +22,15 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '')
 	if (strpos($template, '<!-- s2_blog_calendar -->') !== false)
 		$page['s2_blog_calendar'] = s2_blog_calendar(date('Y'), date('m'), '0');
 
-	$page['text'] = s2_blog_last_posts();
+	$s2_blog_skip = isset($s2_blog_path[2]) ? (int) $s2_blog_path[2] : 0;
+	$page['text'] = s2_blog_last_posts($s2_blog_skip);
 	$page['head_title'] = '';
 
 	// Bread crumbs
 	if (S2_BLOG_CRUMBS)
 		$page['path'][] = S2_BLOG_CRUMBS;
 	if (S2_BLOG_URL)
-		$page['path'][] = $lang_s2_blog['Blog'];
+		$page['path'][] = $s2_blog_skip ? '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>' : $lang_s2_blog['Blog'];
 }
 elseif ($s2_blog_path[1] == S2_FAVORITE_URL)
 {

@@ -543,7 +543,7 @@ function s2_blog_year_posts ($year)
 }
 
 // Returns an array containing info about 10 last posts
-function s2_blog_last_posts_array ()
+function s2_blog_last_posts_array ($skip = 0)
 {
 	global $s2_db;
 
@@ -560,7 +560,7 @@ function s2_blog_last_posts_array ()
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'published = 1',
 		'ORDER BY'	=> 'create_time DESC',
-		'LIMIT'		=> '10'
+		'LIMIT'		=> '10 OFFSET '.intval($skip)
 	);
 	($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_ids_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -629,9 +629,11 @@ function s2_blog_last_posts_array ()
 	return $posts;
 }
 
-function s2_blog_last_posts ()
+function s2_blog_last_posts ($skip = 0)
 {
-	$posts = s2_blog_last_posts_array();
+	global $s2_db, $lang_s2_blog;
+
+	$posts = s2_blog_last_posts_array($skip);
 
 	$output = '';
 	foreach ($posts as $post)
@@ -644,6 +646,23 @@ function s2_blog_last_posts ()
 			$post['comments'],
 			$post['favorite']
 		);
+
+	$query = array(
+		'SELECT'	=> 'count(id)',
+		'FROM'		=> 's2_blog_posts',
+		'WHERE'		=> 'published = 1'
+	);
+	($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_ids_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$post_num = $s2_db->result($result);
+
+	$paginator = '';
+	if ($skip > 0)
+		$paginator = '<a href="'.BLOG_BASE.($skip > 10 ? 'skip/'.($skip - 10) : '').'">'.$lang_s2_blog['Here'].'</a> ';
+	if ($skip + 10 < $post_num)
+		$paginator .= '<a href="'.BLOG_BASE.'skip/'.($skip + 10).'">'.$lang_s2_blog['There'].'</a>';
+
+	$output .= '<p class="s2_blog_pages">'.$paginator.'</p>';
 
 	return $output;
 }

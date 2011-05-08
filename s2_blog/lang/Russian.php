@@ -18,6 +18,8 @@ $lang_s2_blog = array(
 'Nav last'					=> 'Последние 10',
 'Nav favorite'				=> 'Избранные',
 'Nav tags'					=> 'По <a href="%s">ключевым словам</a>:',
+'Here'						=> '← сюда',
+'There'						=> 'туда →',
 
 'See in blog'				=> 'Посмотрите в блоге',
 
