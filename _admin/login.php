@@ -278,7 +278,6 @@ function s2_get_login_form ($message = '')
 <meta http-equiv="Pragma" content="no-cache" />
 <title><?php echo $lang_admin['Admin panel'], S2_SITE_NAME ? ' - '.S2_SITE_NAME : ''; ?></title>
 <link rel="stylesheet" type="text/css" href="css/style.css" />
-<script type="text/javascript" src="js/md5.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
 var shake, salt = '<?php echo $salt ?>';
