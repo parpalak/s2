@@ -275,7 +275,7 @@ var Search = (function ()
 function SetWait (bWait)
 {
 	document.getElementById('loading').style.display = bWait ? 'block' : 'none';
-	document.getElementsByTagName('body')[0].style.cursor = bWait ? 'progress' : 'default';
+	document.getElementsByTagName('body')[0].style.cursor = bWait ? 'progress' : 'inherit';
 }
 
 // Handling "back" and "forward" browser buttons
