@@ -280,7 +280,7 @@ function s2_get_login_form ($message = '')
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
-var shake, salt = '<?php echo $salt ?>';
+var shake, time = 0, salt = '<?php echo $salt ?>';
 
 function SendForm ()
 {
@@ -306,7 +306,7 @@ function SendForm ()
 			document.loginform.style.left = parseInt(-150.0 * Math.exp(-time/5.5) * Math.sin(3.14159 * time/4.0)) + 'px';
 		}
 		shift_form(1);
-		var time = 2;
+		time = 2;
 		shake = setInterval(function () {
 			shift_form(time);
 			if (++time > 32)
@@ -323,6 +323,9 @@ function init ()
 	document.loginform.login.onkeyup =
 	document.loginform.pass.onkeyup = function (e)
 	{
+		if (time > 1 && time < 32)
+			return;
+
 		if (login != document.loginform.login.value || password != document.loginform.pass.value)
 		{
 			document.getElementById('message').innerHTML = '';
