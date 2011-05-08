@@ -244,6 +244,7 @@ body {
 			<p><?php echo $lang_install['Part2 intro'] ?></p>
 			<ul class="spaced">
 				<li><span><strong><?php echo $lang_install['Admin username'] ?></strong> <?php echo $lang_install['Admin username info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Admin password'] ?></strong> <?php echo $lang_install['Admin password info'] ?></span></li>
 				<li><span><strong><?php echo $lang_install['Admin e-mail'] ?></strong> <?php echo $lang_install['Admin e-mail info'] ?></span></li>
 			</ul>
 		</div>
@@ -251,9 +252,13 @@ body {
 			<legend><?php echo $lang_install['Part2 legend'] ?></legend>
 				<div class="input text required">
 					<label for="fld7"><span><?php echo $lang_install['Admin username'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Username help'] ?></small></label>
-					<input id="fld7" type="text" name="req_username" size="35" maxlength="25" />
+					<input id="fld7" type="text" name="req_username" size="35" maxlength="25" value="admin" />
 				</div>
 				<div class="input text required">
+					<label for="fld8"><span><?php echo $lang_install['Admin password'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Password help'] ?></small></label>
+					<input id="fld8" type="password" name="req_password" size="35" maxlength="25" />
+				</div>
+				<div class="input text">
 					<label for="fld10"><span><?php echo $lang_install['Admin e-mail'] ?></span> <small><?php echo $lang_install['E-mail address help'] ?></small></label>
 					<span class="fld-input"><input id="fld10" type="text" name="adm_email" size="50" maxlength="80" />
 				</div>
@@ -319,7 +324,6 @@ else
 		return (get_magic_quotes_gpc() == 1) ? stripslashes($str) : $str;
 	}
 
-
 	$db_type = $_POST['req_db_type'];
 	$db_host = trim($_POST['req_db_host']);
 	$db_name = trim($_POST['req_db_name']);
@@ -327,6 +331,7 @@ else
 	$db_password = unescape(trim($_POST['db_password']));
 	$db_prefix = trim($_POST['db_prefix']);
 	$username = unescape(trim($_POST['req_username']));
+	$password = unescape(trim($_POST['req_password']));
 	$email = unescape(strtolower(trim($_POST['adm_email'])));
 	$default_lang = preg_replace('#[\.\\\/]#', '', unescape(trim($_POST['req_language'])));
 
@@ -347,9 +352,14 @@ else
 	if (strlen($db_prefix) > 0 && !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $db_prefix))
 		error(sprintf($lang_install['Invalid table prefix'], $db_prefix));
 
+	// Validate username
 	if (utf8_strlen($username) < 2)
 		error($lang_install['Username too short']);
 	if (utf8_strlen($username) > 25)
+		error($lang_install['Username too long']);
+
+	// Validate password
+	if (utf8_strlen($password) > 25)
 		error($lang_install['Username too long']);
 
 	// Validate email
@@ -368,7 +378,7 @@ else
 		case 'mysql':
 			require S2_ROOT.'_include/dblayer/mysql.php';
 			break;
-			
+
 		case 'mysql_innodb':
 			require S2_ROOT.'_include/dblayer/mysql_innodb.php';
 			break;
@@ -380,7 +390,7 @@ else
 		case 'mysqli_innodb':
 			require S2_ROOT.'_include/dblayer/mysqli_innodb.php';
 			break;
-			
+
 		case 'pgsql':
 			require S2_ROOT.'_include/dblayer/pgsql.php';
 			break;
@@ -859,7 +869,7 @@ else
 	$query = array(
 		'INSERT'	=> 'login, password, email, view, view_hidden, hide_comments, edit_comments, edit_site, edit_users',
 		'INTO'		=> 'users',
-		'VALUES'	=> '\''.$s2_db->escape($username).'\', \''.md5('Life is not so easy :-)').'\', \''.$s2_db->escape($email).'\', 1, 1, 1, 1, 1, 1'
+		'VALUES'	=> '\''.$s2_db->escape($username).'\', \''.md5($password.'Life is not so easy :-)').'\', \''.$s2_db->escape($email).'\', 1, 1, 1, 1, 1, 1'
 	);
 
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
