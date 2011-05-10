@@ -251,6 +251,8 @@ elseif ($action == 'upload')
 
 			if (!rename($_FILES['pictures']['tmp_name'][$i], $uploadfile))
 				$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
+
+			chmod($uploadfile, 0644);
 		}
 	}
 
