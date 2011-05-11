@@ -15,7 +15,7 @@
 <extension for="S2" engine="1.0">
 	<id>s2_search</id>
 	<title>Search</title>
-	<version>1.0a2</version>
+	<version>1.0a3</version>
 	<description>Full-text search with Russian morphology. Designed for small sites.</description>
 	<author>Roman Parpalak</author>
 
@@ -58,7 +58,7 @@ $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	<hooks>
 
 		<hook id="idx_get_content"><![CDATA[
-if ($request_uri == '/search')
+if ($request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	require $ext_info['path'].'/main.php';
@@ -67,7 +67,7 @@ if ($request_uri == '/search')
 		]]></hook>
 
 		<hook id="idx_template_pre_replace"><![CDATA[
-if ($request_uri == '/search')
+if ($request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
 {
 	$replace['<!-- s2_styles -->'] = '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/style.css" />'."\n".$replace['<!-- s2_styles -->'];
 	$replace['<!-- s2_search_field -->'] = '';
@@ -75,7 +75,7 @@ if ($request_uri == '/search')
 else
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.S2_PATH.S2_URL_PREFIX.'/search"><input type="text" name="q" class="inactive" id="s2_search_input" onblur="if(this.value==\'\'){this.value=this.defaultValue; this.className=\'inactive\';}" onfocus="if(this.value==this.defaultValue){this.value=this.className=\'\';}" value="'.$lang_s2_search['Search'].'"/></form>';
+	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.(S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search').'">'.(S2_URL_PREFIX ? '<input type="hidden" name="search" value="1" />' : '').'<input type="text" name="q" class="inactive" id="s2_search_input" onblur="if(this.value==\'\'){this.value=this.defaultValue; this.className=\'inactive\';}" onfocus="if(this.value==this.defaultValue){this.value=this.className=\'\';}" value="'.$lang_s2_search['Search'].'"/></form>';
 }
 
 if (S2_SEARCH_QUICK)

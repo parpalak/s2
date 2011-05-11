@@ -20,7 +20,7 @@ ob_start();
 
 ?>
 <div class="search-results">
-	<form method="get" action="<?php echo S2_PATH.S2_URL_PREFIX; ?>/search">
+	<form method="get" action="<?php echo S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search'; ?>">
 		<div class="button">
 			<input type="submit" name="search" value="<?php echo $lang_s2_search['Search button']; ?>" />
 		</div>
