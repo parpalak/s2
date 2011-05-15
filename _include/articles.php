@@ -532,7 +532,7 @@ function s2_parse_page_url ($request_uri)
 			'WHERE'		=> 'parent_id = '.$id.' AND published = 1',
 			'ORDER BY'	=> 'priority'
 		);
-		($hook = s2_hook('fn_s2_parse_page_url_pre_get_children')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_parse_page_url_pre_get_children_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$subarticles = $subsections = $menu_subsections = $menu_subarticles = array();
@@ -626,7 +626,7 @@ function s2_parse_page_url ($request_uri)
 			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND (SELECT id FROM '.$s2_db->prefix.'articles i WHERE i.parent_id = a.id AND i.published = 1 LIMIT 1) IS NULL',
 			'ORDER BY'	=> 'priority'
 		);
-		($hook = s2_hook('fn_s2_parse_page_url_pre_get_neighbours')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_parse_page_url_pre_get_neighbours_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$menu_articles = array();
