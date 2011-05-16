@@ -1,0 +1,14 @@
+<?php
+
+return array(
+	'table'			=> array(
+		'title'			=> 'Page',
+		'create_time'	=> 'Date',
+		'modify_time'	=> 'Edit date',
+//		'meta_descr'	=> 'Description',
+		'files'			=> 'Download',
+		'excerpt'		=> 'Excerpt',
+		'pagetext'		=> 'Text',
+	),
+	'page_limit'	=> 2,
+);
