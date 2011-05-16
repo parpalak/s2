@@ -10,5 +10,5 @@ return array(
 		'excerpt'		=> 'Excerpt',
 		'pagetext'		=> 'Text',
 	),
-	'page_limit'	=> 2,
+	'page_limit'	=> 20,
 );
