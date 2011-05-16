@@ -146,7 +146,7 @@ if ($action == 's2_attachment_upload')
 <title><?php echo $lang_pictures['Upload file'] ?></title>
 <meta http-equiv="Pragma" content="no-cache" />
 </head>
-<body onload="<?php echo $error_message; ?>"><?php if ($id) echo s2_attachment_list($id); ?></body>
+<body onload="<?php echo $error_message; ?>"><?php if ($id) echo s2_attachment_items($id); ?></body>
 </html>
 <?php
 

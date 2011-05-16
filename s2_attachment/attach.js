@@ -23,7 +23,7 @@ function s2_attachment_file_uploaded ()
 
 	if (head.indexOf('S2-State-Success') >= 0 && head.indexOf('s2_attachment-State-Success') >= 0)
 	{
-		document.getElementById('s2_attachment_list').innerHTML = window.frames['s2_attachment_result'].document.getElementsByTagName('body')[0].innerHTML;
+		document.getElementById('s2_attachment_items').innerHTML = window.frames['s2_attachment_result'].document.getElementsByTagName('body')[0].innerHTML;
 		document.getElementById('s2_attachment_file_upload_input').innerHTML = '<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" />';
 	}
 	else if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
@@ -37,7 +37,7 @@ function s2_attachment_delete_file (iId, esWarning)
 
 	var Response = GETSyncRequest(sUrl + "action=s2_attachment_delete&id=" + iId);
 	if (Response.status == '200')
-		document.getElementById('s2_attachment_list').innerHTML = Response.text;
+		document.getElementById('s2_attachment_items').innerHTML = Response.text;
 
 	return false;
 }
@@ -50,7 +50,7 @@ function s2_attachment_rename_file (iId, sInfo, esName)
 
 	var Response = GETSyncRequest(sUrl + "action=s2_attachment_rename&id=" + iId + '&name=' + encodeURIComponent(s));
 	if (Response.status == '200')
-		document.getElementById('s2_attachment_list').innerHTML = Response.text;
+		document.getElementById('s2_attachment_items').innerHTML = Response.text;
 
 	return false;
 }

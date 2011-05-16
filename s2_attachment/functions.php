@@ -10,7 +10,7 @@
 //
 // Interface functions
 //
-function s2_attachment_list ($id)
+function s2_attachment_items ($id)
 {
 	global $s2_db, $lang_s2_attachment;
 
@@ -19,7 +19,7 @@ function s2_attachment_list ($id)
 		'FROM'		=> 's2_attachment_files',
 		'WHERE'		=> 'article_id = '.$id
 	);
-	($hook = s2_hook('fn_s2_attachment_list_pre_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$list_files = $list_pictures = '';
@@ -63,7 +63,7 @@ function s2_attachment_add_col ($id)
 		</form>
 		<hr />
 		<div class="text_wrapper" style="padding-bottom: 7.0em;">
-			<div class="tags_list" id="s2_attachment_list"><?php echo s2_attachment_list($id); ?></div>
+			<div class="tags_list" id="s2_attachment_items"><?php echo s2_attachment_items($id); ?></div>
 		</div>
 	</div>
 <?php
@@ -172,7 +172,7 @@ function s2_attachment_placeholder_content ($id, $placeholder_limit)
 		'FROM'		=> 's2_attachment_files',
 		'WHERE'		=> 'article_id = '.$id
 	);
-	($hook = s2_hook('fn_s2_attachment_list_pre_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$list_files = '';

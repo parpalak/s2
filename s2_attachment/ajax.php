@@ -47,7 +47,7 @@ if ($action == 's2_attachment_delete')
 	($hook = s2_hook('rq_action_s2_attachment_delete_pre_del_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	echo s2_attachment_list($file['article_id']);
+	echo s2_attachment_items($file['article_id']);
 }
 
 elseif ($action == 's2_attachment_rename')
@@ -80,5 +80,5 @@ elseif ($action == 's2_attachment_rename')
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$file = $s2_db->fetch_assoc($result);
-	echo s2_attachment_list($file['article_id']);
+	echo s2_attachment_items($file['article_id']);
 }
