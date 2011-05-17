@@ -101,6 +101,8 @@ if ($action == 's2_attachment_upload')
 				$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
 				continue;
 			}
+			else
+				chmod($uploadfile, 0644);
 
 			$size = filesize($uploadfile);
 			$is_picture = (int) (strpos($filename, '.') !== false && in_array(end(explode('.', $filename)), array ('gif', 'bmp', 'jpg', 'jpeg', 'png')));
