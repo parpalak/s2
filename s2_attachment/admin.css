@@ -22,18 +22,28 @@
 		float: right;
 		display: none;
 		}
-		#s2_attachment_col li .buttons img {
+		#s2_attachment_col .buttons img {
 			background-image: url(../../_admin/i/icons.png);
-			background-color: #eee;
-			width: 16px;
-			height: 16px;
+			width: 14px;
+			height: 14px;
+			border: 1px solid transparent;
 			}
-		#s2_attachment_col li .buttons img:hover {
+		#s2_attachment_col .buttons img:active:hover {
 			background-color: #fff;
 			}
+		#s2_attachment_col .buttons img:hover {
+			background-color: #d2e5fc;
+			-moz-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+			-webkit-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+			border: 1px solid #7da2ce;
+			-moz-border-radius: 2px;
+			-webkit-border-radius: 2px;
+			border-radius: 2px;
+			}
 			#s2_attachment_col .buttons img.delete {
-				background-position: 0 -32px;
+				background-position: -1px -33px;
 				}
 			#s2_attachment_col .buttons img.rename {
-				background-position: -32px -16px;
+				background-position: -33px -33px;
 				}
