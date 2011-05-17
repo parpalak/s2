@@ -5,7 +5,7 @@ return array(
 		'title'			=> 'Page',
 		'create_time'	=> 'Date',
 		'modify_time'	=> 'Edit date',
-//		'meta_descr'	=> 'Description',
+//		'meta_desc'		=> 'Description',
 		'files'			=> 'Download',
 		'excerpt'		=> 'Excerpt',
 		'pagetext'		=> 'Text',
