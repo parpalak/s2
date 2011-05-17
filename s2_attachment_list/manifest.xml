@@ -32,7 +32,7 @@ if (strpos($template, '<!-- s2_attachment_list -->') !== false)
 	require $ext_info['path'].'/functions.php';
 	$s2_attachment_list_config = file_exists($ext_info['path'].'/config.php') ? include $ext_info['path'].'/config.php' : array('table' => false, 'page_limit' => 0);
 
-	$page['s2_attachment_list'] = s2_attachment_list($id, $parent_path, $current_path, $s2_attachment_list_config['table'], $s2_attachment_list_config['page_limit']);
+	$page['s2_attachment_list'] = s2_attachment_list($id, $current_path, $s2_attachment_list_config['table'], $s2_attachment_list_config['page_limit']);
 }
 		]]></hook>
 
