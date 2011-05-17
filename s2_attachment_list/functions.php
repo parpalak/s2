@@ -42,7 +42,7 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit)
 	$subquery = array(
 		'SELECT'	=> 'a.id',
 		'FROM'		=> 's2_attachment_files AS f',
-		'WHERE'		=> 'f.article_id = a.id AND f.is_picture = 0',
+		'WHERE'		=> 'f.article_id = a.id',
 		'LIMIT'		=> '1'
 	);
 	$raw_query2 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
@@ -88,7 +88,7 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit)
 		$query = array(
 			'SELECT'	=> 'name, filename, time, size, article_id',
 			'FROM'		=> 's2_attachment_files',
-			'WHERE'		=> 'article_id IN ('.implode(', ', $ids).') AND is_picture = 0',
+			'WHERE'		=> 'article_id IN ('.implode(', ', $ids).')',
 			'ORDER BY'	=> 'time'
 		);
 		($hook = s2_hook('fn_s2_attachment_list_pre_get_files_qr')) ? eval($hook) : null;
