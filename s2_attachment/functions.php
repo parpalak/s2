@@ -55,10 +55,9 @@ function s2_attachment_add_col ($id)
 	<div class="r-float" id="s2_attachment_col">
 		<form target="s2_attachment_result" enctype="multipart/form-data" action="<?php echo S2_PATH; ?>/_admin/pict_ajax.php?action=s2_attachment_upload" method="post" onsubmit="s2_attachment_upload_submit(this);">
 			<div id="s2_attachment_file_upload_input">
-				<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" />
+				<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" onchange="s2_attachment_upload_change(this);" />
 			</div>
-			<?php printf($lang_pictures['Upload limit'], s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))), s2_frendly_filesize(s2_return_bytes(ini_get('post_max_size')))); ?><br />
-			<input type="submit" value="<?php echo $lang_pictures['Upload']; ?>" />
+			<?php printf($lang_pictures['Upload limit'], s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))), s2_frendly_filesize(s2_return_bytes(ini_get('post_max_size')))); ?>
 			<input type="hidden" name="id" value="<?php echo $id; ?>" />
 		</form>
 		<hr />

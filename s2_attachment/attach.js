@@ -13,6 +13,16 @@ function s2_attachment_upload_submit (eForm)
 	s2_attachment_was_upload = true;
 }
 
+function s2_attachment_upload_change (eItem)
+{
+	var eForm = eItem.form;
+	setTimeout(function()
+	{
+		s2_attachment_upload_submit(eForm);
+		eForm.submit();
+	}, 0);
+}
+
 function s2_attachment_file_uploaded ()
 {
 	if (!s2_attachment_was_upload)
@@ -24,7 +34,7 @@ function s2_attachment_file_uploaded ()
 	if (head.indexOf('S2-State-Success') >= 0 && head.indexOf('s2_attachment-State-Success') >= 0)
 	{
 		document.getElementById('s2_attachment_items').innerHTML = window.frames['s2_attachment_result'].document.getElementsByTagName('body')[0].innerHTML;
-		document.getElementById('s2_attachment_file_upload_input').innerHTML = '<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" />';
+		document.getElementById('s2_attachment_file_upload_input').innerHTML = '<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" onchange="s2_attachment_upload_change(this);" />';
 	}
 	else if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
 		DisplayError(body);
