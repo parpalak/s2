@@ -10,5 +10,9 @@ return array(
 		'excerpt'		=> 'Excerpt',
 		'pagetext'		=> 'Text',
 	),
+	'time_format'	=> array(
+		'create_time'	=> 'd.m.Y H:i', // See http://php.net/manual/en/function.date.php for details
+		'modify_time'	=> 'd.m.Y H:i',
+	),
 	'page_limit'	=> 20,
 );

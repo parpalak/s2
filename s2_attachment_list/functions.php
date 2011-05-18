@@ -19,7 +19,7 @@ function s2_attachment_paging ($page, $total_pages, $current_path)
 	return '<div class="paging">'.$str.'</div>';
 }
 
-function s2_attachment_list ($id, $current_path, $config, $page_limit)
+function s2_attachment_list ($id, $current_path, $config, $page_limit, $time_format)
 {
 	global $s2_db, $lang_s2_attachment;
 
@@ -107,9 +107,9 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit)
 			if ($conf_name == 'files')
 				$item = isset($files[$row['id']]) ? implode('<br />', $files[$row['id']]) : '';
 			elseif ($conf_name == 'title')
-				$item = '<a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).($row['children_exist'] ? '/' : '').'">'.$row['title'].'</a>';
+				$item = (!isset($row['pagetext']) || !trim($row['pagetext'])) ? $row['title'] : '<a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).($row['children_exist'] ? '/' : '').'">'.$row['title'].'</a>';
 			elseif ($conf_name == 'create_time' || $conf_name == 'modify_time')
-				$item = $row[$conf_name] ? '<nobr>'.s2_date($row[$conf_name]).'</nobr>' : '';
+				$item = $row[$conf_name] ? (!empty($time_format[$conf_name]) ? date($time_format[$conf_name], $row[$conf_name]) : '<nobr>'.s2_date($row[$conf_name]).'</nobr>') : '';
 			else
 				$item = $row[$conf_name];
 			$tr .= '<td>'.$item.'</td>';
