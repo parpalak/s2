@@ -149,8 +149,8 @@ function s2_show_comments ($mode, $id = 0)
 
 	foreach ($article_titles as $article_id => $title)
 	{
-		$output_header = '<h3><a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">&larr; '.$title.'</a></h3>';
-		$output_subheader = $mode != 'all' ? '<a href="#" title="'.sprintf($lang_admin['All comments to'], $title).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>' : '';
+		$output_header = '<h3><a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">&larr; '.s2_htmlencode($title).'</a></h3>';
+		$output_subheader = $mode != 'all' ? '<a href="#" title="'.sprintf($lang_admin['All comments to'], s2_htmlencode($title)).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>' : '';
 		$output_body = 
 			'<table class="sort" width="100%">'.
 				'<thead><tr><td width="8%">'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td width="8%">'.$lang_admin['Date'].'</td><td width="8%">'.$lang_admin['IP'].'</td><td width="10%">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
