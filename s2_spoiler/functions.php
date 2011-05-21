@@ -111,7 +111,7 @@ function s2_spoiler_flip (eItem)
 (function () {
 	var head = document.getElementsByTagName('head')[0],
 		style = document.createElement('style'),
-		rules = '.s2_spoiler {margin: 1em 0;} .s2_spoiler_body {display: none;} .s2_spoiler_head, .s2_spoiler_head_expand {display: inline-block; border-bottom: 1px dashed; cursor: pointer;} .s2_spoiler_head:before, .s2_spoiler_head_expand:before {position: absolute; margin-left: -14px; margin-top: 6px; display: inline-block; content: "+"; border: 1px solid #999; color: #999; background: #fff; line-height: 8px; font-size: 14px; width: 8px; text-align: center; cursor: pointer; } .s2_spoiler_head_expand:before {content: \'\\2212\'}';
+		rules = '.s2_spoiler {margin: 1em 0;} .s2_spoiler_body {display: none;} .s2_spoiler_head, .s2_spoiler_head_expand {display: inline-block; border-bottom: 1px dashed; cursor: pointer;} .s2_spoiler_head:before, .s2_spoiler_head_expand:before {position: absolute; margin-left: -14px; margin-top: 6px; display: inline-block; content: "+"; border: 1px solid #999; color: #999; background: #fff; line-height: 8px; font-size: 11px; width: 8px; text-align: center; cursor: pointer; } .s2_spoiler_head_expand:before {content: \'\\2212\'}';
 
 	style.type = 'text/css';
 	if (style.styleSheet)
