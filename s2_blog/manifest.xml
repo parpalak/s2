@@ -51,8 +51,7 @@ if (!$s2_db->table_exists('s2_blog_posts'))
 			),
 			'text'			=> array(
 				'datatype'		=> 'LONGTEXT',
-				'allow_null'	=> false,
-				'default'		=> '\'\''
+				'allow_null'	=> true
 			),
 			'published'		=> array(
 				'datatype'		=> 'TINYINT(1)',
@@ -152,8 +151,7 @@ if (!$s2_db->table_exists('s2_blog_comments'))
 			),
 			'text'			=> array(
 				'datatype'		=> 'TEXT',
-				'allow_null'	=> false,
-				'default'		=> '\'\''
+				'allow_null'	=> true
 			),
 		),
 		'PRIMARY KEY'	=> array('id'),
