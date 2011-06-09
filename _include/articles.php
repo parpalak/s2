@@ -281,6 +281,195 @@ function s2_articles_by_tag ($tag_id)
 }
 
 //
+// Returns the title of the main page
+//
+function s2_main_page_title ()
+{
+	global $s2_db;
+
+	$query = array(
+		'SELECT'	=> 'title',
+		'FROM'		=> 'articles',
+		'WHERE'		=> 'parent_id = '.S2_ROOT_ID,
+	);
+
+	($hook = s2_hook('fn_s2_main_page_title_qr')) ? eval($hook) : null;
+
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$main_title = $s2_db->result($result);
+	return $main_title;
+}
+
+//
+// Builds tags pages
+//
+function s2_make_tags_pages ($request_array)
+{
+	global $s2_db, $lang_common;
+
+	if (!isset($request_array[2]) || $request_array[2] == '')
+	{
+		// Tags list
+
+		$query = array(
+			'SELECT'	=> 'tag_id, name, url',
+			'FROM'		=> 'tags'
+		);
+		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_tags_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		while ($row = $s2_db->fetch_assoc($result))
+		{
+			$tag_name[$row['tag_id']] = $row['name'];
+			$tag_url[$row['tag_id']] = $row['url'];
+			$tag_count[$row['tag_id']] = 0;
+		}
+
+		// Well, it's a hack because we don't check parents' "published" property 
+		$query = array(
+			'SELECT'	=> 'at.tag_id',
+			'FROM'		=> 'article_tag AS at',
+			'JOINS'		=> array(
+				array(
+					'INNER JOIN'	=> 'articles AS a',
+					'ON'			=> 'a.id = at.article_id'
+				)
+			),
+			'WHERE'		=> 'a.published = 1'
+		);
+		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_posts_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		while ($row = $s2_db->fetch_row($result))
+			$tag_count[$row[0]]++;
+
+		arsort($tag_count);
+
+		$tags = array();
+		foreach ($tag_count as $id => $num)
+			if ($num)
+				$tags[] = '<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/'.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a>';
+
+		($hook = s2_hook('fn_s2_make_tags_pages_tags_end')) ? eval($hook) : null;
+
+		return array(
+			'text'			=> implode('<br />', $tags),
+			'date'			=> '',
+			'head_title'	=> $lang_common['Tags'],
+			'title'			=> $lang_common['Tags'],
+			'path'			=> '<a href="'.S2_PATH.S2_URL_PREFIX.'/">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].$lang_common['Tags'],
+		);
+	}
+	else
+	{
+		// Tag preview
+
+		$query = array(
+			'SELECT'	=> 'tag_id, description, name',
+			'FROM'		=> 'tags',
+			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[2]).'\''
+		);
+		($hook = s2_hook('fn__pre_get_tag_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		if (!$s2_db->num_rows($result))
+			error_404();
+
+		list($tag_id, $tag_description, $tag_name) = $s2_db->fetch_row($result);
+
+		if ($tag_description)
+			$tag_description .= '<hr />';
+
+		$subquery = array(
+			'SELECT'	=> 'a1.id',
+			'FROM'		=> 'articles AS a1',
+			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
+			'LIMIT'		=> '1'
+		);
+		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+		$query = array(
+			'SELECT'	=> 'a.title, a.url, ('.$raw_query1.') IS NOT NULL AS children_exist, a.id, a.excerpt, a.create_time, a.parent_id',
+			'FROM'		=> 'article_tag AS at',
+			'JOINS'		=> array(
+				array(
+					'INNER JOIN'	=> 'articles AS a',
+					'ON'			=> 'a.id = at.article_id'
+				),
+			),
+			'WHERE'		=> 'at.tag_id = '.$tag_id.' AND published = 1'
+		);
+		($hook = s2_hook('fn__pre_get_arts_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		$urls = $parent_ids = $is_section = $excerpts = array();
+		while ($row = $s2_db->fetch_assoc($result))
+		{
+			$urls[] = urlencode($row['url']);
+			$is_section[] = $row['children_exist'];
+			$time[] = $row['create_time'];
+			$excerpts[] = $row['excerpt'];
+			$titles[] = $row['title'];
+			$parent_ids[] = $row['parent_id'];
+		}
+
+		$urls = s2_get_group_url($parent_ids, $urls);
+
+		$subsection_text = '';
+		$subarticles = array();
+		foreach ($urls as $k => $url)
+		{
+			if ($is_section[$k])
+				$subsection_text .= '<p class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'">'.s2_htmlencode($titles[$k]).'</a></p>';
+			else
+				$subarticles[] = array(
+					'title' => s2_htmlencode($titles[$k]),
+					'time' => $time[$k],
+					'excerpt' => $excerpts[$k],
+					'url' => $urls[$k]
+				);
+		}
+
+		if ($subsection_text)
+			$subsection_text = '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'.$subsection_text;
+
+		$text = '';
+
+		// There are articles in the section
+		if (!empty($subarticles))
+		{
+			// ... and to the page text
+			$text .= '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n";
+
+			// Ordering articles by date
+			$max = count($subarticles);
+			for ($i = 0; $i < $max - 1; $i++)
+				for ($j = $i + 1; $j < $max; $j++)
+					if ($subarticles[$i]['time'] < $subarticles[$j]['time'])
+					{
+						$temp = $subarticles[$i];
+						$subarticles[$i] = $subarticles[$j];
+						$subarticles[$j] = $temp;
+					}
+
+			foreach ($subarticles as $item)
+				$text .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
+					'<div class="article date">'.s2_date($item['time']).'</div>'."\n".
+					'<p class="article">'.$item['excerpt'].'</p>'."\n";
+		}
+
+		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;
+
+		return array(
+			'text'			=> $tag_description.$subsection_text.$text,
+			'date'			=> '',
+			'head_title'	=> s2_htmlencode($tag_name),
+			'title'			=> s2_htmlencode($tag_name),
+			'path'			=> '<a href="'.S2_PATH.S2_URL_PREFIX.'/">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].'<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/">'.$lang_common['Tags'].'</a>'.$lang_common['Crumbs separator'].s2_htmlencode($tag_name),
+		);
+	}
+}
+
+//
 // Functions below build every site page
 //
 
@@ -391,6 +580,14 @@ function s2_parse_page_url ($request_uri)
 	global $page, $s2_db, $template, $lang_common;
 
 	$request_array = explode('/', $request_uri);   //   []/[dir1]/[dir2]/[dir3]/[file1]
+
+	if (isset($request_array[1]) && $request_array[1] == S2_TAGS_URL)
+	{
+		// We process tags pages in a different way
+		$page = s2_make_tags_pages($request_array);
+		$template = s2_get_template('site.php');
+		return;
+	}
 
 	$was_end_slash = '/' == substr($request_uri, -1);
 
