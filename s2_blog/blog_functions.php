@@ -382,7 +382,7 @@ function s2_blog_posts_by_tag ($tag)
 	if ($output == '')
 		error_404();
 
-	return array($tag_descr.$output, $tag_name);
+	return array($tag_descr.$output, s2_htmlencode($tag_name));
 }
 
 function s2_blog_get_favorite_posts ()
