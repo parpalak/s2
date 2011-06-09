@@ -48,4 +48,4 @@ $s2_search_queryuery = array(
 ($hook = s2_hook('s2_search_pre_crumbs_fetch_qr')) ? eval($hook) : null;
 $s2_search_result = $s2_db->query_build($s2_search_queryuery) or error(__FILE__, __LINE__);
 list($s2_search_main) = $s2_db->fetch_row($s2_search_result);
-$page['path'] = sprintf($lang_s2_search['Crumbs'], $s2_search_main, S2_PATH.'/', $lang_s2_search['Search']);
+$page['path'] = sprintf($lang_s2_search['Crumbs'], $s2_search_main, S2_PATH.S2_URL_PREFIX.'/', $lang_s2_search['Search']);
