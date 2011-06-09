@@ -172,7 +172,7 @@ function s2_blog_output_post_list ($criteria)
 			$body .= '<tr'.$class.'><td class="content"><a href="#" onclick="return EditRecord('.$row['id'].'); ">'.$row['title'].'</a></td><td>'.$date.'</td><td>'.$tags.'</td><td>'.$row['label'].'</td><td>'.$comment.'</td><td>'.$buttons.'</td></tr>';
 		}
 
-		echo '<table width="100%" class="sort"><thead><tr><td>'.$lang_s2_blog['Post'].'</td><td width="10%">'.$lang_admin['Date'].'</td><td width="20%">'.$lang_admin['Tags'].'</td><td width="5%">'.$lang_s2_blog['Label'].'</td><td width="9%">'.$lang_common['Comments'].'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
+		echo '<table width="100%" class="sort"><thead><tr><td>'.$lang_s2_blog['Post'].'</td><td width="10%">'.$lang_admin['Date'].'</td><td width="20%">'.$lang_s2_blog['Tags'].'</td><td width="5%">'.$lang_s2_blog['Label'].'</td><td width="9%">'.$lang_common['Comments'].'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
 	}
 	else
 		echo '<div class="info-box"><p>'.$lang_s2_blog['No posts found'].'</p></div>';
