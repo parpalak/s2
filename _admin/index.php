@@ -149,7 +149,7 @@ var template = '<?php echo str_replace(array('\\', '\'', '</script>', "\n", "\r"
 			<div class="reducer" id="comm_div"><?php echo s2_for_premoderation(); ?></div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_tags')) ? eval($hook) : null; ?>
-		<dt id="tag_tab"><?php echo $lang_admin['Tags']; ?></dt>
+		<dt id="tag_tab"><?php echo $lang_common['Tags']; ?></dt>
 		<dd>
 			<div class="reducer" id="tag_div"></div>
 		</dd>

@@ -15,6 +15,7 @@ $lang_common = array(
 'More in this section'		=> 'Еще в разделе <nobr>«%s»</nobr>',
 'Crumbs separator'			=> ' &rarr; ',
 'Subsections'				=> 'Подразделы',
+'Tags'						=> 'Ключевые слова',
 'With this tag'				=> 'По теме «%s»',
 'Comments'					=> 'Комментарии',
 'Copyright 1'				=> '© %1$s, %2$s.',
