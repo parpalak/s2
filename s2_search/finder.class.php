@@ -749,8 +749,6 @@ if (defined('DEBUG'))
 
 	protected static function paging ($page, $total_pages, $link)
 	{
-		global $lang_s2_search;
-
 		$str = '';
 		for ($i = 1; $i <= $total_pages; $i++)
 			$str .= ($i == $page ? '<span class="current">'.$i.'</span>' : '<a href="'.$link.'&amp;p='.$i.'">'.$i.'</a>');
