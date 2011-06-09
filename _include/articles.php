@@ -369,7 +369,7 @@ function s2_make_tags_pages ($request_array)
 			'FROM'		=> 'tags',
 			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[2]).'\''
 		);
-		($hook = s2_hook('fn__pre_get_tag_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 		if (!$s2_db->num_rows($result))
 			error_404();
@@ -398,7 +398,7 @@ function s2_make_tags_pages ($request_array)
 			),
 			'WHERE'		=> 'at.tag_id = '.$tag_id.' AND published = 1'
 		);
-		($hook = s2_hook('fn__pre_get_arts_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_make_tags_pages_pre_get_arts_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$urls = $parent_ids = $is_section = $excerpts = array();
