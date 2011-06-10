@@ -291,7 +291,7 @@ if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 $replace['<!-- s2_blog_calendar -->'] = !empty($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
 		]]></hook>
 
-		<hook id="fn_process_tags_pre_get_tags_qr"><![CDATA[
+		<hook id="fn_tagged_articles_pre_get_tags_qr"><![CDATA[
 $subquery = array(
 	'SELECT'	=> 'p.id',
 	'FROM'		=> 's2_blog_posts AS p',
@@ -311,12 +311,12 @@ $query['SELECT'] .= ', ('.$raw_query.') IS NOT NULL as s2_blog_is_posts';
 $s2_blog_links = array();
 		]]></hook>
 
-		<hook id="fn_process_tags_loop_get_tags"><![CDATA[
+		<hook id="fn_tagged_articles_loop_get_tags"><![CDATA[
 if ($row['s2_blog_is_posts'])
 	$s2_blog_links[] = '<a href="'.BLOG_KEYWORDS.urlencode($row['url']).'/">'.$row['name'].'</a>';
 		]]></hook>
 
-		<hook id="fn_process_tags_end"><![CDATA[
+		<hook id="fn_tagged_articles_end"><![CDATA[
 // Links to blog tags
 if (!empty($s2_blog_links))
 {
