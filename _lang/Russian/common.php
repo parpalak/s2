@@ -16,6 +16,7 @@ $lang_common = array(
 'Crumbs separator'			=> ' &rarr; ',
 'Subsections'				=> 'Подразделы',
 'Tags'						=> 'Ключевые слова',
+'Tags:'						=> 'Ключевые слова: %s',
 'With this tag'				=> 'По теме «%s»',
 'Comments'					=> 'Комментарии',
 'Copyright 1'				=> '© %1$s, %2$s.',

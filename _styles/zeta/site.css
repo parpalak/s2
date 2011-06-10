@@ -381,6 +381,11 @@ body {
 				width: 100%;
 				}
 
+.tags_list {
+	font-size: 0.8571em;
+	color: #666;
+	}
+
 img[align="left"] {
 	margin-right: 1.5em;
 	}

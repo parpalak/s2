@@ -108,6 +108,7 @@ $replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_d
 $replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $page['path'] : '';
 $replace['<!-- s2_text -->'] = isset($page['text']) ? $page['text'] : '';
 $replace['<!-- s2_subarticles -->'] = isset($page['subcontent']) ? $page['subcontent'] : '';
+$replace['<!-- s2_tags -->'] = !empty($page['tags_list']) ? $page['tags_list'] : '';
 $replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
 
 if (S2_ENABLED_COMMENTS && isset($page['commented']) && $page['commented'])
