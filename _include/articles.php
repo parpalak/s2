@@ -564,7 +564,7 @@ function s2_tagged_articles ($id)
 	$output = array();
 	($hook = s2_hook('fn_tagged_articles_pre_menu_merge')) ? eval($hook) : null;
 	foreach ($art_by_tags as $tag_id => $articles)
-		$output[] = '<div class="header">'.sprintf($lang_common['With this tag'], $tag_names[$tag_id]).'</div>'."\n".
+		$output[] = '<div class="header">'.sprintf($lang_common['With this tag'], '<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/">'.$tag_names[$tag_id].'</a>').'</div>'."\n".
 			'<ul>' . $articles . '</ul>'."\n";
 
 	($hook = s2_hook('fn_tagged_articles_end')) ? eval($hook) : null;
