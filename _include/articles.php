@@ -470,7 +470,7 @@ function s2_make_tags_pages ($request_array)
 // Functions below build every site page
 //
 
-function s2_process_tags ($id)
+function s2_tagged_articles ($id)
 {
 	global $s2_db, $lang_common;
 
@@ -485,7 +485,7 @@ function s2_process_tags ($id)
 		),
 		'WHERE'		=> 'atg.article_id = '.$id
 	);
-	($hook = s2_hook('fn_process_tags_pre_get_tags_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_tagged_articles_pre_get_tags_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	if (!$s2_db->num_rows($result))
 		return;
@@ -493,7 +493,7 @@ function s2_process_tags ($id)
 	$tag_names = $tag_urls = array();
 	while ($row = $s2_db->fetch_assoc($result))
 	{
-		($hook = s2_hook('fn_process_tags_loop_get_tags')) ? eval($hook) : null;
+		($hook = s2_hook('fn_tagged_articles_loop_get_tags')) ? eval($hook) : null;
 
 		$tag_names[$row['tag_id']] = $row['name'];
 		$tag_urls[$row['tag_id']] = $row['url'];
@@ -519,7 +519,7 @@ function s2_process_tags ($id)
 		'WHERE'		=> 'atg.tag_id IN ('.implode(', ', array_keys($tag_names)).') AND a.published = 1',
 		'ORDER BY'	=> 'create_time'
 	);
-	($hook = s2_hook('fn_process_tags_pre_get_articles_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_tagged_articles_pre_get_articles_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	if (!$s2_db->num_rows($result))
 		return;
@@ -530,7 +530,7 @@ function s2_process_tags ($id)
 
 	while ($row = $s2_db->fetch_assoc($result))
 	{
-		($hook = s2_hook('fn_process_tags_get_articles_loop')) ? eval($hook) : null;
+		($hook = s2_hook('fn_tagged_articles_get_articles_loop')) ? eval($hook) : null;
 
 		if ($id <> $row['id'])
 			$create_tag_list = true;
@@ -552,7 +552,7 @@ function s2_process_tags ($id)
 			'<li class="active"><span>'.s2_htmlencode($titles[$k]).'</span></li>' :
 			'<li><a href="'.S2_PATH.S2_URL_PREFIX.$urls[$k].'">'.s2_htmlencode($titles[$k]).'</a></li>';
 
-	($hook = s2_hook('fn_process_tags_pre_art_by_tags_merge')) ? eval($hook) : null;
+	($hook = s2_hook('fn_tagged_articles_pre_art_by_tags_merge')) ? eval($hook) : null;
 
 	// Remove tags that have only one article
 	foreach ($art_by_tags as $tag_id => $title_array)
@@ -562,12 +562,12 @@ function s2_process_tags ($id)
 			unset($art_by_tags[$tag_id]);
 
 	$output = array();
-	($hook = s2_hook('fn_process_tags_pre_menu_merge')) ? eval($hook) : null;
+	($hook = s2_hook('fn_tagged_articles_pre_menu_merge')) ? eval($hook) : null;
 	foreach ($art_by_tags as $tag_id => $articles)
 		$output[] = '<div class="header">'.sprintf($lang_common['With this tag'], $tag_names[$tag_id]).'</div>'."\n".
 			'<ul>' . $articles . '</ul>'."\n";
 
-	($hook = s2_hook('fn_process_tags_end')) ? eval($hook) : null;
+	($hook = s2_hook('fn_tagged_articles_end')) ? eval($hook) : null;
 	return !empty($output) ? implode("\n", $output) : '';
 }
 
@@ -854,7 +854,7 @@ function s2_parse_page_url ($request_uri)
 
 	// Tags
 	if (strpos($template, '<!-- s2_article_tags -->') !== false)
-		$page['article_tags'] = s2_process_tags($id);
+		$page['article_tags'] = s2_tagged_articles($id);
 
 	// Comments
 	if ($page['commented'] && S2_SHOW_COMMENTS && strpos($template, '<!-- s2_comments -->') !== false)
