@@ -437,9 +437,6 @@ function s2_make_tags_pages ($request_array)
 		// There are articles in the section
 		if (!empty($subarticles))
 		{
-			// ... and to the page text
-			$text .= '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n";
-
 			// Ordering articles by date
 			$max = count($subarticles);
 			for ($i = 0; $i < $max - 1; $i++)
@@ -460,7 +457,7 @@ function s2_make_tags_pages ($request_array)
 		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;
 
 		return array(
-			'text'			=> $tag_description.$subsection_text.$text,
+			'text'			=> $tag_description.$text.$subsection_text,
 			'date'			=> '',
 			'head_title'	=> s2_htmlencode($tag_name),
 			'title'			=> s2_htmlencode($tag_name),
