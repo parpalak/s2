@@ -628,7 +628,7 @@ function StopDrag()
 			{
 				if (eItem == eSourceLi)
 				{
-					alert(s2_lang.no_loops);
+					s2_popup_message(s2_lang.no_loops);
 					acceptorElement = null;
 					return;
 				}
@@ -1342,7 +1342,7 @@ function AddUser (sUser)
 {
 	if (sUser == '')
 	{
-		alert(s2_lang.empty_login);
+		s2_popup_message(s2_lang.empty_login);
 		return false;
 	}
 
@@ -1374,7 +1374,7 @@ function SetUserPassword (sUser)
 
 	var Response = POSTSyncRequest(sUrl + 'action=user_set_password&name=' + sUser, 'pass=' + encodeURIComponent(hex_md5(s + 'Life is not so easy :-)')));
 	if (Response.status == '200')
-		alert(Response.text);
+		s2_popup_message(Response.text, false, 3);
 
 	return false;
 }
@@ -1438,7 +1438,7 @@ function SaveTag ()
 {
 	if (document.tagform['tag[name]'].value == '')
 	{
-		alert(s2_lang.empty_tag);
+		s2_popup_message(s2_lang.empty_tag);
 		return false;
 	}
 

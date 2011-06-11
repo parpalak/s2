@@ -245,7 +245,7 @@ function CheckStatus (xmlhttp)
 
 	if (s2_status == 'Expired' || s2_status == 'Lost' || s2_status == 'Forbidden')
 	{
-		alert(xmlhttp.responseText);
+		s2_popup_message(xmlhttp.responseText);
 		return false
 	}
 
@@ -337,4 +337,39 @@ function UnknownError (sError, iStatus)
 	else
 		DisplayError(s2_lang.unknown_error + ' ' + iStatus + '<br />' +
 				s2_lang.server_response + '<br />' + sError);
+}
+
+function s2_popup_message (sMessage, aActions, iTime)
+{
+	var eDiv = document.getElementById('popup_message');
+	if (eDiv)
+		eDiv.parentNode.removeChild(eDiv);
+	eDiv = document.createElement('DIV');
+	document.body.appendChild(eDiv);
+	eDiv.setAttribute('id', 'popup_message');
+
+	var eInnerDiv = document.createElement('DIV');
+	eDiv.appendChild(eInnerDiv);
+
+	if (iTime)
+	{
+		setTimeout(function () { eDiv.parentNode.removeChild(eDiv); }, iTime * 1000);
+	}
+	else
+	{
+		var eImg = document.createElement('IMG');
+		eImg.setAttribute('src', 'i/1.gif');
+		eImg.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
+		eInnerDiv.appendChild(eImg);
+	}
+
+	eInnerDiv.appendChild(document.createTextNode(sMessage));
+
+	var max = aActions ? aActions.length : 0;
+	for (var i = 0; i < max; i++)
+	{
+		var eA = document.createElement('A');
+		eA.appendChild(document.createTextNode(aActions.name));
+		eA.onclick = aActions.action;
+	}
 }
