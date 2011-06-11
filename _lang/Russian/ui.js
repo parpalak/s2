@@ -39,7 +39,7 @@ var s2_lang = {
 	delete_item			: 'Удалить «%s» и все дочерние элементы?',
 
 	create_subfolder	: 'Создать подпапку',
-	delete				: 'Удалить',
+	delete_folder		: 'Удалить папку',
 
 	file				: 'Файл: ',
 	folder				: 'папку ',

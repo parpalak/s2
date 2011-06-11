@@ -77,7 +77,7 @@ function InitMovableDivs ()
 	{
 		buttonPanel = document.createElement("SPAN");
 		buttonPanel.setAttribute("id", "context_buttons");
-		buttonPanel.innerHTML = '<img class="add" src="i/1.gif" onclick="return CreateSubFolder();" alt="' + s2_lang.create_subfolder + '" /><img src="i/1.gif" class="delete" onclick="return DeleteFolder();" alt="' + s2_lang.delete + '" />';
+		buttonPanel.innerHTML = '<img class="add" src="i/1.gif" onclick="return CreateSubFolder();" alt="' + s2_lang.create_subfolder + '" /><img src="i/1.gif" class="delete" onclick="return DeleteFolder();" alt="' + s2_lang.delete_folder + '" />';
 	}
 }
 
