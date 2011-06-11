@@ -22,7 +22,7 @@ var s2_counter = {
 			s2_counter.hits.addParam("wmode", "opaque");
 			var settings_file = "../_extensions/s2_counter/traffic.xml?" + Math.random();
 
-			(hook = hooks['fn_s2_counter_draw_chart_pre_hits']) ? eval(hook) : null;
+			(hook = Hooks.get('fn_s2_counter_draw_chart_pre_hits')) ? eval(hook) : null;
 
 			s2_counter.hits.addVariable("settings_file", encodeURIComponent(settings_file));
 		}
@@ -35,7 +35,7 @@ var s2_counter = {
 			s2_counter.rss.addParam("wmode", "opaque");
 			settings_file = "../_extensions/s2_counter/rss.xml?" + Math.random();
 
-			(hook = hooks['fn_s2_counter_draw_chart_pre_rss']) ? eval(hook) : null;
+			(hook = Hooks.get('fn_s2_counter_draw_chart_pre_rss')) ? eval(hook) : null;
 
 			s2_counter.rss.addVariable("settings_file", encodeURIComponent(settings_file));
 		}
