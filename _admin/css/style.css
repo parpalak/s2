@@ -197,6 +197,7 @@ hr {
 	top: -2px;
 	z-index: 5000;
 	width: 90%;
+	left: 5%;
 	height: 1px;
 	}
 	#popup_message > div {
