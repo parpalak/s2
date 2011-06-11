@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_wysiwyg</id>
 	<title>WYSIWYG</title>
-	<version>1.0a3</version>
+	<version>1.0a4</version>
 	<description>Adds TinyMCE WYSIWYG editor to the article edit form.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a4</minversion>
-	<maxtestedon>1.0a4</maxtestedon>
+	<minversion>1.0a5</minversion>
+	<maxtestedon>1.0a5</maxtestedon>
 
 	<install><![CDATA[
 $s2_wysiwys_config = array(
