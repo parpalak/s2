@@ -360,7 +360,7 @@ function StopDrag ()
 			{
 				if (eItem == eSourceLi)
 				{
-					alert(s2_lang.NO_LOOPS_IMG);
+					alert(s2_lang.no_loops_img);
 					acceptorElement = null;
 					return;
 				}
@@ -556,7 +556,7 @@ function DeleteFolder ()
 {
 	var eSpan = buttonPanel.parentNode;
 
-	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, s2_lang.DELETE_ITEM)))
+	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, s2_lang.delete_item)))
 		return false;
 
 	ReleaseItem();
