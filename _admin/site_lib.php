@@ -362,7 +362,7 @@ function s2_output_article_form ($id)
 	($hook = s2_hook('fn_output_article_form_pre_output')) ? eval($hook) : null;
 
 ?>
-<form name="artform" action="" onsubmit="setTimeout('SaveArticle(\'save\');', 0); return false;">
+<form name="artform" action="" onsubmit="SaveArticle('save'); return false;">
 <?php ($hook = s2_hook('fn_output_article_form_pre_btn_col')) ? eval($hook) : null; ?>
 	<div class="r-float">
 		<input type="hidden" name="page[id]" value="<?php echo $page['id']; ?>" />

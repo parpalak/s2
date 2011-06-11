@@ -886,7 +886,7 @@ function CreateChildArticle ()
 	EditItemName(eSpan);
 }
 
-function LoadArticle (sURI)
+function RequestArticle (sURI)
 {
 	var Response = GETSyncRequest(sURI);
 	if (Response.status != '200')
@@ -896,13 +896,8 @@ function LoadArticle (sURI)
 	CommitChanges(document.artform);
 }
 
-function EditArticle (iId)
+function LoadArticle (sURI)
 {
-	if (typeof(iId) == 'undefined')
-		iId = buttonPanel.parentNode.id;
-
-	var sURI = sUrl + 'action=load&id=' + iId;
-
 	if (document.artform && IsChanged(document.artform))
 	{
 		SelectTab(document.getElementById('edit_tab'), true);
@@ -911,23 +906,32 @@ function EditArticle (iId)
 				name: s2_lang.save_and_open,
 				action: (function ()
 				{
-					SaveArticle('save');
-					LoadArticle(sURI);
+					document.artform.onsubmit();
+					RequestArticle(sURI);
 				})
 			},
 			{
 				name: s2_lang.discard_and_open,
 				action: (function ()
 				{
-					LoadArticle(sURI);
+					RequestArticle(sURI);
 				})
 			}
 		]);
 		return false;
 	}
 
-	LoadArticle(sURI);
+	RequestArticle(sURI);
 	SelectTab(document.getElementById('edit_tab'), true);
+}
+
+function EditArticle (iId)
+{
+	if (typeof(iId) == 'undefined')
+		iId = buttonPanel.parentNode.id;
+
+	LoadArticle(sUrl + 'action=load&id=' + iId);
+
 	return false;
 }
 
@@ -965,7 +969,7 @@ function ClearForm()
 	return false;
 }
 
-function SaveArticle (sAction)
+function SendArticle (sAction)
 {
 	var sRequest = StringFromForm(document.artform);
 
@@ -979,6 +983,13 @@ function SaveArticle (sAction)
 	}
 
 	return false;
+}
+
+function SaveArticle(sAction)
+{
+	(hook = Hooks.get('fn_save_article_start')) ? eval(hook) : null;
+
+	SendArticle(sAction);
 }
 
 function ChangeTemplate (eSelect, sHelp)
