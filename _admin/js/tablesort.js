@@ -118,7 +118,7 @@ function init_table(e) {
 		for (var i = 0; (node = thead.getElementsByTagName("td").item(i)); i++) {
 			if (node.addEventListener) node.addEventListener("click", sort, false);
 			else if (node.attachEvent) node.attachEvent("onclick", sort);
-			node.title = S2_LANG_CLICK_TO_SORT;
+			node.title = s2_lang.click_to_sort;
 		}
 		thead.parentNode.up = 0;
 		

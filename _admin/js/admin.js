@@ -136,7 +136,7 @@ function Init ()
 	window.onbeforeunload = function ()
 	{
 		if (document.artform && IsChanged(document.artform))
-			return S2_LANG_UNSAVED_EXIT;
+			return s2_lang.unsaved_exit;
 	}
 
 	cur_page = document.location.hash;
@@ -628,7 +628,7 @@ function StopDrag()
 			{
 				if (eItem == eSourceLi)
 				{
-					alert(S2_LANG_NO_LOOPS);
+					alert(s2_lang.no_loops);
 					acceptorElement = null;
 					return;
 				}
@@ -808,7 +808,7 @@ function MouseIn (e)
 	if (far)
 	{
 		t.className = 'over_far';
-		Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE));
+		Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, s2_lang.move));
 	}
 	else
 	{
@@ -816,19 +816,19 @@ function MouseIn (e)
 		{
 			far = 1;
 			t.className = 'over_far';
-			Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, S2_LANG_MOVE));
+			Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, s2_lang.move));
 		}
 		else
 		{
 			if (mouseStartY > mouseY)
 			{
-				Drag.set_hint(S2_LANG_MOVE_UP);
+				Drag.set_hint(s2_lang.move_up);
 				t.className = 'over_top';
 				t.parentNode.parentNode.firstChild.className = 'over_top';
 			}
 			else
 			{
-				Drag.set_hint(S2_LANG_MOVE_DOWN);
+				Drag.set_hint(s2_lang.move_down);
 				t.className = 'over_bottom';
 				t.parentNode.parentNode.firstChild.className = 'over_bottom';
 			}
@@ -855,7 +855,7 @@ function DeleteArticle ()
 {
 	var eSpan = buttonPanel.parentNode;
 
-	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, S2_LANG_DELETE_ITEM)))
+	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, s2_lang.delete_item)))
 		return;
 
 	var Response = GETSyncRequest(sUrl + 'action=delete&id=' + eSpan.id);
@@ -898,7 +898,7 @@ function EditArticle (iId)
 		// We are going to reload the editor content
 		// only if the article to be loaded differs from the current one.
 
-		if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
+		if (document.artform && IsChanged(document.artform) && !confirm(s2_lang.unsaved))
 			return false;
 
 		var Response = GETSyncRequest(sURI);
@@ -933,7 +933,7 @@ function LoadComments (iId)
 
 function ClearForm()
 {
-	if (!confirm(S2_LANG_CLEAR_PROMPT))
+	if (!confirm(s2_lang.clear_prompt))
 		return false;
 
 	var aeInput = document.artform.getElementsByTagName('INPUT'), i;
@@ -1118,7 +1118,7 @@ function Paragraph ()
 
 function DeleteComment (iId)
 {
-	if (!confirm(S2_LANG_DELETE_COMMENT))
+	if (!confirm(s2_lang.delete_comment))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=delete_comment&id=' + iId);
@@ -1197,7 +1197,7 @@ function SwitchTags (eItem)
 		document.getElementById('tag_values').style.display = 'none';
 		document.getElementById('tag_names').style.display = 'none';
 		eItem.className = 'closed';
-		eItem.alt = S2_LANG_SHOW_TAGS;
+		eItem.alt = s2_lang.show_tags;
 	}
 	else
 	{
@@ -1206,7 +1206,7 @@ function SwitchTags (eItem)
 		document.getElementById('tag_values').style.display = 'block';
 		document.getElementById('tag_names').style.display = 'block';
 		eItem.className = 'opened';
-		eItem.alt = S2_LANG_HIDE_TAGS;
+		eItem.alt = s2_lang.hide_tags;
 	}
 	bTagsOpen = !bTagsOpen;
 	return false;
@@ -1244,7 +1244,7 @@ function TagvaluesMouseIn ()
 
 	bMouseInTagvalues = true;
 	var aName = eCurrentTag.innerHTML.split(' (');
-	Drag.set_hint(str_replace('%s', aName[aName.length - 2], S2_LANG_ADD_TO_TAG));
+	Drag.set_hint(str_replace('%s', aName[aName.length - 2], s2_lang.add_to_tag));
 
 	document.getElementById('tag_values').style.backgroundColor = '#d2e5fc';
 	eCurrentTag.style.backgroundColor = '#d2e5fc';
@@ -1275,7 +1275,7 @@ function AddArticleToTag (iId)
 
 function DeleteArticleFromTag (iId)
 {
-	if (!confirm(S2_LANG_DELETE_TAG_LINK))
+	if (!confirm(s2_lang.delete_tag_link))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=delete_from_tag&id=' + iId);
@@ -1342,7 +1342,7 @@ function AddUser (sUser)
 {
 	if (sUser == '')
 	{
-		alert(S2_LANG_EMPTY_LOGIN);
+		alert(s2_lang.empty_login);
 		return false;
 	}
 
@@ -1368,7 +1368,7 @@ function SetPermission (sUser, sPermission)
 
 function SetUserPassword (sUser)
 {
-	var s = prompt(str_replace('%s', sUser, S2_LANG_NEW_PASSWORD));
+	var s = prompt(str_replace('%s', sUser, s2_lang.new_password));
 	if (typeof(s) != 'string')
 		return false;
 
@@ -1381,7 +1381,7 @@ function SetUserPassword (sUser)
 
 function SetUserEmail (sUser, sEmail)
 {
-	var s = prompt(str_replace('%s', sUser, S2_LANG_NEW_EMAIL));
+	var s = prompt(str_replace('%s', sUser, s2_lang.new_email));
 	if (typeof(s) == 'string')
 	{
 		var Response = GETSyncRequest(sUrl + 'action=user_set_email&name=' + sUser + '&email=' + s);
@@ -1396,7 +1396,7 @@ function SetUserEmail (sUser, sEmail)
 
 function DeleteUser (sUser)
 {
-	if (!confirm(str_replace('%s', sUser, S2_LANG_DELETE_USER)))
+	if (!confirm(str_replace('%s', sUser, s2_lang.delete_user)))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=delete_user&name=' + sUser);
@@ -1438,7 +1438,7 @@ function SaveTag ()
 {
 	if (document.tagform['tag[name]'].value == '')
 	{
-		alert(S2_LANG_EMPTY_TAG);
+		alert(s2_lang.empty_tag);
 		return false;
 	}
 
@@ -1452,7 +1452,7 @@ function SaveTag ()
 
 function DeleteTag (iId, sName)
 {
-	if (!confirm(str_replace('%s', sName, S2_LANG_DELETE_TAG)))
+	if (!confirm(str_replace('%s', sName, s2_lang.delete_tag)))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=delete_tag&id=' + iId);
@@ -1511,10 +1511,10 @@ function FlipExtension (sId)
 
 function UninstallExtension (sId, sMessage)
 {
-	if (!confirm(str_replace('%s', sId, S2_LANG_DELETE_EXTENSION)))
+	if (!confirm(str_replace('%s', sId, s2_lang.delete_extension)))
 		return false;
 
-	if (sMessage != '' && !confirm(str_replace('%s', sMessage, S2_LANG_UNINSTALL_MESSAGE)))
+	if (sMessage != '' && !confirm(str_replace('%s', sMessage, s2_lang.uninstall_message)))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=uninstall_extension&id=' + sId);
@@ -1526,7 +1526,7 @@ function UninstallExtension (sId, sMessage)
 
 function InstallExtension (sId, sMessage)
 {
-	if (!confirm((sMessage != '' ? str_replace('%s', sMessage, S2_LANG_INSTALL_MESSAGE) : '') + str_replace('%s', sId, S2_LANG_INSTALL_EXTENSION)))
+	if (!confirm((sMessage != '' ? str_replace('%s', sMessage, s2_lang.install_message) : '') + str_replace('%s', sId, s2_lang.install_extension)))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=install_extension&id=' + sId);

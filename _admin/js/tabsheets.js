@@ -98,7 +98,7 @@ function OnSwitch (eTab)
 	{
 		if (document.getElementById('tree').innerHTML == '')
 		{
-			document.getElementById('tree').innerHTML = '<br />&nbsp;&nbsp;&nbsp;&nbsp;' + S2_LANG_LOAD_TREE;
+			document.getElementById('tree').innerHTML = '<br />&nbsp;&nbsp;&nbsp;&nbsp;' + s2_lang.load_tree;
 			RefreshTree();
 		}
 	}

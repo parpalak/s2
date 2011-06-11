@@ -77,7 +77,7 @@ function InitMovableDivs ()
 	{
 		buttonPanel = document.createElement("SPAN");
 		buttonPanel.setAttribute("id", "context_buttons");
-		buttonPanel.innerHTML = '<img class="add" src="i/1.gif" onclick="return CreateSubFolder();" alt="' + S2_LANG_CREATE_SUBFOLDER + '" /><img src="i/1.gif" class="delete" onclick="return DeleteFolder();" alt="' + S2_LANG_DELETE + '" />';
+		buttonPanel.innerHTML = '<img class="add" src="i/1.gif" onclick="return CreateSubFolder();" alt="' + s2_lang.create_subfolder + '" /><img src="i/1.gif" class="delete" onclick="return DeleteFolder();" alt="' + s2_lang.delete + '" />';
 	}
 }
 
@@ -114,15 +114,15 @@ function HighlightItem (item)
 	{
 		eHigh = item;
 		item.className = "but_panel";
-		var str = S2_LANG_FILE + sPicturePrefix + item.getAttribute("fname");
+		var str = s2_lang.file + sPicturePrefix + item.getAttribute("fname");
 		if (item.getAttribute("fval"))
-			str += "<br />" + S2_LANG_VALUE + item.getAttribute("fval");
+			str += "<br />" + s2_lang.value + item.getAttribute("fval");
 		if (item.getAttribute("fsize"))
 		{
 			var a = item.getAttribute("fsize").split('*');
-			str += "<br />" + S2_LANG_SIZE + a[0] + "&times;" + a[1];
+			str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
 			sExecDouble = '(window.top.ReturnImage ? window.top : opener).ReturnImage(\'' + sPicturePrefix + item.getAttribute('fname') + '\', \'' + a[0] + '\', \'' + a[1] + '\');'
-			str += '<br /><input type="button" onclick="' + sExecDouble + ' return false;" value="' + S2_LANG_INSERT + '">';
+			str += '<br /><input type="button" onclick="' + sExecDouble + ' return false;" value="' + s2_lang.insert + '">';
 		}
 		else
 			sExecDouble = '';
@@ -360,7 +360,7 @@ function StopDrag ()
 			{
 				if (eItem == eSourceLi)
 				{
-					alert(S2_LANG_NO_LOOPS_IMG);
+					alert(s2_lang.NO_LOOPS_IMG);
 					acceptorElement = null;
 					return;
 				}
@@ -556,7 +556,7 @@ function DeleteFolder ()
 {
 	var eSpan = buttonPanel.parentNode;
 
-	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, S2_LANG_DELETE_ITEM)))
+	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, s2_lang.DELETE_ITEM)))
 		return false;
 
 	ReleaseItem();
@@ -573,7 +573,7 @@ function DeleteFolder ()
 
 function DeleteFile (sName)
 {
-	if (!confirm(str_replace('%s', sPicturePrefix + sName, S2_LANG_DELETE_FILE)))
+	if (!confirm(str_replace('%s', sPicturePrefix + sName, s2_lang.delete_file)))
 		return;
 
 	var Response = GETSyncRequest(sUrl + "action=delete_file&path=" + encodeURIComponent(sName));

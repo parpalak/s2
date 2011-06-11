@@ -20,6 +20,7 @@
 				<!-- s2_date -->
 				<!-- s2_text -->
 				<!-- s2_subarticles -->
+				<!-- s2_tags -->
 				<!-- s2_comments -->
 				<!-- s2_comment_form -->
 			</div>

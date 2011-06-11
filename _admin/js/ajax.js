@@ -335,6 +335,6 @@ function UnknownError (sError, iStatus)
 	if (sError.indexOf('</body>') >= 0 && sError.indexOf('</html>') >= 0)
 		DisplayError(sError);
 	else
-		DisplayError(S2_LANG_UNKNOWN_ERROR + ' ' + iStatus + '<br />' +
-				S2_LANG_SERVER_RESPONSE + '<br />' + sError);
+		DisplayError(s2_lang.unknown_error + ' ' + iStatus + '<br />' +
+				s2_lang.server_response + '<br />' + sError);
 }

@@ -371,7 +371,7 @@ function s2_output_article_form ($id)
 <?php ($hook = s2_hook('fn_output_article_form_after_parag_btn')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_output_article_form_pre_reset')) ? eval($hook) : null; ?>
-		<input class="bitbtn reset" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm(S2_LANG_RESET_PROMPT);" />
+		<input class="bitbtn reset" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm('<?php echo $lang_admin['Reset alert']; ?>');" />
 		<br />
 <?php ($hook = s2_hook('fn_output_article_form_pre_clear')) ? eval($hook) : null; ?>
 		<input class="bitbtn new" type="button" value="<?php echo $lang_admin['Clear']; ?>" onclick="ClearForm(); return false;" />
@@ -795,7 +795,7 @@ function s2_output_tag_form ($tag, $m_time)
 <?php ($hook = s2_hook('fn_output_tag_form_after_submit')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_output_tag_form_pre_reset')) ? eval($hook) : null; ?>
-		<input class="bitbtn resettag" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm(S2_LANG_RESET_PROMPT);" />
+		<input class="bitbtn resettag" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm('<?php echo $lang_admin['Reset alert']; ?>');" />
 <?php
 
 	($hook = s2_hook('fn_output_tag_form_pre_delete')) ? eval($hook) : null;
