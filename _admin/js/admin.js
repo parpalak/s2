@@ -886,6 +886,16 @@ function CreateChildArticle ()
 	EditItemName(eSpan);
 }
 
+function LoadArticle (sURI)
+{
+	var Response = GETSyncRequest(sURI);
+	if (Response.status != '200')
+		return false;
+
+	document.getElementById('form_div').innerHTML = Response.text;
+	CommitChanges(document.artform);
+}
+
 function EditArticle (iId)
 {
 	if (typeof(iId) == 'undefined')
@@ -893,23 +903,30 @@ function EditArticle (iId)
 
 	var sURI = sUrl + 'action=load&id=' + iId;
 
-	if (sCurrTextId != sURI)
+	if (document.artform && IsChanged(document.artform))
 	{
-		// We are going to reload the editor content
-		// only if the article to be loaded differs from the current one.
-
-		if (document.artform && IsChanged(document.artform) && !confirm(s2_lang.unsaved))
-			return false;
-
-		var Response = GETSyncRequest(sURI);
-		if (Response.status != '200')
-			return false;
-
-		document.getElementById('form_div').innerHTML = Response.text;
-		CommitChanges(document.artform);
-
-		sCurrTextId = sURI;
+		SelectTab(document.getElementById('edit_tab'), true);
+		s2_popup_message(s2_lang.unsaved, [
+			{
+				name: s2_lang.save_and_open,
+				action: (function ()
+				{
+					SaveArticle('save');
+					LoadArticle(sURI);
+				})
+			},
+			{
+				name: s2_lang.discard_and_open,
+				action: (function ()
+				{
+					LoadArticle(sURI);
+				})
+			}
+		]);
+		return false;
 	}
+
+	LoadArticle(sURI);
 	SelectTab(document.getElementById('edit_tab'), true);
 	return false;
 }
