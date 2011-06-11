@@ -102,3 +102,4 @@ function ReturnImage (s, w, h)
 
 Hooks.add('fn_tab_switch_start', 'if (sType == "view_tab") tinyMCE.triggerSave();');
 Hooks.add('fn_is_changed', 'tinyMCE.triggerSave();');
+Hooks.add('fn_save_article_start', 'tinyMCE.triggerSave();');
