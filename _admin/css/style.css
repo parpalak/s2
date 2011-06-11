@@ -539,6 +539,7 @@ ul .but_panel .delete,
 	border: 0;
 	padding: 0;
 	overflow: hidden;
+	cursor: default;
 	}
 	#keytable div {
 		float: left;
