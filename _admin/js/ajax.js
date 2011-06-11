@@ -369,7 +369,13 @@ function s2_popup_message (sMessage, aActions, iTime)
 	for (var i = 0; i < max; i++)
 	{
 		var eA = document.createElement('A');
-		eA.appendChild(document.createTextNode(aActions.name));
-		eA.onclick = aActions.action;
+		eA.setAttribute('class', 'action');
+		eA.setAttribute('href', '#');
+		eA.appendChild(document.createTextNode(aActions[i].name));
+		(function (action)
+		{
+			eA.onclick = function () { action(); eDiv.parentNode.removeChild(eDiv); return false;}
+		})(aActions[i].action);
+		eInnerDiv.appendChild(eA);
 	}
 }
