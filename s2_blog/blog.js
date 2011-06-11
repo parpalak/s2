@@ -53,7 +53,7 @@ function EditRecord (iId)
 		// We are going to reload the editor content
 		// only if the article to be loaded differs from the current one.
 
-		if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
+		if (document.artform && IsChanged(document.artform) && !confirm(s2_lang.unsaved))
 			return false;
 
 		var Response = GETSyncRequest(sURI);
@@ -88,7 +88,7 @@ function DeleteRecord (eItem, iId, sWarning)
 
 function CreateBlankRecord ()
 {
-	if (document.artform && IsChanged(document.artform) && !confirm(S2_LANG_UNSAVED))
+	if (document.artform && IsChanged(document.artform) && !confirm(s2_lang.unsaved))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=create_blog_post');
@@ -120,7 +120,7 @@ function LoadBlogComments (iId)
 
 function DeleteBlogComment (iId)
 {
-	if (!confirm(S2_LANG_DELETE_COMMENT))
+	if (!confirm(s2_lang.delete_comment))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + "action=delete_blog_comment&id=" + iId);
