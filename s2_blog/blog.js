@@ -6,7 +6,7 @@
  * @package s2_blog
  */
 
-function BlogAddTag(iId)
+function BlogAddTag (iId)
 {
 	var sPostTags = document.artform.keywords.value;
 
@@ -46,26 +46,8 @@ function LoadPosts ()
 
 function EditRecord (iId)
 {
-	var sURI = sUrl + "action=edit_blog_post&id=" + iId;
+	LoadArticle(sURI = sUrl + 'action=edit_blog_post&id=' + iId);
 
-	if (sCurrTextId != sURI)
-	{
-		// We are going to reload the editor content
-		// only if the article to be loaded differs from the current one.
-
-		if (document.artform && IsChanged(document.artform) && !confirm(s2_lang.unsaved))
-			return false;
-
-		var Response = GETSyncRequest(sURI);
-		if (Response.status != '200')
-			return false;
-
-		document.getElementById('form_div').innerHTML = Response.text;
-		CommitChanges(document.artform);
-
-		sCurrTextId = sURI;
-	}
-	SelectTab(document.getElementById('edit_tab'), true);
 	return false;
 }
 
