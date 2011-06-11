@@ -10,15 +10,23 @@
 
 // Simple hooks managing
 
-var hooks = [];
-
-function add_hook (hook, code)
+var Hooks = (function ()
 {
-	if (typeof(hooks[hook]) != 'string')
-		hooks[hook] = code;
-	else
-		hooks[hook] += code;
-}
+	var hooks = [];
+
+	return (
+	{
+		add: function (hook, code)
+		{
+			hooks[hook] = typeof(hooks[hook]) != 'string' ? code : hooks[hook] + code;
+		},
+
+		get: function (hook)
+		{
+			return hooks[hook] || false;
+		}
+	});
+}());
 
 // Helper functions
 
@@ -143,7 +151,7 @@ function SaveHandler (e)
 	key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
 	if (e.ctrlKey && key)
 	{
-		(hook = hooks['fn_save_handler_start']) ? eval(hook) : null;
+		(hook = Hooks.get('fn_save_handler_start')) ? eval(hook) : null;
 
 		if (e.preventDefault)
 			e.preventDefault();
@@ -315,7 +323,7 @@ function CommitChanges (arg)
 
 function IsChanged (eForm)
 {
-	(hook = hooks['fn_is_changed']) ? eval(hook) : null;
+	(hook = Hooks.get('fn_is_changed')) ? eval(hook) : null;
 
 	return curr_md5 != hex_md5(StringFromForm(eForm));
 }

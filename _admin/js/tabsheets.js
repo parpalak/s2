@@ -70,7 +70,7 @@ function OnSwitch (eTab)
 {
 	var sType = eTab.id;
 
-	(hook = hooks['fn_tab_switch_start']) ? eval(hook) : null;
+	(hook = Hooks.get('fn_tab_switch_start')) ? eval(hook) : null;
 
 	if (sType == 'view_tab')
 	{
