@@ -100,5 +100,5 @@ function ReturnImage (s, w, h)
 	s2_wysiwyg_wImage.document.forms[0].elements['height'].value = h;
 }
 
-add_hook('fn_tab_switch_start', 'if (sType == "view_tab") tinyMCE.triggerSave();');
-add_hook('fn_is_changed', 'tinyMCE.triggerSave();');
+Hooks.add('fn_tab_switch_start', 'if (sType == "view_tab") tinyMCE.triggerSave();');
+Hooks.add('fn_is_changed', 'tinyMCE.triggerSave();');
