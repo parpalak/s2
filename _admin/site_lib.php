@@ -650,7 +650,7 @@ function s2_preload_editor ()
 	($hook = s2_hook('fn_preload_editor_pre_output')) ? eval($hook) : null;
 
 	s2_output_article_form($id);
-	echo '<script type="text/javascript">document.location.hash = "#edit"; Changes.commit(document.artform); sCurrTextId = sUrl + "action=load&id='.$id.'";</script>';
+	echo '<script type="text/javascript">document.location.hash = "#edit"; Changes.commit(document.artform);</script>';
 
 	($hook = s2_hook('fn_preload_editor_end')) ? eval($hook) : null;
 }

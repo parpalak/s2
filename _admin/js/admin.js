@@ -91,8 +91,6 @@ var Event = (function ()
 	});
 }())
 
-var sCurrTextId = ''; // A unique string for the document currently loaded to the editor
-
 var is_local_storage = false;
 try
 {
