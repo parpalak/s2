@@ -217,7 +217,7 @@ function s2_output_comment_form ($comment, $type)
 ?>
 <div class="text_wrapper" style="padding-bottom: 2.167em">
 	<?php echo s2_comment_menu_links(); ?>
-	<form name="commform" action="" onsubmit="setTimeout('SaveComment(\'<?php echo $type; ?>\');', 0); return false;">
+	<form name="commform" action="" onsubmit="SaveComment('<?php echo $type; ?>'); return false;">
 		<div class="r-float">
 			<label for="eml"><input type="checkbox" id="eml" name="comment[show_email]" value="1"<?php if ($comment['show_email']) echo ' checked="checked"'?> />
 			<?php echo $lang_admin['Show email']; ?></label>
