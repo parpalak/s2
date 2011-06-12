@@ -70,7 +70,7 @@ function DeleteRecord (eItem, iId, sWarning)
 
 function CreateBlankRecord ()
 {
-	if (document.artform && IsChanged(document.artform) && !confirm(s2_lang.unsaved))
+	if (document.artform && Changes.present(document.artform) && !confirm(s2_lang.unsaved))
 		return false;
 
 	var Response = GETSyncRequest(sUrl + 'action=create_blog_post');
@@ -78,7 +78,7 @@ function CreateBlankRecord ()
 		return false;
 
 	// We've just asked about saving changes. User doesn't want to.
-	CommitChanges(document.artform);
+	Changes.commit(document.artform);
 
 	EditRecord(Response.text);
 
