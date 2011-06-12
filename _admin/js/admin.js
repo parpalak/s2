@@ -135,7 +135,7 @@ function Init ()
 
 	window.onbeforeunload = function ()
 	{
-		if (document.artform && IsChanged(document.artform))
+		if (document.artform && Changes.present(document.artform))
 			return s2_lang.unsaved_exit;
 	}
 
@@ -310,23 +310,25 @@ function CheckPage ()
 }
 
 // Tracking editor content changes
-
-var curr_md5 = '';
-
-function CommitChanges (arg)
+var Changes = (function ()
 {
-	if (typeof(arg) == 'string')
-		curr_md5 = hex_md5(arg);
-	else
-		curr_md5 = hex_md5(StringFromForm(arg));
-}
+	var curr_md5 = '';
 
-function IsChanged (eForm)
-{
-	(hook = Hooks.get('fn_is_changed')) ? eval(hook) : null;
+	return (
+	{
+		commit: function (arg)
+		{
+			curr_md5 = hex_md5((typeof(arg) == 'string') ? arg : StringFromForm(arg));
+		},
 
-	return curr_md5 != hex_md5(StringFromForm(eForm));
-}
+		present: function (eForm)
+		{
+			(hook = Hooks.get('fn_changes_present')) ? eval(hook) : null;
+
+			return curr_md5 != hex_md5(StringFromForm(eForm));
+		}
+	});
+}());
 
 // Creating the button panel and div for drag
 
@@ -893,12 +895,12 @@ function RequestArticle (sURI)
 		return false;
 
 	document.getElementById('form_div').innerHTML = Response.text;
-	CommitChanges(document.artform);
+	Changes.commit(document.artform);
 }
 
 function LoadArticle (sURI)
 {
-	if (document.artform && IsChanged(document.artform))
+	if (document.artform && Changes.present(document.artform))
 	{
 		SelectTab(document.getElementById('edit_tab'), true);
 		s2_popup_message(s2_lang.unsaved, [
@@ -979,7 +981,7 @@ function SendArticle (sAction)
 		if (Response.text != '')
 			alert(Response.text);
 		else
-			CommitChanges(sRequest);
+			Changes.commit(sRequest);
 	}
 
 	return false;
