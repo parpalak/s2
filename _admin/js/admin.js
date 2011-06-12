@@ -93,6 +93,16 @@ var Event = (function ()
 
 var sCurrTextId = ''; // A unique string for the document currently loaded to the editor
 
+var is_local_storage = false;
+try
+{
+	is_local_storage = 'localStorage' in window && window['localStorage'] !== null;
+}
+catch (e)
+{
+	is_local_storage = false;
+}
+
 var ua = navigator.userAgent.toLowerCase();
 var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
 var isSafari = ua.indexOf('safari') != -1;
@@ -103,6 +113,7 @@ function Init ()
 	InitMovableDivs();
 	Drag.init();
 	Search.init();
+	Changes.init();
 
 	var keyboard_event = isIE || isSafari ? 'keydown' : 'keypress';
 
@@ -310,15 +321,79 @@ function CheckPage ()
 }
 
 // Tracking editor content changes
+
 var Changes = (function ()
 {
-	var curr_md5 = '';
+	var saved_text = curr_md5 = '';
+
+	function check_changes ()
+	{
+		if (!is_local_storage || !document.artform)
+			return;
+
+		(hook = Hooks.get('fn_check_changes_start')) ? eval(hook) : null;
+
+		var new_text = document.artform['page[text]'].value;
+
+		if  (saved_text != new_text)
+			localStorage.setItem('s2_curr_text', new_text);
+		else
+			localStorage.removeItem('s2_curr_text');
+	};
+
+	var recovered_wnd = null;
+
+	function show_recovered (sText)
+	{
+		var div = document.createElement('div');
+		div.appendChild(document.createTextNode(sText));
+		sText = div.innerHTML;
+
+		if (recovered_wnd != null && !recovered_wnd.closed)
+		{
+			recovered_wnd.close();
+		}
+		recovered_wnd = window.open('about:blank', 's2_recovered_text', '', 'True');
+		recovered_wnd.document.open();
+
+		var head = '<title>' + s2_lang.recovered_text_alert + '</title>' +
+			'<style>html {height: 100%; margin: 0;} body {margin: 0 ; padding: 0 10%; height: 100%; background: #eee; font: Verdana 75%;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 70%;}</style>';
+		var body = '<h1>' + s2_lang.recovered_text + '</h1>' + 
+			'<p>' + s2_lang.recovered_text_info + '</p><textarea readonly="readonly">' + sText + '</textarea>';
+
+		(hook = Hooks.get('fn_show_recovered_pre_mgr')) ? eval(hook) : null;
+
+		var text = '<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>';
+
+		recovered_wnd.document.write(text);
+		recovered_wnd.document.close();
+	}
+
+	if (is_local_storage)
+	{
+		var old_text = localStorage.getItem('s2_curr_text');
+		setInterval(check_changes, 5000);
+	}
 
 	return (
 	{
+		init: function ()
+		{
+			if (old_text)
+				s2_popup_message(s2_lang.recovered_text_alert, [{name: s2_lang.recovered_open, action: function (){ show_recovered(old_text); } }]);
+		},
+
 		commit: function (arg)
 		{
 			curr_md5 = hex_md5((typeof(arg) == 'string') ? arg : StringFromForm(arg));
+
+			if (is_local_storage)
+			{
+				(hook = Hooks.get('fn_changes_commit_pre_ls')) ? eval(hook) : null;
+
+				localStorage.removeItem('s2_curr_text');
+				saved_text = document.artform['page[text]'].value;
+			}
 		},
 
 		present: function (eForm)
@@ -910,14 +985,16 @@ function LoadArticle (sURI)
 				{
 					document.artform.onsubmit();
 					RequestArticle(sURI);
-				})
+				}),
+				once: true
 			},
 			{
 				name: s2_lang.discard_and_open,
 				action: (function ()
 				{
 					RequestArticle(sURI);
-				})
+				}),
+				once: true
 			}
 		]);
 		return false;
@@ -1346,6 +1423,8 @@ function Preview ()
 {
 	if (!document.artform || !document.artform['page[text]'])
 		return;
+
+	(hook = Hooks.get('fn_preview_start')) ? eval(hook) : null;
 
 	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
 	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);

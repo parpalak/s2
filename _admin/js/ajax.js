@@ -372,10 +372,16 @@ function s2_popup_message (sMessage, aActions, iTime)
 		eA.setAttribute('class', 'action');
 		eA.setAttribute('href', '#');
 		eA.appendChild(document.createTextNode(aActions[i].name));
-		(function (action)
+		(function (action, once)
 		{
-			eA.onclick = function () { action(); eDiv.parentNode.removeChild(eDiv); return false;}
-		})(aActions[i].action);
+			eA.onclick = function ()
+			{
+				action();
+				if (once)
+					eDiv.parentNode.removeChild(eDiv);
+				return false;
+			}
+		}(aActions[i].action, aActions[i].once));
 		eInnerDiv.appendChild(eA);
 	}
 }
