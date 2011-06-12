@@ -100,6 +100,23 @@ function ReturnImage (s, w, h)
 	s2_wysiwyg_wImage.document.forms[0].elements['height'].value = h;
 }
 
-Hooks.add('fn_tab_switch_start', 'if (sType == "view_tab") tinyMCE.triggerSave();');
+function s2_wysisyg_addjs ()
+{
+	var src = '', aScript = document.getElementsByTagName('SCRIPT');
+	for (var i = aScript.length; i-- ;)
+		if (aScript[i].src.indexOf('tiny_mce.js') != -1)
+		{
+			src = aScript[i].src;
+			break;
+		}
+
+	return '<script type="text/javascript" src="' + src + '"></script>\
+<script type="text/javascript">tinyMCE.init({mode: "textareas", theme: "advanced",\
+theme_advanced_buttons1: "", theme_advanced_buttons2: "", theme_advanced_buttons3 : ""\});</script>';
+}
+
+Hooks.add('fn_preview_start', 'tinyMCE.triggerSave();');
 Hooks.add('fn_changes_present', 'tinyMCE.triggerSave();');
 Hooks.add('fn_save_article_start', 'tinyMCE.triggerSave();');
+Hooks.add('fn_check_changes_start', 'tinyMCE.triggerSave();');
+Hooks.add('fn_show_recovered_pre_mgr', 'head += s2_wysisyg_addjs();');
