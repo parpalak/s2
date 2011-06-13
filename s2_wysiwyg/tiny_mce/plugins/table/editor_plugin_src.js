@@ -752,7 +752,7 @@
 
 	tinymce.create('tinymce.plugins.TablePlugin', {
 		init : function(ed, url) {
-			var winMan, clipboardRows, hasCellSelection = true; // Might be selected cells on reload
+			var winMan, clipboardRows;
 
 			function createTableGrid(node) {
 				var selection = ed.selection, tblElm = ed.dom.getParent(node || selection.getNode(), 'table');
@@ -764,11 +764,7 @@
 			function cleanup() {
 				// Restore selection possibilities
 				ed.getBody().style.webkitUserSelect = '';
-
-				if (hasCellSelection) {
-					ed.dom.removeClass(ed.dom.select('td.mceSelected,th.mceSelected'), 'mceSelected');
-					hasCellSelection = false;
-				}
+				ed.dom.removeClass(ed.dom.select('td.mceSelected,th.mceSelected'), 'mceSelected');
 			};
 
 			// Register buttons
@@ -877,7 +873,6 @@
 							}
 
 							tableGrid.setEndCell(target);
-							hasCellSelection = true;
 						}
 
 						// Remove current selection
@@ -936,8 +931,6 @@
 							rng = dom.createRng();
 							node = selectedCells[0];
 							endNode = selectedCells[selectedCells.length - 1];
-							rng.setStart(node);
-							rng.setEnd(node);
 
 							setPoint(node, 1);
 							walker = new tinymce.dom.TreeWalker(node, dom.getParent(selectedCells[0], 'table'));

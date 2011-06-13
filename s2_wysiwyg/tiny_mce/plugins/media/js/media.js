@@ -20,18 +20,17 @@
 		return elm.value;
 	}
 
-	function setVal(id, value, name) {
+	function setVal(id, value) {
 		if (typeof(value) != 'undefined') {
 			var elm = get(id);
 
 			if (elm.nodeName == "SELECT")
 				selectByValue(document.forms[0], id, value);
 			else if (elm.type == "checkbox") {
-				if (typeof(value) == 'string') {
-					value = value.toLowerCase();
-					value = (!name && value === 'true') || (name && value === name.toLowerCase());
-				}
-				elm.checked = !!value;
+				if (typeof(value) == 'string')
+					elm.checked = value.toLowerCase() === 'true' ? true : false;
+				else
+					elm.checked = !!value;
 			} else
 				elm.value = value;
 		}
@@ -147,7 +146,7 @@
 
 						if (list) {
 							if (to_form) {
-								setVal(formItemName, list[name], type == 'video' ? name : '');
+								setVal(formItemName, list[name]);
 							} else {
 								delete list[name];
 

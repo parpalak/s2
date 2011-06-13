@@ -107,7 +107,6 @@
 .s2Skin .mceNoIcons .mceMenuItemSelected a {background:url(img/menu_arrow.gif) no-repeat -6px center}
 .s2Skin .mceMenu span.mceMenuLine {display:none}
 .s2Skin .mceMenuItemSub a {background:url(img/menu_arrow.gif) no-repeat top right;}
-.s2Skin .mceMenuItem td, .s2Skin .mceMenuItem th {line-height: normal}
 
 /* Progress,Resize */
 .s2Skin .mceBlocker {position:absolute; left:0; top:0; z-index:1000; opacity:0.5; -ms-filter:'alpha(opacity=50)'; filter:alpha(opacity=50); background:#FFF}

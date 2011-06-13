@@ -155,20 +155,17 @@
 
 				img = ed.selection.getNode();
 				if (isMediaImg(img)) {
-					data = ed.dom.getAttrib(img, 'data-mce-json');
-					if (data) {
-						data = JSON.parse(data);
+					data = JSON.parse(ed.dom.getAttrib(img, 'data-mce-json'));
 
-						// Add some extra properties to the data object
-						tinymce.each(rootAttributes, function(name) {
-							var value = ed.dom.getAttrib(img, name);
+					// Add some extra properties to the data object
+					tinymce.each(rootAttributes, function(name) {
+						var value = ed.dom.getAttrib(img, name);
 
-							if (value)
-								data[name] = value;
-						});
+						if (value)
+							data[name] = value;
+					});
 
-						data.type = self.getType(img.className).name.toLowerCase();
-					}
+					data.type = self.getType(img.className).name.toLowerCase();
 				}
 
 				if (!data) {
@@ -263,7 +260,7 @@
 		 * Converts the JSON data object to a HTML string.
 		 */
 		dataToHtml : function(data, force_absolute) {
-			return this.editor.serializer.serialize(this.dataToImg(data, force_absolute), {forced_root_block : '', force_absolute : force_absolute});
+			return this.editor.serializer.serialize(this.dataToImg(data, force_absolute), {force_absolute : force_absolute});
 		},
 
 		/**
@@ -366,11 +363,7 @@
 				}
 			};
 
-			data = node.attr('data-mce-json');
-			if (!data)
-				return;
-
-			data = JSON.parse(data);
+			data = JSON.parse(node.attr('data-mce-json'));
 			typeItem = this.getType(node.attr('class'));
 
 			style = node.attr('data-mce-style')

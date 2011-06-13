@@ -367,7 +367,7 @@
 			header += '\n<html>\n<head>\n';
 
 			if (value = editor.getParam('fullpage_default_title'))
-				header += '<title>' + value + '</title>\n';
+				header += '<title>' + v + '</title>\n';
 
 			if (value = editor.getParam('fullpage_default_encoding'))
 				header += '<meta http-equiv="Content-Type" content="text/html; charset=' + value + '" />\n';
