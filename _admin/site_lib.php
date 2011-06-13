@@ -611,15 +611,15 @@ function s2_preload_editor ()
 {
 	global $s2_db, $lang_admin;
 
+	$return = ($hook = s2_hook('fn_preload_editor_start')) ? eval($hook) : null;
+	if ($return)
+		return;
+
 	if (empty($_GET['path']) || $_GET['path'] == '/')
 	{
 		echo $lang_admin['Empty editor info'];
 		return;
 	}
-
-	$return = ($hook = s2_hook('fn_preload_editor_start')) ? eval($hook) : null;
-	if ($return)
-		return;
 
 	$request_array = explode('/', $_GET['path']);   //   []/[dir1]/[dir2]/[dir3]/[file1]
 
