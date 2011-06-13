@@ -29,11 +29,11 @@ function s2_attachment_file_uploaded ()
 		return;
 
 	var head = window.frames['s2_attachment_result'].document.getElementsByTagName('head')[0].innerHTML,
-		body = window.frames['s2_attachment_result'].document.getElementsByTagName('body')[0].innerHTML;
+		body = window.frames['s2_attachment_result'].document.body.innerHTML;
 
 	if (head.indexOf('S2-State-Success') >= 0 && head.indexOf('s2_attachment-State-Success') >= 0)
 	{
-		document.getElementById('s2_attachment_items').innerHTML = window.frames['s2_attachment_result'].document.getElementsByTagName('body')[0].innerHTML;
+		document.getElementById('s2_attachment_items').innerHTML = window.frames['s2_attachment_result'].document.body.innerHTML;
 		document.getElementById('s2_attachment_file_upload_input').innerHTML = '<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" onchange="s2_attachment_upload_change(this);" />';
 	}
 	else if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
