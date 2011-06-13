@@ -142,6 +142,32 @@ function Init ()
 	eTagValues.onmouseover = TagvaluesMouseIn;
 	eTagValues.onmouseout = TagvaluesMouseOut;
 
+	var eTagTable = document.getElementById('keytable');
+	var fTagSwitch = function ()
+	{
+		if (eTagTable.className == 'closed')
+		{
+			var Response = GETSyncRequest(sUrl + 'action=load_tagnames');
+			if (Response.status == '200')
+				document.getElementById('tag_list').innerHTML = Response.text;
+
+			eTagTable.className = 'opened';
+		}
+		else
+			eTagTable.className = 'closed';
+
+		if (is_local_storage)
+			localStorage.setItem('s2_tags_opened', eTagTable.className == 'closed' ? 0 : 1);
+		return false;
+	}
+
+	if (is_local_storage && parseInt(localStorage.getItem('s2_tags_opened')))
+		fTagSwitch();
+
+	var aeImg = eTagTable.getElementsByTagName('IMG');
+	for (var i = aeImg.length; i-- ;)
+		aeImg[i].onclick = fTagSwitch;
+
 	window.onbeforeunload = function ()
 	{
 		if (document.artform && Changes.present(document.artform))
@@ -1283,39 +1309,6 @@ function LoadTableExt (sAction, iId, sID)
 
 
 //=======================[Tags for articles]====================================
-
-function LoadTagNames ()
-{
-	var Response = GETSyncRequest(sUrl + 'action=load_tagnames');
-	if (Response.status == '200')
-		document.getElementById('tag_list').innerHTML = Response.text;
-	return false;
-}
-
-var bTagsOpen = false;
-
-function SwitchTags (eItem)
-{
-	if (bTagsOpen)
-	{
-		document.getElementById('keytable').style.width = '16px';
-		document.getElementById('tag_values').style.display = 'none';
-		document.getElementById('tag_names').style.display = 'none';
-		eItem.className = 'closed';
-		eItem.alt = s2_lang.show_tags;
-	}
-	else
-	{
-		LoadTagNames();
-		document.getElementById('keytable').style.width = '416px';
-		document.getElementById('tag_values').style.display = 'block';
-		document.getElementById('tag_names').style.display = 'block';
-		eItem.className = 'opened';
-		eItem.alt = s2_lang.hide_tags;
-	}
-	bTagsOpen = !bTagsOpen;
-	return false;
-}
 
 var iCurrentTagId, eCurrentTag = null;
 
