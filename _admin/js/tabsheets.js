@@ -64,7 +64,7 @@ function Make_Tabsheet ()
 }
 
 var iEditorScrollTop = 0;
-var iPreviewScrollTop = 0;
+var iPreviewScrollTop = null;
 
 function OnSwitch (eTab)
 {
@@ -75,15 +75,15 @@ function OnSwitch (eTab)
 	if (sType == 'view_tab')
 	{
 		Preview();
-		if (iPreviewScrollTop)
+		if (typeof iPreviewScrollTop == 'number')
 		{
 			var try_num = 20;
 			var repeater = function ()
 			{
-				if (!iPreviewScrollTop)
+				if (typeof iPreviewScrollTop != 'number')
 					return;
 				window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop = iPreviewScrollTop;
-				if (try_num-- > 0 && !window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop)
+				if (try_num-- > 0 && window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop != iPreviewScrollTop)
 					setTimeout(repeater, 50);
 			}
 			repeater();
@@ -138,10 +138,22 @@ function OnSwitch (eTab)
 			}
 	}
 }
+function OnBeforeSwitch (eTab)
+{
+	var sType = eTab.id;
+
+	if (sType != 'edit_tab' && document.artform && document.artform['page[text]'] && typeof(document.artform['page[text]'].scrollTop) != 'undefined')
+		iEditorScrollTop = document.artform['page[text]'].scrollTop;
+
+	if (sType != 'view_tab' && typeof (window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop) != 'undefined')
+		iPreviewScrollTop = window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop;
+}
 
 function SelectTab(eTab, bAddToHistory)
 {
 	var eSheet = eTab;
+
+	OnBeforeSwitch(eTab);
 
 	while (eSheet.nextSibling)
 	{
@@ -149,12 +161,6 @@ function SelectTab(eTab, bAddToHistory)
 		if (eSheet.nodeName == "DD")
 			break;
 	}
-
-	if (document.artform && document.artform['page[text]'] && document.artform['page[text]'].scrollTop)
-		iEditorScrollTop = document.artform['page[text]'].scrollTop;
-
-	if (window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop)
-		iPreviewScrollTop = window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop;
 
 	if (eSheet.className == "inactive")
 	{
