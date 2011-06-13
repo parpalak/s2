@@ -645,7 +645,7 @@ function Init ()
 
 function SetWait (bWait)
 {
-	document.getElementsByTagName('body')[0].style.cursor = bWait ? 'progress' : 'default';
+	document.body.style.cursor = bWait ? 'progress' : 'default';
 }
 
 var was_upload = false;
@@ -672,7 +672,7 @@ function FileUploaded ()
 		return;
 
 	var head = window.frames['submit_result'].document.getElementsByTagName('head')[0].innerHTML,
-		body = window.frames['submit_result'].document.getElementsByTagName('body')[0].innerHTML;
+		body = window.frames['submit_result'].document.body.innerHTML;
 	if (head.indexOf('S2-State-Success') >= 0 && !body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
 	{
 		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));

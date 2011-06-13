@@ -138,6 +138,7 @@ function Init ()
 		window.status = window.defaultStatus;
 	});
 
+	// Tags list
 	var eTagValues = document.getElementById('tag_values');
 	eTagValues.onmouseover = TagvaluesMouseIn;
 	eTagValues.onmouseout = TagvaluesMouseOut;
@@ -168,6 +169,7 @@ function Init ()
 	for (var i = aeImg.length; i-- ;)
 		aeImg[i].onclick = fTagSwitch;
 
+	// Prevent from loosing unsaved data
 	window.onbeforeunload = function ()
 	{
 		if (document.artform && Changes.present(document.artform))
@@ -215,6 +217,8 @@ function Logout ()
 {
 	GETSyncRequest(sUrl + 'action=logout');
 	document.location.reload();
+
+	return false;
 }
 
 // Search field events handler
@@ -318,7 +322,7 @@ var Search = (function ()
 function SetWait (bWait)
 {
 	document.getElementById('loading').style.display = bWait ? 'block' : 'none';
-	document.getElementsByTagName('body')[0].style.cursor = bWait ? 'progress' : 'inherit';
+	document.body.style.cursor = bWait ? 'progress' : 'inherit';
 }
 
 // Handling "back" and "forward" browser buttons
@@ -987,18 +991,18 @@ function CreateChildArticle ()
 	EditItemName(eSpan);
 }
 
-function RequestArticle (sURI)
-{
-	var Response = GETSyncRequest(sURI);
-	if (Response.status != '200')
-		return false;
-
-	document.getElementById('form_div').innerHTML = Response.text;
-	Changes.commit(document.artform);
-}
-
 function LoadArticle (sURI)
 {
+	function RequestArticle (sURI)
+	{
+		var Response = GETSyncRequest(sURI);
+		if (Response.status != '200')
+			return false;
+
+		document.getElementById('form_div').innerHTML = Response.text;
+		Changes.commit(document.artform);
+	}
+
 	if (document.artform && Changes.present(document.artform))
 	{
 		SelectTab(document.getElementById('edit_tab'), true);
@@ -1072,8 +1076,10 @@ function ClearForm()
 	return false;
 }
 
-function SendArticle (sAction)
+function SaveArticle(sAction)
 {
+	(hook = Hooks.get('fn_save_article_start')) ? eval(hook) : null;
+
 	var sRequest = StringFromForm(document.artform);
 
 	var Response = POSTSyncRequest(sUrl + 'action=' + sAction, sRequest);
@@ -1084,15 +1090,6 @@ function SendArticle (sAction)
 		else
 			Changes.commit(sRequest);
 	}
-
-	return false;
-}
-
-function SaveArticle(sAction)
-{
-	(hook = Hooks.get('fn_save_article_start')) ? eval(hook) : null;
-
-	SendArticle(sAction);
 }
 
 function ChangeTemplate (eSelect, sHelp)
