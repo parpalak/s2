@@ -99,7 +99,7 @@ var template = '<?php echo str_replace(array('\\', '\'', '</script>', "\n", "\r"
 		<dt id="list_tab"><?php echo $lang_admin['Site']; ?></dt>
 		<dd>
 			<div class="reducer" id="tree_div">
-				<div id="keytable" class="closed">
+				<div id="tag_table" class="closed">
 					<div class="tagswitcher">
 						<img class="closed" src="i/1.gif" alt="<?php echo $lang_admin['Show tags']; ?>" />
 						<img class="opened" src="i/1.gif" alt="<?php echo $lang_admin['Hide tags']; ?>" />

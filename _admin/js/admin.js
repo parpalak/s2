@@ -142,7 +142,7 @@ function Init ()
 	eTagValues.onmouseover = TagvaluesMouseIn;
 	eTagValues.onmouseout = TagvaluesMouseOut;
 
-	var eTagTable = document.getElementById('keytable');
+	var eTagTable = document.getElementById('tag_table');
 	var fTagSwitch = function ()
 	{
 		if (eTagTable.className == 'closed')

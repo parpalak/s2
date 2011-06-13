@@ -36,7 +36,7 @@ body {
 	min-height: 100%;
 	}
 
-#keytable,
+#tag_table,
 .tabsheets,
 .text_wrapper,
 form[name="tagform"],
@@ -49,7 +49,7 @@ form[name="commform"],
 
 .tags_list,
 #tree,
-#keytable > div {
+#tag_table > div {
 	overflow: auto;
 	height: 100%;
 	}
@@ -573,9 +573,9 @@ ul .but_panel .delete,
 		display: inline-block;
 		}
 
-/* Tags */
+/* Tags table */
 
-#keytable {
+#tag_table {
 	float: right;
 	margin-left: 10px;
 	padding: 0;
@@ -583,16 +583,16 @@ ul .but_panel .delete,
 	cursor: default;
 	width: 16px;
 	}
-	#keytable > div {
+	#tag_table > div {
 		float: left;
 		}
-	#keytable ul,
-	#keytable li{
+	#tag_table ul,
+	#tag_table li{
 		list-style-type: none;
 		padding: 0;
 		margin: 0;
 		}
-	#keytable.opened {
+	#tag_table.opened {
 		width: 416px;
 		}
 
@@ -650,8 +650,11 @@ ul .but_panel .delete,
 	#tag_values li {
 		padding: 0.25em 0.5em;
 		}
+		#tag_values li:hover {
+			background-color: #fafac0;
+			}
 
-#keytable .tagswitcher {
+#tag_table .tagswitcher {
 	position: relative;
 	width: 16px;
 	overflow: hidden;
@@ -700,10 +703,6 @@ ul .but_panel .delete,
 			background: url(../i/tag.gif) 6px 50% no-repeat, -o-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) 6px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
 			}
-
-#tag_values ul li:hover {
-	background-color: #fafac0;
-	}
 
 /*=======================[Table styles]=======================================*/
 
