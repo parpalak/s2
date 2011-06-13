@@ -620,7 +620,13 @@ $output .= s2_show_comments('s2_blog_new');
 		]]></hook>
 
 		<hook id="fn_preload_editor_start"><![CDATA[
-if (substr($_GET['path'], 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
+if (!empty($_GET['path']) && ($_GET['path'] == S2_BLOG_URL.'/' || $_GET['path'] == S2_BLOG_URL))
+{
+	echo $lang_admin['Empty editor info'];
+	echo '<script type="text/javascript">document.location.hash = "#blog";</script>';
+	return;
+}
+elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 {
 	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	require $ext_info['path'].'/blog_lib.php';
