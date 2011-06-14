@@ -19,8 +19,8 @@
 	<description>Full-text search with Russian morphology. Designed for small sites.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a4</minversion>
-	<maxtestedon>1.0a4</maxtestedon>
+	<minversion>1.0a5</minversion>
+	<maxtestedon>1.0a5</maxtestedon>
 
 	<note type="install">Do not forget to create search index after extension installation (Admin → Stats page).</note>
 
