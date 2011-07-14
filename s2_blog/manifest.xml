@@ -336,6 +336,7 @@ require $ext_info['path'].'/blog_ajax.php';
 
 		<hook id="ai_pre_edit"><![CDATA[
 include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+require $ext_info['path'].'/blog_lib.php';
 ?>
 		<dt id="blog_tab"><?php echo $lang_s2_blog['Blog']; ?></dt>
 		<dd>
@@ -359,13 +360,13 @@ include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 						<tr>
 							<td></td>
 							<td></td>
-							<td style="padding-left: 0.5em;"><input type="checkbox" id="hidd" name="posts[hidden]" value="1" /><label for="hidd"><?php echo $lang_s2_blog['Only hidden']; ?></label></td>
+							<td style="padding-left: 0.5em;"><label><input type="checkbox" name="posts[hidden]" value="1" checked="checked" /><?php echo $lang_s2_blog['Only hidden']; ?></label></td>
 							<td><input name="button" type="submit" value="<?php echo $lang_s2_blog['Show posts']; ?>" onclick="return LoadPosts();" /></td>
 							<td></td>
 						</tr>
 					</table>
 				</form>
-				<div id="blog_div"></div>
+				<div id="blog_div"><?php s2_blog_output_post_list(array('hidden' => 1)); ?></div>
 			</div>
 		</dd>
 <?php
