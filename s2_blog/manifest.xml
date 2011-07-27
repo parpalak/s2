@@ -629,9 +629,6 @@ if (!empty($_GET['path']) && ($_GET['path'] == S2_BLOG_URL.'/' || $_GET['path'] 
 }
 elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 {
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	require $ext_info['path'].'/blog_lib.php';
-
 	$path = substr($_GET['path'], strlen(S2_BLOG_URL));
 	$path = explode('/', $path);   //   []/[2006]/[12]/[31]/[newyear]
 	if (count($path) < 5)
