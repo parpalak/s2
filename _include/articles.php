@@ -419,18 +419,22 @@ function s2_make_tags_pages ($request_array)
 		foreach ($urls as $k => $url)
 		{
 			if ($is_section[$k])
-				$subsection_text .= '<p class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'">'.s2_htmlencode($titles[$k]).'</a></p>';
+			{
+				$subsection_text .= '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'/">'.s2_htmlencode($titles[$k]).'</a></h3>'."\n".
+					($time[$k] ? '<div class="subsection date">'.s2_date($time[$k]).'</div>'."\n" : '').
+					(trim($excerpts[$k]) ? '<p class="subsection">'.$excerpts[$k].'</p>'."\n" : '');
+			}
 			else
 				$subarticles[] = array(
 					'title' => s2_htmlencode($titles[$k]),
 					'time' => $time[$k],
 					'excerpt' => $excerpts[$k],
-					'url' => $urls[$k]
+					'url' => $url
 				);
 		}
 
 		if ($subsection_text)
-			$subsection_text = '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'.$subsection_text;
+			$subsection_text = ($lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>' : '').$subsection_text;
 
 		$text = '';
 
@@ -450,8 +454,8 @@ function s2_make_tags_pages ($request_array)
 
 			foreach ($subarticles as $item)
 				$text .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
-					'<div class="article date">'.s2_date($item['time']).'</div>'."\n".
-					'<p class="article">'.$item['excerpt'].'</p>'."\n";
+					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
+					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 		}
 
 		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;
@@ -767,6 +771,8 @@ function s2_parse_page_url ($request_uri)
 				// The child is a subsection
 				$subsections[] = array(
 					'title' => s2_htmlencode($row['title']),
+					'time' => $row['create_time'],
+					'excerpt' => $row['excerpt'],
 					'url' => $current_path.'/'.urlencode($row['url']).'/'
 				);
 				$menu_subsections[] = '<li><a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).'/">'.s2_htmlencode($row['title']).'</a></li>';
@@ -801,10 +807,12 @@ function s2_parse_page_url ($request_uri)
 			if ($page['children_preview'])
 			{
 				// ... and to the page text
-				$page['subcontent'] = '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>';
+				$page['subcontent'] = $lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '';
 
 				foreach ($subsections as $item)
-					$page['subcontent'] .= '<p class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></p>';
+					$page['subcontent'] .= '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
+						($item['time'] ? '<div class="subsection date">'.s2_date($item['time']).'</div>'."\n" : '').
+						(trim($item['excerpt']) ? '<p class="subsection">'.$item['excerpt'].'</p>'."\n" : '');
 			}
 		}
 
@@ -818,7 +826,7 @@ function s2_parse_page_url ($request_uri)
 			if ($page['children_preview'])
 			{
 				// ... and to the page text
-				$page['subcontent'] .= '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n";
+				$page['subcontent'] .= $lang_common['Read in this section'] ? '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n" : '';
 
 				// Ordering articles by date
 				$max = count($subarticles);
@@ -833,8 +841,8 @@ function s2_parse_page_url ($request_uri)
 
 				foreach ($subarticles as $item)
 					$page['subcontent'] .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
-						'<div class="article date">'.s2_date($item['time']).'</div>'."\n".
-						'<p class="article">'.$item['excerpt'].'</p>'."\n";
+						($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
+						(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 			}
 		}
 	}

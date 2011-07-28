@@ -27,6 +27,7 @@ body.e404 {
 #header, h1, h2, h3, h4, .header, blockquote {
 	font-family: Cambria, Georgia, "Times New Roman", times, serif;
 	font-weight: normal;
+	position: relative;
 	}
 
 code, kbd, pre, textarea {
@@ -62,18 +63,20 @@ hr {
 h1 {
 	font-size: 2em;
 	line-height: 1.5;
-	margin-top: 0.8929em;
-	margin-bottom: 0.607em;
+	margin: 0.75em 0;
+	top: 0.143em;
 	}
 h2 {
 	font-size: 1.5714em;
 	line-height: 0.9545;
 	margin: 1.909em 0 0.955em;
+	top: -0.136em;
 	}
 h3 {
 	font-size: 1.286em;
 	line-height: 1.167;
-	margin: 1.333em 0 1em;
+	margin: 1.167em 0;
+	top: 0.222em;
 	}
 h4 {
 	font-size: 1.214em;
@@ -105,21 +108,20 @@ p small {
 	line-height: 1.75;
 	margin: -1.75em 0 1.75em;
 	}
-	.article.date {
-		margin-bottom: 0;
-		}
 	.preview.time {
 		margin: 0;
 		}
 
-h3.article {
-	margin: -0.167em 0 1.333em;
+h3.article, h3.subsection {
+	margin: 0 0 1.167em;
+	top: -0.167em;
 	}
+p.article, p.subsection {
+	margin: -1.5em 0 1.5em;
+	}
+
 h2.preview {
 	margin: 1.727em 0 0.182em;
-	}
-p.subsection {
-	margin: 0;
 	}
 
 blockquote, .reply {
