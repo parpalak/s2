@@ -46,6 +46,9 @@ function s2_counter_is_bot ()
 		'rulinki.ru',
 	);
 
+	if (!isset($_SERVER['HTTP_USER_AGENT']))
+		return false;
+
 	foreach ($sebot as $se1)
 		if (stristr($_SERVER['HTTP_USER_AGENT'], $se1))
 			return true;
