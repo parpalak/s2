@@ -178,7 +178,7 @@ function s2_counter_rss_count ($dir)
 	if (s2_counter_is_bot())
 		return;
 
-	$user_agent = $_SERVER['HTTP_USER_AGENT'];
+	$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
 	$client_ip = $_SERVER['REMOTE_ADDR'];
 	$filename = '/data/rss_main.txt';
 
