@@ -251,7 +251,7 @@ function s2_get_time_input ($name, $values)
 		'[year]'	=> '<input type="text" class="char-4" name="'.$name.'[year]" size="4" value="'.$values['year'].'" />'
 	);
 
-	$format = $lang_admin['Imput time format'];
+	$format = $lang_admin['Input time format'];
 
 	($hook = s2_hook('fn_get_time_input')) ? eval($hook) : null;
 	return str_replace(array_keys($replace), array_values($replace), $format);

@@ -96,7 +96,7 @@ $lang_admin = array(
 
 'NOBR'						=> 'Запретить перенос строк',
 
-'Imput time format'			=> '[hour]:[minute], [day].[month].[year]',
+'Input time format'			=> '[hour]:[minute], [day].[month].[year]', // Determines order of the input fields
 
 // Preview tab
 'Preview'					=> 'Предпросмотр',
