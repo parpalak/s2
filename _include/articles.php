@@ -798,6 +798,7 @@ function s2_parse_page_url ($request_uri)
 					'excerpt' => $row['excerpt'],
 					'url' => $current_path.'/'.urlencode($row['url'])
 				);
+				$subarticles_time[] = $row['create_time'];
 				$menu_subarticles[] = '<li><a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
 
 				($hook = s2_hook('fn_s2_parse_page_url_add_subarticle')) ? eval($hook) : null;
@@ -838,19 +839,11 @@ function s2_parse_page_url ($request_uri)
 				// ... and to the page text
 				$page['subcontent'] .= $lang_common['Read in this section'] ? '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n" : '';
 
-				// Ordering articles by date
-				$max = count($subarticles);
-				for ($i = 0; $i < $max - 1; $i++)
-					for ($j = $i + 1; $j < $max; $j++)
-						if ($subarticles[$i]['time'] < $subarticles[$j]['time'])
-						{
-							$temp = $subarticles[$i];
-							$subarticles[$i] = $subarticles[$j];
-							$subarticles[$j] = $temp;
-						}
+				arsort($subarticles_time);
 
  				if (S2_MAX_ITEMS)
 				{
+					// Paging navigation
 					$page_num = isset($_GET['~']) ? intval($_GET['~']) - 1 : 0;
 					if ($page_num < 0)
 						$page_num = 0;
@@ -860,13 +853,16 @@ function s2_parse_page_url ($request_uri)
 						$page_num = $start = 0;
 
 					$paging = s2_paging($page_num + 1, ceil(1.0 * count($subarticles) / S2_MAX_ITEMS), $current_path.'/')."\n";
-					$subarticles = array_slice($subarticles, $start, S2_MAX_ITEMS);
+					$subarticles_time = array_slice($subarticles_time, $start, S2_MAX_ITEMS);
 				}
 
-				foreach ($subarticles as $item)
+				foreach ($subarticles_time as $index => $time)
+				{
+					$item = $subarticles[$index];
 					$page['subcontent'] .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
 						($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 						(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
+				}
 
 				if (S2_MAX_ITEMS)
 					$page['subcontent'] .= $paging;
