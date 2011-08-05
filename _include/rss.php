@@ -76,7 +76,7 @@ function s2_do_rss ()
 		{
 
 ?>
-			<author>(<?php echo S2_WEBMASTER_EMAIL; ?>) <?php echo S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME; ?></author>
+			<author><?php echo S2_WEBMASTER_EMAIL; ?> (<?php echo S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME; ?>)</author>
 <?php
 
 		}
