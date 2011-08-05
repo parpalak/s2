@@ -388,6 +388,10 @@ body {
 	color: #666;
 	}
 
+.paging a, .paging .current {
+	padding: 0 0.357em;
+	}
+
 img[align="left"] {
 	margin-right: 1.5em;
 	}

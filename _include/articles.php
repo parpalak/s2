@@ -605,6 +605,16 @@ function s2_tags_list ($id)
 	return '<p class="tags_list">'.sprintf($lang_common['Tags:'], implode(', ', $tags)).'</p>';
 }
 
+function s2_paging ($page, $total_pages, $path)
+{
+	$str = '';
+	for ($i = 1; $i <= $total_pages; $i++)
+		$str .= ($i == $page ? ' <span class="current">'.$i.'</span>' : ' <a href="'.S2_PATH.S2_URL_PREFIX.$path.(S2_URL_PREFIX ? '&amp;' : '?').'~='.$i.'">'.$i.'</a>');
+
+	$str = ($page <= 1 || $page > $total_pages ? '<span class="nav">&larr;</span>' : '<a href="'.S2_PATH.S2_URL_PREFIX.$path.(S2_URL_PREFIX ? '&amp;' : '?').'~='.($page - 1).'">&larr;</a>').$str.($page == $total_pages ? ' <span class="nav">&rarr;</span>' : ' <a href="'.S2_PATH.S2_URL_PREFIX.$path.(S2_URL_PREFIX ? '&amp;' : '?').'~='.($page + 1).'">&rarr;</a>');
+	return '<p class="paging">'.$str.'</p>';
+}
+
 // Processes site pages
 function s2_parse_page_url ($request_uri)
 {
@@ -839,10 +849,27 @@ function s2_parse_page_url ($request_uri)
 							$subarticles[$j] = $temp;
 						}
 
+ 				if (S2_MAX_ITEMS)
+				{
+					$page_num = isset($_GET['~']) ? intval($_GET['~']) - 1 : 0;
+					if ($page_num < 0)
+						$page_num = 0;
+
+					$start = $page_num * S2_MAX_ITEMS;
+					if ($start >= count($subarticles))
+						$page_num = $start = 0;
+
+					$paging = s2_paging($page_num + 1, ceil(1.0 * count($subarticles) / S2_MAX_ITEMS), $current_path.'/')."\n";
+					$subarticles = array_slice($subarticles, $start, S2_MAX_ITEMS);
+				}
+
 				foreach ($subarticles as $item)
 					$page['subcontent'] .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
 						($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 						(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
+
+				if (S2_MAX_ITEMS)
+					$page['subcontent'] .= $paging;
 			}
 		}
 	}

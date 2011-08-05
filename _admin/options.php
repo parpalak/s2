@@ -11,17 +11,18 @@ if (!defined('S2_ROOT'))
 	die;
 
 $s2_const_types = array(
-	'S2_SITE_NAME' => 'string',
-	'S2_WEBMASTER' => 'string',
-	'S2_WEBMASTER_EMAIL' => 'string',
-	'S2_START_YEAR' => 'int',
-	'S2_COMPRESS' => 'boolean',
-	'S2_SHOW_COMMENTS' => 'boolean',
-	'S2_ENABLED_COMMENTS' => 'boolean',
-	'S2_PREMODERATION' => 'boolean',
-	'S2_FAVORITE_URL' => 'string',
-	'S2_TAGS_URL' => 'string',
-	'S2_LOGIN_TIMEOUT' => 'int'
+	'S2_SITE_NAME'			=> 'string',
+	'S2_WEBMASTER'			=> 'string',
+	'S2_WEBMASTER_EMAIL'	=> 'string',
+	'S2_START_YEAR'			=> 'int',
+	'S2_COMPRESS'			=> 'boolean',
+	'S2_SHOW_COMMENTS'		=> 'boolean',
+	'S2_ENABLED_COMMENTS'	=> 'boolean',
+	'S2_PREMODERATION'		=> 'boolean',
+	'S2_MAX_ITEMS'			=> 'int',
+	'S2_FAVORITE_URL'		=> 'string',
+	'S2_TAGS_URL'			=> 'string',
+	'S2_LOGIN_TIMEOUT'		=> 'int'
 );
 
 ($hook = s2_hook('opt_start')) ? eval($hook) : null;
@@ -132,6 +133,7 @@ function s2_get_options ($message = '')
 		'S2_COMPRESS' => s2_get_checkbox('S2_COMPRESS', $options['S2_COMPRESS'], $lang_const_names['S2_COMPRESS'], $lang_const_explain['S2_COMPRESS']),
 		'S2_FAVORITE_URL' => s2_get_input('S2_FAVORITE_URL', $options['S2_FAVORITE_URL'], $lang_const_names['S2_FAVORITE_URL'], $lang_const_explain['S2_FAVORITE_URL']),
 		'S2_TAGS_URL' => s2_get_input('S2_TAGS_URL', $options['S2_TAGS_URL'], $lang_const_names['S2_TAGS_URL'], $lang_const_explain['S2_TAGS_URL']),
+		'S2_MAX_ITEMS' => s2_get_input('S2_MAX_ITEMS', $options['S2_MAX_ITEMS'], $lang_const_names['S2_MAX_ITEMS'], $lang_const_explain['S2_MAX_ITEMS']),
 		'style' => $style,
 		'lang' => $lang,
 	);
