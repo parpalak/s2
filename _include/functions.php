@@ -197,6 +197,19 @@ function s2_get_template ($template_id, $path = false)
 	return $template;
 }
 
+function s2_build_copyright ($request_uri = '')
+{
+	global $lang_common;
+
+	$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
+	$copyright = S2_WEBMASTER && S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : ($request_uri !== '/' ? '<a href="'.S2_BASE_URL.'/">'.$author.'</a>' : $author);
+
+	return (S2_START_YEAR != date('Y') ?
+		sprintf($lang_common['Copyright 2'], $copyright, S2_START_YEAR, date('Y')) :
+		sprintf($lang_common['Copyright 1'], $copyright, date('Y'))).' '.
+		sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
+}
+
 function s2_get_service_template ($template_id = 'service.php', $path = false)
 {
 	global $lang_common;
@@ -212,13 +225,7 @@ function s2_get_service_template ($template_id = 'service.php', $path = false)
 	$replace['<!-- s2_styles -->'] = ob_get_clean();
 
 	// Footer
-	$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
-	$link = S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : '<a href="'.S2_BASE_URL.'/">'.$author.'</a>';
-
-	$replace['<!-- s2_copyright -->'] = (S2_START_YEAR != date('Y') ?
-		sprintf($lang_common['Copyright 2'], $link, S2_START_YEAR, date('Y')) :
-		sprintf($lang_common['Copyright 1'], $link, date('Y'))).' '.
-		sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
+	$replace['<!-- s2_copyright -->'] = s2_build_copyright();
 
 	($hook = s2_hook('fn_get_service_template_pre_replace')) ? eval($hook) : null;
 

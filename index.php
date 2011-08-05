@@ -132,13 +132,7 @@ if (strpos($template, '<!-- s2_last_articles -->') !== false)
 	$replace['<!-- s2_last_articles -->'] = s2_last_articles();
 
 // Footer
-$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
-$link = S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : '<a href="'.S2_BASE_URL.'/">'.$author.'</a>';
-
-$replace['<!-- s2_copyright -->'] = (S2_START_YEAR != date('Y') ?
-	sprintf($lang_common['Copyright 2'], $link, S2_START_YEAR, date('Y')) :
-	sprintf($lang_common['Copyright 1'], $link, date('Y'))).' '.
-	sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
+$replace['<!-- s2_copyright -->'] = s2_build_copyright($request_uri);
 
 // Queries
 $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
