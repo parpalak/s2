@@ -24,8 +24,8 @@ if (isset($_SERVER['PATH_INFO']) && S2_URL_PREFIX != '')
 else
 {
 	$request_uri = substr(urldecode($_SERVER['REQUEST_URI']), strlen(S2_URL_PREFIX.S2_PATH));
-	if (strpos($request_uri, '?') !== false)
-		$request_uri = substr($request_uri, 0, strpos($request_uri, '?'));
+	if (($delimeter = strpos($request_uri, S2_URL_PREFIX != '' ? '&' : '?')) !== false)
+		$request_uri = substr($request_uri, 0, $delimeter);
 }
 
 ($hook = s2_hook('idx_pre_redirect')) ? eval($hook) : null;
