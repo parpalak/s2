@@ -257,7 +257,7 @@ hr {
 	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	line-height: 13px;
 	height: 13px;
-	padding: 3px 6px 6px 26px;
+	padding: 3px 5px 6px 3px;
 	cursor: default;
 	white-space: nowrap;
 	position: relative;
@@ -266,9 +266,6 @@ hr {
 	border: 1px solid #aaa;
 	border-color: #fff #aaa #aaa #f2f2f2;
 	border-bottom: 0;
-	background-image: url('../i/tab_icons.png');
-	background-repeat: no-repeat;
-	background-color: rgba(0, 0, 0, 0.04);
 	color: #333;
 	-webkit-border-top-left-radius: 4px;
 	-webkit-border-top-right-radius: 4px;
@@ -276,12 +273,25 @@ hr {
 	-moz-border-radius-topright: 4px;
 	border-top-left-radius: 4px;
 	border-top-right-radius: 4px;
-	-moz-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
-	-webkit-box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
-	box-shadow: inset 1px 10px 1px rgba(255, 255, 255, 0.3), inset 0 -6px 2px -2px rgba(0, 0, 0, 0.11);
+	background: -moz-linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.09));
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(rgba(0,0,0,0)), to(rgba(0,0,0,0.09)));
+	background: -webkit-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.09));
+	background: -o-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.09));
+	background: -ms-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.09));
+	background: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.09));
 	cursor: pointer;
 	cursor: hand;
 	}
+	.tabsheets > dt:before {
+		content: ' ';
+		background: url('../i/icons.png');
+		display: block;
+		float: left;
+		margin-top: -1px;
+		width: 16px;
+		height: 16px;
+		margin-right: 4px;
+		}
 
 .tabsheets > dt.active {
 	background-color: #eee;
@@ -289,9 +299,12 @@ hr {
 	z-index: 5;
 	color: #000;
 	text-shadow: 0 1px 0 #fff;
-	-moz-box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
-	-webkit-box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
-	box-shadow: inset 1px 10px 4px rgba(255, 255, 255, 0.6), 0 -1px 1px #bbb;
+	background: -moz-linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(rgba(255,255,255,0.9)), to(rgba(255,255,255,0)));
+	background: -webkit-linear-gradient(rgba(255,255,255,0.9),rgba(255,255,255,0));
+	background: -o-linear-gradient(rgba(255,255,255,0.9),rgba(255,255,255,0));
+	background: -ms-linear-gradient(rgba(255,255,255,0.9),rgba(255,255,255,0));
+	background: linear-gradient(rgba(255,255,255,0.9),rgba(255,255,255,0));
 	cursor: default;
 	}
 
@@ -302,12 +315,12 @@ hr {
 	height: 100%;
 	left: 0;
 	padding: 29px 0 0;
-	background: -moz-linear-gradient(top, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.07) 29px) no-repeat;
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.04)), color-stop(29px,rgba(0,0,0,0.07))) no-repeat;
-	background: -webkit-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
-	background: -o-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
-	background: -ms-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
-	background: linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.01)), color-stop(29px,rgba(0,0,0,0.05))) no-repeat;
+	background: -webkit-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
+	background: -o-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
+	background: -ms-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
+	background: linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
 	}
 
 .tabsheets .tabsheets > dd,
@@ -345,17 +358,19 @@ hr {
 	display: block;
 	}
 
-#list_tab { background-position: 4px -138px; margin-left: 0.833em; }
-#edit_tab { background-position: 4px -58px; }
-#view_tab { background-position: 4px 2px; }
-#pict_tab { background-position: 4px -78px; }
-#comm_tab { background-position: 4px -98px; }
-#tag_tab { background-position: 4px -198px; }
-#admin_tab { background-position: 4px -178px; margin-left: 2em;}
-#admin-stat_tab { background-position: 4px -158px; margin-left: 0.833em; }
-#admin-opt_tab { background-position: 4px -118px; }
-#admin-user_tab { background-position: 4px -18px; }
-#admin-ext_tab { background-position: 4px -38px; }
+#list_tab, #admin-stat_tab { margin-left: 0.833em; }
+#list_tab:before { background-position: -64px 0; }
+#edit_tab:before { background-position: -64px -16px; }
+#view_tab:before { background-position: -64px -32px; }
+#pict_tab:before { background-position: -64px -48px; }
+#comm_tab:before { background-position: -16px -64px; }
+#tag_tab:before { background-position: -48px -32px; }
+#admin_tab { margin-left: 2em;}
+#admin_tab:before { background-position: 0 -48px; }
+#admin-stat_tab:before { background-position: -32px -48px; }
+#admin-opt_tab:before { background-position: -16px -64px; }
+#admin-user_tab:before { background-position: 0 -64px; }
+#admin-ext_tab:before { background-position: -48px -48px; }
 
 /*=======================[Site map tab]=======================================*/
 
@@ -551,7 +566,7 @@ hr {
 				}
 		.but_panel span img.delete { background-position: 0px -32px;}
 		.but_panel span img.comments {
-			background: url(../i/tab_icons.png) 0 -100px;
+			background: url(../i/icons.png) -16px -48px;
 			display: none;
 			}
 			.but_panel[comments] span img.comments {

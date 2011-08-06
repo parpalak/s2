@@ -11,6 +11,10 @@ div.input.checkbox input,
 	min-width: 96px;
 	}
 
-	.toolbar img {
-		border: #eee solid 1px;
-		}
+.toolbar img {
+	border: #eee solid 1px;
+	}
+
+.tabsheets > dt {
+	background: #ddd;
+	}
