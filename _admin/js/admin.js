@@ -221,6 +221,33 @@ function Logout ()
 	return false;
 }
 
+var SetBackground = (function ()
+{
+	var background_items = 'body, .tabsheets > dt.active, .tabsheets .tabsheets > dd, .tabsheets > dd .reducer',
+		head = document.getElementsByTagName('head')[0],
+		style = document.createElement('style');
+
+	style.type = 'text/css';
+	head.appendChild(style);
+
+	var set = function (color)
+	{
+		var rules = background_items + '{background-color: ' + color + ';}';
+		if (style.styleSheet)
+			style.styleSheet.cssText = rules;
+		else
+		{
+			if (style.firstChild)
+				style.removeChild(style.firstChild);
+			style.appendChild(document.createTextNode(rules));
+		}
+		return false;
+	}
+
+	return set;
+}());
+
+
 // Search field events handler
 
 var Search = (function ()

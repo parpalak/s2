@@ -11,7 +11,7 @@
 
 
 define('S2_VERSION', '1.0a5');
-define('S2_DB_REVISION', 2);
+define('S2_DB_REVISION', 3);
 define('MIN_PHP_VERSION', '4.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
@@ -893,6 +893,7 @@ else
 		'S2_SHOW_COMMENTS'			=> "'1'",
 		'S2_ENABLED_COMMENTS'		=> "'1'",
 		'S2_PREMODERATION'			=> "'0'",
+		'S2_ADMIN_COLOR'			=> "'#eeeeee'",
 		'S2_LOGIN_TIMEOUT'			=> "'60'",
 		'S2_DB_REVISION'			=> "'".S2_DB_REVISION."'",
 	);

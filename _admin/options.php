@@ -22,7 +22,8 @@ $s2_const_types = array(
 	'S2_MAX_ITEMS'			=> 'int',
 	'S2_FAVORITE_URL'		=> 'string',
 	'S2_TAGS_URL'			=> 'string',
-	'S2_LOGIN_TIMEOUT'		=> 'int'
+	'S2_ADMIN_COLOR'		=> 'string',
+	'S2_LOGIN_TIMEOUT'		=> 'int',
 );
 
 ($hook = s2_hook('opt_start')) ? eval($hook) : null;
@@ -110,6 +111,11 @@ function s2_get_input ($name, $value, $info, $label)
 	return '<div class="input text"><label for="'.$name.'_input"><span>'.$info.'</span><small>'.$label.'</small></label><input type="text" id="'.$name.'_input" name="opt['.$name.']" size="60" maxlength="255" value="'.s2_htmlencode($value).'" /></div>';
 }
 
+function s2_get_color_input ($name, $value, $info, $label, $onchange = '')
+{
+	return '<div class="input color"><label for="'.$name.'_input"><span>'.$info.'</span><small>'.$label.'</small></label><input type="color" id="'.$name.'_input" name="opt['.$name.']" size="60" maxlength="20" value="'.s2_htmlencode($value).'" '.($onchange ? 'onchange="'.$onchange.'" ' : '').'/></div>';
+}
+
 //
 // Returns the options form
 //
@@ -149,8 +155,13 @@ function s2_get_options ($message = '')
 	($hook = s2_hook('fn_get_options_pre_comment_fs_merge')) ? eval($hook) : null;
 	$output .= '<fieldset><legend>'.$lang_common['Comments'].'</legend>'.implode('', $fieldset).'</fieldset>';
 
+	$color_links = array();
+	foreach (array ('#eeeeee', '#f4dbd5', '#f3e8d0', '#f2f2da', '#e0f3e0', '#d2f0f3', '#e7e4f4') as $color)
+		$color_links[] = '<a class="js" href="#" style="background: '.$color.';" onclick="document.getElementById(\'S2_ADMIN_COLOR_input\').value = \''.$color.'\'; return SetBackground(\''.$color.'\');">'.$color.'</a>';
+
 	($hook = s2_hook('fn_get_options_pre_admin_fs')) ? eval($hook) : null;
 	$fieldset = array(
+		'S2_ADMIN_COLOR' => s2_get_color_input('S2_ADMIN_COLOR', $options['S2_ADMIN_COLOR'], $lang_const_names['S2_ADMIN_COLOR'], sprintf($lang_const_explain['S2_ADMIN_COLOR'], implode($color_links, ', ')), 'SetBackground(this.value);'),
 		'S2_LOGIN_TIMEOUT' => s2_get_input('S2_LOGIN_TIMEOUT', $options['S2_LOGIN_TIMEOUT'], $lang_const_names['S2_LOGIN_TIMEOUT'], $lang_const_explain['S2_LOGIN_TIMEOUT']),
 	);
 	($hook = s2_hook('fn_get_options_pre_admin_fs_merge')) ? eval($hook) : null;

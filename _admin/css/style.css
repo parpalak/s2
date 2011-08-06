@@ -12,6 +12,7 @@
 #tagtext,
 .fields input,
 div.input.text input,
+div.input.color input,
 .r-float input[type="text"],
 .extension  p.description,
 #error_dialog .error_text {
@@ -916,6 +917,7 @@ table.fields {
 			}
 
 input[type="text"],
+input[type="color"],
 input[type="password"],
 textarea {
 	color: #000;
@@ -932,6 +934,7 @@ textarea {
 
 .r-float input[type="text"],
 div.input.text input,
+div.input.color input,
 .fields input[type="text"] {
 	padding: 2px;
 	font: 1em Arial, Helvetica, sans-serif;
@@ -939,6 +942,7 @@ div.input.text input,
 
 .r-float input[type="text"],
 div.input.text input,
+div.input.color input,
 .fields input[type="text"],
 #arttext,
 #commtext,

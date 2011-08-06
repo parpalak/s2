@@ -83,6 +83,7 @@ var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
 var cur_date = new Date();
 var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.getTime();
 var template = '<?php echo str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", '') , $template); ?>';
+SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
 <?php ($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null; ?>
 </script>
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>

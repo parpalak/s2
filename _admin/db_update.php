@@ -23,6 +23,19 @@ if (S2_DB_REVISION < 2)
 	define('S2_MAX_ITEMS', 0);
 }
 
+if (S2_DB_REVISION < 3)
+{
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\'S2_ADMIN_COLOR\', \'#eeeeee\''
+	);
+
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	define('S2_ADMIN_COLOR', '#eeeeee');
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',
