@@ -1051,15 +1051,17 @@ div.input.color input,
 		}
 		.toolbar img:hover {
 			border-color: #fff #aaa #aaa #fff;
-			background-color: #f3f3f3;
+			background-color: rgba(255,255,255,0.5);
 			}
 		.toolbar img:active:hover {
 			border-color: #aaa #fff #fff #aaa;
 			}
 	.toolbar .separator {
-		border: none;
+		border: 0;
+		width: 0;
+		padding: 0;
+		margin: 4px;
 		background: none;
-		width: 4px;
 		}
 
 .toolbar .new { background-position: -88px -16px; }
