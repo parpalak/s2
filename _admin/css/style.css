@@ -311,7 +311,7 @@ hr {
 
 .tabsheets .tabsheets > dd,
 .tabsheets > dd .reducer {
-	background-color: transparent;
+	background-color: #eee;
 	background-attachment: fixed;
 	background: -moz-linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.02));
 	background: -webkit-gradient(linear, 0 0, 0 bottom, from(rgba(0,0,0,0)), to(rgba(0,0,0,0.02)));
