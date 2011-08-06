@@ -223,7 +223,7 @@ function Logout ()
 
 var SetBackground = (function ()
 {
-	var background_items = 'body, .tabsheets > dt.active, .tabsheets .tabsheets > dd, .tabsheets > dd .reducer',
+	var background_items = 'body, .tabsheets > dt.active, .tabsheets .tabsheets > dd, .tabsheets > dd .reducer, #tag_names li.cur_tag',
 		head = document.getElementsByTagName('head')[0],
 		style = document.createElement('style');
 
