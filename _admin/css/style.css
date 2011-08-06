@@ -74,6 +74,7 @@ body {
 	right: 0;
 	padding: 0.0em 3px;
 	background: #fff;
+	color: #000;
 	border-left: 1px solid #ccc;
 	height: 28px;
 	line-height: 13px;
@@ -263,7 +264,10 @@ hr {
 	z-index: 1;
 	border: 1px solid #aaa;
 	border-color: #fff #aaa #aaa #f2f2f2;
-	background: url('../i/tab_icons.png') #ddd no-repeat;
+	border-bottom: 0;
+	background-image: url('../i/tab_icons.png');
+	background-repeat: no-repeat;
+	background-color: rgba(0, 0, 0, 0.04);
 	color: #333;
 	-webkit-border-top-left-radius: 4px;
 	-webkit-border-top-right-radius: 4px;
@@ -280,7 +284,6 @@ hr {
 
 .tabsheets > dt.active {
 	background-color: #eee;
-	border-bottom: 0;
 	top: 7px;
 	z-index: 5;
 	color: #000;
@@ -298,21 +301,24 @@ hr {
 	height: 100%;
 	left: 0;
 	padding: 29px 0 0;
-	background: #e2e4ee;
-	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#e2e4ee), to(#000));
-	background: -moz-linear-gradient(#e2e4ee, #000);
-	background: -o-linear-gradient(#e2e4ee, #000);
-	background: linear-gradient(#e2e4ee, #000);
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.07) 29px) no-repeat;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.04)), color-stop(29px,rgba(0,0,0,0.07))) no-repeat;
+	background: -webkit-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
+	background: -o-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
+	background: -ms-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
+	background: linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.07) 29px) no-repeat;
 	}
 
 .tabsheets .tabsheets > dd,
 .tabsheets > dd .reducer {
-	background-color: #eee;
+	background-color: transparent;
 	background-attachment: fixed;
-	background-image: -webkit-gradient(linear, 0 0, 0 bottom, from(#eee), to(#e7e7e7));
-	background-image: -moz-linear-gradient(#eee, #e7e7e7);
-	background-image: -o-linear-gradient(#eee, #e7e7e7);
-	background-image: linear-gradient(#eee, #e7e7e7);
+	background: -moz-linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.02));
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(rgba(0,0,0,0)), to(rgba(0,0,0,0.02)));
+	background: -webkit-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.02));
+	background: -o-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.02));
+	background: -ms-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.02));
+	background: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.02));
 	}
 
 .tabsheets > dd .reducer {
@@ -378,6 +384,7 @@ hr {
 
 #tree {
 	background: #fff;
+	color: #000;
 	border: 1px solid #eee;
 	border-color: #aaa #fff #fff #aaa;
 	position: relative;
@@ -508,8 +515,10 @@ hr {
 .treetree .but_panel {
 	background: #d2e5fc;
 	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
+	background: -webkit-linear-gradient(#dcebfc, #c1dbfc);
 	background: -moz-linear-gradient(#dcebfc, #c1dbfc);
 	background: -o-linear-gradient(#dcebfc, #c1dbfc);
+	background: -ms-linear-gradient(#dcebfc, #c1dbfc);
 	background: linear-gradient(#dcebfc, #c1dbfc);
 	-moz-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 	-webkit-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
@@ -662,8 +671,10 @@ ul .but_panel .delete,
 	.tagswitcher img {
 		background: url(../i/tag.gif) -4px 50% no-repeat #ccc;
 		background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#d4d4d4), to(#cbcbcb));
+		background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-linear-gradient(#e4e4e4, #dbdbdb);
 		background: url(../i/tag.gif) -4px 50% no-repeat, -moz-linear-gradient(#e4e4e4, #dbdbdb);
 		background: url(../i/tag.gif) -4px 50% no-repeat, -o-linear-gradient(#e4e4e4, #dbdbdb);
+		background: url(../i/tag.gif) -4px 50% no-repeat, -ms-linear-gradient(#e4e4e4, #dbdbdb);
 		background: url(../i/tag.gif) -4px 50% no-repeat, linear-gradient(#e4e4e4, #dbdbdb);
 		-webkit-border-top-left-radius: 4px;
 		-webkit-border-bottom-left-radius: 4px;
@@ -691,16 +702,20 @@ ul .but_panel .delete,
 		.tagswitcher img:hover{
 			background: url(../i/tag.gif) -4px 50% no-repeat #d2e5fc;
 			background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
+			background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) -4px 50% no-repeat, -moz-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) -4px 50% no-repeat, -o-linear-gradient(#dcebfc, #c1dbfc);
+			background: url(../i/tag.gif) -4px 50% no-repeat, -ms-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) -4px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
 			border-color: #7da2ce;
 			}
 		.tagswitcher img.closed:hover{
 			background: url(../i/tag.gif) 6px 50% no-repeat #d2e5fc;
 			background: url(../i/tag.gif) 6px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
+			background: url(../i/tag.gif) 6px 50% no-repeat, -webkit-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) 6px 50% no-repeat, -moz-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) 6px 50% no-repeat, -o-linear-gradient(#dcebfc, #c1dbfc);
+			background: url(../i/tag.gif) 6px 50% no-repeat, -ms-linear-gradient(#dcebfc, #c1dbfc);
 			background: url(../i/tag.gif) 6px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
 			}
 
@@ -744,8 +759,10 @@ ul .but_panel .delete,
 		.sort thead td {
 			background: #ddd;
 			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#e2e2e2), to(#d6d6d6));
+			background: -webkit-linear-gradient(#e2e2e2, #d6d6d6);
 			background: -moz-linear-gradient(#e2e2e2, #d6d6d6);
 			background: -o-linear-gradient(#e2e2e2, #d6d6d6);
+			background: -ms-linear-gradient(#e2e2e2, #d6d6d6);
 			background: linear-gradient(#e2e2e2, #d6d6d6);
 			color: #840;
 			cursor: pointer;
@@ -760,8 +777,10 @@ ul .but_panel .delete,
 			.sort thead td.curcol {
 				background: #2491fe;
 				background: -webkit-gradient(linear, 0 0, 0 bottom, from(#2491fe), to(#41a0ff));
+				background: -webkit-linear-gradient(#2491fe, #41a0ff);
 				background: -moz-linear-gradient(#2491fe, #41a0ff);
 				background: -o-linear-gradient(#2491fe, #41a0ff);
+				background: -ms-linear-gradient(#2491fe, #41a0ff);
 				background: linear-gradient(#2491fe, #41a0ff);
 				color: #fff;
 				}
@@ -1143,6 +1162,7 @@ legend {
 	font-weight: normal;
 	margin: 1em 0 0.5em;
 	border-bottom: 3px double #ddd;
+	border-color: rgba(0, 0, 0, 0.1);
 	}
 
 #comm_div h3 {
@@ -1218,10 +1238,12 @@ legend {
 	position: relative;
 	text-align: center;
 	background: #eee;
-	background: -moz-linear-gradient(top, #F4F4F4 0%, #e5e5e5 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F4F4F4), color-stop(100%,#e5e5e5));
-	background: -o-linear-gradient(top, #F4F4F4 0%,#e5e5e5 100%);
-	background: linear-gradient(top, #F4F4F4 0%,#e5e5e5 100%);
+	background: -moz-linear-gradient(#F4F4F4, #e5e5e5);
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#F4F4F4), to(#e5e5e5));
+	background: -webkit-linear-gradient(#F4F4F4, #e5e5e5);
+	background: -o-linear-gradient(#F4F4F4, #e5e5e5);
+	background: -ms-linear-gradient(#F4F4F4, #e5e5e5);
+	background: linear-gradient(#F4F4F4, #e5e5e5);
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
