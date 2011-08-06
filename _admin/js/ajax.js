@@ -198,13 +198,8 @@ function StringFromForm (aeItem)
 	for (i = aeItem.length; i-- ;)
 	{
 		eItem = aeItem[i];
-		if (eItem.nodeName == 'INPUT')
-		{
-			if (eItem.type == 'text' || eItem.type == 'hidden')
-				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
-			if (eItem.type == 'checkbox' && eItem.checked)
-				sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
-		}
+		if (eItem.nodeName == 'INPUT' && (eItem.type != 'checkbox' || eItem.checked))
+			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
 		if (eItem.nodeName == 'TEXTAREA' || eItem.nodeName == 'SELECT')
 			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
 	}
