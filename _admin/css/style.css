@@ -336,7 +336,6 @@ hr {
 	background: -o-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.02));
 	background: -ms-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.02));
 	background: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.02));
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#00000000', EndColorStr='#06000000')";
 	background-attachment: fixed;
 	background-color: #eee;
 	}
