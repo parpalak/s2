@@ -307,6 +307,9 @@ hr {
 	background: -ms-linear-gradient(rgba(255,255,255,0.9),rgba(255,255,255,0));
 	background: linear-gradient(rgba(255,255,255,0.9),rgba(255,255,255,0));
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#e6ffffff', EndColorStr='#00ffffff')";
+	-moz-box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
+	box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
 	cursor: default;
 	}
 
