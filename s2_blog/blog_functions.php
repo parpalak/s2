@@ -770,7 +770,7 @@ function s2_blog_recent_discussions ($cur_url = '---')
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
 		$output .= '<li title="'.$row['comment_num'].'"><a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a></li>';
-	$output = preg_replace('#<a href="'.$cur_url.'">(.*?)</a>#', '\\1', $output);
+	$output = preg_replace('#<a href="'.preg_quote($cur_url, '#').'">(.*?)</a>#', '\\1', $output);
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
 
@@ -835,7 +835,7 @@ function s2_blog_navigation ($cur_url)
 
 	$cur_url = str_replace('%2F', '/', urlencode($cur_url));
 	$output = '<ul><li>'.implode('</li><li>', $s2_blog_navigation).'</li></ul>';
-	$output = preg_replace('#<a href="'.$cur_url.'">(.*?)</a>#', '\\1', $output);
+	$output = preg_replace('#<a href="'.preg_quote($cur_url, '#').'">(.*?)</a>#', '\\1', $output);
 	return $output;
 }
 
