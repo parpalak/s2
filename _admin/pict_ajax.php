@@ -13,6 +13,7 @@ define('S2_ROOT', '../');
 
 define('S2_NO_POST_BAD_CHARS', 1);
 require S2_ROOT.'_include/common.php';
+require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';
 require 'pict_lib.php';
@@ -256,21 +257,8 @@ elseif ($action == 'upload')
 		}
 	}
 
-	$error_message = empty($errors) ? '' : ' alert(\''.sprintf($lang_pictures['Upload failed'], implode('\n', $errors)).'\');';
-
-?>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="S2-State-Success" content="S2-State-Success" />
-<title><?php echo $lang_pictures['Upload file'] ?></title>
-<meta http-equiv="Pragma" content="no-cache" />
-</head>
-<body onload="<?php echo $error_message; ?>">
-</body>
-</html>
-<?
-
+	if (!empty($errors))
+		echo !isset($_POST['ajax']) ? sprintf($lang_pictures['Upload failed'], implode("\n", $errors)) : implode("\n", $errors);
 }
 
 ($hook = s2_hook('prq_custom_action')) ? eval($hook) : null;

@@ -632,6 +632,59 @@ function Init ()
 		document.addEventListener("mouseover", ShowTip, false);
 		document.addEventListener("mouseout", HideTip, false);
 		document.getElementById('tree_div').addEventListener('mousedown', MouseDown, false);
+
+		document.getElementById('brd').addEventListener('dragover', function (e)
+		{
+			e.preventDefault();
+		}, false);
+
+		document.getElementById('brd').addEventListener('dragenter', function (e)
+		{
+			var dt = e.dataTransfer;
+			if (!dt)
+				return;
+
+			document.getElementById('brd').className = 'accept_drag';
+			setTimeout(function () {document.getElementById('brd').className = '';}, 200);
+			setTimeout(function () {document.getElementById('brd').className = 'accept_drag';}, 400);
+			setTimeout(function () {document.getElementById('brd').className = '';}, 600);
+			setTimeout(function () {document.getElementById('brd').className = 'accept_drag';}, 800);
+			setTimeout(function () {document.getElementById('brd').className = '';}, 1000);
+
+			if (dt.types.contains && !dt.types.contains("Files")) //FF
+				return;
+			if (dt.types.indexOf && dt.types.indexOf("Files") == -1) //Chrome
+				return;
+
+			e.preventDefault();
+		}, false);
+
+		document.getElementById('brd').addEventListener('dragleave', function (e)
+		{
+			document.getElementById('brd').className = '';
+			e.preventDefault();
+		}, false);
+		document.getElementById('brd').addEventListener('drop', function (e)
+		{
+			var dt = e.dataTransfer;
+			if (!dt || !dt.files)
+				return;
+
+			document.getElementById('brd').className = '';
+
+			FileCounter(0, 0);
+			var files = dt.files, not_sent = '';
+			for (var i = files.length; i-- ;)
+				if (files[i].size <= iMaxFileSize)
+					SendFile(files[i]);
+				else
+					not_sent += '\n' + files[i].fileName;
+
+			if (not_sent != '')
+				s2_popup_message(str_replace('%s', sFriendlyMaxFileSize, s2_lang.files_too_big) + not_sent);
+
+			e.preventDefault();
+		}, false);
 	}
 
 	var aeItems = document.getElementById('tree_div').getElementsByTagName('span');
@@ -641,6 +694,62 @@ function Init ()
 			HighlightItem(aeItems[i]);
 			break;
 		}
+}
+
+var FileCounter = (function (inc, new_value)
+{
+	var i;
+
+	return function (inc, new_value)
+	{
+		return (i = (typeof(new_value) == 'number' ? new_value : i + inc));
+	}
+}());
+
+function SendFile (file)
+{
+	var xhr = new XMLHttpRequest();
+
+	FileCounter(1);
+	SetWait(true);
+
+	xhr.onreadystatechange = function ()
+	{
+		if (xhr.readyState == 4)
+		{
+			var s2_status = xhr.getResponseHeader('X-S2-Status');
+
+			if (s2_status == 'Expired' || s2_status == 'Lost' || s2_status == 'Forbidden')
+			{
+				if (0 == FileCounter(-1))
+				{
+					SetWait(false);
+					if (xhr.responseText)
+						s2_popup_message(xhr.responseText);
+				}
+				return;
+			}
+
+			if (xhr.responseText)
+				s2_popup_message(xhr.responseText);
+
+			if (0 == FileCounter(-1))
+			{
+				SetWait(false);
+				var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
+				if (Response.status == '200')
+					eFilePanel.innerHTML = Response.text;
+			}
+		}
+	}
+
+	var data = new FormData();
+	data.append('pictures[]', file);
+	data.append('dir', sCurDir);
+	data.append('ajax', '1');
+
+	xhr.open('POST', sUrl + 'action=upload');
+	xhr.send(data);
 }
 
 function SetWait (bWait)
@@ -671,19 +780,17 @@ function FileUploaded ()
 	if (!was_upload)
 		return;
 
-	var head = window.frames['submit_result'].document.getElementsByTagName('head')[0].innerHTML,
-		body = window.frames['submit_result'].document.body.innerHTML;
-	if (head.indexOf('S2-State-Success') >= 0 && !body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
+	var body = window.frames['submit_result'].document.body.innerHTML;
+
+	if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
+		s2_popup_message(body);
+
+	var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
+	if (Response.status == '200')
 	{
-		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
-		if (Response.status == '200')
-		{
-			eFilePanel.innerHTML = Response.text;
-			document.getElementById('file_upload_input').innerHTML = document.getElementById('file_upload_input').innerHTML;
-		}
+		eFilePanel.innerHTML = Response.text;
+		document.getElementById('file_upload_input').innerHTML = document.getElementById('file_upload_input').innerHTML;
 	}
-	else
-		DisplayError(body);
 }
 
 // Tooltips

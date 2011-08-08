@@ -42,6 +42,8 @@ s2_test_user_rights($session_id, $required_rights);
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
 var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
+var iMaxFileSize = <?php echo s2_return_bytes(ini_get('upload_max_filesize')); ?>;
+var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))); ?>';
 </script>
 </head>
 

@@ -25,6 +25,10 @@
 	padding: 0 1em;
 	}
 
+#brd.accept_drag {
+	border: 1px solid #f66;
+	}
+
 .treetree {
 	width: 300px;
 	padding-right: 20px;
