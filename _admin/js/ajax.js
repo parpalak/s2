@@ -337,28 +337,37 @@ function UnknownError (sError, iStatus)
 function s2_popup_message (sMessage, aActions, iTime)
 {
 	var eDiv = document.getElementById('popup_message');
-	if (eDiv)
-		eDiv.parentNode.removeChild(eDiv);
-	eDiv = document.createElement('DIV');
-	document.body.appendChild(eDiv);
-	eDiv.setAttribute('id', 'popup_message');
-
-	var eInnerDiv = document.createElement('DIV');
-	eDiv.appendChild(eInnerDiv);
-
-	if (iTime)
+	if (!eDiv)
 	{
-		setTimeout(function () { eDiv.parentNode.removeChild(eDiv); }, iTime * 1000);
-	}
-	else
-	{
+		eDiv = document.createElement('DIV');
+		document.body.appendChild(eDiv);
+		eDiv.setAttribute('id', 'popup_message');
+
+		var eInnerDiv = document.createElement('DIV');
+		eDiv.appendChild(eInnerDiv);
+
 		var eImg = document.createElement('IMG');
 		eImg.setAttribute('src', 'i/1.gif');
 		eImg.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
 		eInnerDiv.appendChild(eImg);
 	}
+	else
+		var eInnerDiv = eDiv.firstChild;
 
-	eInnerDiv.appendChild(document.createTextNode(sMessage));
+	var eMessage = document.createElement('DIV');
+	eInnerDiv.appendChild(eMessage);
+
+	if (iTime)
+	{
+		setTimeout(function ()
+		{
+			eMessage.parentNode.removeChild(eMessage);
+			if (eInnerDiv.childNodes.length == 1 && eDiv.parentNode)
+				eDiv.parentNode.removeChild(eDiv);
+		}, iTime * 1000);
+	}
+
+	eMessage.appendChild(document.createTextNode(sMessage));
 
 	var max = aActions ? aActions.length : 0;
 	for (var i = 0; i < max; i++)
@@ -373,10 +382,14 @@ function s2_popup_message (sMessage, aActions, iTime)
 			{
 				action();
 				if (once)
-					eDiv.parentNode.removeChild(eDiv);
+				{
+					eMessage.parentNode.removeChild(eMessage);
+					if (eInnerDiv.childNodes.length == 1)
+						eDiv.parentNode.removeChild(eDiv);
+				}
 				return false;
 			}
 		}(aActions[i].action, aActions[i].once));
-		eInnerDiv.appendChild(eA);
+		eMessage.appendChild(eA);
 	}
 }
