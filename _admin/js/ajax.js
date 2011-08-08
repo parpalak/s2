@@ -241,7 +241,7 @@ function CheckStatus (xmlhttp)
 	if (s2_status == 'Expired' || s2_status == 'Lost' || s2_status == 'Forbidden')
 	{
 		s2_popup_message(xmlhttp.responseText);
-		return false
+		return false;
 	}
 
 	var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
