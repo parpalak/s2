@@ -3,40 +3,39 @@
 $lang_comments = array(
 
 // Comment errors
-'Error post comment'		=> 'Error post comment',
-'Save comment'				=> 'Copy your comment just in a case, with the purpose not to&nbsp;lose it.',
-'Go back'					=> 'Go <a href="javascript:history.back()">back</a> and&nbsp;fix error.',
-'Fix error'					=> 'Fix error before sending the comment.',
+'Error post comment'		=> 'Invalid comment data',
+'Save comment'				=> 'Copy your comment somewhere to prevent its loss.',
+'Go back'					=> 'Go <a href="javascript:history.back()">back</a> and&nbsp;fix errors.',
+'Fix error'					=> 'Fix errors before sending the comment.',
 'Email subject'				=> 'Comment to %s',
-'Comment sent'				=> 'Comment was sent',
-'Comment sent info'			=> '<p>Your comment was successfully sent. It will be in&nbsp;site after&nbsp;verification.</p><p>А&nbsp;meanwhile, you can read&nbsp;<a href="%1$s">article with comments</a> or&nbsp;visit&nbsp;<a href="%2$s">home page</a> and&nbsp;read other articles</a>.</p>',
+'Comment sent'				=> 'Comment has been sent',
+'Comment sent info'			=> '<p>Your comment has been successfully sent. It will be published after the verification.</p><p>Meanwhile, you can <a href="%1$s">go back to the article</a> or&nbsp;visit <a href="%2$s">the main page</a>.</p>',
 
-'Unsubscribed OK'			=> 'You have been successfully unsubscribed from mailing',
-'Unsubscribed OK info'		=> 'You have been successfully unsubscribed from sending comments.',
+'Unsubscribed OK'			=> 'You have been successfully unsubscribed',
+'Unsubscribed OK info'		=> 'You have been successfully unsubscribed from mailing comments.',
 
-'Unsubscribed failed'		=> 'You will not be unsubscribed from mailing',
-'Unsubscribed failed info'	=> 'Probably, you followed&nbsp;the wrong or&nbsp;old hyperlink.',
+'Unsubscribed failed'		=> 'You have not been unsubscribed',
+'Unsubscribed failed info'	=> 'Probably, you followed an incorrect or outdated link.',
 
 'Comment preview'			=> 'Comment preview',
-'Comment preview info'		=> 'Your comment has not been saved yet! After editing do not&nbsp;forget select&nbsp;button «Send».',
+'Comment preview info'		=> 'Your comment has not been saved yet! Do not forget to press the «Submit» button after editing.',
 
 'Email pattern'				=>
 'Hello, <name>.
 
-You have received this letter, because you subscribed for the article 
+You have received this e-mail, because you have subscribed for the article 
 «<title>»,
 located at the address:
 <url>
 
-The author of the new comment <author>.
+The author of the new comment is <author>.
 
 ----------------------------------------------------------------------
 <text>
 ----------------------------------------------------------------------
 
-This letter was formed and sent automatically. If you reply,                                                                                                                       
-the author of the site will receive your answer. If you want to refuse from mailing,
-follow the next hyperlink:
+This e-mail was sent automatically. If you reply, the author
+of the site will receive your answer. To unsubscribe, follow the link
 
 <unsubscribe>',
 'Moderator mail'			=> '<No hyperlink, you are a moderator!>',
@@ -44,14 +43,14 @@ follow the next hyperlink:
 );
 
 $lang_comment_errors = array (
-	'Error message'	=> 'It is impossible to save comment because of:',
-	'missing_text'	=> 'You have forgotten to tipe-in the text.',
-	'missing_nick'	=> 'You have forgotten to tipe-in the name.',
-	'long_text'		=> 'The message can&nbsp;not be bigger than%s bytes.',
-	'long_nick'		=> 'Does your name have more symbols than 50? It is something strange...',
-	'question'		=> 'You gave the wrong answer to&nbsp;the question. Try again.',
-	'email'			=> 'Wrong e-mail.<br />Type-in, please, the correct adress, and the author of the site contact&nbsp;with you&nbsp;if it would be necessary. If you clear the check mark &laquo;Show the adress to the visitors of the site&raquo;, your e-mail&nbsp;will not be shown.',
-	'disabled'		=> 'Sorry, but&nbsp;you can not send comments&nbsp;to this site at this moment. Try it later.',
-	'post_error'	=> 'Not all&nbsp;the data have been received. Perhaps, in this&nbsp;site something has been broken. Or&nbsp;maybe, you are a hacker?',
-	'no_item'		=> 'It is unclear because of unknown cause, why&nbsp;have you sent this comment.',
+	'Error message'	=> 'The following errors must be corrected before your comment can be saved:',
+	'missing_text'	=> 'You have forgotten to enter the comment text.',
+	'missing_nick'	=> 'You have forgotten to enter your name.',
+	'long_text'		=> 'The message cannot be larger than%s bytes.',
+	'long_nick'		=> 'Is your name length more than 50 symbols? It is something strange...',
+	'question'		=> 'You gave the wrong answer to the question. Try again.',
+	'email'			=> 'Invalid e-mail. Please, enter the correct e-mail, and the author of the site will contact you if it is needed. If you clear the &laquo;Show to other visitors&raquo; checkbox, your e-mail will not be shown.',
+	'disabled'		=> 'Sorry, but&nbsp;you cannot send comments&nbsp;to this site at this moment. Try it later.',
+	'post_error'	=> 'The data received is not complete. Looks like the site is broken. Or maybe you are a hacker?',
+	'no_item'		=> 'Because of an error the destination page cannot be detected. Go to the page you have commented and try again (you can copy and paste the comment text).',
 );
