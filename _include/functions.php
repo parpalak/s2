@@ -59,7 +59,7 @@ function s2_number_format ($number, $trailing_zero = false, $decimal_count = fal
 
 	$result = number_format($number, $decimal_count === false ? $lang_common['Decimal count'] : $decimal_count, $lang_common['Decimal point'], $lang_common['Thousands separator']);
 	if (!$trailing_zero)
-		$result = preg_replace('#,?0*$#', '', $result);
+		$result = preg_replace('#'.preg_quote($lang_common['Decimal point'], '#').'?0*$#', '', $result);
 
 	return $result;
 }
