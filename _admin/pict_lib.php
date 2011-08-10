@@ -64,7 +64,7 @@ function s2_walk_dir ($dir, $created_name = false)
 		{
 			($hook = s2_hook('fn_walk_dir_format_item_start')) ? eval($hook) : null;
 			$item_count++;
-			$spans[] = '<div><span path="'.$dir.'/'.$item.'"'.($created_name === $item ? ' selected="selected"' : '').'>'.$item .'</span></div>';
+			$spans[] = '<div><span data-path="'.$dir.'/'.$item.'"'.($created_name === $item ? ' selected="selected"' : '').'>'.$item .'</span></div>';
 			$subdirs[] = s2_walk_dir($dir.'/'.$item);
 		}
 	}
@@ -111,7 +111,7 @@ function s2_get_files ($dir)
 		if ($item == '.' || $item == '..' || is_dir(S2_IMG_PATH.$dir.'/'.$item))
 			continue;
 
-		$fsize = '';
+		$dim = '';
 
 		$preview = '<img src="i/file.png" vspace="16" hspace="16" align="center" alt="" />';
 		if (strpos($item, '.') !== false && in_array(end(explode('.', $item)), $allowed_extensions))
@@ -121,7 +121,7 @@ function s2_get_files ($dir)
 			$image_info = getImageSize(S2_IMG_PATH.$dir.'/'.$item);
 			$sx = $image_info[0];
 			$sy = $image_info[1];
-			$fsize = 'fsize="'.$sx.'*'.$sy.'"';
+			$dim = 'data-dim="'.$sx.'*'.$sy.'"';
 			if ($sx < $sy)
 			{
 				if ($sy > $max_size)
@@ -163,7 +163,7 @@ function s2_get_files ($dir)
 		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.$dir.'/'.$item.'\');" alt="'.$lang_pictures['Delete'].'" />';
 
 		($hook = s2_hook('fn_get_files_pre_output_merge')) ? eval($hook) : null;
-		$output .= '<li><span fname="'.$dir.'/'.$item.'"'.$fsize.' fval="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';
+		$output .= '<li><span data-fname="'.$dir.'/'.$item.'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';
 	}
 
 	($hook = s2_hook('fn_get_files_end')) ? eval($hook) : null;

@@ -43,7 +43,7 @@ function SaveExpand ()
 	var sPath;
 
 	for (var i = aSpan.length; i-- ;)
-		if (sPath = aSpan[i].getAttribute("path"))
+		if (sPath = aSpan[i].getAttribute('data-path'))
 			asExpanded[sPath] = aSpan[i].parentNode.parentNode.className.indexOf('ExpandOpen') != -1;
 }
 
@@ -53,7 +53,7 @@ function LoadExpand ()
 	var sPath, eLi;
 
 	for (var i = aSpan.length; i-- ;)
-		if ((sPath = aSpan[i].getAttribute("path")) && asExpanded[sPath])
+		if ((sPath = aSpan[i].getAttribute('data-path')) && asExpanded[sPath])
 		{
 			eLi = aSpan[i].parentNode.parentNode;
 			eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
@@ -98,30 +98,30 @@ var sExecDouble = '';
 
 function HighlightItem (item)
 {
-	if (typeof(item.getAttribute("path")) == 'string')
+	if (typeof(item.getAttribute('data-path')) == 'string')
 	{
 		item.className = "but_panel";
 		item.appendChild(buttonPanel);
-		var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(item.getAttribute("path")));
+		var Response = GETSyncRequest(sUrl + 'action=load_items&path=' + encodeURIComponent(item.getAttribute('data-path')));
 		if (Response.status != "200")
 			return;
 
 		eFilePanel.innerHTML = Response.text;
-		sCurDir = item.getAttribute("path");
+		sCurDir = item.getAttribute('data-path');
 		document.getElementById('fold_name').innerHTML = "<b>" + (item.innerText ? item.innerText : item.textContent) + "</b>";
 	}
-	if (item.getAttribute("fname"))
+	if (item.getAttribute('data-fname'))
 	{
 		eHigh = item;
 		item.className = "but_panel";
-		var str = s2_lang.file + sPicturePrefix + item.getAttribute("fname");
-		if (item.getAttribute("fval"))
-			str += "<br />" + s2_lang.value + item.getAttribute("fval");
-		if (item.getAttribute("fsize"))
+		var str = s2_lang.file + sPicturePrefix + item.getAttribute('data-fname');
+		if (item.getAttribute('data-fsize'))
+			str += "<br />" + s2_lang.value + item.getAttribute('data-fsize');
+		if (item.getAttribute('data-dim'))
 		{
-			var a = item.getAttribute("fsize").split('*');
+			var a = item.getAttribute('data-dim').split('*');
 			str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
-			sExecDouble = '(window.top.ReturnImage ? window.top : opener).ReturnImage(\'' + sPicturePrefix + item.getAttribute('fname') + '\', \'' + a[0] + '\', \'' + a[1] + '\');'
+			sExecDouble = '(window.top.ReturnImage ? window.top : opener).ReturnImage(\'' + sPicturePrefix + item.getAttribute('data-fname') + '\', \'' + a[0] + '\', \'' + a[1] + '\');'
 			str += '<br /><input type="button" onclick="' + sExecDouble + ' return false;" value="' + s2_lang.insert + '">';
 		}
 		else
@@ -169,7 +169,7 @@ function RejectName ()
 
 function EditItemName (eItem)
 {
-	if (eItem.nodeName == "SPAN" && eItem.getAttribute("path"))
+	if (eItem.nodeName == "SPAN" && eItem.getAttribute('data-path'))
 	{
 		sSavedName = eItem.firstChild.nodeValue;
 
@@ -185,7 +185,7 @@ function EditItemName (eItem)
 			{
 				// Enter
 				SaveExpand();
-				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + encodeURIComponent(eItem.getAttribute("path")) + "&name=" + encodeURIComponent(eInput.value));
+				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + encodeURIComponent(eItem.getAttribute('data-path')) + "&name=" + encodeURIComponent(eInput.value));
 
 				if (Response.status == '200')
 				{
@@ -252,7 +252,7 @@ function EditItemName (eItem)
 			if (iCode == 13)
 			{
 				// Enter
-				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + encodeURIComponent(eItem.firstChild.getAttribute("fname")) + "&name=" + encodeURIComponent(eInput.value));
+				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + encodeURIComponent(eItem.firstChild.getAttribute('data-fname')) + "&name=" + encodeURIComponent(eInput.value));
 				if (Response.status == '200')
 					eFilePanel.innerHTML = Response.text;
 				sSavedName = "";
@@ -296,7 +296,7 @@ function SetItemChildren (eSpan, sInnerHTML)
 		eLi.appendChild(eUl);
 		eUl.innerHTML = sInnerHTML;
 	}
-	ExpandSavedItem(eSpan.getAttribute("path"));
+	ExpandSavedItem(eSpan.getAttribute('data-path'));
 }
 
 function SetParentChildren (eParentUl, str)
@@ -342,7 +342,7 @@ function StopDrag ()
 	{
 		if (sourceFElement)
 		{
-			var Response = GETSyncRequest(sUrl + "action=move_file&spath=" + encodeURIComponent(sourceFElement.getAttribute("fname")) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute("path")));
+			var Response = GETSyncRequest(sUrl + "action=move_file&spath=" + encodeURIComponent(sourceFElement.getAttribute('data-fname')) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute('data-path')));
 			if (Response.status == '200')
 				eFilePanel.innerHTML = Response.text;
 			acceptorElement.className = "";
@@ -367,7 +367,7 @@ function StopDrag ()
 				eItem = eItem.parentNode;
 			}
 
-			var Response = GETSyncRequest(sUrl + "action=drag&spath=" + encodeURIComponent(sourceElement.getAttribute("path")) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute("path")));
+			var Response = GETSyncRequest(sUrl + "action=drag&spath=" + encodeURIComponent(sourceElement.getAttribute('data-path')) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute('data-path')));
 
 			if (Response.status == '200')
 			{
@@ -407,11 +407,11 @@ function MouseDown (e)
 
 		return;
 	}
-	else if (t.nodeName == "SPAN" && typeof(t.getAttribute("path")) == 'string')
+	else if (t.nodeName == "SPAN" && typeof(t.getAttribute('data-path')) == 'string')
 		sourceElement = t;
-	else if (t.nodeName == "SPAN" && t.getAttribute("fname"))
+	else if (t.nodeName == "SPAN" && t.getAttribute('data-fname'))
 		sourceFElement = t;
-	else if (t.nodeName == "LI" && t.firstChild.getAttribute("fname"))
+	else if (t.nodeName == "LI" && t.firstChild.getAttribute('data-fname'))
 		sourceFElement = t.firstChild;
 	else
 		return;
@@ -532,7 +532,7 @@ function MouseIn(e)
 {
 	var t = window.event ? window.event.srcElement : e.target;
 
-	if (t.nodeName == 'SPAN' && typeof(t.getAttribute("path")) == 'string' && (sourceElement != null && t != acceptorElement && t != sourceElement || sourceFElement != null))
+	if (t.nodeName == 'SPAN' && typeof(t.getAttribute('data-path')) == 'string' && (sourceElement != null && t != acceptorElement && t != sourceElement || sourceFElement != null))
 	{
 		acceptorElement = t;
 		t.className = "over_far";
@@ -560,7 +560,7 @@ function DeleteFolder ()
 		return false;
 
 	ReleaseItem();
-	var Response = GETSyncRequest(sUrl + "action=delete_folder&path=" + encodeURIComponent(eSpan.getAttribute('path')));
+	var Response = GETSyncRequest(sUrl + "action=delete_folder&path=" + encodeURIComponent(eSpan.getAttribute('data-path')));
 	if (Response.status != '200')
 		return false;
 
@@ -590,7 +590,7 @@ function CreateSubFolder ()
 	var eLi = eSpan.parentNode.parentNode;
 
 	ReleaseItem();
-	var Response = GETSyncRequest(sUrl + "action=create_subfolder&path=" + encodeURIComponent(eSpan.getAttribute('path')));
+	var Response = GETSyncRequest(sUrl + "action=create_subfolder&path=" + encodeURIComponent(eSpan.getAttribute('data-path')));
 	if (Response.status != '200')
 		return false;
 
@@ -644,17 +644,17 @@ function Init ()
 			if (!dt)
 				return;
 
+			if (dt.types.contains && !dt.types.contains("Files")) //FF
+				return;
+			if (dt.types.indexOf && dt.types.indexOf("Files") == -1) //Chrome
+				return;
+
 			document.getElementById('brd').className = 'accept_drag';
 			setTimeout(function () {document.getElementById('brd').className = '';}, 200);
 			setTimeout(function () {document.getElementById('brd').className = 'accept_drag';}, 400);
 			setTimeout(function () {document.getElementById('brd').className = '';}, 600);
 			setTimeout(function () {document.getElementById('brd').className = 'accept_drag';}, 800);
 			setTimeout(function () {document.getElementById('brd').className = '';}, 1000);
-
-			if (dt.types.contains && !dt.types.contains("Files")) //FF
-				return;
-			if (dt.types.indexOf && dt.types.indexOf("Files") == -1) //Chrome
-				return;
 
 			e.preventDefault();
 		}, false);
@@ -689,7 +689,7 @@ function Init ()
 
 	var aeItems = document.getElementById('tree_div').getElementsByTagName('span');
 	for (var i = aeItems.length; i-- ;)
-		if (typeof(aeItems[i].getAttribute('path')) == 'string' && aeItems[i].getAttribute('path') == '')
+		if (typeof(aeItems[i].getAttribute('data-path')) == 'string' && aeItems[i].getAttribute('data-path') == '')
 		{
 			HighlightItem(aeItems[i]);
 			break;

@@ -54,7 +54,7 @@ var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_g
 				<?php s2_upload_form(); ?>
 			</div>
 			<ul>
-				<li class="ExpandOpen IsLast"><div></div><div><span path=""><?php echo $lang_pictures['Pictures'];?></span></div><ul><?php echo s2_walk_dir(''); ?></ul></li>
+				<li class="ExpandOpen IsLast"><div></div><div><span data-path=""><?php echo $lang_pictures['Pictures'];?></span></div><ul><?php echo s2_walk_dir(''); ?></ul></li>
 			</ul>
 			<div id="finfo"></div>
 		</div>

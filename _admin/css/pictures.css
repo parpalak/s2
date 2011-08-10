@@ -48,10 +48,10 @@
 	padding: 0;
 	background: #fff;
 	}
-	#files span[fsize] {
+	#files span[data-fsize] {
 		border-color: #ccc;
 		}
-		#files span.but_panel[fsize] {
+		#files span.but_panel[data-fsize] {
 			border-color: #7cc;
 			}
 
