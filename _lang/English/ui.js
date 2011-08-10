@@ -19,7 +19,7 @@ var s2_lang = {
 	uninstall_message	: 'Read carefully before uninstalling:\n\n%s\n\nDo you want to continue uninstallation?',
 
 	unknown_error		: 'Unknown error',
-	server_response		: 'Something is broken. Please, inform administrators or developers the conditions caused the error and attach the server response:',
+	server_response		: 'Something is broken. Please report the conditions when error occurs to administrators or developers and attach the server response:',
 
 	click_to_sort		: 'Click to sort',
 
