@@ -1128,6 +1128,9 @@ legend {
 	color: #556;
 	text-shadow: 0px 1px 0 #fff;
 	}
+form center {
+	padding: 1em 0;
+	}
 
 .input {
 	width: auto;
