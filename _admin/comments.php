@@ -52,7 +52,8 @@ function s2_show_comments ($mode, $id = 0)
 	{
 		// Show unverified commetns
 		$query['WHERE'] = 'shown = 0 AND sent = 0';
-		$output = '<h2>'.$lang_admin['New comments'].'</h2>';
+		$output = '<h2>'.$lang_admin['New comments'].'</h2>'.
+			'<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
 	}
 	elseif ($mode == 'last')
 	{
@@ -200,8 +201,7 @@ function s2_for_premoderation ()
 		return s2_comment_menu_links();
 
 	$output = s2_comment_menu_links('new');
-	$output .= '<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
-	$output .= '<script type="text/javascript">document.location.hash = "#comm";</script>';
+	$output .= '<script type="text/javascript">s2_popup_message(\''.$lang_admin['Unchecked comments'].'\', [{name: \''.$lang_admin['View comments'].'\', action: function () {SelectTab(document.getElementById(\'comm_tab\'), true); LoadTable(\'load_new_comments\', \'comm_div\');}, once: true}]);</script>';
 	$output .= s2_show_comments('new');
 
 	($hook = s2_hook('fn_for_premoderation_end')) ? eval($hook) : null;

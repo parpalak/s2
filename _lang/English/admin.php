@@ -129,6 +129,8 @@ $lang_admin = array(
 'IP'						=> 'IP',
 'Comment'					=> 'Comment',
 'Premoderation info'		=> 'The premoderation mode is enabled. The following comments are to be checked. You should either publish or delete them.',
+'View comments'				=> 'Moderate',
+'Unchecked comments'		=> 'There are unchecked comments.',
 
 // Pictures tab
 'Pictures'					=> 'Pictures',
