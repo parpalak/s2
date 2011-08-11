@@ -260,7 +260,10 @@ define('BLOG_KEYWORDS', BLOG_BASE.urlencode(S2_TAGS_URL).'/');
 		<hook id="idx_get_content" priority="9"><![CDATA[
 if (substr($request_uri, 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 {
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
 		include $ext_info['path'].'/blog_functions.php';
 	return include $ext_info['path'].'/main.php';
@@ -320,7 +323,10 @@ if ($row['s2_blog_is_posts'])
 // Links to blog tags
 if (!empty($s2_blog_links))
 {
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	$output[] = '<div class="header">'.$lang_s2_blog['See in blog'].'</div>'.implode(', ', $s2_blog_links);
 }
 		]]></hook>
@@ -335,7 +341,10 @@ require $ext_info['path'].'/blog_ajax.php';
 		]]></hook>
 
 		<hook id="ai_pre_edit"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 require $ext_info['path'].'/blog_lib.php';
 ?>
 		<dt id="blog_tab"><?php echo $lang_s2_blog['Blog']; ?></dt>
@@ -373,7 +382,10 @@ require $ext_info['path'].'/blog_lib.php';
 		]]></hook>
 
 		<hook id="fn_output_tag_form_pre_url"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 ?>
 		<label for="s2_blog_important_tag" title="<?php echo $lang_s2_blog['Important tag info']; ?>">
 			<input type="checkbox" id="s2_blog_important_tag" name="tag[s2_blog_important]" value="1"<? if ($tag['s2_blog_important']) echo ' checked="checked"' ?> />
@@ -431,7 +443,10 @@ $info .= '/'.$row['post_count'];
 
 		<hook id="fn_get_user_list_start"><![CDATA[
 array_splice($s2_user_permissions, -1, 0, 'edit_s2_blog');
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 $lang_user_permissions['edit_s2_blog'] = $lang_s2_blog['Edit blog perm'];
 		]]></hook>
 
@@ -466,7 +481,10 @@ if ($type == 'blog')
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	global $lang_s2_blog;
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $post_id);
@@ -474,19 +492,28 @@ if ($type == 'blog')
 		]]></hook>
 
 		<hook id="rq_action_load_hidden_comments_end"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 
 echo s2_show_comments('s2_blog_hidden');
 		]]></hook>
 
 		<hook id="rq_action_load_last_comments_end"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 
 echo s2_show_comments('s2_blog_last');
 		]]></hook>
 
 		<hook id="rq_action_load_new_comments_end"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 
 echo s2_show_comments('s2_blog_new');
 		]]></hook>
@@ -561,7 +588,10 @@ $s2_const_types['S2_BLOG_CRUMBS'] = 'string';
 		]]></hook>
 
 		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 $fieldset = array(
 	'S2_BLOG_TITLE' => s2_get_input('S2_BLOG_TITLE', $options['S2_BLOG_TITLE'], $lang_s2_blog['Blog title'], $lang_s2_blog['Blog title label']),
 	'S2_BLOG_URL' => s2_get_input('S2_BLOG_URL', $options['S2_BLOG_URL'], $lang_s2_blog['Blog URL'], $lang_s2_blog['Blog URL label']),
@@ -572,7 +602,10 @@ $output .= '<fieldset><legend>'.$lang_s2_blog['Blog'].'</legend>'.implode('', $f
 		]]></hook>
 
 		<hook id="fn_get_counters_end"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 
 $query = array(
 	'SELECT'	=> 'count(*)',
@@ -615,7 +648,10 @@ $new_comment_count += $s2_db->result($result);
 		]]></hook>
 
 		<hook id="fn_for_premoderation_end"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 
 $output .= s2_show_comments('s2_blog_new');
 		]]></hook>
@@ -772,7 +808,10 @@ if (defined('S2_BLOG_HANDLED') || isset($_GET['type']) && $_GET['type'] == 's2_b
 		<hook id="idx_pre_rss"><![CDATA[
 if ($request_uri == S2_BLOG_URL.'/rss.xml')
 {
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
 		include $ext_info['path'].'/blog_functions.php';
 	if (!defined('S2_RSS_FUNCTIONS_LOADED'))
@@ -813,7 +852,12 @@ if ($request_uri == S2_BLOG_URL.'/rss.xml')
 
 		<hook id="idx_pre_meta_merge"><![CDATA[
 if (!isset($lang_s2_blog))
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
+}
 if (defined('S2_BLOG_HANDLED'))
 	$meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.S2_BASE_URL.S2_URL_PREFIX.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml" />';
 		]]></hook>

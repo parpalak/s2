@@ -13,7 +13,10 @@ if ($action == 'load_blog_posts')
 	($hook = s2_hook('blrq_action_load_blog_posts_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/blog_lib.php';
 
 	s2_blog_output_post_list($_POST['posts']);
@@ -29,7 +32,10 @@ elseif ($action == 'edit_blog_post')
 		die('Error in GET parameters.');
 	$id = (int) $_GET['id'];
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/blog_lib.php';
 
 	($hook = s2_hook('blrq_action_edit_blog_post_pre_output')) ? eval($hook) : null;
@@ -44,7 +50,10 @@ elseif ($action == 'save_blog')
 	($hook = s2_hook('rq_action_save_blog_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/blog_lib.php';
 
 	if (!isset($_POST['page']))
@@ -167,7 +176,10 @@ elseif ($action == 'create_blog_post')
 	($hook = s2_hook('blrq_action_create_blog_post_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/blog_lib.php';
 
 	echo $s2_db->insert_id();
@@ -236,7 +248,10 @@ elseif ($action == 'flip_favorite_post')
 	($hook = s2_hook('blrq_action_edit_blog_post_pre_set_fav_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 
 	$button = $favorite ?
 		'<img class="favorite" src="i/1.gif" alt="'.$lang_s2_blog['Undo favorite'].'" onclick="return ToggleFavBlog(this, '.$id.');">' :
@@ -258,7 +273,10 @@ elseif ($action == 'load_blog_comments')
 	$id = (int)$_GET['id'];
 
 	require 'comments.php';
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $id);
@@ -295,7 +313,10 @@ elseif ($action == 'delete_blog_comment')
 	($hook = s2_hook('blrq_action_delete_blog_comment_pre_del_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	require 'comments.php';
 
 	echo s2_comment_menu_links();
@@ -339,7 +360,10 @@ elseif ($action == 'hide_blog_comment')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/blog_lib.php';
 	require 'comments.php';
 
@@ -379,7 +403,10 @@ elseif ($action == 'mark_blog_comment')
 	($hook = s2_hook('blrq_action_mark_blog_comment_pre_upd_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
 	require 'comments.php';
 
 	echo s2_comment_menu_links();
