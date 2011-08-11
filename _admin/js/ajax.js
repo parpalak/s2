@@ -390,6 +390,7 @@ function s2_popup_message (sMessage, aActions, iTime)
 				return false;
 			}
 		}(aActions[i].action, aActions[i].once));
+		eMessage.appendChild(document.createTextNode('\u00a0 '));
 		eMessage.appendChild(eA);
 	}
 }
