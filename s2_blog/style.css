@@ -40,8 +40,13 @@ table.cal {
 			background: #eed;
 			}
 	.cal th {
-		font-weight: bold;
+		font-weight: normal;
+		font-size: 80%;
 		}
+		.cal .nav th {
+			font-size: 100%;
+			font-weight: bold;
+			}
 		.cal th.sun {
 			color: #f00;
 			}
