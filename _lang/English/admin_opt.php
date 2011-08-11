@@ -9,8 +9,8 @@ $lang_const_explain = array(
 'S2_SHOW_COMMENTS'		=> 'You can hide all comments for a while by turning this off.',
 'S2_ENABLED_COMMENTS'	=> 'Show input comment form (at pages where it was not explicitly disabled).',
 'S2_PREMODERATION'		=> 'All comments are hidden by default and are to be checked by moderator.',
-'S2_FAVORITE_URL'		=> 'The URL part for the favorite page, e.g. «favorite».',
-'S2_TAGS_URL'			=> 'The URL part for the tags page, e.g. «tags».',
+'S2_FAVORITE_URL'		=> 'The URL part for the favorite page, e.g. “favorite”.',
+'S2_TAGS_URL'			=> 'The URL part for the tags page, e.g. “tags”.',
 'S2_MAX_ITEMS'			=> 'The number of items on the section page. 0 — do not break section content into pages.',
 'S2_START_YEAR'			=> 'Used in the copyright.',
 'S2_ADMIN_COLOR'		=> 'Background color of the control panel (examples: %s).',
@@ -43,6 +43,6 @@ $lang_admin_opt = array(
 'Save options'				=> 'Save (Ctrl + S)',
 'Invalid webmaster email'	=> 'You have entered an invalid webmaster e-mail. The previous one is used.',
 'Invalid style'				=> 'You have chosen the incorrect style.',
-'Invalid lang pack'			=> 'The language pack «%s» contains errors.',
+'Invalid lang pack'			=> 'The language pack “%s” contains errors.',
  
 );

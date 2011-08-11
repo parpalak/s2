@@ -18,13 +18,13 @@ $lang_comments = array(
 'Unsubscribed failed info'	=> 'Probably, you followed an incorrect or outdated link.',
 
 'Comment preview'			=> 'Comment preview',
-'Comment preview info'		=> 'Your comment has not been saved yet! Do not forget to press the «Submit» button after editing.',
+'Comment preview info'		=> 'Your comment has not been saved yet! Do not forget to press the “Submit” button after editing.',
 
 'Email pattern'				=>
 'Hello, <name>.
 
 You have received this e-mail, because you have subscribed for the article 
-«<title>»,
+“<title>”,
 located at the address:
 <url>
 

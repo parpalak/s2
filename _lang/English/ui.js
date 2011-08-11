@@ -3,19 +3,19 @@ var s2_lang = {
 	no_loops			: 'It is impossible to move section into subsections!',
 	delete_comment		: 'Do you want to delete the comment?',
 	delete_tag_link		: 'Do you want to break the link?',
-	new_password		: 'New password of the user «%s»:',
-	new_email			: 'New e-mail of the user «%s»:',
-	delete_user			: 'Do you want to delete the user «%s»?',
+	new_password		: 'New password of the user “%s”:',
+	new_email			: 'New e-mail of the user “%s”:',
+	delete_user			: 'Do you want to delete the user “%s”?',
 
-	delete_tag			: 'Do you want to delete the tag «%s» and all its links?',
+	delete_tag			: 'Do you want to delete the tag “%s” and all its links?',
 
 	empty_tag			: 'It is impossible to save a tag without a name.',
 	empty_login			: 'The username is empty.',
 
-	install_extension	: 'Do you want to continue installation of the extention «%s»?',
+	install_extension	: 'Do you want to continue installation of the extention “%s”?',
 	install_message		: 'Read carefully before installing:\n\n%s\n\n',
 
-	delete_extension	: 'Do you really want to uninstalle the extention «%s»?',
+	delete_extension	: 'Do you really want to uninstalle the extention “%s”?',
 	uninstall_message	: 'Read carefully before uninstalling:\n\n%s\n\nDo you want to continue uninstallation?',
 
 	unknown_error		: 'Unknown error',
@@ -34,13 +34,13 @@ var s2_lang = {
 	recovered_text_info : 'A text that had not been saved last time is recovered. You can copy the necessary fragments and paste them to the editor.',
 	recovered_open		: 'Open in a new window',
 
-	move				: 'Move to «%s»',
+	move				: 'Move to “%s”',
 	move_up				: 'Move up',
 	move_down			: 'Move down',
-	add_to_tag			: 'Add to the tag «%s»',
+	add_to_tag			: 'Add to the tag “%s”',
 
-	delete_file			: 'Do you want to delete the file «%s»?',
-	delete_item			: 'Do you want to delete «%s» with all containing elements?',
+	delete_file			: 'Do you want to delete the file “%s”?',
+	delete_item			: 'Do you want to delete “%s” with all containing elements?',
 
 	create_subfolder	: 'Create subfolder',
 	delete_folder		: 'Delete folder',

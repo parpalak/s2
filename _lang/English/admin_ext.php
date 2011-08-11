@@ -17,7 +17,7 @@ $lang_admin_ext = array(
 'Uninstall'						=>	'Uninstall',
 'Enable'						=>	'Enable',
 'Disable'						=>	'Disable',
-'Extension loading error'		=>	'Loading of extension «%s» failed.',
+'Extension loading error'		=>	'Loading of extension “%s” failed.',
 'Illegal ID'					=>	'The ID must contain only lowercase alphanumeric characters (a-z and 0-9) and the underscore character (_).',
 'Maxtestedon warning'			=>	'This extension has not been explicitly tested on your S2 version and might therefore not be compatible with your current setup.',
 'Missing manifest'				=>	'Missing manifest.xml.',
@@ -41,7 +41,7 @@ $lang_admin_ext = array(
 'extension/hooks/hook error2'	=>	'Element extension/hooks/hook is missing attribute "id".',
 'extension/hooks/hook error3'	=>	'Element extension/hooks/hook has an out of bounds value in attribute "priority".',
 'extension/hooks/hook error4'	=>	'Element extension/hooks/hook has content which does not end in PHP mode.',
-'No XML support'				=>	'This PHP environment doesn\'t have XML support built in. XML support is required if you want to use S2 extensions. Consult the PHP documentation or hosting support for further assistance.',
+'No XML support'				=>	'This PHP environment does not have XML support built in. XML support is required if you want to use S2 extensions. Consult the PHP documentation or hosting support for further assistance.',
 'No installed extensions'		=>	'There are no installed extensions.',
 'No installed hotfixes'			=>	'There are no installed hotfixes.',
 'No available extensions'		=>	'There are no extensions available for install or upgrade.',
@@ -56,9 +56,9 @@ $lang_admin_ext = array(
 'Hotfix description'			=>	'This hotfix for your S2 installation was detected by automatic update.',
 'Install hotfix'				=>	'Install hotfix',
 
-'Missing dependency'			=>	'The extension «%1$s» cannot be installed unless the extension «%2$s» is installed and enabled.',
-'Uninstall dependency'			=>	'The extension «%1$s» cannot be uninstalled before the extension «%2$s» is installed.',
-'Disable dependency'			=>	'The extension «%1$s» cannot be disabled while the extension «%2$s» is enabled.',
-'Disabled dependency'			=>	'The extension «%1$s» cannot be enabled while the extension «%2$s» is disabled.',
+'Missing dependency'			=>	'The extension “%1$s” cannot be installed unless the extension “%2$s” is installed and enabled.',
+'Uninstall dependency'			=>	'The extension “%1$s” cannot be uninstalled before the extension “%2$s” is installed.',
+'Disable dependency'			=>	'The extension “%1$s” cannot be disabled while the extension “%2$s” is enabled.',
+'Disabled dependency'			=>	'The extension “%1$s” cannot be enabled while the extension “%2$s” is disabled.',
 
 );
