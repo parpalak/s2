@@ -33,7 +33,10 @@ echo "\n".'<script type="text/javascript" src="'.$ext_info['url'].'/latexit.js">
 		]]></hook>
 
 		<hook id="fn_comment_form_pre_syntax_info"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 echo $lang_s2_latex['Comment syntax'];
 		]]></hook>
 
