@@ -26,7 +26,7 @@
 
 	<install><![CDATA[
 if (version_compare(PHP_VERSION, '5.0.0', '<'))
-	return '<strong>Error!</strong> The s2_search extension does not work on PHP 4. Please, upgrade to PHP 5.';
+	return '<strong>Error!</strong> The s2_search extension does not work on PHP 4. Please upgrade to PHP 5.';
 
 $s2_search_config = array(
 	'S2_SEARCH_QUICK'		=> '0',
