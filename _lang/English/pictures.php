@@ -14,6 +14,7 @@ $lang_pictures = array(
 'Move upload file error'		=> '%1$s: Error on file moving. Probably, there are no write permissions.',
 'Empty files'					=> 'Files have not been uploaded.',
 'No POST data'					=> 'Empty post data received. Probably, the files you are trying to upload is too big.',
+'Forbidden extension'			=> 'You are not allowed to create “%s” files here. Contact administrators or developers if you really need this.',
 
 'Upload to'						=> 'to',
 

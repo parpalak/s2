@@ -254,8 +254,10 @@ function EditItemName (eItem)
 				// Enter
 				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + encodeURIComponent(eItem.firstChild.getAttribute('data-fname')) + "&name=" + encodeURIComponent(eInput.value));
 				if (Response.status == '200')
+				{
 					eFilePanel.innerHTML = Response.text;
-				sSavedName = "";
+					sSavedName = "";
+				}
 			}
 			if (iCode == 27)
 				// Escape
@@ -719,7 +721,7 @@ function SendFile (file)
 		{
 			var s2_status = xhr.getResponseHeader('X-S2-Status');
 
-			if (s2_status == 'Expired' || s2_status == 'Lost' || s2_status == 'Forbidden')
+			if (s2_status && s2_status != 'Success')
 			{
 				if (0 == FileCounter(-1))
 				{

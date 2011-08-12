@@ -133,6 +133,17 @@ elseif ($action == 'rename_file')
 	while (strpos($filename, '..') !== false)
 		$filename = str_replace('..', '', $filename);
 
+	$extension = '';
+	if (($ext_pos = strrpos($filename, '.')) !== false)
+		 $extension = substr($filename, $ext_pos + 1);
+
+	if ($extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' '.S2_ALLOWED_EXTENSIONS.' ', ' '.$extension.' '))
+	{
+		header('X-S2-Status: Error');
+		printf($lang_pictures['Forbidden extension'], $extension);
+		die;
+	}
+
 	$parent_path = s2_dirname($path);
 	rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$filename);
 
@@ -243,6 +254,17 @@ elseif ($action == 'upload')
 			$filename = strtolower(basename($filename));
 			while (strpos($filename, '..') !== false)
 				$filename = str_replace('..', '', $filename);
+
+			$extension = '';
+			if (($ext_pos = strrpos($filename, '.')) !== false)
+				 $extension = substr($filename, $ext_pos + 1);
+
+			if ($extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' '.S2_ALLOWED_EXTENSIONS.' ', ' '.$extension.' '))
+			{
+				$error_message = sprintf($lang_pictures['Forbidden extension'], $extension);
+				$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
+				continue;
+			}
 
 			// Processing name collisions
 			while (is_file(S2_IMG_PATH.$path.'/'.$filename))

@@ -238,7 +238,7 @@ function CheckStatus (xmlhttp)
 
 	var s2_status = xmlhttp.getResponseHeader('X-S2-Status');
 
-	if (s2_status == 'Expired' || s2_status == 'Lost' || s2_status == 'Forbidden')
+	if (s2_status && s2_status != 'Success')
 	{
 		s2_popup_message(xmlhttp.responseText);
 		return false;

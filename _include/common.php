@@ -64,6 +64,9 @@ if (!defined('S2_IMG_DIR'))
 	define('S2_IMG_DIR', '_pictures');
 define('S2_IMG_PATH', S2_ROOT.S2_IMG_DIR);
 
+if (!defined('S2_ALLOWED_EXTENSIONS'))
+	define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav avi flv mpg mpeg mkv zip 7z doc pdf');
+
 // Load DB abstraction layer and connect
 require S2_ROOT.'_include/dblayer/common_db.php';
 
