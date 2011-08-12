@@ -23,7 +23,10 @@
 	<hooks>
 
 		<hook id="idx_template_after_replace, cmnt_preview_pre_output"><![CDATA[
-include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
 require $ext_info['path'].'/functions.php';
 $template = s2_spoiler_make($template);
 		]]></hook>
