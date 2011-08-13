@@ -326,17 +326,16 @@ function s2_blog_edit_post_form ($id)
 <?php ($hook = s2_hook('fn_s2_blog_post_form_after_clear')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_s2_blog_post_form_pre_labels')) ? eval($hook) : null; ?>
-		<label><?php echo $lang_s2_blog['Labels']; ?><br />
-		<select size="1" name="page[label]">
+		<label title="<?php echo $lang_s2_blog['Label help']; ?>"><?php echo $lang_s2_blog['Labels']; ?><br />
+		<select name="page[label]" data-prev-value="<?php echo s2_htmlencode($page['label']); ?>" onchange="ChangeSelect(this, '<?php echo $lang_admin['Add template info']; ?>', '');">
 <?php
 
 	foreach ($labels as $label)
-		echo '<option value="'.$label.'"'.($page['label'] == $label ? ' selected' : '').'>'.($label ? $label : $lang_s2_blog['No label']).'</option>';
+		echo "\t\t\t".'<option value="'.$label.'"'.($page['label'] == $label ? ' selected' : '').'>'.($label ? $label : $lang_s2_blog['No label']).'</option>'."\n";
 
 ?>
+			<option value="+"><?php echo $lang_s2_blog['New label']; ?></option>
 		</select></label>
-		<label><?php echo $lang_s2_blog['New label']; ?><br />
-		<input type="text" name="page[new_label]" size="15" maxlength="30" value="" /></label>
 <?php ($hook = s2_hook('fn_s2_blog_post_form_pre_checkboxes')) ? eval($hook) : null; ?>
 		<input type="hidden" name="page[id]" value="<?php echo $id; ?>" />
 		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"'?> />

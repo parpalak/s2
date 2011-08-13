@@ -68,7 +68,7 @@ elseif ($action == 'save_blog')
 	$modify_time = isset($_POST['m_time']) ? s2_time_from_array($_POST['m_time']) : time();
 	$id = (int) $page['id'];
 
-	$label = $s2_db->escape($page['new_label'] ? $page['new_label'] : $page['label']);
+	$label = isset($page['label']) ? $s2_db->escape($page['label']) : '';
 
 	$error = false;
 
