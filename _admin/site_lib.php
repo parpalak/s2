@@ -379,7 +379,7 @@ function s2_output_article_form ($id)
 		<hr />
 <?php ($hook = s2_hook('fn_output_article_form_pre_template')) ? eval($hook) : null; ?>
 		<label><?php echo $lang_admin['Template']; ?><br />
-		<select name="page[template]" data-prev-value="<?php echo s2_htmlencode($page['template']); ?>" onchange="ChangeTemplate(this, '<?php echo $lang_admin['Add template info']; ?>');">
+		<select name="page[template]" data-prev-value="<?php echo s2_htmlencode($page['template']); ?>" onchange="ChangeSelect(this, '<?php echo $lang_admin['Add template info']; ?>', 'site.php');">
 <?php
 
 	foreach ($templates as $filename => $template)

@@ -1119,14 +1119,14 @@ function SaveArticle(sAction)
 	}
 }
 
-function ChangeTemplate (eSelect, sHelp)
+function ChangeSelect (eSelect, sHelp, sDefault)
 {
 	if (eSelect[eSelect.selectedIndex].value == '+')
 	{
-		// Adding new template
-		// Ask for the filename
-		var filename = prompt(sHelp, 'site.php');
-		if (typeof(filename) != 'string')
+		// Adding new item
+		// Ask for the value
+		var sItem = prompt(sHelp, sDefault);
+		if (typeof(sItem) != 'string')
 		{
 			// Cancel button
 
@@ -1139,7 +1139,7 @@ function ChangeTemplate (eSelect, sHelp)
 
 			var isItem = false;
 			for (var i = eSelect.length; i-- ;)
-				if (eSelect[i].value == filename)
+				if (eSelect[i].value == sItem)
 				{
 					isItem = true;
 					break;
@@ -1149,8 +1149,8 @@ function ChangeTemplate (eSelect, sHelp)
 			{
 				// Add new item to the dropdown list
 				var eOption = document.createElement('OPTION');
-				eOption.setAttribute('value', filename);
-				eOption.appendChild(document.createTextNode(filename));
+				eOption.setAttribute('value', sItem);
+				eOption.appendChild(document.createTextNode(sItem));
 
 				var eLastOption = eSelect.lastChild;
 				while (eLastOption.nodeName != 'OPTION')
@@ -1159,7 +1159,7 @@ function ChangeTemplate (eSelect, sHelp)
 				eSelect.insertBefore(eOption, eLastOption);
 			}
 
-			eSelect.value = filename;
+			eSelect.value = sItem;
 		}
 	}
 
