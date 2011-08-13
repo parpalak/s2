@@ -8,13 +8,13 @@ $lang_pictures = array(
 'Upload file'					=> 'Upload file',
 'Upload limit'					=> '<small title="Parameters upload_max_filesize and post_max_size in php.ini">Each file up to&nbsp;%1$s, total up to %2$s at once.</small>',
 'Upload'						=> 'Upload',
-'Upload failed'					=> 'Upload failed because of the following errors:\n\n%s',
+'Upload failed'					=> "Upload failed because the following errors occur:\n%s",
 'Upload file error'				=> '%1$s: %2$s',
 'Is upload file error'			=> 'Access error. This file has not been uploaded.',
 'Move upload file error'		=> '%1$s: Error on file moving. Probably, there are no write permissions.',
 'Empty files'					=> 'Files have not been uploaded.',
 'No POST data'					=> 'Empty post data received. Probably, the files you are trying to upload is too big.',
-'Forbidden extension'			=> 'You are not allowed to create “%s” files here. Contact administrators or developers if you really need this.',
+'Forbidden extension'			=> 'You are not allowed to create â€œ%sâ€ files here. Contact administrators or developers if you really need this.',
 
 'Upload to'						=> 'to',
 

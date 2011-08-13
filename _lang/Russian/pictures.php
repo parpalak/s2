@@ -8,7 +8,7 @@ $lang_pictures = array(
 'Upload file'					=> 'Загрузка файла',
 'Upload limit'					=> '<small title="Параметры upload_max_filesize и post_max_size в php.ini">Каждый файл до&nbsp;%1$s, всего до&nbsp;%2$s за&nbsp;раз.</small>',
 'Upload'						=> 'Закачать',
-'Upload failed'					=> "При загрузке файлов возникли следующие ошибки:\n\n%s",
+'Upload failed'					=> "При загрузке файлов возникли следующие ошибки:\n%s",
 'Upload file error'				=> '%1$s: %2$s',
 'Is upload file error'			=> 'Ошибка доступа. Этот файл не был загружен.',
 'Move upload file error'		=> '%1$s: Ошибка при перемещении файла. Возможно, не хватает прав для записи файлов.',
