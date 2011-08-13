@@ -52,8 +52,7 @@ function s2_show_comments ($mode, $id = 0)
 	{
 		// Show unverified commetns
 		$query['WHERE'] = 'shown = 0 AND sent = 0';
-		$output = '<h2>'.$lang_admin['New comments'].'</h2>'.
-			'<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
+		$output = '<h2>'.$lang_admin['New comments'].'</h2>';
 	}
 	elseif ($mode == 'last')
 	{
@@ -147,6 +146,11 @@ function s2_show_comments ($mode, $id = 0)
 		$comments_tables[$row['article_id']][] = '<tr'.$class.'><td>'.s2_htmlencode($row['nick']).'</td><td class="content">'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</td><td>'.date("Y/m/d, H:i", $row['time']).'</td><td>'.$ip.'</td><td>'.$email.'</td><td>'.$buttons.'</td></tr>';
 		$article_titles[$row['article_id']] = $row['title'];
 	}
+
+	if ($mode == 'new' && count($article_titles))
+		$output .= '<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
+
+	($hook = s2_hook('fn_show_comments_after_table_merge')) ? eval($hook) : null;
 
 	foreach ($article_titles as $article_id => $title)
 	{
