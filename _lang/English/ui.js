@@ -30,7 +30,7 @@ var s2_lang = {
 	discard_and_open	: 'Do not save and open',
 	unsaved_exit		: 'You have not saved the page that you had changed before.\nDo you really want to exit the control panel?\nIn this case, the page will not be saved.',
 	recovered_text		: 'Recovered text',
-	recovered_text_alert: 'Non saved text was recovered.',
+	recovered_text_alert: 'Unsaved text was recovered.',
 	recovered_text_info : 'A text that had not been saved last time is recovered. You can copy the necessary fragments and paste them to the editor.',
 	recovered_open		: 'Open in a new window',
 
