@@ -112,7 +112,7 @@ function s2_wysisyg_addjs ()
 
 	return '<script type="text/javascript" src="' + src + '"></script>\
 <script type="text/javascript">tinyMCE.init({mode: "textareas", theme: "advanced",\
-theme_advanced_buttons1: "", theme_advanced_buttons2: "", theme_advanced_buttons3 : ""\});</script>';
+theme_advanced_buttons1: "code", theme_advanced_buttons2: "", theme_advanced_buttons3 : "" });</script>';
 }
 
 Hooks.add('fn_preview_start', 'tinyMCE.triggerSave();');
