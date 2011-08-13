@@ -573,6 +573,11 @@ if (strpos($mode, 's2_blog') === 0)
 }
 		]]></hook>
 
+		<hook id="fn_show_comments_after_table_merge"><![CDATA[
+if ($mode == 's2_blog_new' && count($article_titles))
+	$output .= '<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
+		]]></hook>
+
 		<hook id="fn_show_comments_pre_output_merge"><![CDATA[
 if (strpos($mode, 's2_blog') === 0)
 {
