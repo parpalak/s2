@@ -696,14 +696,15 @@ ul .but_panel .delete,
 	width: 16px;
 	overflow: hidden;
 	}
-	.tagswitcher img {
-		background: url(../i/tag.gif) -4px 50% no-repeat #ccc;
-		background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#d4d4d4), to(#cbcbcb));
-		background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-linear-gradient(#e4e4e4, #dbdbdb);
-		background: url(../i/tag.gif) -4px 50% no-repeat, -moz-linear-gradient(#e4e4e4, #dbdbdb);
-		background: url(../i/tag.gif) -4px 50% no-repeat, -o-linear-gradient(#e4e4e4, #dbdbdb);
-		background: url(../i/tag.gif) -4px 50% no-repeat, -ms-linear-gradient(#e4e4e4, #dbdbdb);
-		background: url(../i/tag.gif) -4px 50% no-repeat, linear-gradient(#e4e4e4, #dbdbdb);
+	.tagswitcher i {
+		display: block;
+		background: #ccc;
+		background: -webkit-gradient(linear, 0 0, 0 bottom, from(#d4d4d4), to(#cbcbcb));
+		background: -webkit-linear-gradient(#e4e4e4, #dbdbdb);
+		background: -moz-linear-gradient(#e4e4e4, #dbdbdb);
+		background: -o-linear-gradient(#e4e4e4, #dbdbdb);
+		background: -ms-linear-gradient(#e4e4e4, #dbdbdb);
+		background: linear-gradient(#e4e4e4, #dbdbdb);
 		-webkit-border-top-left-radius: 4px;
 		-webkit-border-bottom-left-radius: 4px;
 		-moz-border-radius-topleft: 4px;
@@ -717,34 +718,37 @@ ul .but_panel .delete,
 		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 		position: absolute;
 		top: 50%;
-		height: 10px;
-		width: 10px;
-		padding: 30px 3px 30px 2px;
+		height: 8px;
+		width: 8px;
+		padding: 31px 3px 31px 4px;
 		margin-top: -35px;
 		cursor: pointer;
 		cursor: hand;
 		}
-		.tagswitcher img.closed {
-			background-position: 6px 50%;
+		.tagswitcher i:before {
+			content: ' ';
+			display: block;
+			width: 0;
+			height: 0;
+			border-color: transparent #999;
+			border-style: solid;
+			border-width: 4px 0 4px 7px;
 			}
-		.tagswitcher img:hover{
-			background: url(../i/tag.gif) -4px 50% no-repeat #d2e5fc;
-			background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
-			background: url(../i/tag.gif) -4px 50% no-repeat, -webkit-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) -4px 50% no-repeat, -moz-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) -4px 50% no-repeat, -o-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) -4px 50% no-repeat, -ms-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) -4px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
+		.tagswitcher i.closed:before {
+			border-width: 4px 7px 4px 0;
+			}
+		.tagswitcher i:hover{
+			background: #d2e5fc;
+			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
+			background: -webkit-linear-gradient(#dcebfc, #c1dbfc);
+			background: -moz-linear-gradient(#dcebfc, #c1dbfc);
+			background: -o-linear-gradient(#dcebfc, #c1dbfc);
+			background: -ms-linear-gradient(#dcebfc, #c1dbfc);
+			background: linear-gradient(#dcebfc, #c1dbfc);
 			border-color: #7da2ce;
 			}
-		.tagswitcher img.closed:hover{
-			background: url(../i/tag.gif) 6px 50% no-repeat #d2e5fc;
-			background: url(../i/tag.gif) 6px 50% no-repeat, -webkit-gradient(linear, 0 0, 0 bottom, from(#dcebfc), to(#c1dbfc));
-			background: url(../i/tag.gif) 6px 50% no-repeat, -webkit-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) 6px 50% no-repeat, -moz-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) 6px 50% no-repeat, -o-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) 6px 50% no-repeat, -ms-linear-gradient(#dcebfc, #c1dbfc);
-			background: url(../i/tag.gif) 6px 50% no-repeat, linear-gradient(#dcebfc, #c1dbfc);
+		.tagswitcher i:hover:before {
+			border-color: transparent #7da2ce;
 			}
 
 /*=======================[Table styles]=======================================*/

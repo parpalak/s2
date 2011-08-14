@@ -102,8 +102,8 @@ SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
 			<div class="reducer" id="tree_div">
 				<div id="tag_table" class="closed">
 					<div class="tagswitcher">
-						<img class="closed" src="i/1.gif" alt="<?php echo $lang_admin['Show tags']; ?>" />
-						<img class="opened" src="i/1.gif" alt="<?php echo $lang_admin['Hide tags']; ?>" />
+						<i class="closed" title="<?php echo $lang_admin['Show tags']; ?>" ></i>
+						<i class="opened" title="<?php echo $lang_admin['Hide tags']; ?>" ></i>
 					</div>
 					<div id="tag_values"><p><?php echo $lang_admin['Choose tag']; ?></p></div>
 					<div id="tag_names"><ul id="tag_list"></ul></div>

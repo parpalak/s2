@@ -165,9 +165,9 @@ function Init ()
 	if (is_local_storage && parseInt(localStorage.getItem('s2_tags_opened')))
 		fTagSwitch();
 
-	var aeImg = eTagTable.getElementsByTagName('IMG');
-	for (var i = aeImg.length; i-- ;)
-		aeImg[i].onclick = fTagSwitch;
+	var aeI = eTagTable.getElementsByTagName('I');
+	for (var i = aeI.length; i-- ;)
+		aeI[i].onclick = fTagSwitch;
 
 	// Prevent from loosing unsaved data
 	window.onbeforeunload = function ()
