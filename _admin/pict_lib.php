@@ -102,7 +102,7 @@ function s2_get_files ($dir)
 		return;
 	}
 
-	$output = '';
+	$output = array();
 
 	while (($item = readdir($dir_handle)) !== false)
 	{
@@ -162,9 +162,13 @@ function s2_get_files ($dir)
 
 		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.$dir.'/'.$item.'\');" alt="'.$lang_pictures['Delete'].'" />';
 
-		($hook = s2_hook('fn_get_files_pre_output_merge')) ? eval($hook) : null;
-		$output .= '<li><span data-fname="'.$dir.'/'.$item.'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';
+		($hook = s2_hook('fn_get_files_pre_output_item_merge')) ? eval($hook) : null;
+		$output[$item] = '<li><span data-fname="'.$dir.'/'.$item.'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';
 	}
+
+	uksort($output, 'strnatcmp');
+	($hook = s2_hook('fn_get_files_pre_output_merge')) ? eval($hook) : null;
+	$output = implode($output, '');
 
 	($hook = s2_hook('fn_get_files_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul><br clear="both" />' : '<p>'.$lang_pictures['Empty directory'].'</p>';
