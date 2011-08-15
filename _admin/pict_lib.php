@@ -69,7 +69,7 @@ function s2_walk_dir ($dir, $created_name = false)
 		{
 			($hook = s2_hook('fn_walk_dir_format_item_start')) ? eval($hook) : null;
 			$item_count++;
-			$spans[] = '<div><span data-path="'.$dir.'/'.$item.'"'.($created_name === $item ? ' selected="selected"' : '').'>'.$item .'</span></div>';
+			$spans[] = '<div><span data-path="'.s2_htmlencode($dir.'/'.$item).'"'.($created_name === $item ? ' selected="selected"' : '').'>'.s2_htmlencode($item).'</span></div>';
 			$subdirs[] = s2_walk_dir($dir.'/'.$item);
 		}
 	}
@@ -165,10 +165,10 @@ function s2_get_files ($dir)
 				$preview = '<img src="pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.$h.' alt="" />';
 		}
 
-		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.addslashes($dir.'/'.$item).'\');" alt="'.$lang_pictures['Delete'].'" />';
+		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.s2_htmlencode(addslashes($dir.'/'.$item)).'\');" alt="'.$lang_pictures['Delete'].'" />';
 
 		($hook = s2_hook('fn_get_files_pre_output_item_merge')) ? eval($hook) : null;
-		$output[$item] = '<li><span data-fname="'.s2_htmlencode($dir.'/'.$item).'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';
+		$output[$item] = '<li><span data-fname="'.s2_htmlencode($dir.'/'.$item).'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.s2_htmlencode($item).'</li>';
 	}
 
 	uksort($output, 'strnatcmp');
