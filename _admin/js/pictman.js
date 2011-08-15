@@ -94,7 +94,7 @@ function MoveDraggableDiv (x, y)
 var eHigh = null;
 var eFileInfo, eFilePanel;
 var sCurDir = '';
-var sExecDouble = '';
+var fExecDouble = function () {};
 
 function HighlightItem (item)
 {
@@ -121,11 +121,18 @@ function HighlightItem (item)
 		{
 			var a = item.getAttribute('data-dim').split('*');
 			str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
-			sExecDouble = '(window.top.ReturnImage ? window.top : opener).ReturnImage(\'' + sPicturePrefix + item.getAttribute('data-fname') + '\', \'' + a[0] + '\', \'' + a[1] + '\');'
-			str += '<br /><input type="button" onclick="' + sExecDouble + ' return false;" value="' + s2_lang.insert + '">';
+			a[2] = sPicturePrefix + item.getAttribute('data-fname');
+			fExecDouble = function ()
+			{
+				if (window.top.ReturnImage)
+					window.top.ReturnImage(a[2], a[0],  a[1]);
+				else if (opener.ReturnImage)
+					opener.ReturnImage(a[2], a[0],  a[1]);
+			}
+			str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 		}
 		else
-			sExecDouble = '';
+			fExecDouble = function () {};
 		eFileInfo.innerHTML = str;
 	}
 }
@@ -480,7 +487,7 @@ function MouseUp(e)
 		if (!bIntervalPassed)
 		{
 			// Double click
-			eval(sExecDouble);
+			fExecDouble();
 
 			clearTimeout(idTimer);
 			bIntervalPassed = true;
