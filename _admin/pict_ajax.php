@@ -267,7 +267,7 @@ elseif ($action == 'upload')
 				continue;
 			}
 
-			$filename = strtolower(basename($filename));
+			$filename = utf8_strtolower(basename($filename));
 			while (strpos($filename, '..') !== false)
 				$filename = str_replace('..', '', $filename);
 
