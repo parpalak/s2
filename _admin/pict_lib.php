@@ -14,6 +14,11 @@ function s2_dirname ($dir)
 	return preg_replace('#/[^/]*$#', '', $dir);
 }
 
+function s2_basename ($dir)
+{
+	return false !== ($pos = strrpos($dir, '/')) ? substr($dir, $pos + 1) : $dir;
+}
+
 // Removes a folder with all subfolders and files
 function s2_unlink_recursive($dir, $delete_root = true)
 {

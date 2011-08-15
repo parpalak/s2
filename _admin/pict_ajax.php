@@ -180,7 +180,7 @@ elseif ($action == 'drag')
 	while (strpos($dpath, '..') !== false)
 		$dpath = str_replace('..', '', $dpath);
 
-	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.basename($spath));
+	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.s2_basename($spath));
 
 	echo s2_walk_dir($dpath).'|'.s2_walk_dir(s2_dirname($spath));
 }
@@ -212,7 +212,7 @@ elseif ($action == 'move_file')
 	while (strpos($dpath, '..') !== false)
 		$dpath = str_replace('..', '', $dpath);
 
-	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.basename($spath));
+	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.s2_basename($spath));
 
 	echo s2_get_files(s2_dirname($spath));
 }
@@ -267,7 +267,7 @@ elseif ($action == 'upload')
 				continue;
 			}
 
-			$filename = utf8_strtolower(basename($filename));
+			$filename = utf8_strtolower(s2_basename($filename));
 			while (strpos($filename, '..') !== false)
 				$filename = str_replace('..', '', $filename);
 
