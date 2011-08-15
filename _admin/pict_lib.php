@@ -126,7 +126,7 @@ function s2_get_files ($dir)
 			$image_info = getImageSize(S2_IMG_PATH.$dir.'/'.$item);
 			$sx = $image_info[0];
 			$sy = $image_info[1];
-			$dim = 'data-dim="'.$sx.'*'.$sy.'"';
+			$dim = ' data-dim="'.$sx.'*'.$sy.'"';
 			if ($sx < $sy)
 			{
 				if ($sy > $max_size)
@@ -165,10 +165,10 @@ function s2_get_files ($dir)
 				$preview = '<img src="pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.$h.' alt="" />';
 		}
 
-		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.$dir.'/'.$item.'\');" alt="'.$lang_pictures['Delete'].'" />';
+		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.addslashes($dir.'/'.$item).'\');" alt="'.$lang_pictures['Delete'].'" />';
 
 		($hook = s2_hook('fn_get_files_pre_output_item_merge')) ? eval($hook) : null;
-		$output[$item] = '<li><span data-fname="'.$dir.'/'.$item.'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';
+		$output[$item] = '<li><span data-fname="'.s2_htmlencode($dir.'/'.$item).'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.$item.'</li>';
 	}
 
 	uksort($output, 'strnatcmp');
