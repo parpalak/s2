@@ -67,7 +67,7 @@ class DBLayer
 			$this->link_id = @pg_connect(implode(' ', $connect_str));
 
 		if (!$this->link_id)
-			error('Unable to connect to PostgreSQL server.', __FILE__, __LINE__);
+			error('Unable to connect to PostgreSQL server', __FILE__, __LINE__);
 
 		// Setup the client-server character set (UTF-8)
 		if (!defined('S2_NO_SET_NAMES'))
@@ -99,7 +99,7 @@ class DBLayer
 	}
 
 
-	function query($sql, $unbuffered = false)	// $unbuffered is ignored since there is no pgsql_unbuffered_query()
+	function query($sql, $unbuffered = false) // $unbuffered is ignored since there is no pgsql_unbuffered_query()
 	{
 		if (strrpos($sql, 'LIMIT') !== false)
 			$sql = preg_replace('#LIMIT ([0-9]+),([ 0-9]+)#', 'LIMIT \\2 OFFSET \\1', $sql);
@@ -126,6 +126,7 @@ class DBLayer
 			if (defined('S2_SHOW_QUERIES'))
 				$this->saved_queries[] = array($sql, 0);
 
+			$this->error_no = false;
 			$this->error_msg = @pg_result_error($this->query_result);
 
 			if ($this->in_transaction)
@@ -307,7 +308,7 @@ class DBLayer
 	function error()
 	{
 		$result['error_sql'] = @current(@end($this->saved_queries));
-		$result['error_no'] = false;
+		$result['error_no'] = $this->error_no;
 		$result['error_msg'] = $this->error_msg;
 
 		return $result;

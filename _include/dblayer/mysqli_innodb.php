@@ -23,12 +23,15 @@ class DBLayer
 	var $num_queries = 0;
 	var $in_transaction = 0;
 
+	var $error_no = false;
+	var $error_msg = 'Unknown';
+
 	var $datatype_transformations = array(
 		'/^SERIAL$/'	=>	'INT(10) UNSIGNED AUTO_INCREMENT'
 	);
 
 
-	function DBLayer($db_host, $db_username, $db_password, $db_name, $db_prefix, $foo)
+	function DBLayer($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect)
 	{
 		$this->prefix = $db_prefix;
 
@@ -36,10 +39,13 @@ class DBLayer
 		if (strpos($db_host, ':') !== false)
 			list($db_host, $db_port) = explode(':', $db_host);
 
+		// Persistent connection in MySQLi are only available in PHP 5.3 and later releases
+		$p_connect = $p_connect && version_compare(PHP_VERSION, '5.3.0', '>=') ? 'p:' : '';
+
 		if (isset($db_port))
-			$this->link_id = @mysqli_connect($db_host, $db_username, $db_password, $db_name, $db_port);
+			$this->link_id = @mysqli_connect($p_connect.$db_host, $db_username, $db_password, $db_name, $db_port);
 		else
-			$this->link_id = @mysqli_connect($db_host, $db_username, $db_password, $db_name);
+			$this->link_id = @mysqli_connect($p_connect.$db_host, $db_username, $db_password, $db_name);
 
 		if (!$this->link_id)
 			error('Unable to connect to MySQL and select database. MySQL reported: '.mysqli_connect_error(), __FILE__, __LINE__);
@@ -56,7 +62,7 @@ class DBLayer
 	{
 		++$this->in_transaction;
 
-		$this->query('START TRANSACTION');
+		mysqli_query($this->link_id, 'START TRANSACTION');
 		return;
 	}
 
@@ -65,7 +71,7 @@ class DBLayer
 	{
 		--$this->in_transaction;
 
-		$this->query('COMMIT');
+		mysqli_query($this->link_id, 'COMMIT');
 		return;
 	}
 
@@ -91,9 +97,12 @@ class DBLayer
 			if (defined('S2_SHOW_QUERIES'))
 				$this->saved_queries[] = array($sql, 0);
 
+			$this->error_no = @mysqli_errno($this->link_id);
+			$this->error_msg = @mysqli_error($this->link_id);
+
 			// Rollback transaction
 			if ($this->in_transaction)
-				$this->query('ROLLBACK');
+				mysqli_query($this->link_id, 'ROLLBACK');
 
 			--$this->in_transaction;
 
@@ -173,10 +182,13 @@ class DBLayer
 	{
 		if ($query_id)
 		{
-			if ($row)
-				@mysqli_data_seek($query_id, $row);
+			if ($row !== 0 && @mysqli_data_seek($query_id, $row) === false)
+				return false;
 
 			$cur_row = @mysqli_fetch_row($query_id);
+			if ($cur_row === false)
+				return false;
+
 			return $cur_row[$col];
 		}
 		else
@@ -241,8 +253,8 @@ class DBLayer
 	function error()
 	{
 		$result['error_sql'] = @current(@end($this->saved_queries));
-		$result['error_no'] = @mysqli_errno($this->link_id);
-		$result['error_msg'] = @mysqli_error($this->link_id);
+		$result['error_no'] = $this->error_no;
+		$result['error_msg'] = $this->error_msg;
 
 		return $result;
 	}
@@ -300,7 +312,7 @@ class DBLayer
 		$result = $this->query('SHOW INDEX FROM '.($no_prefix ? '' : $this->prefix).$table_name);
 		while ($cur_index = $this->fetch_assoc($result))
 		{
-			if ($cur_index['Key_name'] == ($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name)
+			if (strtolower($cur_index['Key_name']) == strtolower(($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name))
 			{
 				$exists = true;
 				break;

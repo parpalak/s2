@@ -23,6 +23,9 @@ class DBLayer
 	var $saved_queries = array();
 	var $num_queries = 0;
 
+	var $error_no = false;
+	var $error_msg = 'Unknown';
+
 	var $datatype_transformations = array(
 		'/^SERIAL$/'	=>	'INT(10) UNSIGNED AUTO_INCREMENT'
 	);
@@ -57,7 +60,7 @@ class DBLayer
 	{
 		++$this->in_transaction;
 
-		$this->query('START TRANSACTION');
+		mysql_query('START TRANSACTION', $this->link_id);
 		return;
 	}
 
@@ -66,7 +69,7 @@ class DBLayer
 	{
 		--$this->in_transaction;
 
-		$this->query('COMMIT');
+		mysql_query('COMMIT', $this->link_id);
 		return;
 	}
 
@@ -95,9 +98,12 @@ class DBLayer
 			if (defined('S2_SHOW_QUERIES'))
 				$this->saved_queries[] = array($sql, 0);
 
+			$this->error_no = @mysql_errno($this->link_id);
+			$this->error_msg = @mysql_error($this->link_id);
+
 			// Rollback transaction
 			if ($this->in_transaction)
-				$this->query('ROLLBACK');
+				mysql_query('ROLLBACK', $this->link_id);
 
 			--$this->in_transaction;
 
@@ -241,8 +247,8 @@ class DBLayer
 	function error()
 	{
 		$result['error_sql'] = @current(@end($this->saved_queries));
-		$result['error_no'] = @mysql_errno($this->link_id);
-		$result['error_msg'] = @mysql_error($this->link_id);
+		$result['error_no'] = $this->error_no;
+		$result['error_msg'] = $this->error_msg;
 
 		return $result;
 	}
@@ -300,7 +306,7 @@ class DBLayer
 		$result = $this->query('SHOW INDEX FROM '.($no_prefix ? '' : $this->prefix).$table_name);
 		while ($cur_index = $this->fetch_assoc($result))
 		{
-			if ($cur_index['Key_name'] == ($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name)
+			if (strtolower($cur_index['Key_name']) == strtolower(($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name))
 			{
 				$exists = true;
 				break;
@@ -314,7 +320,7 @@ class DBLayer
 	function create_table($table_name, $schema, $no_prefix = false)
 	{
 		if ($this->table_exists($table_name, $no_prefix))
-			return;
+			return true;
 
 		$query = 'CREATE TABLE '.($no_prefix ? '' : $this->prefix).$table_name." (\n";
 

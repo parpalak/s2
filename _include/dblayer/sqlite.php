@@ -45,14 +45,14 @@ class DBLayer
 			@touch($db_name);
 			@chmod($db_name, 0666);
 			if (!file_exists($db_name))
-				error('Unable to create new database \''.$db_name.'\'. Permission denied.', __FILE__, __LINE__);
+				error('Unable to create new database \''.$db_name.'\'. Permission denied', __FILE__, __LINE__);
 		}
 
 		if (!is_readable($db_name))
-			error('Unable to open database \''.$db_name.'\' for reading. Permission denied.', __FILE__, __LINE__);
+			error('Unable to open database \''.$db_name.'\' for reading. Permission denied', __FILE__, __LINE__);
 
 		if (!is_writable($db_name))
-			error('Unable to open database \''.$db_name.'\' for writing. Permission denied.', __FILE__, __LINE__);
+			error('Unable to open database \''.$db_name.'\' for writing. Permission denied', __FILE__, __LINE__);
 
 		if ($p_connect)
 			$this->link_id = @sqlite_popen($db_name, 0666, $sqlite_error);
@@ -220,10 +220,13 @@ class DBLayer
 	{
 		if ($query_id)
 		{
-			if ($row != 0)
-				@sqlite_seek($query_id, $row);
+			if ($row !== 0 && @sqlite_seek($query_id, $row) === false)
+				return false;
 
 			$cur_row = @sqlite_current($query_id);
+			if ($cur_row === false)
+				return false;
+
 			return $cur_row[$col];
 		}
 		else
@@ -272,7 +275,7 @@ class DBLayer
 
 	function affected_rows()
 	{
-		return ($this->query_result) ? @sqlite_changes($this->link_id) : false;
+		return ($this->link_id) ? @sqlite_changes($this->link_id) : false;
 	}
 
 
@@ -434,7 +437,7 @@ class DBLayer
 	function get_table_info($table_name, $no_prefix = false)
 	{
 		// Grab table info
-		$result = $this->query('SELECT sql FROM sqlite_master WHERE tbl_name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' ORDER BY type DESC') or error(__FILE__, __LINE__);
+		$result = $this->query('SELECT sql FROM sqlite_master WHERE tbl_name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' ORDER BY type DESC') or error('Unable to fetch table information', __FILE__, __LINE__, $this->error());
 		$num_rows = $this->num_rows($result);
 
 		if ($num_rows == 0)
@@ -444,6 +447,9 @@ class DBLayer
 		$table['indices'] = array();
 		while ($cur_index = $this->fetch_assoc($result))
 		{
+			if (empty($cur_index['sql']))
+				continue;
+
 			if (!isset($table['sql']))
 				$table['sql'] = $cur_index['sql'];
 			else
