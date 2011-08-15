@@ -181,9 +181,15 @@ function EditItemName (eItem)
 		{
 			var iCode = (e ? e : window.event).keyCode;
 
-			if (iCode == 13)
+			// Escape
+			if (iCode == 27 || iCode == 13 && eInput.value == sSavedName)
 			{
-				// Enter
+				RejectName();
+				HighlightItem(eItem);
+			}
+			// Enter
+			else if (iCode == 13)
+			{
 				SaveExpand();
 				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + encodeURIComponent(eItem.getAttribute('data-path')) + "&name=" + encodeURIComponent(eInput.value));
 
@@ -205,16 +211,9 @@ function EditItemName (eItem)
 
 					if (eSpan != null)
 						HighlightItem(eSpan);
+
+					sSavedName = "";
 				}
-				else
-					HighlightItem(eItem);
-				sSavedName = "";
-			}
-			// Escape
-			else if (iCode == 27)
-			{
-				RejectName();
-				HighlightItem(eItem);
 			}
 			else
 				setTimeout(function ()
@@ -249,9 +248,18 @@ function EditItemName (eItem)
 		{
 			var iCode = (e ? e : window.event).keyCode;
 
-			if (iCode == 13)
+			// Escape
+			if (iCode == 27 || iCode == 13 && eInput.value == sSavedName)
+				RejectName();
+			// Enter
+			else if (iCode == 13)
 			{
-				// Enter
+				if (eInput.value == sSavedName)
+				{
+					sSavedName = '';
+					return;
+				}
+
 				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + encodeURIComponent(eItem.firstChild.getAttribute('data-fname')) + "&name=" + encodeURIComponent(eInput.value));
 				if (Response.status == '200')
 				{
@@ -259,9 +267,6 @@ function EditItemName (eItem)
 					sSavedName = "";
 				}
 			}
-			if (iCode == 27)
-				// Escape
-				RejectName();
 		}
 
 		if (isIE || isSafari)

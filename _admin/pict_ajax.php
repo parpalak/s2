@@ -112,6 +112,14 @@ elseif ($action == 'rename_folder')
 		$folder_name = str_replace('..', '', $folder_name);
 
 	$parent_path = s2_dirname($path);
+
+	if (file_exists(S2_IMG_PATH.$parent_path.'/'.$folder_name))
+	{
+		header('X-S2-Status: Error');
+		printf($lang_pictures['File exists'], $folder_name);
+		die;
+	}
+
 	rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name);
 
 	echo s2_walk_dir($parent_path, $folder_name), '|', s2_get_files($parent_path.'/'.$folder_name);
@@ -145,6 +153,14 @@ elseif ($action == 'rename_file')
 	}
 
 	$parent_path = s2_dirname($path);
+
+	if (file_exists(S2_IMG_PATH.$parent_path.'/'.$filename))
+	{
+		header('X-S2-Status: Error');
+		printf($lang_pictures['File exists'], $filename);
+		die;
+	}
+
 	rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$filename);
 
 	echo s2_get_files($parent_path);

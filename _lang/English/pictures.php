@@ -15,6 +15,7 @@ $lang_pictures = array(
 'Empty files'					=> 'Files have not been uploaded.',
 'No POST data'					=> 'Empty post data received. Probably, the files you are trying to upload is too big.',
 'Forbidden extension'			=> 'You are not allowed to create “%s” files here. Contact administrators or developers if you really need this.',
+'File exists'					=> 'Rename failed: file or directory “%s” already exists.',
 
 'Upload to'						=> 'to',
 
