@@ -143,7 +143,7 @@ function s2_process_multipart_mixed (&$src, &$dest)
 		$start = $next + $separator_len + 2;
 	}
 
-	unset($src);
+	$src = '';
 }
 
 //
