@@ -67,7 +67,7 @@ if ($action == 's2_attachment_upload')
 			}
 
 			// Cleaning up the filename and the title
-			$name = basename($filename);
+			$name = s2_basename($filename);
 			$filename = str_replace(
 				preg_split('##u', 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'),
 				preg_split('##u', 'ABVGDEEJZIIKLMNOPRSTUFHC466JIJEUA'),
@@ -78,9 +78,9 @@ if ($action == 's2_attachment_upload')
 				preg_split('##u', 'abvgdeejziiklmnoprstufhc466jijeua_'),
 				$filename
 			);
-			$filename = strtolower($filename);
+			$filename = utf8_strtolower($filename);
 			$filename = preg_replace('#[^0-9a-z\-_\.]#', '', $filename);
-			if (strtolower($name) == $filename)
+			if (utf8_strtolower($name) == $filename)
 				$name = '';
 
 			// Processing name collisions
