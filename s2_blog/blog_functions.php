@@ -835,10 +835,17 @@ function s2_blog_navigation ($cur_url)
 			$s2_blog_navigation['tags'] = sprintf($lang_s2_blog['Nav tags'], BLOG_KEYWORDS).'<ul>'.$tags.'</ul>';
 
 		// Output navigation array as PHP code
-		$fh = @fopen(S2_CACHE_DIR.'s2_blog_navigation.php', 'wb');
+		$fh = @fopen(S2_CACHE_DIR.'s2_blog_navigation.php', 'ab+');
 		if ($fh)
 		{
-			fwrite($fh, '<?php'."\n\n".'$s2_blog_navigation_time = '.time().';'."\n\n".'$s2_blog_navigation = '.var_export($s2_blog_navigation, true).';');
+			if (flock($fh, LOCK_EX | LOCK_NB))
+			{
+				ftruncate($fh, 0);
+				fwrite($fh, '<?php'."\n\n".'$s2_blog_navigation_time = '.time().';'."\n\n".'$s2_blog_navigation = '.var_export($s2_blog_navigation, true).';');
+				fflush($fh);
+				fflush($fh);
+				flock($fh, LOCK_UN);
+			}
 			fclose($fh);
 		}
 	}
