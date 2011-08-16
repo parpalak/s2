@@ -822,7 +822,7 @@ function s2_blog_navigation ($cur_url)
 			),
 			'WHERE'		=> 't.s2_blog_important = 1 AND p.published = 1',
 			'GROUP BY'	=> 't.tag_id',
-			'ORDER BY'	=> '2 DESC',
+			'ORDER BY'	=> '3 DESC',
 		);
 		($hook = s2_hook('fn_s2_blog_navigation_pre_get_tags_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
