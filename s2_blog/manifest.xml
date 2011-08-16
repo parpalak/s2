@@ -289,7 +289,7 @@ if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 {
 	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
 		include $ext_info['path'].'/blog_functions.php';
-	$replace['<!-- s2_blog_last_post -->'] = s2_blog_last_post();
+	$replace['<!-- s2_blog_last_post -->'] = s2_blog_last_post(1);
 }
 $replace['<!-- s2_blog_calendar -->'] = !empty($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
 		]]></hook>

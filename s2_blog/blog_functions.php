@@ -543,9 +543,12 @@ function s2_blog_year_posts ($year)
 }
 
 // Returns an array containing info about 10 last posts
-function s2_blog_last_posts_array ($skip = 0)
+function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post = false)
 {
 	global $s2_db;
+
+	if ($fake_last_post)
+		$num_posts++;
 
 	// Obtaining last posts
 	$subquery = array(
@@ -560,18 +563,24 @@ function s2_blog_last_posts_array ($skip = 0)
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'published = 1',
 		'ORDER BY'	=> 'create_time DESC',
-		'LIMIT'		=> '10 OFFSET '.intval($skip)
+		'LIMIT'		=>((int) $num_posts).' OFFSET '.((int) $skip)
 	);
 	($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_ids_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$ids = array();
+	$i = 0;
 	while ($row = $s2_db->fetch_assoc($result))
 	{
+		$i++;
 		$posts[$row['id']] = $row;
+
+		if ($i >= $num_posts && $fake_last_post)
+			continue;
+
 		$ids[] = $row['id'];
 	}
-	if (!count($ids))
+	if (!$i)
 		return array();
 
 	$ids = implode(', ', $ids);
@@ -633,10 +642,19 @@ function s2_blog_last_posts ($skip = 0)
 {
 	global $s2_db, $lang_s2_blog;
 
-	$posts = s2_blog_last_posts_array($skip);
+	if ($skip < 0)
+		$skip = 0;
+
+	$posts = s2_blog_last_posts_array(10, $skip, true);
 
 	$output = '';
+	$i = 0;
 	foreach ($posts as $post)
+	{
+		$i++;
+		if ($i > 10)
+			break;
+
 		$output .= s2_blog_format_post(
 			'<a href="'.BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.$post['title'].'</a>',
 			s2_date($post['create_time']),
@@ -646,20 +664,13 @@ function s2_blog_last_posts ($skip = 0)
 			$post['comments'],
 			$post['favorite']
 		);
-
-	$query = array(
-		'SELECT'	=> 'count(id)',
-		'FROM'		=> 's2_blog_posts',
-		'WHERE'		=> 'published = 1'
-	);
-	($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_ids_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$post_num = $s2_db->result($result);
+	}
 
 	$paginator = '';
+
 	if ($skip > 0)
 		$paginator = '<a href="'.BLOG_BASE.($skip > 10 ? 'skip/'.($skip - 10) : '').'">'.$lang_s2_blog['Here'].'</a> ';
-	if ($skip + 10 < $post_num)
+	if ($i > 10)
 		$paginator .= '<a href="'.BLOG_BASE.'skip/'.($skip + 10).'">'.$lang_s2_blog['There'].'</a>';
 
 	$output .= '<p class="s2_blog_pages">'.$paginator.'</p>';
@@ -669,9 +680,9 @@ function s2_blog_last_posts ($skip = 0)
 
 // Fetching last post and comments (for template placeholders)
 
-function s2_blog_last_post ()
+function s2_blog_last_post ($num_post)
 {
-	$posts = s2_blog_last_posts_array();
+	$posts = s2_blog_last_posts_array($num_post);
 	if (!count($posts))
 		return '';
 
@@ -679,14 +690,11 @@ function s2_blog_last_post ()
 		'<div class="preview time">%5$s</div>'."\n".
 		'<div class="post body">%6$s</div>'."\n";
 
-	$num_post = 1;
-
 	($hook = s2_hook('fn_s2_blog_last_post_start')) ? eval($hook) : null;
 
 	$output = '';
-	for ($i = 0; $i < $num_post; $i++)
+	foreach ($posts as $post)
 	{
-		$post = array_shift($posts);
 		$link = BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']);
 		$tag_prefix = $post['tags'] ? '<small>'.preg_replace('/<a.*?>(.*?)<\/a>/', "\\1", $post['tags']).' &rarr;</small> ' : '';
 
