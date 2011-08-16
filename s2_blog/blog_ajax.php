@@ -176,12 +176,6 @@ elseif ($action == 'create_blog_post')
 	($hook = s2_hook('blrq_action_create_blog_post_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
-	require $ext_info['path'].'/blog_lib.php';
-
 	echo $s2_db->insert_id();
 }
 
