@@ -559,7 +559,7 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'create_time, title, text, url, id, commented, modify_time, favorite, ('.$raw_query.') AS comm_num',
+		'SELECT'	=> 'create_time, title, text, url, id, commented, modify_time, favorite, ('.$raw_query.') AS comm_num, label',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'published = 1',
 		'ORDER BY'	=> 'create_time DESC',
@@ -568,7 +568,7 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 	($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_ids_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$ids = array();
+	$merge_labels = $labels = $ids = array();
 	$i = 0;
 	while ($row = $s2_db->fetch_assoc($result))
 	{
@@ -579,6 +579,9 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 			continue;
 
 		$ids[] = $row['id'];
+		$labels[$row['id']] = $row['label'];
+		if ($row['label'])
+			$merge_labels[$row['label']] = 1;
 	}
 	if (!$i)
 		return array();
@@ -587,28 +590,22 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 	$see_also = array();
 
 	// Processing "see also" links
+	if (count($merge_labels))
+	{
+		$query = array(
+			'SELECT'	=> 'p.id, p.label, p.title, p.create_time AS time, p.url',
+			'FROM'		=> 's2_blog_posts AS p',
+			'WHERE'		=> 'p.label IN (\''.implode(array_keys($merge_labels), '\', \'').'\') AND p.published = 1',
+			'ORDER BY'	=> 'time DESC'
+		);
+		($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_similar_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$subquery = array(
-		'SELECT'	=> 'p1.id, label',
-		'FROM'		=> 's2_blog_posts AS p1',
-		'WHERE'		=> 'p1.id IN ('.$ids.') AND p1.label <> \'\'',
-	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
-
-	$query = array(
-		'SELECT'	=> 'temp.id, p2.title, p2.create_time AS time, p2.url',
-		'FROM'		=> 's2_blog_posts AS p2, ('.$raw_query.') AS temp',
-		'WHERE'		=> 'temp.label = p2.label AND p2.id <> temp.id AND published = 1',
-		'ORDER BY'	=> 'time DESC'
-	);
-	($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_similar_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-	while ($row = $s2_db->fetch_assoc($result))
-		$see_also[$row['id']][] = '<a href="'.BLOG_BASE.date('Y/m/d/', $row['time']).urlencode($row['url']).'">'.$row['title'].'</a>';
+		while ($row = $s2_db->fetch_assoc($result))
+			$see_also[$row['label']][$row['id']] = '<a href="'.BLOG_BASE.date('Y/m/d/', $row['time']).urlencode($row['url']).'">'.$row['title'].'</a>';
+	}
 
 	// Obtaining tags
-
 	$query = array(
 		'SELECT'	=> 'pt.post_id AS id, name, url',
 		'FROM'		=> 'tags AS t',
@@ -629,8 +626,13 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 
 	foreach($posts as $i => $row)
 	{
-		if (isset($see_also[$i]))
-			$posts[$i]['text'] .= s2_blog_format_see_also($see_also[$i]);
+		if (!empty($labels[$i]) && isset($see_also[$labels[$i]]))
+		{
+			$label_copy = $see_also[$labels[$i]];
+			if (isset($label_copy[$i]))
+				unset($label_copy[$i]);
+			$posts[$i]['text'] .= s2_blog_format_see_also($label_copy);
+		}
 		$posts[$i]['comments'] = $row['commented'] ? '<a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#comment">'.s2_blog_comment_text($posts[$i]['comm_num']).'</a>' : '';
 		$posts[$i]['tags'] = isset($posts[$i]['tags']) ? implode(', ', $posts[$i]['tags']) : '';
 	}
