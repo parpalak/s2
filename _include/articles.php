@@ -744,7 +744,7 @@ function s2_parse_page_url ($request_uri)
 	$page['id'] = $id;
 
 	$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
-
+	$page['section_link'] = count($bread_crumbs_titles) > 1 ? '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>' : '';
 	// Getting page template
 	$template = s2_get_template($template_id);
 
