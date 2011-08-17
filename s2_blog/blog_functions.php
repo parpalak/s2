@@ -146,25 +146,28 @@ function s2_blog_get_comments ($id)
 	return $comments ? '<h2 class="comment">'.$lang_common['Comments'].'</h2>'."\n".$comments : '';
 }
 
-function s2_blog_get_posts ($sub_query, $sort_asc = true, $sort_field = 'create_time')
+function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_time')
 {
 	global $s2_db;
 
 	// Obtaining posts
 
 	// SELECT for comments number
-	$sub_query2 = array(
+	$sub_query = array(
 		'SELECT'	=> 'count(*)',
 		'FROM'		=> 's2_blog_comments AS c',
-		'WHERE'		=> 'c.post_id = temp.id AND shown = 1',
+		'WHERE'		=> 'c.post_id = p.id AND shown = 1',
 	);
-	$raw_query2 = $s2_db->query_build($sub_query2, true) or error(__FILE__, __LINE__);
+	$raw_query = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, ('.$raw_query2.') AS comment_num, p.label',
-		'FROM'		=> 's2_blog_posts AS p, ('.$sub_query.') AS temp',
-		'WHERE'		=> 'temp.id = p.id AND p.published = 1'
+		'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, ('.$raw_query.') AS comment_num, p.label',
+		'FROM'		=> 's2_blog_posts AS p',
+		'WHERE'		=> 'p.published = 1'.(!empty($query_add['WHERE']) ? ' AND '.$query_add['WHERE'] : '')
 	);
+	if (!empty($query_add['JOINS']))
+		$query['JOINS'] = $query_add['JOINS'];
+
 	($hook = s2_hook('fn_s2_blog_get_posts_pre_get_posts_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
@@ -180,7 +183,7 @@ function s2_blog_get_posts ($sub_query, $sort_asc = true, $sort_field = 'create_
 	}
 
 	$see_also = $tags = array();
-	s2_blog_get_posts_tags_and_labels ($ids, $merge_labels, &$see_also, &$tags);
+	s2_blog_posts_links($ids, $merge_labels, &$see_also, &$tags);
 
 	array_multisort($sort_array, $sort_asc ? SORT_ASC : SORT_DESC, $ids);
 
@@ -230,13 +233,10 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 		$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
 	}
 
-	$subquery = array(
-		'SELECT'	=> 'id',
-		'FROM'		=> 's2_blog_posts',
-		'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND published = 1'
+	$query_add = array(
+		'WHERE'		=> 'p.create_time < '.$end_time.' AND p.create_time >= '.$start_time
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
-	$output = s2_blog_get_posts($raw_query);
+	$output = s2_blog_get_posts($query_add);
 	if ($output != '')
 		return $output;
 
@@ -352,13 +352,16 @@ function s2_blog_posts_by_tag ($tag)
 	if ($tag_descr)
 		$tag_descr .= '<hr />';
 
-	$subquery = array(
-		'SELECT'	=> 'post_id AS id',
-		'FROM'		=> 's2_blog_post_tag',
-		'WHERE'		=> 'tag_id = '.$tag_id
+	$query_add = array(
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 's2_blog_post_tag AS pt',
+				'ON'			=> 'pt.post_id = p.id'
+			)
+		),
+		'WHERE'		=> 'pt.tag_id = '.$tag_id
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
-	$output = s2_blog_get_posts($raw_query, false);
+	$output = s2_blog_get_posts($query_add, false);
 	if ($output == '')
 		error_404();
 
@@ -371,13 +374,10 @@ function s2_blog_get_favorite_posts ()
 
 	$s2_blog_fav_link = '<span class="favorite">*</span>';
 
-	$subquery = array(
-		'SELECT'	=> 'id',
-		'FROM'		=> 's2_blog_posts',
-		'WHERE'		=> 'favorite = 1 AND published = 1'
+	$query_add = array(
+		'WHERE'		=> 'favorite = 1'
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
-	$output = s2_blog_get_posts($raw_query);
+	$output = s2_blog_get_posts($query_add);
 	if ($output == '')
 		s2_404_header();
 
@@ -527,7 +527,7 @@ function s2_blog_year_posts ($year)
 // $ids = array (10, 15, 20);
 // $labels = array ('label1' => 1, 'label2' => 1, 'label3' => 1);
 //
-function s2_blog_get_posts_tags_and_labels ($ids, $labels, &$see_also, &$tags)
+function s2_blog_posts_links ($ids, $labels, &$see_also, &$tags)
 {
 	global $s2_db;
 
@@ -541,7 +541,7 @@ function s2_blog_get_posts_tags_and_labels ($ids, $labels, &$see_also, &$tags)
 			'FROM'		=> 's2_blog_posts AS p',
 			'WHERE'		=> 'p.label IN (\''.implode(array_keys($labels), '\', \'').'\') AND p.published = 1'
 		);
-		($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_similar_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_blog_posts_links_pre_get_labels_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$rows = $sort_array = array();
@@ -569,7 +569,7 @@ function s2_blog_get_posts_tags_and_labels ($ids, $labels, &$see_also, &$tags)
 		),
 		'WHERE'		=> 'pt.post_id IN ('.$ids.')'
 	);
-	($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_tags_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_posts_links_pre_get_tags_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$rows = $sort_array = array();
@@ -630,7 +630,7 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 		return array();
 
 	$see_also = $tags = array();
-	s2_blog_get_posts_tags_and_labels($ids, $merge_labels, $see_also, $tags);
+	s2_blog_posts_links($ids, $merge_labels, $see_also, $tags);
 
 	foreach ($posts as $i => $row)
 	{
