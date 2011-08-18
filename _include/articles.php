@@ -243,7 +243,7 @@ function s2_articles_by_tag ($tag_id)
 	global $s2_db;
 
 	$subquery = array(
-		'SELECT'	=> 'a1.id',
+		'SELECT'	=> '1',
 		'FROM'		=> 'articles AS a1',
 		'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 		'LIMIT'		=> '1'
@@ -251,7 +251,7 @@ function s2_articles_by_tag ($tag_id)
 	$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'a.id, url, title, parent_id, ('.$raw_query1.') IS NOT NULL AS children_exist',
+		'SELECT'	=> 'a.id, a.url, a.title, a.parent_id, ('.$raw_query1.') IS NOT NULL AS children_exist',
 		'FROM'		=> 'articles AS a',
 		'JOINS'		=> array(
 			array(
@@ -259,18 +259,18 @@ function s2_articles_by_tag ($tag_id)
 				'ON'			=> 'atg.article_id = a.id'
 			),
 		),
-		'WHERE'		=> 'atg.tag_id = '.$tag_id.' AND published = 1',
+		'WHERE'		=> 'atg.tag_id = '.$tag_id.' AND a.published = 1',
 	);
 	($hook = s2_hook('fn_articles_by_tag_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$urls = $parent_ids = array();
+	$title = $urls = $parent_ids = array();
 
-	for ($i = 0; $row = $s2_db->fetch_assoc($result); $i++)
+	while ($row = $s2_db->fetch_assoc($result))
 	{
-		$urls[$i] = urlencode($row['url']).($row['children_exist'] ? '/' : '');
-		$parent_ids[$i] = $row['parent_id'];
-		$title[$i] = $row['title'];
+		$urls[] = urlencode($row['url']).($row['children_exist'] ? '/' : '');
+		$parent_ids[] = $row['parent_id'];
+		$title[] = $row['title'];
 	}
 	$urls = s2_get_group_url($parent_ids, $urls);
 
@@ -380,7 +380,7 @@ function s2_make_tags_pages ($request_array)
 			$tag_description .= '<hr />';
 
 		$subquery = array(
-			'SELECT'	=> 'a1.id',
+			'SELECT'	=> '1',
 			'FROM'		=> 'articles AS a1',
 			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 			'LIMIT'		=> '1'
@@ -504,7 +504,7 @@ function s2_tagged_articles ($id)
 	}
 
 	$subquery = array(
-		'SELECT'	=> 'a1.id',
+		'SELECT'	=> '1',
 		'FROM'		=> 'articles AS a1',
 		'WHERE'		=> 'a1.parent_id = atg.article_id AND a1.published = 1',
 		'LIMIT'		=> '1'
@@ -680,7 +680,7 @@ function s2_parse_page_url ($request_uri)
 	$current_path = $parent_path.urlencode($request_array[$i]);
 
 	$subquery = array(
-		'SELECT'	=> 'a1.id',
+		'SELECT'	=> '1',
 		'FROM'		=> 'articles AS a1',
 		'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 		'LIMIT'		=> '1'
@@ -878,7 +878,7 @@ function s2_parse_page_url ($request_uri)
 		$query = array(
 			'SELECT'	=> 'title, url, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND (SELECT id FROM '.$s2_db->prefix.'articles i WHERE i.parent_id = a.id AND i.published = 1 LIMIT 1) IS NULL',
+			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND (SELECT 1 FROM '.$s2_db->prefix.'articles i WHERE i.parent_id = a.id AND i.published = 1 LIMIT 1) IS NULL',
 			'ORDER BY'	=> 'priority'
 		);
 		($hook = s2_hook('fn_s2_parse_page_url_pre_get_neighbours_qr')) ? eval($hook) : null;
