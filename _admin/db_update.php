@@ -36,6 +36,13 @@ if (S2_DB_REVISION < 3)
 	define('S2_ADMIN_COLOR', '#eeeeee');
 }
 
+if (S2_DB_REVISION < 4)
+{
+	$s2_db->add_index('articles', 'children_idx', array('parent_id', 'published'));
+	$s2_db->add_index('art_comments', 'sort_idx', array('article_id', 'time', 'shown'));
+	$s2_db->add_index('tags', 'url_idx', array('url'));
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',

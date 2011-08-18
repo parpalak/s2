@@ -11,7 +11,7 @@
 
 
 define('S2_VERSION', '1.0a5');
-define('S2_DB_REVISION', 3);
+define('S2_DB_REVISION', 4);
 define('MIN_PHP_VERSION', '4.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
@@ -632,6 +632,7 @@ else
 			'url_idx'			=> array('url'),
 			'create_time_idx'	=> array('create_time'),
 			'parent_id_idx'		=> array('parent_id'),
+			'children_idx'		=> array('parent_id', 'published'),
 			'template_idx'		=> array('template')
 		)
 	);
@@ -703,6 +704,7 @@ else
 		'PRIMARY KEY'	=> array('id'),
 		'INDEXES'		=> array(
 			'article_id_idx'	=> array('article_id'),
+			'sort_idx'			=> array('article_id', 'time', 'shown'),
 			'time_idx'			=> array('time')
 		)
 	);
@@ -738,7 +740,8 @@ else
 		),
 		'PRIMARY KEY'	=> array('tag_id'),
 		'UNIQUE KEYS'	=> array(
-			'name_idx'	=> array('name')
+			'name_idx'	=> array('name'),
+			'url_idx'	=> array('url')
 		)
 	);
 
