@@ -387,6 +387,8 @@ function s2_make_tags_pages ($request_array)
 		);
 		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
+		$sort_var = 'time';
+		$sort_desc = true;
 		$query = array(
 			'SELECT'	=> 'a.title, a.url, ('.$raw_query1.') IS NOT NULL AS children_exist, a.id, a.excerpt, a.create_time, a.parent_id',
 			'FROM'		=> 'article_tag AS at',
@@ -415,7 +417,8 @@ function s2_make_tags_pages ($request_array)
 		$urls = s2_get_group_url($parent_ids, $urls);
 
 		$subsection_text = '';
-		$subarticles = array();
+		$sort_var = $$sort_var;
+		$subarticles = $sort_array = array();
 		foreach ($urls as $k => $url)
 		{
 			if ($is_section[$k])
@@ -425,12 +428,15 @@ function s2_make_tags_pages ($request_array)
 					(trim($excerpts[$k]) ? '<p class="subsection">'.$excerpts[$k].'</p>'."\n" : '');
 			}
 			else
+			{
 				$subarticles[] = array(
 					'title' => s2_htmlencode($titles[$k]),
 					'time' => $time[$k],
 					'excerpt' => $excerpts[$k],
 					'url' => $url
 				);
+				$sort_array[] = $sort_var[$k];
+			}
 		}
 
 		if ($subsection_text)
@@ -441,17 +447,7 @@ function s2_make_tags_pages ($request_array)
 		// There are articles in the section
 		if (!empty($subarticles))
 		{
-			// Ordering articles by date
-			$max = count($subarticles);
-			for ($i = 0; $i < $max - 1; $i++)
-				for ($j = $i + 1; $j < $max; $j++)
-					if ($subarticles[$i]['time'] < $subarticles[$j]['time'])
-					{
-						$temp = $subarticles[$i];
-						$subarticles[$i] = $subarticles[$j];
-						$subarticles[$j] = $temp;
-					}
-
+			array_multisort($sort_array, $sort_desc ? SORT_DESC : SORT_ASC, $subarticles);
 			foreach ($subarticles as $item)
 				$text .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
