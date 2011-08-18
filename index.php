@@ -135,6 +135,8 @@ if (strpos($template, '<!-- s2_last_articles -->') !== false)
 // Footer
 $replace['<!-- s2_copyright -->'] = s2_build_copyright($request_uri);
 
+($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
+
 // Queries
 $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
