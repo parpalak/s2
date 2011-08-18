@@ -173,7 +173,7 @@ function s2_get_files ($dir)
 
 	uksort($output, 'strnatcmp');
 	($hook = s2_hook('fn_get_files_pre_output_merge')) ? eval($hook) : null;
-	$output = implode($output, '');
+	$output = implode('', $output);
 
 	($hook = s2_hook('fn_get_files_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul><br clear="both" />' : '<p>'.$lang_pictures['Empty directory'].'</p>';

@@ -161,7 +161,7 @@ function s2_get_options ($message = '')
 
 	($hook = s2_hook('fn_get_options_pre_admin_fs')) ? eval($hook) : null;
 	$fieldset = array(
-		'S2_ADMIN_COLOR' => s2_get_color_input('S2_ADMIN_COLOR', $options['S2_ADMIN_COLOR'], $lang_const_names['S2_ADMIN_COLOR'], sprintf($lang_const_explain['S2_ADMIN_COLOR'], implode($color_links, ', ')), 'SetBackground(this.value);'),
+		'S2_ADMIN_COLOR' => s2_get_color_input('S2_ADMIN_COLOR', $options['S2_ADMIN_COLOR'], $lang_const_names['S2_ADMIN_COLOR'], sprintf($lang_const_explain['S2_ADMIN_COLOR'], implode(', ', $color_links)), 'SetBackground(this.value);'),
 		'S2_LOGIN_TIMEOUT' => s2_get_input('S2_LOGIN_TIMEOUT', $options['S2_LOGIN_TIMEOUT'], $lang_const_names['S2_LOGIN_TIMEOUT'], $lang_const_explain['S2_LOGIN_TIMEOUT']),
 	);
 	($hook = s2_hook('fn_get_options_pre_admin_fs_merge')) ? eval($hook) : null;
