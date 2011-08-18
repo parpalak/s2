@@ -75,7 +75,7 @@ function s2_last_articles_array ($limit = '5')
 	$raw_query_parent_title = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$subquery = array(
-		'SELECT'	=> 'a2.id',
+		'SELECT'	=> '1',
 		'FROM'		=> 'articles AS a2',
 		'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
 		'LIMIT'		=> '1'
@@ -520,8 +520,8 @@ function s2_tagged_articles ($id)
 				'ON'			=> 'a.id = atg.article_id'
 			),
 		),
-		'WHERE'		=> 'atg.tag_id IN ('.implode(', ', array_keys($tag_names)).') AND a.published = 1',
-		'ORDER BY'	=> 'create_time'
+		'WHERE'		=> 'atg.tag_id IN ('.implode(', ', array_keys($tag_names)).') AND a.published = 1'
+//		'ORDER BY'	=> 'create_time'  // no temp table is created but order by ID is almost the same
 	);
 	($hook = s2_hook('fn_tagged_articles_pre_get_articles_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -554,7 +554,7 @@ function s2_tagged_articles ($id)
 	foreach ($urls as $k => $url)
 		$art_by_tags[$tag_ids[$k]][] = ($original_ids[$k] == $id) ?
 			'<li class="active"><span>'.s2_htmlencode($titles[$k]).'</span></li>' :
-			'<li><a href="'.S2_PATH.S2_URL_PREFIX.$urls[$k].'">'.s2_htmlencode($titles[$k]).'</a></li>';
+			'<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'">'.s2_htmlencode($titles[$k]).'</a></li>';
 
 	($hook = s2_hook('fn_tagged_articles_pre_art_by_tags_merge')) ? eval($hook) : null;
 
@@ -875,10 +875,18 @@ function s2_parse_page_url ($request_uri)
 		// It's an article. We have to fetch other articles in the parent section
 
 		// Fetching "brothers"
+		$subquery = array(
+			'SELECT'	=> '1',
+			'FROM'		=> 'articles AS a2',
+			'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
+			'LIMIT'		=> '1'
+		);
+		$raw_query_child_num = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
 		$query = array(
 			'SELECT'	=> 'title, url, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND (SELECT 1 FROM '.$s2_db->prefix.'articles i WHERE i.parent_id = a.id AND i.published = 1 LIMIT 1) IS NULL',
+			'WHERE'		=> 'parent_id = '.$parent_id.' AND published=1 AND ('.$raw_query_child_num.') IS NULL',
 			'ORDER BY'	=> 'priority'
 		);
 		($hook = s2_hook('fn_s2_parse_page_url_pre_get_neighbours_qr')) ? eval($hook) : null;
