@@ -1428,11 +1428,11 @@ function ReturnImage(s, w, h)
 		return;
 
 	s = encodeURI(s).
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/'/g, '&#039;')
-		.replace(/"/g, '&quot;');
+		replace(/&/g, '&amp;').
+		replace(/</g, '&lt;').
+		replace(/>/g, '&gt;').
+		replace(/'/g, '&#039;').
+		replace(/"/g, '&quot;');
  
 	SelectTab(document.getElementById('edit_tab'), true);
 	var sOpenTag = '<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
