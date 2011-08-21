@@ -1427,7 +1427,8 @@ function ReturnImage(s, w, h)
 	if (!document.artform || !document.artform['page[text]'])
 		return;
 
-	s = s.replace(/&/g, '&amp;')
+	s = encodeURI(s).
+		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/'/g, '&#039;')
