@@ -350,15 +350,16 @@ function s2_make_tags_pages ($request_array)
 			if ($num)
 				$tags[] = '<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/'.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a>';
 
-		($hook = s2_hook('fn_s2_make_tags_pages_tags_end')) ? eval($hook) : null;
-
-		return array(
+		$page = array(
 			'text'			=> implode('<br />', $tags),
 			'date'			=> '',
-			'head_title'	=> $lang_common['Tags'],
 			'title'			=> $lang_common['Tags'],
 			'path'			=> '<a href="'.S2_PATH.S2_URL_PREFIX.'/">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].$lang_common['Tags'],
 		);
+
+		($hook = s2_hook('fn_s2_make_tags_pages_tags_end')) ? eval($hook) : null;
+
+		return $page;
 	}
 	else
 	{
@@ -454,15 +455,16 @@ function s2_make_tags_pages ($request_array)
 					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 		}
 
-		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;
-
-		return array(
+		$page = array(
 			'text'			=> $tag_description.$text.$subsection_text,
 			'date'			=> '',
-			'head_title'	=> s2_htmlencode($tag_name),
 			'title'			=> s2_htmlencode($tag_name),
 			'path'			=> '<a href="'.S2_PATH.S2_URL_PREFIX.'/">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].'<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/">'.$lang_common['Tags'].'</a>'.$lang_common['Crumbs separator'].s2_htmlencode($tag_name),
 		);
+
+		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;
+
+		return $page;
 	}
 }
 
