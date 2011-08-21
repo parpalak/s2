@@ -578,8 +578,10 @@ function DeleteFolder ()
 	if (Response.status != '200')
 		return false;
 
+	var eUl = eSpan.parentNode.parentNode.parentNode;
+	HighlightItem(eUl.parentNode.childNodes[1].lastChild);
 	SaveExpand();
-	SetParentChildren(eSpan.parentNode.parentNode.parentNode, Response.text);
+	SetParentChildren(eUl, Response.text);
 	LoadExpand();
 	eFilePanel.innerHTML = '';
 	return false;
