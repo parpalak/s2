@@ -370,7 +370,7 @@ function s2_make_tags_pages ($request_array)
 			'FROM'		=> 'tags',
 			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[2]).'\''
 		);
-		($hook = s2_hook('fn_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 		if (!$s2_db->num_rows($result))
 			error_404();
@@ -388,8 +388,7 @@ function s2_make_tags_pages ($request_array)
 		);
 		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
-		$sort_var = 'time';
-		$sort_desc = true;
+		$sort_order = SORT_DESC; // SORT_ASC also possible
 		$query = array(
 			'SELECT'	=> 'a.title, a.url, ('.$raw_query1.') IS NOT NULL AS children_exist, a.id, a.excerpt, a.create_time, a.parent_id',
 			'FROM'		=> 'article_tag AS at',
@@ -401,42 +400,43 @@ function s2_make_tags_pages ($request_array)
 			),
 			'WHERE'		=> 'at.tag_id = '.$tag_id.' AND published = 1'
 		);
-		($hook = s2_hook('fn_make_tags_pages_pre_get_arts_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_arts_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		$urls = $parent_ids = $is_section = $excerpts = array();
+		$urls = $parent_ids = $rows = array();
 		while ($row = $s2_db->fetch_assoc($result))
 		{
+			$rows[] = $row;
 			$urls[] = urlencode($row['url']);
-			$is_section[] = $row['children_exist'];
-			$time[] = $row['create_time'];
-			$excerpts[] = $row['excerpt'];
-			$titles[] = $row['title'];
 			$parent_ids[] = $row['parent_id'];
 		}
 
 		$urls = s2_get_group_url($parent_ids, $urls);
 
 		$subsection_text = '';
-		$sort_var = $$sort_var;
 		$subarticles = $sort_array = array();
 		foreach ($urls as $k => $url)
 		{
-			if ($is_section[$k])
+			$row = $rows[$k];
+			if ($row['children_exist'])
 			{
-				$subsection_text .= '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'/">'.s2_htmlencode($titles[$k]).'</a></h3>'."\n".
-					($time[$k] ? '<div class="subsection date">'.s2_date($time[$k]).'</div>'."\n" : '').
-					(trim($excerpts[$k]) ? '<p class="subsection">'.$excerpts[$k].'</p>'."\n" : '');
+				$subsection_text .= '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
+					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
+					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
+
+				($hook = s2_hook('fn_s2_make_tags_pages_add_subsection')) ? eval($hook) : null;
 			}
 			else
 			{
 				$subarticles[] = array(
-					'title' => s2_htmlencode($titles[$k]),
-					'time' => $time[$k],
-					'excerpt' => $excerpts[$k],
+					'title' => s2_htmlencode($row['title']),
+					'time' => $row['create_time'],
+					'excerpt' => $row['excerpt'],
 					'url' => $url
 				);
-				$sort_array[] = $sort_var[$k];
+				$sort_array[] = $row['create_time'];
+
+				($hook = s2_hook('fn_s2_make_tags_pages_add_subarticle')) ? eval($hook) : null;
 			}
 		}
 
@@ -448,7 +448,7 @@ function s2_make_tags_pages ($request_array)
 		// There are articles in the section
 		if (!empty($subarticles))
 		{
-			array_multisort($sort_array, $sort_desc ? SORT_DESC : SORT_ASC, $subarticles);
+			array_multisort($sort_array, $sort_order, $subarticles);
 			foreach ($subarticles as $item)
 				$text .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
@@ -686,63 +686,45 @@ function s2_parse_page_url ($request_uri)
 	$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'id, title, meta_keys, meta_desc, pagetext, create_time, commented, template, children_preview, ('.$raw_query1.') IS NOT NULL AS children_exist',
+		'SELECT'	=> 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.pagetext as text, a.create_time as date, commented, template, children_preview, ('.$raw_query1.') IS NOT NULL AS children_exist',
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
 	);
 	($hook = s2_hook('fn_s2_parse_page_url_pre_get_page')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+	$page = $s2_db->fetch_assoc($result);
+
 	// Error handling
-	$match_num = $s2_db->num_rows($result);
-	if (!$match_num)
+	if (!$page)
 		error_404();
-	if ($match_num > 1)
+	if ($s2_db->fetch_assoc($result))
 		error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
 
-	$row = $s2_db->fetch_assoc($result);
-
-	if ($row['template'])
-		$template_id = $row['template'];
+	if ($page['template'])
+		$template_id = $page['template'];
 
 	if (!$template_id)
 	{
-		$bread_crumbs_links[] = '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.s2_htmlencode($row['title']).'</a>';
+		$bread_crumbs_links[] = '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.s2_htmlencode($page['title']).'</a>';
 		error(sprintf($lang_common['Error no template'], implode('<br />', $bread_crumbs_links)));
 	}
 
-	// Correcting URL
-	if (!$row['children_exist'] && $was_end_slash)
+	if ($page['children_exist'] != $was_end_slash)
 	{
-		// "file" - has no children
+		// Correcting trailing slash
 		header('HTTP/1.1 301');
-		header('Location: '.S2_BASE_URL.S2_URL_PREFIX.$current_path);
-		die;
-	}
-	if ($row['children_exist'] && !$was_end_slash)
-	{
-		// "folder" - has children
-		header('HTTP/1.1 301'); 
-		header('Location: '.S2_BASE_URL.S2_URL_PREFIX.$current_path.'/');
+		header('Location: '.S2_BASE_URL.S2_URL_PREFIX.$current_path.(!$was_end_slash ? '/' : ''));
 		die;
 	}
 
-	$id = $row['id'];
-
-	$bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($row['title']);
-
-	$page['children_exist'] = $row['children_exist'];
-	$page['text'] = $row['pagetext'];
-	$page['meta_keywords'] = $row['meta_keys'];
-	$page['meta_description'] = $row['meta_desc'];
-	$page['title'] = s2_htmlencode($row['title']);
-	$page['date'] = !$page['children_exist'] ? $row['create_time'] : '';
-	$page['commented'] = $row['commented'];
-	$page['children_preview'] = $row['children_preview'];
-	$page['id'] = $id;
-
+	$id = $page['id'];
+	$bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
 	$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
 	$page['section_link'] = count($bread_crumbs_titles) > 1 ? '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>' : '';
+
+	($hook = s2_hook('fn_s2_parse_page_url_pre_get_tpl')) ? eval($hook) : null;
+
 	// Getting page template
 	$template = s2_get_template($template_id);
 
@@ -762,6 +744,7 @@ function s2_parse_page_url ($request_uri)
 		);
 		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
+		$sort_order = SORT_DESC;
 		$query = array(
 			'SELECT'	=> 'title, url, ('.$raw_query1.') IS NOT NULL AS children_exist, id, excerpt, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
@@ -796,7 +779,7 @@ function s2_parse_page_url ($request_uri)
 					'excerpt' => $row['excerpt'],
 					'url' => $current_path.'/'.urlencode($row['url'])
 				);
-				$subarticles_time[] = $row['create_time'];
+				$sort_array[] = $row['create_time'];
 				$menu_subarticles[] = '<li><a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
 
 				($hook = s2_hook('fn_s2_parse_page_url_add_subarticle')) ? eval($hook) : null;
@@ -837,7 +820,7 @@ function s2_parse_page_url ($request_uri)
 				// ... and to the page text
 				$page['subcontent'] .= $lang_common['Read in this section'] ? '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n" : '';
 
-				arsort($subarticles_time);
+				($sort_order == SORT_DESC) ? arsort($sort_array) : asort($sort_array);
 
  				if (S2_MAX_ITEMS)
 				{
@@ -851,10 +834,10 @@ function s2_parse_page_url ($request_uri)
 						$page_num = $start = 0;
 
 					$paging = s2_paging($page_num + 1, ceil(1.0 * count($subarticles) / S2_MAX_ITEMS), $current_path.'/')."\n";
-					$subarticles_time = array_slice($subarticles_time, $start, S2_MAX_ITEMS);
+					$sort_array = array_slice($sort_array, $start, S2_MAX_ITEMS);
 				}
 
-				foreach ($subarticles_time as $index => $time)
+				foreach ($sort_array as $index => $value)
 				{
 					$item = $subarticles[$index];
 					$page['subcontent'] .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
