@@ -56,9 +56,9 @@ $lang_admin_ext = array(
 'Hotfix description'			=>	'This hotfix for your S2 installation was detected by automatic update.',
 'Install hotfix'				=>	'Install hotfix',
 
-'Missing dependency'			=>	'The extension “%1$s” cannot be installed unless the extension “%2$s” is installed and enabled.',
-'Uninstall dependency'			=>	'The extension “%1$s” cannot be uninstalled before the extension “%2$s” is installed.',
-'Disable dependency'			=>	'The extension “%1$s” cannot be disabled while the extension “%2$s” is enabled.',
-'Disabled dependency'			=>	'The extension “%1$s” cannot be enabled while the extension “%2$s” is disabled.',
+'Missing dependency'			=>	'The extension “%1$s” cannot be installed unless the following extensions are installed and enabled: %2$s.',
+'Uninstall dependency'			=>	'The extension “%1$s” cannot be uninstalled before the following extensions are installed: %2$s',
+'Disable dependency'			=>	'The extension “%1$s” cannot be disabled while the following extensions are enabled: %2$s.',
+'Disabled dependency'			=>	'The extension “%1$s” cannot be enabled while the following extensiond are disabled: %2$s.',
 
 );

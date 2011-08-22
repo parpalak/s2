@@ -372,10 +372,11 @@ function s2_make_tags_pages ($request_array)
 		);
 		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-		if (!$s2_db->num_rows($result))
-			error_404();
 
-		list($tag_id, $tag_description, $tag_name) = $s2_db->fetch_row($result);
+		if ($row = $s2_db->fetch_row($result))
+			list($tag_id, $tag_description, $tag_name) = $row;
+		else
+			error_404();
 
 		if ($tag_description)
 			$tag_description .= '<hr />';
@@ -489,8 +490,6 @@ function s2_tagged_articles ($id)
 	);
 	($hook = s2_hook('fn_tagged_articles_pre_get_tags_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
-		return;
 
 	$tag_names = $tag_urls = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -500,6 +499,9 @@ function s2_tagged_articles ($id)
 		$tag_names[$row['tag_id']] = $row['name'];
 		$tag_urls[$row['tag_id']] = $row['url'];
 	}
+
+	if (empty($tag_urls))
+		return;
 
 	$subquery = array(
 		'SELECT'	=> '1',
@@ -523,13 +525,12 @@ function s2_tagged_articles ($id)
 	);
 	($hook = s2_hook('fn_tagged_articles_pre_get_articles_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
-		return;
 
 	// Build article lists that have the same tags as our article
 
 	$create_tag_list = false;
 
+	$titles = $parent_ids = $urls = $tag_ids = $original_ids = array();
 	while ($row = $s2_db->fetch_assoc($result))
 	{
 		($hook = s2_hook('fn_tagged_articles_get_articles_loop')) ? eval($hook) : null;
@@ -542,6 +543,9 @@ function s2_tagged_articles ($id)
 		$tag_ids[] = $row['tag_id'];
 		$original_ids[] = $row['id'];
 	}
+
+	if (empty($urls))
+		return;
 
 	if ($create_tag_list)
 		$urls = s2_get_group_url($parent_ids, $urls);
@@ -590,8 +594,6 @@ function s2_tags_list ($id)
 	);
 	($hook = s2_hook('fn_tags_list_pre_get_tags_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
-		return '';
 
 	$tags = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -656,13 +658,11 @@ function s2_parse_page_url ($request_uri)
 		($hook = s2_hook('fn_s2_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		$match_num = $s2_db->num_rows($result);
-		if (!$match_num)
-			error_404();
-		if ($match_num > 1)
-			error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
-
 		$row = $s2_db->fetch_assoc($result);
+		if (!$row)
+			error_404();
+		if ($s2_db->fetch_assoc($result))
+			error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
 
 		($hook = s2_hook('fn_s2_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
 

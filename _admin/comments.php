@@ -27,6 +27,22 @@ function s2_show_comments ($mode, $id = 0)
 {
 	global $s2_db, $session_id, $lang_admin;
 
+	// Determine if we can show hidden info like e-mails and IP
+	$query = array(
+		'SELECT'	=> 'view_hidden',
+		'FROM'		=> 'users_online AS o',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 'users AS u',
+				'ON'			=> 'u.login = o.login'
+			)
+		),
+		'WHERE'		=> 'challenge = \''.$s2_db->escape($session_id).'\''
+	);
+	($hook = s2_hook('fn_show_comments_pre_get_perm_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$show_hidden = $s2_db->result($result);
+
 	// Getting comments
 	$query = array(
 		'SELECT'	=> 'a.title, c.article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.good, c.ip',
@@ -65,24 +81,6 @@ function s2_show_comments ($mode, $id = 0)
 
 	($hook = s2_hook('fn_show_comments_pre_get_comm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
-		return $output.'<div class="info-box"><p>'.$lang_admin['No comments'].'</p></div>';
-
-	// Determine if we can show hidden info like e-mails and IP
-	$query = array(
-		'SELECT'	=> 'view_hidden',
-		'FROM'		=> 'users_online AS o',
-		'JOINS'		=> array(
-			array(
-				'INNER JOIN'	=> 'users AS u',
-				'ON'			=> 'u.login = o.login'
-			)
-		),
-		'WHERE'		=> 'challenge = \''.$s2_db->escape($session_id).'\''
-	);
-	($hook = s2_hook('fn_show_comments_pre_get_perm_qr')) ? eval($hook) : null;
-	$result2 = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$show_hidden = $s2_db->num_rows($result2) == 1 && $s2_db->result($result2);
 
 	$article_titles = $comments_tables = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -147,6 +145,9 @@ function s2_show_comments ($mode, $id = 0)
 		$article_titles[$row['article_id']] = $row['title'];
 	}
 
+	if (empty($comments_tables))
+		return $output.'<div class="info-box"><p>'.$lang_admin['No comments'].'</p></div>';
+
 	if ($mode == 'new' && count($article_titles))
 		$output .= '<div class="info-box"><p>'.$lang_admin['Premoderation info'].'</p></div>';
 
@@ -187,7 +188,7 @@ function s2_for_premoderation ()
 	);
 	($hook = s2_hook('fn_for_premoderation_pre_perm_check_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
+	if (!$s2_db->fetch_row($result))
 		return s2_comment_menu_links();
 
 	// Check if there are new comments
@@ -277,10 +278,10 @@ function s2_edit_comment ($id)
 	);
 	($hook = s2_hook('fn_edit_comment_pre_get_aid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
 	$comment = $s2_db->fetch_assoc($result);
+	if (!$comment)
+		die('Comment not found!');
 
 	s2_output_comment_form($comment, 'site');
 }
@@ -299,10 +300,10 @@ function s2_toggle_hide_comment ($id)
 	);
 	($hook = s2_hook('fn_toggle_hide_comment_pre_get_comment_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
 	$comment = $s2_db->fetch_assoc($result);
+	if (!$comment)
+		die('Comment not found!');
 
 	$sent = 1;
 	if (!$comment['shown'] && !$comment['sent'])
@@ -377,10 +378,12 @@ function s2_toggle_mark_comment ($id)
 	);
 	($hook = s2_hook('fn_toggle_mark_comment_pre_get_aid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
+
+	if ($row = $s2_db->fetch_row($result))
+		$article_id = $row[0];
+	else
 		die('Comment not found!');
 
-	list($article_id) = $s2_db->fetch_row($result);
 
 	// Mark comment
 	$query = array(
@@ -423,10 +426,11 @@ function s2_save_comment ()
 		);
 		($hook = s2_hook('fn_save_comment_pre_get_aid_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-		if ($s2_db->num_rows($result) != 1)
-			die('Comment not found!');
 
-		$article_id = $s2_db->result($result);
+		if ($row = $s2_db->fetch_row($result))
+			$article_id = $row[0];
+		else
+			die('Comment not found!');
 
 		// Save comment
 		$query = array(
@@ -457,10 +461,11 @@ function s2_delete_comment ($id)
 	);
 	($hook = s2_hook('fn_delete_comment_pre_get_aid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
-	list($article_id) = $s2_db->fetch_row($result);
+	if ($row = $s2_db->fetch_row($result))
+		$article_id = $row[0];
+	else
+		die('Comment not found!');
 
 	$query = array(
 		'DELETE'	=> 'art_comments',

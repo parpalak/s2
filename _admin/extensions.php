@@ -234,9 +234,13 @@ function s2_install_extension ($id)
 	while ($row = $s2_db->fetch_assoc($result))
 		$installed_ext[] = $row['id'];
 
+	$broken_dependencies = array();
 	foreach ($ext_data['extension']['dependencies'] as $dependency)
 		if (!in_array($dependency, $installed_ext))
-			return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Missing dependency'], $id, $dependency).'</p></div>';
+			$broken_dependencies[] = $dependency;
+
+	if (!empty($broken_dependencies))
+		return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Missing dependency'], $id, implode(', ', $broken_dependencies)).'</p></div>';
 
 	($hook = s2_hook('aex_install_comply_form_submitted')) ? eval($hook) : null;
 
@@ -277,10 +281,10 @@ function s2_install_extension ($id)
 
 	($hook = s2_hook('aex_install_comply_qr_get_current_ext_version')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result))
+	if ($curr_version = $s2_db->result($result))
 	{
 		// EXT_CUR_VERSION will be available to the extension install routine (to facilitate extension upgrades)
-		define('EXT_CUR_VERSION', $s2_db->result($result));
+		define('EXT_CUR_VERSION', $curr_version);
 
 		// Run the author supplied install code
 		if (isset($ext_data['extension']['install']) && trim($ext_data['extension']['install']) != '')
@@ -381,11 +385,12 @@ function s2_flip_extension ($id)
 
 	($hook = s2_hook('aex_flip_qr_get_disabled_status')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
-		return $lang_common['Bad request'];
 
+	if ($row = $s2_db->fetch_assoc($result))
 	// Are we disabling or enabling?
-	$disable = $s2_db->result($result) == '0';
+		$disable = $row['disabled'] == '0';
+	else
+		return $lang_common['Bad request'];
 
 	// Check dependancies
 	if ($disable)
@@ -399,11 +404,12 @@ function s2_flip_extension ($id)
 		($hook = s2_hook('aex_flip_qr_get_disable_dependencies')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		if ($s2_db->num_rows($result) != 0)
-		{
-			$dependency = $s2_db->fetch_assoc($result);
-			return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Disable dependency'], $id, $dependency['id']).'</p></div>';
-		}
+		$dependency_ids = array();
+		while ($dependency = $s2_db->fetch_assoc($result))
+			$dependency_ids[] = $dependency['id'];
+
+		if (!empty($dependency_ids))
+			return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Disable dependency'], $id, implode(', ', $dependency_ids)).'</p></div>';
 	}
 	else
 	{
@@ -432,9 +438,13 @@ function s2_flip_extension ($id)
 		while ($row = $s2_db->fetch_assoc($result))
 			$installed_ext[] = $row['id'];
 
+		$broken_dependencies = array();
 		foreach ($dependencies as $dependency)
 			if (!empty($dependency) && !in_array($dependency, $installed_ext))
-				return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Disabled dependency'], $id, $dependency).'</p></div>';
+				$broken_dependencies[] = $dependency;
+
+		if (!empty($broken_dependencies))
+			return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Disabled dependency'], $id, implode(', ', $broken_dependencies)).'</p></div>';
 	}
 
 	$query = array(
@@ -476,10 +486,10 @@ function s2_uninstall_extension ($id)
 
 	($hook = s2_hook('aex_uninstall_qr_get_extension')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
-		die('Extension not found.');
 
 	$ext_data = $s2_db->fetch_assoc($result);
+	if (!$ext_data)
+		die('Extension not found.');
 
 	// Check dependancies
 	$query = array(
@@ -491,11 +501,12 @@ function s2_uninstall_extension ($id)
 	($hook = s2_hook('aex_uninstall_qr_check_dependencies')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	if ($s2_db->num_rows($result) != 0)
-	{
-		$dependency = $s2_db->fetch_assoc($result);
-		return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Uninstall dependency'], $id, $dependency['id']).'</p></div>';
-	}
+	$dependencies = array();
+	while ($row = $s2_db->fetch_assoc($result))
+		$dependencies[] = $row['id'];
+
+	if (!empty($dependencies))
+		return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Uninstall dependency'], $id, implode(', ', $dependencies)).'</p></div>';
 
 	($hook = s2_hook('aex_uninstall_comply_form_submitted')) ? eval($hook) : null;
 

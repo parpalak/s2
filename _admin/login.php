@@ -77,7 +77,7 @@ function s2_get_login ($challenge)
 	($hook = s2_hook('fn_get_login_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	return $s2_db->num_rows($result) ? $s2_db->result($result) : false;
+	return $s2_db->result($result);
 }
 
 function s2_update_challenge_time ($challenge)
@@ -106,14 +106,15 @@ function s2_test_user_rights ($challenge, $permissions)
 	($hook = s2_hook('fn_test_user_rights_pre_get_time_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	if ($s2_db->num_rows($result) != 1)
+	if ($row = $s2_db->fetch_row($result))
+		list($login, $time) = $row;
+	else
 	{
 		// Most likely the challenge was removed when another user tried to login
 		header('X-S2-Status: Lost');
 		die($lang_admin['Lost session']);
 	}
 
-	list($login, $time) = $s2_db->fetch_row($result);
 
 	if (time() > $time + S2_EXPIRE_LOGIN_TIMEOUT)
 	{
@@ -133,7 +134,7 @@ function s2_test_user_rights ($challenge, $permissions)
 	($hook = s2_hook('fn_test_user_rights_pre_check_perm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	if (!$s2_db->num_rows($result))
+	if (!$s2_db->fetch_row($result))
 	{
 		header('X-S2-Status: Forbidden');
 		die($lang_admin['No permission']);
@@ -156,7 +157,7 @@ function s2_get_salt ($s)
 	($hook = s2_hook('fn_verify_challenge_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	return $s2_db->num_rows($result) > 0 ? $s2_db->result($result) : false;
+	return $s2_db->result($result);
 }
 
 function s2_get_password_hash ($login)
@@ -171,7 +172,7 @@ function s2_get_password_hash ($login)
 	($hook = s2_hook('fn_get_password_hash_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	return $s2_db->num_rows($result) ? $s2_db->result($result) : false;
+	return $s2_db->result($result);
 }
 
 function s2_login_success ($login, $challenge)

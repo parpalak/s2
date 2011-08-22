@@ -207,10 +207,14 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 	($hook = s2_hook('fn_get_child_branches_pre_get_art_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+	$rows = array();
+	while ($article = $s2_db->fetch_assoc($result))
+		$rows[] = $article;
+
 	$output = '';
-	for ($i = $s2_db->num_rows($result); $i-- ;)
+	for ($i = 0; $i < count($rows); $i++)
 	{
-		$article = $s2_db->fetch_assoc($result);
+		$article = $rows[$i];
 
 		// This element will have onclick event handler and proper styles
 		$expand = '<div></div>';
@@ -228,7 +232,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 
 		if ($search && (!$children && !$article['found']))
 			continue;
-		$output .= '<li class="'.$item_type.(!$i ? ' IsLast' : '' ).($search ? ' Search'.($article['found'] ? ' Match' : '') : '').'">'.$expand.$span.$children.'</li>';
+		$output .= '<li class="'.$item_type.($i == count($rows) ? ' IsLast' : '' ).($search ? ' Search'.($article['found'] ? ' Match' : '') : '').'">'.$expand.$span.$children.'</li>';
 	}
 
 	($hook = s2_hook('fn_get_child_branches_end')) ? eval($hook) : null;
@@ -544,7 +548,7 @@ function s2_get_user_list ($cur_login, $is_admin = false)
 		);
 		($hook = s2_hook('fn_get_user_list_pre_get_perm_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-		$is_admin = $s2_db->num_rows($result) == 1 && $s2_db->result($result) == 1;
+		$is_admin = $s2_db->result($result) == 1;
 	}
 
 	$query = array(
@@ -641,10 +645,9 @@ function s2_preload_editor ()
 		($hook = s2_hook('fn_preload_editor_loop_pre_get_parents_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		if ($s2_db->num_rows($result) != 1)
-			return;
-
 		$id = $s2_db->result($result);
+		if (!$id)
+			return;
 	}
 
 	($hook = s2_hook('fn_preload_editor_pre_output')) ? eval($hook) : null;

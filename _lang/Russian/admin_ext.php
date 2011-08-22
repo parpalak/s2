@@ -57,9 +57,9 @@ $lang_admin_ext = array(
 'Hotfix description'			=>	'This hotfix for your S2 installation was detected by automatic update.',
 'Install hotfix'				=>	'Install hotfix',
 
-'Missing dependency'			=>	'Расширение «%1$s» нельзя установить, пока не установлено и не включено расширение «%2$s».',
-'Uninstall dependency'			=>	'Расширение «%1$s» нельзя удалить, пока установлено расширение «%2$s».',
-'Disable dependency'			=>	'Расширение «%1$s» нельзя отключить, пока расширение «%2$s» включено.',
-'Disabled dependency'			=>	'Расширение «%1$s» нельзя включить, пока расширение «%2$s» отключено.',
+'Missing dependency'			=>	'Расширение «%1$s» нельзя установить, пока не установлены и не включены следующие расширения: %2$s.',
+'Uninstall dependency'			=>	'Расширение «%1$s» нельзя удалить, пока установлены следующие расширения: %2$s.',
+'Disable dependency'			=>	'Расширение «%1$s» нельзя отключить, пока включены следующие расширения: %2$s.',
+'Disabled dependency'			=>	'Расширение «%1$s» нельзя включить, пока отключены следующие расширения: %2$s.',
 
 );

@@ -124,6 +124,8 @@ if (!isset($_POST['form_sent']))
 	}
 //	if (function_exists('sqlite_open'))
 //		$db_extensions[] = array('sqlite', 'SQLite');
+	if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers()))
+		$db_extensions[] = array('pdo_sqlite', 'PDO SQLite');
 	if (function_exists('pg_connect'))
 		$db_extensions[] = array('pgsql', 'PostgreSQL');
 
@@ -399,6 +401,10 @@ else
 			require S2_ROOT.'_include/dblayer/sqlite.php';
 			break;
 
+		case 'pdo_sqlite':
+			require S2_ROOT.'_include/dblayer/pdo_sqlite.php';
+			break;
+
 		default:
 			error(sprintf($lang_install['No such database type'], s2_htmlencode($db_type)));
 	}
@@ -427,7 +433,7 @@ else
 	);
 
 	$result = $s2_db->query_build($query);
-	if ($s2_db->num_rows($result))
+	if ($s2_db->fetch_row($result))
 		error(sprintf($lang_install['S2 already installed'], $db_prefix, $db_name));
 
 

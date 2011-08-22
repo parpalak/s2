@@ -54,10 +54,10 @@ if ($action == 'drag')
 	);
 	($hook = s2_hook('rq_action_drag_pre_get_pr_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 2)
-		die('Items not found!');
 
+	$item_num = 0;
 	while ($row = $s2_db->fetch_assoc($result))
+	{
 		if ($row['id'] == $source_id)
 		{
 			$source_priority = $row['priority'];
@@ -68,6 +68,11 @@ if ($action == 'drag')
 			$dest_priority = $row['priority'];
 			$dest_parent_id = $row['parent_id'];
 		}
+		$item_num++;
+	}
+
+	if ($item_num != 2)
+		die('Items not found!');
 
 	if ($far)
 	{
@@ -151,10 +156,11 @@ elseif ($action == 'delete')
 	);
 	($hook = s2_hook('rq_action_delete_get_parent_id_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Item not found!');
 
-	list($priority, $parent_id) = $s2_db->fetch_row($result);
+	if ($s2_db->fetch_row($result))
+		list($priority, $parent_id) = $row;
+	else
+		die('Item not found!');
 
 	$query = array(
 		'UPDATE'	=> 'articles',
@@ -186,10 +192,11 @@ elseif ($action == 'rename')
 	);
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	($hook = s2_hook('rq_action_rename_pre_get_parent_id_qr')) ? eval($hook) : null;
-	if ($s2_db->num_rows($result) != 1)
-		die('Item not found!');
 
-	list($parent_id) = $s2_db->fetch_row($result);
+	if ($row = $s2_db->fetch_assoc($result))
+		$parent_id = $row['parent_id'];
+	else
+		die('Item not found!');
 
 	$query = array(
 		'UPDATE'	=> 'articles',
@@ -217,10 +224,11 @@ elseif ($action == 'create')
 	);
 	($hook = s2_hook('rq_action_create_pre_get_parent_id_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Item not found!');
 
-	list($parent_id) = $s2_db->fetch_row($result);
+	if ($row = $s2_db->fetch_assoc($result))
+		$parent_id = $row['parent_id'];
+	else
+		die('Item not found!');
 
 	$query = array(
 		'SELECT'	=> 'MAX(priority)',
@@ -404,10 +412,12 @@ elseif ($action == 'delete_from_tag')
 
 	($hook = s2_hook('rq_action_delete_from_tag_pre_get_tagid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
+
+	if ($row = $s2_db->fetch_row($result))
+		list($tag_id) = $row;
+	else
 		die('Can\'t find the article-tag link.');
 
-	list($tag_id) = $s2_db->fetch_row($result);
 
 	$query = array(
 		'DELETE'	=> 'article_tag',
@@ -591,7 +601,7 @@ elseif ($action == 'add_user')
 
 	($hook = s2_hook('rq_action_add_user_pre_login_verify_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result))
+	if ($s2_db->fetch_row($result))
 	{
 		// Exists
 		printf('<div class="info-box"><p>'.$lang_admin['Username exists'].'</p></div>', s2_htmlencode($_GET['name']));
@@ -663,7 +673,7 @@ elseif ($action == 'user_set_password')
 	);
 	($hook = s2_hook('rq_action_user_set_password_pre_get_perm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$is_admin = $s2_db->num_rows($result) == 1 && $s2_db->result($result);
+	$is_admin = $s2_db->result($result);
 
 	// We allow usual users to change only their passwords
 	if ($cur_login == $_GET['name'] || $is_admin)
@@ -702,7 +712,7 @@ elseif ($action == 'user_set_email')
 	);
 	($hook = s2_hook('rq_action_user_set_email_pre_get_perm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$edit_users = $s2_db->num_rows($result) == 1 && $s2_db->result($result);
+	$edit_users = $s2_db->result($result);
 
 	// We allow usual users to change only their passwords
 	if ($cur_login == $_GET['name'] || $edit_users)
@@ -804,10 +814,10 @@ elseif ($action == 'load_tag')
 	);
 	($hook = s2_hook('rq_action_load_tag_pre_get_tag_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Item not found!');
 
 	$tag = $s2_db->fetch_assoc($result);
+	if (!$tag)
+		die('Item not found!');
 
 	s2_output_tag_form($tag, s2_array_from_time($tag['modify_time']));
 }
@@ -873,10 +883,10 @@ elseif ($action == 'save_tag')
 	);
 	($hook = s2_hook('rq_action_save_tag_pre_get_tag_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Item not found!');
 
 	$tag = $s2_db->fetch_assoc($result);
+	if (!$tag)
+		die('Item not found!');
 
 	s2_output_tag_form($tag, s2_array_from_time($tag['modify_time']));
 }
