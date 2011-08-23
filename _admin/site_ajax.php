@@ -25,8 +25,6 @@ header('Content-Type: text/html; charset=utf-8');
 ob_start();
 if (S2_COMPRESS)
 	ob_start('ob_gzhandler');
-else
-	ob_start();
 
 $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
 $action = isset($_GET['action']) ? $_GET['action'] : '';
@@ -1038,6 +1036,7 @@ elseif ($action == 'phpinfo')
 
 ($hook = s2_hook('rq_custom_action')) ? eval($hook) : null;
 
-ob_end_flush();
+if (S2_COMPRESS)
+	ob_end_flush();
 header('Content-Length: '.ob_get_length());
 ob_end_flush();

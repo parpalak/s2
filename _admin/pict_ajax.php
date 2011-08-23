@@ -32,9 +32,14 @@ if ($action == 'preview')
 	exit();
 }
 
+s2_no_cache();
+
 header('X-Powered-By: S2/'.S2_VERSION);
 header('Content-Type: text/html; charset=utf-8');
-s2_no_cache();
+
+ob_start();
+if (S2_COMPRESS)
+	ob_start('ob_gzhandler');
 
 if ($action == 'create_subfolder')
 {
@@ -300,3 +305,9 @@ elseif ($action == 'upload')
 }
 
 ($hook = s2_hook('prq_custom_action')) ? eval($hook) : null;
+
+if (S2_COMPRESS)
+	ob_end_flush();
+
+header('Content-Length: '.ob_get_length());
+ob_end_flush();
