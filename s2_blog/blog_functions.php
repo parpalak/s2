@@ -338,10 +338,11 @@ function s2_blog_posts_by_tag ($tag)
 	);
 	($hook = s2_hook('fn_s2_blog_posts_by_tag_pre_get_tag_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if (!$s2_db->num_rows($result))
-		error_404();
 
-	list($tag_id, $tag_descr, $tag_name) = $s2_db->fetch_row($result);
+	if ($row = $s2_db->fetch_row($result))
+		list($tag_id, $tag_descr, $tag_name) = $row;
+	else
+		error_404();
 
 	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
 		include S2_ROOT.'_include/articles.php';
@@ -539,7 +540,7 @@ function s2_blog_posts_links ($ids, $labels, &$see_also, &$tags)
 		$query = array(
 			'SELECT'	=> 'p.id, p.label, p.title, p.create_time, p.url',
 			'FROM'		=> 's2_blog_posts AS p',
-			'WHERE'		=> 'p.label IN (\''.implode(array_keys($labels), '\', \'').'\') AND p.published = 1'
+			'WHERE'		=> 'p.label IN (\''.implode('\', \'', array_keys($labels)).'\') AND p.published = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_posts_links_pre_get_labels_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);

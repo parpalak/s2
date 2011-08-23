@@ -89,7 +89,7 @@ function s2_blog_output_post_list ($criteria)
 	);
 	($hook = s2_hook('blrq_action_load_blog_posts_pre_get_perm_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$show_hidden = $s2_db->num_rows($result) == 1 && $s2_db->result($result);
+	$show_hidden = $s2_db->result($result);
 
 	if (!$show_hidden)
 		$conditions[] = 'published = 1';
@@ -429,10 +429,10 @@ function s2_blog_toggle_hide_comment ($id)
 	);
 	($hook = s2_hook('blrq_action_hide_blog_comment_pre_get_comment_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
 	$comment = $s2_db->fetch_assoc($result);
+	if (!$comment)
+		die('Comment not found!');
 
 	$sent = 1;
 	if (!$comment['shown'] && !$comment['sent'])

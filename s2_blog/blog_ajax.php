@@ -295,10 +295,11 @@ elseif ($action == 'delete_blog_comment')
 	);
 	($hook = s2_hook('blrq_action_delete_blog_comment_pre_get_rid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
-	list($post_id) = $s2_db->fetch_row($result);
+	if ($row = $s2_db->fetch_row($result))
+		$post_id = $row[0];
+	else
+		die('Comment not found!');
 
 	$query = array(
 		'DELETE'	=> 's2_blog_comments',
@@ -335,10 +336,10 @@ elseif ($action == 'edit_blog_comment')
 	);
 	($hook = s2_hook('blrq_action_edit_blog_comment_pre_get_rid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
 	$comment = $s2_db->fetch_assoc($result);
+	if (!$comment)
+		die('Comment not found!');
 
 	require 'comments.php';
 
@@ -383,10 +384,12 @@ elseif ($action == 'mark_blog_comment')
 	);
 	($hook = s2_hook('blrq_action_mark_blog_comment_pre_get_rid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
-	list($post_id) = $s2_db->fetch_row($result);
+
+	if ($row = $s2_db->fetch_row($result))
+		$post_id = $row[0];
+	else
+		die('Comment not found!');
 
 	// Mark comment
 	$query = array(

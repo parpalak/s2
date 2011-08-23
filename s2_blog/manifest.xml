@@ -466,10 +466,11 @@ if ($type == 'blog')
 	);
 	($hook = s2_hook('blfn_save_comment_pre_get_pid_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	if ($s2_db->num_rows($result) != 1)
-		die('Comment not found!');
 
-	$post_id = $s2_db->result($result);
+	if ($row = $s2_db->fetch_row($result))
+		$post_id = $row[0];
+	else
+		die('Comment not found!');
 
 	// Save comment
 	$query = array(
