@@ -759,33 +759,37 @@ if (isset($_GET['blog_unsubscribe']))
 		($hook = s2_hook('blcmnt_unsubscribe_pre_get_receivers_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+		$found = false;
 		while ($receiver = $s2_db->fetch_assoc($result))
-		{
 			if ($_GET['blog_unsubscribe'] == substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16))
-			{
-				$query = array(
-					'UPDATE'	=> 's2_blog_comments',
-					'SET'		=> 'subscribed = 0',
-					'WHERE'		=> 'post_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
-				);
-				($hook = s2_hook('blcmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
-				$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+				$found = true;
 
-				$template = s2_get_service_template();
-				$replace = array(
-					'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
-					'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
-					'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
-					'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-				);
+		if ($found)
+		{
+			$query = array(
+				'UPDATE'	=> 's2_blog_comments',
+				'SET'		=> 'subscribed = 0',
+				'WHERE'		=> 'post_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
+			);
+			($hook = s2_hook('blcmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
+			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-				($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+			$template = s2_get_service_template();
+			$replace = array(
+				'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
+				'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
+				'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
+				'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+			);
 
-				foreach ($replace as $what => $to)
-					$template = str_replace($what, $to, $template);
+			($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
 
-				die($template);
-			}
+			foreach ($replace as $what => $to)
+				$template = str_replace($what, $to, $template);
+
+			$s2_db->close();
+
+			die($template);
 		}
 	}
 
@@ -801,6 +805,8 @@ if (isset($_GET['blog_unsubscribe']))
 
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);
+
+	$s2_db->close();
 
 	die($template);
 }
@@ -824,6 +830,8 @@ if ($request_uri == S2_BLOG_URL.'/rss.xml')
 		require S2_ROOT.'_include/rss.php';
 	s2_no_cache(false);
 	s2_do_rss();
+
+	$s2_db->close();
 	die;
 }
 		]]></hook>
