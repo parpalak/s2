@@ -415,13 +415,13 @@ function s2_make_tags_pages ($request_array)
 		$urls = s2_get_group_url($parent_ids, $urls);
 
 		$subsection_text = '';
-		$subarticles = $sort_array = array();
+		$subsections = $subarticles = $sort_array = array();
 		foreach ($urls as $k => $url)
 		{
 			$row = $rows[$k];
 			if ($row['children_exist'])
 			{
-				$subsection_text .= '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
+				$subsections[] = '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
 					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
 					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
 
@@ -441,8 +441,10 @@ function s2_make_tags_pages ($request_array)
 			}
 		}
 
-		if ($subsection_text)
-			$subsection_text = ($lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>' : '').$subsection_text;
+		($hook = s2_hook('fn_s2_make_tags_pages_pre_merge')) ? eval($hook) : null;
+
+		if (!empty($subsections))
+			$subsection_text = ($lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '').implode('', $subsections);
 
 		$text = '';
 
