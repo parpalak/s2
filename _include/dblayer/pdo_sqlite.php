@@ -59,7 +59,8 @@ class DBLayer
 		if (!is_writable($db_name))
 			error('Unable to open database \''.$db_name.'\' for writing. Permission denied', __FILE__, __LINE__);
 
-		try {
+		try
+		{
 			if ($p_connect)
 				$this->link_id = new PDO('sqlite:'.$db_name, "", "", array(PDO::ATTR_PERSISTENT => true));
 			else
@@ -67,7 +68,9 @@ class DBLayer
 
 			$this->link_id->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-		} catch (PDOException $e) {
+		}
+		catch (PDOException $e)
+		{
 			error('Unable to open database \''.$db_name.'\'. PDO_SQLite reported: '.$e->getMessage(), __FILE__, __LINE__);
 		}
 	}
@@ -79,9 +82,12 @@ class DBLayer
 
 		++$this->in_transaction;
 
-		try {
+		try
+		{
 			$retVal = $this->link_id->beginTransaction();
-		} catch (PDOException $e) {
+		}
+		catch (PDOException $e)
+		{
 			$this->error_msg = $e->getMessage();
 		}
 
@@ -96,9 +102,12 @@ class DBLayer
 		if ($this->in_transaction)
 			--$this->in_transaction;
 
-		try {
+		try
+		{
 			$retVal = $this->link_id->commit();
-		} catch (PDOException $e) {
+		}
+		catch (PDOException $e)
+		{
 			$this->error_msg = $e->getMessage();
 			$this->rollback_transaction();
 		}
@@ -127,6 +136,8 @@ class DBLayer
 
 			$this->error_no = $this->link_id->errorCode();
 			$this->error_msg = end($this->link_id->errorInfo());
+
+			$this->row_count = -1;
 
 			if ($this->in_transaction)
 			{
