@@ -44,10 +44,6 @@ switch ($db_type)
 		require S2_ROOT.'_include/dblayer/pgsql.php';
 		break;
 
-	case 'sqlite':
-		require S2_ROOT.'_include/dblayer/sqlite.php';
-		break;
-
 	case 'pdo_sqlite':
 		require S2_ROOT.'_include/dblayer/pdo_sqlite.php';
 		break;

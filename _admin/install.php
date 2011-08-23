@@ -122,8 +122,6 @@ if (!isset($_POST['form_sent']))
 		if (count($db_extensions) > 2)
 			$dual_mysql = true;
 	}
-//	if (function_exists('sqlite_open'))
-//		$db_extensions[] = array('sqlite', 'SQLite');
 	if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers()))
 		$db_extensions[] = array('pdo_sqlite', 'PDO SQLite');
 	if (function_exists('pg_connect'))
@@ -397,10 +395,6 @@ else
 			require S2_ROOT.'_include/dblayer/pgsql.php';
 			break;
 
-		case 'sqlite':
-			require S2_ROOT.'_include/dblayer/sqlite.php';
-			break;
-
 		case 'pdo_sqlite':
 			require S2_ROOT.'_include/dblayer/pdo_sqlite.php';
 			break;
@@ -422,7 +416,7 @@ else
 	}
 
 	// Check SQLite prefix collision
-	if ($db_type == 'sqlite' && strtolower($db_prefix) == 'sqlite_')
+	if ($db_type == 'pdo_sqlite' && strtolower($db_prefix) == 'sqlite_')
 		error($lang_install['SQLite prefix collision']);
 
 
