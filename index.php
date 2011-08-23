@@ -36,6 +36,8 @@ else
 if (substr($request_uri, -3) == '---')
 {
 	header('Location: '.S2_BASE_URL.'/_admin/index.php?path='.urlencode(substr($request_uri, 0, -3)));
+
+	$s2_db->close();
 	die;
 }
 
@@ -52,6 +54,8 @@ if ($request_uri == '/rss.xml')
 		require S2_ROOT.'_include/rss.php';
 	s2_no_cache(false);
 	s2_do_rss();
+
+	$s2_db->close();
 	die;
 }
 
