@@ -57,7 +57,7 @@ if (isset($_GET['unsubscribe']))
 
 		$found = false;
 		while ($receiver = $s2_db->fetch_assoc($result))
-			if ($_GET['unsubscribe'] == substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16))
+			if ($_GET['unsubscribe'] == base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36))
 				$found = true;
 
 		if ($found)
@@ -271,7 +271,7 @@ if (!S2_PREMODERATION)
 
 	foreach ($receivers as $receiver)
 	{
-		$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$id.'&unsubscribe='.substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16);
+		$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$id.'&unsubscribe='.base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36);
 		($hook = s2_hook('cmnt_pre_send_mail')) ? eval($hook) : null;
 		s2_mail_comment($receiver['nick'], $receiver['email'], $message, $row['title'], $link, $name, $unsubscribe_link);
 	}
