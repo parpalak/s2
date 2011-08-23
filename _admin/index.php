@@ -34,6 +34,9 @@ if ($session_id == '')
 
 	// A simple login page loading
 	echo s2_get_login_form();
+
+	$s2_db->close();
+
 	die();
 }
 
@@ -48,6 +51,9 @@ if ($login === false)
 
 	// We tell him nothing
 	echo s2_get_login_form();
+
+	$s2_db->close();
+
 	die();
 }
 
@@ -199,3 +205,6 @@ SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
 <?php ($hook = s2_hook('ai_after_tabs')) ? eval($hook) : null; ?>
 </body>
 </html>
+<?php
+
+$s2_db->close();

@@ -1036,7 +1036,10 @@ elseif ($action == 'phpinfo')
 
 ($hook = s2_hook('rq_custom_action')) ? eval($hook) : null;
 
+$s2_db->close();
+
 if (S2_COMPRESS)
 	ob_end_flush();
+
 header('Content-Length: '.ob_get_length());
 ob_end_flush();

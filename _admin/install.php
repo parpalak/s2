@@ -939,6 +939,7 @@ else
 
 	$s2_db->end_transaction();
 
+	$s2_db->close();
 
 	$alerts = array();
 	// Check if the cache directory is writable

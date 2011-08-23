@@ -66,3 +66,6 @@ var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_g
 	</div>
 </body>
 </html>
+<?php
+
+$s2_db->close();

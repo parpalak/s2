@@ -2,7 +2,7 @@
 /**
  * Receives POST data and saves user comments.
  *
- * @copyright (C) 2009-2011 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2011 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -36,6 +36,8 @@ if (isset($_GET['go']))
 
 	($hook = s2_hook('cmnt_go_pre_output')) ? eval($hook) : null;
 
+	$s2_db->close();
+
 	die($template);
 }
 
@@ -53,33 +55,37 @@ if (isset($_GET['unsubscribe']))
 		($hook = s2_hook('cmnt_unsubscribe_pre_get_receivers_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+		$found = false;
 		while ($receiver = $s2_db->fetch_assoc($result))
-		{
 			if ($_GET['unsubscribe'] == substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16))
-			{
-				$query = array(
-					'UPDATE'	=> 'art_comments',
-					'SET'		=> 'subscribed = 0',
-					'WHERE'		=> 'article_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
-				);
-				($hook = s2_hook('cmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
-				$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+				$found = true;
 
-				$template = s2_get_service_template();
-				$replace = array(
-					'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
-					'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
-					'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
-					'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-				);
+		if ($found)
+		{
+			$query = array(
+				'UPDATE'	=> 'art_comments',
+				'SET'		=> 'subscribed = 0',
+				'WHERE'		=> 'article_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
+			);
+			($hook = s2_hook('cmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
+			$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-				($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+			$template = s2_get_service_template();
+			$replace = array(
+				'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
+				'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
+				'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
+				'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+			);
 
-				foreach ($replace as $what => $to)
-					$template = str_replace($what, $to, $template);
+			($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
 
-				die($template);
-			}
+			foreach ($replace as $what => $to)
+				$template = str_replace($what, $to, $template);
+
+			$s2_db->close();
+
+			die($template);
 		}
 	}
 
@@ -97,6 +103,8 @@ if (isset($_GET['unsubscribe']))
 		$template = str_replace($what, $to, $template);
 
 	($hook = s2_hook('cmnt_unsubscribed_pre_output')) ? eval($hook) : null;
+
+	$s2_db->close();
 
 	die($template);
 }
@@ -176,6 +184,8 @@ if (isset($_POST['preview']))
 
 	($hook = s2_hook('cmnt_preview_pre_output')) ? eval($hook) : null;
 
+	$s2_db->close();
+
 	die($template);
 }
 
@@ -221,6 +231,8 @@ if (!empty($errors))
 		$template = str_replace($what, $to, $template);
 
 	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
+
+	$s2_db->close();
 
 	die($template);
 }
@@ -294,3 +306,5 @@ if (!S2_PREMODERATION)
 }
 else
 	header('Location: '.S2_BASE_URL.'/comment.php?go='.urlencode($link));
+
+$s2_db->close();

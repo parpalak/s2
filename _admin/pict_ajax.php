@@ -120,6 +120,8 @@ elseif ($action == 'rename_folder')
 
 	if (file_exists(S2_IMG_PATH.$parent_path.'/'.$folder_name))
 	{
+		$s2_db->close();
+
 		header('X-S2-Status: Error');
 		printf($lang_pictures['File exists'], $folder_name);
 		die;
@@ -152,6 +154,8 @@ elseif ($action == 'rename_file')
 
 	if ($extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' '.S2_ALLOWED_EXTENSIONS.' ', ' '.$extension.' '))
 	{
+		$s2_db->close();
+
 		header('X-S2-Status: Error');
 		printf($lang_pictures['Forbidden extension'], $extension);
 		die;
@@ -161,6 +165,8 @@ elseif ($action == 'rename_file')
 
 	if (file_exists(S2_IMG_PATH.$parent_path.'/'.$filename))
 	{
+		$s2_db->close();
+
 		header('X-S2-Status: Error');
 		printf($lang_pictures['File exists'], $filename);
 		die;
@@ -304,7 +310,10 @@ elseif ($action == 'upload')
 		echo !isset($_POST['ajax']) ? sprintf($lang_pictures['Upload failed'], implode("\n", $errors)) : implode("\n", $errors);
 }
 
+
 ($hook = s2_hook('prq_custom_action')) ? eval($hook) : null;
+
+$s2_db->close();
 
 if (S2_COMPRESS)
 	ob_end_flush();

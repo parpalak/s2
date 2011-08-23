@@ -165,6 +165,8 @@ if (defined('S2_DEBUG'))
 	$etag .= md5($page['generate_time']);
 }
 
+$s2_db->close();
+
 $etag = '"'.md5($etag).'"';
 
 if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
