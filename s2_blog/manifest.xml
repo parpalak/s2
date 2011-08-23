@@ -761,7 +761,7 @@ if (isset($_GET['blog_unsubscribe']))
 
 		$found = false;
 		while ($receiver = $s2_db->fetch_assoc($result))
-			if ($_GET['blog_unsubscribe'] == substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16))
+			if ($_GET['blog_unsubscribe'] == base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36))
 				$found = true;
 
 		if ($found)
