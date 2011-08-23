@@ -731,7 +731,8 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 		]]></hook>
 
 		<hook id="cmnt_pre_send_mail"><![CDATA[
-$unsubscribe_link = str_replace('unsubscribe', 'blog_unsubscribe', $unsubscribe_link);
+if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+	$unsubscribe_link = str_replace('unsubscribe', 'blog_unsubscribe', $unsubscribe_link);
 		]]></hook>
 
 		<hook id="cmnt_pre_get_comment_count_qr"><![CDATA[
