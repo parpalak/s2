@@ -70,7 +70,7 @@ class DBLayer
 	function query($sql, $unbuffered = false)
 	{
 		if (defined('S2_SHOW_QUERIES'))
-			$q_start = get_microtime();
+			$q_start = $this->get_microtime();
 
 		if ($unbuffered)
 			$this->query_result = @mysql_unbuffered_query($sql, $this->link_id);
@@ -80,7 +80,7 @@ class DBLayer
 		if ($this->query_result)
 		{
 			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, get_microtime() - $q_start);
+				$this->saved_queries[] = array($sql, $this->get_microtime() - $q_start);
 
 			++$this->num_queries;
 
@@ -269,6 +269,13 @@ class DBLayer
 			'name'		=> 'MySQL Standard',
 			'version'	=> preg_replace('/^([^-]+).*$/', '\\1', $this->result($result))
 		);
+	}
+
+
+	function get_microtime()
+	{
+		list($usec, $sec) = explode(' ', microtime());
+		return ((float)$usec + (float)$sec);
 	}
 
 

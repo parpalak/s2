@@ -105,7 +105,7 @@ class DBLayer
 			$sql = preg_replace('#LIMIT ([0-9]+),([ 0-9]+)#', 'LIMIT \\2 OFFSET \\1', $sql);
 
 		if (defined('S2_SHOW_QUERIES'))
-			$q_start = get_microtime();
+			$q_start = $this->get_microtime();
 
 		@pg_send_query($this->link_id, $sql);
 		$this->query_result = @pg_get_result($this->link_id);
@@ -113,7 +113,7 @@ class DBLayer
 		if (pg_result_status($this->query_result) != PGSQL_FATAL_ERROR)
 		{
 			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, get_microtime() - $q_start);
+				$this->saved_queries[] = array($sql, $this->get_microtime() - $q_start);
 
 			++$this->num_queries;
 
@@ -351,6 +351,13 @@ class DBLayer
 			'name'		=> 'PostgreSQL',
 			'version'	=> preg_replace('/^[^0-9]+([^\s,-]+).*$/', '\\1', $this->result($result))
 		);
+	}
+
+
+	function get_microtime()
+	{
+		list($usec, $sec) = explode(' ', microtime());
+		return ((float)$usec + (float)$sec);
 	}
 
 

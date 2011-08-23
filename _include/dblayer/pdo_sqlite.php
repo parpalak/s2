@@ -110,7 +110,7 @@ class DBLayer
 	function query($sql, $unbuffered = false)
 	{
 		if (defined('S2_SHOW_QUERIES'))
-			$q_start = get_microtime();
+			$q_start = $this->get_microtime();
 
 /* 		if ($unbuffered)
 			$this->query_result = @sqlite_unbuffered_query($this->link_id, $sql);
@@ -140,7 +140,7 @@ class DBLayer
 		$this->row_count = $this->query_result ? $this->query_result->rowCount() : 0;
 
 		if (defined('S2_SHOW_QUERIES'))
-			$this->saved_queries[] = array($sql, get_microtime() - $q_start);
+			$this->saved_queries[] = array($sql, $this->get_microtime() - $q_start);
 
 		++$this->num_queries;
 
@@ -358,6 +358,13 @@ class DBLayer
 			'name'		=> 'SQLite',
 			'version'	=> $ver
 		);
+	}
+
+
+	function get_microtime()
+	{
+		list($usec, $sec) = explode(' ', microtime());
+		return ((float)$usec + (float)$sec);
 	}
 
 

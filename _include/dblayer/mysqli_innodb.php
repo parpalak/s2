@@ -79,14 +79,14 @@ class DBLayer
 	function query($sql, $unbuffered = false)
 	{
 		if (defined('S2_SHOW_QUERIES'))
-			$q_start = get_microtime();
+			$q_start = $this->get_microtime();
 
 		$this->query_result = @mysqli_query($this->link_id, $sql);
 
 		if ($this->query_result)
 		{
 			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, get_microtime() - $q_start);
+				$this->saved_queries[] = array($sql, $this->get_microtime() - $q_start);
 
 			++$this->num_queries;
 
@@ -288,6 +288,13 @@ class DBLayer
 			'name'		=> 'MySQL Improved (InnoDB)',
 			'version'	=> preg_replace('/^([^-]+).*$/', '\\1', $this->result($result))
 		);
+	}
+
+
+	function get_microtime()
+	{
+		list($usec, $sec) = explode(' ', microtime());
+		return ((float)$usec + (float)$sec);
 	}
 
 
