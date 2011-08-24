@@ -181,6 +181,8 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 		if ($row['label'])
 			$merge_labels[$row['label']] = 1;
 	}
+	if (empty($posts))
+		return '';
 
 	$see_also = $tags = array();
 	s2_blog_posts_links($ids, $merge_labels, &$see_also, &$tags);
