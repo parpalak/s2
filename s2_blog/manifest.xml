@@ -81,14 +81,22 @@ if (!$s2_db->table_exists('s2_blog_posts'))
 		),
 		'PRIMARY KEY'	=> array('id'),
 		'INDEXES'		=> array(
-			'url_idx'			=> array('url'),
-			'create_time_idx'	=> array('create_time'),
-			'label_idx'			=> array('label')
+			'url_idx'					=> array('url'),
+			'create_time_idx'			=> array('create_time'),
+			'create_time_published_idx'	=> array('create_time', 'published'),
+			'id_published_idx'			=> array('id', 'published'),
+			'favorite_idx'				=> array('favorite'),
+			'label_idx'					=> array('label')
 		)
 	);
 
 	$s2_db->create_table('s2_blog_posts', $schema);
 }
+
+// For old installations
+$s2_db->add_index('s2_blog_posts', 'create_time_published_idx', array('create_time', 'published'));
+$s2_db->add_index('s2_blog_posts', 'id_published_idx', array('id', 'published'));
+$s2_db->add_index('s2_blog_posts', 'favorite_idx', array('favorite'));
 
 // Setup blog comments table
 if (!$s2_db->table_exists('s2_blog_comments'))
@@ -157,12 +165,16 @@ if (!$s2_db->table_exists('s2_blog_comments'))
 		'PRIMARY KEY'	=> array('id'),
 		'INDEXES'		=> array(
 			'post_id_idx'	=> array('post_id'),
+			'sort_idx'		=> array('post_id', 'time', 'shown'),
 			'time_idx'		=> array('time')
 		)
 	);
 
 	$s2_db->create_table('s2_blog_comments', $schema);
 }
+
+// For old installations
+$s2_db->add_index('s2_blog_comments', 'sort_idx', array('post_id', 'time', 'shown'));
 
 // Setup table to link posts and tags
 if (!$s2_db->table_exists('s2_blog_post_tag'))
@@ -232,6 +244,8 @@ if (!$s2_db->field_exists('users', 'edit_s2_blog'))
 // A field in tags table for important tags displaying
 if (!$s2_db->field_exists('tags', 's2_blog_important'))
 	$s2_db->add_field('tags', 's2_blog_important', 'INT(1)', false, '0');
+
+$s2_db->add_index('tags', 's2_blog_important_idx', array('s2_blog_important'));
 
 	]]></install>
 
