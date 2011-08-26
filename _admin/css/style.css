@@ -762,6 +762,7 @@ ul .but_panel .delete,
 	background: #fff;
 	border-collapse: collapse;
 	margin: 1em 0;
+	line-height: 1.4;
 	}
 
 	.sort .hidden {
@@ -785,7 +786,7 @@ ul .but_panel .delete,
 	.sort td {
 		border: 1px solid #eee;
 		border-width: 1px 0;
-		padding: 2px 0;
+		padding: 2px 4px;
 		text-align: center;
 		}
 		.sort thead td {
@@ -826,7 +827,7 @@ ul .but_panel .delete,
 
 	.sort a {
 		display: block;
-		padding: 3px 0.5em;
+		padding: 2px;
 		}
 
 	.sort .buttons {
