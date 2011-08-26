@@ -5,7 +5,7 @@ $lang_admin_ext = array(
 
 'Install extension'				=>	'Установить расширение',
 'Upgrade extension'				=>	'Обновить расширение',
-'Extensions available'			=>	'Расширения для установки',
+'Extensions available'			=>	'Расширения для установки или обновления',
 'Hotfixes available'			=>	'Hotfixes available for install',
 'Installed extensions'			=>	'Установленные расширения',
 'Version'						=>	' v%s',
