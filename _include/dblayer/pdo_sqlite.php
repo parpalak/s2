@@ -13,7 +13,7 @@ if (!class_exists('PDO'))
 	exit('This PHP environment does not have PDO support built in. PDO support is required if you want to use a PDO_SQLite database to run this site. Consult the PHP documentation for further assistance.');
 
 // Make sure we have support for PDO_SQLite
-if (!in_array("sqlite", PDO::getAvailableDrivers()))
+if (!in_array('sqlite', PDO::getAvailableDrivers()))
 	exit('This PHP environment does not have PDO_SQLite support built in. PDO_SQLite support is required if you want to use a PDO_SQLite database to run this site. Consult the PHP documentation for further assistance.');
 
 
@@ -121,10 +121,6 @@ class DBLayer
 		if (defined('S2_SHOW_QUERIES'))
 			$q_start = $this->get_microtime();
 
-/* 		if ($unbuffered)
-			$this->query_result = @sqlite_unbuffered_query($this->link_id, $sql);
-		else
- */
 		try
 		{
 			$this->query_result = $this->link_id->query($sql);
