@@ -77,7 +77,7 @@ function s2_get_login ($challenge)
 	($hook = s2_hook('fn_get_login_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	return $s2_db->result($result);
+	return ($return = $s2_db->result($result)) ? $return : false;
 }
 
 function s2_update_challenge_time ($challenge)
@@ -157,7 +157,7 @@ function s2_get_salt ($s)
 	($hook = s2_hook('fn_verify_challenge_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	return $s2_db->result($result);
+	return ($return = $s2_db->result($result)) ? $return : false;
 }
 
 function s2_get_password_hash ($login)
@@ -172,7 +172,7 @@ function s2_get_password_hash ($login)
 	($hook = s2_hook('fn_get_password_hash_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	return $s2_db->result($result);
+	return ($return = $s2_db->result($result)) ? $return : false;
 }
 
 function s2_login_success ($login, $challenge)
