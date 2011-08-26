@@ -15,7 +15,7 @@
 <extension for="S2" engine="1.0">
 	<id>s2_search</id>
 	<title>Search</title>
-	<version>1.0a4</version>
+	<version>1.0a5</version>
 	<description>Full-text search with Russian morphology. Designed for small sites.</description>
 	<author>Roman Parpalak</author>
 
