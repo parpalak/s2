@@ -490,7 +490,7 @@ function s2_remove_bad_characters()
 }
 
 // Clean version string from trailing '.0's
-function clean_version($version)
+function s2_clean_version($version)
 {
 	return preg_replace('/(\.0)+(?!\.)|(\.0+$)/', '$2', $version);
 }

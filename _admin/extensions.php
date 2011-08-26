@@ -17,14 +17,14 @@ if (!defined('S2_XML_FUNCTIONS_LOADED'))
 
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_ext.php';
 
+($hook = s2_hook('aex_start')) ? eval($hook) : null;
+
 // Make sure we have XML support
 if (!function_exists('xml_parser_create'))
 {
 	echo '<div class="info-box"><p>'.$lang_admin_ext['No XML support'].'</p></div>';
 	exit;
 }
-
-($hook = s2_hook('aex_start')) ? eval($hook) : null;
 
 function s2_extension_list ()
 {
@@ -51,76 +51,74 @@ function s2_extension_list ()
 	$d = dir(S2_ROOT.'_extensions');
 	while (($entry = $d->read()) !== false)
 	{
-		if ($entry{0} != '.' && is_dir(S2_ROOT.'_extensions/'.$entry))
+		if ($entry{0} == '.' || !is_dir(S2_ROOT.'_extensions/'.$entry))
+			continue;
+
+		if (preg_match('/[^0-9a-z_]/', $entry))
 		{
-			if (preg_match('/[^0-9a-z_]/', $entry))
+			$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
+				'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
+				'<p>'.$lang_admin_ext['Illegal ID'].'</p>'.
+				'</div>';
+			++$num_failed;
+			continue;
+		}
+		else if (!file_exists(S2_ROOT.'_extensions/'.$entry.'/manifest.xml'))
+		{
+			$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
+				'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
+				'<p>'.$lang_admin_ext['Missing manifest'].'</p>'.
+				'</div>';
+			++$num_failed;
+			continue;
+		}
+
+		// Parse manifest.xml into an array
+		$ext_data = is_readable(S2_ROOT.'_extensions/'.$entry.'/manifest.xml') ? s2_xml_to_array(file_get_contents(S2_ROOT.'_extensions/'.$entry.'/manifest.xml')) : '';
+		if (empty($ext_data))
+		{
+			$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
+				'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
+				'<p>'.$lang_admin_ext['Failed parse manifest'].'</p>'.
+				'</div>';
+			++$num_failed;
+			continue;
+		}
+
+		// Validate manifest
+		$errors = s2_validate_manifest($ext_data, $entry);
+		if (!empty($errors))
+		{
+			$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
+				'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
+				'<p>'.implode(' ', $errors).'</p>'.
+				'</div>';
+			++$num_failed;
+		}
+		else
+		{
+			if (!array_key_exists($entry, $inst_exts) || version_compare($inst_exts[$entry]['version'], $ext_data['extension']['version'], '!='))
 			{
-				$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
-					'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
-					'<p>'.$lang_admin_ext['Illegal ID'].'</p>'.
-					'</div>';
-				++$num_failed;
-				continue;
-			}
-			else if (!file_exists(S2_ROOT.'_extensions/'.$entry.'/manifest.xml'))
-			{
-				$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
-					'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
-					'<p>'.$lang_admin_ext['Missing manifest'].'</p>'.
-					'</div>';
-				++$num_failed;
-				continue;
-			}
+				$install_notes = array();
+				foreach ($ext_data['extension']['note'] as $cur_note)
+					if ($cur_note['attributes']['type'] == 'install')
+						$install_notes[] = s2_htmlencode(addslashes($cur_note['content']));
 
-			// Parse manifest.xml into an array
-			$ext_data = is_readable(S2_ROOT.'_extensions/'.$entry.'/manifest.xml') ? s2_xml_to_array(file_get_contents(S2_ROOT.'_extensions/'.$entry.'/manifest.xml')) : '';
-			if (empty($ext_data))
-			{
-				$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
-					'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
-					'<p>'.$lang_admin_ext['Failed parse manifest'].'</p>'.
-					'</div>';
-				++$num_failed;
-				continue;
-			}
+					if (version_compare(s2_clean_version(S2_VERSION), s2_clean_version($ext_data['extension']['maxtestedon']), '>'))
+					$install_notes[] = s2_htmlencode(addslashes($lang_admin_ext['Maxtestedon warning']));
 
-			// Validate manifest
-			$errors = s2_validate_manifest($ext_data, $entry);
-			if (!empty($errors))
-			{
-				$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
-					'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
-					'<p>'.implode(' ', $errors).'</p>'.
-					'</div>';
-				++$num_failed;
-			}
-			else
-			{
-				if (!array_key_exists($entry, $inst_exts) || version_compare($inst_exts[$entry]['version'], $ext_data['extension']['version'], '!='))
-				{
-					$install_notes = array();
-					foreach ($ext_data['extension']['note'] as $cur_note)
-						if ($cur_note['attributes']['type'] == 'install')
-							$install_notes[] = s2_htmlencode(addslashes($cur_note['content']));
+				if (count($install_notes) > 1)
+					foreach ($install_notes as $index => $cur_note)
+						$install_notes[$index] = ($index + 1).'. '.$cur_note;
 
-						if (version_compare(clean_version(S2_VERSION), clean_version($ext_data['extension']['maxtestedon']), '>'))
-						$install_notes[] = s2_htmlencode(addslashes($lang_admin_ext['Maxtestedon warning']));
+				$buttons['install'] = '<button class="bitbtn inst_ext" onclick="return InstallExtension(\''.s2_htmlencode(addslashes($entry)).'\', \''.implode('\\n', $install_notes).'\');" />'.(isset($inst_exts[$entry]['version']) ? $lang_admin_ext['Upgrade extension'] : $lang_admin_ext['Install extension']).'</button>';
 
-					if (count($install_notes) > 1) {
-						$notes_count = 0;
-						foreach ($install_notes as $index => $cur_note)
-							$install_notes[$index] = (++$notes_count).'. '.$cur_note;
-					}
-
-					$buttons['install'] = '<button class="bitbtn inst_ext" onclick="return InstallExtension(\''.s2_htmlencode(addslashes($entry)).'\', \''.implode('\\n', $install_notes).'\');" />'.(isset($inst_exts[$entry]['version']) ? $lang_admin_ext['Upgrade extension'] : $lang_admin_ext['Install extension']).'</button>';
-
-					$ext_item[] = '<div class="extension available">'.
-						'<div class="info"><h3>'.s2_htmlencode($ext_data['extension']['title']).sprintf($lang_admin_ext['Version'], $ext_data['extension']['version']).'</h3>'.
-						'<p>'.sprintf($lang_admin_ext['Extension by'], s2_htmlencode($ext_data['extension']['author'])).'</p></div>'.
-						(($ext_data['extension']['description'] != '') ? '<p class="description">'.s2_htmlencode($ext_data['extension']['description']).'</p>' : '').
-						'<div class="options">'.implode('<br />', $buttons).'</div></div>';
-					++$num_exts;
-				}
+				$ext_item[] = '<div class="extension available">'.
+					'<div class="info"><h3>'.s2_htmlencode($ext_data['extension']['title']).sprintf($lang_admin_ext['Version'], $ext_data['extension']['version']).'</h3>'.
+					'<p>'.sprintf($lang_admin_ext['Extension by'], s2_htmlencode($ext_data['extension']['author'])).'</p></div>'.
+					(($ext_data['extension']['description'] != '') ? '<p class="description">'.s2_htmlencode($ext_data['extension']['description']).'</p>' : '').
+					'<div class="options">'.implode('<br />', $buttons).'</div></div>';
+				++$num_exts;
 			}
 		}
 	}
@@ -193,7 +191,7 @@ function s2_install_extension ($id)
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
-	// Load manifest (either locally or from punbb.informer.com updates service)
+	// Load manifest (either locally or from s2cms.com updates service)
 //	if (isset($_GET['install']))
 		$manifest = is_readable(S2_ROOT.'_extensions/'.$id.'/manifest.xml') ? file_get_contents(S2_ROOT.'_extensions/'.$id.'/manifest.xml') : false;
 	// else

@@ -163,7 +163,7 @@ function s2_validate_manifest($xml_array, $folder_name)
 			$errors[] = $lang_admin_ext['extension/author error'];
 		if (!isset($ext['minversion']) || $ext['minversion'] == '')
 			$errors[] = $lang_admin_ext['extension/minversion error'];
-		if (isset($ext['minversion']) && version_compare(clean_version(S2_VERSION), clean_version($ext['minversion']), '<'))
+		if (isset($ext['minversion']) && version_compare(s2_clean_version(S2_VERSION), s2_clean_version($ext['minversion']), '<'))
 			$errors[] = sprintf($lang_admin_ext['extension/minversion error2'], $ext['minversion']);
 		if (!isset($ext['maxtestedon']) || $ext['maxtestedon'] == '')
 			$errors[] = $lang_admin_ext['extension/maxtestedon error'];
