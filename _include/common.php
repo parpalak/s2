@@ -67,6 +67,9 @@ define('S2_IMG_PATH', S2_ROOT.S2_IMG_DIR);
 if (!defined('S2_ALLOWED_EXTENSIONS'))
 	define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav avi flv mpg mpeg mkv zip 7z doc pdf');
 
+if (defined('S2_NO_DB'))
+	return;
+
 // Load the appropriate DB layer class
 if ($db_type == 'mysql' || $db_type == 'mysql_innodb' ||
 	$db_type == 'mysqli' || $db_type == 'mysqli_innodb' ||
