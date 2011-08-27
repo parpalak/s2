@@ -977,8 +977,14 @@ elseif ($action == 'flip_extension')
 
 	require 'extensions.php';
 
-	echo s2_flip_extension($id);
-	echo s2_extension_list();
+	$message = s2_flip_extension($id);
+	if (!$message)
+		echo s2_extension_list();
+	else
+	{
+		header('X-S2-Status: Error');
+		echo $message;
+	}
 }
 
 elseif ($action == 'uninstall_extension')
@@ -993,8 +999,14 @@ elseif ($action == 'uninstall_extension')
 
 	require 'extensions.php';
 
-	echo s2_uninstall_extension($id);
-	echo s2_extension_list();
+	$messages = s2_uninstall_extension($id);
+	if (empty($messages))
+		echo s2_extension_list();
+	else
+	{
+		header('X-S2-Status: Error');
+		echo implode("\n", $messages);
+	}
 }
 
 elseif ($action == 'install_extension')
@@ -1009,8 +1021,14 @@ elseif ($action == 'install_extension')
 
 	require 'extensions.php';
 
-	echo s2_install_extension($id);
-	echo s2_extension_list();
+	$messages = s2_install_extension($id);
+	if (empty($messages))
+		echo s2_extension_list();
+	else
+	{
+		header('X-S2-Status: Error');
+		echo implode("\n", $messages);
+	}
 }
 
 elseif ($action == 'load_stat_info')

@@ -104,7 +104,7 @@ function s2_extension_list ()
 					if ($cur_note['attributes']['type'] == 'install')
 						$install_notes[] = s2_htmlencode(addslashes($cur_note['content']));
 
-					if (version_compare(s2_clean_version(S2_VERSION), s2_clean_version($ext_data['extension']['maxtestedon']), '>'))
+				if (version_compare(s2_clean_version(S2_VERSION), s2_clean_version($ext_data['extension']['maxtestedon']), '>'))
 					$install_notes[] = s2_htmlencode(addslashes($lang_admin_ext['Maxtestedon warning']));
 
 				if (count($install_notes) > 1)
@@ -184,10 +184,8 @@ function s2_extension_list ()
 function s2_install_extension ($id)
 {
 	global $s2_db, $lang_admin_ext;
-// Install an extension
-//if (isset($_GET['install']) || isset($_GET['install_hotfix']))
 
-	($hook = s2_hook('aex_install_selected')) ? eval($hook) : null;
+	($hook = s2_hook('fn_install_extension_start')) ? eval($hook) : null;
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
@@ -203,13 +201,10 @@ function s2_install_extension ($id)
 
 	// Parse manifest.xml into an array and validate it
 	$ext_data = s2_xml_to_array($manifest);
-	$errors = s2_validate_manifest($ext_data, $id);
+	$messages = s2_validate_manifest($ext_data, $id);
 
-	if (!empty($errors))
-		return '<div class="info-box"><p class="important">Unexpected error.</p></div>';
-		//message(isset($_GET['install']) ? $lang_common['Bad request'] : $lang_admin_ext['Hotfix download failed']);
-
-	$messages = array();
+	if (!empty($messages))
+		return array((substr($id, 0, 7) != 'hotfix_') ? sprintf($lang_admin_ext['Extension loading error'], $id) : $lang_admin_ext['Hotfix download failed']) + $messages;
 
 	// Make sure we have an array of dependencies
 	if (!isset($ext_data['extension']['dependencies']['dependency']))
@@ -225,7 +220,7 @@ function s2_install_extension ($id)
 		'WHERE'		=> 'e.disabled=0'
 	);
 
-	($hook = s2_hook('aex_install_check_dependencies')) ? eval($hook) : null;
+	($hook = s2_hook('fn_install_extension_check_dependencies')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$installed_ext = array();
@@ -238,9 +233,9 @@ function s2_install_extension ($id)
 			$broken_dependencies[] = $dependency;
 
 	if (!empty($broken_dependencies))
-		return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Missing dependency'], $id, implode(', ', $broken_dependencies)).'</p></div>';
+		return $messages + array(sprintf($lang_admin_ext['Missing dependency'], $id, implode(', ', $broken_dependencies)));
 
-	($hook = s2_hook('aex_install_comply_form_submitted')) ? eval($hook) : null;
+	($hook = s2_hook('fn_install_extension_comply_form_submitted')) ? eval($hook) : null;
 
 	// $ext_info contains some information about the extension being installed
 	$ext_info = array(
@@ -289,7 +284,7 @@ function s2_install_extension ($id)
 		{
 			$return = eval($ext_data['extension']['install']);
 			if (is_string($return))
-				return '<div class="info-box"><p class="important">'.$return.'</p></div>';
+				return $messages + array($return);
 		}
 
 		// Update the existing extension
@@ -299,7 +294,7 @@ function s2_install_extension ($id)
 			'WHERE'		=> 'id=\''.$s2_db->escape($id).'\''
 		);
 
-		($hook = s2_hook('aex_install_comply_qr_update_ext')) ? eval($hook) : null;
+		($hook = s2_hook('fn_install_extension_comply_qr_update_ext')) ? eval($hook) : null;
 		$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		// Delete the old hooks
@@ -308,7 +303,7 @@ function s2_install_extension ($id)
 			'WHERE'		=> 'extension_id=\''.$s2_db->escape($id).'\''
 		);
 
-		($hook = s2_hook('aex_install_comply_qr_update_ext_delete_hooks')) ? eval($hook) : null;
+		($hook = s2_hook('fn_install_extension_qr_update_ext_delete_hooks')) ? eval($hook) : null;
 		$s2_db->query_build($query) or error(__FILE__, __LINE__);
 	}
 	else
@@ -318,7 +313,7 @@ function s2_install_extension ($id)
 		{
 			$return = eval($ext_data['extension']['install']);
 			if (is_string($return))
-				return '<div class="info-box"><p class="important">'.$return.'</p></div>';
+				return $messages + array($return);
 		}
 
 		// Add the new extension
@@ -328,7 +323,7 @@ function s2_install_extension ($id)
 			'VALUES'	=> '\''.$s2_db->escape($ext_data['extension']['id']).'\', \''.$s2_db->escape($ext_data['extension']['title']).'\', \''.$s2_db->escape($ext_data['extension']['version']).'\', \''.$s2_db->escape($ext_data['extension']['description']).'\', \''.$s2_db->escape($ext_data['extension']['author']).'\', '.$uninstall_code.', '.$uninstall_note.', \'|'.implode('|', $ext_data['extension']['dependencies']).'|\'',
 		);
 
-		($hook = s2_hook('aex_install_comply_qr_add_ext')) ? eval($hook) : null;
+		($hook = s2_hook('fn_install_extension_comply_qr_add_ext')) ? eval($hook) : null;
 		$s2_db->query_build($query) or error(__FILE__, __LINE__);
 	}
 
@@ -346,7 +341,7 @@ function s2_install_extension ($id)
 					'VALUES'	=> '\''.$s2_db->escape(trim($cur_hook)).'\', \''.$s2_db->escape($id).'\', \''.$s2_db->escape(trim($ext_hook['content'])).'\', '.time().', '.(isset($ext_hook['attributes']['priority']) ? $ext_hook['attributes']['priority'] : 5)
 				);
 
-				($hook = s2_hook('aex_install_comply_qr_add_hook')) ? eval($hook) : null;
+				($hook = s2_hook('fn_install_extension_comply_qr_add_hook')) ? eval($hook) : null;
 				$s2_db->query_build($query) or error(__FILE__, __LINE__);
 			}
 		}
@@ -363,7 +358,7 @@ function s2_install_extension ($id)
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
 
-	return implode('', $messages);
+	return $messages;
 }
 
 function s2_flip_extension ($id)
@@ -372,7 +367,7 @@ function s2_flip_extension ($id)
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
-	($hook = s2_hook('aex_flip_selected')) ? eval($hook) : null;
+	($hook = s2_hook('fn_flip_extension_start')) ? eval($hook) : null;
 
 	// Fetch the current status of the extension
 	$query = array(
@@ -381,14 +376,14 @@ function s2_flip_extension ($id)
 		'WHERE'		=> 'e.id=\''.$s2_db->escape($id).'\''
 	);
 
-	($hook = s2_hook('aex_flip_qr_get_disabled_status')) ? eval($hook) : null;
+	($hook = s2_hook('fn_flip_extension_qr_get_disabled_status')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	if ($row = $s2_db->fetch_assoc($result))
 	// Are we disabling or enabling?
 		$disable = $row['disabled'] == '0';
 	else
-		return $lang_common['Bad request'];
+		return sprintf($lang_admin_ext['Extension loading error'], $id);
 
 	// Check dependancies
 	if ($disable)
@@ -399,7 +394,7 @@ function s2_flip_extension ($id)
 			'WHERE'		=> 'e.disabled=0 AND e.dependencies LIKE \'%|'.$s2_db->escape($id).'|%\''
 		);
 
-		($hook = s2_hook('aex_flip_qr_get_disable_dependencies')) ? eval($hook) : null;
+		($hook = s2_hook('fn_flip_extension_qr_get_disable_dependencies')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$dependency_ids = array();
@@ -407,7 +402,7 @@ function s2_flip_extension ($id)
 			$dependency_ids[] = $dependency['id'];
 
 		if (!empty($dependency_ids))
-			return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Disable dependency'], $id, implode(', ', $dependency_ids)).'</p></div>';
+			return sprintf($lang_admin_ext['Disable dependency'], $id, implode(', ', $dependency_ids));
 	}
 	else
 	{
@@ -417,7 +412,7 @@ function s2_flip_extension ($id)
 			'WHERE'		=> 'e.id=\''.$s2_db->escape($id).'\''
 		);
 
-		($hook = s2_hook('aex_flip_qr_get_enable_dependencies')) ? eval($hook) : null;
+		($hook = s2_hook('fn_flip_extension_qr_get_enable_dependencies')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$dependencies = $s2_db->fetch_assoc($result);
@@ -429,7 +424,7 @@ function s2_flip_extension ($id)
 			'WHERE'		=> 'e.disabled=0'
 		);
 
-		($hook = s2_hook('aex_flip_qr_check_dependencies')) ? eval($hook) : null;
+		($hook = s2_hook('fn_flip_extension_qr_check_dependencies')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$installed_ext = array();
@@ -442,7 +437,7 @@ function s2_flip_extension ($id)
 				$broken_dependencies[] = $dependency;
 
 		if (!empty($broken_dependencies))
-			return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Disabled dependency'], $id, implode(', ', $broken_dependencies)).'</p></div>';
+			return sprintf($lang_admin_ext['Disabled dependency'], $id, implode(', ', $broken_dependencies));
 	}
 
 	$query = array(
@@ -451,8 +446,9 @@ function s2_flip_extension ($id)
 		'WHERE'		=> 'id=\''.$s2_db->escape($id).'\''
 	);
 
-	($hook = s2_hook('aex_flip_qr_update_disabled_status')) ? eval($hook) : null;
+	($hook = s2_hook('fn_flip_extension_qr_update_disabled_status')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
 
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
@@ -462,7 +458,7 @@ function s2_flip_extension ($id)
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
 
-	($hook = s2_hook('aex_flip_pre_redirect')) ? eval($hook) : null;
+	($hook = s2_hook('fn_flip_extension_end')) ? eval($hook) : null;
 
 	return '';
 }
@@ -471,7 +467,9 @@ function s2_uninstall_extension ($id)
 {
 	global $s2_db, $lang_admin_ext;
 
-	($hook = s2_hook('aex_uninstall_selected')) ? eval($hook) : null;
+	$messages = array();
+
+	($hook = s2_hook('fn_uninstall_extension_start')) ? eval($hook) : null;
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
@@ -482,12 +480,12 @@ function s2_uninstall_extension ($id)
 		'WHERE'		=> 'e.id=\''.$s2_db->escape($id).'\''
 	);
 
-	($hook = s2_hook('aex_uninstall_qr_get_extension')) ? eval($hook) : null;
+	($hook = s2_hook('fn_uninstall_extension_qr_get_ext')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$ext_data = $s2_db->fetch_assoc($result);
 	if (!$ext_data)
-		die('Extension not found.');
+		return array(sprintf($lang_admin_ext['Extension loading error'], $id)) + $messages;
 
 	// Check dependancies
 	$query = array(
@@ -496,7 +494,7 @@ function s2_uninstall_extension ($id)
 		'WHERE'		=> 'e.dependencies LIKE \'%|'.$s2_db->escape($id).'|%\''
 	);
 
-	($hook = s2_hook('aex_uninstall_qr_check_dependencies')) ? eval($hook) : null;
+	($hook = s2_hook('fn_uninstall_extension_qr_chk_dep')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$dependencies = array();
@@ -504,17 +502,15 @@ function s2_uninstall_extension ($id)
 		$dependencies[] = $row['id'];
 
 	if (!empty($dependencies))
-		return '<div class="info-box"><p class="important">'.sprintf($lang_admin_ext['Uninstall dependency'], $id, implode(', ', $dependencies)).'</p></div>';
+		return array(sprintf($lang_admin_ext['Uninstall dependency'], $id, implode(', ', $dependencies))) + $messages;
 
-	($hook = s2_hook('aex_uninstall_comply_form_submitted')) ? eval($hook) : null;
+	($hook = s2_hook('fn_uninstall_extension_comply')) ? eval($hook) : null;
 
 	$ext_info = array(
 		'id'			=> $id,
 		'path'			=> S2_ROOT.'_extensions/'.$id,
 		'url'			=> S2_BASE_URL.'/_extensions/'.$id
 	);
-
-	$messages = array();
 
 	// Run uninstall code
 	eval($ext_data['uninstall']);
@@ -525,7 +521,7 @@ function s2_uninstall_extension ($id)
 		'WHERE'		=> 'extension_id=\''.$s2_db->escape($id).'\''
 	);
 
-	($hook = s2_hook('aex_uninstall_comply_qr_uninstall_delete_hooks')) ? eval($hook) : null;
+	($hook = s2_hook('fn_uninstall_extension_qr_del_hooks')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$query = array(
@@ -533,8 +529,9 @@ function s2_uninstall_extension ($id)
 		'WHERE'		=> 'id=\''.$s2_db->escape($id).'\''
 	);
 
-	($hook = s2_hook('aex_uninstall_comply_qr_delete_extension')) ? eval($hook) : null;
+	($hook = s2_hook('fn_uninstall_extension_qr_del_ext')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
 
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
@@ -546,5 +543,7 @@ function s2_uninstall_extension ($id)
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
 
-	return implode('', $messages);
+	($hook = s2_hook('fn_uninstall_extension_end')) ? eval($hook) : null;
+
+	return $messages;
 }
