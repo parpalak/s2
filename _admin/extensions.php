@@ -91,7 +91,7 @@ function s2_extension_list ()
 		{
 			$ext_error[] = '<div class="extension error db'.++$item_num.'">'.
 				'<h3>'.sprintf($lang_admin_ext['Extension loading error'], s2_htmlencode($entry)).'</h3>'.
-				'<p>'.implode(' ', $errors).'</p>'.
+				'<p>'.implode('<br />', $errors).'</p>'.
 				'</div>';
 			++$num_failed;
 		}

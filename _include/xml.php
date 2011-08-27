@@ -10,7 +10,7 @@
 //
 // Parse XML data into an array
 //
-function s2_xml_to_array($raw_xml)
+function s2_xml_to_array ($raw_xml)
 {
 	$xml_parser = xml_parser_create();
 	xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, 0);
@@ -128,7 +128,7 @@ function s2_xml_to_array($raw_xml)
 //
 // Validate the syntax of an extension manifest file
 //
-function s2_validate_manifest($xml_array, $folder_name)
+function s2_validate_manifest ($xml_array, $folder_name)
 {
 	global $lang_admin_ext;
 
@@ -154,7 +154,7 @@ function s2_validate_manifest($xml_array, $folder_name)
 
 		if (!isset($ext['id']) || $ext['id'] == '')
 			$errors[] = $lang_admin_ext['extension/id error'];
-		if ($ext['id'] != $folder_name)
+		elseif ($ext['id'] != $folder_name)
 			$errors[] = $lang_admin_ext['extension/id error2'];
 		if (!isset($ext['title']) || $ext['title'] == '')
 			$errors[] = $lang_admin_ext['extension/title error'];
