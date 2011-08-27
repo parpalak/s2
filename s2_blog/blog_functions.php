@@ -185,7 +185,7 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 		return '';
 
 	$see_also = $tags = array();
-	s2_blog_posts_links($ids, $merge_labels, &$see_also, &$tags);
+	s2_blog_posts_links($ids, $merge_labels, $see_also, $tags);
 
 	array_multisort($sort_array, $sort_asc ? SORT_ASC : SORT_DESC, $ids);
 
