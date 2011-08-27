@@ -17,6 +17,7 @@ define('MIN_MYSQL_VERSION', '4.1.2');
 
 define('S2_ROOT', '../');
 define('S2_DEBUG', 1);
+define('S2_SHOW_QUERIES', 1);
 
 if (file_exists(S2_ROOT.'config.php'))
 	exit('The file \'config.php\' already exists which would mean that S2 is already installed. You should go <a href="'.S2_ROOT.'">here</a> instead.');
