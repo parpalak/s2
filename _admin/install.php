@@ -198,11 +198,11 @@ body {
 		<div class="info-box">
 			<p><?php echo $lang_install['Part1 intro'] ?></p>
 			<ul class="spaced">
-				<li><span><strong><?php echo $lang_install['Database type'] ?></strong> <?php echo $lang_install['Database type info']; if ($dual_mysql) echo '<br />'.$lang_install['Mysql type info']; if ($mysql_innodb) echo '<br />'.$lang_install['MySQL InnoDB info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Database server'] ?></strong> <?php echo $lang_install['Database server info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Database name'] ?></strong> <?php echo $lang_install['Database name info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Database user pass'] ?></strong> <?php echo $lang_install['Database username info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Table prefix'] ?></strong> <?php echo $lang_install['Table prefix info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Database type'] ?></strong><br /><?php echo $lang_install['Database type info']; if ($dual_mysql) echo '<br />'.$lang_install['Mysql type info']; if ($mysql_innodb) echo '<br />'.$lang_install['MySQL InnoDB info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Database server'] ?></strong><br /><?php echo $lang_install['Database server info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Database name'] ?></strong><br /><?php echo $lang_install['Database name info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Database user pass'] ?></strong><br /><?php echo $lang_install['Database username info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Table prefix'] ?></strong><br /><?php echo $lang_install['Table prefix info'] ?></span></li>
 			</ul>
 		</div>
 		<fieldset>
@@ -243,9 +243,9 @@ body {
 		<div class="info-box">
 			<p><?php echo $lang_install['Part2 intro'] ?></p>
 			<ul class="spaced">
-				<li><span><strong><?php echo $lang_install['Admin username'] ?></strong> <?php echo $lang_install['Admin username info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Admin password'] ?></strong> <?php echo $lang_install['Admin password info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Admin e-mail'] ?></strong> <?php echo $lang_install['Admin e-mail info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Admin username'] ?></strong><br /><?php echo $lang_install['Admin username info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Admin password'] ?></strong><br /><?php echo $lang_install['Admin password info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Admin e-mail'] ?></strong><br /><?php echo $lang_install['Admin e-mail info'] ?></span></li>
 			</ul>
 		</div>
 		<fieldset>
@@ -267,7 +267,7 @@ body {
 		<div class="info-box">
 			<p><?php echo $lang_install['Part3 intro'] ?></p>
 			<ul class="spaced">
-				<li><span><strong><?php echo $lang_install['Base URL'] ?></strong> <?php echo $lang_install['Base URL info'] ?></span></li>
+				<li><span><strong><?php echo $lang_install['Base URL'] ?></strong><br /><?php echo $lang_install['Base URL info'] ?></span></li>
 			</ul>
 		</div>
 		<fieldset>
