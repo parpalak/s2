@@ -143,12 +143,15 @@ function s2_validate_manifest($xml_array, $folder_name)
 	else
 	{
 		$ext = $xml_array['extension'];
-		if (!isset($ext['attributes']['engine']))
+		if (!isset($ext['attributes']['for']))
 			$errors[] = $lang_admin_ext['extension/engine error'];
 		else if ($ext['attributes']['for'] != 'S2')
 			$errors[] = $lang_admin_ext['extension/engine error2'];
-		else if ($ext['attributes']['engine'] != '1.0')
+		else if (!isset($ext['attributes']['engine']))
 			$errors[] = $lang_admin_ext['extension/engine error3'];
+		else if ($ext['attributes']['engine'] != '1.0')
+			$errors[] = $lang_admin_ext['extension/engine error4'];
+
 		if (!isset($ext['id']) || $ext['id'] == '')
 			$errors[] = $lang_admin_ext['extension/id error'];
 		if ($ext['id'] != $folder_name)
