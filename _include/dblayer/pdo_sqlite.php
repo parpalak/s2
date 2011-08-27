@@ -50,7 +50,7 @@ class DBLayer
 			@touch($db_name);
 			@chmod($db_name, 0666);
 			if (!file_exists($db_name))
-				error('Unable to create new database \''.$db_name.'\'. Permission denied', __FILE__, __LINE__);
+				error('Unable to create new database file \''.S2_ROOT.$db_name.'\'. Permission denied. Please allow write permissions for the \''.dirname(S2_ROOT.$db_name).'\' directory.', __FILE__, __LINE__);
 		}
 
 		if (!is_readable($db_name))
@@ -58,6 +58,9 @@ class DBLayer
 
 		if (!is_writable($db_name))
 			error('Unable to open database \''.$db_name.'\' for writing. Permission denied', __FILE__, __LINE__);
+
+		if (!is_writable(dirname(S2_ROOT.$db_name)))
+			error('Unable to write files in the \''.dirname(S2_ROOT.$db_name).'\' directory. Permission denied', __FILE__, __LINE__);
 
 		try
 		{
