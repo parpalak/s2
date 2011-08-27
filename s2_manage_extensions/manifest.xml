@@ -50,8 +50,12 @@ if ($action == 's2_manage_extensions_refresh_hooks')
 	require 'extensions.php';
 	require $ext_info['path'].'/functions.php';
 
-	echo s2_manage_extensions_refresh_hooks($id);
-	echo s2_extension_list();
+	$messages = s2_manage_extensions_refresh_hooks($id);
+	if (!empty($messages))
+	{
+		header('X-S2-Status: Error');
+		echo implode("\n", $messages);
+	}
 }
 		]]></hook>
 

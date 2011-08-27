@@ -25,7 +25,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 	$errors = s2_validate_manifest($ext_data, $id);
 
 	if (!empty($errors))
-		return '<div class="info-box"><p class="important">'.implode('<br />', $errors).'</p></div>';
+		return $errors;
 
 	$messages = array();
 
@@ -58,6 +58,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 		}
 	}
 
+
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
@@ -69,7 +70,6 @@ function s2_manage_extensions_refresh_hooks ($id)
 	require S2_CACHE_DIR.'cache_hooks.php';
 
 	($hook = s2_hook('manage_extensions_refresh_hooks_end')) ? eval($hook) : null;
-	$messages = implode('', $messages);
 
-	return $messages ? '<div class="info-box">'.$messages.'</div>' : '';
+	return $messages;
 }
