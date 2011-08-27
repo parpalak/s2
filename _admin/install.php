@@ -32,7 +32,7 @@ error_reporting(E_ALL);
 // Turn off PHP time limit
 @set_time_limit(0);
 
-// We need some stuff from functions.php
+// We need some stuff
 require S2_ROOT.'_include/functions.php';
 require 'options.php';
 
@@ -72,7 +72,45 @@ function generate_config_file ()
 		'$s2_cookie_name = '."'".$s2_cookie_name."';\n";
 }
 
-$language = isset($_GET['lang']) ? $_GET['lang'] : (isset($_POST['req_language']) ? trim($_POST['req_language']) : 'Russian');
+function get_preferred_lang ($languages)
+{
+	if (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+		return 'English';
+
+	$langs = array();
+
+	// Break up string into pieces (languages and q factors)
+	preg_match_all('#([a-z]{1,8}(-[a-z]{1,8}))?\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?#i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_parse);
+
+	if (count($lang_parse[1]))
+	{
+		// Create a list like "en" => 0.8
+		$langs = array_combine($lang_parse[1], $lang_parse[4]);
+
+		// Set default to 1 for any without q factor
+		foreach ($langs as $lang => $val)
+			if ($val === '')
+				$langs[$lang] = 1;
+
+		// Sort list based on value
+		arsort($langs, SORT_NUMERIC);
+	}
+
+	foreach ($langs as $lang => $val)
+	{
+		list($lang) = explode('-', $lang);
+		foreach ($languages as $available_lang)
+			if (strtolower(substr($available_lang, 0, 2)) == strtolower($lang))
+				return $available_lang;
+	}
+
+	return 'English';
+}
+
+// Check for available language packs
+$languages = s2_read_lang_dir();
+
+$language = isset($_GET['lang']) ? $_GET['lang'] : (isset($_POST['req_language']) ? trim($_POST['req_language']) : get_preferred_lang($languages));
 $language = preg_replace('#[\.\\\/]#', '', $language);
 if (!file_exists(S2_ROOT.'_lang/'.$language.'/install.php'))
 	exit('The language pack you have chosen doesn\'t seem to exist or is corrupt. Please recheck and try again.');
@@ -134,9 +172,6 @@ if (!isset($_POST['form_sent']))
 	$base_url_guess = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://').preg_replace('/:80$/', '', $_SERVER['HTTP_HOST']).substr(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), 0, -6);
 	if (substr($base_url_guess, -1) == '/')
 		$base_url_guess = substr($base_url_guess, 0, -1);
-
-	// Check for available language packs
-	$languages = s2_read_lang_dir();
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
