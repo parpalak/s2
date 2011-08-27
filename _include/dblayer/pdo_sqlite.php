@@ -116,6 +116,22 @@ class DBLayer
 	}
 
 
+	function rollback_transaction()
+	{
+		try
+		{
+			$this->link_id->rollBack();
+		}
+		catch (PDOException $e)
+		{
+			$this->error_msg = ($this->error_msg ? "\n - Then rollback failed: " : '').$e->getMessage();
+			return false;
+		}
+
+		return true;
+	}
+
+
 	function query($sql, $unbuffered = false)
 	{
 		if (defined('S2_SHOW_QUERIES'))
