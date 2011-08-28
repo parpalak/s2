@@ -22,7 +22,7 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == '
 	if (strpos($template, '<!-- s2_blog_calendar -->') !== false)
 		$page['s2_blog_calendar'] = s2_blog_calendar(date('Y'), date('m'), '0');
 
-	$s2_blog_skip = isset($s2_blog_path[2]) ? (int) $s2_blog_path[2] : 0;
+	$s2_blog_skip = (isset($s2_blog_path[2]) && $s2_blog_path[1] == 'skip') ? (int) $s2_blog_path[2] : 0;
 	$page['text'] = s2_blog_last_posts($s2_blog_skip);
 	$page['head_title'] = '';
 
@@ -93,13 +93,25 @@ elseif ($s2_blog_path[1] == S2_TAGS_URL)
 else
 {
 	// []/[2006]/[12]/[31]/[newyear]
+	if ($s2_blog_path[1] && !ctype_digit($s2_blog_path[1]))
+		return false;
+
 	$s2_blog_path[1] = (int) $s2_blog_path[1];
 	if ($s2_blog_path[1] < S2_START_YEAR || $s2_blog_path[1] > (int) date('Y'))
 		return false;
 
-	if (count($s2_blog_path) == 2) $s2_blog_path[2] = '';
-	if (count($s2_blog_path) == 3) $s2_blog_path[3] = '';
-	if (count($s2_blog_path) == 4) $s2_blog_path[4] = '';
+	if (count($s2_blog_path) == 2)
+		$s2_blog_path[2] = '';
+	elseif ($s2_blog_path[2] && !ctype_digit($s2_blog_path[2]))
+		return false;
+
+	if (count($s2_blog_path) == 3)
+		$s2_blog_path[3] = '';
+	elseif ($s2_blog_path[3] && !ctype_digit($s2_blog_path[3]))
+		return false;
+
+	if (count($s2_blog_path) == 4)
+		$s2_blog_path[4] = '';
 
 	// Getting page template
 	$template = s2_get_template('blog.php', $ext_info['path'].'/templates/');
