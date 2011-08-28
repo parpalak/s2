@@ -155,7 +155,7 @@ elseif ($action == 'delete')
 	($hook = s2_hook('rq_action_delete_get_parent_id_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	if ($s2_db->fetch_row($result))
+	if ($row = $s2_db->fetch_row($result))
 		list($priority, $parent_id) = $row;
 	else
 		die('Item not found!');
