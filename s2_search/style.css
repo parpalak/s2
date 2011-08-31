@@ -38,13 +38,3 @@
 .search-results .paging {
 	margin: 2em 0;
 	}
-	.search-results .paging a,
-	.search-results .paging span {
-		display: inline-block;
-		width: 2.5em;
-		line-height: 2em;
-		text-align: center;
-		}
-	.search-results .paging a:hover {
-		background: #ffe;
-		}
