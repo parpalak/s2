@@ -867,7 +867,13 @@ function s2_parse_page_url ($request_uri)
 					foreach ($link_nav as $rel => $href)
 						$page['link_navigation'][$rel] = $href;
 
-					$sort_array = array_slice($sort_array, $start, S2_MAX_ITEMS);
+					$i = 0;
+					foreach ($sort_array as $index => $value)
+					{
+						if ($i < $start || $i >= $start + S2_MAX_ITEMS)
+							unset($sort_array[$index]);
+						$i++;
+					}
 				}
 
 				foreach ($sort_array as $index => $value)
