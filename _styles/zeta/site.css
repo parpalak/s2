@@ -389,8 +389,14 @@ body {
 	}
 
 .paging a, .paging .current {
-	padding: 0 0.357em;
+	display: inline-block;
+	width: 1.75em;
+	line-height: 1.75em;
+	text-align: center;
 	}
+	.paging a:hover {
+		background: #ffe;
+		}
 
 img[align="left"] {
 	margin-right: 1.5em;
