@@ -826,7 +826,8 @@ if (defined('DEBUG'))
 				$result_num_str = sprintf($lang_s2_search['Found'], $item_num);
 			echo '<p>'.$result_num_str.'</p>';
 
-			$total_pages = ceil($item_num / 10.0);
+			$items_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10.0;
+			$total_pages = ceil(1.0 * $item_num / $items_per_page);
 			if ($page < 1 || $page > $total_pages)
 				$page = 1;
 
@@ -835,9 +836,9 @@ if (defined('DEBUG'))
 			foreach ($results as $chapter => $weight)
 			{
 				$i++;
-				if ($i <= ($page - 1) * 10)
+				if ($i <= ($page - 1) * $items_per_page)
 					continue;
-				if ($i > $page * 10)
+				if ($i > $page * $items_per_page)
 					break;
 
 				$output[$chapter]['title'] = '<a class="title" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['title'].'</a>';
