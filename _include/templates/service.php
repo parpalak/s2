@@ -5,6 +5,7 @@
 <title><!-- s2_head_title --></title>
 <!-- s2_meta -->
 <!-- s2_styles -->
+<!-- s2_link_navigation -->
 </head>
 
 <body class="service">
