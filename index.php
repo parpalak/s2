@@ -106,6 +106,15 @@ $replace['<!-- s2_styles -->'] = ob_get_clean();
 
 // Content
 $replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
+$replace['<!-- s2_link_navigation -->'] = '';
+if (isset($page['link_navigation']))
+{
+	$link_navigation = array();
+	foreach ($page['link_navigation'] as $link_rel => $link_href)
+		$link_navigation[] = '<link rel="'.$link_rel.'" href="'.$link_href.'" />';
+
+	$replace['<!-- s2_link_navigation -->'] = implode("\n", $link_navigation);
+}
 
 $replace['<!-- s2_title -->'] = !empty($page['title']) ? '<h1>'.$page['title'].'</h1>' : '';
 $replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
