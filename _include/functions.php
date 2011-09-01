@@ -100,6 +100,39 @@ function s2_frendly_filesize ($size)
 }
 
 //
+// Creates paging navigation (1  2  3 ... total_pages - 1  total_pages)
+// $url must have the following form http://example.com/page?num=%d
+//
+function s2_paging ($page, $total_pages, $url, &$link_nav)
+{
+	$links = '';
+	for ($i = 1; $i <= $total_pages; $i++)
+		$links .= ($i == $page ? ' <span class="current">'.$i.'</span>' : ' <a href="'.sprintf($url, $i).'">'.$i.'</a>');
+
+	$link_nav = array();
+
+	if ($page <= 1 || $page > $total_pages)
+		$prev_link = '<span class="nav">&larr;</span>';
+	else
+	{
+		$prev_url = sprintf($url, $page - 1);
+		$link_nav['prev'] = $prev_url;
+		$prev_link = '<a href="'.$prev_url.'">&larr;</a>';
+	}
+
+	if ($page == $total_pages)
+		$next_link = ' <span class="nav">&rarr;</span>';
+	else
+	{
+		$next_url = sprintf($url, $page + 1);
+		$link_nav['next'] = $next_url;
+		$next_link = ' <a href="'.$next_url.'">&rarr;</a>';
+	}
+
+	return '<p class="paging">'.$prev_link.$links.$next_link.'</p>';
+}
+
+//
 // Workaround for processing multipart/mixed data
 // Opera sends multiple files in this format, and PHP doesn't understand it
 //

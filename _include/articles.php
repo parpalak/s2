@@ -607,35 +607,6 @@ function s2_tags_list ($id)
 	return '<p class="tags_list">'.sprintf($lang_common['Tags:'], implode(', ', $tags)).'</p>';
 }
 
-function s2_paging ($page, $total_pages, $path, &$link_nav)
-{
-	$links = '';
-	for ($i = 1; $i <= $total_pages; $i++)
-		$links .= ($i == $page ? ' <span class="current">'.$i.'</span>' : ' <a href="'.S2_PATH.S2_URL_PREFIX.$path.(S2_URL_PREFIX ? '&amp;' : '?').'~='.$i.'">'.$i.'</a>');
-
-	$link_nav = array();
-
-	if ($page <= 1 || $page > $total_pages)
-		$prev_link = '<span class="nav">&larr;</span>';
-	else
-	{
-		$prev_url = S2_PATH.S2_URL_PREFIX.$path.(S2_URL_PREFIX ? '&amp;' : '?').'~='.($page - 1);
-		$link_nav['prev'] = $prev_url;
-		$prev_link = '<a href="'.$prev_url.'">&larr;</a>';
-	}
-
-	if ($page == $total_pages)
-		$next_link = ' <span class="nav">&rarr;</span>';
-	else
-	{
-		$next_url = S2_PATH.S2_URL_PREFIX.$path.(S2_URL_PREFIX ? '&amp;' : '?').'~='.($page + 1);
-		$link_nav['next'] = $next_url;
-		$next_link = ' <a href="'.$next_url.'">&rarr;</a>';
-	}
-
-	return '<p class="paging">'.$prev_link.$links.$next_link.'</p>';
-}
-
 // Processes site pages
 function s2_parse_page_url ($request_uri)
 {
@@ -863,7 +834,7 @@ function s2_parse_page_url ($request_uri)
 					$total_pages = ceil(1.0 * count($subarticles) / S2_MAX_ITEMS);
 
 					$link_nav = array();
-					$paging = s2_paging($page_num + 1, $total_pages, $current_path.'/', $link_nav)."\n";
+					$paging = s2_paging($page_num + 1, $total_pages, S2_PATH.S2_URL_PREFIX.$current_path.'/'.(S2_URL_PREFIX ? '&amp;' : '?').'~=%d', $link_nav)."\n";
 					foreach ($link_nav as $rel => $href)
 						$page['link_navigation'][$rel] = $href;
 
