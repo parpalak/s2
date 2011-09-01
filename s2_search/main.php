@@ -31,7 +31,7 @@ ob_start();
 <?php
 
 if ($s2_search_query !== '')
-	s2_search_finder::find($s2_search_query, $s2_search_page);
+	$page = s2_search_finder::find($s2_search_query, $s2_search_page);
 
 ?>
 </div>

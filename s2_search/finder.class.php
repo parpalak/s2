@@ -747,17 +747,7 @@ if (defined('DEBUG'))
 		return $many;
 	}
 
-	protected static function paging ($page, $total_pages, $link)
-	{
-		$str = '';
-		for ($i = 1; $i <= $total_pages; $i++)
-			$str .= ($i == $page ? '<span class="current">'.$i.'</span>' : '<a href="'.$link.'&amp;p='.$i.'">'.$i.'</a>');
-
-		$str = ($page <= 1 || $page > $total_pages ? '<span class="nav">&larr;</span>' : '<a href="'.$link.'&amp;p='.($page - 1).'">&larr;</a>').$str.($page == $total_pages ? '<span class="nav">&rarr;</span>' : '<a href="'.$link.'&amp;p='.($page + 1).'">&rarr;</a>');
-		return '<div class="paging">'.$str.'</div>';
-	}
-
-	public static function find ($search_string, $page)
+	public static function find ($search_string, $cur_page)
 	{
 		global $lang_s2_search;
 
@@ -815,6 +805,8 @@ if (defined('DEBUG'))
 	echo '</pre>';
 	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '<br>';
 }
+		$page = array();
+
 		$item_num = count($results);
 		if ($item_num)
 		{
@@ -828,17 +820,17 @@ if (defined('DEBUG'))
 
 			$items_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10.0;
 			$total_pages = ceil(1.0 * $item_num / $items_per_page);
-			if ($page < 1 || $page > $total_pages)
-				$page = 1;
+			if ($cur_page < 1 || $cur_page > $total_pages)
+				$cur_page = 1;
 
 			$i = 0;
 			$output = array();
 			foreach ($results as $chapter => $weight)
 			{
 				$i++;
-				if ($i <= ($page - 1) * $items_per_page)
+				if ($i <= ($cur_page - 1) * $items_per_page)
 					continue;
-				if ($i > $page * $items_per_page)
+				if ($i > $cur_page * $items_per_page)
 					break;
 
 				$output[$chapter]['title'] = '<a class="title" href="'.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['title'].'</a>';
@@ -855,10 +847,15 @@ if (defined('DEBUG'))
 			foreach ($output as $chapter_info)
 				echo '<p>'.implode('<br />', $chapter_info).'<p>';
 
-			echo self::paging($page, $total_pages, '?q='.urlencode($search_string));
+			$link_nav = array();
+			echo s2_paging($cur_page, $total_pages, S2_PATH.S2_URL_PREFIX.'/search'.(S2_URL_PREFIX ? '&amp;' : '?').'q='.str_replace('%', '%%', urlencode($search_string)).'&p=%d', $link_nav);
+			foreach ($link_nav as $rel => $href)
+				$page['link_navigation'][$rel] = $href;
 		}
 		else
 			echo '<p>'.$lang_s2_search['Not found'].'</p>';
+
+		return $page;
 	}
 
 	public static function find_autosearch ($search_string)
