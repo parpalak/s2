@@ -16,9 +16,9 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == '
 {
 	// Main page
 	$s2_blog_skip = 0;
-	if ($s2_blog_path[1] == 'skip')
+	if (isset($s2_blog_path[1]) && $s2_blog_path[1] == 'skip')
 	{
-		if (!isset($s2_blog_path[2]) || !ctype_digit($s2_blog_path[2]))
+		if (count($s2_blog_path) != 3 || !ctype_digit($s2_blog_path[2]))
 			return false;
 		$s2_blog_skip = (int) $s2_blog_path[2];
 	}
@@ -45,6 +45,9 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == '
 }
 elseif ($s2_blog_path[1] == S2_FAVORITE_URL)
 {
+	if (count($s2_blog_path) > 3 || isset($s2_blog_path[2]) && $s2_blog_path[2] !== '')
+		return false;
+
 	// Getting page template
 	$template = s2_get_template('blog.php', $ext_info['path'].'/templates/');
 
@@ -65,7 +68,11 @@ elseif ($s2_blog_path[1] == S2_FAVORITE_URL)
 }
 elseif ($s2_blog_path[1] == S2_TAGS_URL)
 {
-	if (count($s2_blog_path) == 2) $s2_blog_path[2] = '';
+	if (count($s2_blog_path) > 4 || isset($s2_blog_path[3]) && $s2_blog_path[3] !== '')
+		return false;
+
+	if (count($s2_blog_path) == 2)
+		$s2_blog_path[2] = '';
 
 	// Getting page template
 	$template = s2_get_template('blog.php', $ext_info['path'].'/templates/');
@@ -107,7 +114,7 @@ elseif ($s2_blog_path[1] == S2_TAGS_URL)
 else
 {
 	// []/[2006]/[12]/[31]/[newyear]
-	if ($s2_blog_path[1] && !ctype_digit($s2_blog_path[1]))
+	if ($s2_blog_path[1] && !ctype_digit($s2_blog_path[1]) || count($s2_blog_path) > 5)
 		return false;
 
 	$s2_blog_path[1] = (int) $s2_blog_path[1];
