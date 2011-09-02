@@ -833,7 +833,7 @@ if (defined('DEBUG'))
 				if ($i > $cur_page * $items_per_page)
 					break;
 
-				$output[$chapter]['title'] = '<a class="title" href="'.S2_PATH.S2_URL_PREFIX.self::$table_of_contents[$chapter]['url'].'">'.self::$table_of_contents[$chapter]['title'].'</a>';
+				$output[$chapter]['title'] = '<a class="title" href="'.S2_PATH.S2_URL_PREFIX.self::$table_of_contents[$chapter]['url'].'">'.s2_htmlencode(self::$table_of_contents[$chapter]['title']).'</a>';
 				$output[$chapter]['descr'] = trim(self::$table_of_contents[$chapter]['descr']);
 				$output[$chapter]['info'] = '<small><a class="url" href="'.S2_PATH.S2_URL_PREFIX.self::$table_of_contents[$chapter]['url'].'">'.self::display_url(S2_BASE_URL.S2_URL_PREFIX.self::$table_of_contents[$chapter]['url']).'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small>';
 			}
@@ -868,7 +868,7 @@ if (defined('DEBUG'))
 			if (strpos(utf8_strtolower($chapter_info['title']), utf8_strtolower($search_string)) !== false)
 			{
 				$output[] = '<a href="'.self::$table_of_contents[$chapter]['url'].'">'.
-					preg_replace('#('.preg_quote($search_string, '#').')#ui', '<em>\\1</em>', self::$table_of_contents[$chapter]['title']).'</a>';
+					preg_replace('#('.preg_quote($search_string, '#').')#ui', '<em>\\1</em>', s2_htmlencode(self::$table_of_contents[$chapter]['title'])).'</a>';
 			}
 		}
 
