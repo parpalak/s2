@@ -50,6 +50,7 @@ elseif ($s2_blog_path[1] == S2_FAVORITE_URL)
 	$page['path'][] = $lang_common['Favorite'];
 
 	$page['head_title'] = $page['title'] = $lang_common['Favorite'];
+	$page['link_navigation']['up'] = BLOG_BASE;
 }
 elseif ($s2_blog_path[1] == S2_TAGS_URL)
 {
@@ -64,16 +65,17 @@ elseif ($s2_blog_path[1] == S2_TAGS_URL)
 	if ($s2_blog_path[2])
 	{
 		// A tag
-		list ($page['text'], $name) = s2_blog_posts_by_tag($s2_blog_path[2]);
+		$page = s2_blog_posts_by_tag($s2_blog_path[2]) + $page;
 
+		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
 			$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
 		$page['path'][] = '<a href="'.BLOG_KEYWORDS.'">'.$lang_s2_blog['Tags'].'</a>';
-		$page['path'][] = $name;
+		$page['path'][] = $page['title'];
 
-		$page['head_title'] = $page['title'] = $name;
+		$page['link_navigation']['up'] = BLOG_KEYWORDS;
 	}
 	else
 	{
@@ -88,6 +90,7 @@ elseif ($s2_blog_path[1] == S2_TAGS_URL)
 		$page['path'][] = $lang_s2_blog['Tags'];
 
 		$page['head_title'] = $page['title'] = $lang_s2_blog['Tags'];
+		$page['link_navigation']['up'] = BLOG_BASE;
 	}
 }
 else
@@ -124,20 +127,7 @@ else
 	if ($s2_blog_path[2] == '')
 	{
 		// Posts of a year
-		$page['text'] = s2_blog_year_posts($s2_blog_path[1]);
-		$page['head_title'] = $page['title'] =  sprintf($lang_s2_blog['Year'], $s2_blog_path[1]);
-
-		$page['link_navigation']['up'] = BLOG_BASE;
-		if ($s2_blog_path[1] > S2_START_YEAR)
-		{
-			$page['title'] = '<a href="'.BLOG_BASE.($s2_blog_path[1] - 1).'/">&larr;</a> '.$page['title'];
-			$page['link_navigation']['prev'] = BLOG_BASE.($s2_blog_path[1] - 1).'/';
-		}
-		if ($s2_blog_path[1] < date('Y'))
-		{
-			$page['title'] .= ' <a href="'.BLOG_BASE.($s2_blog_path[1] + 1).'/">&rarr;</a>';
-			$page['link_navigation']['next'] = BLOG_BASE.($s2_blog_path[1] + 1).'/';
-		}
+		$page = s2_blog_year_posts($s2_blog_path[1]) + $page;
 
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)

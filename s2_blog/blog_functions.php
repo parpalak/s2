@@ -402,7 +402,11 @@ function s2_blog_posts_by_tag ($tag)
 	if ($output == '')
 		error_404();
 
-	return array($tag_descr.$output, s2_htmlencode($tag_name));
+	return array(
+		'text'			=> $tag_descr.$output,
+		'title'			=> s2_htmlencode($tag_name),
+		'head_title'	=> s2_htmlencode($tag_name)
+	);
 }
 
 function s2_blog_get_favorite_posts ()
@@ -524,10 +528,24 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 
 function s2_blog_year_posts ($year)
 {
-	global $s2_db;
+	global $s2_db, $lang_s2_blog;
 
 	$start_time = mktime(0, 0, 0, 1, 1, $year);
 	$end_time = mktime(0, 0, 0, 1, 1, $year + 1);
+
+	$page['head_title'] = $page['title'] =  sprintf($lang_s2_blog['Year'], $year);
+
+	$page['link_navigation']['up'] = BLOG_BASE;
+	if ($year > S2_START_YEAR)
+	{
+		$page['title'] = '<a href="'.BLOG_BASE.($year - 1).'/">&larr;</a> '.$page['title'];
+		$page['link_navigation']['prev'] = BLOG_BASE.($year - 1).'/';
+	}
+	if ($year < date('Y'))
+	{
+		$page['title'] .= ' <a href="'.BLOG_BASE.($year + 1).'/">&rarr;</a>';
+		$page['link_navigation']['next'] = BLOG_BASE.($year + 1).'/';
+	}
 
 	$query = array(
 		'SELECT'	=> 'create_time',
@@ -550,7 +568,8 @@ function s2_blog_year_posts ($year)
 	}
 	$output .= '</tr></table>';
 
-	return $output;
+	$page['text'] = $output;
+	return $page;
 }
 
 //
