@@ -141,7 +141,7 @@ elseif ($action == 'save_blog')
 		s2_add_js_header_delayed('var e = document.getElementById("url_input_label"); e.className="error"; e.title=e.getAttribute("title_empty");');
 	else
 	{
-		$start_time = intval($create_time / 86400) * 86400;
+		$start_time =strtotime('midnight', $create_time);
 		$end_time = $start_time + 86400;
 
 		$query = array(

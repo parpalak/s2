@@ -241,7 +241,7 @@ function s2_blog_edit_post_form ($id)
 		$url_error = $lang_admin['URL empty'];
 	else
 	{
-		$start_time = intval($page['create_time'] / 86400) * 86400;
+		$start_time = strtotime('midnight', $page['create_time']);
 		$end_time = $start_time + 86400;
 
 		$query = array(

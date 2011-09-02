@@ -821,7 +821,7 @@ function s2_blog_recent_discussions ($cur_url = '---')
 	$subquery1 = array(
 		'SELECT'	=> 'c.post_id AS post_id, count(c.post_id) AS comment_num',
 		'FROM'		=> 's2_blog_comments AS c',
-		'WHERE'		=> 'c.shown = 1 AND c.time > '.((intval(time() / 86400) - 31)*86400),
+		'WHERE'		=> 'c.shown = 1 AND c.time > '.strtotime('-1 month midnight'),
 		'GROUP BY'	=> 'c.post_id',
 		'ORDER BY'	=> 'comment_num DESC',
 	);
