@@ -819,7 +819,7 @@ function s2_blog_recent_discussions ($cur_url = '---')
 		return '';
 
 	$subquery1 = array(
-		'SELECT'	=> 'c.post_id AS post_id, count(c.post_id) AS comment_num',
+		'SELECT'	=> 'c.post_id AS post_id, count(c.post_id) AS comment_num,  max(c.id) AS max_id',
 		'FROM'		=> 's2_blog_comments AS c',
 		'WHERE'		=> 'c.shown = 1 AND c.time > '.strtotime('-1 month midnight'),
 		'GROUP BY'	=> 'c.post_id',
@@ -828,8 +828,14 @@ function s2_blog_recent_discussions ($cur_url = '---')
 	$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'create_time, url, title, c1.comment_num AS comment_num',
+		'SELECT'	=> 'p.create_time, p.url, p.title, c1.comment_num AS comment_num, c2.nick, c2.time',
 		'FROM'		=> 's2_blog_posts AS p, ('.$raw_query1.') AS c1',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 's2_blog_comments AS c2',
+				'ON'			=> 'c2.id = c1.max_id'
+			),
+		),
 		'WHERE'		=> 'c1.post_id = p.id AND p.commented = 1 AND p.published = 1',
 		'LIMIT'		=> '10',
 	);
@@ -838,7 +844,7 @@ function s2_blog_recent_discussions ($cur_url = '---')
 
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$output .= '<li title="'.$row['comment_num'].'"><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
+		$output .= '<li><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'" title="'.s2_htmlencode($row['nick'].' ('.s2_date_time($row['time']).')').'">'.s2_htmlencode($row['title']).'</a></li>';
 	$output = preg_replace('#<a href="'.preg_quote(S2_URL_PREFIX.$cur_url, '#').'">(.*?)</a>#', '\\1', $output);
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
