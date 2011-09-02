@@ -194,7 +194,7 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 	{
 		$row = $posts[$id];
 		$link = S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']);
-		$header = '<a href="'.$link.'">'.$row['title'].'</a>';
+		$header = '<a href="'.$link.'">'.s2_htmlencode($row['title']).'</a>';
 		$date = s2_date($row['create_time']);
 		$time = s2_date_time($row['create_time']);
 		$post_tags = isset($tags[$id]) ? implode(', ', $tags[$id]) : '';
@@ -310,7 +310,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 
 		$links = array();
 		while ($row1 = $s2_db->fetch_assoc($result))
-			$links[] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']).'">'.$row1['title'].'</a>';
+			$links[] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']).'">'.s2_htmlencode($row1['title']).'</a>';
 
 		if (!empty($links))
 			$row['text'] .= s2_blog_format_see_also($links);
@@ -337,7 +337,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 		$tags[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($row1['url']).'/">'.$row1['name'].'</a>';
 
 	$output = s2_blog_format_post(
-		$row['title'],
+		s2_htmlencode($row['title']),
 		s2_date($row['create_time']),
 		s2_date_time($row['create_time']),
 		$row['text'],
@@ -351,7 +351,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 
 	return array(
 		'text'				=> $output,
-		'head_title'		=> $row['title'],
+		'head_title'		=> s2_htmlencode($row['title']),
 		'commented'			=> $row['commented'],
 		'id'				=> $post_id,
 		'link_navigation'	=> array('up' => S2_BLOG_PATH.date('Y/m/d/', $start_time))
@@ -596,7 +596,7 @@ function s2_blog_posts_links ($ids, $labels, &$see_also, &$tags)
 		array_multisort($sort_array, SORT_DESC, $rows);
 
 		foreach ($rows as $row)
-			$see_also[$row['label']][$row['id']] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a>';
+			$see_also[$row['label']][$row['id']] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a>';
 	}
 
 	// Obtaining tags
@@ -709,7 +709,7 @@ function s2_blog_last_posts ($skip = 0)
 			break;
 
 		$output .= s2_blog_format_post(
-			'<a href="'.S2_BLOG_PATH.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.$post['title'].'</a>',
+			'<a href="'.S2_BLOG_PATH.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.s2_htmlencode($post['title']).'</a>',
 			s2_date($post['create_time']),
 			s2_date_time($post['create_time']),
 			$post['text'],
@@ -764,7 +764,7 @@ function s2_blog_last_post ($num_post)
 		$output .= sprintf($html,
 			$tag_prefix,
 			$link,
-			$post['title'],
+			s2_htmlencode($post['title']),
 			s2_date($post['create_time']),
 			s2_date_time($post['create_time']),
 			$post['text']
@@ -806,7 +806,7 @@ function s2_blog_recent_comments ()
 
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$output .= '<li><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#'.$row['count'].'">'.$row['title'].'</a>, <em>'.$row['nick'].'</em></li>';
+		$output .= '<li><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#'.$row['count'].'">'.s2_htmlencode($row['title']).'</a>, <em>'.s2_htmlencode($row['nick']).'</em></li>';
 
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
@@ -838,7 +838,7 @@ function s2_blog_recent_discussions ($cur_url = '---')
 
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$output .= '<li title="'.$row['comment_num'].'"><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a></li>';
+		$output .= '<li title="'.$row['comment_num'].'"><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
 	$output = preg_replace('#<a href="'.preg_quote(S2_URL_PREFIX.$cur_url, '#').'">(.*?)</a>#', '\\1', $output);
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
