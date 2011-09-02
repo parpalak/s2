@@ -249,8 +249,6 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 	}
 	else
 	{
-		if ((int) $day <= 0)
-			error_404();
 		$start_time = mktime(0, 0, 0, $month, $day, $year);
 		$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
 		$link_nav['up'] = S2_BLOG_PATH.date('Y/m/', $start_time);
@@ -274,11 +272,8 @@ function s2_blog_get_post ($year, $month, $day, $url)
 {
 	global $s2_db, $lang_s2_blog;
 
-	if (((int) $day) <= 0)
-		error_404();
-
 	$start_time = mktime(0, 0, 0, $month, $day, $year);
-	$end_time = mktime(0, 0, 0, $month, $day+1, $year);
+	$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
 
 	$query = array(
 		'SELECT'	=> 'create_time, title, text, id, commented, label, favorite',
@@ -434,9 +429,6 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 
 	$start_time = mktime(0, 0, 0, $month, 1, $year);
 	$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
-
-	if ($start_time === false)
-		error_404();
 
 	// Dealing with week days
 	$n = date('w', $start_time);
