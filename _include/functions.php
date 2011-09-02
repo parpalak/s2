@@ -184,7 +184,7 @@ function s2_process_multipart_mixed (&$src, &$dest)
 //
 function s2_get_template ($template_id, $path = false)
 {
-	global $lang_common;
+	global $lang_common, $request_uri;
 
 	if ($path === false)
 		$path = S2_ROOT.'_include/templates/';
@@ -204,13 +204,8 @@ function s2_get_template ($template_id, $path = false)
 	include $path;
 	$template = ob_get_clean();
 
-
-	if (strpos($template, '</a>') !== false)
+	if ((strpos($template, '</a>') !== false) && isset($request_uri))
 	{
-		$request_uri = $_SERVER['REQUEST_URI'];
-		if (strpos($request_uri, '?') !== false)
-			$request_uri = substr($request_uri, 0, strpos($request_uri, '?'));
-
 		if (!function_exists('_s2_check_link'))
 		{
 			function _s2_check_link($url, $request_uri, $text)
@@ -223,7 +218,7 @@ function s2_get_template ($template_id, $path = false)
 					return '<a href="'.$url.'">'.$text.'</a>';
 			}
 		}
-		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.$request_uri.'\', \'\\2\')', $template);
+		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.S2_PATH.S2_URL_PREFIX.$request_uri.'\', \'\\2\')', $template);
 	}
 
 	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
