@@ -29,7 +29,7 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == '
 	if (strpos($template, '<!-- s2_blog_calendar -->') !== false)
 		$page['s2_blog_calendar'] = s2_blog_calendar(date('Y'), date('m'), '0');
 
-	$page += s2_blog_last_posts($s2_blog_skip);
+	$page = s2_blog_last_posts($s2_blog_skip) + $page;
 	$page['head_title'] = '';
 
 	// Bread crumbs
@@ -157,7 +157,7 @@ else
 	elseif (!$s2_blog_path[3])
 	{
 		// Posts of a month
-		$page += s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2]);
+		$page = s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2]) + $page;
 		$page['head_title'] = s2_month($s2_blog_path[2]).', '.$s2_blog_path[1];
 
 		// Bread crumbs
@@ -171,7 +171,7 @@ else
 	elseif ($s2_blog_path[4] === '')
 	{
 		// Posts of a day
-		$page += s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3]);
+		$page = s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3]) + $page;
 		$page['head_title'] = s2_date(mktime(0, 0, 0, $s2_blog_path[2], $s2_blog_path[3], $s2_blog_path[1]));
 
 		// Bread crumbs
@@ -186,7 +186,7 @@ else
 	else
 	{
 		// A post
-		$page += s2_blog_get_post($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3], $s2_blog_path[4]);
+		$page = s2_blog_get_post($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3], $s2_blog_path[4]) + $page;
 
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
