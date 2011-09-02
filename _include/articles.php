@@ -157,7 +157,7 @@ function s2_last_artilce_comments ()
 	$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'time, url, title, nick, parent_id, ('.$raw_query1.') AS count',
+		'SELECT'	=> 'c.time, a.url, a.title, c.nick, a.parent_id, ('.$raw_query1.') AS count',
 		'FROM'		=> 'articles AS a',
 		'JOINS'		=> array(
 			array(
