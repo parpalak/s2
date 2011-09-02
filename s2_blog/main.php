@@ -23,7 +23,7 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == '
 		$page['s2_blog_calendar'] = s2_blog_calendar(date('Y'), date('m'), '0');
 
 	$s2_blog_skip = (isset($s2_blog_path[2]) && $s2_blog_path[1] == 'skip') ? (int) $s2_blog_path[2] : 0;
-	$page['text'] = s2_blog_last_posts($s2_blog_skip);
+	$page += s2_blog_last_posts($s2_blog_skip);
 	$page['head_title'] = '';
 
 	// Bread crumbs
@@ -102,7 +102,7 @@ else
 
 	if (count($s2_blog_path) == 2)
 		$s2_blog_path[2] = '';
-	elseif ($s2_blog_path[2] && !ctype_digit($s2_blog_path[2]))
+	elseif ($s2_blog_path[2] && (!ctype_digit($s2_blog_path[2]) || $s2_blog_path[2] > 12 || $s2_blog_path[2] < 1))
 		return false;
 
 	if (count($s2_blog_path) == 3)
@@ -127,10 +127,17 @@ else
 		$page['text'] = s2_blog_year_posts($s2_blog_path[1]);
 		$page['head_title'] = $page['title'] =  sprintf($lang_s2_blog['Year'], $s2_blog_path[1]);
 
+		$page['link_navigation']['up'] = BLOG_BASE;
 		if ($s2_blog_path[1] > S2_START_YEAR)
-			$page['title'] = '<a href="'.BLOG_BASE.($s2_blog_path[1]-1).'/">&larr;</a> '.$page['title'];
+		{
+			$page['title'] = '<a href="'.BLOG_BASE.($s2_blog_path[1] - 1).'/">&larr;</a> '.$page['title'];
+			$page['link_navigation']['prev'] = BLOG_BASE.($s2_blog_path[1] - 1).'/';
+		}
 		if ($s2_blog_path[1] < date('Y'))
-			$page['title'] .= ' <a href="'.BLOG_BASE.($s2_blog_path[1]+1).'/">&rarr;</a>';
+		{
+			$page['title'] .= ' <a href="'.BLOG_BASE.($s2_blog_path[1] + 1).'/">&rarr;</a>';
+			$page['link_navigation']['next'] = BLOG_BASE.($s2_blog_path[1] + 1).'/';
+		}
 
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
@@ -142,7 +149,7 @@ else
 	elseif ($s2_blog_path[3] == '')
 	{
 		// Posts of a month
-		$page['text'] = s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2]);
+		$page += s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2]);
 		$page['head_title'] = s2_month($s2_blog_path[2]).', '.$s2_blog_path[1];
 
 		// Bread crumbs
@@ -156,7 +163,7 @@ else
 	elseif ($s2_blog_path[4] == '')
 	{
 		// Posts of a day
-		$page['text'] = s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3]);
+		$page += s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3]);
 		$page['head_title'] = s2_date(mktime(0, 0, 0, $s2_blog_path[2], $s2_blog_path[3], $s2_blog_path[1]));
 
 		// Bread crumbs
@@ -171,7 +178,8 @@ else
 	else
 	{
 		// A post
-		list($page['text'], $page['head_title'], $page['commented'], $page['id']) = s2_blog_get_post($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3], $s2_blog_path[4]);
+		$page += s2_blog_get_post($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3], $s2_blog_path[4]);
+
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;

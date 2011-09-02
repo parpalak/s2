@@ -222,10 +222,30 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 {
 	global $s2_db, $lang_s2_blog;
 
+	$link_nav = array();
+	$paging = '';
+
 	if ($day === false)
 	{
 		$start_time = mktime(0, 0, 0, $month, 1, $year);
 		$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
+		$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
+
+		$link_nav['up'] = BLOG_BASE.date('Y/', $start_time);
+
+		if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
+		{
+			$link_nav['prev'] = BLOG_BASE.date('Y/m/', $prev_time);
+			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_s2_blog['Here'].'</a> ';
+		}
+		if ($end_time < time())
+		{
+			$link_nav['next'] = BLOG_BASE.date('Y/m/', $end_time);
+			$paging .= '<a href="'.$link_nav['next'].'">'.$lang_s2_blog['There'].'</a>';
+		}
+
+		if ($paging)
+			$paging = '<p class="s2_blog_pages">'.$paging.'</p>';
 	}
 	else
 	{
@@ -233,17 +253,21 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 			error_404();
 		$start_time = mktime(0, 0, 0, $month, $day, $year);
 		$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
+		$link_nav['up'] = BLOG_BASE.date('Y/m/', $start_time);
 	}
 
 	$query_add = array(
 		'WHERE'		=> 'p.create_time < '.$end_time.' AND p.create_time >= '.$start_time
 	);
 	$output = s2_blog_get_posts($query_add);
-	if ($output != '')
-		return $output;
 
-	s2_404_header();
-	return $lang_s2_blog['Not found'];
+	if ($output == '')
+	{
+		s2_404_header();
+		$output = $lang_s2_blog['Not found'];
+	}
+
+	return array('text' => $output.$paging, 'link_navigation' => $link_nav);
 }
 
 function s2_blog_get_post ($year, $month, $day, $url)
@@ -267,7 +291,11 @@ function s2_blog_get_post ($year, $month, $day, $url)
 	if (!$row = $s2_db->fetch_assoc($result))
 	{
 		s2_404_header();
-		return array($lang_s2_blog['Not found'], $lang_s2_blog['Not found'], '', '');
+		return array(
+			'text'				=> $lang_s2_blog['Not found'],
+			'head_title'		=> $lang_s2_blog['Not found'],
+			'link_navigation'	=> array('up' => BLOG_BASE.date('Y/m/d/', $start_time))
+		);
 	}
 
 	$post_id = $row['id'];
@@ -326,7 +354,13 @@ function s2_blog_get_post ($year, $month, $day, $url)
 	if ($row['commented'] && S2_SHOW_COMMENTS)
 		$output .= s2_blog_get_comments($post_id);
 
-	return array($output, $row['title'], $row['commented'], $post_id);
+	return array(
+		'text'				=> $output,
+		'head_title'		=> $row['title'],
+		'commented'			=> $row['commented'],
+		'id'				=> $post_id,
+		'link_navigation'	=> array('up' => BLOG_BASE.date('Y/m/d/', $start_time))
+	);
 }
 
 function s2_blog_posts_by_tag ($tag)
@@ -391,14 +425,7 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 {
 	global $s2_db, $lang_s2_blog, $lang_s2_blog_days;
 
-	// Cleanup month value
-	if ($month !== '')
-	{
-		$month = (int) $month;
-		if ($month > 12 || $month < 1)
-			error_404();
-	}
-	else 
+	if ($month === '')
 		$month = 1;
 
 	$start_time = mktime(0, 0, 0, $month, 1, $year);
@@ -436,6 +463,7 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 	$month_name = s2_month($month);
 	if ($day == '-1')
 	{
+		// One of 12 year tables
 		if ($start_time < time())
 			$month_name = '<a href="'.BLOG_BASE.date('Y/m', $start_time).'/">'.$month_name.'</a>';
 		$header = '<tr class="nav"><th colspan="7" align="center">'.$month_name.'</th></tr>';
@@ -658,14 +686,15 @@ function s2_blog_last_posts ($skip = 0)
 	if ($skip < 0)
 		$skip = 0;
 
-	$posts = s2_blog_last_posts_array(10, $skip, true);
+	$posts_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10;
+	$posts = s2_blog_last_posts_array($posts_per_page, $skip, true);
 
 	$output = '';
 	$i = 0;
 	foreach ($posts as $post)
 	{
 		$i++;
-		if ($i > 10)
+		if ($i > $posts_per_page)
 			break;
 
 		$output .= s2_blog_format_post(
@@ -679,16 +708,24 @@ function s2_blog_last_posts ($skip = 0)
 		);
 	}
 
-	$paginator = '';
+	$paging = '';
 
+	$link_nav = array();
 	if ($skip > 0)
-		$paginator = '<a href="'.BLOG_BASE.($skip > 10 ? 'skip/'.($skip - 10) : '').'">'.$lang_s2_blog['Here'].'</a> ';
-	if ($i > 10)
-		$paginator .= '<a href="'.BLOG_BASE.'skip/'.($skip + 10).'">'.$lang_s2_blog['There'].'</a>';
+	{
+		$link_nav['prev'] = BLOG_BASE.($skip > $posts_per_page ? 'skip/'.($skip - $posts_per_page) : '');
+		$paging = '<a href="'.$link_nav['prev'].'">'.$lang_s2_blog['Here'].'</a> ';
+	}
+	if ($i > $posts_per_page)
+	{
+		$link_nav['next'] = BLOG_BASE.'skip/'.($skip + $posts_per_page);
+		$paging .= '<a href="'.$link_nav['next'].'">'.$lang_s2_blog['There'].'</a>';
+	}
 
-	$output .= '<p class="s2_blog_pages">'.$paginator.'</p>';
+	if ($paging)
+		$output .= '<p class="s2_blog_pages">'.$paging.'</p>';
 
-	return $output;
+	return array('text' => $output, 'link_navigation' => $link_nav);
 }
 
 // Fetching last post and comments (for template placeholders)
