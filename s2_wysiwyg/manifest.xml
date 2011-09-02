@@ -16,10 +16,10 @@
 	<id>s2_wysiwyg</id>
 	<title>WYSIWYG</title>
 	<version>1.0a5</version>
-	<description>Adds TinyMCE WYSIWYG editor to the article edit form.</description>
+	<description>Adds TinyMCE WYSIWYG editor to the edit form.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a5</minversion>
+	<minversion>1.0a6</minversion>
 	<maxtestedon>1.0a6</maxtestedon>
 
 	<install><![CDATA[
@@ -95,7 +95,7 @@ $padding -= 2.4;
 		<hook id="fn_s2_blog_post_form_pre_output"><![CDATA[
 if (isset($_GET['action']) && $_GET['action'] == 'edit_blog_post')
 {
-	s2_add_js_header('s2_wysiwyg_set_path("'.BLOG_BASE.date('Y/m/d/', $page['create_time']).'"); tinyMCE.execCommand("mceRemoveControl", false, "arttext");');
+	s2_add_js_header('s2_wysiwyg_set_path("'.S2_BLOG_PATH.date('Y/m/d/', $page['create_time']).'"); tinyMCE.execCommand("mceRemoveControl", false, "arttext");');
 	s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext");');
 }
 		]]></hook>
