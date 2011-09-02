@@ -737,7 +737,7 @@ function s2_parse_page_url ($request_uri)
 	$is_menu = strpos($template, '<!-- s2_menu -->') !== false;
 
 	// Dealing with sections, subsections, neighbours
-	if ($page['children_exist'] && (($page['children_preview'] && strpos($template, '<!-- s2_subarticles -->') !== false) || $is_menu || strpos($template, '<!-- s2_link_navigation -->') !== false))
+	if ($page['children_exist'] && (($page['children_preview'] && strpos($template, '<!-- s2_subarticles -->') !== false) || $is_menu || strpos($template, '<!-- s2_navigation_link -->') !== false))
 	{
 		// It's a section. We have to fetch subsections and articles.
 
@@ -869,7 +869,7 @@ function s2_parse_page_url ($request_uri)
 		}
 	}
 
-	if (!$page['children_exist'] && ($is_menu || strpos($template, '<!-- s2_back_forward -->') !== false || strpos($template, '<!-- s2_link_navigation -->') !== false))
+	if (!$page['children_exist'] && ($is_menu || strpos($template, '<!-- s2_back_forward -->') !== false || strpos($template, '<!-- s2_navigation_link -->') !== false))
 	{
 		// It's an article. We have to fetch other articles in the parent section
 
