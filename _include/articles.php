@@ -200,7 +200,7 @@ function s2_last_discussions ()
 	global $s2_db;
 
 	$subquery1 = array(
-		'SELECT'	=> 'c.article_id AS article_id, count(c.article_id) AS comment_num',
+		'SELECT'	=> 'c.article_id AS article_id, count(c.article_id) AS comment_num, max(c.id) AS max_id',
 		'FROM'		=> 'art_comments AS c',
 		'WHERE'		=> 'c.shown = 1 AND c.time > '.strtotime('-1 month midnight'),
 		'GROUP BY'	=> 'c.article_id',
@@ -209,8 +209,14 @@ function s2_last_discussions ()
 	$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'url, title, parent_id',
+		'SELECT'	=> 'a.url, a.title, a.parent_id, c2.nick, c2.time',
 		'FROM'		=> 'articles AS a, ('.$raw_query1.') AS c1',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 'art_comments AS c2',
+				'ON'			=> 'c2.id = c1.max_id'
+			),
+		),
 		'WHERE'		=> 'c1.article_id = a.id AND a.commented = 1 AND a.published = 1',
 		'LIMIT'		=> '10',
 	);
@@ -223,13 +229,15 @@ function s2_last_discussions ()
 		$titles[] = $row['title'];
 		$parent_ids[] = $row['parent_id'];
 		$urls[] = urlencode($row['url']);
+		$nicks[] = $row['nick'];
+		$time[] = $row['time'];
 	}
 
 	$urls = s2_get_group_url($parent_ids, $urls);
 
 	$output = '';
 	foreach ($urls as $k => $url)
-		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'">'.$titles[$k].'</a></li>';
+		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'" title="'.s2_htmlencode($nicks[$k].' ('.s2_date_time($time[$k]).')').'">'.$titles[$k].'</a></li>';
 
 	($hook = s2_hook('fn_last_discussions_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul>' : '';
