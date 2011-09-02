@@ -121,7 +121,7 @@ else
 
 	if (count($s2_blog_path) == 3)
 		$s2_blog_path[3] = '';
-	elseif ($s2_blog_path[3] && !ctype_digit($s2_blog_path[3]))
+	elseif ($s2_blog_path[3] && (!ctype_digit($s2_blog_path[3]) || !checkdate($s2_blog_path[2], $s2_blog_path[3], $s2_blog_path[1])))
 		return false;
 
 	if (count($s2_blog_path) == 4)
