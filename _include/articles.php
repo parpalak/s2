@@ -202,7 +202,7 @@ function s2_last_discussions ()
 	$subquery1 = array(
 		'SELECT'	=> 'c.article_id AS article_id, count(c.article_id) AS comment_num',
 		'FROM'		=> 'art_comments AS c',
-		'WHERE'		=> 'c.shown = 1 AND c.time > '.((intval(time() / 86400) - 31)*86400),
+		'WHERE'		=> 'c.shown = 1 AND c.time > '.strtotime('-1 month midnight'),
 		'GROUP BY'	=> 'c.article_id',
 		'ORDER BY'	=> 'comment_num DESC',
 	);
