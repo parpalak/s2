@@ -264,7 +264,7 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 	if ($output == '')
 	{
 		s2_404_header();
-		$output = $lang_s2_blog['Not found'];
+		$output = '<p>'.$lang_s2_blog['Not found'].'</p>';
 	}
 
 	return array('text' => $output.$paging, 'link_navigation' => $link_nav);
@@ -292,7 +292,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 	{
 		s2_404_header();
 		return array(
-			'text'				=> $lang_s2_blog['Not found'],
+			'text'				=> '<p>'.$lang_s2_blog['Not found'].'</p>',
 			'head_title'		=> $lang_s2_blog['Not found'],
 			'link_navigation'	=> array('up' => S2_BLOG_PATH.date('Y/m/d/', $start_time))
 		);
