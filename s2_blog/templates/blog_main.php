@@ -4,7 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><!-- s2_head_title --></title>
 <!-- s2_meta -->
-<meta name="keywords" content="blog" />
 <link rel="stylesheet" type="text/css" media="screen" href="<?php echo $GLOBALS['ext_info']['url']; ?>/style.css" />
 <!-- s2_styles -->
 <!-- s2_link_navigation -->
