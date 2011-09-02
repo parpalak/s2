@@ -30,7 +30,7 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == '
 	if (S2_BLOG_CRUMBS)
 		$page['path'][] = S2_BLOG_CRUMBS;
 	if (S2_BLOG_URL)
-		$page['path'][] = $s2_blog_skip ? '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>' : $lang_s2_blog['Blog'];
+		$page['path'][] = $s2_blog_skip ? '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>' : $lang_s2_blog['Blog'];
 }
 elseif ($s2_blog_path[1] == S2_FAVORITE_URL)
 {
@@ -46,11 +46,11 @@ elseif ($s2_blog_path[1] == S2_FAVORITE_URL)
 	if (S2_BLOG_CRUMBS)
 		$page['path'][] = S2_BLOG_CRUMBS;
 	if (S2_BLOG_URL)
-		$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
 	$page['path'][] = $lang_common['Favorite'];
 
 	$page['head_title'] = $page['title'] = $lang_common['Favorite'];
-	$page['link_navigation']['up'] = BLOG_BASE;
+	$page['link_navigation']['up'] = S2_BLOG_PATH;
 }
 elseif ($s2_blog_path[1] == S2_TAGS_URL)
 {
@@ -71,11 +71,11 @@ elseif ($s2_blog_path[1] == S2_TAGS_URL)
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
-		$page['path'][] = '<a href="'.BLOG_KEYWORDS.'">'.$lang_s2_blog['Tags'].'</a>';
+			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_TAGS_PATH.'">'.$lang_s2_blog['Tags'].'</a>';
 		$page['path'][] = $page['title'];
 
-		$page['link_navigation']['up'] = BLOG_KEYWORDS;
+		$page['link_navigation']['up'] = S2_BLOG_TAGS_PATH;
 	}
 	else
 	{
@@ -86,11 +86,11 @@ elseif ($s2_blog_path[1] == S2_TAGS_URL)
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
+			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
 		$page['path'][] = $lang_s2_blog['Tags'];
 
 		$page['head_title'] = $page['title'] = $lang_s2_blog['Tags'];
-		$page['link_navigation']['up'] = BLOG_BASE;
+		$page['link_navigation']['up'] = S2_BLOG_PATH;
 	}
 }
 else
@@ -133,7 +133,7 @@ else
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
+			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
 		$page['path'][] = $s2_blog_path[1];
 	}
 	elseif ($s2_blog_path[3] == '')
@@ -146,8 +146,8 @@ else
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
-		$page['path'][] = '<a href="'.BLOG_BASE.$s2_blog_path[1].'/">'.$s2_blog_path[1].'</a>';
+			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_PATH.$s2_blog_path[1].'/">'.$s2_blog_path[1].'</a>';
 		$page['path'][] = $s2_blog_path[2];
 	}
 	elseif ($s2_blog_path[4] == '')
@@ -160,9 +160,9 @@ else
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
-		$page['path'][] = '<a href="'.BLOG_BASE.$s2_blog_path[1].'/">'.$s2_blog_path[1].'</a>';
-		$page['path'][] = '<a href="'.BLOG_BASE.$s2_blog_path[1].'/'.$s2_blog_path[2].'/">'.$s2_blog_path[2].'</a>';
+			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_PATH.$s2_blog_path[1].'/">'.$s2_blog_path[1].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_PATH.$s2_blog_path[1].'/'.$s2_blog_path[2].'/">'.$s2_blog_path[2].'</a>';
 		$page['path'][] = $s2_blog_path[3];
 	}
 	else
@@ -174,10 +174,10 @@ else
 		if (S2_BLOG_CRUMBS)
 			$page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Blog'].'</a>';
-		$page['path'][] = '<a href="'.BLOG_BASE.$s2_blog_path[1].'/">'.$s2_blog_path[1].'</a>';
-		$page['path'][] = '<a href="'.BLOG_BASE.$s2_blog_path[1].'/'.$s2_blog_path[2].'/">'.$s2_blog_path[2].'</a>';
-		$page['path'][] = '<a href="'.BLOG_BASE.$s2_blog_path[1].'/'.$s2_blog_path[2].'/'.$s2_blog_path[3].'/">'.$s2_blog_path[3].'</a>';
+			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_PATH.$s2_blog_path[1].'/">'.$s2_blog_path[1].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_PATH.$s2_blog_path[1].'/'.$s2_blog_path[2].'/">'.$s2_blog_path[2].'</a>';
+		$page['path'][] = '<a href="'.S2_BLOG_PATH.$s2_blog_path[1].'/'.$s2_blog_path[2].'/'.$s2_blog_path[3].'/">'.$s2_blog_path[3].'</a>';
 	}
 }
 

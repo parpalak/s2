@@ -234,7 +234,7 @@ function s2_blog_edit_post_form ($id)
 		s2_test_user_rights($GLOBALS['session_id'], $required_rights);
 	}
 
-	$page['path'] = BLOG_BASE.date('Y/m/d/', $page['create_time']).urlencode($page['url']);
+	$page['path'] = S2_BLOG_PATH.date('Y/m/d/', $page['create_time']).urlencode($page['url']);
 
 	$url_error = '';
 	if ($page['url'] == '')

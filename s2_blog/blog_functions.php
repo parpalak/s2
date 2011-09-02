@@ -18,7 +18,7 @@ function s2_blog_extent_number ($n)
 // HTML formatting
 //
 
-$s2_blog_fav_link = '<a href="'.BLOG_BASE.urlencode(S2_FAVORITE_URL).'/" class="favorite" title="'.$lang_s2_blog['Favorite'].'">*</a>';
+$s2_blog_fav_link = '<a href="'.S2_BLOG_PATH.urlencode(S2_FAVORITE_URL).'/" class="favorite" title="'.$lang_s2_blog['Favorite'].'">*</a>';
 
 function s2_blog_format_post ($header, $date, $date_time, $body, $keywords, $comments, $favorite = 0)
 {
@@ -98,7 +98,7 @@ function s2_blog_all_tags ()
 	$tags = array();
 	foreach ($tag_count as $id => $num)
 		if ($num)
-			$tags[] = '<a href="'.BLOG_KEYWORDS.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a> ('.$num.')';
+			$tags[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a> ('.$num.')';
 
 	($hook = s2_hook('fn_s2_blog_all_tags_end')) ? eval($hook) : null;
 	return implode('<br />', $tags);
@@ -193,7 +193,7 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 	foreach ($ids as $id)
 	{
 		$row = $posts[$id];
-		$link = BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']);
+		$link = S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']);
 		$header = '<a href="'.$link.'">'.$row['title'].'</a>';
 		$date = s2_date($row['create_time']);
 		$time = s2_date_time($row['create_time']);
@@ -231,16 +231,16 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 		$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
 		$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
 
-		$link_nav['up'] = BLOG_BASE.date('Y/', $start_time);
+		$link_nav['up'] = S2_BLOG_PATH.date('Y/', $start_time);
 
 		if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
 		{
-			$link_nav['prev'] = BLOG_BASE.date('Y/m/', $prev_time);
+			$link_nav['prev'] = S2_BLOG_PATH.date('Y/m/', $prev_time);
 			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_s2_blog['Here'].'</a> ';
 		}
 		if ($end_time < time())
 		{
-			$link_nav['next'] = BLOG_BASE.date('Y/m/', $end_time);
+			$link_nav['next'] = S2_BLOG_PATH.date('Y/m/', $end_time);
 			$paging .= '<a href="'.$link_nav['next'].'">'.$lang_s2_blog['There'].'</a>';
 		}
 
@@ -253,7 +253,7 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 			error_404();
 		$start_time = mktime(0, 0, 0, $month, $day, $year);
 		$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
-		$link_nav['up'] = BLOG_BASE.date('Y/m/', $start_time);
+		$link_nav['up'] = S2_BLOG_PATH.date('Y/m/', $start_time);
 	}
 
 	$query_add = array(
@@ -294,7 +294,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 		return array(
 			'text'				=> $lang_s2_blog['Not found'],
 			'head_title'		=> $lang_s2_blog['Not found'],
-			'link_navigation'	=> array('up' => BLOG_BASE.date('Y/m/d/', $start_time))
+			'link_navigation'	=> array('up' => S2_BLOG_PATH.date('Y/m/d/', $start_time))
 		);
 	}
 
@@ -315,7 +315,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 
 		$links = array();
 		while ($row1 = $s2_db->fetch_assoc($result))
-			$links[] = '<a href="'.BLOG_BASE.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']).'">'.$row1['title'].'</a>';
+			$links[] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']).'">'.$row1['title'].'</a>';
 
 		if (!empty($links))
 			$row['text'] .= s2_blog_format_see_also($links);
@@ -339,7 +339,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 
 	$tags = array();
 	while ($row1 = $s2_db->fetch_assoc($result))
-		$tags[] = '<a href="'.BLOG_KEYWORDS.urlencode($row1['url']).'/">'.$row1['name'].'</a>';
+		$tags[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($row1['url']).'/">'.$row1['name'].'</a>';
 
 	$output = s2_blog_format_post(
 		$row['title'],
@@ -359,7 +359,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 		'head_title'		=> $row['title'],
 		'commented'			=> $row['commented'],
 		'id'				=> $post_id,
-		'link_navigation'	=> array('up' => BLOG_BASE.date('Y/m/d/', $start_time))
+		'link_navigation'	=> array('up' => S2_BLOG_PATH.date('Y/m/d/', $start_time))
 	);
 }
 
@@ -469,22 +469,22 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 	{
 		// One of 12 year tables
 		if ($start_time < time())
-			$month_name = '<a href="'.BLOG_BASE.date('Y/m', $start_time).'/">'.$month_name.'</a>';
+			$month_name = '<a href="'.S2_BLOG_PATH.date('Y/m', $start_time).'/">'.$month_name.'</a>';
 		$header = '<tr class="nav"><th colspan="7" align="center">'.$month_name.'</th></tr>';
 	}
 	else
 	{
 		if ($day != '')
-			$month_name = '<a href="'.BLOG_BASE.date('Y/m', $start_time).'/">'.$month_name.'</a>';
+			$month_name = '<a href="'.S2_BLOG_PATH.date('Y/m', $start_time).'/">'.$month_name.'</a>';
 
 		// Links in the header
-		$next_month = $end_time < time() ? '<a class="nav_mon" href="'.BLOG_BASE.date('Y/m', $end_time).'/" title="'.s2_month(date('m', $end_time)).date(', Y', $end_time).'">&rarr;</a>' : '&rarr;';
+		$next_month = $end_time < time() ? '<a class="nav_mon" href="'.S2_BLOG_PATH.date('Y/m', $end_time).'/" title="'.s2_month(date('m', $end_time)).date(', Y', $end_time).'">&rarr;</a>' : '&rarr;';
 
 		$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
-		$prev_month = $prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR) ? '<a class="nav_mon" href="'.BLOG_BASE.date('Y/m', $prev_time).'/" title="'.s2_month(date('m', $prev_time)).date(', Y', $prev_time).'">&larr;</a>' : '&larr;';
+		$prev_month = $prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR) ? '<a class="nav_mon" href="'.S2_BLOG_PATH.date('Y/m', $prev_time).'/" title="'.s2_month(date('m', $prev_time)).date(', Y', $prev_time).'">&larr;</a>' : '&larr;';
 
 		$header = '<tr class="nav"><th>'.$prev_month.'</th><th align="center" colspan="5">'
-			.$month_name.', <a href="'.BLOG_BASE.$year.'/">'.$year.'</a></th><th>'.$next_month.'</th></tr>';
+			.$month_name.', <a href="'.S2_BLOG_PATH.$year.'/">'.$year.'</a></th><th>'.$next_month.'</th></tr>';
 	}
 
 	// Titles
@@ -502,7 +502,7 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 	{
 		$n++;
 		// Are there posts?
-		$b = isset($day_flags[$i]) ? '<a href="'.BLOG_BASE.$year.'/'.s2_blog_extent_number($month).'/'.s2_blog_extent_number($i).'/">'.$i.'</a>' : $i;
+		$b = isset($day_flags[$i]) ? '<a href="'.S2_BLOG_PATH.$year.'/'.s2_blog_extent_number($month).'/'.s2_blog_extent_number($i).'/">'.$i.'</a>' : $i;
 		$classes = array();
 		if ($i == $day)
 			// Current day
@@ -535,16 +535,16 @@ function s2_blog_year_posts ($year)
 
 	$page['head_title'] = $page['title'] =  sprintf($lang_s2_blog['Year'], $year);
 
-	$page['link_navigation']['up'] = BLOG_BASE;
+	$page['link_navigation']['up'] = S2_BLOG_PATH;
 	if ($year > S2_START_YEAR)
 	{
-		$page['title'] = '<a href="'.BLOG_BASE.($year - 1).'/">&larr;</a> '.$page['title'];
-		$page['link_navigation']['prev'] = BLOG_BASE.($year - 1).'/';
+		$page['title'] = '<a href="'.S2_BLOG_PATH.($year - 1).'/">&larr;</a> '.$page['title'];
+		$page['link_navigation']['prev'] = S2_BLOG_PATH.($year - 1).'/';
 	}
 	if ($year < date('Y'))
 	{
-		$page['title'] .= ' <a href="'.BLOG_BASE.($year + 1).'/">&rarr;</a>';
-		$page['link_navigation']['next'] = BLOG_BASE.($year + 1).'/';
+		$page['title'] .= ' <a href="'.S2_BLOG_PATH.($year + 1).'/">&rarr;</a>';
+		$page['link_navigation']['next'] = S2_BLOG_PATH.($year + 1).'/';
 	}
 
 	$query = array(
@@ -604,7 +604,7 @@ function s2_blog_posts_links ($ids, $labels, &$see_also, &$tags)
 		array_multisort($sort_array, SORT_DESC, $rows);
 
 		foreach ($rows as $row)
-			$see_also[$row['label']][$row['id']] = '<a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a>';
+			$see_also[$row['label']][$row['id']] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a>';
 	}
 
 	// Obtaining tags
@@ -632,7 +632,7 @@ function s2_blog_posts_links ($ids, $labels, &$see_also, &$tags)
 	array_multisort($sort_array, $rows);
 
 	foreach ($rows as $row)
-		$tags[$row['post_id']][] = '<a href="'.BLOG_KEYWORDS.urlencode($row['url']).'/">'.$row['name'].'</a>';
+		$tags[$row['post_id']][] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($row['url']).'/">'.$row['name'].'</a>';
 }
 
 // Returns an array containing info about 10 last posts
@@ -691,7 +691,7 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 				unset($label_copy[$i]);
 			$posts[$i]['text'] .= s2_blog_format_see_also($label_copy);
 		}
-		$posts[$i]['comments'] = $row['commented'] ? '<a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#comment">'.s2_blog_comment_text($posts[$i]['comm_num']).'</a>' : '';
+		$posts[$i]['comments'] = $row['commented'] ? '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#comment">'.s2_blog_comment_text($posts[$i]['comm_num']).'</a>' : '';
 		$posts[$i]['tags'] = isset($tags[$i]) ? implode(', ', $tags[$i]) : '';
 	}
 
@@ -717,7 +717,7 @@ function s2_blog_last_posts ($skip = 0)
 			break;
 
 		$output .= s2_blog_format_post(
-			'<a href="'.BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.$post['title'].'</a>',
+			'<a href="'.S2_BLOG_PATH.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.$post['title'].'</a>',
 			s2_date($post['create_time']),
 			s2_date_time($post['create_time']),
 			$post['text'],
@@ -732,12 +732,12 @@ function s2_blog_last_posts ($skip = 0)
 	$link_nav = array();
 	if ($skip > 0)
 	{
-		$link_nav['prev'] = BLOG_BASE.($skip > $posts_per_page ? 'skip/'.($skip - $posts_per_page) : '');
+		$link_nav['prev'] = S2_BLOG_PATH.($skip > $posts_per_page ? 'skip/'.($skip - $posts_per_page) : '');
 		$paging = '<a href="'.$link_nav['prev'].'">'.$lang_s2_blog['Here'].'</a> ';
 	}
 	if ($i > $posts_per_page)
 	{
-		$link_nav['next'] = BLOG_BASE.'skip/'.($skip + $posts_per_page);
+		$link_nav['next'] = S2_BLOG_PATH.'skip/'.($skip + $posts_per_page);
 		$paging .= '<a href="'.$link_nav['next'].'">'.$lang_s2_blog['There'].'</a>';
 	}
 
@@ -764,7 +764,7 @@ function s2_blog_last_post ($num_post)
 	$output = '';
 	foreach ($posts as $post)
 	{
-		$link = BLOG_BASE.date('Y/m/d/', $post['create_time']).urlencode($post['url']);
+		$link = S2_BLOG_PATH.date('Y/m/d/', $post['create_time']).urlencode($post['url']);
 		$tag_prefix = $post['tags'] ? '<small>'.preg_replace('/<a.*?>(.*?)<\/a>/', "\\1", $post['tags']).' &rarr;</small> ' : '';
 
 		($hook = s2_hook('fn_s2_blog_last_post_pre_post_merge')) ? eval($hook) : null;
@@ -814,7 +814,7 @@ function s2_blog_recent_comments ()
 
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$output .= '<li><a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#'.$row['count'].'">'.$row['title'].'</a>, <em>'.$row['nick'].'</em></li>';
+		$output .= '<li><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#'.$row['count'].'">'.$row['title'].'</a>, <em>'.$row['nick'].'</em></li>';
 
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
@@ -846,7 +846,7 @@ function s2_blog_recent_discussions ($cur_url = '---')
 
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
-		$output .= '<li title="'.$row['comment_num'].'"><a href="'.BLOG_BASE.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a></li>';
+		$output .= '<li title="'.$row['comment_num'].'"><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.$row['title'].'</a></li>';
 	$output = preg_replace('#<a href="'.preg_quote($cur_url, '#').'">(.*?)</a>#', '\\1', $output);
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
@@ -860,7 +860,7 @@ function s2_blog_navigation ($cur_url)
 
 	if (empty($s2_blog_navigation) || !isset($s2_blog_navigation_time) || $s2_blog_navigation_time < time() - 900)
 	{
-		$s2_blog_navigation = array('last' => '<a href="'.BLOG_BASE.'">'.sprintf($lang_s2_blog['Nav last'], S2_MAX_ITEMS ? S2_MAX_ITEMS : 10).'</a>');
+		$s2_blog_navigation = array('last' => '<a href="'.S2_BLOG_PATH.'">'.sprintf($lang_s2_blog['Nav last'], S2_MAX_ITEMS ? S2_MAX_ITEMS : 10).'</a>');
 
 		$query = array(
 			'SELECT'	=> '1',
@@ -872,7 +872,7 @@ function s2_blog_navigation ($cur_url)
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		if ($s2_db->fetch_row($result))
-			$s2_blog_navigation['favorite'] = '<a href="'.BLOG_BASE.urlencode(S2_FAVORITE_URL).'/">'.$lang_s2_blog['Nav favorite'].'</a>';
+			$s2_blog_navigation['favorite'] = '<a href="'.S2_BLOG_PATH.urlencode(S2_FAVORITE_URL).'/">'.$lang_s2_blog['Nav favorite'].'</a>';
 
 		$query = array(
 			'SELECT'	=> 't.name, t.url, count(t.tag_id)',
@@ -896,10 +896,10 @@ function s2_blog_navigation ($cur_url)
 
 		$tags = '';
 		while ($tag = $s2_db->fetch_assoc($result))
-			$tags .= '<li><a href="'.BLOG_KEYWORDS.urlencode($tag['url']).'/">'.$tag['name'].'</a></li>';
+			$tags .= '<li><a href="'.S2_BLOG_TAGS_PATH.urlencode($tag['url']).'/">'.$tag['name'].'</a></li>';
 
 		if ($tags != '')
-			$s2_blog_navigation['tags'] = sprintf($lang_s2_blog['Nav tags'], BLOG_KEYWORDS).'<ul>'.$tags.'</ul>';
+			$s2_blog_navigation['tags'] = sprintf($lang_s2_blog['Nav tags'], S2_BLOG_TAGS_PATH).'<ul>'.$tags.'</ul>';
 
 		// Output navigation array as PHP code
 		$fh = @fopen(S2_CACHE_DIR.'s2_blog_navigation.php', 'ab+');
