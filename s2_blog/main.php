@@ -31,6 +31,11 @@ if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == '
 		$page['path'][] = S2_BLOG_CRUMBS;
 	if (S2_BLOG_URL)
 		$page['path'][] = $s2_blog_skip ? '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>' : $lang_s2_blog['Blog'];
+
+	if ($s2_blog_skip)
+		$page['link_navigation']['up'] = S2_BLOG_PATH;
+	elseif (S2_BLOG_URL && S2_BLOG_CRUMBS && preg_match('#href="(.*?)"#', S2_BLOG_CRUMBS, $s2_blog_matches))
+		$page['link_navigation']['up'] = $s2_blog_matches[1];
 }
 elseif ($s2_blog_path[1] == S2_FAVORITE_URL)
 {
