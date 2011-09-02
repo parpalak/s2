@@ -132,7 +132,7 @@ function s2_last_articles ()
 
 	$output = '';
 	foreach ($articles as $item)
-		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.S2_PATH.S2_URL_PREFIX.$item['rel_path'].'">'.$item['title'].'</a></h2>'.
+		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.S2_PATH.S2_URL_PREFIX.$item['rel_path'].'">'.s2_htmlencode($item['title']).'</a></h2>'.
 			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
 			 '<div class="preview cite">'.$item['text'].'</div>';
 
@@ -186,7 +186,7 @@ function s2_last_artilce_comments ()
 
 	$output = '';
 	foreach ($urls as $k => $url)
-		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'#'.$counts[$k].'">'.$titles[$k].'</a>, <em>'.$nicks[$k].'</em></li>';
+		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'#'.$counts[$k].'">'.s2_htmlencode($titles[$k]).'</a>, <em>'.s2_htmlencode($nicks[$k]).'</em></li>';
 
 	($hook = s2_hook('fn_last_article_comments_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul>' : '';
@@ -237,7 +237,7 @@ function s2_last_discussions ()
 
 	$output = '';
 	foreach ($urls as $k => $url)
-		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'" title="'.s2_htmlencode($nicks[$k].' ('.s2_date_time($time[$k]).')').'">'.$titles[$k].'</a></li>';
+		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'" title="'.s2_htmlencode($nicks[$k].' ('.s2_date_time($time[$k]).')').'">'.s2_htmlencode($titles[$k]).'</a></li>';
 
 	($hook = s2_hook('fn_last_discussions_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul>' : '';
@@ -719,7 +719,7 @@ function s2_parse_page_url ($request_uri)
 	}
 
 	$id = $page['id'];
-	$bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
+	$page['title'] = $bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
 	$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
 
 	$page['link_navigation']['top'] = S2_PATH.S2_URL_PREFIX.'/';
