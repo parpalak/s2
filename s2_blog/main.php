@@ -15,14 +15,20 @@ $page['commented'] = 0;
 if (count($s2_blog_path) <= 1 || $s2_blog_path[1] == '' || $s2_blog_path[1] == 'skip')
 {
 	// Main page
+	$s2_blog_skip = 0;
+	if ($s2_blog_path[1] == 'skip')
+	{
+		if (!isset($s2_blog_path[2]) || !ctype_digit($s2_blog_path[2]))
+			return false;
+		$s2_blog_skip = (int) $s2_blog_path[2];
+	}
 
 	// Getting page template
-	$template = s2_get_template('blog_main.php', $ext_info['path'].'/templates/');
+	$template = s2_get_template($s2_blog_skip ? 'blog.php' : 'blog_main.php', $ext_info['path'].'/templates/');
 
 	if (strpos($template, '<!-- s2_blog_calendar -->') !== false)
 		$page['s2_blog_calendar'] = s2_blog_calendar(date('Y'), date('m'), '0');
 
-	$s2_blog_skip = (isset($s2_blog_path[2]) && $s2_blog_path[1] == 'skip') ? (int) $s2_blog_path[2] : 0;
 	$page += s2_blog_last_posts($s2_blog_skip);
 	$page['head_title'] = '';
 
