@@ -6,7 +6,7 @@
 <!-- s2_meta -->
 <link rel="stylesheet" type="text/css" media="screen" href="<?php echo $GLOBALS['ext_info']['url']; ?>/style.css" />
 <!-- s2_styles -->
-<!-- s2_link_navigation -->
+<!-- s2_navigation_link -->
 </head>
 
 <body>
