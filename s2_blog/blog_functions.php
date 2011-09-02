@@ -841,7 +841,7 @@ function s2_blog_navigation ($cur_url)
 
 	if (empty($s2_blog_navigation) || !isset($s2_blog_navigation_time) || $s2_blog_navigation_time < time() - 900)
 	{
-		$s2_blog_navigation = array('last' => '<a href="'.BLOG_BASE.'">'.$lang_s2_blog['Nav last'].'</a>');
+		$s2_blog_navigation = array('last' => '<a href="'.BLOG_BASE.'">'.sprintf($lang_s2_blog['Nav last'], S2_MAX_ITEMS ? S2_MAX_ITEMS : 10).'</a>');
 
 		$query = array(
 			'SELECT'	=> '1',

@@ -15,7 +15,7 @@ $lang_s2_blog = array(
 'Year'						=> '%s year',
 
 'Navigation'				=> 'Posts',
-'Nav last'					=> 'Last 10',
+'Nav last'					=> 'Last %d',
 'Nav favorite'				=> 'Favorite',
 'Nav tags'					=> 'By <a href="%s">tags</a>:',
 'Here'						=> '← here',
