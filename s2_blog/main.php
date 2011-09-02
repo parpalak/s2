@@ -135,7 +135,7 @@ else
 
 	$page['title'] = '';
 
-	if ($s2_blog_path[2] == '')
+	if (!$s2_blog_path[2])
 	{
 		// Posts of a year
 		$page = s2_blog_year_posts($s2_blog_path[1]) + $page;
@@ -147,7 +147,7 @@ else
 			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
 		$page['path'][] = $s2_blog_path[1];
 	}
-	elseif ($s2_blog_path[3])
+	elseif (!$s2_blog_path[3])
 	{
 		// Posts of a month
 		$page += s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2]);
@@ -161,7 +161,7 @@ else
 		$page['path'][] = '<a href="'.S2_BLOG_PATH.$s2_blog_path[1].'/">'.$s2_blog_path[1].'</a>';
 		$page['path'][] = $s2_blog_path[2];
 	}
-	elseif ($s2_blog_path[4] == '')
+	elseif ($s2_blog_path[4] === '')
 	{
 		// Posts of a day
 		$page += s2_blog_posts_by_time($s2_blog_path[1], $s2_blog_path[2], $s2_blog_path[3]);
