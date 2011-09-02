@@ -67,7 +67,7 @@ function s2_do_rss ()
 
 ?>
 		<item>
-			<title><?php echo s2_htmlencode($item['title']); ?></title>
+			<title><?php echo s2_htmlencode(s2_htmlencode($item['title'])); ?></title>
 			<link><?php echo S2_BASE_URL.S2_URL_PREFIX.$item['rel_path']; ?></link>
 			<description><?php echo s2_htmlencode($item['text']); ?></description>
 <?php
