@@ -48,6 +48,7 @@ $lang_s2_blog = array(
 'Label help'				=> '“See also” links (to the posts that have the same label) will be appended to this post.',
 'No label'					=> '— No label —',
 'New label'					=> '— New label —',
+'Enter new label'			=> 'Enter new label:',
 
 'Invalid start date'		=> 'Invalid start date. For exaple, yesterday was <b>%1$s</b> and today is <b>%2$s</b>.',
 'Invalid end date'			=> 'Invalid end date. For exaple, yesterday was <b>%1$s</b> and today is <b>%2$s</b>.',

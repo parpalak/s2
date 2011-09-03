@@ -327,7 +327,7 @@ function s2_blog_edit_post_form ($id)
 		<hr />
 <?php ($hook = s2_hook('fn_s2_blog_post_form_pre_labels')) ? eval($hook) : null; ?>
 		<label title="<?php echo $lang_s2_blog['Label help']; ?>"><?php echo $lang_s2_blog['Labels']; ?><br />
-		<select name="page[label]" data-prev-value="<?php echo s2_htmlencode($page['label']); ?>" onchange="ChangeSelect(this, '<?php echo $lang_admin['Add template info']; ?>', '');">
+		<select name="page[label]" data-prev-value="<?php echo s2_htmlencode($page['label']); ?>" onchange="ChangeSelect(this, '<?php echo $lang_s2_blog['Enter new label']; ?>', '');">
 <?php
 
 	foreach ($labels as $label)
