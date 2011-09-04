@@ -23,7 +23,7 @@ $lang_admin_ext = array(
 'Failed parse manifest'			=>	'Не могу разобрать файл manifest.xml.',
 
 'extension root error'			=>	'Корневой элемент «extension» отсутствует или имеет неправильный формат.',
-'extension/engine error1'		=>	'Отсутствует атрибут «for» у корневого элемента. Это расширение не для S2.',
+'extension/engine error'		=>	'Отсутствует атрибут «for» у корневого элемента. Это расширение не для S2.',
 'extension/engine error2'		=>	'Атрибут «for» корневого элемента имеет неправильное значение. Это расширение не для S2.',
 'extension/engine error3'		=>	'Отсутствует атрибут «engine» у корневого элемента.',
 'extension/engine error4'		=>	'Версия формата расширения не поддерживается.',
