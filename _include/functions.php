@@ -218,7 +218,7 @@ function s2_get_template ($template_id, $path = false)
 					return '<a href="'.$url.'">'.$text.'</a>';
 			}
 		}
-		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.S2_PATH.S2_URL_PREFIX.$request_uri.'\', \'\\2\')', $template);
+		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.S2_PATH.S2_URL_PREFIX.str_replace('\'', '\\\'', $request_uri).'\', \'\\2\')', $template);
 	}
 
 	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
