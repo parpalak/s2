@@ -493,28 +493,25 @@ function s2_unregister_globals()
 // Removes any "bad" characters (characters which mess with the display of a page, are invisible, etc) from user input
 function s2_remove_bad_characters()
 {
-	global $bad_utf8_chars;
-
 	$bad_utf8_chars = array("\0", "\xc2\xad", "\xcc\xb7", "\xcc\xb8", "\xe1\x85\x9F", "\xe1\x85\xA0", "\xe2\x80\x80", "\xe2\x80\x81", "\xe2\x80\x82", "\xe2\x80\x83", "\xe2\x80\x84", "\xe2\x80\x85", "\xe2\x80\x86", "\xe2\x80\x87", "\xe2\x80\x88", "\xe2\x80\x89", "\xe2\x80\x8a", "\xe2\x80\x8b", "\xe2\x80\x8e", "\xe2\x80\x8f", "\xe2\x80\xaa", "\xe2\x80\xab", "\xe2\x80\xac", "\xe2\x80\xad", "\xe2\x80\xae", "\xe2\x80\xaf", "\xe2\x81\x9f", "\xe3\x80\x80", "\xe3\x85\xa4", "\xef\xbb\xbf", "\xef\xbe\xa0", "\xef\xbf\xb9", "\xef\xbf\xba", "\xef\xbf\xbb", "\xE2\x80\x8D");
 
 	($hook = s2_hook('fn_remove_bad_characters_start')) ? eval($hook) : null;
 
-	function _s2_remove_bad_characters(&$array)
+	function _s2_remove_bad_characters(&$array, &$bad_utf8_chars)
 	{
-		global $bad_utf8_chars;
 		if (is_array($array))
 			foreach (array_keys($array) as $key)
-				_s2_remove_bad_characters($array[$key]);
+				_s2_remove_bad_characters($array[$key], $bad_utf8_chars);
 		else
 			$array = str_replace($bad_utf8_chars, '', $array);
 	}
 
-	_s2_remove_bad_characters($_GET);
+	_s2_remove_bad_characters($_GET, $bad_utf8_chars);
 	// Check if we expect binary data in $_POST
 	if (!defined('S2_NO_POST_BAD_CHARS'))
-		_s2_remove_bad_characters($_POST);
-	_s2_remove_bad_characters($_COOKIE);
-	_s2_remove_bad_characters($_REQUEST);
+		_s2_remove_bad_characters($_POST, $bad_utf8_chars);
+	_s2_remove_bad_characters($_COOKIE, $bad_utf8_chars);
+	_s2_remove_bad_characters($_REQUEST, $bad_utf8_chars);
 }
 
 // Clean version string from trailing '.0's
