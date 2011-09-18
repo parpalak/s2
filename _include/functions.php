@@ -633,11 +633,7 @@ function s2_404_header ()
 	if ($return != null)
 		return;
 
-//	global $count_this;
-
 	header('HTTP/1.1 404 Not Found');
-//	@log_it("\n404!".date('d.m H:i:s ').$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']." ".getenv('REQUEST_URI').' '.$_SERVER['HTTP_REFERER'], '404');
-//	$count_this = 0;
 	s2_no_cache();
 }
 
