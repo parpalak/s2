@@ -641,13 +641,10 @@ function s2_404_header ()
 	s2_no_cache();
 }
 
-function error_404 ()
+function s2_error_404 ()
 {
 	global $lang_common;
 
-//	@log_it("\n40x!".date('d.m H:i:s ').$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']." ".getenv('REQUEST_URI').' '.$_SERVER['HTTP_REFERER'], '404');
-	//include "404/error.php";
-	//exit();
 	header('HTTP/1.1 404 Not Found');
 	header('Content-Type: text/html; charset=utf-8');
 
@@ -659,7 +656,7 @@ function error_404 ()
 		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
-	($hook = s2_hook('fn_error_404_pre_replace')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_error_404_pre_replace')) ? eval($hook) : null;
 
 	foreach ($replace as $what => $to)
 		$template = str_replace($what, $to, $template);

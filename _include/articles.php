@@ -384,7 +384,7 @@ function s2_make_tags_pages ($request_array)
 		if ($row = $s2_db->fetch_row($result))
 			list($tag_id, $tag_description, $tag_name) = $row;
 		else
-			error_404();
+			s2_error_404();
 
 		if ($tag_description)
 			$tag_description .= '<hr />';
@@ -660,7 +660,7 @@ function s2_parse_page_url ($request_uri)
 
 		$row = $s2_db->fetch_assoc($result);
 		if (!$row)
-			error_404();
+			s2_error_404();
 		if ($s2_db->fetch_assoc($result))
 			error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
 
@@ -697,7 +697,7 @@ function s2_parse_page_url ($request_uri)
 
 	// Error handling
 	if (!$page)
-		error_404();
+		s2_error_404();
 	if ($s2_db->fetch_assoc($result))
 		error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
 
