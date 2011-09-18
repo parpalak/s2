@@ -373,7 +373,7 @@ function s2_blog_posts_by_tag ($tag)
 	if ($row = $s2_db->fetch_row($result))
 		list($tag_id, $tag_descr, $tag_name) = $row;
 	else
-		error_404();
+		s2_error_404();
 
 	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
 		include S2_ROOT.'_include/articles.php';
@@ -395,7 +395,7 @@ function s2_blog_posts_by_tag ($tag)
 	);
 	$output = s2_blog_get_posts($query_add, false);
 	if ($output == '')
-		error_404();
+		s2_error_404();
 
 	return array(
 		'text'			=> $tag_descr.$output,
