@@ -122,13 +122,13 @@ function s2_last_articles_array ($limit = '5')
 //
 // Formatting last articles (for template placeholders)
 //
-function s2_last_articles ()
+function s2_last_articles ($num)
 {
 	$return = ($hook = s2_hook('fn_last_articles_start')) ? eval($hook) : null;
 	if ($return)
 		return $return;
 
-	$articles = s2_last_articles_array();
+	$articles = s2_last_articles_array($num);
 
 	$output = '';
 	foreach ($articles as $item)

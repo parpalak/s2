@@ -143,7 +143,7 @@ if (strpos($template, '<!-- s2_last_discussions -->') !== false && ($last_discus
 	$replace['<!-- s2_last_discussions -->'] = '<div class="header">'.$lang_common['Last discussions'].'</div>'.$last_discussions;
 
 if (strpos($template, '<!-- s2_last_articles -->') !== false)
-	$replace['<!-- s2_last_articles -->'] = s2_last_articles();
+	$replace['<!-- s2_last_articles -->'] = s2_last_articles(5);
 
 if (strpos($template, '<!-- s2_tags_list -->') !== false)
 	$replace['<!-- s2_tags_list -->'] = s2_tags_list();
