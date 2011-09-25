@@ -122,7 +122,7 @@ $replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $page['path'] : '';
 $replace['<!-- s2_section_link -->'] = isset($page['section_link']) ? $page['section_link'] : '';
 $replace['<!-- s2_text -->'] = isset($page['text']) ? $page['text'] : '';
 $replace['<!-- s2_subarticles -->'] = isset($page['subcontent']) ? $page['subcontent'] : '';
-$replace['<!-- s2_tags -->'] = !empty($page['tags_list']) ? $page['tags_list'] : '';
+$replace['<!-- s2_tags -->'] = !empty($page['tags']) ? $page['tags'] : '';
 $replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
 
 if (S2_ENABLED_COMMENTS && isset($page['commented']) && $page['commented'])
@@ -144,6 +144,9 @@ if (strpos($template, '<!-- s2_last_discussions -->') !== false && ($last_discus
 
 if (strpos($template, '<!-- s2_last_articles -->') !== false)
 	$replace['<!-- s2_last_articles -->'] = s2_last_articles();
+
+if (strpos($template, '<!-- s2_tags_list -->') !== false)
+	$replace['<!-- s2_tags_list -->'] = s2_tags_list();
 
 // Footer
 $replace['<!-- s2_copyright -->'] = s2_build_copyright($request_uri);

@@ -308,22 +308,21 @@ function s2_main_page_title ()
 	return $main_title;
 }
 
-//
-// Builds tags pages
-//
-function s2_make_tags_pages ($request_array)
+// Makes tags list for the tags page and the placeholder
+function s2_tags_list ()
 {
-	global $s2_db, $lang_common;
+	global $s2_db;
 
-	if (!isset($request_array[2]) || $request_array[2] == '')
+	static $tags = array();
+	static $ready = false;
+
+	if (!$ready)
 	{
-		// Tags list
-
 		$query = array(
 			'SELECT'	=> 'tag_id, name, url',
 			'FROM'		=> 'tags'
 		);
-		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_tags_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_tags_list_pre_get_tags_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		while ($row = $s2_db->fetch_assoc($result))
@@ -345,7 +344,7 @@ function s2_make_tags_pages ($request_array)
 			),
 			'WHERE'		=> 'a.published = 1'
 		);
-		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_posts_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_tags_list_pre_get_posts_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		while ($row = $s2_db->fetch_row($result))
@@ -353,13 +352,33 @@ function s2_make_tags_pages ($request_array)
 
 		arsort($tag_count);
 
-		$tags = array();
 		foreach ($tag_count as $id => $num)
 			if ($num)
 				$tags[] = '<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/'.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a>';
 
+		$ready = true;
+	}
+
+	$output = implode('<br />', $tags);
+
+	($hook = s2_hook('fn_s2_tags_list_end')) ? eval($hook) : null;
+
+	return $output;
+}
+
+//
+// Builds tags pages
+//
+function s2_make_tags_pages ($request_array)
+{
+	global $s2_db, $lang_common;
+
+	if (!isset($request_array[2]) || $request_array[2] == '')
+	{
+		// Tag list
+
 		$page = array(
-			'text'			=> implode('<br />', $tags),
+			'text'			=> '<div class="tags_list">'.s2_tags_list().'</div>',
 			'date'			=> '',
 			'title'			=> $lang_common['Tags'],
 			'path'			=> '<a href="'.S2_PATH.S2_URL_PREFIX.'/">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].$lang_common['Tags'],
@@ -511,7 +530,7 @@ function s2_tagged_articles ($id)
 	}
 
 	if (empty($tag_urls))
-		return;
+		return '';
 
 	$subquery = array(
 		'SELECT'	=> '1',
@@ -555,7 +574,7 @@ function s2_tagged_articles ($id)
 	}
 
 	if (empty($urls))
-		return;
+		return '';
 
 	if ($create_tag_list)
 		$urls = s2_get_group_url($parent_ids, $urls);
@@ -587,7 +606,7 @@ function s2_tagged_articles ($id)
 	return !empty($output) ? implode("\n", $output) : '';
 }
 
-function s2_tags_list ($id)
+function s2_get_tags ($id)
 {
 	global $s2_db, $lang_common;
 
@@ -612,7 +631,7 @@ function s2_tags_list ($id)
 	if (empty($tags))
 		return '';
 
-	return '<p class="tags_list">'.sprintf($lang_common['Tags:'], implode(', ', $tags)).'</p>';
+	return '<p class="article_tags">'.sprintf($lang_common['Tags:'], implode(', ', $tags)).'</p>';
 }
 
 // Processes site pages
@@ -937,7 +956,7 @@ function s2_parse_page_url ($request_uri)
 		$page['article_tags'] = s2_tagged_articles($id);
 
 	if (strpos($template, '<!-- s2_tags -->') !== false)
-		$page['tags_list'] = s2_tags_list($id);
+		$page['tags'] = s2_get_tags($id);
 
 	// Comments
 	if ($page['commented'] && S2_SHOW_COMMENTS && strpos($template, '<!-- s2_comments -->') !== false)
