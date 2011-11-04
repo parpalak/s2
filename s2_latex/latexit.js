@@ -1,123 +1,3 @@
-/* Cross-Browser Split 1.0.1
-(c) Steven Levithan <stevenlevithan.com>; MIT License
-An ECMA-compliant, uniform cross-browser split method */
-
-var cbSplit;
-
-// avoid running twice, which would break `cbSplit._nativeSplit`'s reference to the native `split`
-if (!cbSplit)
-{
-	cbSplit = function (str, separator, limit)
-	{
-		// if `separator` is not a regex, use the native `split`
-		if (Object.prototype.toString.call(separator) !== "[object RegExp]")
-		{
-			return cbSplit._nativeSplit.call(str, separator, limit);
-		}
-
-		var output = [],
-			lastLastIndex = 0,
-			flags = (separator.ignoreCase ? "i" : "") +
-					(separator.multiline  ? "m" : "") +
-					(separator.sticky ? "y" : ""),
-			separator = RegExp(separator.source, flags + "g"), // make `global` and avoid `lastIndex` issues by working with a copy
-			separator2, match, lastIndex, lastLength;
-
-		str = str + ""; // type conversion
-		if (!cbSplit._compliantExecNpcg)
-		{
-			separator2 = RegExp("^" + separator.source + "$(?!\\s)", flags); // doesn't need /g or /y, but they don't hurt
-		}
-
-		/* behavior for `limit`: if it's...
-		- `undefined`: no limit.
-		- `NaN` or zero: return an empty array.
-		- a positive number: use `Math.floor(limit)`.
-		- a negative number: no limit.
-		- other: type-convert, then use the above rules. */
-		if (limit === undefined || +limit < 0)
-		{
-			limit = Infinity;
-		}
-		else
-		{
-			limit = Math.floor(+limit);
-			if (!limit)
-			{
-				return [];
-			}
-		}
-
-		while (match = separator.exec(str))
-		{
-			lastIndex = match.index + match[0].length; // `separator.lastIndex` is not reliable cross-browser
-
-			if (lastIndex > lastLastIndex)
-			{
-				output.push(str.slice(lastLastIndex, match.index));
-
-				// fix browsers whose `exec` methods don't consistently return `undefined` for nonparticipating capturing groups
-				if (!cbSplit._compliantExecNpcg && match.length > 1)
-				{
-					match[0].replace(separator2, function ()
-					{
-						for (var i = 1; i < arguments.length - 2; i++)
-						{
-							if (arguments[i] === undefined)
-							{
-								match[i] = undefined;
-							}
-						}
-					});
-				}
-
-				if (match.length > 1 && match.index < str.length)
-				{
-					Array.prototype.push.apply(output, match.slice(1));
-				}
-
-				lastLength = match[0].length;
-				lastLastIndex = lastIndex;
-
-				if (output.length >= limit)
-				{
-					break;
-				}
-			}
-
-			if (separator.lastIndex === match.index)
-			{
-				separator.lastIndex++; // avoid an infinite loop
-			}
-		}
-
-		if (lastLastIndex === str.length)
-		{
-			if (lastLength || !separator.test(""))
-			{
-				output.push("");
-			}
-		}
-		else
-		{
-			output.push(str.slice(lastLastIndex));
-		}
-
-		return output.length > limit ? output.slice(0, limit) : output;
-	};
-
-	cbSplit._compliantExecNpcg = /()??/.exec("")[1] === undefined; // NPCG: nonparticipating capturing group
-	cbSplit._nativeSplit = String.prototype.split;
-
-} // end `if (!cbSplit)`
-
-// for convenience...
-String.prototype.split = function (separator, limit)
-{
-	return cbSplit(this, separator, limit);
-};
-
-
 /*
 * LaTeX IT - JavaScript to Convert Latex within an HTML page into Equations
 * Copyright (C) 2009 William Bateman, 2008 Waipot Ngamsaad
@@ -212,19 +92,28 @@ var LatexIT = (function ()
 				var bProcessed = false;
 				for (var j = 0, max = eItem.childNodes.length; j < max; j++)
 				{
-					if (eItem.childNodes[j].nodeType == 1 && eItem.childNodes[j].nodeName != 'SCRIPT' && eItem.childNodes[j].nodeName != 'TEXTAREA' && eItem.childNodes[j].nodeName != 'OBJECT')
-						LatexIT.process_item(eItem.childNodes[j]);
-					else if (eItem.childNodes[j].nodeType == 3)
+					var eCurItem = eItem.childNodes[j];
+
+					if (eCurItem.nodeType == 1 && eCurItem.nodeName != 'SCRIPT' && eCurItem.nodeName != 'TEXTAREA' && eCurItem.nodeName != 'OBJECT')
+						LatexIT.process_item(eCurItem);
+					else if (eCurItem.nodeType == 3)
 					{
-						var eCurItem = eItem.childNodes[j];
-						var as = eCurItem.nodeValue.split(/(\$\$.*?[^\\]\$\$)/g);
-						if (as.length > 1)
+						var as = (' ' + eCurItem.nodeValue + ' ').split(/\$\$/g);
+						var item_num = as.length;
+						if (item_num > 2)
 						{
+							as[0] = as[0].substr(1);
+							as[item_num - 1] = as[item_num - 1].substr(0, as[item_num - 1].length - 1);
 							bProcessed = true;
-							for (var i = 0; i < as.length; i++)
+							for (var i = 0; i < item_num; i++)
 							{
-								if (as[i].substr(0, 2) == '$$' && as[i].substr(as[i].length - 2, 2) == '$$')
-									eItem.insertBefore(LatexIT.create_image(as[i]), eCurItem);
+								if (i % 2)
+								{
+									if (i + 1 < item_num)
+										eItem.insertBefore(LatexIT.create_image(as[i]), eCurItem);
+									else
+										eItem.insertBefore(document.createTextNode('$$' + as[i]), eCurItem);
+								}
 								else
 									eItem.insertBefore(document.createTextNode(as[i]), eCurItem);
 							}
@@ -243,14 +132,15 @@ var LatexIT = (function ()
 			var aeItem = document.getElementsByTagName(tag);
 			for (var i = aeItem.length; i-- ;)
 			{
+				var eItem = aeItem[i];
 				if (latexmode)
-					LatexIT.process_item(aeItem[i]);
+					LatexIT.process_item(eItem);
 				else
 				{
 					try
 					{
-						if (aeItem[i].getAttribute("lang") == "latex" || aeItem[i].getAttribute("xml:lang") == "latex")
-							aeItem[i].innerHTML = LatexIT.pre(aeItem[i].innerHTML);
+						if (eItem.getAttribute("lang") == "latex" || eItem.getAttribute("xml:lang") == "latex")
+							eItem.innerHTML = LatexIT.pre(eItem.innerHTML);
 					}
 					catch (e) {}
 				}
