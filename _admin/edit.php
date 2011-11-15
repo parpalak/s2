@@ -199,7 +199,7 @@ function s2_output_article_form ($id)
 <?php
 
 	foreach ($templates as $filename => $template)
-		echo "\t\t\t".'<option value="'.s2_htmlencode($filename).'"'.($page['template'] == $filename ? ' selected="selected"' : '').'>'.$template.'</option>'."\n";
+		echo "\t\t\t".'<option value="'.s2_htmlencode($filename).'"'.($page['template'] == $filename ? ' selected="selected"' : '').'>'.s2_htmlencode($template).'</option>'."\n";
 
 ?>
 		</select></label>
