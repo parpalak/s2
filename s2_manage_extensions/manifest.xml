@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_manage_extensions</id>
 	<title>Manage Extensions</title>
-	<version>1.0a2</version>
+	<version>1.0b</version>
 	<description>Adds the "Refresh hooks" button to the extension list. It can be useful for extension developers.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a1</minversion>
-	<maxtestedon>1.0a6</maxtestedon>
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b</maxtestedon>
 
 	<hooks>
 
@@ -39,9 +39,9 @@ $buttons = array_merge(array('refresh_hooks' => '<button class="bitbtn" style="b
 		<hook id="rq_custom_action"><![CDATA[
 if ($action == 's2_manage_extensions_refresh_hooks')
 {
-	$required_rights = array('edit_users');
+	$is_permission = $s2_user['edit_users'];
 	($hook = s2_hook('rq_action_load_extensions_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');

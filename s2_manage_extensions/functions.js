@@ -11,7 +11,6 @@
 
 function emRefreshHooks (sId)
 {
-	GETSyncRequest(sUrl + "action=s2_manage_extensions_refresh_hooks&id=" + sId);
-
+	GETAsyncRequest(sUrl + "action=s2_manage_extensions_refresh_hooks&id=" + sId);
 	return false;
 }
