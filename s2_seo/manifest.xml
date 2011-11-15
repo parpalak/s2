@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_seo</id>
 	<title>Seo pack</title>
-	<version>1.0a</version>
+	<version>1.0b</version>
 	<description>Allows to edit the title tag on every page.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a5</minversion>
-	<maxtestedon>1.0a5</maxtestedon>
+	<minversion>1.0ab</minversion>
+	<maxtestedon>1.0ab</maxtestedon>
 
 	<note type="uninstall" timing="pre">Warning! All your custom titles will be deleted during the uninstall process. It is strongly recommended you to disable Seo pack extension instead or to upgrade it without uninstalling.</note>
 
@@ -57,7 +57,7 @@ else
 <?php
 		]]></hook>
 
-		<hook id="rq_action_save_article_pre_post_upd_qr"><![CDATA[
+		<hook id="fn_save_article_pre_upd_qr"><![CDATA[
 $query['SET'] .= ', s2_seo_title = \''.$s2_db->escape($page['s2_seo_title']).'\'';
 		]]></hook>
 
