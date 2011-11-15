@@ -1,12 +1,15 @@
 <?php
 /**
- * Helper functions for blog administrating
+ * Helper functions for blog tab in the admin panel
  *
  * @copyright (C) 2007-2011 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  */
 
+//
+// Editor tab
+//
 
 // Converts a date like 2010/05/09 into the timestamp
 function s2_blog_parse_date ($time, $day_shift = 0)
@@ -33,9 +36,396 @@ function s2_blog_parse_date ($time, $day_shift = 0)
 		mktime(0, 0, 0, $time_array['m'], $time_array['d'] + $day_shift, $time_array['Y']) : false;
 }
 
+function s2_blog_save_post ($page, $flags)
+{
+	global $s2_db, $lang_admin, $s2_user;
+
+	$favorite = (int) isset($flags['favorite']);
+	$published = (int) isset($flags['published']);
+	$commented = (int) isset($flags['commented']);
+
+	$create_time = isset($page['create_time']) ? s2_time_from_array($page['create_time']) : time();
+	$modify_time = isset($page['modify_time']) ? s2_time_from_array($page['modify_time']) : time();
+
+	$id = (int) $page['id'];
+
+	$label = isset($page['label']) ? $s2_db->escape($page['label']) : '';
+
+	$query = array(
+		'SELECT'	=> 'user_id, revision, text',
+		'FROM'		=> 's2_blog_posts',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_save_post_pre_get_post_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	if ($row = $s2_db->fetch_row($result))
+		list($user_id, $revision, $text) = $row;
+	else
+		die('Item not found!');
+
+	if (!$s2_user['edit_site'])
+		s2_test_user_rights($user_id == $s2_user['id']);
+
+	if ($page['text'] != $text)
+	{
+		// If the page text has been modified, we check if this modification is done by current user
+		if ($revision != $page['revision'])
+			return array(null, $revision, 'conflict'); // No, it's somebody else
+
+		$revision++;
+	}
+
+	$error = false;
+
+	$query = array(
+		'UPDATE'	=> 's2_blog_posts',
+		'SET'		=> "title = '".$s2_db->escape($page['title'])."', text = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, label = '$label', revision = $revision",
+		'WHERE'		=> 'id = '.$id
+	);
+
+	if ($s2_user['edit_site'])
+		$query['SET'] .= ', user_id = '.intval($page['user_id']);
+
+	($hook = s2_hook('fn_s2_blog_save_post_pre_upd_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	if ($s2_db->affected_rows() == -1)
+		$error = true;
+
+	// Dealing with tags
+
+	$new_tags = isset($_POST['keywords']) ? $_POST['keywords'] : '|';
+
+	$query = array(
+		'SELECT'	=> 'tag_id',
+		'FROM'		=> 's2_blog_post_tag',
+		'WHERE'		=> 'post_id = '.$id,
+		'ORDER BY'	=> 'id'
+	);
+	($hook = s2_hook('fn_s2_blog_save_post_pre_get_tags_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$old_tags = '|';
+	while ($row = $s2_db->fetch_row($result))
+		$old_tags .= $row[0].'|';
+
+	// Compare old and new tags
+	if ($old_tags != $new_tags)
+	{
+		// Deleting old links
+		$query = array(
+			'DELETE'	=> 's2_blog_post_tag',
+			'WHERE'		=> 'post_id = '.$id
+		);
+		($hook = s2_hook('fn_s2_blog_save_post_pre_del_tags_qr')) ? eval($hook) : null;
+		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		if ($s2_db->affected_rows() == -1)
+			$error = true;
+
+		// Inserting new links
+		if ($new_tags != '' && $new_tags != '|')
+		{
+			foreach (explode('|', substr($new_tags, 1, -1)) as $tag_id)
+			{
+				$tag_id = (int) $tag_id;
+				if (!$tag_id)
+					continue;
+
+				$query = array(
+					'INSERT'	=> 'post_id, tag_id',
+					'INTO'		=> 's2_blog_post_tag',
+					'VALUES'	=> $id.', '.$tag_id
+				);
+				($hook = s2_hook('fn_s2_blog_save_post_pre_ins_tags_qr')) ? eval($hook) : null;
+				$s2_db->query_build($query) or error(__FILE__, __LINE__);
+				if ($s2_db->affected_rows() == -1)
+					$error = true;
+			}
+		}
+	}
+
+	if ($error)
+		die($lang_admin['Not saved correct']);
+
+	return array($create_time, $revision, 'ok');
+}
+
+// Check nor unique and empty post urls
+function s2_blog_check_url_status ($create_time, $url)
+{
+	global $s2_db;
+
+	$url_status = 'ok';
+
+	if ($url == '')
+		$url_status = 'empty';
+	else
+	{
+		$start_time = strtotime('midnight', $create_time);
+		$end_time = $start_time + 86400;
+
+		$query = array(
+			'SELECT'	=> 'count(id)',
+			'FROM'		=> 's2_blog_posts',
+			'WHERE'		=> 'url = \''.$url.'\' AND create_time < '.$end_time.' AND create_time >= '.$start_time
+		);
+		($hook = s2_hook('fn_s2_blog_check_url_status_pre_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		if ($s2_db->result($result) != 1)
+			$url_status = 'not_unique';
+	}
+
+	return $url_status;
+}
+
+//
+// Blog tab
+//
+
+function s2_blog_create_post ()
+{
+	global $s2_db, $lang_admin, $s2_user;
+
+	$now = time();
+
+	$query = array(
+		'INSERT'	=> 'create_time, modify_time, title, text, published, user_id',
+		'INTO'		=> 's2_blog_posts',
+		'VALUES'	=> $now.', '.$now.', \''.$lang_admin['New page'].'\', \'\', 0, '.$s2_user['id']
+	);
+	($hook = s2_hook('fn_s2_blog_create_post_pre_ins_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	return $s2_db->insert_id();
+}
+
+function s2_blog_flip_favorite ($id)
+{
+	global $s2_db;
+
+	$query = array(
+		'UPDATE'	=> 's2_blog_posts',
+		'SET'		=> 'favorite = 1 - favorite',
+		'WHERE'		=> 'id = '.$id,
+	);
+	($hook = s2_hook('fn_s2_blog_flip_favorite_pre_upd_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+}
+
+function s2_blog_delete_post ($id)
+{
+	global $s2_db, $s2_user;
+
+	if (!$s2_user['edit_site'])
+	{
+		$query = array(
+			'SELECT'	=> 'user_id',
+			'FROM'		=> 's2_blog_posts',
+			'WHERE'		=> 'id = '.$id
+		);
+		($hook = s2_hook('fn_s2_blog_delete_post_pre_get_uid_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		if ($row = $s2_db->fetch_row($result))
+			list($user_id) = $row;
+		else
+			die('Item not found!');
+
+		s2_test_user_rights($user_id == $s2_user['id']);
+	}
+
+	$query = array(
+		'DELETE'	=> 's2_blog_posts',
+		'WHERE'		=> 'id = '.$id,
+		'LIMIT'		=> '1'
+	);
+	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_post_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$query = array(
+		'DELETE'	=> 's2_blog_post_tag',
+		'WHERE'		=> 'post_id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_tags_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$query = array(
+		'DELETE'	=> 's2_blog_comments',
+		'WHERE'		=> 'post_id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_cmnts_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	($hook = s2_hook('fn_s2_blog_delete_post_end')) ? eval($hook) : null;
+}
+
+//
+// Comments tab
+//
+
+function s2_blog_get_comment ($id)
+{
+	global $s2_db;
+
+	// Get comment
+	$query = array(
+		'SELECT'	=> 'id, nick, email, text, show_email, subscribed',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_get_comment_pre_get_cmnnt_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$comment = $s2_db->fetch_assoc($result);
+
+	return $comment;
+}
+
+function s2_blog_hide_comment ($id)
+{
+	global $s2_db;
+
+	// Does the comment exist?
+	// We need post id for displaying comments.
+	// Also we need the comment if the premoderation is turned on.
+	$query = array(
+		'SELECT'	=> 'post_id, sent, shown, nick, email, text',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_hide_comment_pre_get_cmnt_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$comment = $s2_db->fetch_assoc($result);
+	if (!$comment)
+		die('Comment not found!');
+
+	$sent = 1;
+	if (!$comment['shown'] && !$comment['sent'])
+	{
+		// Premoderation is enabled and we have to send the comment to be shown
+		// to the subscribed commentators
+		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
+			require S2_ROOT.'_include/comments.php';
+
+		global $lang_comments;
+		require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
+
+		// Getting some info about the post commented
+		$query = array(
+			'SELECT'	=> 'title, create_time, url',
+			'FROM'		=> 's2_blog_posts',
+			'WHERE'		=> 'id = '.$comment['post_id'].' AND published = 1 AND commented = 1'
+		);
+		($hook = s2_hook('fn_s2_blog_hide_comment_pre_get_post_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		if ($post = $s2_db->fetch_assoc($result))
+		{
+			$link = S2_BASE_URL.S2_URL_PREFIX.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $post['create_time']).urlencode($post['url']);
+
+			// Fetching receivers' names and addresses
+			$query = array(
+				'SELECT'	=> 'id, nick, email, ip, time',
+				'FROM'		=> 's2_blog_comments',
+				'WHERE'		=> 'post_id = '.$comment['post_id'].' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($comment['email']).'\''
+			);
+			($hook = s2_hook('fn_s2_blog_toggle_hide_comment_pre_get_rcvs_qr')) ? eval($hook) : null;
+			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+			$receivers = array();
+			while ($receiver = $s2_db->fetch_assoc($result))
+				$receivers[$receiver['email']] = $receiver;
+
+			foreach ($receivers as $receiver)
+			{
+				$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$comment['post_id'].'&blog_unsubscribe='.base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36);
+				s2_mail_comment($receiver['nick'], $receiver['email'], $comment['text'], $post['title'], $link, $comment['nick'], $unsubscribe_link);
+			}
+		}
+		else
+			$sent = 0;
+	}
+
+	// Toggle comment visibility
+	$query = array(
+		'UPDATE'	=> 's2_blog_comments',
+		'SET'		=> 'shown = 1 - shown, sent = '.$sent,
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_hide_comment_pre_upd_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	return $comment['post_id'];
+}
+
+function s2_blog_mark_comment ($id)
+{
+	global $s2_db;
+
+	// Does the comment exist?
+	// We need post id for displaying comments
+	$query = array(
+		'SELECT'	=> 'post_id',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_mark_comment_pre_get_pid_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	if ($row = $s2_db->fetch_row($result))
+		$post_id = $row[0];
+	else
+		die('Comment not found!');
+
+	// Mark comment
+	$query = array(
+		'UPDATE'	=> 's2_blog_comments',
+		'SET'		=> 'good = 1 - good',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_mark_comment_pre_get_upd_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	return $post_id;
+}
+
+function s2_blog_delete_comment ($id)
+{
+	global $s2_db;
+
+	// Does the comment exist?
+	// We need post id for displaying the other comments
+	$query = array(
+		'SELECT'	=> 'post_id',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_delete_comment_pre_get_pid_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	if ($row = $s2_db->fetch_row($result))
+		$post_id = $row[0];
+	else
+		die('Comment not found!');
+
+	$query = array(
+		'DELETE'	=> 's2_blog_comments',
+		'WHERE'		=> 'id = '.$id
+	);
+	($hook = s2_hook('fn_s2_blog_delete_comment_pre_del_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	return $post_id;
+}
+
+//
+// HTML building
+//
+
 function s2_blog_output_post_list ($criteria)
 {
-	global $s2_db, $lang_common, $lang_admin, $lang_s2_blog, $session_id;
+	global $s2_db, $lang_common, $lang_admin, $lang_s2_blog, $s2_user;
 
 	$conditions = array();
 	$messages = array();
@@ -46,7 +436,7 @@ function s2_blog_output_post_list ($criteria)
 		if ($time === false)
 			$messages[] = sprintf($lang_s2_blog['Invalid start date'], date($lang_s2_blog['Date pattern'], time() - 86400), date($lang_s2_blog['Date pattern']));
 		elseif ((int) $time != 0)
-			$conditions[] = 'create_time > ' . ((int) $time);
+			$conditions[] = 'p.create_time >= ' . ((int) $time);
 		else
 			$messages[] = $time;
 	}
@@ -57,42 +447,29 @@ function s2_blog_output_post_list ($criteria)
 		if ($time === false)
 			$messages[] = sprintf($lang_s2_blog['Invalid end date'], date($lang_s2_blog['Date pattern'], time() - 86400), date($lang_s2_blog['Date pattern']));
 		elseif ((int) $time != 0)
-			$conditions[] = 'create_time < ' . ((int) $time);
+			$conditions[] = 'p.create_time <= ' . ((int) $time);
 		else
 			$messages[] = $time;
 	}
 
-	if (isset($criteria['text']) &&  $criteria['text'] != '')
+	if (!empty($criteria['text']))
 	{
 		$condition = array();
 		foreach (explode(' ', $criteria['text']) as $word)
 			if ($word != '')
-				$condition[] = 'title LIKE \'%'.$s2_db->escape($word).'%\' OR p.text LIKE \'%'.$s2_db->escape($word).'%\'';
+				$condition[] = 'p.title LIKE \'%'.$s2_db->escape($word).'%\' OR p.text LIKE \'%'.$s2_db->escape($word).'%\'';
 		if (count($condition))
 			$conditions[] = '('.implode(' OR ', $condition).')';
 	}
 
 	if (isset($criteria['hidden']) &&  $criteria['hidden'] == '1')
-		$conditions[] = 'published = 0';
+		$conditions[] = 'p.published = 0';
 
-	// Determine if we can show hidden info like e-mails and IP addresses
-	$query = array(
-		'SELECT'	=> 'view_hidden',
-		'FROM'		=> 'users_online AS l',
-		'JOINS'		=> array(
-			array(
-				'INNER JOIN'	=> 'users AS u',
-				'ON'			=> 'u.login = l.login'
-			)
-		),
-		'WHERE'		=> 'challenge = \''.$s2_db->escape($session_id).'\''
-	);
-	($hook = s2_hook('blrq_action_load_blog_posts_pre_get_perm_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$show_hidden = $s2_db->result($result);
+	if (!$s2_user['view_hidden'])
+		$conditions[] = '(p.published = 1 OR p.user_id = '.$s2_user['id'].')';
 
-	if (!$show_hidden)
-		$conditions[] = 'published = 1';
+	if (!empty($criteria['author']) && trim($criteria['author']))
+		$conditions[] = 'p.user_id in (SELECT u.id FROM '.$s2_db->prefix.'users AS u WHERE u.login LIKE \'%'.$s2_db->escape(trim($criteria['author'])).'%\')';
 
 	$key_search = isset($criteria['key']) ? trim($criteria['key']) : '';
 
@@ -111,25 +488,25 @@ function s2_blog_output_post_list ($criteria)
 			$conditions = array('NULL');
 	}
 
-	($hook = s2_hook('blrq_action_load_blog_posts_pre_crit_merge')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_output_post_list_pre_crit_mrg')) ? eval($hook) : null;
 
 	$condition = count($conditions) ? implode(' AND ', $conditions) : '1';
 	$message = empty($messages) ? '' : '<div class="info-box"><p>'.implode('</p><p>', $messages).'</p></div>';
 
 	$query = array(
-		'SELECT'	=> 'id, title, published, commented, (SELECT count(c.post_id) FROM '.$s2_db->prefix.'s2_blog_comments AS c WHERE c.post_id = p.id) as comment_count, create_time, label, favorite',
+		'SELECT'	=> 'id, title, published, commented, (SELECT count(c.post_id) FROM '.$s2_db->prefix.'s2_blog_comments AS c WHERE c.post_id = p.id) as comment_count, create_time, label, favorite, user_id',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> $condition,
 		'ORDER BY'	=> 'create_time DESC'
 	);
-	($hook = s2_hook('blrq_action_load_blog_posts_pre_fetch_posts_query')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_output_post_list_pre_fetch_posts_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$rows = array();
 	while ($row = $s2_db->fetch_assoc($result))
 	{
 		$row['tags'] = array();
-		($hook = s2_hook('blrq_action_load_blog_posts_pre_format_row_array')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_blog_output_post_list_pre_form_row_ar')) ? eval($hook) : null;
 		$rows[$row['id']] = $row;
 	}
 
@@ -142,7 +519,7 @@ function s2_blog_output_post_list ($criteria)
 			'FROM'		=> 's2_blog_post_tag',
 			'ORDER BY'	=> 'id'
 		);
-		($hook = s2_hook('blrq_action_load_blog_posts_pre_get_tags_qr')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_blog_output_post_list_pre_get_tags_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 		while ($row = $s2_db->fetch_assoc($result))
 			if (isset($rows[$row['post_id']]))
@@ -154,20 +531,20 @@ function s2_blog_output_post_list ($criteria)
 		{
 			$class = $row['published'] ? '' : ' class="hidden"';
 			$comment = $row['comment_count'] ? '<a href="#" onclick="return LoadBlogComments('.$row['id'].');" ondblclick="return true;">'.$row['comment_count'].'</a>' : ($row['commented'] ? '' : '×'); // commented
-			$buttons = array(
-				'favorite' => $row['favorite'] ?
-					'<img class="favorite" src="i/1.gif" alt="'.$lang_s2_blog['Undo favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">' :
-					'<img class="notfavorite" src="i/1.gif" alt="'.$lang_s2_blog['Do favorite'].'" onclick="return ToggleFavBlog(this, '.$row['id'].');">',
-				'delete' => '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteRecord(this, '.$row['id'].', \''.s2_htmlencode(addslashes(sprintf($lang_s2_blog['Delete warning'], $row['title']))).'\');">',
-			);
 
-			($hook = s2_hook('blrq_action_load_blog_posts_pre_item_merge')) ? eval($hook) : null;
+			$buttons = array();
+			if ($s2_user['edit_site'])
+				$buttons['favorite'] = '<img class="'.($row['favorite'] ? 'favorite' : 'notfavorite').'" data-class="'.(!$row['favorite'] ? 'favorite' : 'notfavorite').'" src="i/1.gif" alt="'.($row['favorite'] ? $lang_s2_blog['Undo favorite'] : $lang_s2_blog['Do favorite']).'" data-alt="'.(!$row['favorite'] ? $lang_s2_blog['Undo favorite'] : $lang_s2_blog['Do favorite']).'" onclick="return ToggleFavBlog(this, '.$row['id'].');">';
+			if ($s2_user['edit_site'] || $s2_user['id'] == $row['user_id'])
+				$buttons['delete'] = '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteRecord(this, '.$row['id'].', \''.s2_htmlencode(addslashes(sprintf($lang_s2_blog['Delete warning'], $row['title']))).'\');">';
+
+			($hook = s2_hook('fn_s2_blog_output_post_list_pre_item_mrg')) ? eval($hook) : null;
 
 			$buttons = '<span class="buttons">'.implode('', $buttons).'</span>';
 			$tags = implode(', ', $row['tags']);
 			$date = date('Y/m/d', $row['create_time']);
 
-			($hook = s2_hook('blrq_action_load_blog_posts_pre_row_merge')) ? eval($hook) : null;
+			($hook = s2_hook('fn_s2_blog_output_post_list_pre_row_mrg')) ? eval($hook) : null;
 
 			$body .= '<tr'.$class.'><td class="content"><a href="#" onclick="return EditRecord('.$row['id'].'); ">'.s2_htmlencode($row['title']).'</a></td><td>'.$date.'</td><td>'.$tags.'</td><td>'.$row['label'].'</td><td>'.$comment.'</td><td>'.$buttons.'</td></tr>';
 		}
@@ -194,7 +571,7 @@ function s2_blog_tag_list ()
 		'FROM'		=> 'tags AS t',
 		'ORDER BY'	=> 'post_count DESC'
 	);
-	($hook = s2_hook('fn_s2_blog_post_form_pre_page_get_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_tag_list_pre_page_get_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$names = $urls = $counts = array();
@@ -209,7 +586,7 @@ function s2_blog_tag_list ()
 
 function s2_blog_edit_post_form ($id)
 {
-	global $s2_db, $lang_s2_blog, $lang_common, $lang_admin;
+	global $s2_db, $lang_s2_blog, $lang_common, $lang_admin, $s2_user;
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',
@@ -219,45 +596,28 @@ function s2_blog_edit_post_form ($id)
 	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'title, text, create_time, modify_time, published, favorite, commented, url, label, ('.$raw_query.') AS comment_num',
+		'SELECT'	=> 'title, text, create_time, modify_time, published, favorite, commented, url, label, ('.$raw_query.') AS comment_num, user_id, revision',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'id = '.$id
 	);
-	($hook = s2_hook('fn_s2_blog_post_form_pre_page_get_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_page_get_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	$page = $s2_db->fetch_assoc($result);
 
 	if (!$page['published'])
-	{
-		$required_rights = array('view_hidden');
-		($hook = s2_hook('fn_s2_blog_post_form_pre_perm_check')) ? eval($hook) : null;
-		s2_test_user_rights($GLOBALS['session_id'], $required_rights);
-	}
+		s2_test_user_rights($s2_user['view_hidden'] || $s2_user['id'] == $page['user_id']);
 
 	$page['path'] = S2_BLOG_PATH.date('Y/m/d/', $page['create_time']).urlencode($page['url']);
 
 	$url_error = '';
-	if ($page['url'] == '')
+	$url_status = s2_blog_check_url_status($page['create_time'], $page['url']);
+	if ($url_status == 'empty')
 		$url_error = $lang_admin['URL empty'];
-	else
-	{
-		$start_time = strtotime('midnight', $page['create_time']);
-		$end_time = $start_time + 86400;
+	elseif ($url_status == 'not_unique')
+		$url_error = $lang_admin['URL not unique'];
 
-		$query = array(
-			'SELECT'	=> 'count(id)',
-			'FROM'		=> 's2_blog_posts',
-			'WHERE'		=> 'url = \''.$page['url'].'\' AND create_time < '.$end_time.' AND create_time >= '.$start_time
-		);
-		($hook = s2_hook('fn_s2_blog_post_form_pre_check_url_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		if ($s2_db->result($result) != 1)
-			$url_error = $lang_admin['URL not unique'];
-	}
-
-	$cr_time = s2_array_from_time($page['create_time']);
-	$m_time = s2_array_from_time($page['modify_time']);
+	$create_time = s2_array_from_time($page['create_time']);
+	$modify_time = s2_array_from_time($page['modify_time']);
 
 	$query = array(
 		'SELECT'	=> 'tag_id',
@@ -265,7 +625,7 @@ function s2_blog_edit_post_form ($id)
 		'WHERE'		=> 'post_id = '.$id,
 		'ORDER BY'	=> 'id'
 	);
-	($hook = s2_hook('fn_s2_blog_post_form_pre_tags_get_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_tags_get_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$i = 0;
@@ -285,18 +645,33 @@ function s2_blog_edit_post_form ($id)
 		'GROUP BY'	=> 'label',
 		'ORDER BY'	=> 'count(label) DESC'
 	);
-	($hook = s2_hook('fn_s2_blog_get_post_pre_labels_fetch_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_labels_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$labels = array();
 	while ($row = $s2_db->fetch_row($result))
 		$labels[] = $row[0];
 
-	($hook = s2_hook('fn_s2_blog_post_form_pre_output')) ? eval($hook) : null;
+	if ($s2_user['edit_site'])
+	{
+		$query = array( 
+			'SELECT'	=> 'id, login',
+			'FROM'		=> 'users',
+			'WHERE'		=> 'create_articles = 1'
+		);
+		($hook = s2_hook('fn_s2_blog_edit_post_form_pre_users_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		$users = array(0 => '');
+		while ($user = $s2_db->fetch_assoc($result))
+			$users[$user['id']] = $user['login'];
+	}
+
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_output')) ? eval($hook) : null;
 
 ?>
 <form name="artform" action="" onsubmit="SaveArticle('save_blog'); return false;">
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_tag_col')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_tag_col')) ? eval($hook) : null; ?>
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
 		<hr />
@@ -312,20 +687,32 @@ function s2_blog_edit_post_form ($id)
 			</div>
 		</div>
 	</div>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_btn_col')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_btn_col')) ? eval($hook) : null; ?>
 	<div class="r-float">
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_parag_btn')) ? eval($hook) : null; ?>
-		<input class="bitbtn parag" type="button" value="<?php echo $lang_admin['Paragraphs']; ?>" onclick="return Paragraph();" />
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_parag_btn')) ? eval($hook) : null; ?>
-		<hr />
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_reset')) ? eval($hook) : null; ?>
-		<input class="bitbtn reset" type="reset" value="<?php echo $lang_admin['Reset']; ?>" onclick="return confirm('<?php echo $lang_admin['Reset alert']; ?>');" />
-		<br />
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_clear')) ? eval($hook) : null; ?>
-		<input class="bitbtn new" type="button" value="<?php echo $lang_admin['Clear']; ?>" onclick="ClearForm(); return false;" />
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_clear')) ? eval($hook) : null; ?>
-		<hr />
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_labels')) ? eval($hook) : null; ?>
+<?php
+
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_author')) ? eval($hook) : null;
+
+	if ($s2_user['edit_site'])
+	{
+
+?>
+		<label><?php echo $lang_admin['Author']; ?><br />
+		<select name="page[user_id]">
+<?php
+
+		foreach ($users as $user_id => $login)
+			echo "\t\t\t".'<option value="'.$user_id.'"'.($user_id == $page['user_id'] ? ' selected="selected"' : '').'>'.s2_htmlencode($login).'</option>'."\n";
+
+?>
+		</select></label>
+<?php
+
+	}
+
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_labels')) ? eval($hook) : null;
+
+?>
 		<label title="<?php echo $lang_s2_blog['Label help']; ?>"><?php echo $lang_s2_blog['Labels']; ?><br />
 		<select name="page[label]" data-prev-value="<?php echo s2_htmlencode($page['label']); ?>" onchange="ChangeSelect(this, '<?php echo $lang_s2_blog['Enter new label']; ?>', '');">
 <?php
@@ -336,15 +723,16 @@ function s2_blog_edit_post_form ($id)
 ?>
 			<option value="+"><?php echo $lang_s2_blog['New label']; ?></option>
 		</select></label>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_checkboxes')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_checkboxes')) ? eval($hook) : null; ?>
 		<input type="hidden" name="page[id]" value="<?php echo $id; ?>" />
+		<input type="hidden" name="page[revision]" value="<?php echo $page['revision']; ?>" />
 		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"'?> />
 		<?php echo $lang_common['Favorite']; ?></label>
 		<label for="com"><input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Commented']; ?></label>
 <?php
 
-	($hook = s2_hook('fn_s2_blog_post_form_pre_links')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_links')) ? eval($hook) : null;
 
 	if ($page['comment_num'])
 	{
@@ -355,55 +743,55 @@ function s2_blog_edit_post_form ($id)
 	else
 		echo "\t\t".$lang_admin['No comments']."\n";
 
-	($hook = s2_hook('fn_s2_blog_post_form_after_checkboxes')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_edit_post_form_after_checkboxes')) ? eval($hook) : null;
 ?>
 		<hr />
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_url')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_url')) ? eval($hook) : null; ?>
 		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
 		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" /></label>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_published')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_published')) ? eval($hook) : null; ?>
 		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Published']; ?></label>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_save')) ? eval($hook) : null; ?>
-		<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_save')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_save')) ? eval($hook) : null; ?>
+		<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>"<?php if (!$s2_user['edit_site'] && $s2_user['id'] != $page['user_id']) echo ' disabled="disabled"'; ?> />
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_save')) ? eval($hook) : null; ?>
 		<br />
 		<br />
-		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo $page['path']; ?>"><?php echo $lang_admin['Preview ready']; ?></a>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_prv')) ? eval($hook) : null; ?>
+		<a title="<?php echo $lang_admin['Preview published']; ?>" id="preview_link" target="_blank" href="<?php echo $page['path']; ?>"<?php if (!$page['published']) echo ' style="display:none;"'; ?>><?php echo $lang_admin['Preview ready']; ?></a>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_prv')) ? eval($hook) : null; ?>
 	</div>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_cols')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_cols')) ? eval($hook) : null; ?>
 	<div class="l-float">
 		<table class="fields">
-<?php ($hook = s2_hook('fn_s2_blog_post_form_pre_title')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_title')) ? eval($hook) : null; ?>
 			<tr>
 				<td class="label"><?php echo $lang_admin['Title']; ?></td>
 				<td><input type="text" name="page[title]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['title']); ?>" /></td>
 			</tr>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_title')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_title')) ? eval($hook) : null; ?>
 		</table>
-<?php ($hook = s2_hook('fn_s2_blog_post_form_after_fields1')) ? eval($hook) : null; ?>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_fields1')) ? eval($hook) : null; ?>
 		<table class="fields">
 			<tr>
 				<td class="label"><?php echo $lang_admin['Create time']; ?></td>
 				<td><nobr>
-					<?php echo s2_get_time_input('cr_time', $cr_time); ?>
-					<a href="#" class="js" onclick="return SetTime(document.artform, 'cr_time');"><?php echo $lang_admin['Now']; ?></a>
+					<?php echo s2_get_time_input('page[create_time]', $create_time); ?>
+					<a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[create_time]');"><?php echo $lang_admin['Now']; ?></a>
 				</nobr></td>
 				<td class="label"><?php echo $lang_admin['Modify time']; ?></td>
 				<td><nobr>
-					<?php echo s2_get_time_input('m_time', $m_time); ?>
-					<a href="#" class="js" onclick="return SetTime(document.artform, 'm_time');"><?php echo $lang_admin['Now']; ?></a>
+					<?php echo s2_get_time_input('page[modify_time]', $modify_time); ?>
+					<a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[modify_time]');"><?php echo $lang_admin['Now']; ?></a>
 				</nobr></td>
 			</tr>
 		</table>
 <?php
 
-	($hook = s2_hook('fn_s2_blog_post_form_after_fields2')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_edit_post_form_after_fields2')) ? eval($hook) : null;
 
 	s2_toolbar();
 	$padding = 8;
-	($hook = s2_hook('fn_s2_blog_post_form_pre_text')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_text')) ? eval($hook) : null;
 
 ?>
 		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
@@ -413,83 +801,4 @@ function s2_blog_edit_post_form ($id)
 </form>
 <?
 
-}
-
-function s2_blog_toggle_hide_comment ($id)
-{
-	global $s2_db;
-
-	// Does the comment exist?
-	// We need post id for displaying comments.
-	// Also we need the comment if the premoderation is turned on.
-	$query = array(
-		'SELECT'	=> 'post_id, sent, shown, nick, email, text',
-		'FROM'		=> 's2_blog_comments',
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('blrq_action_hide_blog_comment_pre_get_comment_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-	$comment = $s2_db->fetch_assoc($result);
-	if (!$comment)
-		die('Comment not found!');
-
-	$sent = 1;
-	if (!$comment['shown'] && !$comment['sent'])
-	{
-		// Premoderation is enabled and we have to send the comment to be shown
-		// to the subscribed commentators
-		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
-			require S2_ROOT.'_include/comments.php';
-
-		global $lang_comments;
-		require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
-
-		// Getting some info about the post commented
-		$query = array(
-			'SELECT'	=> 'title, create_time, url',
-			'FROM'		=> 's2_blog_posts',
-			'WHERE'		=> 'id = '.$comment['post_id'].' AND published = 1 AND commented = 1'
-		);
-		($hook = s2_hook('blrq_action_hide_blog_comment_pre_get_post_info_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		if ($post = $s2_db->fetch_assoc($result))
-		{
-			$link = S2_BASE_URL.S2_URL_PREFIX.str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $post['create_time']).urlencode($post['url']);
-
-			// Fetching receivers' names and addresses
-			$query = array(
-				'SELECT'	=> 'id, nick, email, ip, time',
-				'FROM'		=> 's2_blog_comments',
-				'WHERE'		=> 'post_id = '.$comment['post_id'].' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($comment['email']).'\''
-			);
-			($hook = s2_hook('fn_s2_blog_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-			$receivers = array();
-			while ($receiver = $s2_db->fetch_assoc($result))
-				$receivers[$receiver['email']] = $receiver;
-
-			foreach ($receivers as $receiver)
-			{
-				$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$comment['post_id'].'&blog_unsubscribe='.base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36);
-				s2_mail_comment($receiver['nick'], $receiver['email'], $comment['text'], $post['title'], $link, $comment['nick'], $unsubscribe_link);
-			}
-		}
-		else
-			$sent = 0;
-	}
-
-	// Toggle comment visibility
-	$query = array(
-		'UPDATE'	=> 's2_blog_comments',
-		'SET'		=> 'shown = 1 - shown, sent = '.$sent,
-		'WHERE'		=> 'id = '.$id
-	);
-	($hook = s2_hook('blrq_action_hide_blog_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-	echo s2_comment_menu_links();
-	echo s2_show_comments('s2_blog', $comment['post_id']);
 }

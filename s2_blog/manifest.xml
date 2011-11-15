@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_blog</id>
 	<title>Blog</title>
-	<version>1.0a5</version>
+	<version>1.0b</version>
 	<description>Adds a blog to your site.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a6</minversion>
-	<maxtestedon>1.0a6</maxtestedon>
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b</maxtestedon>
 
 	<note type="uninstall" timing="pre">Warning! All your posts and user comments will be deleted during the uninstall process. It is strongly recommended you to disable 'Blog' extension instead or to upgrade it without uninstalling.</note>
 
@@ -43,6 +43,11 @@ if (!$s2_db->table_exists('s2_blog_posts'))
 				'datatype'		=> 'INT(10) UNSIGNED',
 				'allow_null'	=> false,
 				'default'		=> '0'
+			),
+			'revision'		=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '1'
 			),
 			'title'			=> array(
 				'datatype'		=> 'VARCHAR(255)',
@@ -77,6 +82,11 @@ if (!$s2_db->table_exists('s2_blog_posts'))
 				'datatype'		=> 'VARCHAR(255)',
 				'allow_null'	=> false,
 				'default'		=> '\'\''
+			),
+			'user_id'		=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
 			)
 		),
 		'PRIMARY KEY'	=> array('id'),
@@ -91,6 +101,11 @@ if (!$s2_db->table_exists('s2_blog_posts'))
 	);
 
 	$s2_db->create_table('s2_blog_posts', $schema);
+}
+else
+{
+	$s2_db->add_field('s2_blog_posts', 'revision', 'INT(10) UNSIGNED', false, '1', 'modify_time');
+	$s2_db->add_field('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', false, '0', 'url');
 }
 
 // For old installations
@@ -228,18 +243,8 @@ foreach ($s2_blog_config as $conf_name => $conf_value)
 }
 
 // User permissions
-if (!$s2_db->field_exists('users', 'edit_s2_blog'))
-{
-	$s2_db->add_field('users', 'edit_s2_blog', 'INT(10)', false, '0', 'edit_site');
-
-	$query = array(
-		'UPDATE'	=> 'users',
-		'SET'		=> 'edit_s2_blog = 1',
-		'WHERE'		=> 'edit_site = 1'
-	);
-
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
-}
+if ($s2_db->field_exists('users', 'edit_s2_blog'))
+	$s2_db->drop_field('users', 'edit_s2_blog');
 
 // A field in tags table for important tags displaying
 if (!$s2_db->field_exists('tags', 's2_blog_important'))
@@ -260,7 +265,6 @@ $s2_db->drop_table('s2_blog_posts');
 $s2_db->drop_table('s2_blog_post_tag');
 $s2_db->drop_table('s2_blog_comments');
 
-$s2_db->drop_field('users', 'edit_s2_blog');
 $s2_db->drop_field('tags', 's2_blog_important');
 	]]></uninstall>
 
@@ -381,8 +385,8 @@ require $ext_info['path'].'/blog_lib.php';
 							<td></td>
 						</tr>
 						<tr>
-							<td></td>
-							<td></td>
+							<td class="label"><?php echo $lang_s2_blog['Author']; ?></td>
+							<td><input style="width: 10em;" type="text" name="posts[author]" size="20" value="" /></td>
 							<td style="padding-left: 0.5em;"><label><input type="checkbox" name="posts[hidden]" value="1" checked="checked" /><?php echo $lang_s2_blog['Only hidden']; ?></label></td>
 							<td><input name="button" type="submit" value="<?php echo $lang_s2_blog['Show posts']; ?>" onclick="return LoadPosts();" /></td>
 							<td></td>
@@ -402,41 +406,35 @@ else
 	require $ext_info['path'].'/lang/English.php';
 ?>
 		<label for="s2_blog_important_tag" title="<?php echo $lang_s2_blog['Important tag info']; ?>">
-			<input type="checkbox" id="s2_blog_important_tag" name="tag[s2_blog_important]" value="1"<? if (isset($tag['s2_blog_important']) && $tag['s2_blog_important']) echo ' checked="checked"' ?> />
+			<input type="checkbox" id="s2_blog_important_tag" name="tag[s2_blog_important]" value="1"<? if (!empty($tag['s2_blog_important'])) echo ' checked="checked"' ?> />
 			<?php echo $lang_s2_blog['Important tag']; ?>
 		</label>
 		<hr />
 <?php
 		]]></hook>
 
-		<hook id="rq_action_load_tags_start"><![CDATA[
-$tag['s2_blog_important'] = 0;
-		]]></hook>
-
-		<hook id="rq_action_load_tag_pre_get_tag_qr,rq_action_save_tag_pre_get_tag_qr"><![CDATA[
+		<hook id="fn_load_tag_pre_qr"><![CDATA[
 $query['SELECT'] .= ', s2_blog_important';
 		]]></hook>
 
-		<hook id="rq_action_delete_tag_pre_new_form_output"><![CDATA[
+		<hook id="fn_delete_tag_end"><![CDATA[
 $query = array(
 	'DELETE'	=> 's2_blog_post_tag',
 	'WHERE'		=> 'tag_id = '.$id,
 );
 ($hook = s2_hook('blrq_action_delete_tag_pre_del_links_qr')) ? eval($hook) : null;
 $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-$tag['s2_blog_important'] = 0;
 		]]></hook>
 
-		<hook id="rq_action_save_tag_pre_id_check"><![CDATA[
+		<hook id="fn_save_tag_pre_id_check"><![CDATA[
 $s2_blog_important = isset($_POST['tag']['s2_blog_important']) ? (int) $_POST['tag']['s2_blog_important'] : 0;
 		]]></hook>
 
-		<hook id="rq_action_save_tag_pre_upd_qr"><![CDATA[
+		<hook id="fn_save_tag_pre_upd_qr"><![CDATA[
 $query['SET'] .= ', s2_blog_important = '.$s2_blog_important;
 		]]></hook>
 
-		<hook id="rq_action_save_tag_pre_ins_qr"><![CDATA[
+		<hook id="fn_save_tag_pre_ins_qr"><![CDATA[
 $query['INSERT'] .= ', s2_blog_important';
 $query['VALUES'] .= ', \''.$s2_blog_important.'\'';
 		]]></hook>
@@ -453,19 +451,6 @@ $query['SELECT'] .= ', ('.$raw_query.') AS post_count';
 
 		<hook id="fn_output_tag_form_loop_get_tags_qr"><![CDATA[
 $info .= '/'.$row['post_count'];
-		]]></hook>
-
-		<hook id="fn_get_user_list_start"><![CDATA[
-array_splice($s2_user_permissions, -1, 0, 'edit_s2_blog');
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
-$lang_user_permissions['edit_s2_blog'] = $lang_s2_blog['Edit blog perm'];
-		]]></hook>
-
-		<hook id="rq_action_save_comment_start,rq_action_save_tag_start,rq_action_delete_tag_start,prq_action_create_subfolder_start,prq_action_delete_folder_start,prq_action_delete_file_start,prq_action_rename_folder_start,prq_action_rename_file_start,prq_action_drag_start,prq_action_load_items_start,prq_action_move_file_start,prq_action_upload_start,prq_action_upload_window_start"><![CDATA[
-$required_rights[] = 'edit_s2_blog';
 		]]></hook>
 
 		<hook id="fn_save_comment_end"><![CDATA[
@@ -501,36 +486,20 @@ if ($type == 'blog')
 	else
 		require $ext_info['path'].'/lang/English.php';
 
-	echo s2_comment_menu_links();
-	echo s2_show_comments('s2_blog', $post_id);
+	$article_id = $post_id;
 }
 		]]></hook>
 
-		<hook id="rq_action_load_hidden_comments_end"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
-
-echo s2_show_comments('s2_blog_hidden');
-		]]></hook>
-
-		<hook id="rq_action_load_last_comments_end"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
-
-echo s2_show_comments('s2_blog_last');
-		]]></hook>
-
-		<hook id="rq_action_load_new_comments_end"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
-
-echo s2_show_comments('s2_blog_new');
+		<hook id="fn_show_comments_end"><![CDATA[
+if ($mode == 'hidden' || $mode == 'new' || $mode == 'last')
+{
+	global $lang_s2_blog;
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
+	$output .= s2_show_comments('s2_blog_'.$mode);
+}
 		]]></hook>
 
 		<hook id="fn_show_comments_pre_get_comm_qr"><![CDATA[
@@ -583,6 +552,7 @@ if (strpos($mode, 's2_blog') === 0)
 		'edit_comment' => 'edit_blog_comment',
 		'mark_comment' => 'mark_blog_comment',
 		'hide_comment' => 'hide_blog_comment',
+		'\'s2_blog_' => '\'',
 	);
 	$buttons = strtr($buttons, $s2_blog_replace);
 }
@@ -667,21 +637,12 @@ $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 $new_comment_count += $s2_db->result($result);
 		]]></hook>
 
-		<hook id="fn_for_premoderation_end"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
-
-$output .= s2_show_comments('s2_blog_new');
-		]]></hook>
-
 		<hook id="fn_preload_editor_start"><![CDATA[
 if (!empty($_GET['path']) && ($_GET['path'] == S2_BLOG_URL.'/' || $_GET['path'] == S2_BLOG_URL))
 {
 	echo $lang_admin['Empty editor info'];
 	echo '<script type="text/javascript">document.location.hash = "#blog";</script>';
-	return;
+	return true;
 }
 elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
 {
@@ -874,6 +835,7 @@ if ($request_uri == S2_BLOG_URL.'/rss.xml')
 			'time'			=> $s2_blog_post['create_time'],
 			'modify_time'	=> $s2_blog_post['modify_time'],
 			'rel_path'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $s2_blog_post['create_time']).urlencode($s2_blog_post['url']),
+			'author'		=> $s2_blog_post['author'],
 		);
 	return $s2_blog_items;
 }
@@ -930,7 +892,7 @@ if (substr($chapter, 0, 8) == 's2_blog_')
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	$s2_blog_post = $s2_db->fetch_assoc($result);
 	if (!$s2_blog_post)
-		return false;
+		return array();
 
 	return array(
 		$s2_blog_post['title'],

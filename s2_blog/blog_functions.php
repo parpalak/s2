@@ -20,14 +20,15 @@ function s2_blog_extent_number ($n)
 
 $s2_blog_fav_link = '<a href="'.S2_BLOG_PATH.urlencode(S2_FAVORITE_URL).'/" class="favorite" title="'.$lang_s2_blog['Favorite'].'">*</a>';
 
-function s2_blog_format_post ($header, $date, $date_time, $body, $keywords, $comments, $favorite = 0)
+function s2_blog_format_post ($author, $header, $date, $date_time, $body, $keywords, $comments, $favorite = 0)
 {
 	global $s2_blog_fav_link, $lang_s2_blog;
 
-	$html = '<h2 class="post head">%6$s%1$s</h2>'."\n".
-		'<div class="post time">%3$s</div>'."\n".
-		'<div class="post body">%4$s</div>'."\n".
-		'<div class="post foot">%5$s</div>'."\n";
+	$html = '<div class="post author">%1$s</div>'."\n".
+		'<h2 class="post head">%7$s%2$s</h2>'."\n".
+		'<div class="post time">%4$s</div>'."\n".
+		'<div class="post body">%5$s</div>'."\n".
+		'<div class="post foot">%6$s</div>'."\n";
 
 	($hook = s2_hook('fn_s2_blog_format_post_start')) ? eval($hook) : null;
 
@@ -39,7 +40,7 @@ function s2_blog_format_post ($header, $date, $date_time, $body, $keywords, $com
 
 	($hook = s2_hook('fn_s2_blog_format_post_end')) ? eval($hook) : null;
 
-	return sprintf($html, $header, $date, $date_time, $body, $comments, ($favorite ? $s2_blog_fav_link : ''));
+	return sprintf($html, $author, $header, $date, $date_time, $body, $comments, ($favorite ? $s2_blog_fav_link : ''));
 }
 
 function s2_blog_format_see_also ($title_array)
@@ -152,16 +153,22 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 
 	// Obtaining posts
 
-	// SELECT for comments number
 	$sub_query = array(
 		'SELECT'	=> 'count(*)',
 		'FROM'		=> 's2_blog_comments AS c',
 		'WHERE'		=> 'c.post_id = p.id AND shown = 1',
 	);
-	$raw_query = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+	$raw_query_comment = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+
+	$sub_query = array(
+		'SELECT'	=> 'u.name',
+		'FROM'		=> 'users AS u',
+		'WHERE'		=> 'u.id = p.user_id',
+	);
+	$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, ('.$raw_query.') AS comment_num, p.label',
+		'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, ('.$raw_query_comment.') AS comment_num, ('.$raw_query_user.') AS author, p.label',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'p.published = 1'.(!empty($query_add['WHERE']) ? ' AND '.$query_add['WHERE'] : '')
 	);
@@ -199,6 +206,7 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 		$time = s2_date_time($row['create_time']);
 		$post_tags = isset($tags[$id]) ? implode(', ', $tags[$id]) : '';
 		$text = $row['text'];
+		$author = isset($row['author']) ? s2_htmlencode($row['author']) : '';
 
 		if (!empty($labels[$id]) && isset($see_also[$labels[$id]]))
 		{
@@ -212,7 +220,7 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 
 		($hook = s2_hook('fn_s2_blog_get_posts_loop_pre_post_merge')) ? eval($hook) : null;
 
-		$output .= s2_blog_format_post($header, $date, $time, $text, $post_tags, $comment, $row['favorite']);
+		$output .= s2_blog_format_post($author, $header, $date, $time, $text, $post_tags, $comment, $row['favorite']);
 	}
 
 	return $output;
@@ -275,9 +283,16 @@ function s2_blog_get_post ($year, $month, $day, $url)
 	$start_time = mktime(0, 0, 0, $month, $day, $year);
 	$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
 
+	$sub_query = array(
+		'SELECT'	=> 'u.name',
+		'FROM'		=> 'users AS u',
+		'WHERE'		=> 'u.id = p.user_id',
+	);
+	$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+
 	$query = array(
-		'SELECT'	=> 'create_time, title, text, id, commented, label, favorite',
-		'FROM'		=> 's2_blog_posts',
+		'SELECT'	=> 'create_time, title, text, id, commented, label, favorite, ('.$raw_query_user.') AS author',
+		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND url = \''.$s2_db->escape($url).'\' AND published = 1'
 	);
 	($hook = s2_hook('fn_s2_blog_get_post_pre_get_post_qr')) ? eval($hook) : null;
@@ -337,6 +352,7 @@ function s2_blog_get_post ($year, $month, $day, $url)
 		$tags[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($row1['url']).'/">'.$row1['name'].'</a>';
 
 	$output = s2_blog_format_post(
+		isset($row['author']) ? s2_htmlencode($row['author']) : '',
 		s2_htmlencode($row['title']),
 		s2_date($row['create_time']),
 		s2_date_time($row['create_time']),
@@ -636,15 +652,22 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 		$num_posts++;
 
 	// Obtaining last posts
-	$subquery = array(
+	$sub_query = array(
 		'SELECT'	=> 'count(*)',
 		'FROM'		=> 's2_blog_comments AS c',
 		'WHERE'		=> 'c.post_id = p.id AND shown = 1',
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$raw_query_comment = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+
+	$sub_query = array(
+		'SELECT'	=> 'u.name',
+		'FROM'		=> 'users AS u',
+		'WHERE'		=> 'u.id = p.user_id',
+	);
+	$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'create_time, title, text, url, id, commented, modify_time, favorite, ('.$raw_query.') AS comm_num, label',
+		'SELECT'	=> 'create_time, title, text, url, id, commented, modify_time, favorite, ('.$raw_query_comment.') AS comm_num, ('.$raw_query_user.') AS author, label',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'published = 1',
 		'ORDER BY'	=> 'create_time DESC',
@@ -685,6 +708,7 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 		}
 		$posts[$i]['comments'] = $row['commented'] ? '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#comment">'.s2_blog_comment_text($posts[$i]['comm_num']).'</a>' : '';
 		$posts[$i]['tags'] = isset($tags[$i]) ? implode(', ', $tags[$i]) : '';
+		$posts[$i]['author'] = isset($posts[$i]['author']) ? $posts[$i]['author'] : '';
 	}
 
 	return $posts;
@@ -709,6 +733,7 @@ function s2_blog_last_posts ($skip = 0)
 			break;
 
 		$output .= s2_blog_format_post(
+			s2_htmlencode($post['author']),
 			'<a href="'.S2_BLOG_PATH.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.s2_htmlencode($post['title']).'</a>',
 			s2_date($post['create_time']),
 			s2_date_time($post['create_time']),

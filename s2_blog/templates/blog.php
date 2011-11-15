@@ -9,7 +9,7 @@
 <!-- s2_navigation_link -->
 </head>
 
-<body>
+<body class="blog">
 	<div id="crumbs"><!-- s2_crumbs --></div>
 <!-- s2_search_field -->
 	<div id="header"><!-- s2_site_title --></div>

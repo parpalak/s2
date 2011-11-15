@@ -28,6 +28,7 @@ $lang_s2_blog = array(
 'Blog'						=> 'Blog',
 'Start time'				=> 'Start date',
 'End time'					=> 'End date',
+'Author'					=> 'Author',
 'Search label'				=> 'Title or text contains words',
 'Tag label'					=> 'Tags',
 'Only hidden'				=> 'Only hidden posts',
@@ -58,8 +59,6 @@ $lang_s2_blog = array(
 
 'Important tag'				=> 'Important',
 'Important tag info'		=> 'Important tags are used in the blog navigation menu',
-
-'Edit blog perm'			=> 'Edit blog',
 
 'Blog URL'					=> 'Blog URL',
 'Blog URL label'			=> 'Blog URL prefix (it should contain a leading slash and no trailing slash). E.g. “/blog”. Leave it blank to put the blog on the site main page.',
