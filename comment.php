@@ -139,7 +139,7 @@ if (strlen($text) > S2_MAX_COMMENT_BYTES)
 	$errors[] = sprintf($lang_comment_errors['long_text'], S2_MAX_COMMENT_BYTES);
 
 $email = $_POST[s2_field_name('email')];
-if (!is_valid_email($email))
+if (!s2_is_valid_email($email))
 	$errors[] = $lang_comment_errors['email'];
 
 $name = trim($_POST[s2_field_name('name')]);

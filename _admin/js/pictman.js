@@ -102,13 +102,12 @@ function HighlightItem (item)
 	{
 		item.className = "but_panel";
 		item.appendChild(buttonPanel);
-		var Response = GETSyncRequest(sUrl + 'action=load_items&path=' + encodeURIComponent(item.getAttribute('data-path')));
-		if (Response.status != "200")
-			return;
-
-		eFilePanel.innerHTML = Response.text;
-		sCurDir = item.getAttribute('data-path');
-		document.getElementById('fold_name').innerHTML = "<b>" + (item.innerText ? item.innerText : item.textContent) + "</b>";
+		GETAsyncRequest(sUrl + 'action=load_items&path=' + encodeURIComponent(item.getAttribute('data-path')), function (http)
+		{
+			eFilePanel.innerHTML = http.responseText;
+			sCurDir = item.getAttribute('data-path');
+			document.getElementById('fold_name').innerHTML = "<b>" + (item.innerText ? item.innerText : item.textContent) + "</b>";
+		});
 	}
 	if (item.getAttribute('data-fname'))
 	{
@@ -198,14 +197,13 @@ function EditItemName (eItem)
 			else if (iCode == 13)
 			{
 				SaveExpand();
-				var Response = GETSyncRequest(sUrl + "action=rename_folder&path=" + encodeURIComponent(eItem.getAttribute('data-path')) + "&name=" + encodeURIComponent(eInput.value));
-
-				if (Response.status == '200')
+				GETAsyncRequest(sUrl + "action=rename_folder&path=" + encodeURIComponent(eItem.getAttribute('data-path')) + "&name=" + encodeURIComponent(eInput.value), function (http)
 				{
-					var a = Response.text.split('|');
-					var eUl = eItem.parentNode.parentNode.parentNode;
-					eUl.innerHTML = a[0];
-					eFilePanel.innerHTML = a[1];
+					var xmldoc = http.responseXML,
+						eUl = eItem.parentNode.parentNode.parentNode;
+
+					eUl.innerHTML = xmldoc.getElementsByTagName('subtree')[0].firstChild.nodeValue;
+					eFilePanel.innerHTML = xmldoc.getElementsByTagName('files')[0].firstChild.nodeValue;
 					LoadExpand();
 
 					var eSpan = null;
@@ -220,7 +218,7 @@ function EditItemName (eItem)
 						HighlightItem(eSpan);
 
 					sSavedName = "";
-				}
+				});
 			}
 			else
 				setTimeout(function ()
@@ -267,12 +265,11 @@ function EditItemName (eItem)
 					return;
 				}
 
-				var Response = GETSyncRequest(sUrl + "action=rename_file&path=" + encodeURIComponent(eItem.firstChild.getAttribute('data-fname')) + "&name=" + encodeURIComponent(eInput.value));
-				if (Response.status == '200')
+				GETAsyncRequest(sUrl + "action=rename_file&path=" + encodeURIComponent(eItem.firstChild.getAttribute('data-fname')) + "&name=" + encodeURIComponent(eInput.value), function (http)
 				{
-					eFilePanel.innerHTML = Response.text;
+					eFilePanel.innerHTML = http.responseText;
 					sSavedName = "";
-				}
+				});
 			}
 		}
 
@@ -301,11 +298,13 @@ function SetItemChildren (eSpan, sInnerHTML)
 	var eLi = eSpan.parentNode.parentNode;
 
 	if (eLi.lastChild.nodeName == "UL")
+	{
 		eLi.lastChild.innerHTML = sInnerHTML;
+		eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
+	}
 	else
 	{
 		var eUl = document.createElement("UL");
-
 		eLi.className = str_replace('ExpandLeaf', 'ExpandOpen', eLi.className);
 		eLi.appendChild(eUl);
 		eUl.innerHTML = sInnerHTML;
@@ -356,41 +355,44 @@ function StopDrag ()
 	{
 		if (sourceFElement)
 		{
-			var Response = GETSyncRequest(sUrl + "action=move_file&spath=" + encodeURIComponent(sourceFElement.getAttribute('data-fname')) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute('data-path')));
-			if (Response.status == '200')
-				eFilePanel.innerHTML = Response.text;
-			acceptorElement.className = "";
+			GETAsyncRequest(sUrl + "action=move_file&spath=" + encodeURIComponent(sourceFElement.getAttribute('data-fname')) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute('data-path')), function (http)
+			{
+				eFilePanel.innerHTML = http.responseText;
+			});
 		}
 		else
 		{
 			SaveExpand();
 
-			acceptorElement.className = "";
-
-			var eItem = acceptorElement;
-			var eSourceLi = sourceElement.parentNode.parentNode;
+			var eItem = acceptorElement,
+				eLastAcceptor = acceptorElement,
+				eSourceLi = sourceElement.parentNode.parentNode,
+				bIsLoop = false;
 
 			while (eItem)
 			{
 				if (eItem == eSourceLi)
 				{
-					alert(s2_lang.no_loops_img);
-					acceptorElement = null;
-					return;
+					bIsLoop = true;
+					break;
 				}
 				eItem = eItem.parentNode;
 			}
 
-			var Response = GETSyncRequest(sUrl + "action=drag&spath=" + encodeURIComponent(sourceElement.getAttribute('data-path')) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute('data-path')));
-
-			if (Response.status == '200')
+			if (bIsLoop)
+				alert(s2_lang.no_loops_img);
+			else
 			{
-				var a = Response.text.split('|');
-				SetParentChildren(sourceParent, a[1]); //source
-				SetItemChildren(acceptorElement, a[0]); //destination
-				LoadExpand();
+				GETAsyncRequest(sUrl + "action=drag&spath=" + encodeURIComponent(sourceElement.getAttribute('data-path')) + "&dpath=" + encodeURIComponent(acceptorElement.getAttribute('data-path')), function (http)
+				{
+					var xmldoc = http.responseXML;
+					SetParentChildren(sourceParent, xmldoc.getElementsByTagName('source_parent')[0].firstChild.nodeValue);
+					SetItemChildren(eLastAcceptor, xmldoc.getElementsByTagName('destination')[0].firstChild.nodeValue);
+					LoadExpand();
+				});
 			}
 		}
+		acceptorElement.className = "";
 		acceptorElement = null;
 	}
 }
@@ -574,16 +576,15 @@ function DeleteFolder ()
 		return false;
 
 	ReleaseItem();
-	var Response = GETSyncRequest(sUrl + "action=delete_folder&path=" + encodeURIComponent(eSpan.getAttribute('data-path')));
-	if (Response.status != '200')
-		return false;
-
-	var eUl = eSpan.parentNode.parentNode.parentNode;
-	HighlightItem(eUl.parentNode.childNodes[1].lastChild);
-	SaveExpand();
-	SetParentChildren(eUl, Response.text);
-	LoadExpand();
-	eFilePanel.innerHTML = '';
+	GETAsyncRequest(sUrl + "action=delete_folder&path=" + encodeURIComponent(eSpan.getAttribute('data-path')), function (http)
+	{
+		var eUl = eSpan.parentNode.parentNode.parentNode;
+		HighlightItem(eUl.parentNode.childNodes[1].lastChild);
+		SaveExpand();
+		SetParentChildren(eUl, http.responseText);
+		LoadExpand();
+		eFilePanel.innerHTML = '';
+	});
 	return false;
 }
 
@@ -592,12 +593,11 @@ function DeleteFile (sName)
 	if (!confirm(str_replace('%s', sPicturePrefix + sName, s2_lang.delete_file)))
 		return;
 
-	var Response = GETSyncRequest(sUrl + "action=delete_file&path=" + encodeURIComponent(sName));
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + "action=delete_file&path=" + encodeURIComponent(sName), function (http)
 	{
-		eFilePanel.innerHTML = Response.text;
+		eFilePanel.innerHTML = http.responseText;
 		eFileInfo.innerHTML = '';
-	}
+	});
 }
 
 function CreateSubFolder ()
@@ -606,26 +606,26 @@ function CreateSubFolder ()
 	var eLi = eSpan.parentNode.parentNode;
 
 	ReleaseItem();
-	var Response = GETSyncRequest(sUrl + "action=create_subfolder&path=" + encodeURIComponent(eSpan.getAttribute('data-path')));
-	if (Response.status != '200')
-		return false;
 
-	SetItemChildren(eSpan, Response.text);
-
-	var eSpan = null;
-	var eUl = eLi.lastChild;
-	for (var i = eUl.childNodes.length; i-- ;)
-		if (eUl.childNodes[i].childNodes[1].lastChild.getAttribute('selected'))
-		{
-			eSpan = eUl.childNodes[i].childNodes[1].lastChild;
-			break;
-		}
-
-	if (eSpan != null)
+	GETAsyncRequest(sUrl + "action=create_subfolder&path=" + encodeURIComponent(eSpan.getAttribute('data-path')), function (http)
 	{
-		HighlightItem(eSpan);
-		EditItemName(eSpan);
-	}
+		SetItemChildren(eSpan, http.responseText);
+
+		var eItem = null;
+		var eUl = eLi.lastChild;
+		for (var i = eUl.childNodes.length; i-- ;)
+			if (eUl.childNodes[i].childNodes[1].lastChild.getAttribute('selected'))
+			{
+				eItem = eUl.childNodes[i].childNodes[1].lastChild;
+				break;
+			}
+
+		if (eItem != null)
+		{
+			HighlightItem(eItem);
+			EditItemName(eItem);
+		}
+	});
 	return false;
 }
 
@@ -692,12 +692,12 @@ function Init ()
 			var files = dt.files, not_sent = '';
 			for (var i = files.length; i-- ;)
 				if (files[i].size <= iMaxFileSize)
-					SendFile(files[i]);
+					SendDroppedFile(files[i]);
 				else
-					not_sent += '\n' + files[i].fileName;
+					not_sent += '<br />' + files[i].fileName;
 
 			if (not_sent != '')
-				s2_popup_message(str_replace('%s', sFriendlyMaxFileSize, s2_lang.files_too_big) + not_sent);
+				PopupMessages.show(str_replace('%s', sFriendlyMaxFileSize, s2_lang.files_too_big) + not_sent);
 
 			e.preventDefault();
 		}, false);
@@ -722,42 +722,45 @@ var FileCounter = (function (inc, new_value)
 	}
 }());
 
-function SendFile (file)
+function DroppedFileUploaded ()
+{
+	if (this.readyState == 4)
+	{
+		var s2_status = this.getResponseHeader('X-S2-Status');
+
+		if (s2_status && s2_status != 'Success')
+		{
+			if (0 == FileCounter(-1))
+			{
+				SetWait(false);
+				if (this.responseText)
+					PopupMessages.show(this.responseText);
+			}
+			return;
+		}
+
+		if (this.responseText)
+			PopupMessages.show(this.responseText);
+
+		if (0 == FileCounter(-1))
+		{
+			SetWait(false);
+			GETAsyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir), function (http)
+			{
+				eFilePanel.innerHTML = http.responseText;
+			});
+		}
+	}
+}
+
+function SendDroppedFile (file)
 {
 	var xhr = new XMLHttpRequest();
 
 	FileCounter(1);
 	SetWait(true);
 
-	xhr.onreadystatechange = function ()
-	{
-		if (xhr.readyState == 4)
-		{
-			var s2_status = xhr.getResponseHeader('X-S2-Status');
-
-			if (s2_status && s2_status != 'Success')
-			{
-				if (0 == FileCounter(-1))
-				{
-					SetWait(false);
-					if (xhr.responseText)
-						s2_popup_message(xhr.responseText);
-				}
-				return;
-			}
-
-			if (xhr.responseText)
-				s2_popup_message(xhr.responseText);
-
-			if (0 == FileCounter(-1))
-			{
-				SetWait(false);
-				var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
-				if (Response.status == '200')
-					eFilePanel.innerHTML = Response.text;
-			}
-		}
-	}
+	xhr.onreadystatechange = DroppedFileUploaded;
 
 	var data = new FormData();
 	data.append('pictures[]', file);
@@ -799,14 +802,13 @@ function FileUploaded ()
 	var body = window.frames['submit_result'].document.body.innerHTML;
 
 	if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
-		s2_popup_message(body);
+		PopupMessages.show(body);
 
-	var Response = GETSyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir));
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + "action=load_items&path=" + encodeURIComponent(sCurDir), function (http)
 	{
-		eFilePanel.innerHTML = Response.text;
+		eFilePanel.innerHTML = http.responseText;
 		document.getElementById('file_upload_input').innerHTML = document.getElementById('file_upload_input').innerHTML;
-	}
+	});
 }
 
 // Tooltips

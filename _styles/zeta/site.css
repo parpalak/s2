@@ -39,7 +39,7 @@ code, kbd, pre, textarea {
 		background: #f2f2f2;
 		}
 
-p, ol, ul, #content table {
+p, ol, ul, #content table, pre {
 	font-size: 1em;
 	margin: 0 0 1.5em;
 	}
@@ -62,13 +62,12 @@ hr {
 
 h1 {
 	font-size: 2em;
-	line-height: 1.5;
-	margin: 0.75em 0;
-	top: 0.143em;
+	line-height: 1;
+	margin: -0.25em 0 0.75em;
 	}
 h2 {
 	font-size: 1.5714em;
-	line-height: 0.9545;
+	line-height: 0.955;
 	margin: 1.909em 0 0.955em;
 	top: -0.136em;
 	}
@@ -82,14 +81,23 @@ h4 {
 	font-size: 1.214em;
 	}
 
-sup, sub {
-	vertical-align: middle;
-	position: relative;
-	font-size: 0.7857em;
+sup {
+	vertical-align: top;
+	font-size: 0.75em;
+	line-height: 1;
 	}
+	sup * {
+		vertical-align: top;
+		}
 
-sup { bottom: 0.5em; }
-sub { top: 0.5em; }
+sub {
+	vertical-align: bottom;
+	font-size: 0.75em;
+	line-height: 1;
+	}
+	sub * {
+		vertical-align: bottom;
+		}
 
 h2 small {
 	color: #666;
@@ -97,10 +105,10 @@ h2 small {
 	font-weight: normal;
 	}
 
-small, .date, .time, #crumbs, #footer {
+small, .date, .time, #crumbs, #footer, .author {
 	font-size: 0.8571em;
 	}
-p small {
+p small, .author {
 	line-height: 1.75;
 	}
 .date, .time {
@@ -121,7 +129,7 @@ p.article, p.subsection {
 	}
 
 h2.preview {
-	margin: 1.727em 0 0.182em;
+	margin: 1.909em 0 0;
 	}
 
 blockquote, .reply {
@@ -214,12 +222,16 @@ body {
 	}
 
 #content {
+	padding-top: 3em;
 	position: relative;
 	float: left;
 	left: -240%;
 	margin-right: -200%;
 	width: 200%
 	}
+	.mainpage #content {
+		padding-top: 0;
+		}
 
 .back_forward #content {
 	width: 300%;
@@ -297,7 +309,7 @@ body {
 		}
 
 #menu .header {
-	margin: 2.1667em 0 0.1667em;
+	margin: 2.333em 0 0;
 	font-size: 1.2857em;
 	line-height: 1.1667;
 	padding: 0;
@@ -386,6 +398,7 @@ body {
 .tags_list {
 	font-size: 0.8571em;
 	color: #666;
+	line-height: 1.75;
 	}
 
 .paging a, .paging .current {
@@ -414,6 +427,7 @@ img[align="right"] {
 	.s2_search_form input {
 		width: 70%;
 		margin-left: 1px;
+		font-family: Arial, Helvetica, sans-serif;
 		}
 		.s2_search_form .inactive {
 			color: #999;

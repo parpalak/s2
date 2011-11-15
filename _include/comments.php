@@ -87,12 +87,10 @@ function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subs
 					</p>
 				</form>
 				<script type="text/javascript">
-<!--
-var a=<?php echo ($s - $add2)?>;
-a=a<?php echo ($bbb ? '-' : '+'), $add1?>;
-document.getElementById("quest").value=parseInt(a)+<?php echo ($c + $add2)?>;
+var a=<?php echo ($s - $add2); ?>;
+a=a<?php echo ($bbb ? '-' : '+'), $add1; ?>;
+document.getElementById("quest").value=parseInt(a)+<?php echo ($c + $add2); ?>;
 document.getElementById("qsp").style.display="none";
-// -->
 				</script>
 <?php
 

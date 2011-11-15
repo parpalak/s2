@@ -60,9 +60,10 @@ $lang_install = array(
 // Install errors
 'No database support'		=>	'This PHP environment does not have support for any of the databases that S2 supports. PHP needs to have support for either MySQL, PostgreSQL or SQLite in order for S2 to be installed.',
 'Missing database name'		=>	'You must enter a database name. Please go back and correct.',
-'Username too long'			=>	'Usernames must be no more than 25 characters long. Please go back and correct.',
+'Username too long'			=>	'Usernames must be no more than 40 characters long. Please go back and correct.',
 'Username too short'		=>	'Usernames must be at least 2 characters long. Please go back and correct.',
-'Pass too short'			=>	'Passwords must be at least 4 characters long. Please go back and correct.',
+'Password too short'		=>	'Passwords must be at least 4 characters long. Please go back and correct.',
+'Password too long'			=>	'Passwords must be no more than 100 characters long. Please go back and correct.',
 'Invalid email'				=>	'The administrator e-mail address you entered is invalid. Please go back and correct.',
 'Missing base url'			=>	'You must enter a base URL. Please go back and correct.',
 'No such database type'		=>	'“%s” is not a valid database type.',

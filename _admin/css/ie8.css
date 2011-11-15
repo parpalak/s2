@@ -14,3 +14,7 @@ div.input.checkbox input,
 .toolbar img {
 	border: #eee solid 1px;
 	}
+
+.treetree li {
+	clear: both;
+	}

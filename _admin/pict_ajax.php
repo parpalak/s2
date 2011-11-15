@@ -13,6 +13,17 @@ define('S2_ROOT', '../');
 
 define('S2_NO_POST_BAD_CHARS', 1);
 require S2_ROOT.'_include/common.php';
+
+// Activate HTTP Strict Transport Security
+// IIS sets HTTPS to 'off' for non-SSL requests
+if (defined('S2_FORCE_ADMIN_HTTPS') && isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')
+	header('Strict-Transport-Security: max-age=500');
+elseif (defined('S2_FORCE_ADMIN_HTTPS'))
+{
+	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+	die();
+}
+
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';
@@ -20,6 +31,9 @@ require 'pict_lib.php';
 
 $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
 $action = isset($_GET['action']) ? $_GET['action'] : '';
+
+// Check the current user and fetch the user info
+$s2_user = s2_authenticate_user($session_id);
 
 if ($action == 'preview')
 {
@@ -29,7 +43,9 @@ if ($action == 'preview')
 		$file = str_replace('..', '', $file);
 
 	s2_make_thumbnail(S2_IMG_PATH.$file, 80);
-	exit();
+
+	$s2_db->close();
+	die;
 }
 
 s2_no_cache();
@@ -43,9 +59,9 @@ if (S2_COMPRESS)
 
 if ($action == 'create_subfolder')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['create_articles'];
 	($hook = s2_hook('prq_action_create_subfolder_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$path = $_GET['path'];
 
@@ -68,9 +84,9 @@ if ($action == 'create_subfolder')
 
 elseif ($action == 'delete_folder')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_delete_folder_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$path = $_GET['path'];
 
@@ -87,9 +103,9 @@ elseif ($action == 'delete_folder')
 
 elseif ($action == 'delete_file')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_delete_file_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
@@ -102,9 +118,9 @@ elseif ($action == 'delete_file')
 
 elseif ($action == 'rename_folder')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_rename_folder_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
@@ -127,16 +143,27 @@ elseif ($action == 'rename_folder')
 		die;
 	}
 
-	rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name);
+	if (rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name))
+	{
+		header('Content-Type: text/xml; charset=utf-8');
 
-	echo s2_walk_dir($parent_path, $folder_name), '|', s2_get_files($parent_path.'/'.$folder_name);
+		echo '<response>';
+			echo '<subtree><![CDATA['.str_replace(']]>', ']]&gt;', s2_walk_dir($parent_path, $folder_name)).']]></subtree>';
+			echo '<files><![CDATA['.str_replace(']]>', ']]&gt;', s2_get_files($parent_path.'/'.$folder_name)).']]></files>';
+		echo '</response>';
+	}
+	else
+	{
+		header('X-S2-Status: Error');
+		die($lang_pictures['Rename error']);
+	}
 }
 
 elseif ($action == 'rename_file')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_rename_file_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
@@ -172,16 +199,20 @@ elseif ($action == 'rename_file')
 		die;
 	}
 
-	rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$filename);
-
-	echo s2_get_files($parent_path);
+	if (rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$filename))
+		echo s2_get_files($parent_path);
+	else
+	{
+		header('X-S2-Status: Error');
+		die($lang_pictures['Rename error']);
+	}
 }
 
 elseif ($action == 'drag')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_drag_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$spath = $_GET['spath'];
 	while (strpos($spath, '..') !== false)
@@ -193,14 +224,19 @@ elseif ($action == 'drag')
 
 	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.s2_basename($spath));
 
-	echo s2_walk_dir($dpath).'|'.s2_walk_dir(s2_dirname($spath));
+	header('Content-Type: text/xml; charset=utf-8');
+
+	echo '<response>';
+	echo '<destination><![CDATA['.str_replace(']]>', ']]&gt;', s2_walk_dir($dpath)).']]></destination>';
+	echo '<source_parent><![CDATA['.str_replace(']]>', ']]&gt;', s2_walk_dir(s2_dirname($spath))).']]></source_parent>';
+	echo '</response>';
 }
 
 elseif ($action == 'load_items')
 {
-	$required_rights = array('view');
+	$is_permission = $s2_user['view'];
 	($hook = s2_hook('prq_action_load_items_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
@@ -211,9 +247,9 @@ elseif ($action == 'load_items')
 
 elseif ($action == 'move_file')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_move_file_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$spath = $_GET['spath'];
 	while (strpos($spath, '..') !== false)
@@ -230,9 +266,9 @@ elseif ($action == 'move_file')
 
 elseif ($action == 'upload')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['create_articles'];
 	($hook = s2_hook('prq_action_upload_start')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$errors = array();
 
@@ -286,7 +322,7 @@ elseif ($action == 'upload')
 			if (($ext_pos = strrpos($filename, '.')) !== false)
 				 $extension = substr($filename, $ext_pos + 1);
 
-			if ($extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' '.S2_ALLOWED_EXTENSIONS.' ', ' '.$extension.' '))
+			if (!$s2_user['edit_users'] && $extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' '.S2_ALLOWED_EXTENSIONS.' ', ' '.$extension.' '))
 			{
 				$error_message = sprintf($lang_pictures['Forbidden extension'], $extension);
 				$errors[] = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
@@ -307,7 +343,7 @@ elseif ($action == 'upload')
 	}
 
 	if (!empty($errors))
-		echo !isset($_POST['ajax']) ? sprintf($lang_pictures['Upload failed'], implode("\n", $errors)) : implode("\n", $errors);
+		echo !isset($_POST['ajax']) ? sprintf($lang_pictures['Upload failed'], implode('<br />', $errors)) : implode('<br />', $errors);
 }
 
 

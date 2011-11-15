@@ -61,6 +61,9 @@ function s2_do_rss ()
 		$item['text'] = str_replace('href="'.S2_PATH.'/', 'href="'.S2_BASE_URL.'/', $item['text']);
 		$item['text'] = str_replace('src="'.S2_PATH.'/', 'src="'.S2_BASE_URL.'/', $item['text']);
 
+		if (empty($item['author']) && S2_WEBMASTER)
+			$item['author'] = S2_WEBMASTER;
+
 		($hook = s2_hook('fn_do_rss_loop_pre_output')) ? eval($hook) : null;
 
 		ob_start();
@@ -72,11 +75,11 @@ function s2_do_rss ()
 			<description><?php echo s2_htmlencode($item['text']); ?></description>
 <?php
 
-		if (S2_WEBMASTER_EMAIL)
+		if (!empty($item['author']))
 		{
 
 ?>
-			<author><?php echo S2_WEBMASTER_EMAIL; ?> (<?php echo S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME; ?>)</author>
+			<author><?php echo s2_htmlencode($item['author']); ?></author>
 <?php
 
 		}

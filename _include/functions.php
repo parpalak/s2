@@ -57,6 +57,10 @@ function s2_number_format ($number, $trailing_zero = false, $decimal_count = fal
 {
 	global $lang_common;
 
+	$return = ($hook = s2_hook('fn_number_format_start')) ? eval($hook) : null;
+	if ($return)
+		return $return;
+
 	$result = number_format($number, $decimal_count === false ? $lang_common['Decimal count'] : $decimal_count, $lang_common['Decimal point'], $lang_common['Thousands separator']);
 	if (!$trailing_zero)
 		$result = preg_replace('#'.preg_quote($lang_common['Decimal point'], '#').'?0*$#', '', $result);
@@ -105,6 +109,10 @@ function s2_frendly_filesize ($size)
 //
 function s2_paging ($page, $total_pages, $url, &$link_nav)
 {
+	$return = ($hook = s2_hook('fn_paging_start')) ? eval($hook) : null;
+	if ($return)
+		return $return;
+
 	$links = '';
 	for ($i = 1; $i <= $total_pages; $i++)
 		$links .= ($i == $page ? ' <span class="current">'.$i.'</span>' : ' <a href="'.sprintf($url, $i).'">'.$i.'</a>');
@@ -336,6 +344,11 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 		curl_setopt($ch, CURLOPT_NOBODY, $head_only);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 		curl_setopt($ch, CURLOPT_USERAGENT, 'S2');
+		if ($parsed_url['scheme'] == 'https')
+		{
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		}
 
 		// Grab the page
 		$content = @curl_exec($ch);
@@ -377,7 +390,7 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 	// fsockopen() is the second best thing
 	else if (function_exists('fsockopen'))
 	{
-		$remote = @fsockopen($parsed_url['host'], !empty($parsed_url['port']) ? intval($parsed_url['port']) : 80, $errno, $errstr, $timeout);
+		$remote = @fsockopen(($parsed_url['scheme'] == 'https' ? 'ssl://' : '').$parsed_url['host'], !empty($parsed_url['port']) ? intval($parsed_url['port']) : ($parsed_url['scheme'] == 'https' ? 443 : 80), $errno, $errstr, $timeout);
 		if ($remote)
 		{
 			// Send a standard HTTP 1.0 request for the page
@@ -523,9 +536,9 @@ function s2_clean_version($version)
 //
 // Validate an e-mail address
 //
-function is_valid_email ($email)
+function s2_is_valid_email ($email)
 {
-	$return = ($hook = s2_hook('em_fn_is_valid_email_start')) ? eval($hook) : null;
+	$return = ($hook = s2_hook('fn_is_valid_email_start')) ? eval($hook) : null;
 	if ($return != null)
 		return $return;
 

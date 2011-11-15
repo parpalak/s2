@@ -169,10 +169,21 @@ function SelectTab(eTab, bAddToHistory)
 		for (var i = aeDL_child.length; i-- ;)
 			if (aeDL_child[i].nodeName == "DT" && aeDL_child[i].className != "on")
 				aeDL_child[i].className = "";
-			else if (aeDL_child[i].nodeName == "DD")
+			else if (aeDL_child[i].nodeName == "DD" && aeDL_child[i].className != "inactive")
+			{
+				var aeDD_child = aeDL_child[i].childNodes;
+				for (var j = aeDD_child.length; j-- ;)
+					if (aeDD_child[j].nodeName == "DIV")
+						aeDD_child[j].setAttribute('data-scroll', aeDD_child[j].scrollTop);
+
 				aeDL_child[i].className = "inactive";
-		eSheet.className = "active";
+			}
 		eTab.className = "active";
+		eSheet.className = "active";
+		aeDD_child = eSheet.childNodes;
+		for (j = aeDD_child.length; j-- ;)
+			if (aeDD_child[j].nodeName == "DIV" && aeDD_child[j].getAttribute('data-scroll'))
+				aeDD_child[j].scrollTop = aeDD_child[j].getAttribute('data-scroll');
 	}
 	if (bAddToHistory)
 		SetPage(eTab.id);

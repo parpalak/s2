@@ -1,14 +1,12 @@
 /**
- * Ajax requests.
- *
- * GET and POST requests via XMLHttpRequest.
+ * Basic functions: ajax, md5, popup messages.
  *
  * @copyright (C) 2007-2011 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
 
-var hex_md5 = function (string)
+function hex_md5 (string)
 {
 	// Based on http://www.webtoolkit.info/javascript-md5.html
 
@@ -207,6 +205,10 @@ function StringFromForm (aeItem)
 	return sRequest;
 }
 
+//
+// Ajax wrappers
+//
+
 function getHTTPRequestObject() 
 {
 	var xmlHttpRequest = false;
@@ -226,7 +228,6 @@ function getHTTPRequestObject()
 }
 
 var xmlhttp_sync = getHTTPRequestObject();
-var xmlhttp_async = getHTTPRequestObject();
 
 function CheckStatus (xmlhttp)
 {
@@ -240,7 +241,13 @@ function CheckStatus (xmlhttp)
 
 	if (s2_status && s2_status != 'Success')
 	{
-		s2_popup_message(xmlhttp.responseText);
+		if (s2_status == 'Lost' || s2_status == 'Expired' || s2_status == 'Wrong_IP')
+			PopupMessages.showUnique(xmlhttp.responseText, 'expired_session');
+		else if (s2_status == 'Forbidden')
+			PopupMessages.showUnique(xmlhttp.responseText, 'forbidden_action');
+		else
+			PopupMessages.show(xmlhttp.responseText);
+
 		return false;
 	}
 
@@ -254,36 +261,43 @@ function CheckStatus (xmlhttp)
 	return true;
 }
 
+function AsyncCallback ()
+{
+	if (this.readyState != 4)
+		return;
+
+	if (typeof SetWait == 'function')
+		SetWait(false);
+
+	if (CheckStatus(this) && this.S2CustomCallback)
+		this.S2CustomCallback(this);
+};
+
 function AjaxRequest (sRequestUrl, sParam, fCallback)
 {
 	var xmlhttp;
 
+	if (typeof SetWait == 'function')
+		SetWait(true);
+
 	if (fCallback == null)
 	{
-		if (typeof SetWait == 'function')
-			SetWait(true);
 		xmlhttp = xmlhttp_sync;
 	}
 	else
-		xmlhttp = xmlhttp_async;
+	{
+		xmlhttp = getHTTPRequestObject();
+		if (typeof fCallback == 'function')
+			xmlhttp.S2CustomCallback = fCallback;
+	}
 
 	xmlhttp.open(sParam == '' ? 'GET' : 'POST', sRequestUrl, fCallback != null);
 
 	if (sParam != '')
-	{
-		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		xmlhttp.setRequestHeader("Content-length", sParam.length);
-		xmlhttp.setRequestHeader("Connection", "close");
-	}
+		xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
 	if (fCallback != null)
-		xmlhttp.onreadystatechange = function()
-		{
-			if (xmlhttp.readyState != 4)
-				return;
-			if (CheckStatus(xmlhttp))
-				fCallback(xmlhttp);
-		};
+		xmlhttp.onreadystatechange = AsyncCallback;
 
 	xmlhttp.send(sParam == '' ? null : sParam);
 
@@ -305,6 +319,8 @@ function GETSyncRequest (sRequestUrl)
 
 function GETAsyncRequest (sRequestUrl, fCallback)
 {
+	if (fCallback == null)
+		fCallback = true;
 	AjaxRequest(sRequestUrl, '', fCallback);
 }
 
@@ -312,6 +328,17 @@ function POSTSyncRequest (sRequestUrl, sParam)
 {
 	return AjaxRequest(sRequestUrl, sParam);
 }
+
+function POSTAsyncRequest (sRequestUrl, sParam, fCallback)
+{
+	if (fCallback == null)
+		fCallback = true;
+	AjaxRequest(sRequestUrl, sParam, fCallback);
+}
+
+//
+// Displaying messages
+//
 
 function DisplayError (sError)
 {
@@ -334,63 +361,166 @@ function UnknownError (sError, iStatus)
 				s2_lang.server_response + '<br />' + sError);
 }
 
-function s2_popup_message (sMessage, aActions, iTime)
+function PopupWindow (sTitle, sHeader, sInfo, sText)
 {
-	var eDiv = document.getElementById('popup_message');
-	if (!eDiv)
+	// HTML encode for textarea
+	var div = document.createElement('div');
+	div.appendChild(document.createTextNode(sText));
+	sText = div.innerHTML;
+
+	var wnd = window.open('about:blank', '', '', 'True');
+	wnd.document.open();
+
+	var head = '<title>' + sTitle + '</title>' +
+		'<style>html {height: 100%; margin: 0;} body {margin: 0 ; padding: 0 10%; height: 100%; background: #eee; font: Verdana 75%;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 70%;}</style>';
+	var body = '<h1>' + sHeader + '</h1>' + 
+		'<p>' + sInfo + '</p><textarea readonly="readonly">' + sText + '</textarea>';
+
+	(hook = Hooks.get('fn_popup_window_pre_mgr')) ? eval(hook) : null;
+
+	var text = '<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>';
+
+	wnd.document.write(text);
+	wnd.document.close();
+}
+
+var PopupMessages = {
+
+	show : function (sMessage, aActions, iTime, sId)
 	{
-		eDiv = document.createElement('DIV');
-		document.body.appendChild(eDiv);
-		eDiv.setAttribute('id', 'popup_message');
+		var eDiv = document.getElementById('popup_message');
+		if (!eDiv)
+		{
+			eDiv = document.createElement('DIV');
+			document.body.appendChild(eDiv);
+			eDiv.setAttribute('id', 'popup_message');
 
-		var eInnerDiv = document.createElement('DIV');
-		eDiv.appendChild(eInnerDiv);
+			var eInnerDiv = document.createElement('DIV');
+			eDiv.appendChild(eInnerDiv);
 
-		var eImg = document.createElement('IMG');
-		eImg.setAttribute('src', 'i/1.gif');
-		eImg.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
-		eInnerDiv.appendChild(eImg);
+			var eImg = document.createElement('IMG');
+			eImg.setAttribute('src', 'i/1.gif');
+			eImg.setAttribute('alt', '');
+			eImg.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
+			eInnerDiv.appendChild(eImg);
+		}
+		else
+			var eInnerDiv = eDiv.firstChild;
+
+		if (sId)
+		{
+			var aeMessages = eInnerDiv.childNodes;
+			for (var i = aeMessages.length; i-- ;)
+				if (aeMessages[i].nodeName == 'DIV' && aeMessages[i].getAttribute('data-id') == sId)
+				{
+					aeMessages[i].style.color = 'transparent';
+					setTimeout(function () { aeMessages[i].style.color = ''; }, 200);
+					setTimeout(function () { aeMessages[i].style.color = 'transparent'; }, 350);
+					setTimeout(function () { aeMessages[i].style.color = ''; }, 500);
+					return;
+				}
+		}
+
+		var eMessage = document.createElement('DIV');
+		eMessage.setAttribute('data-id', sId || '');
+		eInnerDiv.appendChild(eMessage);
+
+		if (iTime)
+		{
+			setTimeout(function ()
+			{
+				eMessage.parentNode.removeChild(eMessage);
+				if (eInnerDiv.childNodes.length == 1 && eDiv.parentNode)
+					eDiv.parentNode.removeChild(eDiv);
+			}, iTime * 1000);
+		}
+
+		eMessage.innerHTML = sMessage;
+
+		var max = aActions ? aActions.length : 0;
+		for (var i = 0; i < max; i++)
+		{
+			var eA = document.createElement('A');
+			eA.setAttribute('class', 'action');
+			eA.setAttribute('href', '#');
+			eA.appendChild(document.createTextNode(aActions[i].name));
+			(function (action, once)
+			{
+				eA.onclick = function ()
+				{
+					action();
+					if (once)
+					{
+						eMessage.parentNode.removeChild(eMessage);
+						if (eInnerDiv.childNodes.length == 1)
+							eDiv.parentNode.removeChild(eDiv);
+					}
+					return false;
+				}
+			}(aActions[i].action, aActions[i].once));
+			eMessage.appendChild(document.createTextNode('\u00a0 '));
+			eMessage.appendChild(eA);
+		}
+	},
+
+	showUnique: function (sMessage, sId)
+	{
+		this.show(sMessage, null, null, sId);
+	},
+
+	hide: function (sId)
+	{
+		var eDiv = document.getElementById('popup_message');
+		if (!eDiv || !sId)
+			return;
+
+		var aeMessages = eDiv.firstChild.childNodes;
+		for (var i = aeMessages.length; i-- ;)
+			if (aeMessages[i].nodeName == 'DIV' && aeMessages[i].getAttribute('data-id') == sId)
+				aeMessages[i].parentNode.removeChild(aeMessages[i]);
+
+		if (eDiv.firstChild.childNodes.length == 1 && eDiv.parentNode)
+			eDiv.parentNode.removeChild(eDiv);
+	}
+};
+
+//
+// Login form processing
+//
+
+function SendLoginData (eForm, fSuccess, fFailed)
+{
+	eForm.key.value = hex_md5(hex_md5(eForm.pass.value + 'Life is not so easy :-)') + ';-)' + eForm.getAttribute('data-salt'));
+	var Response = POSTSyncRequest(sUrl + 'action=login', StringFromForm(eForm));
+
+	if (Response.status == '200' && Response.text == 'OK')
+		fSuccess();
+	else if (Response.text.substr(0, 9) == 'OLD_SALT_')
+	{
+		var params = Response.text.split('_');
+		eForm.setAttribute('data-salt', params[2]);
+		eForm.challenge.value = params[3];
+		setTimeout(function () { SendLoginData (eForm, fSuccess, fFailed); }, 0);
 	}
 	else
-		var eInnerDiv = eDiv.firstChild;
+		fFailed(Response.text);
+}
 
-	var eMessage = document.createElement('DIV');
-	eInnerDiv.appendChild(eMessage);
+function SendAjaxLoginForm ()
+{
+	document.forms['loginform'].login.value = username;
 
-	if (iTime)
+	SendLoginData(document.forms['loginform'], function ()
 	{
+		PopupMessages.hide('expired_session')
+	}, function (sText)
+	{
+		document.getElementById('ajax_login_message').innerHTML = sText;
 		setTimeout(function ()
 		{
-			eMessage.parentNode.removeChild(eMessage);
-			if (eInnerDiv.childNodes.length == 1 && eDiv.parentNode)
-				eDiv.parentNode.removeChild(eDiv);
-		}, iTime * 1000);
-	}
-
-	eMessage.appendChild(document.createTextNode(sMessage));
-
-	var max = aActions ? aActions.length : 0;
-	for (var i = 0; i < max; i++)
-	{
-		var eA = document.createElement('A');
-		eA.setAttribute('class', 'action');
-		eA.setAttribute('href', '#');
-		eA.appendChild(document.createTextNode(aActions[i].name));
-		(function (action, once)
-		{
-			eA.onclick = function ()
-			{
-				action();
-				if (once)
-				{
-					eMessage.parentNode.removeChild(eMessage);
-					if (eInnerDiv.childNodes.length == 1)
-						eDiv.parentNode.removeChild(eDiv);
-				}
-				return false;
-			}
-		}(aActions[i].action, aActions[i].once));
-		eMessage.appendChild(document.createTextNode('\u00a0 '));
-		eMessage.appendChild(eA);
-	}
+			eDiv = document.getElementById('ajax_login_message');
+			if (eDiv)
+				eDiv.innerHTML = '';
+		}, 5000)
+	});
 }

@@ -82,12 +82,12 @@ body {
 	}
 
 #loading {
-	height: 20px;
-	width: 20px;
-	float: left;
-	margin: 2px 3px 2px 0;
-	border: 1px solid #E4BB50;
-	background: #FFF4D7 url('../i/loading.gif') 50% 50% no-repeat;
+	height: 6px;
+	width: 42px;
+	left: -55px;
+	top: 11px;
+	position: absolute;
+	background: url('../i/loading.gif') 0 0 no-repeat;
 	}
 
 a, a:visited {
@@ -216,7 +216,6 @@ hr {
 		-webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
 		box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
 		overflow: hidden;
-		white-space: pre-line;
 		font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
 		}
 		#popup_message > div > div {
@@ -455,6 +454,7 @@ hr {
 	}
 	.treetree li {
 		list-style-type: none;
+		display: block;
 		background-image : url(../i/tree_icons.png);
 		background-position: -72px 0;
 		background-repeat : repeat-y;
@@ -848,9 +848,11 @@ ul .but_panel .delete,
 		.sort .buttons .rename { background-position: -32px -16px; }
 		.sort .buttons.yes { background-position: 0 0; }
 		.sort .buttons.no { background-position: 0 -16px; }
-	.sort img {
+	.sort img, .sort img.nohover:hover, .sort img.nohover:active:hover {
 		border: none;
+		box-shadow: none;
 		margin: 1px;
+		background-color: transparent;
 		}
 		.sort img:hover {
 			background-color: #d2e5fc;
@@ -976,6 +978,7 @@ div.input.color input,
 div.input.text input,
 div.input.color input,
 .fields input[type="text"],
+.r-float select,
 #arttext,
 #commtext,
 #tagtext,
@@ -1030,18 +1033,20 @@ div.input.color input,
 		-webkit-box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
 		box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
 		}
+	.bitbtn[disabled], .bitbtn[disabled]:hover, .bitbtn[disabled]:active {
+		-moz-box-shadow: none;
+		-webkit-box-shadow: none;
+		box-shadow: none;
+		background-color: #f4f4f4;
+		}
 
 .bitbtn.save { background-position: 1px -34px; }
-.bitbtn.reset { background-position: 1px -16px; }
-.bitbtn.new { background-position: 1px 2px; }
-.bitbtn.parag { background-position: 1px -52px; }
 .bitbtn.savetag { background-position: 1px -160px; }
-.bitbtn.resettag { background-position: 1px -142px; }
 .enabled .bitbtn.flip_ext { background-position: 1px -88px; }
 .disabled .bitbtn.flip_ext { background-position: 1px -70px; }
 .bitbtn.uninst_ext { background-position: 1px -124px; }
 .bitbtn.inst_ext { background-position: 1px -106px; }
-.bitbtn.add_user { background-position: 1px -178px; }
+.bitbtn.add_user { background-position: 1px -52px; }
 
 /*=======================[Toolbar]============================================*/
 
@@ -1094,7 +1099,8 @@ div.input.color input,
 .toolbar .h4 { background-position: -34px -34px; }
 .toolbar .pre { background-position: -52px -34px; }
 .toolbar .code { background-position: -70px -34px; }
-.toolbar .nobr{ background-position: -88px -34px; }
+.toolbar .nobr { background-position: -88px -34px; }
+.toolbar .parag { background-position: -106px -52px; }
 
 .toolbar .a { background-position: -88px -52px; }
 .toolbar .quote { background-position: -16px -16px; }
@@ -1200,7 +1206,7 @@ form center {
 #ext_div h2,
 #comm_div h2 {
 	font-size: 1.4em;
-	font-weight: normal;
+	font-family: Arial, Helvetica, sans-serif;
 	margin: 1em 0 0.5em;
 	border-bottom: 3px double #ddd;
 	border-color: rgba(0, 0, 0, 0.1);
@@ -1275,7 +1281,14 @@ form center {
 	top: 50%;
 	line-height: 1.5;
 	}
-#login_wrap form {
+	#login_wrap p {
+		margin: 1em;
+		}
+	#login_wrap .message,
+	#ajax_login_message {
+		color: red;
+		}
+.loginform {
 	position: relative;
 	text-align: center;
 	background: #eee;
@@ -1294,25 +1307,19 @@ form center {
 	-webkit-box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
 	box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
 	}
-	#login_wrap label {
+	.loginform label {
 		text-align: left;
 		display: block;
 		padding: 0.2em 0;
 		}
-		#login_wrap label input {
+		.loginform label input {
 			width: 15em;
 			margin: 0;
 			}
-		#login_wrap label span {
+		.loginform label span {
 			display: block;
 			float: left;
 			width: 6em;
 			margin-right: 0.5em;
 			text-shadow: 0px 1px 0 #fff;
 			}
-	#login_wrap p {
-		margin: 1em;
-		}
-#login_wrap #message {
-	color: red;
-	}

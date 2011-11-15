@@ -10,8 +10,8 @@
  */
 
 
-define('S2_VERSION', '1.0a6');
-define('S2_DB_REVISION', 4);
+define('S2_VERSION', '1.0b');
+define('S2_DB_REVISION', 8);
 define('MIN_PHP_VERSION', '4.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
@@ -60,6 +60,21 @@ function generate_config_file ()
 			break;
 	}
 
+	$path = preg_replace('#^[^:/]+://[^/]*#', '', $base_url);
+
+	$use_https = false;
+	if (substr($base_url, 0, 8) == 'https://')
+		$use_https = true;
+	else
+	{
+		$content = s2_get_remote_file('https://'.substr($base_url, 7).$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 5, false, 10, true);
+		if (false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
+			$use_https = true;
+	}
+
+	if ($use_https)
+		$base_url = substr($base_url, strpos($base_url, '//'));
+
 	return '<?php'."\n\n".'$db_type = \''.$db_type."';\n".
 		'$db_host = \''.$db_host."';\n".
 		'$db_name = \''.addslashes($db_name)."';\n".
@@ -68,8 +83,9 @@ function generate_config_file ()
 		'$db_prefix = \''.addslashes($db_prefix)."';\n".
 		'$p_connect = false;'."\n\n".
 		'define(\'S2_BASE_URL\', \''.$base_url.'\');'."\n".
-		'define(\'S2_PATH\', \''.preg_replace('#^[^:/]+://[^/]*#', '', $base_url).'\');'."\n".
+		'define(\'S2_PATH\', \''.$path.'\');'."\n".
 		'define(\'S2_URL_PREFIX\', \''.$url_prefix.'\');'."\n\n".
+		($use_https ? 'define(\'S2_FORCE_ADMIN_HTTPS\', \'1\');'."\n\n" : '').
 		'$s2_cookie_name = '."'".$s2_cookie_name."';\n";
 }
 
@@ -288,11 +304,11 @@ body {
 			<legend><?php echo $lang_install['Part2 legend'] ?></legend>
 				<div class="input text required">
 					<label for="fld7"><span><?php echo $lang_install['Admin username'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Username help'] ?></small></label>
-					<input id="fld7" type="text" name="req_username" size="35" maxlength="25" value="admin" />
+					<input id="fld7" type="text" name="req_username" size="35" maxlength="40" value="admin" />
 				</div>
 				<div class="input text required">
 					<label for="fld8"><span><?php echo $lang_install['Admin password'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Password help'] ?></small></label>
-					<input id="fld8" type="password" name="req_password" size="35" maxlength="25" />
+					<input id="fld8" type="password" name="req_password" size="35" maxlength="200" />
 				</div>
 				<div class="input text">
 					<label for="fld10"><span><?php echo $lang_install['Admin e-mail'] ?></span> <small><?php echo $lang_install['E-mail address help'] ?></small></label>
@@ -391,15 +407,15 @@ else
 	// Validate username
 	if (utf8_strlen($username) < 2)
 		error($lang_install['Username too short']);
-	if (utf8_strlen($username) > 25)
+	if (utf8_strlen($username) > 40)
 		error($lang_install['Username too long']);
 
 	// Validate password
-	if (utf8_strlen($password) > 25)
-		error($lang_install['Username too long']);
+	if (utf8_strlen($password) > 100)
+		error($lang_install['Password too long']);
 
 	// Validate email
-	if ($email && !is_valid_email($email))
+	if ($email && !s2_is_valid_email($email))
 		error($lang_install['Invalid email']);
 
 	if (utf8_strlen($base_url) == 0)
@@ -627,6 +643,11 @@ else
 				'allow_null'	=> false,
 				'default'		=> '0'
 			),
+			'revision'		=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '1'
+			),
 			'priority'		=> array(
 				'datatype'		=> 'INT(10) UNSIGNED',
 				'allow_null'	=> false,
@@ -647,11 +668,6 @@ else
 				'allow_null'	=> false,
 				'default'		=> '1'
 			),
-			'children_preview'=> array(
-				'datatype'		=> 'TINYINT(1)',
-				'allow_null'	=> false,
-				'default'		=> '1'
-			),
 			'url'			=> array(
 				'datatype'		=> 'VARCHAR(255)',
 				'allow_null'	=> false,
@@ -661,6 +677,11 @@ else
 				'datatype'		=> 'VARCHAR(30)',
 				'allow_null'	=> false,
 				'default'		=> '\'\''
+			),
+			'user_id'		=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
 			)
 		),
 		'PRIMARY KEY'	=> array('id'),
@@ -832,9 +853,20 @@ else
 				'datatype'		=> 'VARCHAR(200)',
 				'allow_null'	=> true
 			),
+			'ip'			=> array(
+				'datatype'		=> 'VARCHAR(39)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
+			'ua'			=> array(
+				'datatype'		=> 'VARCHAR(200)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
 		),
 		'INDEXES'		=> array(
 			'challenge_idx'		=> array('challenge'),
+			'login_idx'			=> array('login'),
 		),
 	);
 
@@ -862,6 +894,11 @@ else
 				'allow_null'	=> false,
 				'default'		=> '\'\''
 			),
+			'name'				=> array(
+				'datatype'		=> 'VARCHAR(80)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
 			'view'				=> array(
 				'datatype'		=> 'TINYINT(1)',
 				'allow_null'	=> false,
@@ -879,6 +916,11 @@ else
 			),
 			'edit_comments'		=> array(
 				'datatype'		=> 'TINYINT(1)',
+				'allow_null'	=> false,
+				'default'		=> '0'
+			),
+			'create_articles'	=> array(
+				'datatype'		=> 'INT(10) UNSIGNED',
 				'allow_null'	=> false,
 				'default'		=> '0'
 			),
@@ -906,13 +948,13 @@ else
 
 	// Admin user
 	$query = array(
-		'INSERT'	=> 'login, password, email, view, view_hidden, hide_comments, edit_comments, edit_site, edit_users',
+		'INSERT'	=> 'login, password, email, view, view_hidden, hide_comments, edit_comments, create_articles, edit_site, edit_users',
 		'INTO'		=> 'users',
-		'VALUES'	=> '\''.$s2_db->escape($username).'\', \''.md5($password.'Life is not so easy :-)').'\', \''.$s2_db->escape($email).'\', 1, 1, 1, 1, 1, 1'
+		'VALUES'	=> '\''.$s2_db->escape($username).'\', \''.md5($password.'Life is not so easy :-)').'\', \''.$s2_db->escape($email).'\', 1, 1, 1, 1, 1, 1, 1'
 	);
 
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
-	//$new_uid = $s2_db->insert_id();
+	$admin_uid = $s2_db->insert_id();
 
 	// Enable/disable automatic check for updates depending on PHP environment (require cURL, fsockopen or allow_url_fopen)
 	//$check_for_updates = (function_exists('curl_init') || function_exists('fsockopen') || in_array(strtolower(@ini_get('allow_url_fopen')), array('on', 'true', '1'))) ? 1 : 0;
@@ -950,9 +992,9 @@ else
 
 	// Insert some other default data
 	$query = array(
-		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, children_preview',
+		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template',
 		'INTO'		=> 'articles',
-		'VALUES'	=> '0, \''.$lang_install['Main Page'].'\', 0, '.$now.', 1, \'mainpage.php\', 0'
+		'VALUES'	=> '0, \''.$lang_install['Main Page'].'\', 0, '.$now.', 1, \'mainpage.php\''
 	);
 
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -966,9 +1008,9 @@ else
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url, pagetext, excerpt',
+		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url, pagetext, excerpt, user_id',
 		'INTO'		=> 'articles',
-		'VALUES'	=> '2, \''.$lang_install['Page example'].'\', '.$now.', '.$now.', 1, \'\', \'page1\', \''.$s2_db->escape($lang_install['Page text']).'\', \''.$s2_db->escape($lang_install['Page text']).'\''
+		'VALUES'	=> '2, \''.$lang_install['Page example'].'\', '.$now.', '.$now.', 1, \'\', \'page1\', \''.$s2_db->escape($lang_install['Page text']).'\', \''.$s2_db->escape($lang_install['Page text']).'\', '.$admin_uid
 	);
 
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);

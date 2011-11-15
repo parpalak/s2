@@ -178,7 +178,7 @@ function s2_save_options ($opt)
 {
 	global $s2_const_types, $s2_db, $lang_admin_opt;
 
-	$return = '';
+	$return = array();
 	($hook = s2_hook('fn_save_options_start')) ? eval($hook) : null;
 
 	foreach ($s2_const_types as $name => $type)
@@ -195,9 +195,9 @@ function s2_save_options ($opt)
 			$value = $opt[$name];
 		}
 
-		if ($name == 'S2_WEBMASTER_EMAIL' && $value != '' && !is_valid_email($value))
+		if ($name == 'S2_WEBMASTER_EMAIL' && $value != '' && !s2_is_valid_email($value))
 		{
-			$return .= '<p style="color: red;">'.$lang_admin_opt['Invalid webmaster email'].'</p>';
+			$return[] = $lang_admin_opt['Invalid webmaster email'];
 			continue;
 		}
 
@@ -217,7 +217,7 @@ function s2_save_options ($opt)
 
 	$style = preg_replace('#[\.\\\/]#', '', $opt['style']);
 	if (!file_exists(S2_ROOT.'_styles/'.$style.'/'.$style.'.php'))
-		$return .= '<p style="color: red;">'.$lang_admin_opt['Invalid style'].'</p>';
+		$return[] = $lang_admin_opt['Invalid style'];
 	else if ($style != S2_STYLE)
 	{
 		$query = array(
@@ -231,7 +231,7 @@ function s2_save_options ($opt)
 
 	$lang = preg_replace('#[\.\\\/]#', '', $opt['lang']);
 	if (!file_exists(S2_ROOT.'_lang/'.$lang.'/common.php'))
-		$return .= '<p style="color: red;">'.sprintf($lang_admin_opt['Invalid lang pack'], s2_htmlencode($lang)).'</p>';
+		$return[] = sprintf($lang_admin_opt['Invalid lang pack'], s2_htmlencode($lang));
 	else if ($lang != S2_LANGUAGE)
 	{
 		$query = array(
@@ -248,5 +248,5 @@ function s2_save_options ($opt)
 
 	s2_generate_config_cache();
 
-	return $return;
+	return implode("\n", $return);
 }

@@ -9,9 +9,12 @@ $lang_admin = array(
 'Delete from list'			=> 'Delete the page from this list',
 'New page'					=> 'New page',
 'Admin panel'				=> 'Control panel',
-'Expired session'			=> "Your session has been expired.\nCopy somewhere the unsaved data and update the page to log in again.",
-'Lost session'				=> "The session has been interrupted. Probably, someone has used your login and password.\nCopy somewhere the unsaved data and update the page to log in again.",
+'Expired session'			=> 'Your session is suspended due to a pause. Please, enter your password to continue.',
+'Lost session'				=> 'Your session has been closed. Please, enter your password to continue.',
+'Wrong_IP session'			=> 'Your IP address has been changed. Please, enter your password to continue.',
 'No permission'				=> 'You do not have enough permissions to perform this action.',
+'Other sessions'			=> 'You have logged in from different browsers. Here are your sessions: <br />%s',
+'Close other sessions'		=> 'Close all sessions except the current one',
 
 // Login form
 'Password'					=> 'Password',
@@ -21,7 +24,7 @@ $lang_admin = array(
 
 // List tab
 'Site'						=> 'Site',
-'Choose tag'				=> 'Select a&nbsp;tag from the list on the right or&nbsp;add the new one using <a href="#tag">the tags’ tab</a>.',
+'Choose tag'				=> 'Select a&nbsp;tag from the list on the right or&nbsp;add a new one using the <a href="#tag">tags’ tab</a>. Then drop here pages from the tree on the left.',
 'Show tags'					=> 'Show tags',
 'Hide tags'					=> 'Hide tags',
 'Expand'					=> 'Expand',
@@ -34,6 +37,7 @@ $lang_admin = array(
 'Empty editor info'			=> 'Go to the “<a href="#list">Site</a>” tab and choose a page for editing.',
 'Not saved correct'			=> 'Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.',
 'Editor'					=> 'Editor',
+'Author'					=> 'Author:',
 'Template'					=> 'Template:',
 'Title'						=> 'Title',
 'Add template info'			=> 'The filename of the new template:',
@@ -46,19 +50,13 @@ $lang_admin = array(
 'Modify time'				=> 'Modified',
 'Modify time help'			=> 'Used in RSS. You can update this after editing a published page.',
 'Now'						=> 'now',
-'Paragraphs'				=> 'Paragraphs',
 'Paragraphs info'			=> '“Smart” inserting &lt;p&gt; and &lt;br&gt; tags',
 'Published'					=> 'Published',
-'Commented'					=> 'It is possible to comment',
+'Commented'					=> 'Allow comments',
 'Commented info'			=> 'To display the input form of comments. Setting is important only for pages.',
-'Subcontent'				=> 'Excerpts',
-'Children preview'			=> 'Show the excerpts of children. Setting is important only for sections.', 
 'Preview published'			=> 'The published page will be opened in a new window.',
 'Preview ready'				=> 'View the published page &uarr;',
 'Go to comments'			=> 'Go to the comments',
-'Clear'						=> 'Clear',
-'Reset'						=> 'Reset',
-'Reset alert'				=> 'Do you want to restore the original version (unsaved changes will be lost)?',
 'Preview not found'			=> '<h1>Page not found</h1><p>The page you want to browse is not published yet or does not exist at all. It is possible to view only the published pages.</p>',
 'URL not unique'			=> 'This URL part is already used. Choose another one.',
 'URL empty'					=> 'Set the URL part to form the page address.',
@@ -136,8 +134,8 @@ $lang_admin = array(
 'Pictures'					=> 'Pictures',
 
 // Tags tab
-'Tags:'						=> 'Tags',
-'Tag:'						=> 'Tag',
+'Tags:'						=> 'Tags:',
+'Tag'						=> 'Tag',
 'New'						=> '— New —',
 'Replace tag'				=> 'Replace existing tag:',
 'Delete tag'				=> 'Delete the “%s” tag',
@@ -168,14 +166,15 @@ $lang_admin = array(
 
 // Users tab
 'Users'						=> 'Users',
-'No permissions email'		=> 'The e-mail is not changed. You do not have enough permissions to change users’ data.',
 'No other admin'			=> '<strong>Attention!</strong> You cannot drop your administrative permissions because there is no another administrator.',
 'No other admin delete'		=> '<strong>Attention!</strong> You cannot delete yourself because there is no another administrator.',
 'Set email'					=> 'Set the e-mail address',
 'Change email'				=> 'Change the e-mail address',
+'Set name'					=> 'Set the name',
+'Change name'				=> 'Change the name',
 'Deny'						=> 'Click to deny',
 'Allow'						=> 'Click to allow',
-'Username exists'			=> '<strong>Warning!</strong> The username “%s” already exists.',
+'Username exists'			=> 'The username “%s” already exists.',
 'Password changed'			=> 'The password has been changed.',
 'Change password'			=> 'Change the password',
 'Delete user'				=> 'Delete user',
@@ -194,7 +193,8 @@ $lang_user_permissions = array (
 'view_hidden'			=> 'View secret data',
 'hide_comments'			=> 'Hide comments',
 'edit_comments'			=> 'Edit comments',
-'edit_site'				=> 'Edit the site',
+'create_articles'		=> 'Create pages',
+'edit_site'				=> 'Edit site',
 'edit_users'			=> 'Manage users’ accounts'
 
 );

@@ -10,7 +10,7 @@
 require S2_ROOT.'_include/functions.php';
 require S2_ROOT.'_include/utf8/utf8.php';
 
-define('S2_VERSION', '1.0a6');
+define('S2_VERSION', '1.0b');
 
 // Uncomment these lines for debug
 //define('S2_DEBUG', 1);
@@ -94,7 +94,7 @@ if (!defined('S2_CONFIG_LOADED'))
 	require S2_CACHE_DIR.'cache_config.php';
 }
 
-define('S2_DB_LAST_REVISION', 4);
+define('S2_DB_LAST_REVISION', 8);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION)
 	include S2_ROOT.'_admin/db_update.php';
 

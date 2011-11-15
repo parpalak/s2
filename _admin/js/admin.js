@@ -38,18 +38,6 @@ function str_replace (substr, newsubstr, str)
 	return str;
 }
 
-function get_attr (sStr, sAttr)
-{
-	var iBeg = sStr.indexOf(sAttr);
-	if (iBeg != -1)
-	{
-		var iStart = sStr.indexOf('"', iBeg) + 1;
-		var iEnd = sStr.indexOf('"', iStart);
-		return sStr.substring(iStart, iEnd);
-	}
-	return '';
-}
-
 function SetTime (eForm, sName)
 {
 	var d = new Date();
@@ -69,8 +57,8 @@ function SetTime (eForm, sName)
 
 var Event = (function ()
 {
-	var bIE = document.attachEvent != null;
-	var bFF = !document.attachEvent && document.addEventListener;
+	var bFF = document.addEventListener;
+	var bIE = !bFF && document.attachEvent != null;
 
 	bIE && attachEvent('onload', Init);
 	bFF && addEventListener('load', Init, true);
@@ -148,11 +136,11 @@ function Init ()
 	{
 		if (eTagTable.className == 'closed')
 		{
-			var Response = GETSyncRequest(sUrl + 'action=load_tagnames');
-			if (Response.status == '200')
-				document.getElementById('tag_list').innerHTML = Response.text;
-
 			eTagTable.className = 'opened';
+			GETAsyncRequest(sUrl + 'action=load_tagnames', function (http)
+			{
+				document.getElementById('tag_list').innerHTML = http.responseText;
+			});
 		}
 		else
 			eTagTable.className = 'closed';
@@ -215,9 +203,16 @@ function SaveHandler (e)
 
 function Logout ()
 {
-	GETSyncRequest(sUrl + 'action=logout');
-	document.location.reload();
+	GETAsyncRequest(sUrl + 'action=logout', function ()
+	{
+		document.location.reload();
+	});
+	return false;
+}
 
+function CloseOtherSessions ()
+{
+	GETAsyncRequest(sUrl + 'action=close_other_sessions' /*, function () {} */);
 	return false;
 }
 
@@ -261,9 +256,9 @@ var Search = (function ()
 		{
 			var DoSearch = function ()
 			{
-				GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (xmlhttp) {
-					document.getElementById('tree').innerHTML = '<ul>' + xmlhttp.responseText + '</ul>';
-					SetWait(false);
+				GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (http)
+				{
+					document.getElementById('tree').innerHTML = '<ul>' + http.responseText + '</ul>';
 				});
 			}
 
@@ -396,32 +391,9 @@ var Changes = (function ()
 			localStorage.removeItem('s2_curr_text');
 	};
 
-	var recovered_wnd = null;
-
 	function show_recovered (sText)
 	{
-		var div = document.createElement('div');
-		div.appendChild(document.createTextNode(sText));
-		sText = div.innerHTML;
-
-		if (recovered_wnd != null && !recovered_wnd.closed)
-		{
-			recovered_wnd.close();
-		}
-		recovered_wnd = window.open('about:blank', 's2_recovered_text', '', 'True');
-		recovered_wnd.document.open();
-
-		var head = '<title>' + s2_lang.recovered_text_alert + '</title>' +
-			'<style>html {height: 100%; margin: 0;} body {margin: 0 ; padding: 0 10%; height: 100%; background: #eee; font: Verdana 75%;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 70%;}</style>';
-		var body = '<h1>' + s2_lang.recovered_text + '</h1>' + 
-			'<p>' + s2_lang.recovered_text_info + '</p><textarea readonly="readonly">' + sText + '</textarea>';
-
-		(hook = Hooks.get('fn_show_recovered_pre_mgr')) ? eval(hook) : null;
-
-		var text = '<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>';
-
-		recovered_wnd.document.write(text);
-		recovered_wnd.document.close();
+		PopupWindow(s2_lang.recovered_text_alert, s2_lang.recovered_text, s2_lang.recovered_text_info, sText);
 	}
 
 	if (is_local_storage)
@@ -435,7 +407,7 @@ var Changes = (function ()
 		init: function ()
 		{
 			if (old_text)
-				s2_popup_message(s2_lang.recovered_text_alert, [{name: s2_lang.recovered_open, action: function (){ show_recovered(old_text); } }]);
+				PopupMessages.show(s2_lang.recovered_text_alert, [{name: s2_lang.recovered_open, action: function (){ show_recovered(old_text); } }]);
 		},
 
 		commit: function (arg)
@@ -548,13 +520,14 @@ function SaveExpand ()
 
 function LoadExpand ()
 {
-	var i, eLi;
+	var i, eLi, eSpan;
 
 	for (i in asExpanded)
-	{
-		eLi = document.getElementById(i).parentNode.parentNode;
-		eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
-	}
+		if (eSpan = document.getElementById(i))
+		{
+			eLi = eSpan.parentNode.parentNode;
+			eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
+		}
 }
 
 function CloseAll ()
@@ -600,14 +573,12 @@ function OpenById (sId)
 function RefreshTree ()
 {
 	Search.reset();
-
-	var Response = GETSyncRequest(sUrl + 'action=load_tree&id=0&search=');
-	if (Response.status != '200')
-		return;
-
-	SaveExpand()
-	document.getElementById('tree').innerHTML = '<ul>' + Response.text + '</ul>';
-	LoadExpand();
+	GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=', function (http)
+	{
+		SaveExpand()
+		document.getElementById('tree').innerHTML = '<ul>' + http.responseText + '</ul>';
+		LoadExpand();
+	});
 }
 
 //=======================[Highlight and renaming]===============================
@@ -657,11 +628,10 @@ function EditItemName (eSpan)
 			var sTitle = eInput.value;
 
 			SaveExpand();
-			var Response = POSTSyncRequest(sUrl + 'action=rename&id=' + eSpan.id, 'title=' + encodeURIComponent(sTitle));
-			if (Response.status == '200')
+			POSTAsyncRequest(sUrl + 'action=rename&id=' + eSpan.id, 'title=' + encodeURIComponent(sTitle), function (http)
 			{
-				if (Response.text != '')
-					alert(Response.text);
+				if (http.responseText != '')
+					alert(http.responseText);
 				else
 				{
 					eSpan.firstChild.nodeValue = sTitle;
@@ -671,7 +641,7 @@ function EditItemName (eSpan)
 					HighlightItem(eSpan);
 					eSpan = null;
 				}
-			}
+			});
 		}
 		else if (iCode == 27)
 			// Escape
@@ -716,7 +686,10 @@ function SetItemChildren (eSpan, sInnerHTML)
 	var eLi = eSpan.parentNode.parentNode;
 
 	if (eLi.lastChild.nodeName == 'UL')
+	{
 		eLi.lastChild.innerHTML = sInnerHTML;
+		eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
+	}
 	else
 	{
 		var eUl = document.createElement('UL');
@@ -724,6 +697,7 @@ function SetItemChildren (eSpan, sInnerHTML)
 		eLi.appendChild(eUl);
 		eUl.innerHTML = sInnerHTML;
 	}
+	ExpandSavedItem(eSpan.id);
 }
 
 // We have to remove the "UL" node if the list is empty
@@ -749,47 +723,49 @@ function StopDrag()
 	{
 		SaveExpand();
 
-		acceptorElement.className = '';
-
 		if (far)
 		{
-			var eItem = acceptorElement;
-			var eSourceLi = sourceElement.parentNode.parentNode;
+			var eItem = acceptorElement,
+				eLastAcceptor = acceptorElement,
+				eSourceLi = sourceElement.parentNode.parentNode,
+				bIsLoop = false;
 
 			while (eItem)
 			{
 				if (eItem == eSourceLi)
 				{
-					s2_popup_message(s2_lang.no_loops);
-					acceptorElement = null;
-					return;
+					bIsLoop = true;
+					break;
 				}
 				eItem = eItem.parentNode;
 			}
 
-			var Response = GETSyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far);
-			if (Response.status != '200')
+			if (bIsLoop)
+				PopupMessages.showUnique(s2_lang.no_loops, 'tree_no_loops');
+			else
 			{
-				acceptorElement = null;
-				return;
+				GETAsyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far, function (http)
+				{
+					var xmldoc = http.responseXML;
+					SetParentChildren(sourceParent, xmldoc.getElementsByTagName('source_parent')[0].firstChild.nodeValue);
+					SetItemChildren(eLastAcceptor, xmldoc.getElementsByTagName('destination')[0].firstChild.nodeValue);
+					LoadExpand();
+				});
 			}
-
-			var a = Response.text.split('|', 2);
-			SetParentChildren(sourceParent, a[1]); //source
-			SetItemChildren(acceptorElement, a[0]); //destination
 		}
 		else
 		{
-			var Response = GETSyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far);
-			if (Response.status != '200')
+			GETAsyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far, function (http)
 			{
-				acceptorElement = null;
-				return;
-			}
-			sourceParent.innerHTML = Response.text;
+				var xmldoc = http.responseXML;
+				sourceParent.innerHTML = xmldoc.getElementsByTagName('source_parent')[0].firstChild.nodeValue;
+				LoadExpand();
+			});
 		}
+
+		acceptorElement.className = '';
+		acceptorElement.parentNode.parentNode.firstChild.className = ''
 		acceptorElement = null;
-		LoadExpand();
 	}
 }
 
@@ -990,74 +966,88 @@ function DeleteArticle ()
 	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, s2_lang.delete_item)))
 		return;
 
-	var Response = GETSyncRequest(sUrl + 'action=delete&id=' + eSpan.id);
-	if (Response.status != '200')
-		return;
-
-	SaveExpand();
-	ReleaseItem();
-	SetParentChildren(eSpan.parentNode.parentNode.parentNode, Response.text);
-	LoadExpand();
+	GETAsyncRequest(sUrl + 'action=delete&id=' + eSpan.id, function (http)
+	{
+		SaveExpand()
+		ReleaseItem();
+		SetParentChildren(eSpan.parentNode.parentNode.parentNode, http.responseText);
+		LoadExpand();
+	});
 }
 
 function CreateChildArticle ()
 {
 	var eSpan = buttonPanel.parentNode;
-	var eLi = eSpan.parentNode.parentNode;
 
-	var Response = GETSyncRequest(sUrl + 'action=create&id=' + eSpan.id);
-	if (Response.status != '200')
-		return;
+	GETAsyncRequest(sUrl + 'action=create&id=' + eSpan.id, function (http)
+	{
+		var eLi = eSpan.parentNode.parentNode;
 
-	ReleaseItem();
-	SetItemChildren(eSpan, Response.text);
+		ReleaseItem();
+		SetItemChildren(eSpan, http.responseText);
 
-	eSpan = eLi.lastChild.lastChild.lastChild.lastChild;
+		eSpan = eLi.lastChild.lastChild.lastChild.lastChild;
 
-	HighlightItem(eSpan);
-	EditItemName(eSpan);
+		HighlightItem(eSpan);
+		EditItemName(eSpan);
+	});
 }
 
-function LoadArticle (sURI)
+var ArticleFunctions = (function ()
 {
+	var sLoadedURI;
+
 	function RequestArticle (sURI)
 	{
-		var Response = GETSyncRequest(sURI);
-		if (Response.status != '200')
-			return false;
-
-		document.getElementById('form_div').innerHTML = Response.text;
-		Changes.commit(document.artform);
+		GETAsyncRequest(sURI, function (http)
+		{
+			document.getElementById('form_div').innerHTML = http.responseText;
+			Changes.commit(document.artform);
+			SelectTab(document.getElementById('edit_tab'), true);
+			sLoadedURI = sURI;
+		});
 	}
 
-	if (document.artform && Changes.present(document.artform))
-	{
-		SelectTab(document.getElementById('edit_tab'), true);
-		s2_popup_message(s2_lang.unsaved, [
+	return {
+		LoadArticle: function (sURI)
+		{
+			if (document.artform && Changes.present(document.artform))
 			{
-				name: s2_lang.save_and_open,
-				action: (function ()
-				{
-					document.artform.onsubmit();
-					RequestArticle(sURI);
-				}),
-				once: true
-			},
-			{
-				name: s2_lang.discard_and_open,
-				action: (function ()
-				{
-					RequestArticle(sURI);
-				}),
-				once: true
+				SelectTab(document.getElementById('edit_tab'), true);
+				PopupMessages.show(s2_lang.unsaved, [
+					{
+						name: s2_lang.save_and_open,
+						action: (function ()
+						{
+							document.artform.onsubmit();
+							RequestArticle(sURI);
+						}),
+						once: true
+					},
+					{
+						name: s2_lang.discard_and_open,
+						action: (function ()
+						{
+							RequestArticle(sURI);
+						}),
+						once: true
+					}
+				]);
+				return false;
 			}
-		]);
-		return false;
-	}
 
-	RequestArticle(sURI);
-	SelectTab(document.getElementById('edit_tab'), true);
-}
+			RequestArticle(sURI);
+		},
+
+		ReloadArticle: function ()
+		{
+			RequestArticle(sLoadedURI);
+		},
+	};
+}());
+
+var LoadArticle = ArticleFunctions.LoadArticle;
+var ReloadArticle = ArticleFunctions.ReloadArticle; 
 
 function EditArticle (iId)
 {
@@ -1074,49 +1064,79 @@ function LoadComments (iId)
 	if (typeof(iId) == 'undefined')
 		iId = buttonPanel.parentNode.id;
 
-	var Response = GETSyncRequest(sUrl + 'action=load_comments&id=' + iId);
-	if (Response.status != '200')
-		return false;
-
-	document.getElementById('comm_div').innerHTML = Response.text;
-	init_table(null);
-	SelectTab(document.getElementById('comm_tab'), true);
+	GETAsyncRequest(sUrl + 'action=load_comments&id=' + iId, function (http)
+	{
+		document.getElementById('comm_div').innerHTML = http.responseText;
+		init_table(null);
+		SelectTab(document.getElementById('comm_tab'), true);
+	});
 	return false;
 }
 
 //=======================[Editor button handlers]===============================
 
-function ClearForm()
-{
-	if (!confirm(s2_lang.clear_prompt))
-		return false;
-
-	var aeInput = document.artform.getElementsByTagName('INPUT'), i;
-	for (i = aeInput.length; i-- ;)
-		if (aeInput[i].type == 'text')
-			aeInput[i].value = '';
-
-	aeInput = document.artform.getElementsByTagName('TEXTAREA');
-	for (i = aeInput.length; i-- ;)
-		aeInput[i].value = '';
-
-	return false;
-}
-
 function SaveArticle(sAction)
 {
 	(hook = Hooks.get('fn_save_article_start')) ? eval(hook) : null;
 
-	var sRequest = StringFromForm(document.artform);
+	var sRequest = StringFromForm(document.forms['artform']);
 
-	var Response = POSTSyncRequest(sUrl + 'action=' + sAction, sRequest);
-	if (Response.status == '200')
+	POSTAsyncRequest(sUrl + 'action=' + sAction, sRequest, function(http)
 	{
-		if (Response.text != '')
-			alert(Response.text);
-		else
+		if (http.responseXML)
+		{
+			var xmldoc = http.responseXML,
+				sStatus = xmldoc.getElementsByTagName('status')[0].firstChild.nodeValue;
+
+			if (sStatus == 'conflict')
+			{
+				PopupMessages.show(s2_lang.conflicted_revisions, [
+					{
+						name: s2_lang.conflicted_action,
+						action: (function ()
+						{
+							PopupWindow(s2_lang.conflicted_text, s2_lang.conflicted_text, s2_lang.conflicted_text_info, document.forms['artform'].elements['page[text]'].value);
+							ReloadArticle();
+						}),
+						once: true
+					}
+				]);
+				return;
+			}
+
+			var sUrlStatus = xmldoc.getElementsByTagName('url_status')[0].firstChild.nodeValue,
+				sRevision = xmldoc.getElementsByTagName('revision')[0].firstChild.nodeValue;
+
+			var eItem = document.getElementById("url_input_label");
+			if (sUrlStatus == 'empty')
+			{
+				eItem.className = 'error';
+				eItem.title = eItem.getAttribute('title_empty');
+			}
+			else if (sUrlStatus == 'not_unique')
+			{
+				eItem.className = 'error';
+				eItem.title = eItem.getAttribute('title_unique');
+			}
+			else
+			{
+				eItem.className = '';
+				eItem.title = '';
+			}
+
+			document.forms['artform'].elements['page[revision]'].value = sRevision;
+
+			eItem = document.getElementById('pub');
+			eItem.parentNode.className = eItem.checked ? 'ok' : '';
+			document.getElementById('preview_link').style.display = eItem.checked ? 'inline' : 'none';
+
 			Changes.commit(sRequest);
-	}
+
+			(hook = Hooks.get('fn_save_article_end')) ? eval(hook) : null;
+		}
+		else if (http.responseText != '')
+			alert(http.responseText);
+	});
 }
 
 function ChangeSelect (eSelect, sHelp, sDefault)
@@ -1236,9 +1256,94 @@ function set_selection (e, start_pos, end_pos)
 	}
 }
 
+function SmartParagraphs (sText)
+{
+	sText = str_replace ("\r", '', sText);
+	var asParagraphs = sText.split("\n\n"); // split on empty lines
+
+	for (var i = asParagraphs.length; i-- ;)
+	{
+		// We are working with non-empty contents
+		if (asParagraphs[i].replace(/^\s+|\s+$/g, '') == '')
+			continue;
+
+		// rtrim
+		asParagraphs[i] = asParagraphs[i].replace(/\s+$/gm, '');
+
+		// Do not touch special tags
+		if (/<\/?(?:pre|script|style|ol|ul|li)[^>]*>/.test(asParagraphs[i]))
+			continue;
+
+		// Put <br /> if there are no closing tag like </h2>
+
+		// Remove old tag
+		asParagraphs[i] = asParagraphs[i].replace(/<br \/>$/gm, '').
+			// A hack. Otherwise the next regex works twice.
+			replace(/$/gm, '-').
+			// Put new tag
+			replace(/(<\/(?:blockquote|p|h[2-4])>)?-$/gm, function ($0, $1) {return $1 ? $1 : '<br />';}).
+			// Remove unnecessary last tag
+			replace(/(?:<br \/>)?$/g, '');
+
+		// Put <p>...</p> tags
+		if (!/<\/?(?:blockquote|h[2-4])[^>]*>/.test(asParagraphs[i]))
+		{
+			if (!/<\/p>\s*$/.test(asParagraphs[i]))
+				asParagraphs[i] = asParagraphs[i].replace(/\s*$/g, '</p>');
+			if (!/^\s*<p[^>]*>/.test(asParagraphs[i]))
+				asParagraphs[i] = asParagraphs[i].replace(/^\s*/g, '<p>');
+		}
+	}
+
+	return asParagraphs.join("\n\n");
+}
+
+function InsertParagraph (sType)
+{
+	var eTextarea = document.artform['page[text]'];
+	var selection = get_selection(eTextarea);
+	if (selection.length)
+		return false;
+
+	if (sType == 'h2' || sType == 'h3' || sType == 'h4')
+	{
+		var sOpenTag = '<' + sType + '>', sCloseTag = '</' + sType + '>';
+	}
+	else
+	{
+		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
+	}
+	var sText = eTextarea.value;
+
+	var start_pos = sText.lastIndexOf('\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
+	var end_pos = sText.indexOf('\r', selection.start);
+	if (end_pos == -1)
+		end_pos = sText.indexOf('\n', selection.start);
+	if (end_pos == -1)
+		end_pos = sText.length;
+
+	var sEnd = sText.substr(start_pos, sText.length);
+	var old_length = sEnd.length;
+	var start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
+
+	// Move cursor right if needed to put inside the tag
+	var new_cursor = Math.max(sOpenTag.length + start_pos, start_len_diff + selection.start);
+
+	sEnd = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?(.*?)(?:<\/(?:p|h[2-4])>)?[ ]*$/m, sOpenTag + '$1' + sCloseTag);
+
+	// Move cursor left if needed to put inside the tag
+	new_cursor = Math.min(end_pos + (sEnd.length - old_length) - sCloseTag.length, new_cursor);
+
+	eTextarea.value = sText.substr(0, start_pos) + sEnd;
+
+	set_selection(eTextarea, new_cursor, new_cursor);
+
+	return false;
+}
+
 function InsertTag (sOpenTag, sCloseTag, selection)
 {
-	eTextarea = document.artform['page[text]'];
+	var eTextarea = document.artform['page[text]'];
 	if (selection == null)
 		selection = get_selection(eTextarea);
 
@@ -1263,71 +1368,53 @@ function GetImage ()
 
 function Paragraph ()
 {
-	var Response = POSTSyncRequest(sUrl + 'action=smart_paragraph', 'data=' + encodeURIComponent(document.artform['page[text]'].value));
-
-	if (Response.status == '200')
-		document.artform['page[text]'].value = Response.text;
+	document.artform['page[text]'].value = SmartParagraphs(document.artform['page[text]'].value);
 }
 
 //=======================[Comment management]===================================
 
-function DeleteComment (iId)
+function DeleteComment (iId, sMode)
 {
 	if (!confirm(s2_lang.delete_comment))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + 'action=delete_comment&id=' + iId);
-
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + 'action=delete_comment&id=' + iId + '&mode=' + sMode, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = Response.text;
+		document.getElementById('comm_div').innerHTML = http.responseText;
 		init_table(null);
-	}
+	});
 
-	return false;
-}
-
-function EditComment (iId)
-{
-	var Response = GETSyncRequest(sUrl + 'action=edit_comment&id=' + iId);
-	if (Response.status != '200')
-		return false;
-
-	document.getElementById('comm_div').innerHTML = Response.text;
 	return false;
 }
 
 function SaveComment (sType)
 {
 	var sRequest = StringFromForm(document.commform);
-	var Response = POSTSyncRequest(sUrl + 'action=save_comment&type=' + sType, sRequest);
-	if (Response.status == '200')
+	POSTAsyncRequest(sUrl + 'action=save_comment&type=' + sType, sRequest, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = Response.text;
+		document.getElementById('comm_div').innerHTML = http.responseText;
 		init_table(null);
-	}
+	});
 	return false;
 }
 
 function LoadTable (sAction, sID)
 {
-	var Response = GETSyncRequest(sUrl + 'action=' + sAction);
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + 'action=' + sAction, function (http)
 	{
-		document.getElementById(sID).innerHTML = Response.text;
+		document.getElementById(sID).innerHTML = http.responseText;
 		init_table(null);
-	}
+	});
 	return false;
 }
 
-function LoadTableExt (sAction, iId, sID)
+function LoadCommentsTable (sAction, iId, sMode)
 {
-	var Response = GETSyncRequest(sUrl + 'action=' + sAction + '&id=' + iId);
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + iId + '&mode=' + sMode, function (http)
 	{
-		document.getElementById(sID).innerHTML = Response.text;
+		document.getElementById('comm_div').innerHTML = http.responseText;
 		init_table(null);
-	}
+	});
 	return false;
 }
 
@@ -1348,11 +1435,12 @@ function ChooseTag (eItem)
 	eCurrentTag.onmouseover = TagvaluesMouseIn;
 	eCurrentTag.onmouseout = TagvaluesMouseOut;
 	eCurrentTag.className = 'cur_tag';
-	iCurrentTagId = eCurrentTag.getAttribute('tagid');
+	iCurrentTagId = eCurrentTag.getAttribute('data-tagid');
 
-	var Response = GETSyncRequest(sUrl + 'action=load_tagvalues&id=' + iCurrentTagId);
-	if (Response.status == '200')
-		document.getElementById('tag_values').innerHTML = Response.text;
+	GETAsyncRequest(sUrl + 'action=load_tagvalues&id=' + iCurrentTagId, function (http)
+	{
+		document.getElementById('tag_values').innerHTML = http.responseText;
+	});
 
 	return false;
 }
@@ -1386,26 +1474,28 @@ function TagvaluesMouseOut ()
 
 function AddArticleToTag (iId)
 {
-	var Response = GETSyncRequest(sUrl + 'action=add_to_tag&tag_id=' + iCurrentTagId + '&article_id=' + iId);
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + 'action=add_to_tag&tag_id=' + iCurrentTagId + '&article_id=' + iId, function (http)
 	{
-		document.getElementById('tag_values').innerHTML = Response.text;
+		document.getElementById('tag_values').innerHTML = http.responseText;
 		eCurrentTag.childNodes[1].innerHTML = parseInt(eCurrentTag.childNodes[1].innerHTML) + 1;
-	}
+	});
 	return false;
 }
 
-function DeleteArticleFromTag (iId)
+function DeleteArticleFromTag (iId, e)
 {
 	if (!confirm(s2_lang.delete_tag_link))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + 'action=delete_from_tag&id=' + iId);
-	if (Response.status == '200')
+	if (e.stopPropagation)
+		e.stopPropagation();
+	e.cancelBubble = true;
+
+	GETAsyncRequest(sUrl + 'action=delete_from_tag&id=' + iId, function (http)
 	{
-		document.getElementById('tag_values').innerHTML = Response.text;
+		document.getElementById('tag_values').innerHTML = http.responseText;
 		eCurrentTag.childNodes[1].innerHTML = parseInt(eCurrentTag.childNodes[1].innerHTML) - 1;
-	}
+	});
 	return false;
 }
 
@@ -1459,69 +1549,79 @@ function Preview ()
 
 function LoadUserList ()
 {
-	var eDiv = document.getElementById('user_div');
-
-	var Response = GETSyncRequest(sUrl + 'action=load_userlist');
-	if (Response.status == '200')
-	{
-		eDiv.innerHTML = Response.text;
-		init_table(null);
-	}
+	LoadTable('load_userlist', 'user_div');
 }
 
-function AddUser (sUser)
+function AddUser (eForm)
 {
+	var sUser = eForm.userlogin.value;
 	if (sUser == '')
+		return false;
+
+	if (sUser.length > 25)
 	{
-		s2_popup_message(s2_lang.empty_login);
+		PopupMessages.showUnique(s2_lang.login_too_long, 'login_too_long');
 		return false;
 	}
 
-	var Response = GETSyncRequest(sUrl + 'action=add_user&name=' + sUser);
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + 'action=add_user&name=' + encodeURIComponent(sUser), function (http)
 	{
-		document.getElementById('user_div').innerHTML = Response.text;
+		eForm.userlogin.value = '';
+		document.getElementById('user_div').innerHTML = http.responseText;
 		init_table(null);
-	}
+	});
+
 	return false;
 }
 
 function SetPermission (sUser, sPermission)
 {
-	var Response = GETSyncRequest(sUrl + 'action=user_set_permission&name=' + sUser + '&permission=' + sPermission);
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + 'action=user_set_permission&name=' + encodeURIComponent(sUser) + '&permission=' + sPermission, function (http)
 	{
-		document.getElementById('user_div').innerHTML = Response.text;
+		document.getElementById('user_div').innerHTML = http.responseText;
 		init_table(null);
-	}
+	});
 	return false;
 }
 
 function SetUserPassword (sUser)
 {
 	var s = prompt(str_replace('%s', sUser, s2_lang.new_password));
-	if (typeof(s) != 'string')
+	if (typeof s != 'string')
 		return false;
 
-	var Response = POSTSyncRequest(sUrl + 'action=user_set_password&name=' + sUser, 'pass=' + encodeURIComponent(hex_md5(s + 'Life is not so easy :-)')));
-	if (Response.status == '200')
-		s2_popup_message(Response.text, false, 3);
-
+	POSTAsyncRequest(sUrl + 'action=user_set_password&name=' + encodeURIComponent(sUser), 'pass=' + encodeURIComponent(hex_md5(s + 'Life is not so easy :-)')), function (http)
+	{
+		PopupMessages.show(http.responseText, false, 3);
+	});
 	return false;
 }
 
 function SetUserEmail (sUser, sEmail)
 {
-	var s = prompt(str_replace('%s', sUser, s2_lang.new_email));
-	if (typeof(s) == 'string')
+	var s = prompt(str_replace('%s', sUser, s2_lang.new_email), sEmail);
+	if (typeof s != 'string')
+		return false;
+
+	GETAsyncRequest(sUrl + 'action=user_set_email&login=' + encodeURIComponent(sUser) + '&email=' + encodeURIComponent(s), function (http)
 	{
-		var Response = GETSyncRequest(sUrl + 'action=user_set_email&name=' + sUser + '&email=' + s);
-		if (Response.status == '200')
-		{
-			document.getElementById('user_div').innerHTML = Response.text;
-			init_table(null);
-		}
-	}
+		document.getElementById('user_div').innerHTML = http.responseText;
+		init_table(null);
+	});
+	return false;
+}
+
+function SetUserName (sUser, sName)
+{
+	var s = prompt(str_replace('%s', sUser, s2_lang.new_name), sName);
+	if (typeof s != 'string')
+		return false;
+
+	GETAsyncRequest(sUrl + 'action=user_set_name&login=' + encodeURIComponent(sUser) + '&name=' + encodeURIComponent(s), function (http)
+	{
+		document.getElementById('user_div').innerHTML = http.responseText;
+		init_table(null);
+	});
 	return false;
 }
 
@@ -1530,12 +1630,11 @@ function DeleteUser (sUser)
 	if (!confirm(str_replace('%s', sUser, s2_lang.delete_user)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + 'action=delete_user&name=' + sUser);
-	if (Response.status == '200')
+	GETAsyncRequest(sUrl + 'action=delete_user&name=' + encodeURIComponent(sUser), function (http)
 	{
-		document.getElementById('user_div').innerHTML = Response.text;
+		document.getElementById('user_div').innerHTML = http.responseText;
 		init_table(null);
-	}
+	});
 	return false;
 }
 
@@ -1548,20 +1647,19 @@ function LoadTags ()
 	if (eDiv.innerHTML != '')
 		return false;
 
-	var Response = GETSyncRequest(sUrl + 'action=load_tags');
-	if (Response.status == '200')
-		eDiv.innerHTML = Response.text;
-
+	GETAsyncRequest(sUrl + 'action=load_tags', function (http)
+	{
+		document.getElementById('tag_div').innerHTML = http.responseText;
+	});
 	return false;
 }
 
 function LoadTag (iId)
 {
-	var Response = GETSyncRequest(sUrl + 'action=load_tag&id=' + iId);
-
-	if (Response.status == '200')
-		document.getElementById('tag_div').innerHTML = Response.text;
-
+	GETAsyncRequest(sUrl + 'action=load_tag&id=' + iId, function (http)
+	{
+		document.getElementById('tag_div').innerHTML = http.responseText;
+	});
 	return false;
 }
 
@@ -1569,15 +1667,15 @@ function SaveTag ()
 {
 	if (document.tagform['tag[name]'].value == '')
 	{
-		s2_popup_message(s2_lang.empty_tag);
+		PopupMessages.showUnique(s2_lang.empty_tag, 'tag_without_name');
 		return false;
 	}
 
-	var sRequest = StringFromForm(document.tagform);
-	var Response = POSTSyncRequest(sUrl + 'action=save_tag', sRequest);
-	if (Response.status == '200')
-		document.getElementById('tag_div').innerHTML = Response.text;
-
+	var sRequest = StringFromForm(document.forms['tagform']);
+	POSTAsyncRequest(sUrl + 'action=save_tag', sRequest, function (http)
+	{
+		document.getElementById('tag_div').innerHTML = http.responseText;
+	});
 	return false;
 }
 
@@ -1586,10 +1684,10 @@ function DeleteTag (iId, sName)
 	if (!confirm(str_replace('%s', sName, s2_lang.delete_tag)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + 'action=delete_tag&id=' + iId);
-	if (Response.status == '200')
-		document.getElementById('tag_div').innerHTML = Response.text;
-
+	GETAsyncRequest(sUrl + 'action=delete_tag&id=' + iId, function (http)
+	{
+		document.getElementById('tag_div').innerHTML = http.responseText;
+	});
 	return false;
 }
 
@@ -1597,22 +1695,17 @@ function DeleteTag (iId, sName)
 
 function LoadOptions ()
 {
-	var eDiv = document.getElementById('opt_div');
-
-	var Response = GETSyncRequest(sUrl + 'action=load_options');
-	if (Response.status == '200')
-		eDiv.innerHTML = Response.text;
-
+	GETAsyncRequest(sUrl + 'action=load_options', function (http)
+	{
+		document.getElementById('opt_div').innerHTML = http.responseText;
+	});
 	return false;
 }
 
 function SaveOptions ()
 {
 	var sRequest = StringFromForm(document.optform);
-	var Response = POSTSyncRequest(sUrl + 'action=save_options', sRequest);
-	if (Response.status == '200')
-		document.getElementById('opt_div').innerHTML = Response.text;
-
+	POSTAsyncRequest(sUrl + 'action=save_options', sRequest);
 	return false;
 }
 
@@ -1620,23 +1713,19 @@ function SaveOptions ()
 
 function LoadExtensions ()
 {
-	var eDiv = document.getElementById('ext_div');
-
-	var Response = GETSyncRequest(sUrl + 'action=load_extensions');
-	if (Response.status == '200')
-		eDiv.innerHTML = Response.text;
-
+	GETAsyncRequest(sUrl + 'action=load_extensions', function (http)
+	{
+		document.getElementById('ext_div').innerHTML = http.responseText;
+	});
 	return false;
 }
 
 function FlipExtension (sId)
 {
-	var eDiv = document.getElementById('ext_div');
-
-	var Response = GETSyncRequest(sUrl + 'action=flip_extension&id=' + sId);
-	if (Response.status == '200')
-		eDiv.innerHTML = Response.text;
-
+	GETAsyncRequest(sUrl + 'action=flip_extension&id=' + sId, function (http)
+	{
+		document.getElementById('ext_div').innerHTML = http.responseText;
+	});
 	return false;
 }
 
@@ -1648,9 +1737,10 @@ function UninstallExtension (sId, sMessage)
 	if (sMessage != '' && !confirm(str_replace('%s', sMessage, s2_lang.uninstall_message)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + 'action=uninstall_extension&id=' + sId);
-	if (Response.status == '200')
-		document.getElementById('ext_div').innerHTML = Response.text;
+	GETAsyncRequest(sUrl + 'action=uninstall_extension&id=' + sId, function (http)
+	{
+		document.getElementById('ext_div').innerHTML = http.responseText;
+	});
 
 	return false;
 }
@@ -1660,9 +1750,10 @@ function InstallExtension (sId, sMessage)
 	if (!confirm((sMessage != '' ? str_replace('%s', sMessage, s2_lang.install_message) : '') + str_replace('%s', sId, s2_lang.install_extension)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + 'action=install_extension&id=' + sId);
-	if (Response.status == '200')
-		document.getElementById('ext_div').innerHTML = Response.text;
+	GETAsyncRequest(sUrl + 'action=install_extension&id=' + sId, function (http)
+	{
+		document.getElementById('ext_div').innerHTML = http.responseText;
+	});
 
 	return false;
 }
@@ -1671,11 +1762,9 @@ function InstallExtension (sId, sMessage)
 
 function LoadStatInfo ()
 {
-	var eDiv = document.getElementById('stat_div');
-
-	var Response = GETSyncRequest(sUrl + 'action=load_stat_info');
-	if (Response.status == '200')
-		eDiv.innerHTML = Response.text;
-
+	GETAsyncRequest(sUrl + 'action=load_stat_info', function (http)
+	{
+		document.getElementById('stat_div').innerHTML = http.responseText;
+	});
 	return false;
 }

@@ -11,6 +11,17 @@
 
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
+
+// Activate HTTP Strict Transport Security
+// IIS sets HTTPS to 'off' for non-SSL requests
+if (defined('S2_FORCE_ADMIN_HTTPS') && isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')
+	header('Strict-Transport-Security: max-age=500');
+elseif (defined('S2_FORCE_ADMIN_HTTPS'))
+{
+	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+	die();
+}
+
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
 require 'site_lib.php';
 require 'login.php';
@@ -47,7 +58,7 @@ if ($login === false)
 {
 	// We didn't find a session of a logged user
 	// Most likely the user has refreshed the login page
-	setcookie($s2_cookie_name, '');
+	s2_setcookie($s2_cookie_name, '');
 
 	// We tell him nothing
 	echo s2_get_login_form();
@@ -57,7 +68,8 @@ if ($login === false)
 	die();
 }
 
-s2_update_challenge_time($session_id);
+s2_update_challenge($session_id);
+$s2_user = s2_get_user_info($login);
 
 // Preparing the template for the preview tab
 $return = ($hook = s2_hook('ai_pre_get_template')) ? eval($hook) : null;
@@ -87,6 +99,7 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
 var cur_date = new Date();
+var username = '<?php echo $login; ?>';
 var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.getTime();
 var template = '<?php echo str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", '') , $template); ?>';
 SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
@@ -116,8 +129,8 @@ SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
 				</div>
 <?php
 
-	$padding = 2.5;
-	($hook = s2_hook('ai_pre_tree_col')) ? eval($hook) : null;
+$padding = 2.5;
+($hook = s2_hook('ai_pre_tree_col')) ? eval($hook) : null;
 
 ?>
 				<div class="l-float no-border" style="padding-bottom: <?php echo $padding; ?>em;">
@@ -163,7 +176,14 @@ SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
 		<dd>
 			<div class="reducer" id="tag_div"></div>
 		</dd>
-<?php ($hook = s2_hook('ai_pre_admin')) ? eval($hook) : null; ?>
+<?php
+
+($hook = s2_hook('ai_pre_admin')) ? eval($hook) : null;
+
+if ($s2_user['view_hidden'])
+{
+
+?>
 		<dt id="admin_tab"><?php echo $lang_admin['Administrate']; ?></dt>
 		<dd>
 			<div class="reducer" id="admin_div" style="padding: 0;">
@@ -182,9 +202,11 @@ SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
 				<dt id="admin-user_tab"><?php echo $lang_admin['Users']; ?></dt>
 				<dd>
 					<div class="reducer">
-						<p align="center">
-							<input type="text" name="userlogin" id="userlogin" size="30" value="" />
-							<input class="bitbtn add_user" type="button" onclick="return AddUser(document.getElementById('userlogin').value);" value="<?php echo $lang_admin['Add user']; ?>" />
+						<p>
+							<form name="adduserform" action="" onsubmit="AddUser(this); return false;">
+								<input type="text" name="userlogin" size="30" value="" />
+								<input class="bitbtn add_user" type="submit" value="<?php echo $lang_admin['Add user']; ?>" />
+							</form>
 						</p>
 						<hr />
 						<div id="user_div"></div>
@@ -199,10 +221,22 @@ SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
 			</dl>
 			</div>
 		</dd>
-<?php ($hook = s2_hook('ai_last_tab')) ? eval($hook) : null; ?>
+<?php
+
+}
+
+($hook = s2_hook('ai_last_tab')) ? eval($hook) : null;
+
+?>
 	</dl>
 	<script type="text/javascript">Make_Tabsheet();</script>
-<?php ($hook = s2_hook('ai_after_tabs')) ? eval($hook) : null; ?>
+<?php
+
+($hook = s2_hook('ai_after_tabs')) ? eval($hook) : null;
+
+echo s2_get_sessions($login, $session_id);
+
+?>
 </body>
 </html>
 <?php
