@@ -1079,7 +1079,10 @@ function SaveArticle(sAction)
 {
 	(hook = Hooks.get('fn_save_article_start')) ? eval(hook) : null;
 
-	var sRequest = StringFromForm(document.forms['artform']);
+	document.forms['artform'].setAttribute('data-save-process', 1);
+
+	var sRequest = StringFromForm(document.forms['artform']),
+		sPagetext = document.forms['artform'].elements['page[text]'].value;
 
 	POSTAsyncRequest(sUrl + 'action=' + sAction, sRequest, function(http)
 	{
@@ -1095,7 +1098,7 @@ function SaveArticle(sAction)
 						name: s2_lang.conflicted_action,
 						action: (function ()
 						{
-							PopupWindow(s2_lang.conflicted_text, s2_lang.conflicted_text, s2_lang.conflicted_text_info, document.forms['artform'].elements['page[text]'].value);
+							PopupWindow(s2_lang.conflicted_text, s2_lang.conflicted_text, s2_lang.conflicted_text_info, sPagetext);
 							ReloadArticle();
 						}),
 						once: true
@@ -1103,6 +1106,12 @@ function SaveArticle(sAction)
 				]);
 				return;
 			}
+
+			// If the form was reloaded, we do not have to update it.
+			// (for example, if user had modified the page
+			// then opened another page and chose "Save and open") 
+			if (!document.forms['artform'].getAttribute('data-save-process'))
+				return;
 
 			var sUrlStatus = xmldoc.getElementsByTagName('url_status')[0].firstChild.nodeValue,
 				sRevision = xmldoc.getElementsByTagName('revision')[0].firstChild.nodeValue;
