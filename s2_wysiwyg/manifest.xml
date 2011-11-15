@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_wysiwyg</id>
 	<title>WYSIWYG</title>
-	<version>1.0a5</version>
-	<description>Adds TinyMCE WYSIWYG editor to the edit form.</description>
+	<version>1.0b</version>
+	<description>Adds TinyMCE WYSIWYG editor to the admin panel.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a6</minversion>
-	<maxtestedon>1.0a6</maxtestedon>
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b</maxtestedon>
 
 	<install><![CDATA[
 $s2_wysiwys_config = array(
@@ -74,14 +74,6 @@ s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext")
 
 		<hook id="fn_preload_editor_end, blfn_preload_editor_end"><![CDATA[
 echo '<script type="text/javascript">s2_wysiwyg_set_path("'.$_GET['path'].'");</script>';
-		]]></hook>
-
-		<hook id="fn_output_article_form_pre_parag_btn,fn_s2_blog_post_form_pre_parag_btn" priority="9"><![CDATA[
-ob_start();
-		]]></hook>
-
-		<hook id="fn_output_article_form_pre_template,fn_s2_blog_post_form_pre_labels" priority="1"><![CDATA[
-ob_end_clean();
 		]]></hook>
 
 		<hook id="fn_toolbar_start"><![CDATA[

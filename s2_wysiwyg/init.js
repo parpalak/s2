@@ -119,4 +119,4 @@ Hooks.add('fn_preview_start', 'tinyMCE.triggerSave();');
 Hooks.add('fn_changes_present', 'tinyMCE.triggerSave();');
 Hooks.add('fn_save_article_start', 'tinyMCE.triggerSave();');
 Hooks.add('fn_check_changes_start', 'tinyMCE.triggerSave();');
-Hooks.add('fn_show_recovered_pre_mgr', 'head += s2_wysisyg_addjs();');
+Hooks.add('fn_popup_window_pre_mgr', 'head += s2_wysisyg_addjs();');
