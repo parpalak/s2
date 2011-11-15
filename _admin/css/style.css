@@ -68,7 +68,7 @@ body {
 
 #logout {
 	text-align: center;
-	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 	position: absolute;
 	z-index: 1;
 	top: 0;
@@ -216,7 +216,7 @@ hr {
 		-webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
 		box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
 		overflow: hidden;
-		font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+		font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 		}
 		#popup_message > div > div {
 			padding: 2px 0;
@@ -261,7 +261,7 @@ hr {
 
 .tabsheets > dt {
 	float: left;
-	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 	line-height: 13px;
 	height: 13px;
 	padding: 3px 5px 6px 3px;
@@ -393,7 +393,7 @@ hr {
 	}
 
 #dragged {
-	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 	color: #fff;
 	background: #0079f1;
 	border: 1px solid #49a4ff;
@@ -645,7 +645,7 @@ ul .but_panel .delete,
 #tag_names {
 	width: 200px;
 	display: none;
-	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 	}
 	#tag_names ul {
 		border-left: 1px solid #fff;
@@ -800,7 +800,7 @@ ul .but_panel .delete,
 			color: #840;
 			cursor: pointer;
 			cursor: hand;
-			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 			vertical-align: middle;
 			}
 			.sort thead td span {
@@ -873,7 +873,7 @@ ul .but_panel .delete,
 /*=======================[Tags tab]===========================================*/
 
 .tags_list {
-	font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 	}
 	.tags_list a,
 	.tags_list a:active,
@@ -927,7 +927,7 @@ ul .but_panel .delete,
 			margin: 2px 0.25em;
 			}
 	.r-float select {
-		font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+		font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 		}
 
 table.fields {
@@ -1003,7 +1003,7 @@ div.input.color input,
 	}
 
 .bitbtn {
-	font: 0.917em/1.2 Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font: 0.917em/1.2 "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 	padding: 1px 2px 2px 20px;
 	height: 22px;
 	min-width: 120px;
@@ -1177,7 +1177,7 @@ form center {
 		margin-left: 1.583em;
 		}
 		.input label small {
-			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 			color: #666;
 			margin: 1.636em 0 0 0.454em;
 			display: block;
@@ -1198,7 +1198,7 @@ form center {
 			position: absolute;
 			right: 0;
 			top: 1.25em;
-			font: 0.917em Tahoma, Verdana, Arial, Helvetica, sans-serif;
+			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 			}
 
 /*=======================[Extensions tab]=====================================*/
