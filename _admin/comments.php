@@ -13,9 +13,9 @@ function s2_comment_menu_links ($mode = false)
 	global $lang_admin;
 
 	$output = array(
-		'<a href="#" class="js'.(strpos($mode, 'new') !== false ? ' curr' : '').'" onclick="return LoadTable(\'load_new_comments\', \'comm_div\');">'.$lang_admin['Show new comments'].'</a>',
-		'<a href="#" class="js'.(strpos($mode, 'hidden') !== false ? ' curr' : '').'" onclick="return LoadTable(\'load_hidden_comments\', \'comm_div\');">'.$lang_admin['Show hidden comments'].'</a>',
-		'<a href="#" class="js'.(strpos($mode, 'last') !== false ? ' curr' : '').'" onclick="return LoadTable(\'load_last_comments\', \'comm_div\');">'.$lang_admin['Show last comments'].'</a>',
+		'<a href="#" class="js'.(strpos($mode, 'new') !== false ? ' cur_link' : '').'" onclick="return LoadTable(\'load_new_comments\', \'comm_div\');">'.$lang_admin['Show new comments'].'</a>',
+		'<a href="#" class="js'.(strpos($mode, 'hidden') !== false ? ' cur_link' : '').'" onclick="return LoadTable(\'load_hidden_comments\', \'comm_div\');">'.$lang_admin['Show hidden comments'].'</a>',
+		'<a href="#" class="js'.(strpos($mode, 'last') !== false ? ' cur_link' : '').'" onclick="return LoadTable(\'load_last_comments\', \'comm_div\');">'.$lang_admin['Show last comments'].'</a>',
 	);
 
 	($hook = s2_hook('fn_comment_menu_links_end')) ? eval($hook) : null;

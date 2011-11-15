@@ -133,7 +133,11 @@ a > img {
 	display: inline;
 	padding: 2px 0 0;
 	}
-	.js.curr {
+
+a.cur_link{
+	font-weight: bold;
+	}
+	a.js.cur_link {
 		-moz-border-radius: 8px;
 		-webkit-border-radius: 8px;
 		border-radius: 8px;
@@ -141,6 +145,7 @@ a > img {
 		color: #000;
 		padding: 2px 3px;
 		margin: 0 9px 0 -3px;
+		font-weight: normal;
 		}
 
 hr {
