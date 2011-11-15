@@ -371,8 +371,21 @@ function PopupWindow (sTitle, sHeader, sInfo, sText)
 	var wnd = window.open('about:blank', '', '', 'True');
 	wnd.document.open();
 
+	var color = '#eee';
+	try
+	{
+		if (window.getComputedStyle) // All the cool bro
+			color = window.getComputedStyle(document.body, null).backgroundColor;
+		else if (document.body.currentStyle) // Heh, IE8
+			color = document.body.currentStyle.backgroundColor;
+	}
+	catch (e)
+	{
+		color = '#eee';
+	}
+
 	var head = '<title>' + sTitle + '</title>' +
-		'<style>html {height: 100%; margin: 0;} body {margin: 0 ; padding: 0 10%; height: 100%; background: #eee; font: Verdana 75%;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 70%;}</style>';
+		'<style>html {height: 100%; margin: 0;} body {margin: 0 ; padding: 0 10%; height: 100%; background: ' + color + '; font: Verdana 75%;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 70%;}</style>';
 	var body = '<h1>' + sHeader + '</h1>' + 
 		'<p>' + sInfo + '</p><textarea readonly="readonly">' + sText + '</textarea>';
 
