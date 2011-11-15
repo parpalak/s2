@@ -202,14 +202,16 @@ if ($s2_user['view_hidden'])
 				<dt id="admin-user_tab"><?php echo $lang_admin['Users']; ?></dt>
 				<dd>
 					<div class="reducer">
-						<p>
-							<form name="adduserform" action="" onsubmit="AddUser(this); return false;">
-								<input type="text" name="userlogin" size="30" value="" />
-								<input class="bitbtn add_user" type="submit" value="<?php echo $lang_admin['Add user']; ?>" />
-							</form>
-						</p>
-						<hr />
 						<div id="user_div"></div>
+						<fieldset>
+							<legend><?php echo $lang_admin['Add user']; ?></legend>
+							<p>
+								<form name="adduserform" action="" onsubmit="AddUser(this); return false;">
+									<input type="text" name="userlogin" size="30" value="" />
+									<input class="bitbtn add_user" type="submit" value="<?php echo $lang_admin['Add user']; ?>" />
+								</form>
+							</p>
+						</fieldset>
 					</div>
 				</dd>
 <?php ($hook = s2_hook('ai_pre_extensions')) ? eval($hook) : null; ?>
