@@ -1130,7 +1130,7 @@ function SaveArticle(sAction)
 			eItem.parentNode.className = eItem.checked ? 'ok' : '';
 			document.getElementById('preview_link').style.display = eItem.checked ? 'inline' : 'none';
 
-			Changes.commit(sRequest);
+			Changes.commit(document.forms['artform']);
 
 			(hook = Hooks.get('fn_save_article_end')) ? eval(hook) : null;
 		}
