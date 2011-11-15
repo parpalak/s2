@@ -157,7 +157,7 @@ function s2_get_options ($message = '')
 
 	$color_links = array();
 	foreach (array ('#eeeeee', '#f4dbd5', '#f3e8d0', '#f2f2da', '#e0f3e0', '#d2f0f3', '#e7e4f4') as $color)
-		$color_links[] = '<a class="js" href="#" style="background: '.$color.';" onclick="document.getElementById(\'S2_ADMIN_COLOR_input\').value = \''.$color.'\'; return SetBackground(\''.$color.'\');">'.$color.'</a>';
+		$color_links[] = '<a class="js" href="#" style="background-color: '.$color.';" onclick="document.getElementById(\'S2_ADMIN_COLOR_input\').value = \''.$color.'\'; return SetBackground(\''.$color.'\');">'.$color.'</a>';
 
 	($hook = s2_hook('fn_get_options_pre_admin_fs')) ? eval($hook) : null;
 	$fieldset = array(

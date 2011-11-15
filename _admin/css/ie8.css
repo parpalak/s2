@@ -18,3 +18,18 @@ div.input.checkbox input,
 .treetree li {
 	clear: both;
 	}
+
+.js,
+.js:active,
+.js:hover,
+.js:visited {
+	border-bottom: 1px dashed #8AADDE;
+	}
+	.js.curr {
+		border-bottom: none;
+		}
+
+
+a, a:visited {
+	border-bottom: 1px solid #bce;
+	}

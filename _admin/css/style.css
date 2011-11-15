@@ -92,6 +92,16 @@ body {
 
 a, a:visited {
 	color: #05c;
+	text-decoration: none;
+	background: -moz-linear-gradient(left, #bce, #bce 100%);
+	background: -ms-linear-gradient(left, #bce, #bce 100%);
+	background: -o-linear-gradient(left, #bce, #bce 100%);
+	background: -webkit-gradient(linear, 0 0, 100% 0, from(#bce), to(#bce));
+	background: -webkit-linear-gradient(left, #bce, #bce 100%);
+	background: linear-gradient(left, #bce, #bce 100%);
+	background-position: 0 100%;
+	background-size: 10px 1px;
+	background-repeat: repeat-x;
 	}
 
 a > img {
@@ -108,10 +118,16 @@ a > img {
 .js,
 .js:active,
 .js:hover,
-.js:visited,
-.sort .js {
-	text-decoration: none;
-	border-bottom: 1px dashed #05c;
+.js:visited {
+	background: -moz-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
+	background: -ms-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
+	background: -o-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
+	background: -webkit-gradient(linear, 0 0, 100% 0, from(#8AADDE), color-stop(0.6, #8AADDE), color-stop(0.6, transparent));
+	background: -webkit-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
+	background: linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
+	background-size: 8px 1px;
+	background-repeat: repeat-x;
+	background-position: 0 100%;
 	color: #05c;
 	outline: none;
 	display: inline;
@@ -122,7 +138,6 @@ a > img {
 		-webkit-border-radius: 8px;
 		border-radius: 8px;
 		background: #bdf;
-		border-bottom: none;
 		color: #000;
 		padding: 2px 3px;
 		margin: 0 9px 0 -3px;
@@ -784,19 +799,17 @@ ul .but_panel .delete,
 		}
 
 	.sort td {
-		border: 1px solid #eee;
-		border-width: 1px 0;
 		padding: 2px 4px;
-		text-align: center;
+		vertical-align: top;
 		}
 		.sort thead td {
 			background: #ddd;
-			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#e2e2e2), to(#d6d6d6));
-			background: -webkit-linear-gradient(#e2e2e2, #d6d6d6);
-			background: -moz-linear-gradient(#e2e2e2, #d6d6d6);
-			background: -o-linear-gradient(#e2e2e2, #d6d6d6);
-			background: -ms-linear-gradient(#e2e2e2, #d6d6d6);
-			background: linear-gradient(#e2e2e2, #d6d6d6);
+			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#ebebeb), to(#d6d6d6));
+			background: -webkit-linear-gradient(#ebebeb, #d6d6d6);
+			background: -moz-linear-gradient(#ebebeb, #d6d6d6);
+			background: -o-linear-gradient(#ebebeb, #d6d6d6);
+			background: -ms-linear-gradient(#ebebeb, #d6d6d6);
+			background: linear-gradient(#ebebeb, #d6d6d6);
 			color: #840;
 			cursor: pointer;
 			cursor: hand;
@@ -820,15 +833,9 @@ ul .but_panel .delete,
 		.sort td.content {
 			text-align: left;
 			}
-			#comm_div .content a {
-				display: inline;
-				padding: 0;
+			#comm_div .sort td.content {
+				padding: 4px;
 				}
-
-	.sort a {
-		display: block;
-		padding: 2px;
-		}
 
 	.sort .buttons {
 		white-space: nowrap;
@@ -879,8 +886,6 @@ ul .but_panel .delete,
 	.tags_list a:active,
 	.tags_list a:hover,
 	.tags_list a:visited {
-		text-decoration: none;
-		color: #05c;
 		outline: none;
 		}
 
@@ -1179,7 +1184,7 @@ form center {
 		.input label small {
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 			color: #666;
-			margin: 1.636em 0 0 0.454em;
+			margin: 1.636em 0 0 0.273em;
 			display: block;
 			}
 	.input label span,
