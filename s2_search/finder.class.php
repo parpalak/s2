@@ -341,7 +341,7 @@ class s2_search_finder
 		global $s2_db;
 
 		$data = ($hook = s2_hook('s2_search_get_chapter_start')) ? eval($hook) : null;
-		if ($data)
+		if (is_array($data))
 			return $data;
 
 		$subquery = array(
@@ -362,11 +362,11 @@ class s2_search_finder
 
 		$article = $s2_db->fetch_assoc($result);
 		if (!$article)
-			return false;
+			return array();
 
 		$parent_path = s2_path_from_id($article['parent_id'], true);
 		if ($parent_path === false)
-			return false;
+			return array();
 
 		return array(
 			$article['title'],
@@ -395,10 +395,10 @@ class s2_search_finder
 		self::remove_chapter($chapter);
 
 		$data = ($hook = s2_hook('s2_search_refresh_get_chapter')) ? eval($hook) : null;
-		if (!$data)
+		if (empty($data))
 			$data = self::get_chapter($chapter);
 
-		if ($data)
+		if (!empty($data))
 		{
 			self::add_to_index($chapter, self::htmlstr_to_str($data[0]), self::htmlstr_to_str($data[1]), $data[2]);
 			self::$table_of_contents[$chapter] = $data[3];

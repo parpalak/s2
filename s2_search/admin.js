@@ -49,3 +49,5 @@ var s2_search = {
 		window.status = window.defaultStatus;
 	}
 }
+
+Hooks.add('fn_save_article_end', 's2_search.refresh_index((sAction == "save_blog" ? "s2_blog_" : "") + document.forms["artform"].elements["page[id]"].value);');

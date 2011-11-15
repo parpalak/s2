@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_search</id>
 	<title>Search</title>
-	<version>1.0a5</version>
+	<version>1.0b</version>
 	<description>Full-text search with Russian morphology. Designed for small sites.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a6</minversion>
-	<maxtestedon>1.0a6</maxtestedon>
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b</maxtestedon>
 
 	<note type="install">Do not forget to create search index after extension installation (Admin → Stats page).</note>
 
@@ -105,9 +105,9 @@ $counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(is_file(
 		<hook id="rq_custom_action"><![CDATA[
 if ($action == 's2_search_makeindex')
 {
-	$required_rights = array('edit_site');
+	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('s2_search_action_makeindex')) ? eval($hook) : null;
-	s2_test_user_rights($session_id, $required_rights);
+	s2_test_user_rights($is_permission);
 
 	$chapter = isset($_GET['chapter']) ? $_GET['chapter'] : false;
 
@@ -118,10 +118,6 @@ if ($action == 's2_search_makeindex')
 	else
 		s2_search_finder::refresh($chapter);
 }
-		]]></hook>
-
-		<hook id="rq_action_save_article_end"><![CDATA[
-s2_add_js_header_delayed('s2_search.refresh_index('.$id.')');
 		]]></hook>
 
 		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
