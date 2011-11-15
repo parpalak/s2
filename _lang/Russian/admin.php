@@ -190,7 +190,7 @@ $lang_admin = array(
 $lang_user_permissions = array (
 
 'view'					=> 'Просмотр',
-'view_hidden'			=> 'Просмотр конфиденциальной информации',
+'view_hidden'			=> 'Секретный доступ',
 'hide_comments'			=> 'Скрывать комментарии',
 'edit_comments'			=> 'Редактировать комментарии',
 'create_articles'		=> 'Создавать страницы',

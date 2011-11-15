@@ -34,9 +34,9 @@ var s2_lang = {
 	recovered_open		: 'Open in a new window',
 
 	conflicted_revisions: 'Somebody has modified the text while you have been editing it. Your changes cannot be saved right now without loss of other ones. But it is possible to open your version in a new window and to load a new version to the editor. After you can move your changes to the new version.',
-	conflicted_action	: 'Open my text in a new window and load here another\'s one',
+	conflicted_action	: 'Open my text in a new window and load here another’s one',
 	conflicted_text		: 'Your text version',
-	conflicted_text_info: 'The text containing your changes has been moved here, and another\'s one has been loaded to the editor. You can copy the necessary fragments and paste them to the editor. Do not close this page until you copy the text, otherwise the text will be lost.',
+	conflicted_text_info: 'The text containing your changes has been moved here, and another’s one has been loaded to the editor. You can copy the necessary fragments and paste them to the editor. Do not close this page until you copy the text, otherwise the text will be lost.',
 
 	move				: 'Move to “%s”',
 	move_up				: 'Move up',
