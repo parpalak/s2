@@ -208,7 +208,7 @@ function s2_output_comment_form ($comment, $mode, $type)
 <?php ($hook = s2_hook('fn_output_comment_form_after_checkboxes')) ? eval($hook) : null; ?>
 			<hr />
 <?php ($hook = s2_hook('fn_output_comment_form_pre_submit')) ? eval($hook) : null; ?>
-			<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
+			<input class="bitbtn savecomment" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
 		</div>
 		<div class="l-float">
 			<table class="fields">

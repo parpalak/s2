@@ -168,7 +168,7 @@ function s2_get_options ($message = '')
 	$output .= '<fieldset><legend>'.$lang_admin['Admin panel'].'</legend>'.implode('', $fieldset).'</fieldset>';
 
 	($hook = s2_hook('fn_get_options_end')) ? eval($hook) : null;
-	return '<form name="optform" method="post" action="">'.$output.'<center><input name="button" type="submit" value="'.$lang_admin_opt['Save options'].'" onclick="return SaveOptions();" /></center></form>';
+	return '<form name="optform" method="post" action="">'.$output.'<center><input name="button" class="bitbtn saveopt" type="submit" value="'.$lang_admin_opt['Save options'].'" onclick="return SaveOptions();" /></center></form>';
 }
 
 //

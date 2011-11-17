@@ -177,7 +177,7 @@ function s2_output_tag_form ($tag, $modify_time)
 	{
 
 ?>
-		<a href="#" onclick="return DeleteTag(<?php echo $tag['id'], ', \'', s2_htmlencode(addslashes($tag['name'])), '\''; ?>);" style="color: #f00;"><?php printf($lang_admin['Delete tag'], s2_htmlencode($tag['name'])); ?></a>
+		<input class="bitbtn deltag" type="button" title="<?php printf($lang_admin['Delete tag'], s2_htmlencode($tag['name'])); ?>" value="<?php echo $lang_admin['Delete']; ?>" onclick="return DeleteTag(<?php echo $tag['id'], ', \'', s2_htmlencode(addslashes($tag['name'])), '\''; ?>);" />
 <?php
 
 	}

@@ -1050,13 +1050,16 @@ div.input.color input,
 		background-color: #f4f4f4;
 		}
 
-.bitbtn.save { background-position: 1px -34px; }
-.bitbtn.savetag { background-position: 1px -160px; }
-.enabled .bitbtn.flip_ext { background-position: 1px -88px; }
-.disabled .bitbtn.flip_ext { background-position: 1px -70px; }
-.bitbtn.uninst_ext { background-position: 1px -124px; }
-.bitbtn.inst_ext { background-position: 1px -106px; }
-.bitbtn.add_user { background-position: 1px -52px; }
+.bitbtn.save { background-position: 1px 2px; }
+.bitbtn.savetag { background-position: 1px -124px; }
+.bitbtn.deltag { background-position: 1px -106px; }
+.bitbtn.savecomment { background-position: 1px -142px; }
+.bitbtn.saveopt { background-position: 1px -160px; }
+.enabled .bitbtn.flip_ext { background-position: 1px -22px; }
+.disabled .bitbtn.flip_ext { background-position: 1px -34px; }
+.bitbtn.uninst_ext { background-position: 1px -88px; }
+.bitbtn.inst_ext { background-position: 1px -70px; }
+.bitbtn.add_user { background-position: 1px -16px; }
 
 /*=======================[Toolbar]============================================*/
 
