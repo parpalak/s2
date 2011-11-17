@@ -395,7 +395,7 @@ hr {
 #edit_tab:before { background-position: -64px -16px; }
 #view_tab:before { background-position: -64px -32px; }
 #pict_tab:before { background-position: -64px -48px; }
-#comm_tab:before { background-position: -16px -64px; }
+#comm_tab:before { background-position: -16px -48px; }
 #tag_tab:before { background-position: -48px -32px; }
 #admin_tab { margin-left: 2em;}
 #admin_tab:before { background-position: 0 -48px; }
