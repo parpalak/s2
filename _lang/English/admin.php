@@ -121,7 +121,6 @@ $lang_admin = array(
 'Save'						=> 'Save',
 'Save info'					=> 'Moreover, CTRL + S works',
 'Show email'				=> 'Show e-mail',
-'Name:'						=> 'Name:',
 'Name'						=> 'Name',
 'Date'						=> 'Time',
 'IP'						=> 'IP',
@@ -180,7 +179,6 @@ $lang_admin = array(
 'Delete user'				=> 'Delete user',
 'Add user'					=> 'Add user',
 'Login'						=> 'Username',
-'Email:'					=> 'E-mail:',
 'Email'						=> 'E-mail',
 
 // Extensions tab

@@ -214,12 +214,12 @@ function s2_output_comment_form ($comment, $mode, $type)
 			<table class="fields">
 <?php ($hook = s2_hook('fn_output_comment_form_pre_name')) ? eval($hook) : null; ?>
 				<tr>
-					<td class="label"><?php echo $lang_admin['Name:']; ?></td>
+					<td class="label"><?php echo $lang_admin['Name']; ?></td>
 					<td><input type="text" name="comment[nick]" size="100" maxlength="255" value="<?php echo s2_htmlencode($comment['nick']); ?>" /></td>
 				</tr>
 <?php ($hook = s2_hook('fn_output_comment_form_pre_email')) ? eval($hook) : null; ?>
 				<tr>
-					<td class="label"><?php echo $lang_admin['Email:']; ?></td>
+					<td class="label"><?php echo $lang_admin['Email']; ?></td>
 					<td><input type="text" name="comment[email]" size="100" maxlength="255" value="<?php echo s2_htmlencode($comment['email']); ?>" /></td>
 				</tr>
 <?php ($hook = s2_hook('fn_output_comment_form_after_email')) ? eval($hook) : null; ?>
