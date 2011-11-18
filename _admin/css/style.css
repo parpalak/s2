@@ -1055,7 +1055,7 @@ div.input.color input,
 .bitbtn.deltag { background-position: 1px -106px; }
 .bitbtn.savecomment { background-position: 1px -142px; }
 .bitbtn.saveopt { background-position: 1px -160px; }
-.enabled .bitbtn.flip_ext { background-position: 1px -22px; }
+.enabled .bitbtn.flip_ext { background-position: 1px -52px; }
 .disabled .bitbtn.flip_ext { background-position: 1px -34px; }
 .bitbtn.uninst_ext { background-position: 1px -88px; }
 .bitbtn.inst_ext { background-position: 1px -70px; }
