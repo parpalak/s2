@@ -111,7 +111,7 @@ function s2_extension_list ()
 					foreach ($install_notes as $index => $cur_note)
 						$install_notes[$index] = ($index + 1).'. '.$cur_note;
 
-				$buttons['install'] = '<button class="bitbtn inst_ext" onclick="return InstallExtension(\''.s2_htmlencode(addslashes($entry)).'\', \''.implode('\\n', $install_notes).'\');" />'.(isset($inst_exts[$entry]['version']) ? $lang_admin_ext['Upgrade extension'] : $lang_admin_ext['Install extension']).'</button>';
+				$buttons['install'] = '<button class="bitbtn '.(isset($inst_exts[$entry]['version']) ? 'upgr_ext' : 'inst_ext').'" onclick="return InstallExtension(\''.s2_htmlencode(addslashes($entry)).'\', \''.implode('\\n', $install_notes).'\');" />'.(isset($inst_exts[$entry]['version']) ? $lang_admin_ext['Upgrade extension'] : $lang_admin_ext['Install extension']).'</button>';
 
 				$ext_item[] = '<div class="extension available">'.
 					'<div class="info"><h3>'.s2_htmlencode($ext_data['extension']['title']).sprintf($lang_admin_ext['Version'], $ext_data['extension']['version']).'</h3>'.
