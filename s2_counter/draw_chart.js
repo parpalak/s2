@@ -15,31 +15,31 @@ var s2_counter = {
 	rss: null,
 	draw_chart: function ()
 	{
-		if (!s2_counter.hits)
+		if (!this.hits)
 		{
-			s2_counter.hits = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
-			s2_counter.hits.addVariable("path", "../_extensions/s2_counter/");
-			s2_counter.hits.addParam("wmode", "opaque");
+			this.hits = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
+			this.hits.addVariable("path", "../_extensions/s2_counter/");
+			this.hits.addParam("wmode", "opaque");
 			var settings_file = "../_extensions/s2_counter/traffic.xml?" + Math.random();
 
 			(hook = Hooks.get('fn_s2_counter_draw_chart_pre_hits')) ? eval(hook) : null;
 
-			s2_counter.hits.addVariable("settings_file", encodeURIComponent(settings_file));
+			this.hits.addVariable("settings_file", encodeURIComponent(settings_file));
 		}
-		s2_counter.hits.write("s2_counter_hits");
+		this.hits.write("s2_counter_hits");
 
-		if (!s2_counter.rss)
+		if (!this.rss)
 		{
-			s2_counter.rss = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
-			s2_counter.rss.addVariable("path", "../_extensions/s2_counter/");
-			s2_counter.rss.addParam("wmode", "opaque");
+			this.rss = new SWFObject("../_extensions/s2_counter/amstock/amstock.swf", "amstock", "100%", "400px", "8", "#FFFFFF");
+			this.rss.addVariable("path", "../_extensions/s2_counter/");
+			this.rss.addParam("wmode", "opaque");
 			settings_file = "../_extensions/s2_counter/rss.xml?" + Math.random();
 
 			(hook = Hooks.get('fn_s2_counter_draw_chart_pre_rss')) ? eval(hook) : null;
 
-			s2_counter.rss.addVariable("settings_file", encodeURIComponent(settings_file));
+			this.rss.addVariable("settings_file", encodeURIComponent(settings_file));
 		}
-		s2_counter.rss.write("s2_counter_rss");
+		this.rss.write("s2_counter_rss");
 	},
 
 }
