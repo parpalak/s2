@@ -144,6 +144,8 @@ function s2_last_articles ($num)
 			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
 			 '<div class="preview cite">'.$item['text'].'</div>';
 
+	($hook = s2_hook('fn_last_articles_end')) ? eval($hook) : null;
+
 	return $output;
 }
 
