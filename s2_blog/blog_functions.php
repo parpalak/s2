@@ -228,7 +228,7 @@ function s2_blog_get_posts ($query_add, $sort_asc = true, $sort_field = 'create_
 
 function s2_blog_posts_by_time ($year, $month, $day = false)
 {
-	global $s2_db, $lang_s2_blog;
+	global $s2_db, $lang_common, $lang_s2_blog;
 
 	$link_nav = array();
 	$paging = '';
@@ -244,12 +244,12 @@ function s2_blog_posts_by_time ($year, $month, $day = false)
 		if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
 		{
 			$link_nav['prev'] = S2_BLOG_PATH.date('Y/m/', $prev_time);
-			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_s2_blog['Here'].'</a> ';
+			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
 		}
 		if ($end_time < time())
 		{
 			$link_nav['next'] = S2_BLOG_PATH.date('Y/m/', $end_time);
-			$paging .= '<a href="'.$link_nav['next'].'">'.$lang_s2_blog['There'].'</a>';
+			$paging .= '<a href="'.$link_nav['next'].'">'.$lang_common['There'].'</a>';
 		}
 
 		if ($paging)
@@ -716,7 +716,7 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 
 function s2_blog_last_posts ($skip = 0)
 {
-	global $s2_db, $lang_s2_blog;
+	global $s2_db, $lang_common, $lang_s2_blog;
 
 	if ($skip < 0)
 		$skip = 0;
@@ -750,12 +750,12 @@ function s2_blog_last_posts ($skip = 0)
 	if ($skip > 0)
 	{
 		$link_nav['prev'] = S2_BLOG_PATH.($skip > $posts_per_page ? 'skip/'.($skip - $posts_per_page) : '');
-		$paging = '<a href="'.$link_nav['prev'].'">'.$lang_s2_blog['Here'].'</a> ';
+		$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
 	}
 	if ($i > $posts_per_page)
 	{
 		$link_nav['next'] = S2_BLOG_PATH.'skip/'.($skip + $posts_per_page);
-		$paging .= '<a href="'.$link_nav['next'].'">'.$lang_s2_blog['There'].'</a>';
+		$paging .= '<a href="'.$link_nav['next'].'">'.$lang_common['There'].'</a>';
 	}
 
 	if ($paging)
