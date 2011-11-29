@@ -24,6 +24,8 @@ $lang_common = array(
 'Powered by'				=> 'Сайт работает на движке %s.',
 'Last comments'				=> 'Последние комментарии на&nbsp;сайте',
 'Last discussions'			=> 'Обсуждаемое на&nbsp;сайте',
+'Here'						=> '← сюда',
+'There'						=> 'туда →',
 
 'Favorite'					=> 'Избранное',
 

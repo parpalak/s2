@@ -116,9 +116,12 @@ p small, .author {
 	line-height: 1.75;
 	margin: -1.75em 0 1.75em;
 	}
-	.preview.time {
-		margin: 0;
-		}
+.preview.time {
+	margin: 0;
+	}
+.preview.cite {
+	margin: 0 0 1.75em;
+	}
 
 h3.article, h3.subsection {
 	margin: 0 0 1.167em;
@@ -403,12 +406,17 @@ body {
 
 .paging a, .paging .current {
 	display: inline-block;
-	width: 1.75em;
 	line-height: 1.75em;
-	text-align: center;
 	}
+	.paging .digit {
+		width: 1.75em;
+		text-align: center;
+		}
 	.paging a:hover {
 		background: #ffe;
+		}
+	.paging .there {
+		margin-right: 1.75em;
 		}
 
 img[align="left"] {

@@ -24,6 +24,8 @@ $lang_common = array(
 'Powered by'				=> 'Powered by %s CMS.',
 'Last comments'				=> 'Last comments on&nbsp;the site',
 'Last discussions'			=> 'Last discussions on&nbsp;the site',
+'Here'						=> '← here',
+'There'						=> 'there →',
 
 'Favorite'					=> 'Favorite',
 
