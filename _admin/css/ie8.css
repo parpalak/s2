@@ -25,7 +25,7 @@ div.input.checkbox input,
 .js:visited {
 	border-bottom: 1px dashed #8AADDE;
 	}
-	.js.curr {
+	.js.cur_link {
 		border-bottom: none;
 		}
 
