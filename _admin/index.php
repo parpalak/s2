@@ -90,6 +90,7 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
+<!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->
 <script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 <?php ($hook = s2_hook('ai_pre_js_include')) ? eval($hook) : null; ?>
 <script type="text/javascript" src="js/ajax.js"></script>
