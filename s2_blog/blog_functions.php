@@ -870,7 +870,7 @@ function s2_blog_recent_discussions ($cur_url = '---')
 	$output = '';
 	while ($row = $s2_db->fetch_assoc($result))
 		$output .= '<li><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'" title="'.s2_htmlencode($row['nick'].' ('.s2_date_time($row['time']).')').'">'.s2_htmlencode($row['title']).'</a></li>';
-	$output = preg_replace('#<a href="'.preg_quote(S2_URL_PREFIX.$cur_url, '#').'">(.*?)</a>#', '\\1', $output);
+	$output = preg_replace('#<a href="'.preg_quote(s2_link($cur_url), '#').'">(.*?)</a>#', '\\1', $output);
 	return $output ? '<ul>'.$output.'</ul>' : '';
 }
 
@@ -942,7 +942,7 @@ function s2_blog_navigation ($cur_url)
 
 	$cur_url = str_replace('%2F', '/', urlencode($cur_url));
 	$output = '<ul><li>'.implode('</li><li>', $s2_blog_navigation).'</li></ul>';
-	$output = preg_replace('#<a href="'.preg_quote(S2_URL_PREFIX.$cur_url, '#').'">(.*?)</a>#', '\\1', $output);
+	$output = preg_replace('#<a href="'.preg_quote(s2_link($cur_url), '#').'">(.*?)</a>#', '\\1', $output);
 	return $output;
 }
 
