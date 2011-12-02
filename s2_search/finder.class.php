@@ -833,9 +833,9 @@ if (defined('DEBUG'))
 				if ($i > $cur_page * $items_per_page)
 					break;
 
-				$output[$chapter]['title'] = '<a class="title" href="'.S2_PATH.S2_URL_PREFIX.self::$table_of_contents[$chapter]['url'].'">'.s2_htmlencode(self::$table_of_contents[$chapter]['title']).'</a>';
+				$output[$chapter]['title'] = '<a class="title" href="'.s2_link(self::$table_of_contents[$chapter]['url']).'">'.s2_htmlencode(self::$table_of_contents[$chapter]['title']).'</a>';
 				$output[$chapter]['descr'] = trim(self::$table_of_contents[$chapter]['descr']);
-				$output[$chapter]['info'] = '<small><a class="url" href="'.S2_PATH.S2_URL_PREFIX.self::$table_of_contents[$chapter]['url'].'">'.self::display_url(S2_BASE_URL.S2_URL_PREFIX.self::$table_of_contents[$chapter]['url']).'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small>';
+				$output[$chapter]['info'] = '<small><a class="url" href="'.s2_link(self::$table_of_contents[$chapter]['url']).'">'.self::display_url(s2_abs_link(self::$table_of_contents[$chapter]['url'])).'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small>';
 			}
 
 if (defined('DEBUG'))
@@ -848,7 +848,7 @@ if (defined('DEBUG'))
 				echo '<p>'.implode('<br />', $chapter_info).'<p>';
 
 			$link_nav = array();
-			echo s2_paging($cur_page, $total_pages, S2_PATH.S2_URL_PREFIX.'/search'.(S2_URL_PREFIX ? '&amp;' : '?').'q='.str_replace('%', '%%', urlencode($search_string)).'&p=%d', $link_nav);
+			echo s2_paging($cur_page, $total_pages, s2_link('/search', array('q='.str_replace('%', '%%', urlencode($search_string)), 'p=%d')), $link_nav);
 			foreach ($link_nav as $rel => $href)
 				$page['link_navigation'][$rel] = $href;
 		}
