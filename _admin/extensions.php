@@ -241,7 +241,7 @@ function s2_install_extension ($id)
 	$ext_info = array(
 		'id'			=> $id,
 		'path'			=> S2_ROOT.'_extensions/'.$id,
-		'url'			=> S2_BASE_URL.'/_extensions/'.$id,
+		'url'			=> S2_PATH.'/_extensions/'.$id,
 		'dependencies'	=> array()
 	);
 
@@ -250,7 +250,7 @@ function s2_install_extension ($id)
 		$ext_info['dependencies'][$dependency] = array(
 			'id'	=> $dependency,
 			'path'	=> S2_ROOT.'_extensions/'.$dependency,
-			'url'	=> S2_BASE_URL.'/_extensions/'.$dependency,
+			'url'	=> S2_PATH.'/_extensions/'.$dependency,
 		);
 	}
 
@@ -509,7 +509,7 @@ function s2_uninstall_extension ($id)
 	$ext_info = array(
 		'id'			=> $id,
 		'path'			=> S2_ROOT.'_extensions/'.$id,
-		'url'			=> S2_BASE_URL.'/_extensions/'.$id
+		'url'			=> S2_PATH.'/_extensions/'.$id
 	);
 
 	// Run uninstall code

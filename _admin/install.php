@@ -72,9 +72,6 @@ function generate_config_file ()
 			$use_https = true;
 	}
 
-	if ($use_https)
-		$base_url = substr($base_url, strpos($base_url, '//'));
-
 	return '<?php'."\n\n".'$db_type = \''.$db_type."';\n".
 		'$db_host = \''.$db_host."';\n".
 		'$db_name = \''.addslashes($db_name)."';\n".

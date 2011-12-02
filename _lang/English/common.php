@@ -7,7 +7,7 @@ $lang_common = array(
 'Error no template'			=> 'Neither section has a template.<br /><br />You have to choose a tepmlate differs from “inherited” at least for one item from listed below:<br />%s',
 'Template not found'		=> 'The template file <strong>%s</strong> was not found. If this error recur, try to reinstall S2.',
 'Error 404'					=> 'Error 404',
-'Error 404 text'			=> 'This page never existed or&nbsp;has been removed. Go to&nbsp;<a href="%1$s/">the main page</a> and&nbsp;find the necessary information, or&nbsp;write webmaster.',
+'Error 404 text'			=> 'This page never existed or&nbsp;has been removed. Go to&nbsp;<a href="%1$s">the main page</a> and&nbsp;find the necessary information, or&nbsp;write webmaster.',
 
 // Page content
 'In this section'			=> 'In this section',

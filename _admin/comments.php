@@ -303,7 +303,7 @@ function s2_toggle_hide_comment ($id)
 
 		if (($article = $s2_db->fetch_assoc($result)) && ($path = s2_path_from_id($article['parent_id'], true)) !== false)
 		{
-			$link = S2_BASE_URL.S2_URL_PREFIX.$path.'/'.urlencode($article['url']);
+			$link = s2_abs_link($path.'/'.urlencode($article['url']));
 
 			// Fetching receivers' names and adresses
 			$query = array(

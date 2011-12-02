@@ -25,7 +25,7 @@ if (isset($_GET['go']))
 	$replace = array(
 		'<!-- s2_head_title -->'	=> $lang_comments['Comment sent'],
 		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Comment sent'].'</h1>',
-		'<!-- s2_text -->'			=> sprintf($lang_comments['Comment sent info'], $_GET['go'], S2_BASE_URL.'/'),
+		'<!-- s2_text -->'			=> sprintf($lang_comments['Comment sent info'], $_GET['go'], s2_link('/')),
 		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
@@ -237,7 +237,7 @@ if (!empty($errors))
 	die($template);
 }
 
-$link = S2_BASE_URL.S2_URL_PREFIX.$path.'/'.urlencode($row['url']);
+$link = s2_abs_link($path.'/'.urlencode($row['url']));
 
 //
 // Everything is ok, save and send the comment

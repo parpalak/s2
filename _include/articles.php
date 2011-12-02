@@ -140,7 +140,7 @@ function s2_last_articles ($num)
 
 	$output = '';
 	foreach ($articles as $item)
-		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.S2_PATH.S2_URL_PREFIX.$item['rel_path'].'">'.s2_htmlencode($item['title']).'</a></h2>'.
+		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
 			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
 			 '<div class="preview cite">'.$item['text'].'</div>';
 
@@ -196,7 +196,7 @@ function s2_last_artilce_comments ()
 
 	$output = '';
 	foreach ($urls as $k => $url)
-		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'#'.$counts[$k].'">'.s2_htmlencode($titles[$k]).'</a>, <em>'.s2_htmlencode($nicks[$k]).'</em></li>';
+		$output .= '<li><a href="'.s2_link($url).'#'.$counts[$k].'">'.s2_htmlencode($titles[$k]).'</a>, <em>'.s2_htmlencode($nicks[$k]).'</em></li>';
 
 	($hook = s2_hook('fn_last_article_comments_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul>' : '';
@@ -247,7 +247,7 @@ function s2_last_discussions ()
 
 	$output = '';
 	foreach ($urls as $k => $url)
-		$output .= '<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'" title="'.s2_htmlencode($nicks[$k].' ('.s2_date_time($time[$k]).')').'">'.s2_htmlencode($titles[$k]).'</a></li>';
+		$output .= '<li><a href="'.s2_link($url).'" title="'.s2_htmlencode($nicks[$k].' ('.s2_date_time($time[$k]).')').'">'.s2_htmlencode($titles[$k]).'</a></li>';
 
 	($hook = s2_hook('fn_last_discussions_end')) ? eval($hook) : null;
 	return $output ? '<ul>'.$output.'</ul>' : '';
@@ -293,7 +293,7 @@ function s2_articles_by_tag ($tag_id)
 	$urls = s2_get_group_url($parent_ids, $urls);
 
 	foreach ($urls as $k => $v)
-		$urls[$k] = '<a href="'.S2_PATH.S2_URL_PREFIX.$v.'">'.$title[$k].'</a>';
+		$urls[$k] = '<a href="'.s2_link($v).'">'.$title[$k].'</a>';
 
 	return $urls;
 }
@@ -364,7 +364,7 @@ function s2_tags_list ()
 
 		foreach ($tag_count as $id => $num)
 			if ($num)
-				$tags[] = '<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/'.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a>';
+				$tags[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_url[$id])).'/">'.$tag_name[$id].'</a>';
 
 		$ready = true;
 	}
@@ -391,7 +391,7 @@ function s2_make_tags_pages ($request_array)
 			'text'			=> '<div class="tags_list">'.s2_tags_list().'</div>',
 			'date'			=> '',
 			'title'			=> $lang_common['Tags'],
-			'path'			=> '<a href="'.S2_PATH.S2_URL_PREFIX.'/">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].$lang_common['Tags'],
+			'path'			=> '<a href="'.s2_link('/').'">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].$lang_common['Tags'],
 		);
 
 		($hook = s2_hook('fn_s2_make_tags_pages_tags_end')) ? eval($hook) : null;
@@ -458,7 +458,7 @@ function s2_make_tags_pages ($request_array)
 			$row = $rows[$k];
 			if ($row['children_exist'])
 			{
-				$subsections[] = '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$url.'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
+				$subsections[] = '<h3 class="subsection"><a href="'.s2_link($url).'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
 					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
 					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
 
@@ -490,7 +490,7 @@ function s2_make_tags_pages ($request_array)
 		{
 			array_multisort($sort_array, $sort_order, $subarticles);
 			foreach ($subarticles as $item)
-				$text .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
+				$text .= '<h3 class="article"><a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 		}
@@ -499,7 +499,7 @@ function s2_make_tags_pages ($request_array)
 			'text'			=> $tag_description.$text.$subsection_text,
 			'date'			=> '',
 			'title'			=> s2_htmlencode($tag_name),
-			'path'			=> '<a href="'.S2_PATH.S2_URL_PREFIX.'/">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].'<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/">'.$lang_common['Tags'].'</a>'.$lang_common['Crumbs separator'].s2_htmlencode($tag_name),
+			'path'			=> '<a href="'.s2_link('/').'">'.s2_htmlencode(s2_main_page_title()).'</a>'.$lang_common['Crumbs separator'].'<a href="'.s2_link('/'.S2_TAGS_URL.'/').'">'.$lang_common['Tags'].'</a>'.$lang_common['Crumbs separator'].s2_htmlencode($tag_name),
 		);
 
 		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;
@@ -595,7 +595,7 @@ function s2_tagged_articles ($id)
 	foreach ($urls as $k => $url)
 		$art_by_tags[$tag_ids[$k]][] = ($original_ids[$k] == $id) ?
 			'<li class="active"><span>'.s2_htmlencode($titles[$k]).'</span></li>' :
-			'<li><a href="'.S2_PATH.S2_URL_PREFIX.$url.'">'.s2_htmlencode($titles[$k]).'</a></li>';
+			'<li><a href="'.s2_link($url).'">'.s2_htmlencode($titles[$k]).'</a></li>';
 
 	($hook = s2_hook('fn_tagged_articles_pre_art_by_tags_merge')) ? eval($hook) : null;
 
@@ -609,7 +609,7 @@ function s2_tagged_articles ($id)
 	$output = array();
 	($hook = s2_hook('fn_tagged_articles_pre_menu_merge')) ? eval($hook) : null;
 	foreach ($art_by_tags as $tag_id => $articles)
-		$output[] = '<div class="header">'.sprintf($lang_common['With this tag'], '<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/">'.$tag_names[$tag_id].'</a>').'</div>'."\n".
+		$output[] = '<div class="header">'.sprintf($lang_common['With this tag'], '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/').'">'.$tag_names[$tag_id].'</a>').'</div>'."\n".
 			'<ul>' . $articles . '</ul>'."\n";
 
 	($hook = s2_hook('fn_tagged_articles_end')) ? eval($hook) : null;
@@ -636,7 +636,7 @@ function s2_get_tags ($id)
 
 	$tags = array();
 	while ($row = $s2_db->fetch_assoc($result))
-		$tags[] = '<a href="'.S2_PATH.S2_URL_PREFIX.'/'.S2_TAGS_URL.'/'.urlencode($row['url']).'/">'.$row['name'].'</a>';
+		$tags[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($row['url']).'/').'">'.$row['name'].'</a>';
 
 	if (empty($tags))
 		return '';
@@ -700,7 +700,7 @@ function s2_parse_page_url ($request_uri)
 		if ($row['template'] != '')
 			$template_id = $row['template'];
 
-		$bread_crumbs_links[] = '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.s2_htmlencode($row['title']).'</a>';
+		$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($row['title']).'</a>';
 	}
 
 	// Path to the requested page (without trailing slash)
@@ -742,7 +742,7 @@ function s2_parse_page_url ($request_uri)
 
 	if (!$template_id)
 	{
-		$bread_crumbs_links[] = '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.s2_htmlencode($page['title']).'</a>';
+		$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($page['title']).'</a>';
 		error(sprintf($lang_common['Error no template'], implode('<br />', $bread_crumbs_links)));
 	}
 
@@ -750,7 +750,7 @@ function s2_parse_page_url ($request_uri)
 	{
 		// Correcting trailing slash
 		header('HTTP/1.1 301');
-		header('Location: '.S2_BASE_URL.S2_URL_PREFIX.$current_path.(!$was_end_slash ? '/' : ''));
+		header('Location: '.s2_abs_link($current_path.(!$was_end_slash ? '/' : '')));
 		die;
 	}
 
@@ -760,11 +760,11 @@ function s2_parse_page_url ($request_uri)
 	if (!empty($page['author']))
 		$page['author'] = s2_htmlencode($page['author']);
 
-	$page['link_navigation']['top'] = S2_PATH.S2_URL_PREFIX.'/';
+	$page['link_navigation']['top'] = s2_link('/');
 	if (count($bread_crumbs_titles) > 1)
 	{
-		$page['link_navigation']['up'] = S2_PATH.S2_URL_PREFIX.$parent_path;
-		$page['section_link'] = '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>';
+		$page['link_navigation']['up'] = s2_link($parent_path);
+		$page['section_link'] = '<a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>';
 	}
 
 	($hook = s2_hook('fn_s2_parse_page_url_pre_get_tpl')) ? eval($hook) : null;
@@ -810,7 +810,7 @@ function s2_parse_page_url ($request_uri)
 					'excerpt' => $row['excerpt'],
 					'url' => $current_path.'/'.urlencode($row['url']).'/'
 				);
-				$menu_subsections[] = '<li><a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).'/">'.s2_htmlencode($row['title']).'</a></li>';
+				$menu_subsections[] = '<li><a href="'.s2_link($current_path.'/'.urlencode($row['url']).'/').'">'.s2_htmlencode($row['title']).'</a></li>';
 
 				($hook = s2_hook('fn_s2_parse_page_url_add_subsection')) ? eval($hook) : null;
 			}
@@ -824,7 +824,7 @@ function s2_parse_page_url ($request_uri)
 					'url' => $current_path.'/'.urlencode($row['url'])
 				);
 				$sort_array[] = $row['create_time'];
-				$menu_subarticles[] = '<li><a href="'.S2_PATH.S2_URL_PREFIX.$current_path.'/'.urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a></li>';
+				$menu_subarticles[] = '<li><a href="'.s2_link($current_path.'/'.urlencode($row['url'])).'">'.s2_htmlencode($row['title']).'</a></li>';
 
 				($hook = s2_hook('fn_s2_parse_page_url_add_subarticle')) ? eval($hook) : null;
 			}
@@ -844,7 +844,7 @@ function s2_parse_page_url ($request_uri)
 			$page['subcontent'] = $lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '';
 
 			foreach ($subsections as $item)
-				$page['subcontent'] .= '<h3 class="subsection"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
+				$page['subcontent'] .= '<h3 class="subsection"><a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="subsection date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="subsection">'.$item['excerpt'].'</p>'."\n" : '');
 		}
@@ -875,7 +875,7 @@ function s2_parse_page_url ($request_uri)
 				$total_pages = ceil(1.0 * count($subarticles) / S2_MAX_ITEMS);
 
 				$link_nav = array();
-				$paging = s2_paging($page_num + 1, $total_pages, S2_PATH.S2_URL_PREFIX.$current_path.'/'.(S2_URL_PREFIX ? '&amp;' : '?').'~=%d', $link_nav)."\n";
+				$paging = s2_paging($page_num + 1, $total_pages, s2_link(str_replace('%', '%%', $current_path.'/'), array('~=%d')), $link_nav)."\n";
 				foreach ($link_nav as $rel => $href)
 					$page['link_navigation'][$rel] = $href;
 
@@ -891,7 +891,7 @@ function s2_parse_page_url ($request_uri)
 			foreach ($sort_array as $index => $value)
 			{
 				$item = $subarticles[$index];
-				$page['subcontent'] .= '<h3 class="article"><a href="'.S2_PATH.S2_URL_PREFIX.$item['url'].'">'.$item['title'].'</a></h3>'."\n".
+				$page['subcontent'] .= '<h3 class="article"><a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 			}
@@ -929,7 +929,7 @@ function s2_parse_page_url ($request_uri)
 		while ($row = $s2_db->fetch_assoc($result))
 		{
 			// A neighbour
-			$url = S2_PATH.S2_URL_PREFIX.$parent_path.urlencode($row['url']);
+			$url = s2_link($parent_path.urlencode($row['url']));
 			if ($id == $row['id'])
 			{
 				$menu_articles[] = '<li class="active"><span>'.s2_htmlencode($row['title']).'</span></li>';
@@ -945,7 +945,7 @@ function s2_parse_page_url ($request_uri)
 			$i++;
 		}
 
-		$page['menu']['articles'] = '<div class="header">'.sprintf($lang_common['More in this section'], '<a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>').'</div>'."\n".
+		$page['menu']['articles'] = '<div class="header">'.sprintf($lang_common['More in this section'], '<a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>').'</div>'."\n".
 			'<ul>'."\n".implode("\n", $menu_articles)."\n".'</ul>'."\n";
 
 
@@ -957,7 +957,7 @@ function s2_parse_page_url ($request_uri)
 				$page['link_navigation']['next'] = $neighbour_urls[$curr_item + 1];
 
 			$page['back_forward'] = '<ul class="back_forward">'.
-				'<li class="up"><span class="arrow">&uarr;</span> <a href="'.S2_PATH.S2_URL_PREFIX.$parent_path.'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a></li>'.
+				'<li class="up"><span class="arrow">&uarr;</span> <a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a></li>'.
 				(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back"><span class="arrow">&larr;</span> ', $menu_articles[$curr_item - 1]) : '<li class="back"><span class="arrow">&larr;</span> </li>').
 				(isset($menu_articles[$curr_item + 1]) ? str_replace('<li>', '<li class="forward"><span class="arrow">&rarr;</span> ', $menu_articles[$curr_item + 1]) : '<li class="forward"><span class="arrow">&rarr;</span> </li>').
 				'</ul>';

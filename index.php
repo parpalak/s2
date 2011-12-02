@@ -23,7 +23,7 @@ if (isset($_SERVER['PATH_INFO']) && S2_URL_PREFIX != '')
 	$request_uri = $_SERVER['PATH_INFO'];
 else
 {
-	$request_uri = substr(urldecode($_SERVER['REQUEST_URI']), strlen(S2_URL_PREFIX.S2_PATH));
+	$request_uri = substr(urldecode($_SERVER['REQUEST_URI']), strlen(s2_link()));
 	if (($delimeter = strpos($request_uri, S2_URL_PREFIX != '' ? '&' : '?')) !== false)
 		$request_uri = substr($request_uri, 0, $delimeter);
 }
@@ -97,7 +97,7 @@ if (!empty($page['meta_description']))
 ($hook = s2_hook('idx_pre_meta_merge')) ? eval($hook) : null;
 $replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
 
-$replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.S2_BASE_URL.S2_URL_PREFIX.'/rss.xml" />';
+$replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.s2_link('/rss.xml').'" />';
 
 // Including the style
 ob_start();

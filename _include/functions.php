@@ -104,9 +104,29 @@ function s2_frendly_filesize ($size)
 }
 
 //
+// Link processing
+//
+
+function s2_link ($path = '', $params = array())
+{
+	$return = ($hook = s2_hook('fn_link_start')) ? eval($hook) : null;
+	if ($return)
+		return $return;
+
+	return S2_PATH.S2_URL_PREFIX.$path.(!empty($params) && is_array($params) ? (S2_URL_PREFIX ? '&amp;' : '?').implode('&amp;', $params) : '');
+}
+
+function s2_abs_link ($path = '', $params = array())
+{
+	$return = ($hook = s2_hook('fn_abs_link_start')) ? eval($hook) : null;
+	if ($return)
+		return $return;
+
+	return S2_BASE_URL.S2_URL_PREFIX.$path.(!empty($params) && is_array($params) ? (S2_URL_PREFIX ? '&amp;' : '?').implode('&amp;', $params) : '');
+}
+
 // Creates paging navigation (1  2  3 ... total_pages - 1  total_pages)
 // $url must have the following form http://example.com/page?num=%d
-//
 function s2_paging ($page, $total_pages, $url, &$link_nav)
 {
 	$return = ($hook = s2_hook('fn_paging_start')) ? eval($hook) : null;
@@ -226,7 +246,7 @@ function s2_get_template ($template_id, $path = false)
 					return '<a href="'.$url.'">'.$text.'</a>';
 			}
 		}
-		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.S2_PATH.S2_URL_PREFIX.str_replace('\'', '\\\'', $request_uri).'\', \'\\2\')', $template);
+		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.str_replace('\'', '\\\'', s2_link($request_uri)).'\', \'\\2\')', $template);
 	}
 
 	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
@@ -238,7 +258,7 @@ function s2_build_copyright ($request_uri = '')
 	global $lang_common;
 
 	$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
-	$copyright = S2_WEBMASTER && S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : ($request_uri !== '/' ? '<a href="'.S2_BASE_URL.'/">'.$author.'</a>' : $author);
+	$copyright = S2_WEBMASTER && S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : ($request_uri !== '/' ? '<a href="'.s2_link('/').'">'.$author.'</a>' : $author);
 
 	return (S2_START_YEAR != date('Y') ?
 		sprintf($lang_common['Copyright 2'], $copyright, S2_START_YEAR, date('Y')) :
@@ -661,7 +681,7 @@ function s2_error_404 ()
 	$replace = array(
 		'<!-- s2_head_title -->'	=> $lang_common['Error 404'],
 		'<!-- s2_title -->'			=> '<h1>'.$lang_common['Error 404'].'</h1>',
-		'<!-- s2_text -->'			=> sprintf($lang_common['Error 404 text'], S2_BASE_URL),
+		'<!-- s2_text -->'			=> sprintf($lang_common['Error 404 text'], s2_link('/')),
 		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
