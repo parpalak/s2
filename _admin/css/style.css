@@ -1014,9 +1014,7 @@ div.input.color input,
 	height: 22px;
 	min-width: 120px;
 	margin-bottom: 1px;
-	background-position: 1px 2px;
-	background-repeat: no-repeat;
-	background-color: #f2f2f2;
+	background: url(../i/button_icons.png) 1px 2px no-repeat #f2f2f2;
 	border: 1px solid #777;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
@@ -1024,7 +1022,6 @@ div.input.color input,
 	-moz-box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
 	-webkit-box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
 	box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
-	background-image: url(../i/button_icons.png);
 	}
 	.bitbtn:hover {
 		background-color: #eaedf2;
