@@ -115,6 +115,10 @@ a > img {
 		margin-right: 12px;
 		}
 
+.tags_list a,
+.tags_list a:active,
+.tags_list a:hover,
+.tags_list a:visited,
 .js,
 .js:active,
 .js:hover,
@@ -130,8 +134,6 @@ a > img {
 	background-position: 0 100%;
 	color: #05c;
 	outline: none;
-	display: inline;
-	padding: 2px 0 0;
 	}
 
 a.cur_link{
@@ -887,12 +889,6 @@ ul .but_panel .delete,
 .tags_list {
 	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Arial, Helvetica, sans-serif;
 	}
-	.tags_list a,
-	.tags_list a:active,
-	.tags_list a:hover,
-	.tags_list a:visited {
-		outline: none;
-		}
 
 /*===========================[Editor styles]==================================*/
 
