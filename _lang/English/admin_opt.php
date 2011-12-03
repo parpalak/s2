@@ -2,9 +2,9 @@
 
 $lang_const_explain = array(
 
-'S2_SITE_NAME'			=> 'Used in headings and RSS.',
+'S2_SITE_NAME'			=> 'Used in titles and RSS.',
 'S2_WEBMASTER'			=> 'Used in the copyright, RSS and as the sender name in subscription e-mails; you can leave it empty.',
-'S2_WEBMASTER_EMAIL'	=> 'Used in the copyright, RSS and as the sender address.',
+'S2_WEBMASTER_EMAIL'	=> 'Used in the copyright and as the sender address.',
 'S2_COMPRESS'			=> 'This will reduce bandwidth usage, but use a little more CPU.',
 'S2_SHOW_COMMENTS'		=> 'You can hide all comments for a while by turning this off.',
 'S2_ENABLED_COMMENTS'	=> 'Show input comment form (at pages where it was not explicitly disabled).',
