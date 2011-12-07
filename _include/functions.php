@@ -221,6 +221,7 @@ function s2_get_template ($template_id, $path = false)
 	if ($return)
 		return $return;
 
+	$template_id = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $template_id);
 	if (file_exists(S2_ROOT.'_styles/'.S2_STYLE.'/templates/'.$template_id))
 		$path = S2_ROOT.'_styles/'.S2_STYLE.'/templates/'.$template_id;
 	elseif (file_exists($path.$template_id))
@@ -270,6 +271,11 @@ function s2_get_service_template ($template_id = 'service.php', $path = false)
 {
 	global $lang_common;
 
+	$return = ($hook = s2_hook('fn_get_service_template_start')) ? eval($hook) : null;
+	if ($return)
+		return $return;
+
+	$template_id = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $template_id);
 	$template = s2_get_template($template_id, $path);
 
 	$replace['<!-- s2_meta -->'] = '<meta name="Generator" content="S2 '.S2_VERSION.'" />';
