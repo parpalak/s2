@@ -958,8 +958,8 @@ function s2_parse_page_url ($request_uri)
 
 			$page['back_forward'] = '<ul class="back_forward">'.
 				'<li class="up"><span class="arrow">&uarr;</span> <a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a></li>'.
-				(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back"><span class="arrow">&larr;</span> ', $menu_articles[$curr_item - 1]) : '<li class="back"><span class="arrow">&larr;</span> </li>').
-				(isset($menu_articles[$curr_item + 1]) ? str_replace('<li>', '<li class="forward"><span class="arrow">&rarr;</span> ', $menu_articles[$curr_item + 1]) : '<li class="forward"><span class="arrow">&rarr;</span> </li>').
+				(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back"><span class="arrow">&larr;</span> ', $menu_articles[$curr_item - 1]) : '<li class="back empty"><span class="arrow">&larr;</span> </li>').
+				(isset($menu_articles[$curr_item + 1]) ? str_replace('<li>', '<li class="forward"><span class="arrow">&rarr;</span> ', $menu_articles[$curr_item + 1]) : '<li class="forward empty"><span class="arrow">&rarr;</span> </li>').
 				'</ul>';
 		}
 	}

@@ -368,6 +368,9 @@ body {
 		position: relative;
 		z-index: 10;
 		}
+		#content ul.back_forward li.empty {
+			color: #aaa;
+			}
 		#content ul.back_forward li.up {
 			text-align: center;
 			width: 100%;
