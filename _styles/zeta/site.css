@@ -20,7 +20,11 @@ body.e404 {
 		}
 
 
-*+html body, * html body {
+*+html body {
+	font-size: 87.5%;
+	}
+
+* html body {
 	font-size: 87.5%;
 	}
 
@@ -440,3 +444,31 @@ img[align="right"] {
 		.s2_search_form .inactive {
 			color: #999;
 			}
+
+/* Styles for printer */
+@media print {
+	body, #header, h1, h2, h3, h4, .header, blockquote {font-family: "Times New Roman", Times, serif;}
+	body {font-size: 12pt; line-height: normal;}
+	h1, h2, h3, h4 {position: static; margin: 1em 0 0.5em; font-weight: bold;}
+	h1 {font-size: 2em; margin: 0.5em 0 0;}
+
+	#crumbs, #menu, #clearing, form, #debug, #queries, .comment.form {display: none;}
+	#header, #center, #container, #content, #footer, .date, .time {position: static; width: 100%; padding: 0; margin: 0;}
+
+	#header {font-size: 10pt; border-bottom: 1px solid #000; text-align: left;}
+	#copyright {	border-top: 1px solid #000;}
+
+	.reply {	margin: 0 0 1em 2em;}
+
+	a:link, a:visited {color: #05c; background: transparent; text-decoration: underline;}
+
+	#content a:after,
+	#copyright a:after {content: " (" attr(href) ")"; font-size: 90%;}
+	/* Uncomment the next line and put your site URL. */
+	/* 	#content a[href^="/"]:after {content: " (http://example.com" attr(href) ")";} */
+		#content a[href^="#"]:after {content: "";}
+
+	#content table {border-collapse: collapse;}
+		#content table td {border: 1px solid #000;}
+
+	}
