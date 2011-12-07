@@ -339,12 +339,14 @@ function s2_htmlencode($str)
 //
 function s2_js_mailto($name, $email)
 {
-	$s = explode('@', $email);
-	return '<script type="text/javascript"><!--'."\n".
-		'mailto = "'.$s[0].'" + "%40" + "'.$s[1].'";'."\n".
-		"document.write('<a href=\"mailto:' + mailto + '\">".str_replace('\'', '\\\'', $name)."</a>'); //-->\n".
-		'</script>'.
-		'<noscript>'.$name.', <small>['.$s[0].' at '.$s[1].']</small></noscript>';
+	$parts = explode('@', $email);
+
+	if (count($parts) != 2)
+		return $name;
+
+	return '<script type="text/javascript">var mailto="'.$parts[0].'"+"%40"+"'.$parts[1].'";'.
+		'document.write(\'<a href="mailto:\'+mailto+\'">'.str_replace('\'', '\\\'', $name).'</a>\');</script>'.
+		'<noscript>'.$name.', <small>['.$parts[0].' at '.$parts[1].']</small></noscript>';
 }
 
 // Attempts to fetch the provided URL using any available means
