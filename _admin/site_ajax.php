@@ -152,9 +152,11 @@ elseif ($action == 'create')
 
 	require 'tree.php';
 
-	s2_create_article($id);
+	$return['id'] = s2_create_article($id);
+	$return['children'] = s2_get_child_branches($id);
 
-	echo s2_get_child_branches($id);
+	header('Content-Type: text/xml; charset=utf-8');
+	echo '<response>'.s2_array2xml($return).'</response>';
 }
 
 // Load folder tree

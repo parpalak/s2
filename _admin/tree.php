@@ -42,6 +42,11 @@ function s2_create_article ($id)
 	);
 	($hook = s2_hook('fn_create_article_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$new_id = $s2_db->insert_id();
+
+	($hook = s2_hook('fn_create_article_end')) ? eval($hook) : null;
+
+	return $new_id;
 }
 
 function s2_rename_article ($id, $title)

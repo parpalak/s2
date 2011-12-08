@@ -982,11 +982,12 @@ function CreateChildArticle ()
 	GETAsyncRequest(sUrl + 'action=create&id=' + eSpan.id, function (http)
 	{
 		var eLi = eSpan.parentNode.parentNode;
+		var xmldoc = http.responseXML;
 
 		ReleaseItem();
-		SetItemChildren(eSpan, http.responseText);
+		SetItemChildren(eSpan, xmldoc.getElementsByTagName('children')[0].firstChild.nodeValue);
 
-		eSpan = eLi.lastChild.lastChild.lastChild.lastChild;
+		eSpan = document.getElementById(xmldoc.getElementsByTagName('id')[0].firstChild.nodeValue);
 
 		HighlightItem(eSpan);
 		EditItemName(eSpan);
