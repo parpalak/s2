@@ -385,9 +385,9 @@ function PopupWindow (sTitle, sHeader, sInfo, sText)
 	}
 
 	var head = '<title>' + sTitle + '</title>' +
-		'<style>html {height: 100%; margin: 0;} body {margin: 0 ; padding: 0 10%; height: 100%; background: ' + color + '; font: Verdana 75%;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 70%;}</style>';
-	var body = '<h1>' + sHeader + '</h1>' + 
-		'<p>' + sInfo + '</p><textarea readonly="readonly">' + sText + '</textarea>';
+		'<style>html {height: 100%; margin: 0;} body {margin: 0 auto; padding: 9em 10% 1em; height: 100%; background: ' + color + '; font: 75% Verdana, sans-serif;} body, textarea {-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 100%;} .text {position: absolute; top: 0; width: 80%;}</style>';
+	var body = '<div class="text"><h1>' + sHeader + '</h1>' + 
+		'<p>' + sInfo + '</p></div><textarea readonly="readonly">' + sText + '</textarea>';
 
 	(hook = Hooks.get('fn_popup_window_pre_mgr')) ? eval(hook) : null;
 
