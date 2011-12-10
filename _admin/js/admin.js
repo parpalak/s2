@@ -203,10 +203,39 @@ function SaveHandler (e)
 
 function Logout ()
 {
-	GETAsyncRequest(sUrl + 'action=logout', function ()
+	function DoLogout ()
 	{
-		document.location.reload();
-	});
+		GETAsyncRequest(sUrl + 'action=logout', function ()
+		{
+			document.location.reload();
+		});
+	}
+
+	if (document.artform && Changes.present(document.artform))
+	{
+		PopupMessages.show(s2_lang.unsaved_exit, [
+			{
+				name: s2_lang.save_and_exit,
+				action: (function ()
+				{
+					document.artform.onsubmit();
+					setTimeout(DoLogout, 200);
+				}),
+				once: true
+			},
+			{
+				name: s2_lang.discard_and_exit,
+				action: (function ()
+				{
+					DoLogout();
+				}),
+				once: true
+			}
+		]);
+		return false;
+	}
+
+	DoLogout();
 	return false;
 }
 
