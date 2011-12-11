@@ -64,7 +64,7 @@ function Make_Tabsheet ()
 }
 
 var iEditorScrollTop = 0;
-var iPreviewScrollTop = null;
+var iPreviewHtmlScrollTop = null, iPreviewBodyScrollTop = null;
 
 function OnSwitch (eTab)
 {
@@ -75,16 +75,23 @@ function OnSwitch (eTab)
 	if (sType == 'view_tab')
 	{
 		Preview();
-		if (typeof iPreviewScrollTop == 'number')
+		if (typeof iPreviewHtmlScrollTop == 'number' || typeof iPreviewBodyScrollTop == 'number')
 		{
 			var try_num = 20;
 			var repeater = function ()
 			{
-				if (typeof iPreviewScrollTop != 'number')
-					return;
-				window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop = iPreviewScrollTop;
-				if (try_num-- > 0 && window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop != iPreviewScrollTop)
-					setTimeout(repeater, 50);
+				if (typeof iPreviewHtmlScrollTop == 'number' && iPreviewHtmlScrollTop)
+				{
+					window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop = iPreviewHtmlScrollTop;
+					if (try_num-- > 0 && window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop != iPreviewHtmlScrollTop)
+						setTimeout(repeater, 50);
+				}
+				else if (typeof iPreviewBodyScrollTop == 'number')
+				{
+					window.frames['preview_frame'].document.body.scrollTop = iPreviewBodyScrollTop;
+					if (try_num-- > 0 && window.frames['preview_frame'].document.body.scrollTop != iPreviewBodyScrollTop)
+						setTimeout(repeater, 50);
+				}
 			}
 			repeater();
 		}
@@ -145,8 +152,13 @@ function OnBeforeSwitch (eTab)
 	if (sType != 'edit_tab' && document.artform && document.artform['page[text]'] && typeof(document.artform['page[text]'].scrollTop) != 'undefined')
 		iEditorScrollTop = document.artform['page[text]'].scrollTop;
 
-	if (sType != 'view_tab' && typeof (window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop) != 'undefined')
-		iPreviewScrollTop = window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop;
+	if (sType != 'view_tab')
+	{
+		if (typeof (window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop) != 'undefined')
+			iPreviewHtmlScrollTop = window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop;
+		if (typeof (window.frames['preview_frame'].document.body.scrollTop) != 'undefined')
+			iPreviewBodyScrollTop = window.frames['preview_frame'].document.body.scrollTop;
+	}
 }
 
 function SelectTab(eTab, bAddToHistory)
