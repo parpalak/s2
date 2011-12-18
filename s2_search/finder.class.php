@@ -211,15 +211,37 @@ class s2_search_finder
 
 	protected static function save_index ()
 	{
-		$data = serialize(array(
-				self::$fulltext_index,
-				self::$excluded_words,
-				self::$keyword_1_index,
-				self::$keyword_base_index,
-				self::$keyword_n_index,
-				self::$table_of_contents,
-			));
-		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.$data);
+		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.'a:'.count(self::$fulltext_index).':{');
+		$buffer = '';
+		$length = 0;
+		foreach (self::$fulltext_index as $word => $data)
+		{
+			$chunk = serialize($word).serialize($data);
+			$length += strlen($chunk);
+			$buffer .= $chunk;
+			if ($length > 100000)
+			{
+				file_put_contents(S2_CACHE_DIR.self::index_name, $buffer, FILE_APPEND);
+				$buffer = '';
+				$length = 0;
+			}
+		}
+		file_put_contents(S2_CACHE_DIR.self::index_name, $buffer.'}'."\n", FILE_APPEND);
+		self::$fulltext_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$excluded_words)."\n", FILE_APPEND);
+		self::$excluded_words = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_1_index)."\n", FILE_APPEND);
+		self::$keyword_1_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_base_index)."\n", FILE_APPEND);
+		self::$keyword_base_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_n_index)."\n", FILE_APPEND);
+		self::$keyword_n_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$table_of_contents)."\n", FILE_APPEND);
 	}
   
 	protected static function walk_site ($parent_id, $url)
@@ -284,38 +306,44 @@ class s2_search_finder
 			self::save_index();
 			clearstatcache();
 
-			die('go_0');
+			die('go_20');
 		}
 		elseif ($state == 'step')
 		{
+			$start = microtime(1);
 			self::read_index();
 
 			$file_pointer = file_get_contents(S2_CACHE_DIR.self::buffer_pointer);
 
 			$f = fopen(S2_CACHE_DIR.self::buffer_name, 'rb');
 			fseek($f, $file_pointer);
-			$data = fgets($f);
-			fclose($f);
 
-			if (!$data)
+			do
 			{
-				self::cleanup_index();
-				self::save_index();    
-				file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
-				file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '');
-				file_put_contents(S2_CACHE_DIR.self::process_state, '');
-				die('stop');
-			}
+				$data = fgets($f);
 
-			file_put_contents(S2_CACHE_DIR.self::buffer_pointer, $file_pointer + strlen($data));
+				if (!$data)
+				{
+					fclose($f);
+					self::cleanup_index();
+					self::save_index();
+					file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
+					file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '');
+					file_put_contents(S2_CACHE_DIR.self::process_state, '');
+					die('stop');
+				}
 
-			list($chapter, $data) = explode(' ', $data, 2);
-			$data = unserialize($data);
-			self::add_to_index($chapter, $data[0], $data[1], $data[2]);
+				$file_pointer += strlen($data);
+				list($chapter, $data) = explode(' ', $data, 2);
+				$data = unserialize($data);
+				self::add_to_index($chapter, $data[0], $data[1], $data[2]);
+			} while ($start + 4.0 > microtime(1));
 
-			self::save_index();    
+			fclose($f);
+			file_put_contents(S2_CACHE_DIR.self::buffer_pointer, $file_pointer);
+			self::save_index();
 
-			die('go_'.intval(100.0*$file_pointer/filesize(S2_CACHE_DIR.self::buffer_name)));
+			die('go_'.(20 + (int)(80.0*$file_pointer/filesize(S2_CACHE_DIR.self::buffer_name))));
 		}
 
 		($hook = s2_hook('s2_search_index_end')) ? eval($hook) : null;
@@ -427,14 +455,37 @@ if (defined('DEBUG'))
 			return false;
 		}
 
-		list(
-			self::$fulltext_index,
-			self::$excluded_words,
-			self::$keyword_1_index,
-			self::$keyword_base_index,
-			self::$keyword_n_index,
-			self::$table_of_contents,
-		) = unserialize(file_get_contents(S2_CACHE_DIR.self::index_name, NULL, NULL, 8));
+		$data = file_get_contents(S2_CACHE_DIR.self::index_name);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$fulltext_index = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$excluded_words = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$keyword_1_index = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$keyword_base_index = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$keyword_n_index = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$table_of_contents = unserialize($my_data);
 
 if (defined('DEBUG'))
 	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '<br>';
