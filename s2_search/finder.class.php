@@ -196,6 +196,7 @@ class s2_search_finder
 		if ($threshold < 20)
 			$threshold = 20;
 
+		$link = &self::$fulltext_index; // for memory optimization
 		foreach (self::$fulltext_index as $word => $stat)
 		{
 			// Drop fulltext frequent or empty items
@@ -324,6 +325,7 @@ class s2_search_finder
 
 	protected static function remove_chapter ($chapter)
 	{
+		$link = &self::$fulltext_index; // for memory optimization
 		foreach (self::$fulltext_index as $word => $data)
 		{
 			if (isset($data[$chapter]))
