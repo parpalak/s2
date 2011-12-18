@@ -132,7 +132,7 @@ class s2_search_finder
 	protected static function add_word_to_fulltext ($chapter, $position, $word)
 	{
 		$word = s2_search_stemmer::stem_word($word);
-		self::$fulltext_index[$word][$chapter] = (isset(self::$fulltext_index[$word][$chapter]) ? '|' : '').$position; 
+		self::$fulltext_index[$word][$chapter] = (isset(self::$fulltext_index[$word][$chapter]) ? self::$fulltext_index[$word][$chapter].'|' : '').$position; 
 	}
 
 	protected static function add_to_index ($chapter, $title, $contents, $keywords)
@@ -205,8 +205,6 @@ class s2_search_finder
 				self::$excluded_words[$word] = 1;
 				continue;
 			}
-
-			self::$fulltext_index[$word] = $stat;
 		}
 	}
 
