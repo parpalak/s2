@@ -243,7 +243,7 @@ class s2_search_finder
 
 		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$table_of_contents)."\n", FILE_APPEND);
 	}
-  
+
 	protected static function walk_site ($parent_id, $url)
 	{
 		global $s2_db;
@@ -434,7 +434,7 @@ class s2_search_finder
 		else
 			unset(self::$table_of_contents[$chapter]);
 
-		self::save_index();    
+		self::save_index();
 	}
 
 	protected static function read_index ()
@@ -443,10 +443,6 @@ class s2_search_finder
 			return false;
 if (defined('DEBUG'))
 	$start_time = microtime(true);
-
-//		self::index();
-//if (defined('DEBUG'))
-//	echo 'Индексация: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
 		if (!is_file(S2_CACHE_DIR.self::index_name))
 		{
