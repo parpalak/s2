@@ -132,7 +132,7 @@ class s2_search_finder
 	protected static function add_word_to_fulltext ($chapter, $position, $word)
 	{
 		$word = s2_search_stemmer::stem_word($word);
-		self::$fulltext_index[$word][$chapter] = (isset(self::$fulltext_index[$word][$chapter]) ? self::$fulltext_index[$word][$chapter].'|' : '').$position; 
+		self::$fulltext_index[$word][$chapter] = (isset(self::$fulltext_index[$word][$chapter]) ? self::$fulltext_index[$word][$chapter].'|' : '').base_convert($position, 10, 36);
 	}
 
 	protected static function add_to_index ($chapter, $title, $contents, $keywords)
@@ -553,7 +553,7 @@ if (defined('DEBUG'))
 					$entries = explode('|', $entries);
 					// Remember chapters and positions
 					foreach ($entries as $position)
-						$curr_positions[$chapter][] = $position;
+						$curr_positions[$chapter][] = base_convert($position, 36, 10);
 
 					if (!isset (self::$keys[$chapter][$word]))
 						self::$keys[$chapter][$word] = count($entries) * $word_weight;
