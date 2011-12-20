@@ -640,13 +640,21 @@ if (defined('DEBUG'))
 			$stems = $full_words = array();
 			foreach (array_keys(self::$keys[$id]) as $word)
 				// Excluding neighbours weight
-				if (0 !== strpos($word, '*n_'))
+				if (0 !== strpos($word, '*n_') && !isset(self::$excluded_words[$word]))
 					$full_words[$stems[] = s2_search_stemmer::stem_word($word)] = $word;
 
 			// Text cleanup
 			$string = str_replace("\r", '', $string);
+			$string = str_replace('&nbsp;', ' ', $string);
+			$string = str_replace('&mdash;', '—', $string);
+			$string = str_replace('&ndash;', '–', $string);
+			$string = str_replace('&laquo;', '«', $string);
+			$string = str_replace('&laquo;', '»', $string);
 			$string = str_replace('<br>', "<br>\r", $string);
 			$string = str_replace('<br />', "<br />\r", $string);
+			$string = str_replace('</h2>', "</h2>\r", $string);
+			$string = str_replace('</h3>', "</h3>\r", $string);
+			$string = str_replace('</h4>', "</h4>\r", $string);
 			$string = str_replace('</p>', "</p>\r", $string);
 			$string = str_replace('</code>', "</code>\r", $string);
 			$string = str_replace('</ol>', "</ol>\r", $string);
@@ -662,6 +670,7 @@ if (defined('DEBUG'))
 			for ($i = count($lines); $i-- ;)
 			{
 				// Check every sentence for the query words
+				// Modifier S works poorly on cyrillic :(
 				preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $lines[$i], $matches);
 				foreach ($matches[0] as $k => $word)
 				{
