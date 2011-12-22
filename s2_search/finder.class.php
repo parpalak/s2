@@ -452,6 +452,8 @@ if (defined('DEBUG'))
 		}
 
 		$data = file_get_contents(S2_CACHE_DIR.self::index_name);
+if (defined('DEBUG'))
+	echo 'Чтение файла индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
@@ -484,7 +486,7 @@ if (defined('DEBUG'))
 		self::$table_of_contents = unserialize($my_data);
 
 if (defined('DEBUG'))
-	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '<br>';
+	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 	}
 
@@ -512,19 +514,7 @@ if (defined('DEBUG'))
 
 	protected static function neighbour_weight ($distance)
 	{
-		if ($distance == 1)
-			return 11;
-
-		if ($distance == 2)
-			return 9;
-
-		if ($distance == 3)
-			return 7;
-
-		if ($distance == 4)
-			return 4;
-
-		return 0;
+		return max(13 - 2*$distance, 2);
 	}
 
 	protected static function find_fulltext ($words)
@@ -547,7 +537,6 @@ if (defined('DEBUG'))
 			{
 				if (!isset(self::$fulltext_index[$search_word]))
 					continue;
-
 				foreach (self::$fulltext_index[$search_word] as $chapter => $entries)
 				{
 					$entries = explode('|', $entries);
@@ -664,6 +653,12 @@ if (defined('DEBUG'))
 			$string = str_replace('ё', 'е', $string);
 			$lines = preg_split('#((?<=[\.?!:;])[ \n\t]+|\r)#s', $string);
 			$reserved_line = $lines[0].(isset($lines[1]) ? ' '.$lines[1] : '');
+
+			if (empty($full_words))
+			{
+				$output[$id]['descr'] = $reserved_line;
+				continue;
+			}
 
 			// Remove the sentences without stems
 			$found_words = $found_stems_lines = $lines_weight = array();
@@ -818,7 +813,7 @@ if (defined('DEBUG'))
 		$cleaned_search_string = implode(' ', $raw_words);
 
 if (defined('DEBUG'))
-	echo 'Чистка строки: ', - $start_time + ($start_time = microtime(true)), '<br>';
+	echo 'Чистка строки: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		if (count($raw_words) > 1)
 			self::find_spaced_keywords($cleaned_search_string);
@@ -859,7 +854,7 @@ if (defined('DEBUG'))
 	echo '<pre>';
 	print_r(self::$keys);
 	echo '</pre>';
-	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '<br>';
+	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 }
 		$page = array();
 
@@ -895,10 +890,10 @@ if (defined('DEBUG'))
 			}
 
 if (defined('DEBUG'))
-	echo 'Страница: ', - $start_time + ($start_time = microtime(true)), '<br>';
+	echo 'Страница: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 			$output = self::get_snippets($output);
 if (defined('DEBUG'))
-	echo 'Сниппеты: ', - $start_time + ($start_time = microtime(true)), '<br>';
+	echo 'Сниппеты: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 			foreach ($output as $chapter_info)
 				echo '<p>'.implode('<br />', $chapter_info).'<p>';
