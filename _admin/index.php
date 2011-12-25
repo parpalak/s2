@@ -181,7 +181,7 @@ $padding = 2.5;
 
 ($hook = s2_hook('ai_pre_admin')) ? eval($hook) : null;
 
-if ($s2_user['view_hidden'])
+if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 {
 
 ?>
