@@ -1352,7 +1352,7 @@ function InsertParagraph (sType)
 	{
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
 	}
-	var sText = eTextarea.value;
+	var sText = eTextarea.value.replace(/(\r\n|\r|\n)/g, '\n');
 
 	var start_pos = sText.lastIndexOf('\n\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
 	if (start_pos)
