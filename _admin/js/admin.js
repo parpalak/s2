@@ -1352,21 +1352,32 @@ function InsertParagraph (sType)
 	{
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
 	}
-	var sText = eTextarea.value.replace(/(\r\n|\r|\n)/g, '\n');
+	var sText = eTextarea.value;
 
-	var start_pos = sText.lastIndexOf('\n\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
+	var start_pos = sText.lastIndexOf('\r\n\r\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
 	if (start_pos)
-		start_pos++;
+		start_pos += 3;
+	else
+	{
+		start_pos = sText.lastIndexOf('\n\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
+		if (start_pos)
+			start_pos++;
+	}
 
 	if (selection.start < start_pos)
+	{
 		// Ignore empty line
+		set_selection(eTextarea, selection.start, selection.start);
 		return false;
+	}
 
-	var end_pos = sText.indexOf('\n\n', selection.start);
+	var end_pos = sText.indexOf('\r\n\r\n', selection.start);
+	if (end_pos == -1)
+		end_pos = sText.indexOf('\n\n', selection.start);
 	if (end_pos == -1)
 		end_pos = sText.length;
 
-	var sEnd = sText.substr(start_pos, end_pos - start_pos);
+	var sEnd = sText.substring(start_pos, end_pos);
 	var old_length = sEnd.length;
 	var start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
 
@@ -1378,7 +1389,7 @@ function InsertParagraph (sType)
 	// Move cursor left if needed to put inside the tag
 	new_cursor = Math.min(end_pos + (sEnd.length - old_length) - sCloseTag.length, new_cursor);
 
-	eTextarea.value = sText.substr(0, start_pos) + sEnd + sText.substr(end_pos);
+	eTextarea.value = sText.substring(0, start_pos) + sEnd + sText.substring(end_pos);
 
 	set_selection(eTextarea, new_cursor, new_cursor);
 
