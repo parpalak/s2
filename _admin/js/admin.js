@@ -1297,8 +1297,8 @@ function set_selection (e, start_pos, end_pos)
 
 function SmartParagraphs (sText)
 {
-	sText = str_replace ("\r", '', sText);
-	var asParagraphs = sText.split("\n\n"); // split on empty lines
+	sText = sText.replace(/(\r\n|\r|\n)/g, '\n');
+	var asParagraphs = sText.split(/\n{2,}/); // split on empty lines
 
 	for (var i = asParagraphs.length; i-- ;)
 	{
