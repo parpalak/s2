@@ -1343,7 +1343,7 @@ function InsertParagraph (sType)
 		selection = get_selection(eTextarea),
 		sText = eTextarea.value;
 
-	if (sType == 'h2' || sType == 'h3' || sType == 'h4')
+	if (sType == 'h2' || sType == 'h3' || sType == 'h4' || sType == 'blockquote')
 		var sOpenTag = '<' + sType + '>', sCloseTag = '</' + sType + '>';
 	else
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
@@ -1384,12 +1384,12 @@ function InsertParagraph (sType)
 
 		var sEnd = sText.substring(start_pos, end_pos);
 		var old_length = sEnd.length;
-		var start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
+		var start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
 
 		// Move cursor right if needed to put inside the tag
 		var new_cursor = Math.max(sOpenTag.length + start_pos, start_len_diff + selection.start);
 
-		sEnd = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?([\s\S]*?)(?:<\/(?:p|h[2-4])>)?[ ]*$/, sOpenTag + '$1' + sCloseTag);
+		sEnd = sEnd.replace(/(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)?([\s\S]*?)(?:<\/(?:p|blockquote|h[2-4])>)?[ ]*$/, sOpenTag + '$1' + sCloseTag);
 
 		// Move cursor left if needed to put inside the tag
 		new_cursor = Math.min(end_pos + (sEnd.length - old_length) - sCloseTag.length, new_cursor);

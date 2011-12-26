@@ -233,15 +233,14 @@ function s2_toolbar ()
 	<img class="i" src="i/1.gif" alt="<?php echo $lang_admin['Italic']; ?>" onclick="return TagSelection('em');" />
 	<img class="strike" src="i/1.gif" alt="<?php echo $lang_admin['Strike']; ?>" onclick="return TagSelection('s');" />
 	<img class="separator" src="i/1.gif" alt="" />
-	<img class="a" src="i/1.gif" alt="<?php echo $lang_admin['Link']; ?>" onclick="return InsertTag('<a href=&quot;&quot;>', '</a>');" />
-	<img class="quote" src="i/1.gif" alt="<?php echo $lang_admin['Quote']; ?>" onclick="return TagSelection('blockquote');" />
-	<img class="img" src="i/1.gif" alt="<?php echo $lang_admin['Image']; ?>" onclick="return GetImage();" />
-	<img class="separator" src="i/1.gif" alt="" />
 	<img class="big" src="i/1.gif" alt="<?php echo $lang_admin['BIG']; ?>" onclick="return TagSelection('big');" />
 	<img class="small" src="i/1.gif" alt="<?php echo $lang_admin['SMALL']; ?>" onclick="return TagSelection('small');" />
 	<img class="separator" src="i/1.gif" alt="" />
 	<img class="sup" src="i/1.gif" alt="<?php echo $lang_admin['SUP']; ?>" onclick="return TagSelection('sup');" />
 	<img class="sub" src="i/1.gif" alt="<?php echo $lang_admin['SUB']; ?>" onclick="return TagSelection('sub');" />
+	<img class="separator" src="i/1.gif" alt="" />
+	<img class="a" src="i/1.gif" alt="<?php echo $lang_admin['Link']; ?>" onclick="return InsertTag('<a href=&quot;&quot;>', '</a>');" />
+	<img class="img" src="i/1.gif" alt="<?php echo $lang_admin['Image']; ?>" onclick="return GetImage();" />
 	<img class="separator" src="i/1.gif" alt="" />
 	<img class="h2" src="i/1.gif" alt="<?php echo $lang_admin['Header 2']; ?>" onclick="return InsertParagraph('h2');" />
 	<img class="h3" src="i/1.gif" alt="<?php echo $lang_admin['Header 3']; ?>" onclick="return InsertParagraph('h3');" />
@@ -251,6 +250,8 @@ function s2_toolbar ()
 	<img class="center" src="i/1.gif" alt="<?php echo $lang_admin['Center']; ?>" onclick="return InsertParagraph('center');" />
 	<img class="right" src="i/1.gif" alt="<?php echo $lang_admin['Right']; ?>" onclick="return InsertParagraph('right');" />
 	<img class="justify" src="i/1.gif" alt="<?php echo $lang_admin['Justify']; ?>" onclick="return InsertParagraph('justify');" />
+	<img class="separator" src="i/1.gif" alt="" />
+	<img class="quote" src="i/1.gif" alt="<?php echo $lang_admin['Quote']; ?>" onclick="return InsertParagraph('blockquote');" />
 	<img class="separator" src="i/1.gif" alt="" />
 	<img class="ul" src="i/1.gif" alt="<?php echo $lang_admin['UL']; ?>" onclick="return TagSelection('ul');" />
 	<img class="ol" src="i/1.gif" alt="<?php echo $lang_admin['OL']; ?>" onclick="return TagSelection('ol');" />
