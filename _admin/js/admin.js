@@ -392,7 +392,7 @@ function CheckPage ()
 {
 	if (document.location.hash != cur_page)
 	{
-		var new_page = document.location.hash.substr(1)
+		var new_page = document.location.hash.substring(1)
 		if (new_page.indexOf('-') != -1)
 			SelectTab(document.getElementById(new_page.split('-')[0] + '_tab'), false);
 		SelectTab(document.getElementById(new_page + '_tab'), true);
@@ -1237,7 +1237,7 @@ function get_selection (e)
 	if ('selectionStart' in e)
 	{
 		var l = e.selectionEnd - e.selectionStart;
-		return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr(e.selectionStart, l) };
+		return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substring(e.selectionStart, e.selectionEnd) };
 	}
 	// IE
 	else if (document.selection)
@@ -1339,59 +1339,65 @@ function SmartParagraphs (sText)
 
 function InsertParagraph (sType)
 {
-	var eTextarea = document.artform['page[text]'];
-	var selection = get_selection(eTextarea);
-	if (selection.length)
-		return false;
+	var eTextarea = document.artform['page[text]'],
+		selection = get_selection(eTextarea),
+		sText = eTextarea.value;
 
 	if (sType == 'h2' || sType == 'h3' || sType == 'h4')
-	{
 		var sOpenTag = '<' + sType + '>', sCloseTag = '</' + sType + '>';
-	}
 	else
-	{
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
-	}
-	var sText = eTextarea.value;
 
-	var start_pos = sText.lastIndexOf('\r\n\r\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
-	if (start_pos)
-		start_pos += 3;
+	if (selection.length)
+	{
+		var replace_str = sOpenTag + selection.text + sCloseTag,
+			start_pos = selection.start,
+			end_pos = start_pos + replace_str.length;
+
+		eTextarea.value = sText.substring(0, start_pos) + replace_str + sText.substring(selection.end);
+		set_selection(eTextarea, start_pos, end_pos);
+	}
 	else
 	{
-		start_pos = sText.lastIndexOf('\n\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
+		var start_pos = sText.lastIndexOf('\r\n\r\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
 		if (start_pos)
-			start_pos++;
+			start_pos += 3;
+		else
+		{
+			start_pos = sText.lastIndexOf('\n\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
+			if (start_pos)
+				start_pos++;
+		}
+
+		if (selection.start < start_pos)
+		{
+			// Ignore empty line
+			set_selection(eTextarea, selection.start, selection.start);
+			return false;
+		}
+
+		var end_pos = sText.indexOf('\r\n\r\n', selection.start);
+		if (end_pos == -1)
+			end_pos = sText.indexOf('\n\n', selection.start);
+		if (end_pos == -1)
+			end_pos = sText.length;
+
+		var sEnd = sText.substring(start_pos, end_pos);
+		var old_length = sEnd.length;
+		var start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
+
+		// Move cursor right if needed to put inside the tag
+		var new_cursor = Math.max(sOpenTag.length + start_pos, start_len_diff + selection.start);
+
+		sEnd = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?([\s\S]*?)(?:<\/(?:p|h[2-4])>)?[ ]*$/, sOpenTag + '$1' + sCloseTag);
+
+		// Move cursor left if needed to put inside the tag
+		new_cursor = Math.min(end_pos + (sEnd.length - old_length) - sCloseTag.length, new_cursor);
+
+		eTextarea.value = sText.substring(0, start_pos) + sEnd + sText.substring(end_pos);
+
+		set_selection(eTextarea, new_cursor, new_cursor);
 	}
-
-	if (selection.start < start_pos)
-	{
-		// Ignore empty line
-		set_selection(eTextarea, selection.start, selection.start);
-		return false;
-	}
-
-	var end_pos = sText.indexOf('\r\n\r\n', selection.start);
-	if (end_pos == -1)
-		end_pos = sText.indexOf('\n\n', selection.start);
-	if (end_pos == -1)
-		end_pos = sText.length;
-
-	var sEnd = sText.substring(start_pos, end_pos);
-	var old_length = sEnd.length;
-	var start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
-
-	// Move cursor right if needed to put inside the tag
-	var new_cursor = Math.max(sOpenTag.length + start_pos, start_len_diff + selection.start);
-
-	sEnd = sEnd.replace(/(?:[ ]*<(?:p|h[2-4])[^>]*>)?([\s\S]*?)(?:<\/(?:p|h[2-4])>)?[ ]*$/, sOpenTag + '$1' + sCloseTag);
-
-	// Move cursor left if needed to put inside the tag
-	new_cursor = Math.min(end_pos + (sEnd.length - old_length) - sCloseTag.length, new_cursor);
-
-	eTextarea.value = sText.substring(0, start_pos) + sEnd + sText.substring(end_pos);
-
-	set_selection(eTextarea, new_cursor, new_cursor);
 
 	return false;
 }
@@ -1405,7 +1411,7 @@ function InsertTag (sOpenTag, sCloseTag, selection)
 	var replace_str = sOpenTag + selection.text + sCloseTag;
 	var start_pos = selection.start;
 	var end_pos = start_pos + replace_str.length;
-	eTextarea.value = eTextarea.value.substr(0, start_pos) + replace_str + eTextarea.value.substr(selection.end, eTextarea.value.length);
+	eTextarea.value = eTextarea.value.substring(0, start_pos) + replace_str + eTextarea.value.substring(selection.end);
 	set_selection(eTextarea, start_pos, end_pos);
 
 	return false;
