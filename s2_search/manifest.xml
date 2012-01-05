@@ -113,10 +113,14 @@ if ($action == 's2_search_makeindex')
 
 	require $ext_info['path'].'/stemmer.class.php';
 	require $ext_info['path'].'/finder.class.php';
+	require $ext_info['path'].'/fetcher.class.php';
+
+	$fetcher = new s2_search_fetcher();
+	$finder = new s2_search_finder($fetcher);
 	if (!$chapter)
-		s2_search_finder::index();
+		$finder->index();
 	else
-		s2_search_finder::refresh($chapter);
+		$finder->refresh($chapter);
 }
 		]]></hook>
 

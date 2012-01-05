@@ -15,6 +15,8 @@
 
 class s2_search_finder
 {
+	private $fetcher;
+
 	const KEYWORD_WEIGHT = 30;
 	const TITLE_WEIGHT = 20;
 
@@ -31,6 +33,11 @@ class s2_search_finder
 	protected static $table_of_contents = array();
 
 	protected static $keys = array();
+
+	function __construct(s2_search_fetcher $fetcher)
+	{
+		$this->fetcher = $fetcher;
+	}
 
 	protected static function filter_input ($contents)
 	{
@@ -180,7 +187,7 @@ class s2_search_finder
 		}
 	}
 
-	protected static function buffer_chapter ($chapter, $title, $contents, $keywords)
+	public static function buffer_chapter ($chapter, $title, $contents, $keywords, $description, $time, $url)
 	{
 		$str = $chapter.' '.serialize(array(
 			self::htmlstr_to_str($title),
@@ -188,6 +195,13 @@ class s2_search_finder
 			$keywords
 			))."\n";
 		file_put_contents(S2_CACHE_DIR.self::buffer_name, $str, FILE_APPEND);
+
+		self::$table_of_contents[$chapter] = array(
+			'title'		=> $title,
+			'descr'		=> $description,
+			'time'		=> $time,
+			'url'		=> $url,
+		);
 	}
 
 	protected static function cleanup_index ()
@@ -244,45 +258,7 @@ class s2_search_finder
 		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$table_of_contents)."\n", FILE_APPEND);
 	}
 
-	protected static function walk_site ($parent_id, $url)
-	{
-		global $s2_db;
-
-		$subquery = array(
-			'SELECT'	=> 'count(*)',
-			'FROM'		=> 'articles AS a2',
-			'WHERE'		=> 'a2.parent_id = a.id',
-			'LIMIT'		=> '1'
-		);
-		$child_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
-
-		$query = array(
-			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
-			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'parent_id = '.$parent_id.' AND published = 1',
-		);
-		($hook = s2_hook('s2_search_walk_site_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		while ($article = $s2_db->fetch_assoc($result))
-		{
-			self::buffer_chapter($article['id'], $article['title'], $article['pagetext'], $article['meta_keys']);
-			self::$table_of_contents[$article['id']] = array(
-				'title'		=> $article['title'],
-				'descr'		=> $article['meta_desc'],
-				'time'		=> $article['create_time'],
-				'url'		=> $url.urlencode($article['url']).($article['is_children'] ? '/' : ''),
-			);
-
-			$article['pagetext'] = '';
-
-			self::walk_site($article['id'], $url.urlencode($article['url']).'/');
-		}
-
-		($hook = s2_hook('s2_search_walk_site_end')) ? eval($hook) : null;
-	}
-
-	public static function index ()
+	public function index ()
 	{
 		self::$fulltext_index = array();
 		self::$excluded_words = array();
@@ -298,9 +274,8 @@ class s2_search_finder
 		{
 			file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
 			file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '0');
-			self::walk_site(0, '');
 
-			($hook = s2_hook('s2_search_index_after_walk')) ? eval($hook) : null;
+			$this->fetcher->process($this);
 
 			file_put_contents(S2_CACHE_DIR.self::process_state, 'step');
 			self::save_index();
@@ -346,8 +321,6 @@ class s2_search_finder
 			die('go_'.(20 + (int)(80.0*$file_pointer/filesize(S2_CACHE_DIR.self::buffer_name))));
 		}
 
-		($hook = s2_hook('s2_search_index_end')) ? eval($hook) : null;
-
 		file_put_contents(S2_CACHE_DIR.self::process_state, '');
 	}
 
@@ -364,52 +337,6 @@ class s2_search_finder
 		}
 	}
 
-	protected static function get_chapter ($chapter)
-	{
-		global $s2_db;
-
-		$data = ($hook = s2_hook('s2_search_get_chapter_start')) ? eval($hook) : null;
-		if (is_array($data))
-			return $data;
-
-		$subquery = array(
-			'SELECT'	=> 'count(*)',
-			'FROM'		=> 'articles AS a2',
-			'WHERE'		=> 'a2.parent_id = a.id',
-			'LIMIT'		=> '1'
-		);
-		$child_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
-
-		$query = array(
-			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
-			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'id = \''.$s2_db->escape($chapter).'\' AND published = 1',
-		);
-		($hook = s2_hook('s2_search_get_chapter_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		$article = $s2_db->fetch_assoc($result);
-		if (!$article)
-			return array();
-
-		$parent_path = s2_path_from_id($article['parent_id'], true);
-		if ($parent_path === false)
-			return array();
-
-		return array(
-			$article['title'],
-			$article['pagetext'],
-			$article['meta_keys'],
-			array(
-				'title'		=> $article['title'],
-				'descr'		=> $article['meta_desc'],
-				'time'		=> $article['create_time'],
-				'url'		=> $parent_path.'/'.urlencode($article['url']).($article['url'] && $article['is_children'] ? '/' : ''),
-			)
-		);
-
-	}
-
 	public static function refresh ($chapter)
 	{
 		self::$fulltext_index = array();
@@ -422,9 +349,7 @@ class s2_search_finder
 		self::read_index();
 		self::remove_chapter($chapter);
 
-		$data = ($hook = s2_hook('s2_search_refresh_get_chapter')) ? eval($hook) : null;
-		if (empty($data))
-			$data = self::get_chapter($chapter);
+		$data = $this->fetcher->chapter($chapter);
 
 		if (!empty($data))
 		{
@@ -594,34 +519,11 @@ if (defined('DEBUG'))
 		return implode('/', $a);
 	}
 
-	protected static function get_snippets ($output)
+	protected function get_snippets ($output)
 	{
-		global $s2_db;
-
 		$ids = array_keys($output);
-		$articles = array();
 
-		$result = ($hook = s2_hook('s2_search_get_snippets_start')) ? eval($hook) : null;
-		if ($result)
-			return $output;
-
-		foreach ($ids as $k => $v)
-			$ids[$k] = (int) $v;
-
-		if (count($ids))
-		{
-			// Obtaining articles text
-			$query = array(
-				'SELECT'	=> 'id, pagetext',
-				'FROM'		=> 'articles AS a',
-				'WHERE'		=> 'id IN ('.implode(', ', $ids).') AND published = 1',
-			);
-			($hook = s2_hook('s2_search_get_chapter_pre_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-			while ($article = $s2_db->fetch_assoc($result))
-				$articles[$article['id']] = $article['pagetext'];
-		}
+		$articles = $this->fetcher->texts($ids);
 
 		foreach ($articles as $id => $string)
 		{
@@ -798,7 +700,7 @@ if (defined('DEBUG'))
 		return $many;
 	}
 
-	public static function find ($search_string, $cur_page)
+	public function find ($search_string, $cur_page)
 	{
 		global $lang_s2_search;
 
@@ -891,7 +793,7 @@ if (defined('DEBUG'))
 
 if (defined('DEBUG'))
 	echo 'Страница: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
-			$output = self::get_snippets($output);
+			$output = $this->get_snippets($output);
 if (defined('DEBUG'))
 	echo 'Сниппеты: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 

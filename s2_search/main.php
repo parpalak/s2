@@ -13,9 +13,6 @@ $s2_search_page = isset($_GET['p']) ? (int) $_GET['p'] : 1;
 
 $template = s2_get_template('service.php');
 
-require $ext_info['path'].'/stemmer.class.php';
-require $ext_info['path'].'/finder.class.php';
-
 ob_start();
 
 ?>
@@ -31,7 +28,16 @@ ob_start();
 <?php
 
 if ($s2_search_query !== '')
-	$page = s2_search_finder::find($s2_search_query, $s2_search_page);
+{
+	require $ext_info['path'].'/stemmer.class.php';
+	require $ext_info['path'].'/finder.class.php';
+	require $ext_info['path'].'/fetcher.class.php';
+
+	$fetcher = new s2_search_fetcher();
+	$finder = new s2_search_finder($fetcher);
+
+	$page = $finder->find($s2_search_query, $s2_search_page);
+}
 
 ?>
 </div>
