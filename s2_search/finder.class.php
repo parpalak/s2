@@ -516,18 +516,9 @@ class s2_search_finder extends s2_search_worker
 		}
 	}
 
-	protected static function display_url ($s)
+	public function snippets ($ids)
 	{
-		$a = explode('/', $s);
-		foreach ($a as $k => $v)
-			$a[$k] = urldecode($v);
-
-		return implode('/', $a);
-	}
-
-	protected function get_snippets ($output)
-	{
-		$ids = array_keys($output);
+		$snippets = array();
 
 		$articles = $this->fetcher->texts($ids);
 
@@ -564,7 +555,9 @@ class s2_search_finder extends s2_search_worker
 
 			if (empty($full_words))
 			{
-				$output[$id]['descr'] = $reserved_line;
+				$snippets[$id]['snippet'] = '';
+				$snippets[$id]['rel'] = 0;
+				$snippets[$id]['start_text'] = $reserved_line;
 				continue;
 			}
 
@@ -680,33 +673,16 @@ class s2_search_finder extends s2_search_worker
 			}
 			$snippet_str = str_replace('.... ', '... ', $snippet_str);
 
+			$snippets[$id]['snippet'] = $snippet_str;
+			$snippets[$id]['rel'] = count($found_stems) * 1.0 / count($stems);
+			$snippets[$id]['start_text'] = $reserved_line;
 
-			if ((count($found_stems) * 1.0 / count($stems) > 0.6))
-				$output[$id]['descr'] = $snippet_str;
-			elseif(!$output[$id]['descr'])
-				$output[$id]['descr'] = $reserved_line;
 		}
 
-		return $output;
+		return $snippets;
 	}
 
-	protected static function s2_search_rus_plural ($number, $many, $one, $two)
-	{
-		$number = abs((int) $number);
-
-		if ($number % 100 == 1 || $number % 100 > 20 && $number % 10 == 1)
-			return $one;
-		if ($number % 100 == 2 || $number % 100 > 20 && $number % 10 == 2)
-			return $two;
-		if ($number % 100 == 3 || $number % 100 > 20 && $number % 10 == 3)
-			return $two;
-		if ($number % 100 == 4 || $number % 100 > 20 && $number % 10 == 4)
-			return $two;
-
-		return $many;
-	}
-
-	public function find ($search_string, $cur_page)
+	public function find ($search_string)
 	{
 		global $lang_s2_search;
 
@@ -743,78 +719,29 @@ if (defined('DEBUG'))
 
 		// Determine relevance
 
-		// Now keys are chapters and values are arrays "word => weight".
 if (defined('DEBUG') && defined('MORE_DEBUG'))
 {
 	echo "<pre>";
 	print_r($this->keys);
 	echo '</pre>';
 }
-		$results = array();
+		// Now keys are chapters and values are arrays "word => weight".
+		$weights = array();
 		foreach ($this->keys as $chapter => $stat)
-			$results[$chapter] = array_sum($stat);
+			$weights[$chapter] = array_sum($stat);
 
 		// Order by weight
-		arsort($results);
+		arsort($weights);
 
 if (defined('DEBUG'))
 {
 	echo '<pre>';
 	print_r($this->keys);
+	print_r($weights);
 	echo '</pre>';
 	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 }
-		$page = array();
-
-		$item_num = count($results);
-		if ($item_num)
-		{
-			if (substr(S2_LANGUAGE, 0, 7) == 'Russian')
-				// Well... Not pretty much. But it's nice to see phrases in human language.
-				// Feel free to suggest the code for other languages.
-				$result_num_str = sprintf(self::s2_search_rus_plural($item_num, 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $item_num);
-			else
-				$result_num_str = sprintf($lang_s2_search['Found'], $item_num);
-			echo '<p>'.$result_num_str.'</p>';
-
-			$items_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10.0;
-			$total_pages = ceil(1.0 * $item_num / $items_per_page);
-			if ($cur_page < 1 || $cur_page > $total_pages)
-				$cur_page = 1;
-
-			$i = 0;
-			$output = array();
-			foreach ($results as $chapter => $weight)
-			{
-				$i++;
-				if ($i <= ($cur_page - 1) * $items_per_page)
-					continue;
-				if ($i > $cur_page * $items_per_page)
-					break;
-
-				$output[$chapter]['title'] = '<a class="title" href="'.s2_link($this->table_of_contents[$chapter]['url']).'">'.s2_htmlencode($this->table_of_contents[$chapter]['title']).'</a>';
-				$output[$chapter]['descr'] = trim($this->table_of_contents[$chapter]['descr']);
-				$output[$chapter]['info'] = '<small><a class="url" href="'.s2_link($this->table_of_contents[$chapter]['url']).'">'.self::display_url(s2_abs_link($this->table_of_contents[$chapter]['url'])).'</a>'.($this->table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date($this->table_of_contents[$chapter]['time']) : '').'</small>';
-			}
-
-if (defined('DEBUG'))
-	echo 'Страница: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
-			$output = $this->get_snippets($output);
-if (defined('DEBUG'))
-	echo 'Сниппеты: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
-
-			foreach ($output as $chapter_info)
-				echo '<p>'.implode('<br />', $chapter_info).'<p>';
-
-			$link_nav = array();
-			echo s2_paging($cur_page, $total_pages, s2_link('/search', array('q='.str_replace('%', '%%', urlencode($search_string)), 'p=%d')), $link_nav);
-			foreach ($link_nav as $rel => $href)
-				$page['link_navigation'][$rel] = $href;
-		}
-		else
-			echo '<p>'.$lang_s2_search['Not found'].'</p>';
-
-		return $page;
+		return array($weights, $this->table_of_contents);
 	}
 }
 
