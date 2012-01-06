@@ -59,7 +59,7 @@ if ($s2_search_query !== '')
 	require $ext_info['path'].'/fetcher.class.php';
 
 	$fetcher = new s2_search_custom_fetcher();
-	$finder = new s2_search_finder(S2_CACHE_DIR, $fetcher);
+	$finder = new s2_search_finder(S2_CACHE_DIR);
 
 	list($weights, $toc) = $finder->find($s2_search_query);
 
@@ -102,7 +102,7 @@ if (defined('DEBUG'))
 
 if (defined('DEBUG')) echo 'Страница: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
-		$snippets = $finder->snippets(array_keys($output));
+		$snippets = $finder->snippets(array_keys($output), $fetcher);
 
 if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 

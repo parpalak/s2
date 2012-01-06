@@ -24,13 +24,11 @@ abstract class s2_search_worker
 	protected $keyword_n_index = array();
 	protected $table_of_contents = array();
 
-	protected $fetcher;
 	protected $dir;
 
-	function __construct($dir, s2_search_fetcher $fetcher = null)
+	function __construct($dir)
 	{
 		$this->dir = $dir;
-		$this->fetcher = $fetcher;
 	}
 
 	protected function read_index ()
@@ -130,9 +128,11 @@ class s2_search_indexer extends s2_search_worker
 	const KEYWORD_WEIGHT = 30;
 	const TITLE_WEIGHT = 20;
 
+	protected $fetcher;
+
 	function __construct($dir, s2_search_fetcher $fetcher)
 	{
-		$this->dir = $dir;
+		parent::__construct($dir);
 		$this->fetcher = $fetcher;
 	}
 
@@ -516,11 +516,11 @@ class s2_search_finder extends s2_search_worker
 		}
 	}
 
-	public function snippets ($ids)
+	public function snippets (array $ids, s2_search_fetcher $fetcher)
 	{
 		$snippets = array();
 
-		$articles = $this->fetcher->texts($ids);
+		$articles = $fetcher->texts($ids);
 
 		foreach ($articles as $id => $string)
 		{
@@ -749,7 +749,7 @@ class s2_search_title_finder extends s2_search_worker
 {
 	function __construct($dir)
 	{
-		$this->dir = $dir;
+		parent::__construct($dir);
 		$this->read_index();
 	}
 
