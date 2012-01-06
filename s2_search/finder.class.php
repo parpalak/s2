@@ -180,13 +180,13 @@ class s2_search_indexer extends s2_search_worker
 
 	protected function add_to_index ($chapter, $title, $contents, $keywords)
 	{
-		// Processing keywords
-		foreach (explode(',', $keywords) as $item)
-			$this->add_keyword_to_index($chapter, trim($item), self::KEYWORD_WEIGHT);
-
 		// Processing title
 		foreach (self::str_to_array($title) as $word)
 			$this->add_keyword_to_index($chapter, trim($word), self::TITLE_WEIGHT);
+
+		// Processing keywords
+		foreach (explode(',', $keywords) as $item)
+			$this->add_keyword_to_index($chapter, trim($item), self::KEYWORD_WEIGHT);
 
 		// Fulltext index
 		$words = self::str_to_array($title.' '.str_replace(', ', ' ', $keywords).' '.$contents);
