@@ -22,7 +22,7 @@ require 'finder.class.php';
 
 if ($s2_search_query !== '')
 {
-	$finder = new s2_search_title_finder();
+	$finder = new s2_search_title_finder(S2_CACHE_DIR);
 	$toc = $finder->find($s2_search_query);
 
 	foreach ($toc as $chapter => $chapter_info)

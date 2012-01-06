@@ -25,9 +25,11 @@ abstract class s2_search_worker
 	protected $table_of_contents = array();
 
 	protected $fetcher;
+	protected $dir;
 
-	function __construct(s2_search_fetcher $fetcher = null)
+	function __construct($dir, s2_search_fetcher $fetcher = null)
 	{
+		$this->dir = $dir;
 		$this->fetcher = $fetcher;
 	}
 
@@ -38,14 +40,14 @@ abstract class s2_search_worker
 if (defined('DEBUG'))
 	$start_time = microtime(true);
 
-		if (!is_file(S2_CACHE_DIR.self::index_name))
+		if (!is_file($this->dir.self::index_name))
 		{
 			if (defined('DEBUG'))
 				echo 'Can\'t find index file. Try to rebuild search index.';
 			return false;
 		}
 
-		$data = file_get_contents(S2_CACHE_DIR.self::index_name);
+		$data = file_get_contents($this->dir.self::index_name);
 if (defined('DEBUG'))
 	echo 'Чтение файла индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
@@ -85,7 +87,7 @@ if (defined('DEBUG'))
 
 	protected function save_index ()
 	{
-		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.'a:'.count($this->fulltext_index).':{');
+		file_put_contents($this->dir.self::index_name, '<?php //'.'a:'.count($this->fulltext_index).':{');
 		$buffer = '';
 		$length = 0;
 		foreach ($this->fulltext_index as $word => $data)
@@ -95,27 +97,27 @@ if (defined('DEBUG'))
 			$buffer .= $chunk;
 			if ($length > 100000)
 			{
-				file_put_contents(S2_CACHE_DIR.self::index_name, $buffer, FILE_APPEND);
+				file_put_contents($this->dir.self::index_name, $buffer, FILE_APPEND);
 				$buffer = '';
 				$length = 0;
 			}
 		}
-		file_put_contents(S2_CACHE_DIR.self::index_name, $buffer.'}'."\n", FILE_APPEND);
+		file_put_contents($this->dir.self::index_name, $buffer.'}'."\n", FILE_APPEND);
 		$this->fulltext_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->excluded_words)."\n", FILE_APPEND);
+		file_put_contents($this->dir.self::index_name, '      //'.serialize($this->excluded_words)."\n", FILE_APPEND);
 		$this->excluded_words = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->keyword_1_index)."\n", FILE_APPEND);
+		file_put_contents($this->dir.self::index_name, '      //'.serialize($this->keyword_1_index)."\n", FILE_APPEND);
 		$this->keyword_1_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->keyword_base_index)."\n", FILE_APPEND);
+		file_put_contents($this->dir.self::index_name, '      //'.serialize($this->keyword_base_index)."\n", FILE_APPEND);
 		$this->keyword_base_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->keyword_n_index)."\n", FILE_APPEND);
+		file_put_contents($this->dir.self::index_name, '      //'.serialize($this->keyword_n_index)."\n", FILE_APPEND);
 		$this->keyword_n_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->table_of_contents)."\n", FILE_APPEND);
+		file_put_contents($this->dir.self::index_name, '      //'.serialize($this->table_of_contents)."\n", FILE_APPEND);
 	}
 }
 
@@ -128,8 +130,9 @@ class s2_search_indexer extends s2_search_worker
 	const KEYWORD_WEIGHT = 30;
 	const TITLE_WEIGHT = 20;
 
-	function __construct(s2_search_fetcher $fetcher)
+	function __construct($dir, s2_search_fetcher $fetcher)
 	{
+		$this->dir = $dir;
 		$this->fetcher = $fetcher;
 	}
 
@@ -227,7 +230,7 @@ class s2_search_indexer extends s2_search_worker
 			self::htmlstr_to_str($contents),
 			$keywords
 			))."\n";
-		file_put_contents(S2_CACHE_DIR.self::buffer_name, $str, FILE_APPEND);
+		file_put_contents($this->dir.self::buffer_name, $str, FILE_APPEND);
 
 		$this->table_of_contents[$chapter] = array(
 			'title'		=> $title,
@@ -257,17 +260,17 @@ class s2_search_indexer extends s2_search_worker
 
 	public function index ()
 	{
-		if (!is_file(S2_CACHE_DIR.self::process_state) || !($state = file_get_contents(S2_CACHE_DIR.self::process_state)))
+		if (!is_file($this->dir.self::process_state) || !($state = file_get_contents($this->dir.self::process_state)))
 			$state = 'start';
 
 		if ($state == 'start')
 		{
-			file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
-			file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '0');
+			file_put_contents($this->dir.self::buffer_name, '');
+			file_put_contents($this->dir.self::buffer_pointer, '0');
 
 			$this->fetcher->process($this);
 
-			file_put_contents(S2_CACHE_DIR.self::process_state, 'step');
+			file_put_contents($this->dir.self::process_state, 'step');
 			$this->save_index();
 			clearstatcache();
 
@@ -278,9 +281,9 @@ class s2_search_indexer extends s2_search_worker
 			$start = microtime(1);
 			$this->read_index();
 
-			$file_pointer = file_get_contents(S2_CACHE_DIR.self::buffer_pointer);
+			$file_pointer = file_get_contents($this->dir.self::buffer_pointer);
 
-			$f = fopen(S2_CACHE_DIR.self::buffer_name, 'rb');
+			$f = fopen($this->dir.self::buffer_name, 'rb');
 			fseek($f, $file_pointer);
 
 			do
@@ -292,9 +295,9 @@ class s2_search_indexer extends s2_search_worker
 					fclose($f);
 					$this->cleanup_index();
 					$this->save_index();
-					file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
-					file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '');
-					file_put_contents(S2_CACHE_DIR.self::process_state, '');
+					file_put_contents($this->dir.self::buffer_name, '');
+					file_put_contents($this->dir.self::buffer_pointer, '');
+					file_put_contents($this->dir.self::process_state, '');
 					die('stop');
 				}
 
@@ -305,13 +308,13 @@ class s2_search_indexer extends s2_search_worker
 			} while ($start + 4.0 > microtime(1));
 
 			fclose($f);
-			file_put_contents(S2_CACHE_DIR.self::buffer_pointer, $file_pointer);
+			file_put_contents($this->dir.self::buffer_pointer, $file_pointer);
 			$this->save_index();
 
-			die('go_'.(20 + (int)(80.0*$file_pointer/filesize(S2_CACHE_DIR.self::buffer_name))));
+			die('go_'.(20 + (int)(80.0*$file_pointer/filesize($this->dir.self::buffer_name))));
 		}
 
-		file_put_contents(S2_CACHE_DIR.self::process_state, '');
+		file_put_contents($this->dir.self::process_state, '');
 	}
 
 	protected function remove_from_index ($chapter)
@@ -817,8 +820,9 @@ if (defined('DEBUG'))
 
 class s2_search_title_finder extends s2_search_worker
 {
-	function __construct()
+	function __construct($dir)
 	{
+		$this->dir = $dir;
 		$this->read_index();
 	}
 

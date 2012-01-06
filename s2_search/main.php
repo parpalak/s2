@@ -34,7 +34,7 @@ if ($s2_search_query !== '')
 	require $ext_info['path'].'/fetcher.class.php';
 
 	$fetcher = new s2_search_custom_fetcher();
-	$finder = new s2_search_finder($fetcher);
+	$finder = new s2_search_finder(S2_CACHE_DIR, $fetcher);
 
 	$page = $finder->find($s2_search_query, $s2_search_page);
 }

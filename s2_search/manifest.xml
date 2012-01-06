@@ -116,7 +116,7 @@ if ($action == 's2_search_makeindex')
 	require $ext_info['path'].'/fetcher.class.php';
 
 	$fetcher = new s2_search_custom_fetcher();
-	$finder = new s2_search_indexer($fetcher);
+	$finder = new s2_search_indexer(S2_CACHE_DIR, $fetcher);
 	if (!$chapter)
 		$finder->index();
 	else
