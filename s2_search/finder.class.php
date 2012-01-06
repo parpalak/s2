@@ -218,7 +218,6 @@ class s2_search_finder
 			{
 				unset (self::$fulltext_index[$word]);
 				self::$excluded_words[$word] = 1;
-				continue;
 			}
 		}
 	}
@@ -326,15 +325,9 @@ class s2_search_finder
 
 	protected static function remove_chapter ($chapter)
 	{
-		$link = &self::$fulltext_index; // for memory optimization
-		foreach (self::$fulltext_index as $word => $data)
-		{
+		foreach (self::$fulltext_index as $word => &$data)
 			if (isset($data[$chapter]))
-			{
 				unset($data[$chapter]);
-				self::$fulltext_index[$word] = $data;
-			}
-		}
 	}
 
 	public static function refresh ($chapter)
