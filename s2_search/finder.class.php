@@ -106,7 +106,7 @@ class s2_search_finder
 		$contents = strip_tags($contents);
 
 		$contents = str_replace('&nbsp;', ' ' , $contents);
-		$contents = preg_replace('#&[^;]+;#', '', $contents);
+		$contents = preg_replace('#&[^;]{1,20};#', '', $contents);
 		$contents = utf8_strtolower($contents);
 		$contents = preg_replace('#[^\-а-яё0-9a-z\^]+#u', ' ', $contents);
 
