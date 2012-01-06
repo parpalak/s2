@@ -13,9 +13,9 @@ abstract class s2_search_fetcher
 	// This method should call the following method
 	// for each page available for search:
 	//
-	// s2_search_finder::buffer_chapter($id, $title, $text,
+	// s2_search_indexer::buffer_chapter($id, $title, $text,
 	//   $meta_keywords, $meta_description, $time, $url);
-	abstract public function process (s2_search_finder $finder);
+	abstract public function process (s2_search_indexer $indexer);
 
 	// Returns info about a page ID
 	abstract public function chapter ($id);
@@ -26,7 +26,7 @@ abstract class s2_search_fetcher
 
 class s2_search_custom_fetcher extends s2_search_fetcher
 {
-	private $finder;
+	private $indexer;
 
 	private function crawl ($parent_id, $url)
 	{
@@ -50,7 +50,7 @@ class s2_search_custom_fetcher extends s2_search_fetcher
 
 		while ($article = $s2_db->fetch_assoc($result))
 		{
-			$this->finder->buffer_chapter($article['id'], $article['title'], $article['pagetext'], $article['meta_keys'], $article['meta_desc'], $article['create_time'], $url.urlencode($article['url']).($article['is_children'] ? '/' : ''));
+			$this->indexer->buffer_chapter($article['id'], $article['title'], $article['pagetext'], $article['meta_keys'], $article['meta_desc'], $article['create_time'], $url.urlencode($article['url']).($article['is_children'] ? '/' : ''));
 
 			$article['pagetext'] = '';
 
@@ -60,9 +60,9 @@ class s2_search_custom_fetcher extends s2_search_fetcher
 		($hook = s2_hook('s2_search_fetcher_crawl_end')) ? eval($hook) : null;
 	}
 
-	public function process (s2_search_finder $finder)
+	public function process (s2_search_indexer $indexer)
 	{
-		$this->finder = $finder;
+		$this->indexer = $indexer;
 		$this->crawl(0, '');
 
 		($hook = s2_hook('s2_search_fetcher_process_end')) ? eval($hook) : null;

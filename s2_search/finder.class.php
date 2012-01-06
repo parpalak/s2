@@ -13,17 +13,9 @@
 
 //error_reporting (E_ALL);
 
-class s2_search_finder
+abstract class s2_search_worker
 {
-	private $fetcher;
-
-	const KEYWORD_WEIGHT = 30;
-	const TITLE_WEIGHT = 20;
-
 	const index_name = 's2_search_index.php';
-	const process_state = 's2_search_state.txt';
-	const buffer_name = 's2_search_buffer.txt';
-	const buffer_pointer = 's2_search_pointer.txt';
 
 	protected static $fulltext_index = array();
 	protected static $excluded_words = array();
@@ -32,73 +24,110 @@ class s2_search_finder
 	protected static $keyword_n_index = array();
 	protected static $table_of_contents = array();
 
-	protected static $keys = array();
+	protected $fetcher;
 
 	function __construct(s2_search_fetcher $fetcher)
 	{
 		$this->fetcher = $fetcher;
 	}
 
-	protected static function filter_input ($contents)
+	protected static function read_index ()
 	{
-		$contents = strip_tags($contents);
+		if (count(self::$fulltext_index))
+			return false;
+if (defined('DEBUG'))
+	$start_time = microtime(true);
 
-		foreach (array('\\', '|', '/') as $str)
-			while (strpos($contents, $str.$str) !== false)
-				$contents = str_replace($str.$str, $str, $contents);
-
-		$contents = str_replace(array('\\', '/', '|'), ' ', $contents);
-		$contents = str_replace(array('«', '»', '“', '”', '‘', '’'), '"', $contents);
-		//$contents = str_replace(array('---', '--', '–'), '—', $contents);
-		$contents = str_replace(array('---', '--', '–', '−',), '—', $contents);
-		$contents = preg_replace('#,\s+,#u', ',,', $contents);
-		$contents = preg_replace('#[^\-а-яё0-9a-z\^\.,\(\)";?!…:—]+#iu', ' ', $contents);
-		$contents = preg_replace('#\n+#', ' ', $contents);
-		$contents = preg_replace('#\s+#u', ' ', $contents);
-		$contents = utf8_strtolower($contents);
-
-		$contents = preg_replace('#(,+)#u', '\\1 ', $contents);
-
-		$contents = preg_replace('#[ ]+#', ' ', $contents);
-
-		$words = explode(' ', $contents);
-		foreach ($words as $k => $v)
+		if (!is_file(S2_CACHE_DIR.self::index_name))
 		{
-			// Separate chars from the letter combination
-			if (strlen($v) > 1)
-				foreach (array('—', '^', '(', ')', '"', ':', '?', '!') as $special_char)
-					if (utf8_substr($v, 0, 1) == $special_char || utf8_substr($v, -1) == $special_char)
-					{
-						$words[$k] = str_replace($special_char, '', $v);
-						$words[] = $special_char;
-					}
-
-			// Separate hyphen from the letter combination
-			if (strlen($v) > 1 && (substr($v, 0, 1) == '-' || substr($v, -1) == '-'))
-			{
-				$words[$k] = str_replace('-', '', $v);
-				$words[] = '-';
-			}
-
-			// Replace 'ё' inside words
-			if (false !== strpos($v, 'ё') && $v != 'ё')
-				$words[$k] = str_replace('ё', 'е', $v);
-
-			// Remove ','
-			if (preg_match('#^[^,]+,$#u', $v) || preg_match('#^,[^,]+$#u', $v))
-			{
-				$words[$k] = str_replace(',', '', $v);
-				$words[] = ',';
-			}
+			if (defined('DEBUG'))
+				echo 'Can\'t find index file. Try to rebuild search index.';
+			return false;
 		}
 
-		$words = array_filter($words, "strlen");
+		$data = file_get_contents(S2_CACHE_DIR.self::index_name);
+if (defined('DEBUG'))
+	echo 'Чтение файла индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
-		// Fix keys order
-		$words = array_values($words);
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$fulltext_index = unserialize($my_data);
 
-		return $words;
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$excluded_words = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$keyword_1_index = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$keyword_base_index = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$keyword_n_index = unserialize($my_data);
+
+		$end = strpos($data, "\n");
+		$my_data = substr($data, 8, $end);
+		$data = substr($data, $end + 1);
+		self::$table_of_contents = unserialize($my_data);
+
+if (defined('DEBUG'))
+	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 	}
+
+	protected static function save_index ()
+	{
+		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.'a:'.count(self::$fulltext_index).':{');
+		$buffer = '';
+		$length = 0;
+		foreach (self::$fulltext_index as $word => $data)
+		{
+			$chunk = serialize($word).serialize($data);
+			$length += strlen($chunk);
+			$buffer .= $chunk;
+			if ($length > 100000)
+			{
+				file_put_contents(S2_CACHE_DIR.self::index_name, $buffer, FILE_APPEND);
+				$buffer = '';
+				$length = 0;
+			}
+		}
+		file_put_contents(S2_CACHE_DIR.self::index_name, $buffer.'}'."\n", FILE_APPEND);
+		self::$fulltext_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$excluded_words)."\n", FILE_APPEND);
+		self::$excluded_words = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_1_index)."\n", FILE_APPEND);
+		self::$keyword_1_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_base_index)."\n", FILE_APPEND);
+		self::$keyword_base_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_n_index)."\n", FILE_APPEND);
+		self::$keyword_n_index = null;
+
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$table_of_contents)."\n", FILE_APPEND);
+	}
+
+}
+
+class s2_search_indexer extends s2_search_worker
+{
+	const process_state = 's2_search_state.txt';
+	const buffer_name = 's2_search_buffer.txt';
+	const buffer_pointer = 's2_search_pointer.txt';
+
+	const KEYWORD_WEIGHT = 30;
+	const TITLE_WEIGHT = 20;
 
 	// Cleaning up an HTML string
 	protected static function htmlstr_to_str ($contents)
@@ -222,50 +251,8 @@ class s2_search_finder
 		}
 	}
 
-	protected static function save_index ()
-	{
-		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.'a:'.count(self::$fulltext_index).':{');
-		$buffer = '';
-		$length = 0;
-		foreach (self::$fulltext_index as $word => $data)
-		{
-			$chunk = serialize($word).serialize($data);
-			$length += strlen($chunk);
-			$buffer .= $chunk;
-			if ($length > 100000)
-			{
-				file_put_contents(S2_CACHE_DIR.self::index_name, $buffer, FILE_APPEND);
-				$buffer = '';
-				$length = 0;
-			}
-		}
-		file_put_contents(S2_CACHE_DIR.self::index_name, $buffer.'}'."\n", FILE_APPEND);
-		self::$fulltext_index = null;
-
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$excluded_words)."\n", FILE_APPEND);
-		self::$excluded_words = null;
-
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_1_index)."\n", FILE_APPEND);
-		self::$keyword_1_index = null;
-
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_base_index)."\n", FILE_APPEND);
-		self::$keyword_base_index = null;
-
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_n_index)."\n", FILE_APPEND);
-		self::$keyword_n_index = null;
-
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$table_of_contents)."\n", FILE_APPEND);
-	}
-
 	public function index ()
 	{
-		self::$fulltext_index = array();
-		self::$excluded_words = array();
-		self::$keyword_1_index = array();
-		self::$keyword_base_index = array();
-		self::$keyword_n_index = array();
-		self::$table_of_contents = array();
-
 		if (!is_file(S2_CACHE_DIR.self::process_state) || !($state = file_get_contents(S2_CACHE_DIR.self::process_state)))
 			$state = 'start';
 
@@ -344,13 +331,6 @@ class s2_search_finder
 
 	public function refresh ($chapter)
 	{
-		self::$fulltext_index = array();
-		self::$excluded_words = array();
-		self::$keyword_1_index = array();
-		self::$keyword_base_index = array();
-		self::$keyword_n_index = array();
-		self::$table_of_contents = array();
-
 		self::read_index();
 		self::remove_from_index($chapter);
 
@@ -367,57 +347,71 @@ class s2_search_finder
 		self::save_index();
 	}
 
-	protected static function read_index ()
-	{
-		if (count(self::$fulltext_index))
-			return false;
-if (defined('DEBUG'))
-	$start_time = microtime(true);
+}
 
-		if (!is_file(S2_CACHE_DIR.self::index_name))
+class s2_search_finder extends s2_search_worker
+{
+	protected static $keys = array();
+
+	protected static function filter_input ($contents)
+	{
+		$contents = strip_tags($contents);
+
+		foreach (array('\\', '|', '/') as $str)
+			while (strpos($contents, $str.$str) !== false)
+				$contents = str_replace($str.$str, $str, $contents);
+
+		$contents = str_replace(array('\\', '/', '|'), ' ', $contents);
+		$contents = str_replace(array('«', '»', '“', '”', '‘', '’'), '"', $contents);
+		//$contents = str_replace(array('---', '--', '–'), '—', $contents);
+		$contents = str_replace(array('---', '--', '–', '−',), '—', $contents);
+		$contents = preg_replace('#,\s+,#u', ',,', $contents);
+		$contents = preg_replace('#[^\-а-яё0-9a-z\^\.,\(\)";?!…:—]+#iu', ' ', $contents);
+		$contents = preg_replace('#\n+#', ' ', $contents);
+		$contents = preg_replace('#\s+#u', ' ', $contents);
+		$contents = utf8_strtolower($contents);
+
+		$contents = preg_replace('#(,+)#u', '\\1 ', $contents);
+
+		$contents = preg_replace('#[ ]+#', ' ', $contents);
+
+		$words = explode(' ', $contents);
+		foreach ($words as $k => $v)
 		{
-			if (defined('DEBUG'))
-				echo 'Can\'t find index file. Try to rebuild search index.';
-			return false;
+			// Separate chars from the letter combination
+			if (strlen($v) > 1)
+				foreach (array('—', '^', '(', ')', '"', ':', '?', '!') as $special_char)
+					if (utf8_substr($v, 0, 1) == $special_char || utf8_substr($v, -1) == $special_char)
+					{
+						$words[$k] = str_replace($special_char, '', $v);
+						$words[] = $special_char;
+					}
+
+			// Separate hyphen from the letter combination
+			if (strlen($v) > 1 && (substr($v, 0, 1) == '-' || substr($v, -1) == '-'))
+			{
+				$words[$k] = str_replace('-', '', $v);
+				$words[] = '-';
+			}
+
+			// Replace 'ё' inside words
+			if (false !== strpos($v, 'ё') && $v != 'ё')
+				$words[$k] = str_replace('ё', 'е', $v);
+
+			// Remove ','
+			if (preg_match('#^[^,]+,$#u', $v) || preg_match('#^,[^,]+$#u', $v))
+			{
+				$words[$k] = str_replace(',', '', $v);
+				$words[] = ',';
+			}
 		}
 
-		$data = file_get_contents(S2_CACHE_DIR.self::index_name);
-if (defined('DEBUG'))
-	echo 'Чтение файла индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+		$words = array_filter($words, "strlen");
 
-		$end = strpos($data, "\n");
-		$my_data = substr($data, 8, $end);
-		$data = substr($data, $end + 1);
-		self::$fulltext_index = unserialize($my_data);
+		// Fix keys order
+		$words = array_values($words);
 
-		$end = strpos($data, "\n");
-		$my_data = substr($data, 8, $end);
-		$data = substr($data, $end + 1);
-		self::$excluded_words = unserialize($my_data);
-
-		$end = strpos($data, "\n");
-		$my_data = substr($data, 8, $end);
-		$data = substr($data, $end + 1);
-		self::$keyword_1_index = unserialize($my_data);
-
-		$end = strpos($data, "\n");
-		$my_data = substr($data, 8, $end);
-		$data = substr($data, $end + 1);
-		self::$keyword_base_index = unserialize($my_data);
-
-		$end = strpos($data, "\n");
-		$my_data = substr($data, 8, $end);
-		$data = substr($data, $end + 1);
-		self::$keyword_n_index = unserialize($my_data);
-
-		$end = strpos($data, "\n");
-		$my_data = substr($data, 8, $end);
-		$data = substr($data, $end + 1);
-		self::$table_of_contents = unserialize($my_data);
-
-if (defined('DEBUG'))
-	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
-
+		return $words;
 	}
 
 	protected static function compare_arrays ($a1, $a2)
