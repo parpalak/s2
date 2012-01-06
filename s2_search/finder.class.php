@@ -330,7 +330,7 @@ class s2_search_finder
 				unset($data[$chapter]);
 	}
 
-	public static function refresh ($chapter)
+	public function refresh ($chapter)
 	{
 		self::$fulltext_index = array();
 		self::$excluded_words = array();
