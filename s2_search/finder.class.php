@@ -370,7 +370,6 @@ class s2_search_finder extends s2_search_worker
 
 		$contents = str_replace(array('\\', '/', '|'), ' ', $contents);
 		$contents = str_replace(array('«', '»', '“', '”', '‘', '’'), '"', $contents);
-		//$contents = str_replace(array('---', '--', '–'), '—', $contents);
 		$contents = str_replace(array('---', '--', '–', '−',), '—', $contents);
 		$contents = preg_replace('#,\s+,#u', ',,', $contents);
 		$contents = preg_replace('#[^\-а-яё0-9a-z\^\.,\(\)";?!…:—]+#iu', ' ', $contents);
@@ -413,7 +412,7 @@ class s2_search_finder extends s2_search_worker
 			}
 		}
 
-		$words = array_filter($words, "strlen");
+		$words = array_filter($words, 'strlen');
 
 		// Fix keys order
 		$words = array_values($words);
@@ -490,17 +489,17 @@ class s2_search_finder extends s2_search_worker
 		}
 	}
 
-	protected function find_simple_keywords ($string, $use_weight)
+	protected function find_simple_keywords ($word)
 	{
-		if (isset($this->keyword_1_index[$string]))
-			foreach ($this->keyword_1_index[$string] as $chapter => $weight)
-				$this->keys[$chapter][$string] = $weight;
+		if (isset($this->keyword_1_index[$word]))
+			foreach ($this->keyword_1_index[$word] as $chapter => $weight)
+				$this->keys[$chapter][$word] = $weight;
 
-		$string = s2_search_stemmer::stem_word($string);
+		$word = s2_search_stemmer::stem_word($word);
 
-		if (isset($this->keyword_base_index[$string]))
-			foreach ($this->keyword_base_index[$string] as $chapter => $weight)
-				$this->keys[$chapter][$string] = $weight;
+		if (isset($this->keyword_base_index[$word]))
+			foreach ($this->keyword_base_index[$word] as $chapter => $weight)
+				$this->keys[$chapter][$word] = $weight;
 	}
 
 	protected function find_spaced_keywords ($string)
@@ -684,8 +683,6 @@ class s2_search_finder extends s2_search_worker
 
 	public function find ($search_string)
 	{
-		global $lang_s2_search;
-
 		$this->read_index();
 
 if (defined('DEBUG'))
@@ -706,9 +703,8 @@ if (defined('DEBUG'))
 	echo 'Ключевые слова с пробелом: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
 		foreach ($raw_words as $word)
-		{
-			$this->find_simple_keywords($word, count($raw_words) == 1);
-		}
+			$this->find_simple_keywords($word);
+
 if (defined('DEBUG'))
 	echo 'Одиночные ключевые слова: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
