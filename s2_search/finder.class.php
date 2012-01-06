@@ -726,9 +726,12 @@ if (defined('DEBUG') && defined('MORE_DEBUG'))
 	echo '</pre>';
 }
 		// Now keys are chapters and values are arrays "word => weight".
-		$weights = array();
+		$toc = $weights = array();
 		foreach ($this->keys as $chapter => $stat)
+		{
 			$weights[$chapter] = array_sum($stat);
+			$toc[$chapter] = $this->table_of_contents[$chapter];
+		}
 
 		// Order by weight
 		arsort($weights);
@@ -741,7 +744,7 @@ if (defined('DEBUG'))
 	echo '</pre>';
 	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 }
-		return array($weights, $this->table_of_contents);
+		return array($weights, $toc);
 	}
 }
 
