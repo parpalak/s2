@@ -21,4 +21,11 @@ $s2_search_query = isset($_GET['q']) ? $_GET['q'] : '';
 require 'finder.class.php';
 
 if ($s2_search_query !== '')
-	s2_search_finder::find_autosearch($s2_search_query);
+{
+	$finder = new s2_search_title_finder();
+	$toc = $finder->find($s2_search_query);
+
+	foreach ($toc as $chapter => $chapter_info)
+		echo '<a href="'.$chapter_info['url'].'">'.
+				preg_replace('#('.preg_quote($s2_search_query, '#').')#ui', '<em>\\1</em>', s2_htmlencode($chapter_info['title'])).'</a>';
+}

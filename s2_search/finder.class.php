@@ -809,21 +809,22 @@ if (defined('DEBUG'))
 
 		return $page;
 	}
+}
 
-	public static function find_autosearch ($search_string)
+class s2_search_title_finder extends s2_search_worker
+{
+	function __construct()
 	{
 		self::read_index();
+	}
 
+	public function find ($search_string)
+	{
 		$output = array();
 		foreach (self::$table_of_contents as $chapter => $chapter_info)
-		{
 			if (strpos(utf8_strtolower($chapter_info['title']), utf8_strtolower($search_string)) !== false)
-			{
-				$output[] = '<a href="'.self::$table_of_contents[$chapter]['url'].'">'.
-					preg_replace('#('.preg_quote($search_string, '#').')#ui', '<em>\\1</em>', s2_htmlencode(self::$table_of_contents[$chapter]['title'])).'</a>';
-			}
-		}
+				$output[$chapter] = $chapter_info;
 
-		echo implode('', $output);
+		return $output;
 	}
 }
