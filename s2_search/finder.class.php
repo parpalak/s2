@@ -17,23 +17,23 @@ abstract class s2_search_worker
 {
 	const index_name = 's2_search_index.php';
 
-	protected static $fulltext_index = array();
-	protected static $excluded_words = array();
-	protected static $keyword_1_index = array();
-	protected static $keyword_base_index = array();
-	protected static $keyword_n_index = array();
-	protected static $table_of_contents = array();
+	protected $fulltext_index = array();
+	protected $excluded_words = array();
+	protected $keyword_1_index = array();
+	protected $keyword_base_index = array();
+	protected $keyword_n_index = array();
+	protected $table_of_contents = array();
 
 	protected $fetcher;
 
-	function __construct(s2_search_fetcher $fetcher)
+	function __construct(s2_search_fetcher $fetcher = null)
 	{
 		$this->fetcher = $fetcher;
 	}
 
-	protected static function read_index ()
+	protected function read_index ()
 	{
-		if (count(self::$fulltext_index))
+		if (count($this->fulltext_index))
 			return false;
 if (defined('DEBUG'))
 	$start_time = microtime(true);
@@ -52,43 +52,43 @@ if (defined('DEBUG'))
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
 		$data = substr($data, $end + 1);
-		self::$fulltext_index = unserialize($my_data);
+		$this->fulltext_index = unserialize($my_data);
 
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
 		$data = substr($data, $end + 1);
-		self::$excluded_words = unserialize($my_data);
+		$this->excluded_words = unserialize($my_data);
 
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
 		$data = substr($data, $end + 1);
-		self::$keyword_1_index = unserialize($my_data);
+		$this->keyword_1_index = unserialize($my_data);
 
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
 		$data = substr($data, $end + 1);
-		self::$keyword_base_index = unserialize($my_data);
+		$this->keyword_base_index = unserialize($my_data);
 
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
 		$data = substr($data, $end + 1);
-		self::$keyword_n_index = unserialize($my_data);
+		$this->keyword_n_index = unserialize($my_data);
 
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
 		$data = substr($data, $end + 1);
-		self::$table_of_contents = unserialize($my_data);
+		$this->table_of_contents = unserialize($my_data);
 
 if (defined('DEBUG'))
 	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 	}
 
-	protected static function save_index ()
+	protected function save_index ()
 	{
-		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.'a:'.count(self::$fulltext_index).':{');
+		file_put_contents(S2_CACHE_DIR.self::index_name, '<?php //'.'a:'.count($this->fulltext_index).':{');
 		$buffer = '';
 		$length = 0;
-		foreach (self::$fulltext_index as $word => $data)
+		foreach ($this->fulltext_index as $word => $data)
 		{
 			$chunk = serialize($word).serialize($data);
 			$length += strlen($chunk);
@@ -101,23 +101,22 @@ if (defined('DEBUG'))
 			}
 		}
 		file_put_contents(S2_CACHE_DIR.self::index_name, $buffer.'}'."\n", FILE_APPEND);
-		self::$fulltext_index = null;
+		$this->fulltext_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$excluded_words)."\n", FILE_APPEND);
-		self::$excluded_words = null;
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->excluded_words)."\n", FILE_APPEND);
+		$this->excluded_words = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_1_index)."\n", FILE_APPEND);
-		self::$keyword_1_index = null;
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->keyword_1_index)."\n", FILE_APPEND);
+		$this->keyword_1_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_base_index)."\n", FILE_APPEND);
-		self::$keyword_base_index = null;
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->keyword_base_index)."\n", FILE_APPEND);
+		$this->keyword_base_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$keyword_n_index)."\n", FILE_APPEND);
-		self::$keyword_n_index = null;
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->keyword_n_index)."\n", FILE_APPEND);
+		$this->keyword_n_index = null;
 
-		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize(self::$table_of_contents)."\n", FILE_APPEND);
+		file_put_contents(S2_CACHE_DIR.self::index_name, '      //'.serialize($this->table_of_contents)."\n", FILE_APPEND);
 	}
-
 }
 
 class s2_search_indexer extends s2_search_worker
@@ -128,6 +127,11 @@ class s2_search_indexer extends s2_search_worker
 
 	const KEYWORD_WEIGHT = 30;
 	const TITLE_WEIGHT = 20;
+
+	function __construct(s2_search_fetcher $fetcher)
+	{
+		$this->fetcher = $fetcher;
+	}
 
 	// Cleaning up an HTML string
 	protected static function htmlstr_to_str ($contents)
@@ -150,7 +154,7 @@ class s2_search_indexer extends s2_search_worker
 		return $words;
 	}
 
-	protected static function add_keyword_to_index ($chapter, $word, $weight)
+	protected function add_keyword_to_index ($chapter, $word, $weight)
 	{
 		if ($word === '')
 			return;
@@ -158,28 +162,28 @@ class s2_search_indexer extends s2_search_worker
 		$word = str_replace('ё', 'е', $word);
 
 		if (strpos($word, ' ') !== false)
-			self::$keyword_n_index[$word][$chapter] = $weight;
+			$this->keyword_n_index[$word][$chapter] = $weight;
 		elseif (substr($word, -2) == '__' && substr($word, 0, 2) == '__')
-			self::$keyword_base_index[s2_search_stemmer::stem_word(substr($word, 2, -2))][$chapter] = $weight;
+			$this->keyword_base_index[s2_search_stemmer::stem_word(substr($word, 2, -2))][$chapter] = $weight;
 		else
-			self::$keyword_1_index[$word][$chapter] = $weight;
+			$this->keyword_1_index[$word][$chapter] = $weight;
 	}
 
-	protected static function add_word_to_fulltext ($chapter, $position, $word)
+	protected function add_word_to_fulltext ($chapter, $position, $word)
 	{
 		$word = s2_search_stemmer::stem_word($word);
-		self::$fulltext_index[$word][$chapter] = (isset(self::$fulltext_index[$word][$chapter]) ? self::$fulltext_index[$word][$chapter].'|' : '').base_convert($position, 10, 36);
+		$this->fulltext_index[$word][$chapter] = (isset($this->fulltext_index[$word][$chapter]) ? $this->fulltext_index[$word][$chapter].'|' : '').base_convert($position, 10, 36);
 	}
 
-	protected static function add_to_index ($chapter, $title, $contents, $keywords)
+	protected function add_to_index ($chapter, $title, $contents, $keywords)
 	{
 		// Processing keywords
 		foreach (explode(',', $keywords) as $item)
-			self::add_keyword_to_index($chapter, trim($item), self::KEYWORD_WEIGHT);
+			$this->add_keyword_to_index($chapter, trim($item), self::KEYWORD_WEIGHT);
 
 		// Processing title
 		foreach (self::str_to_array($title) as $word)
-			self::add_keyword_to_index($chapter, trim($word), self::TITLE_WEIGHT);
+			$this->add_keyword_to_index($chapter, trim($word), self::TITLE_WEIGHT);
 
 		// Fulltext index
 		$words = self::str_to_array($title.' '.str_replace(', ', ' ', $keywords).' '.$contents);
@@ -192,7 +196,7 @@ class s2_search_indexer extends s2_search_worker
 
 			$i++;
 
-			if (isset(self::$excluded_words[$word]))
+			if (isset($this->excluded_words[$word]))
 				continue;
 
 			/// Build reverse index
@@ -201,22 +205,22 @@ class s2_search_indexer extends s2_search_worker
 			if (false !== strpos($word, 'ё'))
 			{
 				$new_word = str_replace('ё', 'е', $word);
-				self::add_word_to_fulltext($chapter, $i, $new_word);
+				$this->add_word_to_fulltext($chapter, $i, $new_word);
 			}
 			else
-				self::add_word_to_fulltext($chapter, $i, $word);
+				$this->add_word_to_fulltext($chapter, $i, $word);
 
 			// If the word contains hyphen, add a variant without it
 			if (strlen($word) > 1 && false !== strpos($word, '-'))
 			{
 				$new_word = str_replace('-', '', $word);
 				if ($new_word != '')
-					self::add_word_to_fulltext($chapter, $i, $new_word);
+					$this->add_word_to_fulltext($chapter, $i, $new_word);
 			}
 		}
 	}
 
-	public static function buffer_chapter ($chapter, $title, $contents, $keywords, $description, $time, $url)
+	public function buffer_chapter ($chapter, $title, $contents, $keywords, $description, $time, $url)
 	{
 		$str = $chapter.' '.serialize(array(
 			self::htmlstr_to_str($title),
@@ -225,7 +229,7 @@ class s2_search_indexer extends s2_search_worker
 			))."\n";
 		file_put_contents(S2_CACHE_DIR.self::buffer_name, $str, FILE_APPEND);
 
-		self::$table_of_contents[$chapter] = array(
+		$this->table_of_contents[$chapter] = array(
 			'title'		=> $title,
 			'descr'		=> $description,
 			'time'		=> $time,
@@ -233,20 +237,20 @@ class s2_search_indexer extends s2_search_worker
 		);
 	}
 
-	protected static function cleanup_index ()
+	protected function cleanup_index ()
 	{
-		$threshold = count(self::$table_of_contents) * 0.3;
+		$threshold = count($this->table_of_contents) * 0.3;
 		if ($threshold < 20)
 			$threshold = 20;
 
-		$link = &self::$fulltext_index; // for memory optimization
-		foreach (self::$fulltext_index as $word => $stat)
+		$link = &$this->fulltext_index; // for memory optimization
+		foreach ($this->fulltext_index as $word => $stat)
 		{
 			// Drop fulltext frequent or empty items
 			if (count($stat) > $threshold || empty($word))
 			{
-				unset (self::$fulltext_index[$word]);
-				self::$excluded_words[$word] = 1;
+				unset ($this->fulltext_index[$word]);
+				$this->excluded_words[$word] = 1;
 			}
 		}
 	}
@@ -264,7 +268,7 @@ class s2_search_indexer extends s2_search_worker
 			$this->fetcher->process($this);
 
 			file_put_contents(S2_CACHE_DIR.self::process_state, 'step');
-			self::save_index();
+			$this->save_index();
 			clearstatcache();
 
 			die('go_20');
@@ -272,7 +276,7 @@ class s2_search_indexer extends s2_search_worker
 		elseif ($state == 'step')
 		{
 			$start = microtime(1);
-			self::read_index();
+			$this->read_index();
 
 			$file_pointer = file_get_contents(S2_CACHE_DIR.self::buffer_pointer);
 
@@ -286,8 +290,8 @@ class s2_search_indexer extends s2_search_worker
 				if (!$data)
 				{
 					fclose($f);
-					self::cleanup_index();
-					self::save_index();
+					$this->cleanup_index();
+					$this->save_index();
 					file_put_contents(S2_CACHE_DIR.self::buffer_name, '');
 					file_put_contents(S2_CACHE_DIR.self::buffer_pointer, '');
 					file_put_contents(S2_CACHE_DIR.self::process_state, '');
@@ -297,12 +301,12 @@ class s2_search_indexer extends s2_search_worker
 				$file_pointer += strlen($data);
 				list($chapter, $data) = explode(' ', $data, 2);
 				$data = unserialize($data);
-				self::add_to_index($chapter, $data[0], $data[1], $data[2]);
+				$this->add_to_index($chapter, $data[0], $data[1], $data[2]);
 			} while ($start + 4.0 > microtime(1));
 
 			fclose($f);
 			file_put_contents(S2_CACHE_DIR.self::buffer_pointer, $file_pointer);
-			self::save_index();
+			$this->save_index();
 
 			die('go_'.(20 + (int)(80.0*$file_pointer/filesize(S2_CACHE_DIR.self::buffer_name))));
 		}
@@ -310,48 +314,48 @@ class s2_search_indexer extends s2_search_worker
 		file_put_contents(S2_CACHE_DIR.self::process_state, '');
 	}
 
-	protected static function remove_from_index ($chapter)
+	protected function remove_from_index ($chapter)
 	{
-		foreach (self::$fulltext_index as $word => &$data)
+		foreach ($this->fulltext_index as $word => &$data)
 			if (isset($data[$chapter]))
 				unset($data[$chapter]);
 
-		foreach (self::$keyword_1_index as $word => &$data)
+		foreach ($this->keyword_1_index as $word => &$data)
 			if (isset($data[$chapter]))
 				unset($data[$chapter]);
 
-		foreach (self::$keyword_base_index as $word => &$data)
+		foreach ($this->keyword_base_index as $word => &$data)
 			if (isset($data[$chapter]))
 				unset($data[$chapter]);
 
-		foreach (self::$keyword_n_index as $word => &$data)
+		foreach ($this->keyword_n_index as $word => &$data)
 			if (isset($data[$chapter]))
 				unset($data[$chapter]);
 	}
 
 	public function refresh ($chapter)
 	{
-		self::read_index();
-		self::remove_from_index($chapter);
+		$this->read_index();
+		$this->remove_from_index($chapter);
 
 		$data = $this->fetcher->chapter($chapter);
 
 		if (!empty($data))
 		{
-			self::add_to_index($chapter, self::htmlstr_to_str($data[0]), self::htmlstr_to_str($data[1]), $data[2]);
-			self::$table_of_contents[$chapter] = $data[3];
+			$this->add_to_index($chapter, self::htmlstr_to_str($data[0]), self::htmlstr_to_str($data[1]), $data[2]);
+			$this->table_of_contents[$chapter] = $data[3];
 		}
 		else
-			unset(self::$table_of_contents[$chapter]);
+			unset($this->table_of_contents[$chapter]);
 
-		self::save_index();
+		$this->save_index();
 	}
 
 }
 
 class s2_search_finder extends s2_search_worker
 {
-	protected static $keys = array();
+	protected $keys;
 
 	protected static function filter_input ($contents)
 	{
@@ -441,7 +445,7 @@ class s2_search_finder extends s2_search_worker
 		return max(13 - 2*$distance, 2);
 	}
 
-	protected static function find_fulltext ($words)
+	protected function find_fulltext ($words)
 	{
 		$word_weight = self::fulltext_weight(count($words));
 		$prev_positions = array();
@@ -459,52 +463,52 @@ class s2_search_finder extends s2_search_worker
 
 			foreach ($words_for_search as $search_word)
 			{
-				if (!isset(self::$fulltext_index[$search_word]))
+				if (!isset($this->fulltext_index[$search_word]))
 					continue;
-				foreach (self::$fulltext_index[$search_word] as $chapter => $entries)
+				foreach ($this->fulltext_index[$search_word] as $chapter => $entries)
 				{
 					$entries = explode('|', $entries);
 					// Remember chapters and positions
 					foreach ($entries as $position)
 						$curr_positions[$chapter][] = base_convert($position, 36, 10);
 
-					if (!isset (self::$keys[$chapter][$word]))
-						self::$keys[$chapter][$word] = count($entries) * $word_weight;
+					if (!isset ($this->keys[$chapter][$word]))
+						$this->keys[$chapter][$word] = count($entries) * $word_weight;
 					else
-						self::$keys[$chapter][$word] += count($entries) * $word_weight;
+						$this->keys[$chapter][$word] += count($entries) * $word_weight;
 				}
 			}
 
 			foreach ($curr_positions as $chapter => $positions)
 				if (isset($prev_positions[$chapter]))
-					self::$keys[$chapter]['*n_'.$word] = self::neighbour_weight(self::compare_arrays($positions, $prev_positions[$chapter])) * $word_weight;
+					$this->keys[$chapter]['*n_'.$word] = self::neighbour_weight(self::compare_arrays($positions, $prev_positions[$chapter])) * $word_weight;
 
 			$prev_positions = $curr_positions;
 		}
 	}
 
-	protected static function find_simple_keywords ($string, $use_weight)
+	protected function find_simple_keywords ($string, $use_weight)
 	{
-		if (isset(self::$keyword_1_index[$string]))
-			foreach (self::$keyword_1_index[$string] as $chapter => $weight)
-				self::$keys[$chapter][$string] = $weight;
+		if (isset($this->keyword_1_index[$string]))
+			foreach ($this->keyword_1_index[$string] as $chapter => $weight)
+				$this->keys[$chapter][$string] = $weight;
 
 		$string = s2_search_stemmer::stem_word($string);
 
-		if (isset(self::$keyword_base_index[$string]))
-			foreach (self::$keyword_base_index[$string] as $chapter => $weight)
-				self::$keys[$chapter][$string] = $weight;
+		if (isset($this->keyword_base_index[$string]))
+			foreach ($this->keyword_base_index[$string] as $chapter => $weight)
+				$this->keys[$chapter][$string] = $weight;
 	}
 
-	protected static function find_spaced_keywords ($string)
+	protected function find_spaced_keywords ($string)
 	{
 		$string = ' '.$string.' ';
-		foreach (self::$keyword_n_index as $keyword => $value)
+		foreach ($this->keyword_n_index as $keyword => $value)
 		{
 			if (strpos($string, ' '.$keyword.' ') !== false)
 			{
 				foreach ($value as $chapter => $weight)
-					self::$keys[$chapter][$keyword] = $weight;
+					$this->keys[$chapter][$keyword] = $weight;
 			}
 		}
 	}
@@ -528,9 +532,9 @@ class s2_search_finder extends s2_search_worker
 		{
 			// Stems of the words found in the $id chapter
 			$stems = $full_words = array();
-			foreach (array_keys(self::$keys[$id]) as $word)
+			foreach (array_keys($this->keys[$id]) as $word)
 				// Excluding neighbours weight
-				if (0 !== strpos($word, '*n_') && !isset(self::$excluded_words[$word]))
+				if (0 !== strpos($word, '*n_') && !isset($this->excluded_words[$word]))
 					$full_words[$stems[] = s2_search_stemmer::stem_word($word)] = $word;
 
 			// Text cleanup
@@ -703,12 +707,12 @@ class s2_search_finder extends s2_search_worker
 	{
 		global $lang_s2_search;
 
-		self::read_index();
+		$this->read_index();
 
 if (defined('DEBUG'))
 	$start_time = microtime(true);
 
-		self::$keys = array();
+		$this->keys = array();
 
 		$raw_words = self::filter_input($search_string);
 		$cleaned_search_string = implode(' ', $raw_words);
@@ -717,19 +721,19 @@ if (defined('DEBUG'))
 	echo 'Чистка строки: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		if (count($raw_words) > 1)
-			self::find_spaced_keywords($cleaned_search_string);
+			$this->find_spaced_keywords($cleaned_search_string);
 
 if (defined('DEBUG'))
 	echo 'Ключевые слова с пробелом: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
 		foreach ($raw_words as $word)
 		{
-			self::find_simple_keywords($word, count($raw_words) == 1);
+			$this->find_simple_keywords($word, count($raw_words) == 1);
 		}
 if (defined('DEBUG'))
 	echo 'Одиночные ключевые слова: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
-		self::find_fulltext($raw_words);
+		$this->find_fulltext($raw_words);
 
 if (defined('DEBUG'))
 	echo 'Полнотекстовый поиск: ', - $start_time + ($start_time = microtime(true)), '<br>';
@@ -740,11 +744,11 @@ if (defined('DEBUG'))
 if (defined('DEBUG') && defined('MORE_DEBUG'))
 {
 	echo "<pre>";
-	print_r(self::$keys);
+	print_r($this->keys);
 	echo '</pre>';
 }
 		$results = array();
-		foreach (self::$keys as $chapter => $stat)
+		foreach ($this->keys as $chapter => $stat)
 			$results[$chapter] = array_sum($stat);
 
 		// Order by weight
@@ -753,7 +757,7 @@ if (defined('DEBUG') && defined('MORE_DEBUG'))
 if (defined('DEBUG'))
 {
 	echo '<pre>';
-	print_r(self::$keys);
+	print_r($this->keys);
 	echo '</pre>';
 	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 }
@@ -785,9 +789,9 @@ if (defined('DEBUG'))
 				if ($i > $cur_page * $items_per_page)
 					break;
 
-				$output[$chapter]['title'] = '<a class="title" href="'.s2_link(self::$table_of_contents[$chapter]['url']).'">'.s2_htmlencode(self::$table_of_contents[$chapter]['title']).'</a>';
-				$output[$chapter]['descr'] = trim(self::$table_of_contents[$chapter]['descr']);
-				$output[$chapter]['info'] = '<small><a class="url" href="'.s2_link(self::$table_of_contents[$chapter]['url']).'">'.self::display_url(s2_abs_link(self::$table_of_contents[$chapter]['url'])).'</a>'.(self::$table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date(self::$table_of_contents[$chapter]['time']) : '').'</small>';
+				$output[$chapter]['title'] = '<a class="title" href="'.s2_link($this->table_of_contents[$chapter]['url']).'">'.s2_htmlencode($this->table_of_contents[$chapter]['title']).'</a>';
+				$output[$chapter]['descr'] = trim($this->table_of_contents[$chapter]['descr']);
+				$output[$chapter]['info'] = '<small><a class="url" href="'.s2_link($this->table_of_contents[$chapter]['url']).'">'.self::display_url(s2_abs_link($this->table_of_contents[$chapter]['url'])).'</a>'.($this->table_of_contents[$chapter]['time'] ? ' &mdash; '.s2_date($this->table_of_contents[$chapter]['time']) : '').'</small>';
 			}
 
 if (defined('DEBUG'))
@@ -815,13 +819,13 @@ class s2_search_title_finder extends s2_search_worker
 {
 	function __construct()
 	{
-		self::read_index();
+		$this->read_index();
 	}
 
 	public function find ($search_string)
 	{
 		$output = array();
-		foreach (self::$table_of_contents as $chapter => $chapter_info)
+		foreach ($this->table_of_contents as $chapter => $chapter_info)
 			if (strpos(utf8_strtolower($chapter_info['title']), utf8_strtolower($search_string)) !== false)
 				$output[$chapter] = $chapter_info;
 
