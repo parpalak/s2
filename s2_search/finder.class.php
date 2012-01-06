@@ -323,9 +323,21 @@ class s2_search_finder
 		file_put_contents(S2_CACHE_DIR.self::process_state, '');
 	}
 
-	protected static function remove_chapter ($chapter)
+	protected static function remove_from_index ($chapter)
 	{
 		foreach (self::$fulltext_index as $word => &$data)
+			if (isset($data[$chapter]))
+				unset($data[$chapter]);
+
+		foreach (self::$keyword_1_index as $word => &$data)
+			if (isset($data[$chapter]))
+				unset($data[$chapter]);
+
+		foreach (self::$keyword_base_index as $word => &$data)
+			if (isset($data[$chapter]))
+				unset($data[$chapter]);
+
+		foreach (self::$keyword_n_index as $word => &$data)
 			if (isset($data[$chapter]))
 				unset($data[$chapter]);
 	}
@@ -340,7 +352,7 @@ class s2_search_finder
 		self::$table_of_contents = array();
 
 		self::read_index();
-		self::remove_chapter($chapter);
+		self::remove_from_index($chapter);
 
 		$data = $this->fetcher->chapter($chapter);
 
