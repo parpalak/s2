@@ -7,9 +7,28 @@
  * @package s2_search
  */
 
-class s2_search_fetcher
+abstract class s2_search_fetcher
 {
-	private function crawl ($finder, $parent_id, $url)
+	// Walks through all pages and gets info about them
+	// This method should call the following method
+	// for each page available for search:
+	//
+	// s2_search_finder::buffer_chapter($id, $title, $text,
+	//   $meta_keywords, $meta_description, $time, $url);
+	abstract public function process (s2_search_finder $finder);
+
+	// Returns info about a page ID
+	abstract public function chapter ($id);
+
+	// Returns page text for a given array of IDs
+	abstract public function texts ($ids);
+}
+
+class s2_search_custom_fetcher extends s2_search_fetcher
+{
+	private $finder;
+
+	private function crawl ($parent_id, $url)
 	{
 		global $s2_db;
 
@@ -31,11 +50,11 @@ class s2_search_fetcher
 
 		while ($article = $s2_db->fetch_assoc($result))
 		{
-			$finder->buffer_chapter($article['id'], $article['title'], $article['pagetext'], $article['meta_keys'], $article['meta_desc'], $article['create_time'], $url.urlencode($article['url']).($article['is_children'] ? '/' : ''));
+			$this->finder->buffer_chapter($article['id'], $article['title'], $article['pagetext'], $article['meta_keys'], $article['meta_desc'], $article['create_time'], $url.urlencode($article['url']).($article['is_children'] ? '/' : ''));
 
 			$article['pagetext'] = '';
 
-			$this->crawl($finder, $article['id'], $url.urlencode($article['url']).'/');
+			$this->crawl($article['id'], $url.urlencode($article['url']).'/');
 		}
 
 		($hook = s2_hook('s2_search_fetcher_crawl_end')) ? eval($hook) : null;
@@ -43,12 +62,13 @@ class s2_search_fetcher
 
 	public function process (s2_search_finder $finder)
 	{
-		$this->crawl($finder, 0, '');
+		$this->finder = $finder;
+		$this->crawl(0, '');
 
 		($hook = s2_hook('s2_search_fetcher_process_end')) ? eval($hook) : null;
 	}
 
-	public function chapter ($chapter)
+	public function chapter ($id)
 	{
 		global $s2_db;
 
@@ -67,7 +87,7 @@ class s2_search_fetcher
 		$query = array(
 			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
 			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'id = \''.$s2_db->escape($chapter).'\' AND published = 1',
+			'WHERE'		=> 'id = \''.$s2_db->escape($id).'\' AND published = 1',
 		);
 		($hook = s2_hook('s2_search_fetcher_chapter_pre_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
