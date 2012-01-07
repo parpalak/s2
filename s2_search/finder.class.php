@@ -29,7 +29,6 @@ abstract class s2_search_worker
 	function __construct($dir)
 	{
 		$this->dir = $dir;
-		$this->read_index();
 	}
 
 	protected function read_index ()
@@ -294,6 +293,7 @@ class s2_search_indexer extends s2_search_worker
 		elseif ($state == 'step')
 		{
 			$start = microtime(1);
+			$this->read_index();
 
 			$file_pointer = file_get_contents($this->dir.self::buffer_pointer);
 
@@ -356,6 +356,8 @@ class s2_search_indexer extends s2_search_worker
 
 	public function refresh ($chapter)
 	{
+		$this->read_index();
+
 		if (isset($this->table_of_contents[$chapter]))
 		{
 			$chapter_id = $this->table_of_contents[$chapter]['id'];
@@ -716,6 +718,8 @@ class s2_search_finder extends s2_search_worker
 
 	public function find ($search_string)
 	{
+		$this->read_index();
+
 if (defined('DEBUG'))
 	$start_time = microtime(true);
 
@@ -780,6 +784,12 @@ if (defined('DEBUG'))
 
 class s2_search_title_finder extends s2_search_worker
 {
+	function __construct($dir)
+	{
+		parent::__construct($dir);
+		$this->read_index();
+	}
+
 	public function find ($search_string)
 	{
 		$output = array();
