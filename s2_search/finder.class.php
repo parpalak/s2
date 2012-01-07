@@ -394,6 +394,15 @@ class s2_search_finder extends s2_search_worker
 	protected $keys;
 	protected $chapters = array();
 
+	function __construct($dir)
+	{
+		parent::__construct($dir);
+		$this->read_index();
+
+		foreach ($this->table_of_contents as $chapter => &$info)
+			$this->chapters[$info['id']] = $chapter;
+	}
+
 	protected static function filter_input ($contents)
 	{
 		$contents = strip_tags($contents);
@@ -718,15 +727,10 @@ class s2_search_finder extends s2_search_worker
 
 	public function find ($search_string)
 	{
-		$this->read_index();
-
 if (defined('DEBUG'))
 	$start_time = microtime(true);
 
 		$this->keys = array();
-
-		foreach ($this->table_of_contents as $chapter => &$info)
-			$this->chapters[$info['id']] = $chapter;
 
 		$raw_words = self::filter_input($search_string);
 		$cleaned_search_string = implode(' ', $raw_words);
