@@ -561,13 +561,10 @@ class s2_search_finder extends s2_search_worker
 
 	public function snippets (array $ids, s2_search_fetcher $fetcher)
 	{
-if (defined('DEBUG')) $start_time = microtime(true);
 		$snippets = array();
-
 		s2_search_stemmer::stem_caching(1);
 
 		$articles = $fetcher->texts($ids);
-if (defined('DEBUG')) echo 'Сниппеты - данные: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		$replace = array(
 			"\r"		=> '',
@@ -606,16 +603,13 @@ if (defined('DEBUG')) echo 'Сниппеты - данные: ', - $start_time + 
 				$snippets[$id]['start_text'] = $reserved_line;
 				continue;
 			}
-if (defined('DEBUG')) echo 'Сниппеты - готовим: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
-			// Check every sentence for the query words
+			// Check the text for the query words
 			// Modifier S works poorly on cyrillic :(
 			preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $string, $matches, PREG_OFFSET_CAPTURE);
-//print_r($matches);
-if (defined('DEBUG')) echo 'Сниппеты - регулярка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
-			$line = 0;
-			$line_end = strlen($lines[$line]);
+			$line_num = 0;
+			$line_end = strlen($lines[$line_num]);
 
 			$found_words = $found_stems_lines = $lines_weight = array();
 			foreach ($matches[0] as $i => $word_info)
@@ -630,21 +624,19 @@ if (defined('DEBUG')) echo 'Сниппеты - регулярка: ', - $start_t
 
 				$offset = $word_info[1];
 
-				while ($line_end < $offset && isset($lines[$line + 1]))
+				while ($line_end < $offset && isset($lines[$line_num + 1]))
 				{
-					$line++;
-					$line_end += 1 + strlen($lines[$line]);
+					$line_num++;
+					$line_end += 1 + strlen($lines[$line_num]);
 				}
 
-				$found_words[$line][] = $word;
-				$found_stems_lines[$line][$stem] = 1;
-				if (isset($lines_weight[$line]))
-					$lines_weight[$line]++;
+				$found_words[$line_num][] = $word;
+				$found_stems_lines[$line_num][$stem] = 1;
+				if (isset($lines_weight[$line_num]))
+					$lines_weight[$line_num]++;
 				else
-					$lines_weight[$line] = 1;
+					$lines_weight[$line_num] = 1;
 			}
-
-if (defined('DEBUG')) echo 'Сниппеты - разбиение на строки: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 			// Finding the best matches for the snippet
 			arsort($lines_weight);
@@ -718,11 +710,7 @@ if (defined('DEBUG')) echo 'Сниппеты - разбиение на стро�
 			$snippets[$id]['snippet'] = $snippet_str;
 			$snippets[$id]['rel'] = count($found_stems) * 1.0 / count($stems);
 			$snippets[$id]['start_text'] = $reserved_line;
-
-if (defined('DEBUG')) echo 'Сниппеты - сортировка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
-
 		}
-if (defined('DEBUG')) echo 'Сниппеты - обработка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		return $snippets;
 	}
