@@ -118,7 +118,7 @@ if ($action == 's2_search_makeindex')
 	$fetcher = new s2_search_custom_fetcher();
 	$finder = new s2_search_indexer(S2_CACHE_DIR, $fetcher);
 	if (!$chapter)
-		$finder->index();
+		echo $finder->index();
 	else
 		$finder->refresh($chapter);
 }

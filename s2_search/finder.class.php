@@ -274,7 +274,7 @@ class s2_search_indexer extends s2_search_worker
 			$this->save_index();
 			clearstatcache();
 
-			die('go_20');
+			return 'go_20';
 		}
 		elseif ($state == 'step')
 		{
@@ -298,7 +298,7 @@ class s2_search_indexer extends s2_search_worker
 					file_put_contents($this->dir.self::buffer_name, '');
 					file_put_contents($this->dir.self::buffer_pointer, '');
 					file_put_contents($this->dir.self::process_state, '');
-					die('stop');
+					return 'stop';
 				}
 
 				$file_pointer += strlen($data);
@@ -311,10 +311,12 @@ class s2_search_indexer extends s2_search_worker
 			file_put_contents($this->dir.self::buffer_pointer, $file_pointer);
 			$this->save_index();
 
-			die('go_'.(20 + (int)(80.0*$file_pointer/filesize($this->dir.self::buffer_name))));
+			return 'go_'.(20 + (int)(80.0*$file_pointer/filesize($this->dir.self::buffer_name)));
 		}
 
 		file_put_contents($this->dir.self::process_state, '');
+
+		return 'unknown state';
 	}
 
 	protected function remove_from_index ($chapter)
