@@ -561,9 +561,25 @@ class s2_search_finder extends s2_search_worker
 
 	public function snippets (array $ids, s2_search_fetcher $fetcher)
 	{
+if (defined('DEBUG')) $start_time = microtime(true);
 		$snippets = array();
 
+		s2_search_stemmer::stem_caching(1);
+
 		$articles = $fetcher->texts($ids);
+if (defined('DEBUG')) echo 'Сниппеты - данные: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+
+		$replace = array(
+			"\r"		=> '',
+			'ё'			=> 'е',
+			'&nbsp;'	=> ' ',
+			'&mdash;'	=> '—',
+			'&ndash;'	=> '–',
+			'&laquo;'	=> '«',
+			'&laquo;'	=> '»',
+		);
+		foreach (array('<br>', '<br />', '</h1>', '</h2>', '</h3>', '</h4>', '</p>', '</code>', '</blockquote>', '</ul>', '</ol>') as $tag)
+			$replace[$tag] = $tag."\r";
 
 		foreach ($articles as $id => $string)
 		{
@@ -575,25 +591,12 @@ class s2_search_finder extends s2_search_worker
 					$full_words[$stems[] = s2_search_stemmer::stem_word($word)] = $word;
 
 			// Text cleanup
-			$string = str_replace("\r", '', $string);
-			$string = str_replace('&nbsp;', ' ', $string);
-			$string = str_replace('&mdash;', '—', $string);
-			$string = str_replace('&ndash;', '–', $string);
-			$string = str_replace('&laquo;', '«', $string);
-			$string = str_replace('&laquo;', '»', $string);
-			$string = str_replace('<br>', "<br>\r", $string);
-			$string = str_replace('<br />', "<br />\r", $string);
-			$string = str_replace('</h2>', "</h2>\r", $string);
-			$string = str_replace('</h3>', "</h3>\r", $string);
-			$string = str_replace('</h4>', "</h4>\r", $string);
-			$string = str_replace('</p>', "</p>\r", $string);
-			$string = str_replace('</code>', "</code>\r", $string);
-			$string = str_replace('</ol>', "</ol>\r", $string);
-			$string = str_replace('</ul>', "</ul>\r", $string);
-			$string = str_replace('</blockquote>', "</blockquote>\r", $string);
+			$string = str_replace(array_keys($replace), array_values($replace), $string);
 			$string = strip_tags($string);
-			$string = str_replace('ё', 'е', $string);
-			$lines = preg_split('#((?<=[\.?!:;])[ \n\t]+|\r)#s', $string);
+
+			// Breaking the text into lines
+			$string = preg_replace('#(?<=[\.?!:;])[ \n\t]+#sS', "\r", $string);
+			$lines = explode("\r", $string);
 			$reserved_line = $lines[0].(isset($lines[1]) ? ' '.$lines[1] : '');
 
 			if (empty($full_words))
@@ -603,49 +606,45 @@ class s2_search_finder extends s2_search_worker
 				$snippets[$id]['start_text'] = $reserved_line;
 				continue;
 			}
+if (defined('DEBUG')) echo 'Сниппеты - готовим: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
-			// Remove the sentences without stems
+			// Check every sentence for the query words
+			// Modifier S works poorly on cyrillic :(
+			preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $string, $matches, PREG_OFFSET_CAPTURE);
+//print_r($matches);
+if (defined('DEBUG')) echo 'Сниппеты - регулярка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+
+			$line = 0;
+			$line_end = strlen($lines[$line]);
+
 			$found_words = $found_stems_lines = $lines_weight = array();
-			for ($i = count($lines); $i-- ;)
+			foreach ($matches[0] as $i => $word_info)
 			{
-				// Check every sentence for the query words
-				// Modifier S works poorly on cyrillic :(
-				preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $lines[$i], $matches);
-				foreach ($matches[0] as $k => $word)
-				{
-					$stem = utf8_strtolower($matches[1][$k]);
-					$word = utf8_strtolower($word);
-					$stemmed_word = s2_search_stemmer::stem_word($word);
-					if ($stem != $word && $stem != $stemmed_word && $stemmed_word != $full_words[$stem])
-					{
-						unset($matches[0][$k]);
-						unset($matches[1][$k]);
-					}
-					else
-						$matches[1][$k] = $stem;
-				}
+				$word = utf8_strtolower($word_info[0]);
+				$stem = utf8_strtolower($matches[1][$i][0]);
+				$stemmed_word = s2_search_stemmer::stem_word($word);
 
-				if (!count($matches[0]))
-				{
-					unset($lines[$i]);
+				// Ignore entry if the word stem differs from needed ones
+				if ($stem != $word && $stem != $stemmed_word && $stemmed_word != $full_words[$stem])
 					continue;
-				}
 
-				$stem_weight = array();
+				$offset = $word_info[1];
 
-				foreach ($matches[0] as $word)
-					$found_words[$i][] = $word;
-
-				foreach ($matches[1] as $stem)
+				while ($line_end < $offset && isset($lines[$line + 1]))
 				{
-					$found_stems_lines[$i][$stem] = 1;
-					if (isset($stem_weight[$stem]))
-						$stem_weight[$stem] ++;
-					else
-						$stem_weight[$stem] = 1;
+					$line++;
+					$line_end += 1 + strlen($lines[$line]);
 				}
-				$lines_weight[$i] = array_sum($stem_weight);
+
+				$found_words[$line][] = $word;
+				$found_stems_lines[$line][$stem] = 1;
+				if (isset($lines_weight[$line]))
+					$lines_weight[$line]++;
+				else
+					$lines_weight[$line] = 1;
 			}
+
+if (defined('DEBUG')) echo 'Сниппеты - разбиение на строки: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 			// Finding the best matches for the snippet
 			arsort($lines_weight);
@@ -720,7 +719,10 @@ class s2_search_finder extends s2_search_worker
 			$snippets[$id]['rel'] = count($found_stems) * 1.0 / count($stems);
 			$snippets[$id]['start_text'] = $reserved_line;
 
+if (defined('DEBUG')) echo 'Сниппеты - сортировка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+
 		}
+if (defined('DEBUG')) echo 'Сниппеты - обработка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		return $snippets;
 	}
