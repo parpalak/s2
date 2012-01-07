@@ -176,7 +176,17 @@ class s2_search_indexer extends s2_search_worker
 	protected function add_word_to_fulltext ($id, $position, $word)
 	{
 		$word = s2_search_stemmer::stem_word($word);
-		$this->fulltext_index[$word][$id] = (isset($this->fulltext_index[$word][$id]) ? $this->fulltext_index[$word][$id].'|' : '').base_convert($position, 10, 36);
+
+		if (isset($this->fulltext_index[$word][$id]))
+		{
+			$value = $this->fulltext_index[$word][$id];
+			if (is_int($value))
+				$this->fulltext_index[$word][$id] = base_convert($value, 10, 36).'|'.base_convert($position, 10, 36);
+			else
+				$this->fulltext_index[$word][$id] = $value.'|'.base_convert($position, 10, 36);
+		}
+		else
+			$this->fulltext_index[$word][$id] = $position;
 	}
 
 	protected function add_to_index ($chapter, $title, $contents, $keywords)
@@ -513,10 +523,16 @@ class s2_search_finder extends s2_search_worker
 				foreach ($this->fulltext_index[$search_word] as $id => $entries)
 				{
 					$chapter = $this->chapters[$id];
-					$entries = explode('|', $entries);
+
 					// Remember chapters and positions
-					foreach ($entries as $position)
-						$curr_positions[$chapter][] = base_convert($position, 36, 10);
+					if (is_int($entries))
+						$curr_positions[$chapter][] = $entries;
+					else
+					{
+						$entries = explode('|', $entries);
+						foreach ($entries as $position)
+							$curr_positions[$chapter][] = base_convert($position, 36, 10);
+					}
 
 					if (!isset ($this->keys[$chapter][$word]))
 						$this->keys[$chapter][$word] = count($entries) * $word_weight;
