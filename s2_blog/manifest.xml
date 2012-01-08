@@ -859,7 +859,7 @@ if ($request_uri == S2_BLOG_URL.'/rss.xml')
 	$filename = '/data/rss_s2_blog.txt';
 		]]></hook>
 
-		<hook id="s2_search_index_after_walk"><![CDATA[
+		<hook id="s2_search_fetcher_process_end"><![CDATA[
 global $s2_db;
 $query = array (
 	'SELECT'	=> 'id, title, text, create_time, url',
@@ -870,23 +870,17 @@ $query = array (
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 while ($s2_blog_post = $s2_db->fetch_assoc($result))
 {
-	self::buffer_chapter('s2_blog_'.$s2_blog_post['id'], $s2_blog_post['title'], $s2_blog_post['text'], '');
-	self::$table_of_contents['s2_blog_'.$s2_blog_post['id']] = array(
-		'title'		=> $s2_blog_post['title'],
-		'descr'		=> '',
-		'time'		=> $s2_blog_post['create_time'],
-		'url'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'],
-	);
+	$indexer->buffer_chapter('s2_blog_'.$s2_blog_post['id'], $s2_blog_post['title'], $s2_blog_post['text'], '', '', $s2_blog_post['create_time'], str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url']);
 }
 		]]></hook>
 
-		<hook id="s2_search_get_chapter_start"><![CDATA[
-if (substr($chapter, 0, 8) == 's2_blog_')
+		<hook id="s2_search_fetcher_chapter_start"><![CDATA[
+if (substr($id, 0, 8) == 's2_blog_')
 {
 	$query = array (
 		'SELECT'	=> 'id, title, text, create_time, url',
 		'FROM'		=> 's2_blog_posts',
-		'WHERE'		=> 'published = 1 AND id = '.intval(substr($chapter, 8)),
+		'WHERE'		=> 'published = 1 AND id = '.intval(substr($id, 8)),
 	);
 	($hook = s2_hook('s2_blog_pre_get_chapter_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -908,7 +902,7 @@ if (substr($chapter, 0, 8) == 's2_blog_')
 }
 		]]></hook>
 
-		<hook id="s2_search_get_snippets_start"><![CDATA[
+		<hook id="s2_search_fetcher_texts_start"><![CDATA[
 $s2_blog_ids = array();
 foreach ($ids as $k => $v)
 	if (substr($v, 0, 8) == 's2_blog_')
