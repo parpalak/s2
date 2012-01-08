@@ -644,7 +644,7 @@ class s2_search_finder extends s2_search_worker
 					$line_end += 1 + strlen($lines[$line_num]);
 				}
 
-				$found_words[$line_num][] = $word;
+				$found_words[$line_num][] = $word_info[0];
 				$found_stems_lines[$line_num][$stem] = 1;
 				if (isset($lines_weight[$line_num]))
 					$lines_weight[$line_num]++;
