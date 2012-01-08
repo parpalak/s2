@@ -584,7 +584,7 @@ class s2_search_finder extends s2_search_worker
 
 		// Text cleanup
 		$replace_what = array("\r", 'ё', '&nbsp;', '&mdash;', '&ndash;', '&laquo;', '&laquo;');
-		$replace_to = array('', 'е', ' ', '—', '–', '«', '»',);
+		$replace_to = array('', 'е', ' ', '—', '–', '«', '»',);
 		foreach (array('<br>', '<br />', '</h1>', '</h2>', '</h3>', '</h4>', '</p>', '</code>', '</blockquote>', '</ul>', '</ol>') as $tag)
 		{
 			$replace_what[] = $tag;
