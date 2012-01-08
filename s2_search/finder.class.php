@@ -26,7 +26,7 @@ abstract class s2_search_worker
 
 	protected $dir;
 
-	function __construct($dir)
+	function __construct ($dir)
 	{
 		$this->dir = $dir;
 	}
@@ -131,7 +131,7 @@ class s2_search_indexer extends s2_search_worker
 	protected $fetcher;
 	protected $chapter_lengths = array();
 
-	function __construct($dir, s2_search_fetcher $fetcher)
+	function __construct ($dir, s2_search_fetcher $fetcher)
 	{
 		parent::__construct($dir);
 		$this->fetcher = $fetcher;
@@ -399,7 +399,7 @@ class s2_search_finder extends s2_search_worker
 	protected $keys;
 	protected $chapters = array();
 
-	function __construct($dir)
+	function __construct ($dir)
 	{
 		parent::__construct($dir);
 		$this->read_index();
@@ -791,7 +791,7 @@ if (defined('DEBUG'))
 
 class s2_search_title_finder extends s2_search_worker
 {
-	function __construct($dir)
+	function __construct ($dir)
 	{
 		parent::__construct($dir);
 		$this->read_index();
