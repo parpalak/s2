@@ -228,11 +228,9 @@ class s2_search_indexer extends s2_search_worker
 
 			// If the word contains hyphen, add a variant without it
 			if (strlen($word) > 1 && false !== strpos($word, '-'))
-			{
-				$new_word = str_replace('-', '', $word);
-				if ($new_word != '')
-					$this->add_word_to_fulltext($id, $i, $new_word);
-			}
+				foreach (explode('-', $word) as $subword)
+					if ($subword)
+						$this->add_word_to_fulltext($id, $i, $subword);
 		}
 	}
 
