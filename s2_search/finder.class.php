@@ -260,7 +260,7 @@ class s2_search_indexer extends s2_search_worker
 
 	protected function cleanup_index ()
 	{
-		$threshold = count($this->table_of_contents) * 0.3;
+		$threshold = count($this->table_of_contents) * 0.5;
 		if ($threshold < 20)
 			$threshold = 20;
 
@@ -492,7 +492,7 @@ class s2_search_finder extends s2_search_worker
 
 	protected static function neighbour_weight ($distance)
 	{
-		return max(13 - 2*$distance, 2);
+		return max(13 - $distance, 3);
 	}
 
 	protected function find_fulltext ($words)
