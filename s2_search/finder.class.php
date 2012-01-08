@@ -219,12 +219,9 @@ class s2_search_indexer extends s2_search_worker
 
 			// Remove ё from the fulltext index
 			if (false !== strpos($word, 'ё'))
-			{
-				$new_word = str_replace('ё', 'е', $word);
-				$this->add_word_to_fulltext($id, $i, $new_word);
-			}
-			else
-				$this->add_word_to_fulltext($id, $i, $word);
+				$word = str_replace('ё', 'е', $word);
+
+			$this->add_word_to_fulltext($id, $i, $word);
 
 			// If the word contains hyphen, add a variant without it
 			if (strlen($word) > 1 && false !== strpos($word, '-'))
