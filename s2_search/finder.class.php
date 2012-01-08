@@ -619,8 +619,7 @@ class s2_search_finder extends s2_search_worker
 			}
 
 			// Check the text for the query words
-			// Modifier S works poorly on cyrillic :(
-			preg_match_all('#(?<=[^a-zа-я]|^)('.implode('|', $stems).')[a-zа-я]*#sui', $string, $matches, PREG_OFFSET_CAPTURE);
+			preg_match_all('#(?<=\s|^)('.implode('|', $stems).')[^\s\.?!:;,()]*#Ssi', $string, $matches, PREG_OFFSET_CAPTURE);
 
 			$line_num = 0;
 			$line_end = strlen($lines[$line_num]);
