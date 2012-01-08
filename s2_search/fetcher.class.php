@@ -7,7 +7,7 @@
  * @package s2_search
  */
 
-abstract class s2_search_fetcher
+interface s2_search_generic_fetcher
 {
 	// Walks through all pages and gets info about them
 	// This method should call the following method
@@ -15,16 +15,16 @@ abstract class s2_search_fetcher
 	//
 	// s2_search_indexer::buffer_chapter($id, $title, $text,
 	//   $meta_keywords, $meta_description, $time, $url);
-	abstract public function process (s2_search_indexer $indexer);
+	public function process (s2_search_indexer $indexer);
 
 	// Returns info about a page ID
-	abstract public function chapter ($id);
+	public function chapter ($id);
 
 	// Returns page text for a given array of IDs
-	abstract public function texts ($ids);
+	public function texts ($ids);
 }
 
-class s2_search_custom_fetcher extends s2_search_fetcher
+class s2_search_fetcher implements s2_search_generic_fetcher
 {
 	private $indexer;
 

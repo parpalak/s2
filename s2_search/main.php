@@ -58,7 +58,7 @@ if ($s2_search_query !== '')
 	require $ext_info['path'].'/finder.class.php';
 	require $ext_info['path'].'/fetcher.class.php';
 
-	$fetcher = new s2_search_custom_fetcher();
+	$fetcher = new s2_search_fetcher();
 	$finder = new s2_search_finder(S2_CACHE_DIR);
 
 	list($weights, $toc) = $finder->find($s2_search_query);

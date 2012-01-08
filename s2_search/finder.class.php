@@ -131,7 +131,7 @@ class s2_search_indexer extends s2_search_worker
 	protected $fetcher;
 	protected $chapter_lengths = array();
 
-	function __construct ($dir, s2_search_fetcher $fetcher)
+	function __construct ($dir, s2_search_generic_fetcher $fetcher)
 	{
 		parent::__construct($dir);
 		$this->fetcher = $fetcher;
@@ -570,7 +570,7 @@ class s2_search_finder extends s2_search_worker
 		}
 	}
 
-	public function snippets (array $ids, s2_search_fetcher $fetcher)
+	public function snippets (array $ids, s2_search_generic_fetcher $fetcher)
 	{
 		$snippets = array();
 		s2_search_stemmer::stem_caching(1);
