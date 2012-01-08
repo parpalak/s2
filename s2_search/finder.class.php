@@ -35,19 +35,17 @@ abstract class s2_search_worker
 	{
 		if (count($this->fulltext_index))
 			return false;
-if (defined('DEBUG'))
-	$start_time = microtime(true);
+if (defined('DEBUG')) $start_time = microtime(true);
 
 		if (!is_file($this->dir.self::index_name))
 		{
-			if (defined('DEBUG'))
-				echo 'Can\'t find index file. Try to rebuild search index.';
+if (defined('DEBUG')) echo 'Can\'t find index file. Try to rebuild search index.';
 			return false;
 		}
 
 		$data = file_get_contents($this->dir.self::index_name);
-if (defined('DEBUG'))
-	echo 'Чтение файла индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+
+if (defined('DEBUG')) echo 'Чтение файла индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		$end = strpos($data, "\n");
 		$my_data = substr($data, 8, $end);
@@ -79,8 +77,7 @@ if (defined('DEBUG'))
 		$data = substr($data, $end + 1);
 		$this->table_of_contents = unserialize($my_data);
 
-if (defined('DEBUG'))
-	echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+if (defined('DEBUG')) echo 'Чтение индекса: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 	}
 
 	protected function save_index ()
@@ -730,33 +727,29 @@ class s2_search_finder extends s2_search_worker
 
 	public function find ($search_string)
 	{
-if (defined('DEBUG'))
-	$start_time = microtime(true);
+
+if (defined('DEBUG')) $start_time = microtime(true);
 
 		$this->keys = array();
 
 		$raw_words = self::filter_input($search_string);
 		$cleaned_search_string = implode(' ', $raw_words);
 
-if (defined('DEBUG'))
-	echo 'Чистка строки: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+if (defined('DEBUG')) echo 'Чистка строки: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 
 		if (count($raw_words) > 1)
 			$this->find_spaced_keywords($cleaned_search_string);
 
-if (defined('DEBUG'))
-	echo 'Ключевые слова с пробелом: ', - $start_time + ($start_time = microtime(true)), '<br>';
+if (defined('DEBUG')) echo 'Ключевые слова с пробелом: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
 		foreach ($raw_words as $word)
 			$this->find_simple_keywords($word);
 
-if (defined('DEBUG'))
-	echo 'Одиночные ключевые слова: ', - $start_time + ($start_time = microtime(true)), '<br>';
+if (defined('DEBUG')) echo 'Одиночные ключевые слова: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
 		$this->find_fulltext($raw_words);
 
-if (defined('DEBUG'))
-	echo 'Полнотекстовый поиск: ', - $start_time + ($start_time = microtime(true)), '<br>';
+if (defined('DEBUG')) echo 'Полнотекстовый поиск: ', - $start_time + ($start_time = microtime(true)), '<br>';
 
 		// Determine relevance
 
@@ -780,11 +773,11 @@ if (defined('DEBUG') && defined('MORE_DEBUG'))
 if (defined('DEBUG'))
 {
 	echo '<pre>';
-	print_r($this->keys);
 	print_r($weights);
 	echo '</pre>';
 	echo 'Финальная обработка: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
 }
+
 		return array($weights, $toc);
 	}
 }

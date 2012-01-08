@@ -63,8 +63,7 @@ if ($s2_search_query !== '')
 
 	list($weights, $toc) = $finder->find($s2_search_query);
 
-if (defined('DEBUG'))
-	$start_time = microtime(true);
+if (defined('DEBUG')) $start_time = microtime(true);
 
 	$page = array();
 
