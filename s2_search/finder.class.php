@@ -706,8 +706,12 @@ class s2_search_finder extends s2_search_worker
 			$snippet_str = '';
 			ksort($snippet);
 			$previous_line_num = -1;
-			foreach ($snippet as $line_num => $line)
+			foreach ($snippet as $line_num => &$line)
 			{
+				// Cleaning up unbalanced quotation makrs
+				$line = preg_replace('#«(.*?)»#Ss', '&laquo;\\1&raquo;', $line);
+				$line = str_replace(array('«', '»'), array('', ''), $line);
+
 				if ($previous_line_num == -1)
 					$snippet_str = $line;
 				else
