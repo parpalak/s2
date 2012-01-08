@@ -582,19 +582,22 @@ class s2_search_finder extends s2_search_worker
 
 		$articles = $fetcher->texts($ids);
 
-		$replace = array(
-			"\r"		=> '',
-			'ё'			=> 'е',
-			'&nbsp;'	=> ' ',
-			'&mdash;'	=> '—',
-			'&ndash;'	=> '–',
-			'&laquo;'	=> '«',
-			'&laquo;'	=> '»',
-		);
+		// Text cleanup
+		$replace_what = array("\r", 'ё', '&nbsp;', '&mdash;', '&ndash;', '&laquo;', '&laquo;');
+		$replace_to = array('', 'е', ' ', '—', '–', '«', '»',);
 		foreach (array('<br>', '<br />', '</h1>', '</h2>', '</h3>', '</h4>', '</p>', '</code>', '</blockquote>', '</ul>', '</ol>') as $tag)
-			$replace[$tag] = $tag."\r";
+		{
+			$replace_what[] = $tag;
+			$replace_to[] = $tag."\r";
+		}
+		$articles = str_replace($replace_what, $replace_to, $articles);
+		foreach ($articles as $id => &$string)
+			$string = strip_tags($string);
 
-		foreach ($articles as $id => $string)
+		// Preparing for breaking into lines
+		$articles = preg_replace('#(?<=[\.?!:;])[ \n\t]+#sS', "\r", $articles);
+
+		foreach ($articles as $id => &$string)
 		{
 			// Stems of the words found in the $id chapter
 			$stems = $full_words = array();
@@ -603,12 +606,7 @@ class s2_search_finder extends s2_search_worker
 				if (0 !== strpos($word, '*n_') && !isset($this->excluded_words[$word]))
 					$full_words[$stems[] = s2_search_stemmer::stem_word($word)] = $word;
 
-			// Text cleanup
-			$string = str_replace(array_keys($replace), array_values($replace), $string);
-			$string = strip_tags($string);
-
 			// Breaking the text into lines
-			$string = preg_replace('#(?<=[\.?!:;])[ \n\t]+#sS', "\r", $string);
 			$lines = explode("\r", $string);
 			$reserved_line = $lines[0].(isset($lines[1]) ? ' '.$lines[1] : '');
 
