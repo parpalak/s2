@@ -285,7 +285,7 @@ var SetBackground = (function ()
 
 	function css_rule ()
 	{
-		return 'body, .tabsheets > .tabsheets > dd, .tabsheets > dd > .reducer, #tag_names li.cur_tag {background: ' + back_img + ' ' + color + '; background-size: ' + _size*8 + 'px ' + _size + 'px;} .tabsheets > dt.active {background-color: ' + color + ';}';
+		return 'body, .tabsheets .tabsheets > dd, .tabsheets > dd > .reducer, #tag_names li.cur_tag {background: ' + back_img + ' ' + color + '; background-size: ' + _size*8 + 'px ' + _size + 'px;} .tabsheets > dt.active {background-color: ' + color + ';}';
 	}
 
 	var head = document.getElementsByTagName('head')[0],
