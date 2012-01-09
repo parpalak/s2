@@ -260,7 +260,7 @@ var SetBackground = (function ()
 
 		var ctx = canvas.getContext('2d'),
 			imgData = ctx.createImageData(canvas.width, canvas.height),
-			maxAlpha = 5.5,
+			maxAlpha = 4.5,
 			maxLine = 4;
 
 		var repeat_num = 0;
@@ -283,11 +283,6 @@ var SetBackground = (function ()
 
 	setTimeout(Noise, 0);
 
-	function css_rule ()
-	{
-		return 'body, .tabsheets .tabsheets > dd, .tabsheets > dd > .reducer, #tag_names li.cur_tag {background: ' + back_img + ' ' + color + '; background-size: ' + _size*8 + 'px ' + _size + 'px;} .tabsheets > dt.active {background-color: ' + color + ';}';
-	}
-
 	var head = document.getElementsByTagName('head')[0],
 		style = document.createElement('style');
 
@@ -297,14 +292,15 @@ var SetBackground = (function ()
 	var set = function (c)
 	{
 		color = c;
+		var css_rule = 'body, .tabsheets .tabsheets > dd, .tabsheets > dd > .reducer, #tag_names li.cur_tag {background: ' + back_img + ' ' + color + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;} .tabsheets > dt.active {background-color: ' + color + ';}';
 
 		if (style.styleSheet)
-			style.styleSheet.cssText = css_rule();
+			style.styleSheet.cssText = css_rule;
 		else
 		{
 			if (style.firstChild)
 				style.removeChild(style.firstChild);
-			style.appendChild(document.createTextNode(css_rule()));
+			style.appendChild(document.createTextNode(css_rule));
 		}
 		return false;
 	}
