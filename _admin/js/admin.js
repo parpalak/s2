@@ -247,23 +247,64 @@ function CloseOtherSessions ()
 
 var SetBackground = (function ()
 {
-	var background_items = 'body, .tabsheets > dt.active, .tabsheets .tabsheets > dd, .tabsheets > dd .reducer, #tag_names li.cur_tag',
-		head = document.getElementsByTagName('head')[0],
+	var back_img = '', color = '#eee',
+		_size = 100;
+
+	function Noise ()
+	{
+		if (!!!document.createElement('canvas').getContext)
+			return false;
+
+		var canvas = document.createElement('canvas');
+		canvas.width = canvas.height = _size;
+
+		var ctx = canvas.getContext('2d'),
+			imgData = ctx.createImageData(canvas.width, canvas.height),
+			maxAlpha = 5.5,
+			maxLine = 4;
+
+		var repeat_num = 0;
+ 		for (var y = canvas.height; y--; )
+		for (var x = canvas.width, index = (x + y * imgData.width) * 4; x--; )
+		{
+			var alpha = Math.random() * maxLine < repeat_num++ ? (repeat_num = 0) + ~~(Math.random() * maxAlpha) : alpha;
+			index -= 4;
+			imgData.data[index] = imgData.data[index + 1] = imgData.data[index + 2] = 0;
+			imgData.data[index + 3] = alpha;
+		}
+
+		ctx.putImageData(imgData, 0, 0);
+		uri = canvas.toDataURL('image/png');
+
+		back_img = 'url(' + uri + ')';
+
+		set(color);
+	}
+
+	setTimeout(Noise, 0);
+
+	function css_rule ()
+	{
+		return 'body, .tabsheets > .tabsheets > dd, .tabsheets > dd > .reducer, #tag_names li.cur_tag {background: ' + back_img + ' ' + color + '; background-size: ' + _size*8 + 'px ' + _size + 'px;} .tabsheets > dt.active {background-color: ' + color + ';}';
+	}
+
+	var head = document.getElementsByTagName('head')[0],
 		style = document.createElement('style');
 
 	style.type = 'text/css';
 	head.appendChild(style);
 
-	var set = function (color)
+	var set = function (c)
 	{
-		var rules = background_items + '{background-color: ' + color + ';}';
+		color = c;
+
 		if (style.styleSheet)
-			style.styleSheet.cssText = rules;
+			style.styleSheet.cssText = css_rule();
 		else
 		{
 			if (style.firstChild)
 				style.removeChild(style.firstChild);
-			style.appendChild(document.createTextNode(rules));
+			style.appendChild(document.createTextNode(css_rule()));
 		}
 		return false;
 	}
