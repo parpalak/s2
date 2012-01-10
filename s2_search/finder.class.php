@@ -386,6 +386,7 @@ class s2_search_indexer extends s2_search_worker
 			$this->add_to_index($chapter, self::htmlstr_to_str($data[0]), self::htmlstr_to_str($data[1]), $data[2]);
 		}
 
+		$this->cleanup_index();
 		$this->save_index();
 	}
 
