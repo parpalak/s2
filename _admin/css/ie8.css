@@ -29,7 +29,18 @@ div.input.checkbox input,
 		border-bottom: none;
 		}
 
-
 a, a:visited {
 	border-bottom: 1px solid #bce;
+	}
+
+.tabsheets > dt {
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#00000000', EndColorStr='#17000000')";
+	}
+
+.tabsheets > dt.active {
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#e6ffffff', EndColorStr='#00ffffff')";
+	}
+
+.loginform {
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#f4f4f4', EndColorStr='#e5e5e5')";
 	}
