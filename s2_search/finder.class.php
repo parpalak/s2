@@ -707,7 +707,9 @@ class s2_search_finder extends s2_search_worker
 			{
 				// Cleaning up unbalanced quotation makrs
 				$line = preg_replace('#«(.*?)»#Ss', '&laquo;\\1&raquo;', $line);
-				$line = str_replace(array('«', '»'), array('', ''), $line);
+				$line = str_replace(array('&quot', '«', '»'), array('"', ''), $line);
+				if (substr_count($line, '"') % 2)
+					$line = str_replace('"', '', $line);
 
 				if ($previous_line_num == -1)
 					$snippet_str = $line;
