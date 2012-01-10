@@ -248,7 +248,7 @@ function CloseOtherSessions ()
 var SetBackground = (function ()
 {
 	var back_img = '', color = '#eee',
-		_size = 100;
+		_size = 150;
 
 	function Noise ()
 	{
@@ -260,7 +260,7 @@ var SetBackground = (function ()
 
 		var ctx = canvas.getContext('2d'),
 			imgData = ctx.createImageData(canvas.width, canvas.height),
-			maxAlpha = 4.5,
+			maxAlpha = 5.5,
 			maxLine = 4;
 
 		var repeat_num = 0;
@@ -274,9 +274,8 @@ var SetBackground = (function ()
 		}
 
 		ctx.putImageData(imgData, 0, 0);
-		uri = canvas.toDataURL('image/png');
 
-		back_img = 'url(' + uri + ')';
+		back_img = 'url(' + canvas.toDataURL('image/png') + ')';
 
 		set(color);
 	}
