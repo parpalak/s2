@@ -18,7 +18,8 @@ header('X-Powered-By: S2/'.S2_VERSION);
 
 $s2_search_query = isset($_GET['q']) ? $_GET['q'] : '';
 
-require 'finder.class.php';
+require 'worker.class.php';
+require 'title_finder.class.php';
 
 if ($s2_search_query !== '')
 {

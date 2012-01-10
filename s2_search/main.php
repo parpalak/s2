@@ -55,6 +55,7 @@ ob_start();
 if ($s2_search_query !== '')
 {
 	require $ext_info['path'].'/stemmer.class.php';
+	require $ext_info['path'].'/worker.class.php';
 	require $ext_info['path'].'/finder.class.php';
 	require $ext_info['path'].'/fetcher.class.php';
 
