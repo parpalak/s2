@@ -73,7 +73,7 @@ body {
 	z-index: 1;
 	top: 0;
 	right: 0;
-	padding: 0.0em 3px;
+	padding: 0 3px;
 	background: #fff;
 	color: #000;
 	border-left: 1px solid #ccc;
@@ -132,7 +132,6 @@ a > img {
 	background-size: 8px 1px;
 	background-repeat: repeat-x;
 	background-position: 0 100%;
-	color: #05c;
 	outline: none;
 	}
 
@@ -425,7 +424,6 @@ hr {
 
 #tree {
 	background: #fff;
-	color: #000;
 	border: 1px solid #eee;
 	border-color: #aaa #fff #fff #aaa;
 	position: relative;
@@ -468,15 +466,10 @@ hr {
 	.treetree li {
 		list-style-type: none;
 		display: block;
-		background-image : url(../i/tree_icons.png);
-		background-position: -72px 0;
-		background-repeat : repeat-y;
+		background : url(../i/tree_icons.png) -72px 0 repeat-y;
 		margin-left: 18px;
 		}
-		.treetree li.IsLast {
-			background-position: -72px -27px;
-			background-repeat: no-repeat;
-			}
+		.treetree li.IsLast,
 		.treetree li:last-child {
 			background-position: -72px -27px;
 			background-repeat: no-repeat;
@@ -499,9 +492,7 @@ hr {
 				height: 18px;
 				float: left;
 				margin-left: 0;
-				background-image : url(../i/tree_icons.png);
-				background-position: -36px 0;
-				background-repeat : no-repeat;
+				background : url(../i/tree_icons.png) -36px 0 no-repeat;
 				}
 				.treetree .ExpandOpen > div:first-child {
 					background-position: 0 -18px;
@@ -512,13 +503,10 @@ hr {
 				.treetree .ExpandLeaf > div:first-child {
 					background-position: -36px 0;
 					}
- 				.treetree .ExpandOpen.Search, 
- 				.treetree .ExpandClosed.Search {
+ 				.treetree .Search {
 					color: #999;
 					}
- 				.treetree .ExpandLeaf.Search.Match,
- 				.treetree .ExpandOpen.Search.Match,
- 				.treetree .ExpandClosed.Search.Match {
+ 				.treetree .Search.Match {
 					color: #03a;
 					}
 
@@ -1060,8 +1048,7 @@ div.input.color input,
 		height: 16px;
 		width: 16px;
 		border: transparent solid 1px;
-		background-image: url(../i/toolbar.png);
-		background-color: transparent;
+		background: url(../i/toolbar.png) transparent;
 		-webkit-background-origin: padding-box;
 		-moz-background-origin: padding;
 		background-origin: padding-box;

@@ -67,6 +67,7 @@ s2_test_user_rights($is_permission);
 <meta http-equiv="Pragma" content="no-cache" />
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
+<!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/pictman.js"></script>
 <script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
