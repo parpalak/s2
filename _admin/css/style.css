@@ -892,7 +892,6 @@ ul .but_panel .delete,
 	}
 	.r-float label {
 		display: block;
-		overflow: hidden;
 		margin: 0 0 0.5em;
 		}
 		.r-float label.error {
@@ -1107,6 +1106,7 @@ div.input.color input,
 
 #search_field {
 	float: right;
+	margin: 1px;
 	width: 300px;
 	}
 	#search_field.inactive {
