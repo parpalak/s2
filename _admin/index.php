@@ -75,6 +75,11 @@ $s2_user = s2_get_user_info($login);
 $return = ($hook = s2_hook('ai_pre_get_template')) ? eval($hook) : null;
 $template = $return ? $return : s2_get_template('site.php');
 
+function s2_jsvarencode ($var)
+{
+	return str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", '') , $var);
+}
+
 ob_start();
 include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
 ($hook = s2_hook('ai_pre_get_tpl_styles')) ? eval($hook) : null;
@@ -100,10 +105,10 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
 var cur_date = new Date();
-var username = '<?php echo $login; ?>';
+var username = '<?php echo s2_jsvarencode($login); ?>';
 var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.getTime();
-var template = '<?php echo str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", '') , $template); ?>';
-SetBackground('<?php echo S2_ADMIN_COLOR; ?>');
+var template = '<?php echo s2_jsvarencode($template); ?>';
+SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 <?php ($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null; ?>
 </script>
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>
