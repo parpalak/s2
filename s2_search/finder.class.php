@@ -312,6 +312,8 @@ class s2_search_finder extends s2_search_worker
 						$replace[$word] = '<i>'.$word.'</i>';
 
 					$snippet[$line_num] = strtr($lines[$line_num], $replace);
+					// Cleaning up HTML entites
+					$snippet[$line_num] = preg_replace('#&[^;]{0,10}(?:<i>'.preg_quote($word, '#').'</i>[^;]{0,15})+;#ue', 'str_replace(array("<i>", "</i>"), "", "\\0")', $snippet[$line_num]);
 
 					// If we have found all stems, we do not need any more sentence
 					if ($max == count($stems))
