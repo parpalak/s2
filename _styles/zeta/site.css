@@ -184,7 +184,10 @@ p.input {
 		vertical-align: middle;
 		}
 
-p.text textarea { width: 99%; }
+p.text textarea {
+	overflow: auto;
+	width: 99%;
+	}
 
 /* Layout */
 
