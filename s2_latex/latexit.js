@@ -87,43 +87,40 @@ var LatexIT = (function ()
 
 		process_item : function (eItem)
 		{
-			while (true)
-			{
-				var bProcessed = false;
-				for (var j = 0, max = eItem.childNodes.length; j < max; j++)
-				{
-					var eCurItem = eItem.childNodes[j];
+			var eNextChild = eItem.firstChild;
 
-					if (eCurItem.nodeType == 1 && eCurItem.nodeName != 'SCRIPT' && eCurItem.nodeName != 'TEXTAREA' && eCurItem.nodeName != 'OBJECT')
-						LatexIT.process_item(eCurItem);
-					else if (eCurItem.nodeType == 3)
+			while (eNextChild)
+			{
+				var eCurChild = eNextChild;
+				eNextChild = eNextChild.nextSibling;
+
+				if (eCurChild.nodeType == 1 && eCurChild.nodeName != 'SCRIPT' && eCurChild.nodeName != 'TEXTAREA' && eCurChild.nodeName != 'OBJECT')
+					LatexIT.process_item(eCurChild);
+				else if (eCurChild.nodeType == 3)
+				{
+					var as = (' ' + eCurChild.nodeValue + ' ').split(/\$\$/g);
+					var item_num = as.length;
+					if (item_num > 2)
 					{
-						var as = (' ' + eCurItem.nodeValue + ' ').split(/\$\$/g);
-						var item_num = as.length;
-						if (item_num > 2)
+						as[0] = as[0].substring(1);
+						as[item_num - 1] = as[item_num - 1].substring(0, as[item_num - 1].length - 1);
+
+						for (var i = 0; i < item_num; i++)
 						{
-							as[0] = as[0].substr(1);
-							as[item_num - 1] = as[item_num - 1].substr(0, as[item_num - 1].length - 1);
-							bProcessed = true;
-							for (var i = 0; i < item_num; i++)
+							if (i % 2)
 							{
-								if (i % 2)
-								{
-									if (i + 1 < item_num)
-										eItem.insertBefore(LatexIT.create_image(as[i]), eCurItem);
-									else
-										eItem.insertBefore(document.createTextNode('$$' + as[i]), eCurItem);
-								}
+								if (i + 1 < item_num)
+									eItem.insertBefore(LatexIT.create_image(as[i]), eCurChild);
 								else
-									eItem.insertBefore(document.createTextNode(as[i]), eCurItem);
+									eItem.insertBefore(document.createTextNode('$$' + as[i]), eCurChild);
 							}
-							eItem.removeChild(eCurItem);
-							break;
+							else
+								eItem.insertBefore(document.createTextNode(as[i]), eCurChild);
 						}
+
+						eItem.removeChild(eCurChild);
 					}
 				}
-				if (!bProcessed)
-					break;
 			}
 		},
 
