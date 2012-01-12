@@ -35,7 +35,7 @@ var LatexIT = (function ()
 	}
 
 	// FF 3 doesn't support svg in <img> and mistakes with <object> size
-	if (!oldFF && document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1"))
+	if (!oldFF && document.implementation && document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1"))
 		ext = 'svg';
 
 	// Add extension styles
