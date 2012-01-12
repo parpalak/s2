@@ -1,8 +1,12 @@
-/*
-* LaTeX IT - JavaScript to Convert Latex within an HTML page into Equations
-* Copyright (C) 2009 William Bateman, 2008 Waipot Ngamsaad
-* Modified by Roman Parpalak
-*/
+/**
+ * Replaces LaTeX formulae with pictures
+ *
+ * Inspired by http://www.codecogs.com/latex/htmlequations.php
+ *
+ * @copyright (C) 2011-2012 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package S2
+ */
 
 var LatexIT = {scale : function(e,scale) {}};
 
