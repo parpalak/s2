@@ -2,19 +2,6 @@
 * LaTeX IT - JavaScript to Convert Latex within an HTML page into Equations
 * Copyright (C) 2009 William Bateman, 2008 Waipot Ngamsaad
 * Modified by Roman Parpalak
-
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 var LatexIT = (function ()
@@ -31,10 +18,10 @@ var LatexIT = (function ()
 		if ((i = fullVersion.indexOf(' ')) != -1)
 			fullVersion = fullVersion.substring(0, i);
 		if (parseInt('' + fullVersion) < 4)
+			// FF 3 doesn't support svg in <img> and mistakes with <object> size
 			oldFF = true;
 	}
 
-	// FF 3 doesn't support svg in <img> and mistakes with <object> size
 	if (!oldFF && document.implementation && document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1"))
 		ext = 'svg';
 
