@@ -1132,9 +1132,10 @@ function LoadComments (iId)
 
 	GETAsyncRequest(sUrl + 'action=load_comments&id=' + iId, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = http.responseText;
-		init_table(null);
-		SelectTab(document.getElementById('comm_tab'), true);
+		var eItem = document.getElementById('comm_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
+		SelectTab(eItem, true);
 	});
 	return false;
 }
@@ -1477,8 +1478,9 @@ function DeleteComment (iId, sMode)
 
 	GETAsyncRequest(sUrl + 'action=delete_comment&id=' + iId + '&mode=' + sMode, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('comm_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 
 	return false;
@@ -1489,8 +1491,9 @@ function SaveComment (sType)
 	var sRequest = StringFromForm(document.commform);
 	POSTAsyncRequest(sUrl + 'action=save_comment&type=' + sType, sRequest, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('comm_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 	return false;
 }
@@ -1499,8 +1502,9 @@ function LoadTable (sAction, sID)
 {
 	GETAsyncRequest(sUrl + 'action=' + sAction, function (http)
 	{
-		document.getElementById(sID).innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById(sID);
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 	return false;
 }
@@ -1509,8 +1513,9 @@ function LoadCommentsTable (sAction, iId, sMode)
 {
 	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + iId + '&mode=' + sMode, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('comm_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 	return false;
 }
@@ -1664,8 +1669,9 @@ function AddUser (eForm)
 	GETAsyncRequest(sUrl + 'action=add_user&name=' + encodeURIComponent(sUser), function (http)
 	{
 		eForm.userlogin.value = '';
-		document.getElementById('user_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('user_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 
 	return false;
@@ -1675,8 +1681,9 @@ function SetPermission (sUser, sPermission)
 {
 	GETAsyncRequest(sUrl + 'action=user_set_permission&name=' + encodeURIComponent(sUser) + '&permission=' + sPermission, function (http)
 	{
-		document.getElementById('user_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('user_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 	return false;
 }
@@ -1702,8 +1709,9 @@ function SetUserEmail (sUser, sEmail)
 
 	GETAsyncRequest(sUrl + 'action=user_set_email&login=' + encodeURIComponent(sUser) + '&email=' + encodeURIComponent(s), function (http)
 	{
-		document.getElementById('user_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('user_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 	return false;
 }
@@ -1716,8 +1724,9 @@ function SetUserName (sUser, sName)
 
 	GETAsyncRequest(sUrl + 'action=user_set_name&login=' + encodeURIComponent(sUser) + '&name=' + encodeURIComponent(s), function (http)
 	{
-		document.getElementById('user_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('user_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 	return false;
 }
@@ -1729,8 +1738,9 @@ function DeleteUser (sUser)
 
 	GETAsyncRequest(sUrl + 'action=delete_user&name=' + encodeURIComponent(sUser), function (http)
 	{
-		document.getElementById('user_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('user_div');
+		eItem.innerHTML = http.responseText;
+		init_table(eItem);
 	});
 	return false;
 }

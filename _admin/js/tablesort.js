@@ -132,16 +132,19 @@ var init_table = (function ()
 		if (!document.getElementsByTagName)
 			return;
 
-		for (var j = 0; (thead = document.getElementsByTagName("thead").item(j)); j++)
+		aeTHead = (e ? e : document).getElementsByTagName('thead');
+		for (var j = aeTHead.length; j-- ;)
 		{
-			var node;
-			for (var i = 0; (node = thead.getElementsByTagName("td").item(i)); i++)
+			var node, eTHead = aeTHead[j];
+			if (eTHead.parentNode.className != 'sort')
+				continue;
+
+			aeTD = eTHead.getElementsByTagName('td');
+			for (var i = aeTD.length; i-- ;)
 			{
-				if (node.addEventListener)
-					node.addEventListener("click", sort, false);
-				else if (node.attachEvent)
-					node.attachEvent("onclick", sort);
-				node.title = node.title ? node.title + ' (' + s2_lang.click_to_sort + ')' : s2_lang.click_to_sort;
+				eTD = aeTD[i];
+				Event.add(eTD, 'click', sort);
+				eTD.title = eTD.title ? eTD.title + ' (' + s2_lang.click_to_sort + ')' : s2_lang.click_to_sort;
 			}
 		}
 	}
