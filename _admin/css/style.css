@@ -11,8 +11,8 @@
 #commtext,
 #tagtext,
 .fields input,
-div.input.text input,
-div.input.color input,
+.input.text input,
+.input.color input,
 .r-float input[type="text"],
 .extension  p.description,
 #error_dialog .error_text {
@@ -368,17 +368,17 @@ hr {
 	padding: 0.833em;
 	}
 
-.tabsheets > dd.inactive {
+.tabsheets > .inactive {
 	display: none;
 	}
-	.tabsheets > dd.inactive iframe,
-	.tabsheets > dd.inactive select,
-	.tabsheets > dd.inactive textarea,
-	.tabsheets > dd.inactive input {
+	.tabsheets > .inactive iframe,
+	.tabsheets > .inactive select,
+	.tabsheets > .inactive textarea,
+	.tabsheets > .inactive input {
 		display: none ! important;
 		}
 
-.tabsheets > dd.active {
+.tabsheets > .active {
 	display: block;
 	}
 
@@ -788,7 +788,7 @@ ul .but_panel .delete,
 		padding: 3px 4px;
 		vertical-align: top;
 		}
-		.sort thead td {
+		.sort thead {
 			background: #ddd;
 			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#ebebeb), to(#d6d6d6));
 			background: -webkit-linear-gradient(#ebebeb, #d6d6d6);
@@ -802,11 +802,11 @@ ul .but_panel .delete,
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 			vertical-align: middle;
 			}
-			.sort thead td span {
+			.sort thead span {
 				margin-right: 0.5em;
 				font-weight: bold;
 				}
-			.sort thead td.curcol {
+			.sort thead .curcol {
 				background: #2491fe;
 				background: -webkit-gradient(linear, 0 0, 0 bottom, from(#2491fe), to(#41a0ff));
 				background: -webkit-linear-gradient(#2491fe, #41a0ff);
@@ -921,12 +921,12 @@ table.fields {
 	margin: 0;
 	margin-bottom: 0.25em;
 	}
-	table.fields tr td {
+	table.fields td {
 		vertical-align: middle;
 		border: 0;
 		padding: 1px 0;
 		}
-		table.fields tr td.label {
+		table.fields td.label {
 			text-align: right;
 			padding-right: 0.5em;
 			padding-left: 0.5em;
@@ -951,16 +951,16 @@ textarea {
 	}
 
 .r-float input[type="text"],
-div.input.text input,
-div.input.color input,
+.input.text input,
+.input.color input,
 .fields input[type="text"] {
 	padding: 2px;
 	font: 1em Arial, Helvetica, sans-serif;
 	}
 
 .r-float input[type="text"],
-div.input.text input,
-div.input.color input,
+.input.text input,
+.input.color input,
 .fields input[type="text"],
 .r-float select,
 #arttext,
@@ -1296,11 +1296,11 @@ form center {
 		display: block;
 		padding: 0.2em 0;
 		}
-		.loginform label input {
+		.loginform input {
 			width: 15em;
 			margin: 0;
 			}
-		.loginform label span {
+		.loginform span {
 			display: block;
 			float: left;
 			width: 6em;
