@@ -859,6 +859,11 @@ if ($request_uri == S2_BLOG_URL.'/rss.xml')
 	$filename = '/data/rss_s2_blog.txt';
 		]]></hook>
 
+		<hook id="s2_search_action_makeindex"><![CDATA[
+if ($save_action = 'save_blog_' && $id)
+	$chapter = 's2_blog_'.$id;
+		]]></hook>
+
 		<hook id="s2_search_fetcher_process_end"><![CDATA[
 global $s2_db;
 $query = array (
