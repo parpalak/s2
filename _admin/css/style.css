@@ -1301,7 +1301,7 @@ form center {
 		display: block;
 		padding: 0.2em 0;
 		}
-		.loginform input {
+		.loginform label input {
 			width: 15em;
 			margin: 0;
 			}
