@@ -769,8 +769,6 @@ ul .but_panel .delete,
 	.sort .hidden {
 		background: #f5f5f5;
 		color: #666;
-		}
-	.sort .hidden td {
 		text-decoration: line-through;
 		}
 	.sort .good {
@@ -831,7 +829,7 @@ ul .but_panel .delete,
 	.sort .buttons {
 		white-space: nowrap;
 		}
-		.sort .buttons img,
+		.sort .buttons > img,
 		.sort img.buttons {
 			width: 16px;
 			height: 16px;
@@ -926,12 +924,12 @@ table.fields {
 	margin: 0;
 	margin-bottom: 0.25em;
 	}
-	table.fields td {
+	.fields td {
 		vertical-align: middle;
 		border: 0;
 		padding: 1px 0;
 		}
-		table.fields td.label {
+		.fields td.label {
 			text-align: right;
 			padding-right: 0.5em;
 			padding-left: 0.5em;
@@ -1166,13 +1164,13 @@ form center {
 	.input.checkbox label {
 		margin-left: 1.583em;
 		}
-		.input label small {
+		.input label > small {
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 			color: #666;
 			margin: 1.636em 0 0 0.273em;
 			display: block;
 			}
-	.input label span,
+	.input label > span,
 	.input .subhead {
 		display: block;
 		float: left;
@@ -1183,7 +1181,7 @@ form center {
 		font-weight: bold;
 		color: #555;
 		}
-		.input label span em {
+		.input label > span > em {
 			color: #f00;
 			position: absolute;
 			right: 0;
@@ -1223,13 +1221,10 @@ form center {
 		width: 19em;
 		}
 	.extension .options,
-	.extension  p.description {
+	.extension  .description {
 		padding-left: 20em;
 		}
-		.extension .options br {
-			display: none;
-			}
-		.extension .options button {
+		.extension button {
 			margin: 0 1em 1em 0;
 			}
 	.extension h3 {
@@ -1241,7 +1236,7 @@ form center {
 		margin: 0 0 1em;
 		font-size: 1em;
 		}
-	.info-box p strong,
+	.info-box strong,
 	.extension.error h3 {
 		color: red;
 		}
@@ -1301,7 +1296,7 @@ form center {
 		display: block;
 		padding: 0.2em 0;
 		}
-		.loginform label input {
+		.loginform label > input {
 			width: 15em;
 			margin: 0;
 			}

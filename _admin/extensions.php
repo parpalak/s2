@@ -164,7 +164,7 @@ function s2_extension_list ()
 			'<div class="info"><h3>'.s2_htmlencode($ext['title']).sprintf($lang_admin_ext['Version'], $ext['version']).'</h3>'.
 			'<p>'.sprintf($lang_admin_ext['Extension by'], s2_htmlencode($ext['author'])).'</p>'.$extra_info.'</div>'.
 			(($ext['description'] != '') ? '<p class="description">'.s2_htmlencode($ext['description']).'</p>' : '').
-			'<div class="options">'.implode('<br />', $buttons).'</div></div>';
+			'<div class="options">'.implode(' ', $buttons).'</div></div>';
 
 		$installed_count++;
 	}
