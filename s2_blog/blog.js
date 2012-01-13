@@ -37,8 +37,9 @@ function LoadPosts ()
 	var sRequest = StringFromForm(document.blogform);
 	POSTAsyncRequest(sUrl + "action=load_blog_posts", sRequest, function(http)
 	{
-		document.getElementById('blog_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('blog_div');
+		eItem.innerHTML = http.responseText;
+		TableSort(eItem);
 	});
 	return false;
 }
@@ -81,9 +82,10 @@ function LoadBlogComments (iId)
 {
 	GETAsyncRequest(sUrl + "action=load_blog_comments&id=" + iId, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = http.responseText;
-		init_table(null);
-		SelectTab(document.getElementById('comm_tab'), true);
+		var eItem = document.getElementById('comm_div');
+		eItem.innerHTML = http.responseText;
+		TableSort(eItem);
+		SelectTab(eItem, true);
 	});
 	return false;
 }
@@ -95,8 +97,9 @@ function DeleteBlogComment (iId, sMode)
 
 	GETAsyncRequest(sUrl + "action=delete_blog_comment&id=" + iId + '&mode=' + sMode, function (http)
 	{
-		document.getElementById('comm_div').innerHTML = http.responseText;
-		init_table(null);
+		var eItem = document.getElementById('comm_div');
+		eItem.innerHTML = http.responseText;
+		TableSort(eItem);
 	});
 	return false 
 }
