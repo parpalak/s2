@@ -120,17 +120,21 @@ function ToggleFavBlog (eItem, iId)
 	return false;
 }
 
-function AdjustPreviewLink ()
+function AdjustPreviewLink (sAction)
 {
+	if (sAction != 'save_blog')
+		return;
+
 	var eA = document.getElementById('preview_link'),
 		sLink = eA.getAttribute('href'),
 		eForm = document.forms['artform'],
 		sYear = eForm.elements['page[create_time][year]'].value,
 		sMonth = eForm.elements['page[create_time][mon]'].value,
-		sDay = eForm.elements['page[create_time][day]'].value;
+		sDay = eForm.elements['page[create_time][day]'].value,
+		sURL = eForm.elements['page[url]'].value;
 
-	eA.setAttribute('href', sLink.replace(/\/\d*\/\d*\/\d*(\/[^\/]*)$/, '/' + sYear + '/' + sMonth + '/' + sDay + '$1'))
+	eA.setAttribute('href', sLink.replace(/\/\d*\/\d*\/\d*\/[^\/]*$/, '/' + sYear + '/' + sMonth + '/' + sDay + '/' + sURL))
 }
 
 Hooks.add('fn_s2_counter_draw_chart_pre_rss', 'settings_file += ",../_extensions/s2_blog/rss.xml?" + Math.random();');
-Hooks.add('fn_save_article_end', 'AdjustPreviewLink();');
+Hooks.add('fn_save_article_end', 'AdjustPreviewLink(sAction);');
