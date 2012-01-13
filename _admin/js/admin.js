@@ -1059,7 +1059,9 @@ function CreateChildArticle ()
 	});
 }
 
-var ArticleFunctions = (function ()
+var LoadArticle, ReloadArticle;
+
+(function ()
 {
 	var sLoadedURI;
 
@@ -1074,46 +1076,41 @@ var ArticleFunctions = (function ()
 		});
 	}
 
-	return {
-		LoadArticle: function (sURI)
+	LoadArticle = function (sURI)
+	{
+		if (document.artform && Changes.present(document.artform))
 		{
-			if (document.artform && Changes.present(document.artform))
-			{
-				SelectTab(document.getElementById('edit_tab'), true);
-				PopupMessages.show(s2_lang.unsaved, [
+			SelectTab(document.getElementById('edit_tab'), true);
+			PopupMessages.show(s2_lang.unsaved, [
+				{
+					name: s2_lang.save_and_open,
+					action: (function ()
 					{
-						name: s2_lang.save_and_open,
-						action: (function ()
-						{
-							document.artform.onsubmit();
-							RequestArticle(sURI);
-						}),
-						once: true
-					},
+						document.artform.onsubmit();
+						RequestArticle(sURI);
+					}),
+					once: true
+				},
+				{
+					name: s2_lang.discard_and_open,
+					action: (function ()
 					{
-						name: s2_lang.discard_and_open,
-						action: (function ()
-						{
-							RequestArticle(sURI);
-						}),
-						once: true
-					}
-				]);
-				return false;
-			}
+						RequestArticle(sURI);
+					}),
+					once: true
+				}
+			]);
+			return false;
+		}
 
-			RequestArticle(sURI);
-		},
+		RequestArticle(sURI);
+	}
 
-		ReloadArticle: function ()
-		{
-			RequestArticle(sLoadedURI);
-		},
-	};
+	ReloadArticle = function ()
+	{
+		RequestArticle(sLoadedURI);
+	}
 }());
-
-var LoadArticle = ArticleFunctions.LoadArticle;
-var ReloadArticle = ArticleFunctions.ReloadArticle; 
 
 function EditArticle (iId)
 {
