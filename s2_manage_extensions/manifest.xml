@@ -24,16 +24,12 @@
 
 	<hooks>
 
-		<hook id="ai_head_end"><![CDATA[
-echo '<script type="text/javascript" src="'.$ext_info['url'].'/functions.js"></script>'."\n";
-		]]></hook>
-
 		<hook id="fn_extension_list_pre_inst_item_merge"><![CDATA[
 if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 else
 	require $ext_info['path'].'/lang/English.php';
-$buttons = array_merge(array('refresh_hooks' => '<button class="bitbtn" style="background-image: url('.$ext_info['url'].'/r.png);" onclick="return emRefreshHooks(\''.s2_htmlencode(addslashes($id)).'\');" />'.$lang_s2_manage_extensions['Refresh hooks'].'</button>'), $buttons);
+$buttons = array_merge(array('refresh_hooks' => '<button class="bitbtn" style="background-image: url('.$ext_info['url'].'/r.png);" onclick="GETAsyncRequest(sUrl + \'action=s2_manage_extensions_refresh_hooks&id='.s2_htmlencode(addslashes($id)).'\'); return false;" />'.$lang_s2_manage_extensions['Refresh hooks'].'</button>'), $buttons);
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[
