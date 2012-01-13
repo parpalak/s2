@@ -27,7 +27,7 @@ var s2_search = {
 		if (response.indexOf('go_') == 0)
 		{
 			setTimeout(s2_search.reindex_query, 50);
-			document.getElementById('s2_search_progress').innerHTML = ': ' + response.substr(3) + '%...';
+			document.getElementById('s2_search_progress').innerHTML = ': ' + response.substring(3) + '%...';
 		}
 		else
 		{
@@ -40,13 +40,7 @@ var s2_search = {
 
 	refresh_index: function (sChapter)
 	{
-		GETAsyncRequest(sUrl + 'action=s2_search_makeindex&chapter=' + encodeURIComponent(sChapter), s2_search.refresh_callback);
-		window.status = '...';
-	},
-
-	refresh_callback: function ()
-	{
-		window.status = window.defaultStatus;
+		GETAsyncRequest(sUrl + 'action=s2_search_makeindex&chapter=' + encodeURIComponent(sChapter));
 	}
 }
 
