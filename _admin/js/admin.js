@@ -164,6 +164,8 @@ function Init ()
 			return s2_lang.unsaved_exit;
 	}
 
+	TableSort();
+
 	cur_page = document.location.hash;
 	setInterval(CheckPage, 400);
 	SetWait(false);
@@ -501,7 +503,7 @@ var Changes = (function ()
 // originally written by paul sowden <paul@idontsmoke.co.uk> | http://idontsmoke.co.uk
 // modified and localized by alexander shurkayev <alshur@ya.ru> | http://htmlcoder.visions.ru
 
-var init_table = (function ()
+var TableSort = (function ()
 {
 	var sort_case_sensitive = false;
 
@@ -1282,7 +1284,7 @@ function LoadComments (iId)
 	{
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 		SelectTab(eItem, true);
 	});
 	return false;
@@ -1628,7 +1630,7 @@ function DeleteComment (iId, sMode)
 	{
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 
 	return false;
@@ -1641,7 +1643,7 @@ function SaveComment (sType)
 	{
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 	return false;
 }
@@ -1652,7 +1654,7 @@ function LoadTable (sAction, sID)
 	{
 		var eItem = document.getElementById(sID);
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 	return false;
 }
@@ -1663,7 +1665,7 @@ function LoadCommentsTable (sAction, iId, sMode)
 	{
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 	return false;
 }
@@ -1819,7 +1821,7 @@ function AddUser (eForm)
 		eForm.userlogin.value = '';
 		var eItem = document.getElementById('user_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 
 	return false;
@@ -1831,7 +1833,7 @@ function SetPermission (sUser, sPermission)
 	{
 		var eItem = document.getElementById('user_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 	return false;
 }
@@ -1859,7 +1861,7 @@ function SetUserEmail (sUser, sEmail)
 	{
 		var eItem = document.getElementById('user_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 	return false;
 }
@@ -1874,7 +1876,7 @@ function SetUserName (sUser, sName)
 	{
 		var eItem = document.getElementById('user_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 	return false;
 }
@@ -1888,7 +1890,7 @@ function DeleteUser (sUser)
 	{
 		var eItem = document.getElementById('user_div');
 		eItem.innerHTML = http.responseText;
-		init_table(eItem);
+		TableSort(eItem);
 	});
 	return false;
 }
