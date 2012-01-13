@@ -161,7 +161,7 @@ $padding = 2.5;
 		<dt id="view_tab"><?php echo $lang_admin['Preview']; ?></dt>
 		<dd>
 			<div class="reducer no-scroll" style="padding: 0;">
-				<iframe src="<?php echo S2_PATH; ?>/_admin/site_ajax.php?action=load_preview_frame" frameborder="0" id="preview_frame" name="preview_frame"></iframe>
+				<iframe src="" frameborder="0" id="preview_frame" name="preview_frame"></iframe>
 			</div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_pictures')) ? eval($hook) : null; ?>
