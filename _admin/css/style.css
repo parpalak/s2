@@ -802,11 +802,16 @@ ul .but_panel .delete,
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 			vertical-align: middle;
 			}
-			.sort thead span {
+			.sort .curcol_up:before,
+			.sort .curcol_down:before {
+				content: '\2193 ';
 				margin-right: 0.5em;
 				font-weight: bold;
 				}
-			.sort thead .curcol {
+			.sort .curcol_up:before {
+				content: '\2191 ';
+				}
+			.sort .curcol_up, .sort .curcol_down {
 				background: #2491fe;
 				background: -webkit-gradient(linear, 0 0, 0 bottom, from(#2491fe), to(#41a0ff));
 				background: -webkit-linear-gradient(#2491fe, #41a0ff);
