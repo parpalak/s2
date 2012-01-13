@@ -38,10 +38,10 @@ var s2_search = {
 		}
 	},
 
-	refresh_index: function (sChapter)
+	refresh_index: function (sAction, sId)
 	{
-		GETAsyncRequest(sUrl + 'action=s2_search_makeindex&chapter=' + encodeURIComponent(sChapter));
+		GETAsyncRequest(sUrl + 'action=s2_search_makeindex&save_action=' + encodeURIComponent(sAction) + '&id=' + encodeURIComponent(sId));
 	}
 }
 
-Hooks.add('fn_save_article_end', 's2_search.refresh_index((sAction == "save_blog" ? "s2_blog_" : "") + document.forms["artform"].elements["page[id]"].value);');
+Hooks.add('fn_save_article_end', 's2_search.refresh_index(sAction, document.forms["artform"].elements["page[id]"].value);');

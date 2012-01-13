@@ -106,10 +106,12 @@ $counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(is_file(
 if ($action == 's2_search_makeindex')
 {
 	$is_permission = $s2_user['edit_site'];
+	$save_action = isset($_GET['save_action']) ? $_GET['save_action'] : '';
+	$id = isset($_GET['id']) ? $_GET['id'] : '';
+	$save_action = ($save_action == 'save') ? '' : $save_action.'_';
+	$chapter = $id ? $save_action.$id : false;
 	($hook = s2_hook('s2_search_action_makeindex')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
-
-	$chapter = isset($_GET['chapter']) ? $_GET['chapter'] : false;
 
 	require $ext_info['path'].'/stemmer.class.php';
 	require $ext_info['path'].'/worker.class.php';
