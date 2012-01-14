@@ -278,19 +278,23 @@ hr {
 
 .tabsheets {
 	position: relative;
+	}
+
+body > .tabsheets {
 	background: -moz-linear-gradient(top, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.01)), color-stop(29px,rgba(0,0,0,0.05))) no-repeat;
 	background: -webkit-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
 	background: -o-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
 	background: -ms-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
 	background: linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
+	background-size: 100% 29px;
 	}
 
 .tabsheets > dt {
 	float: left;
 	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 	line-height: 13px;
-	height: 13px;
+	height: 12px;
 	padding: 3px 5px 6px 3px;
 	cursor: default;
 	white-space: nowrap;
@@ -329,6 +333,7 @@ hr {
 
 .tabsheets > dt.active {
 	top: 7px;
+	height: 13px;
 	z-index: 5;
 	color: #000;
 	text-shadow: 0 1px 0 #fff;
@@ -352,11 +357,6 @@ hr {
 	height: 100%;
 	left: 0;
 	padding: 29px 0 0;
-	}
-
-.tabsheets .tabsheets > dd,
-.tabsheets > dd .reducer {
-	background: #eee;
 	}
 
 .tabsheets > dd .reducer {

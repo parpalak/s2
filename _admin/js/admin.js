@@ -293,7 +293,7 @@ var SetBackground = (function ()
 	var set = function (c)
 	{
 		color = c;
-		var css_rule = 'body, .tabsheets .tabsheets > dd, .tabsheets > dd > .reducer, #tag_names li.cur_tag {background: ' + back_img + ' ' + color + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;} .tabsheets > dt.active {background-color: ' + color + ';}';
+		var css_rule = 'body {background: ' + back_img + ' ' + color + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;} #tag_names li.cur_tag, .tabsheets > dt.active {background-color: ' + color + ';}';
 
 		if (style.styleSheet)
 			style.styleSheet.cssText = css_rule;
