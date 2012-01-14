@@ -413,6 +413,7 @@ function shift_form (time)
 function SendForm ()
 {
 	clearInterval(shake);
+	shift_form(time = 0);
 
 	SendLoginData(document.forms['loginform'], function ()
 	{
