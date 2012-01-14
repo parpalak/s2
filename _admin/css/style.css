@@ -278,6 +278,12 @@ hr {
 
 .tabsheets {
 	position: relative;
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.01)), color-stop(29px,rgba(0,0,0,0.05))) no-repeat;
+	background: -webkit-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
+	background: -o-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
+	background: -ms-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
+	background: linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
 	}
 
 .tabsheets > dt {
@@ -346,12 +352,6 @@ hr {
 	height: 100%;
 	left: 0;
 	padding: 29px 0 0;
-	background: -moz-linear-gradient(top, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.01)), color-stop(29px,rgba(0,0,0,0.05))) no-repeat;
-	background: -webkit-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
-	background: -o-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
-	background: -ms-linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
-	background: linear-gradient(top, rgba(0,0,0,0.01) 0%,rgba(0,0,0,0.05) 29px) no-repeat;
 	}
 
 .tabsheets .tabsheets > dd,
