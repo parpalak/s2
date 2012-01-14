@@ -328,7 +328,6 @@ hr {
 		}
 
 .tabsheets > dt.active {
-	background-color: #eee;
 	top: 7px;
 	z-index: 5;
 	color: #000;
@@ -343,6 +342,7 @@ hr {
 	-webkit-box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
 	box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
 	cursor: default;
+	background-color: #eee;
 	}
 
 .tabsheets > dd {
