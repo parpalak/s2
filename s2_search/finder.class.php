@@ -197,7 +197,7 @@ class s2_search_finder extends s2_search_worker
 		// Text cleanup
 		$replace_what = array("\r", 'ё', '&nbsp;', '&mdash;', '&ndash;', '&laquo;', '&raquo;');
 		$replace_to = array('', 'е', ' ', '—', '–', '«', '»',);
-		foreach (array('<br>', '<br />', '</h1>', '</h2>', '</h3>', '</h4>', '</p>', '</pre>', '</blockquote>', '</ul>', '</ol>') as $tag)
+		foreach (array('<br>', '<br />', '</h1>', '</h2>', '</h3>', '</h4>', '</p>', '</pre>', '</blockquote>', '</li>') as $tag)
 		{
 			$replace_what[] = $tag;
 			$replace_to[] = $tag."\r";
@@ -207,7 +207,7 @@ class s2_search_finder extends s2_search_worker
 			$string = strip_tags($string);
 
 		// Preparing for breaking into lines
-		$articles = preg_replace('#(?<=[\.?!:;])[ \n\t]+#sS', "\r", $articles);
+		$articles = preg_replace('#(?<=[\.?!;])[ \n\t]+#sS', "\r", $articles);
 
 		foreach ($articles as $id => &$string)
 		{
