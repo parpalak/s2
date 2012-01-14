@@ -49,3 +49,10 @@ a, a:visited {
 	background-position: -72px -27px;
 	background-repeat: no-repeat;
 	}
+
+.r-float label.error {
+	outline: 2px solid #f66;
+	}
+.r-float label.ok {
+	outline: 2px solid #bfb;
+	}
