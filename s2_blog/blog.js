@@ -85,7 +85,7 @@ function LoadBlogComments (iId)
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
 		TableSort(eItem);
-		SelectTab(eItem, true);
+		SelectTab(document.getElementById('comm_tab'), true);
 	});
 	return false;
 }
