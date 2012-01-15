@@ -819,12 +819,6 @@ ul .but_panel .delete,
 				background: linear-gradient(#2491fe, #41a0ff);
 				color: #fff;
 				}
-		.sort td.content {
-			text-align: left;
-			}
-			#comm_div .sort td.content {
-				padding: 4px;
-				}
 
 	.sort .buttons {
 		white-space: nowrap;
