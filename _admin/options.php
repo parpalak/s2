@@ -121,7 +121,7 @@ function s2_get_color_input ($name, $value, $info, $label, $onchange = '')
 //
 function s2_get_options ($message = '')
 {
-	global $s2_db, $lang_common, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
+	global $s2_db, $s2_user, $lang_common, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
 
 	$options = s2_read_options();
 
@@ -168,7 +168,7 @@ function s2_get_options ($message = '')
 	$output .= '<fieldset><legend>'.$lang_admin['Admin panel'].'</legend>'.implode('', $fieldset).'</fieldset>';
 
 	($hook = s2_hook('fn_get_options_end')) ? eval($hook) : null;
-	return '<form name="optform" method="post" action="">'.$output.'<center><input name="button" class="bitbtn saveopt" type="submit" value="'.$lang_admin_opt['Save options'].'" onclick="return SaveOptions();" /></center></form>';
+	return '<form name="optform" method="post" action="" onsubmit="return SaveOptions();">'.$output.'<center><input name="button" class="bitbtn saveopt" type="submit" value="'.$lang_admin_opt['Save options'].'" '.(!$s2_user['edit_users'] ? 'disabled="disabled" ' : '').'/></center></form>';
 }
 
 //
