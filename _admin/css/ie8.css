@@ -1,12 +1,3 @@
-div.input.checkbox input,
-.r-float input[type="checkbox"] {
-	padding: 0;
-	}
-
-.r-float input[type="checkbox"] {
-	margin: 3px;
-	}
-
 .bitbtn {
 	min-width: 96px;
 	}

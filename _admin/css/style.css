@@ -897,6 +897,14 @@ ul .but_panel .delete,
 		display: block;
 		margin: 0 0 0.5em;
 		}
+		.r-float label:after {
+			content: ".";
+			display: block;
+			clear: both;
+			visibility: hidden;
+			line-height: 0;
+			height: 0;
+			}
 		.r-float label.error {
 			-moz-box-shadow: 0 0 0 2px #f66;
 			-webkit-box-shadow: 0 0 0 2px #f66;
@@ -912,6 +920,7 @@ ul .but_panel .delete,
 		.r-float label input[type="checkbox"] {
 			float: left;
 			margin: 2px 0.25em;
+			padding: 0;
 			}
 	.r-float select {
 		font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
@@ -1157,6 +1166,7 @@ form center {
 		}
 	.input.checkbox input {
 		margin: 0.166em 0;
+		padding: 0;
 		}
 	.input.text label {
 		padding: 0;
