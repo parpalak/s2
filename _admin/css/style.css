@@ -955,6 +955,9 @@ textarea {
 	-webkit-box-shadow: inset 2px 3px 3px -3px #ccc;
 	box-shadow: inset 2px 3px 3px -3px #ccc;
 	}
+	input[type="text"][disabled] {
+		background: #ddd;
+		}
 
 .r-float input[type="text"],
 .input.text input,

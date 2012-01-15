@@ -226,7 +226,7 @@ function s2_output_article_form ($id)
 		<hr />
 <?php ($hook = s2_hook('fn_output_article_form_pre_url')) ? eval($hook) : null; ?>
 		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; elseif ($page['parent_id'] == S2_ROOT_ID) echo ' title="'.$lang_admin['URL on mainpage'].'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
-		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" <?php $page['parent_id'] == S2_ROOT_ID ? print 'disabled="disabled" ' : null; ?>/></label>
+		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" <?php echo $page['parent_id'] == S2_ROOT_ID ? 'disabled="disabled" ' : ''; ?>/></label>
 <?php ($hook = s2_hook('fn_output_article_form_pre_published')) ? eval($hook) : null; ?>
 		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"' ?> />
 		<?php echo $lang_admin['Published']; ?></label>
