@@ -142,7 +142,7 @@ elseif ($action == 'rename')
 
 elseif ($action == 'create')
 {
-	$is_permission = ($s2_user['create_articles'] || $s2_user['edit_site']);
+	$is_permission = $s2_user['create_articles'];
 	($hook = s2_hook('rq_action_create_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
