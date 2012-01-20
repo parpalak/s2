@@ -7,14 +7,14 @@ $lang_const_explain = array(
 'S2_WEBMASTER_EMAIL'	=> 'Used in the copyright and as the sender address.',
 'S2_COMPRESS'			=> 'This will reduce bandwidth usage, but use a little more CPU.',
 'S2_SHOW_COMMENTS'		=> 'You can hide all comments for a while by turning this off.',
-'S2_ENABLED_COMMENTS'	=> 'Show input comment form (at pages where it was not explicitly disabled).',
-'S2_PREMODERATION'		=> 'All new comments will be hidden by default. They are to be checked by moderator.',
+'S2_ENABLED_COMMENTS'	=> 'Show the comment form (at pages where it was not explicitly disabled).',
+'S2_PREMODERATION'		=> 'All new comments will be hidden by default. They are to be checked by a moderator before publishing.',
 'S2_FAVORITE_URL'		=> 'The URL part for the favorite page, e.g. “favorite”.',
 'S2_TAGS_URL'			=> 'The URL part for the tags page, e.g. “tags”.',
 'S2_MAX_ITEMS'			=> 'The number of items on the section page. 0 — do not break section content into pages.',
 'S2_START_YEAR'			=> 'Used in the copyright.',
 'S2_ADMIN_COLOR'		=> 'Background color of the control panel (examples: %s).',
-'S2_LOGIN_TIMEOUT'		=> 'Idle timeout (minutes). One has to enter his login and password again when this timeout expires.'
+'S2_LOGIN_TIMEOUT'		=> 'Idle timeout (minutes). Users have to re-enter their login and password when this timeout expires.'
 
 );
 
