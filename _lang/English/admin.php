@@ -197,6 +197,18 @@ $lang_user_permissions = array (
 
 );
 
+$lang_user_permissions_help = array (
+
+'view'					=> 'Access to published pages and comments, uploaded pictures.',
+'view_hidden'			=> 'Access to hidden pages and comments, displaying commenttators’ IP and e-mail addresses, administration tab. Allow users to change their own data: name, e-mail and password.',
+'hide_comments'			=> 'Allow users to hide and show comments (moderators).',
+'edit_comments'			=> 'Allow users to edit comments (moderators).',
+'create_articles'		=> 'Allow users to create and edit their own pages, to upload pictures, to create and edit tags (authors).',
+'edit_site'				=> 'Allow users to edit and remove another’s pages, to edit and remove tags (editors).',
+'edit_users'			=> 'Allow users to change options, to create and edit user accounts and to install extensions (administrators).'
+
+);
+
 $lang_templates = array(
 
 ''					=> '— inherited —',

@@ -86,7 +86,7 @@ function s2_grb ($b, $login, $permission, $allow_modify)
 
 function s2_get_user_list ()
 {
-	global $s2_db, $lang_user_permissions, $lang_admin, $s2_user;
+	global $s2_db, $lang_user_permissions, $lang_user_permissions_help, $lang_admin, $s2_user;
 
 	$s2_user_permissions = array(
 		'view',
@@ -150,7 +150,7 @@ function s2_get_user_list ()
 	($hook = s2_hook('fn_get_user_list_pre_loop_thead_perm')) ? eval($hook) : null;
 
 	foreach ($s2_user_permissions as $permission)
-		$thead[$permission] = '<td>'.$lang_user_permissions[$permission].'</td>';
+		$thead[$permission] = '<td title="'.$lang_user_permissions_help[$permission].'">'.$lang_user_permissions[$permission].'</td>';
 
 	$thead['buttons'] = '<td>&nbsp;</td>';
 
