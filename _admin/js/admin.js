@@ -644,7 +644,7 @@ var TableSort = (function ()
 			{
 				eTD = aeTD[i];
 				Event.add(eTD, 'click', sort);
-				eTD.title = eTD.title ? eTD.title + ' (' + s2_lang.click_to_sort + ')' : s2_lang.click_to_sort;
+				eTD.title = eTD.title ? eTD.title : s2_lang.click_to_sort;
 			}
 		}
 	}
