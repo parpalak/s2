@@ -201,12 +201,12 @@ elseif ($action == 'save')
 	($hook = s2_hook('rq_action_save_article_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	if (!isset($_POST['page']) || !isset($_POST['flags']))
+	if (!isset($_POST['page']))
 		die('Error in POST parameters.');
 
 	require 'edit.php';
 
-	list($parent_id, $return['revision'], $return['status']) = s2_save_article($_POST['page'], $_POST['flags']);
+	list($parent_id, $return['revision'], $return['status']) = s2_save_article($_POST['page'], isset($_POST['flags']) ? $_POST['flags'] : array());
 	if ($return['status'] == 'ok')
 		$return['url_status'] = s2_check_url_status($parent_id, $_POST['page']['url']);
 
