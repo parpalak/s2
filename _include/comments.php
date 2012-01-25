@@ -175,6 +175,7 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name, $unsubs
 	$sender_email = S2_WEBMASTER_EMAIL ? S2_WEBMASTER_EMAIL : 'example@example.com';
 	$from = S2_WEBMASTER ? "=?UTF-8?B?".base64_encode(S2_WEBMASTER)."?=".' <'.$sender_email.'>' : $sender_email;
 	$headers = 'From: '.$from."\r\n".
+		'Return-Path: '.$from."\r\n".
 		'Date: '.gmdate('r')."\r\n".
 		'MIME-Version: 1.0'."\r\n".
 		'Content-transfer-encoding: 8bit'."\r\n".
