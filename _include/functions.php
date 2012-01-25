@@ -164,8 +164,11 @@ function s2_paging ($page, $total_pages, $url, &$link_nav)
 // Workaround for processing multipart/mixed data
 // Opera sends multiple files in this format, and PHP doesn't understand it
 //
-function s2_process_multipart_mixed (&$src, &$dest)
+function s2_process_multipart_mixed (&$src, &$dest, $dir = false)
 {
+	if (!$dir)
+		$dir = sys_get_temp_dir();
+
 	$separator_len = strpos($src, "\r\n");
 	$separator = substr($src, 0, $separator_len);
 	$start = $separator_len + 2;
@@ -183,7 +186,7 @@ function s2_process_multipart_mixed (&$src, &$dest)
 		if (preg_match('#Content-Type:\s*(\S*)#i', $headers, $matches))
 			$content_type = $matches[1];
 
-		$tmp_filename = tempnam(sys_get_temp_dir(), 'php');
+		$tmp_filename = tempnam($dir, 'php');
 		$f = fopen($tmp_filename, 'wb');
 		while ($length = min(20480, $next - $file_start))
 		{
