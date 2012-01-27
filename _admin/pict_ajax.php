@@ -335,18 +335,14 @@ elseif ($action == 'upload')
 
 			$uploadfile = S2_IMG_PATH.$path.'/'.$filename;
 
-			if ($check_uploaded)
-			{
-				if (!move_uploaded_file($_FILES['pictures']['tmp_name'][$i], $uploadfile))
-					$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
-			}
+			$result = $check_uploaded ?
+				move_uploaded_file($_FILES['pictures']['tmp_name'][$i], $uploadfile) :
+				rename($_FILES['pictures']['tmp_name'][$i], $uploadfile);
+
+			if ($result)
+				chmod($uploadfile, 0644);
 			else
-			{
-				if (rename($_FILES['pictures']['tmp_name'][$i], $uploadfile))
-					chmod($uploadfile, 0644);
-				else
-					$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
-			}
+				$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
 		}
 	}
 
