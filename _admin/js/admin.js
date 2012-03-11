@@ -1535,6 +1535,9 @@ function InsertParagraph (sType)
 	else
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
 
+	if (eTextarea && typeof(eTextarea.scrollTop) != 'undefined')
+		var iScrollTop = eTextarea.scrollTop;
+
 	if (selection.length)
 	{
 		var replace_str = sOpenTag + selection.text + sCloseTag,
@@ -1586,6 +1589,9 @@ function InsertParagraph (sType)
 		set_selection(eTextarea, new_cursor, new_cursor);
 	}
 
+	// Buggy in Opera 11.61 build 1250
+	eTextarea.scrollTop = iScrollTop;
+
 	return false;
 }
 
@@ -1598,8 +1604,15 @@ function InsertTag (sOpenTag, sCloseTag, selection)
 	var replace_str = sOpenTag + selection.text + sCloseTag;
 	var start_pos = selection.start;
 	var end_pos = start_pos + replace_str.length;
+
+	if (eTextarea && typeof(eTextarea.scrollTop) != 'undefined')
+		var iScrollTop = eTextarea.scrollTop;
+
 	eTextarea.value = eTextarea.value.substring(0, start_pos) + replace_str + eTextarea.value.substring(selection.end);
 	set_selection(eTextarea, start_pos, end_pos);
+
+	// Buggy in Opera 11.61 build 1250
+	eTextarea.scrollTop = iScrollTop;
 
 	return false;
 }
