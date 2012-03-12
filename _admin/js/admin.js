@@ -1222,10 +1222,14 @@ var LoadArticle, ReloadArticle;
 	{
 		GETAsyncRequest(sURI, function (http)
 		{
+			(hook = Hooks.get('request_article_start')) ? eval(hook) : null;
+
 			document.getElementById('form_div').innerHTML = http.responseText;
 			Changes.commit(document.artform);
 			SelectTab(document.getElementById('edit_tab'), true);
 			sLoadedURI = sURI;
+
+			(hook = Hooks.get('request_article_end')) ? eval(hook) : null;
 		});
 	}
 
