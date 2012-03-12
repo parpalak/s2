@@ -77,20 +77,20 @@ function OnSwitch (eTab)
 		Preview();
 		if (typeof iPreviewHtmlScrollTop == 'number' || typeof iPreviewBodyScrollTop == 'number')
 		{
-			var try_num = 20;
+			var try_num = 33;
 			var repeater = function ()
 			{
 				if (typeof iPreviewHtmlScrollTop == 'number' && iPreviewHtmlScrollTop)
 				{
 					window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop = iPreviewHtmlScrollTop;
 					if (try_num-- > 0 && window.frames['preview_frame'].document.getElementsByTagName('html')[0].scrollTop != iPreviewHtmlScrollTop)
-						setTimeout(repeater, 50);
+						setTimeout(repeater, 30);
 				}
-				else if (typeof iPreviewBodyScrollTop == 'number')
+				else if (typeof iPreviewBodyScrollTop == 'number' && iPreviewBodyScrollTop)
 				{
 					window.frames['preview_frame'].document.body.scrollTop = iPreviewBodyScrollTop;
 					if (try_num-- > 0 && window.frames['preview_frame'].document.body.scrollTop != iPreviewBodyScrollTop)
-						setTimeout(repeater, 50);
+						setTimeout(repeater, 30);
 				}
 			}
 			repeater();
