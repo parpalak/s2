@@ -1530,14 +1530,18 @@ function SmartParagraphs (sText)
 
 function InsertParagraph (sType)
 {
-	var eTextarea = document.artform['page[text]'],
-		selection = get_selection(eTextarea),
-		sText = eTextarea.value;
-
 	if (sType == 'h2' || sType == 'h3' || sType == 'h4' || sType == 'blockquote')
 		var sOpenTag = '<' + sType + '>', sCloseTag = '</' + sType + '>';
 	else
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
+
+	var result = (hook = Hooks.get('fn_insert_paragraph_start')) ? eval(hook) : null;
+	if (result)
+		return;
+
+	var eTextarea = document.artform['page[text]'],
+		selection = get_selection(eTextarea),
+		sText = eTextarea.value;
 
 	if (eTextarea && typeof(eTextarea.scrollTop) != 'undefined')
 		var iScrollTop = eTextarea.scrollTop;
@@ -1601,6 +1605,10 @@ function InsertParagraph (sType)
 
 function InsertTag (sOpenTag, sCloseTag, selection)
 {
+	var result = (hook = Hooks.get('fn_insert_tag_start')) ? eval(hook) : null;
+	if (result)
+		return;
+
 	var eTextarea = document.artform['page[text]'];
 	if (selection == null)
 		selection = get_selection(eTextarea);
