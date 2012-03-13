@@ -943,7 +943,8 @@ table.fields {
 input[type="text"],
 input[type="color"],
 input[type="password"],
-textarea {
+textarea,
+.CodeMirror-scroll {
 	color: #000;
 	background: #fff;
 	border: 1px solid #ccc;
