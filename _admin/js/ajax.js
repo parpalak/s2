@@ -196,6 +196,8 @@ function StringFromForm (aeItem)
 	for (i = aeItem.length; i-- ;)
 	{
 		eItem = aeItem[i];
+		if (!eItem.name)
+			continue;
 		if (eItem.nodeName == 'INPUT' && (eItem.type != 'checkbox' || eItem.checked))
 			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
 		if (eItem.nodeName == 'TEXTAREA' || eItem.nodeName == 'SELECT')
