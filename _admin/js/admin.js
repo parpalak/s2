@@ -1613,7 +1613,11 @@ function InsertTag (sOpenTag, sCloseTag, selection)
 	if (selection == null)
 		selection = get_selection(eTextarea);
 
-	var replace_str = sOpenTag + selection.text + sCloseTag;
+	if (selection.text.substring(0, sOpenTag.length) == sOpenTag && selection.text.substring(selection.text.length - sCloseTag.length) == sCloseTag)
+		var replace_str = selection.text.substring(sOpenTag.length, selection.text.length - sCloseTag.length);
+	else
+		var replace_str = sOpenTag + selection.text + sCloseTag;
+
 	var start_pos = selection.start;
 	var end_pos = start_pos + replace_str.length;
 
