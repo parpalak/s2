@@ -366,7 +366,7 @@ else
 require $ext_info['path'].'/blog_lib.php';
 ?>
 		<dt id="blog_tab"><?php echo $lang_s2_blog['Blog']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer">
 				<form name="blogform">
 					<table width="100%" class="fields">
