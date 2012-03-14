@@ -84,7 +84,7 @@ function hex_md5 (string)
 		lWordArray[lNumberOfWords-2] = lMessageLength<<3;
 		lWordArray[lNumberOfWords-1] = lMessageLength>>>29;
 		return lWordArray;
-	};
+	}
  
 	function WordToHex(lValue)
 	{
@@ -96,7 +96,7 @@ function hex_md5 (string)
 			WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2,2);
 		}
 		return WordToHexValue;
-	};
+	}
  
 	var x = Array();
 	var k, AA, BB, CC, DD, a, b, c, d;

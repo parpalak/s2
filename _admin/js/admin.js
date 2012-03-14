@@ -57,11 +57,11 @@ function SetTime (eForm, sName)
 
 var Event = (function ()
 {
-	var bFF = document.addEventListener;
-	var bIE = !bFF && document.attachEvent != null;
+	var bFF = document.addEventListener,
+		bIE = !bFF && document.attachEvent != null;
 
-	bIE && attachEvent('onload', Init);
-	bFF && addEventListener('load', Init, true);
+	bIE && window.attachEvent('onload', Init);
+	bFF && window.addEventListener('load', Init, true);
 
 	return (
 	{
@@ -77,7 +77,7 @@ var Event = (function ()
 			bIE && eItem.detachEvent('on' + type, handler);
 		}
 	});
-}())
+}());
 
 var is_local_storage = false;
 try
@@ -148,7 +148,7 @@ function Init ()
 		if (is_local_storage)
 			localStorage.setItem('s2_tags_opened', eTagTable.className == 'closed' ? 0 : 1);
 		return false;
-	}
+	};
 
 	if (is_local_storage && parseInt(localStorage.getItem('s2_tags_opened')))
 		fTagSwitch();
