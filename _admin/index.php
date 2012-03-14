@@ -122,7 +122,7 @@ SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 <?php ($hook = s2_hook('ai_pre_site')) ? eval($hook) : null; ?>
 	<dl class="tabsheets">
 		<dt id="list_tab"><?php echo $lang_admin['Site']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer" id="tree_div">
 				<div id="tag_table" class="closed">
 					<div class="tagswitcher">
@@ -154,31 +154,31 @@ $padding = 2.5;
 		</dd>
 <?php ($hook = s2_hook('ai_pre_edit')) ? eval($hook) : null; ?>
 		<dt id="edit_tab"><?php echo $lang_admin['Editor']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer" id="form_div"><?php s2_preload_editor(); ?></div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_review')) ? eval($hook) : null; ?>
 		<dt id="view_tab"><?php echo $lang_admin['Preview']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer no-scroll" style="padding: 0;">
 				<iframe src="" frameborder="0" id="preview_frame" name="preview_frame"></iframe>
 			</div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_pictures')) ? eval($hook) : null; ?>
 		<dt id="pict_tab"><?php echo $lang_admin['Pictures']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer no-scroll">
 				<iframe src="" frameborder="0" id="pict_frame" name="pict_frame"></iframe>
 			</div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_comments')) ? eval($hook) : null; ?>
 		<dt id="comm_tab"><?php echo $lang_common['Comments']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer" id="comm_div"><?php echo s2_for_premoderation(); ?></div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_tags')) ? eval($hook) : null; ?>
 		<dt id="tag_tab"><?php echo $lang_common['Tags']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer" id="tag_div"></div>
 		</dd>
 <?php
@@ -190,22 +190,22 @@ if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 
 ?>
 		<dt id="admin_tab"><?php echo $lang_admin['Administrate']; ?></dt>
-		<dd>
+		<dd class="inactive">
 			<div class="reducer" id="admin_div" style="padding: 0;">
 			<dl class="tabsheets">
 <?php ($hook = s2_hook('ai_pre_stat')) ? eval($hook) : null; ?>
 				<dt id="admin-stat_tab"><?php echo $lang_admin['Stat']; ?></dt>
-				<dd>
+				<dd class="inactive">
 					<div class="reducer" id="stat_div"></div>
 				</dd>
 <?php ($hook = s2_hook('ai_pre_options')) ? eval($hook) : null; ?>
 				<dt id="admin-opt_tab"><?php echo $lang_admin['Options']; ?></dt>
-				<dd>
+				<dd class="inactive">
 					<div class="reducer" id="opt_div"></div>
 				</dd>
 <?php ($hook = s2_hook('ai_pre_users')) ? eval($hook) : null; ?>
 				<dt id="admin-user_tab"><?php echo $lang_admin['Users']; ?></dt>
-				<dd>
+				<dd class="inactive">
 					<div class="reducer">
 						<div id="user_div"></div>
 						<fieldset>
@@ -221,7 +221,7 @@ if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 				</dd>
 <?php ($hook = s2_hook('ai_pre_extensions')) ? eval($hook) : null; ?>
 				<dt id="admin-ext_tab"><?php echo $lang_admin['Extensions']; ?></dt>
-				<dd>
+				<dd class="inactive">
 					<div class="reducer" id="ext_div"></div>
 				</dd>
 <?php ($hook = s2_hook('ai_after_extensions')) ? eval($hook) : null; ?>

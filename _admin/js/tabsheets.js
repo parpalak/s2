@@ -1,7 +1,5 @@
 /*
-// 2005-03-21
-// Copyright (c) Art. Lebedev | http://www.artlebedev.ru/
-// Author - Vladimir Tokmakov
+// Originally written by Vladimir Tokmakov | Copyright (c) Art. Lebedev | http://www.artlebedev.ru/
 // Modified by Roman Parpalak
 */
 
@@ -16,55 +14,54 @@ function Make_Tabsheet ()
 
 	for (var i = aeDl.length; i-- ;)
 	{
-		if (aeDl[i].className == "tabsheets")
-		{
-			var aeDL_child = aeDl[i].childNodes;
-			var bActivated = false;
-			for (var j = aeDL_child.length; j-- ;)
-			{
-				if (aeDL_child[j].nodeName == "DT")
-				{
-					var eDT = aeDL_child[j];
-					eDT.unselectable = true;
-					eDT.onmousedown = function (e)
-					{
-						var eTab = e ? e.target : window.event.srcElement;
-						SelectTab(eTab, true);
-						return false;
-					}
+		if (aeDl[i].className != "tabsheets")
+			continue;
 
-					var eDD = eDT;
-					while (eDD = eDD.nextSibling)
-					{
-						if (eDD.nodeName == "DD")
-						{
-							if (bActivated || (-1 == sActiveTab.indexOf(eDT.id) && j > 4))
-								eDD.className = "inactive";
-							else
-							{
-								eDT.className = "active";
-								if (-1 == eDT.id.indexOf('-'))
-								{
-									eToSwitch = eDT;
-									if (sActiveTab == '_tab')
-										SetPage(eDT.id);
-								}
-								bActivated = true;
-							}
-							break
-						}
-					}
-				}
+		var aeDL_child = aeDl[i].childNodes,
+			bActivated = false;
+
+		for (var j = aeDL_child.length; j-- ;)
+		{
+			if (aeDL_child[j].nodeName != "DT")
+				continue;
+
+			var eDT = aeDL_child[j];
+			eDT.unselectable = true;
+			eDT.onmousedown = function (e)
+			{
+				var eTab = e ? e.target : window.event.srcElement;
+				SelectTab(eTab, true);
+				return false;
 			}
-			if (eToSwitch)
-				OnSwitch(eToSwitch);
+
+			var eDD = eDT;
+			while (eDD = eDD.nextSibling)
+			{
+				if (eDD.nodeName != "DD")
+					continue;
+
+				if (!bActivated && !(-1 == sActiveTab.indexOf(eDT.id) && j > 4))
+				{
+					eDD.className = eDT.className = "active";
+					if (-1 == eDT.id.indexOf('-'))
+					{
+						eToSwitch = eDT;
+						if (sActiveTab == '_tab')
+							SetPage(eDT.id);
+					}
+					bActivated = true;
+				}
+
+				break;
+			}
 		}
+		if (eToSwitch)
+			OnSwitch(eToSwitch);
 	}
 	return true;
 }
 
-var iEditorScrollTop = 0;
-var iPreviewHtmlScrollTop = null, iPreviewBodyScrollTop = null;
+var iEditorScrollTop = 0, iPreviewHtmlScrollTop = null, iPreviewBodyScrollTop = null;
 
 function OnSwitch (eTab)
 {
@@ -145,6 +142,7 @@ function OnSwitch (eTab)
 			}
 	}
 }
+
 function OnBeforeSwitch (eTab)
 {
 	var sType = eTab.id;
