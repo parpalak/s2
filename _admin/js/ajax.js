@@ -391,7 +391,7 @@ function PopupWindow (sTitle, sHeader, sInfo, sText)
 	var body = '<div class="text"><h1>' + sHeader + '</h1>' + 
 		'<p>' + sInfo + '</p></div><textarea readonly="readonly">' + sText + '</textarea>';
 
-	(hook = Hooks.get('fn_popup_window_pre_mgr')) ? eval(hook) : null;
+	eval(Hooks.get('fn_popup_window_pre_mgr'));
 
 	var text = '<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>';
 

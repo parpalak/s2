@@ -23,7 +23,7 @@ var Hooks = (function ()
 
 		get: function (hook)
 		{
-			return hooks[hook] || false;
+			return hooks[hook] || null;
 		}
 	});
 }());
@@ -178,7 +178,7 @@ function SaveHandler (e)
 	key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
 	if (e.ctrlKey && key)
 	{
-		(hook = Hooks.get('fn_save_handler_start')) ? eval(hook) : null;
+		eval(Hooks.get('fn_save_handler_start'));
 
 		if (e.preventDefault)
 			e.preventDefault();
@@ -448,7 +448,7 @@ var Changes = (function ()
 		if (!is_local_storage || !document.artform)
 			return;
 
-		(hook = Hooks.get('fn_check_changes_start')) ? eval(hook) : null;
+		eval(Hooks.get('fn_check_changes_start'));
 
 		var new_text = document.artform['page[text]'].value;
 
@@ -483,7 +483,7 @@ var Changes = (function ()
 
 			if (is_local_storage)
 			{
-				(hook = Hooks.get('fn_changes_commit_pre_ls')) ? eval(hook) : null;
+				eval(Hooks.get('fn_changes_commit_pre_ls'));
 
 				localStorage.removeItem('s2_curr_text');
 				saved_text = document.artform['page[text]'].value;
@@ -492,7 +492,7 @@ var Changes = (function ()
 
 		present: function (eForm)
 		{
-			(hook = Hooks.get('fn_changes_present')) ? eval(hook) : null;
+			eval(Hooks.get('fn_changes_present'));
 
 			return curr_md5 != hex_md5(StringFromForm(eForm));
 		}
@@ -1222,14 +1222,14 @@ var LoadArticle, ReloadArticle;
 	{
 		GETAsyncRequest(sURI, function (http)
 		{
-			(hook = Hooks.get('request_article_start')) ? eval(hook) : null;
+			eval(Hooks.get('request_article_start'));
 
 			document.getElementById('form_div').innerHTML = http.responseText;
 			Changes.commit(document.artform);
 			SelectTab(document.getElementById('edit_tab'), true);
 			sLoadedURI = sURI;
 
-			(hook = Hooks.get('request_article_end')) ? eval(hook) : null;
+			eval(Hooks.get('request_article_end'));
 		});
 	}
 
@@ -1298,7 +1298,7 @@ function LoadComments (iId)
 
 function SaveArticle(sAction)
 {
-	(hook = Hooks.get('fn_save_article_start')) ? eval(hook) : null;
+	eval(Hooks.get('fn_save_article_start'));
 
 	document.forms['artform'].setAttribute('data-save-process', 1);
 
@@ -1362,7 +1362,7 @@ function SaveArticle(sAction)
 
 			Changes.commit(document.forms['artform']);
 
-			(hook = Hooks.get('fn_save_article_end')) ? eval(hook) : null;
+			eval(Hooks.get('fn_save_article_end'));
 		}
 		else if (http.responseText != '')
 			alert(http.responseText);
@@ -1535,7 +1535,7 @@ function InsertParagraph (sType)
 	else
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
 
-	var result = (hook = Hooks.get('fn_insert_paragraph_start')) ? eval(hook) : null;
+	var result = eval(Hooks.get('fn_insert_paragraph_start'));
 	if (result)
 		return;
 
@@ -1605,7 +1605,7 @@ function InsertParagraph (sType)
 
 function InsertTag (sOpenTag, sCloseTag, selection)
 {
-	var result = (hook = Hooks.get('fn_insert_tag_start')) ? eval(hook) : null;
+	var result = eval(Hooks.get('fn_insert_tag_start'));
 	if (result)
 		return;
 
@@ -1817,7 +1817,7 @@ function Preview ()
 	if (!document.artform || !document.artform['page[text]'])
 		return;
 
-	(hook = Hooks.get('fn_preview_start')) ? eval(hook) : null;
+	eval(Hooks.get('fn_preview_start'));
 
 	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
 	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);

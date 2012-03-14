@@ -70,7 +70,7 @@ function OnSwitch (eTab)
 {
 	var sType = eTab.id;
 
-	(hook = Hooks.get('fn_tab_switch_start')) ? eval(hook) : null;
+	eval(Hooks.get('fn_tab_switch_start'));
 
 	if (sType == 'view_tab')
 	{
@@ -149,7 +149,7 @@ function OnBeforeSwitch (eTab)
 {
 	var sType = eTab.id;
 
-	(hook = Hooks.get('fn_before_switch_start')) ? eval(hook) : null;
+	eval(Hooks.get('fn_before_switch_start'));
 
 	if (sType != 'edit_tab' && document.artform && document.artform['page[text]'] && typeof(document.artform['page[text]'].scrollTop) != 'undefined')
 		iEditorScrollTop = document.artform['page[text]'].scrollTop;
