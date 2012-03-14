@@ -103,7 +103,7 @@ sub {
 		vertical-align: bottom;
 		}
 
-h2 small {
+h2.preview small, .preview .preview_section {
 	color: #666;
 	font-size: 100%;
 	font-weight: normal;

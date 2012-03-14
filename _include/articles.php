@@ -140,7 +140,7 @@ function s2_last_articles ($num)
 
 	$output = '';
 	foreach ($articles as $item)
-		$output .= '<h2 class="preview"><small>'.$item['ptitle'].' &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
+		$output .= '<h2 class="preview"><small><a class="preview_section" href="'.s2_link(preg_replace('#[^/]*$#', '', $item['rel_path'])).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
 			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
 			 '<div class="preview cite">'.$item['text'].'</div>';
 
