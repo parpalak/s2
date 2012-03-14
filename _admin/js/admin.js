@@ -1645,6 +1645,10 @@ function GetImage ()
 
 function Paragraph ()
 {
+	var result = eval(Hooks.get('fn_paragraph_start'));
+	if (result)
+		return;
+
 	document.artform['page[text]'].value = SmartParagraphs(document.artform['page[text]'].value);
 }
 
