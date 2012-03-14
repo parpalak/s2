@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * HTML code highlighting
+ *
+ * @copyright (C) 2012 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_highlight
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_highlight</id>
+	<title>Editor Highlighting</title>
+	<version>1.0a</version>
+	<description>Highlights HTML code in the editor.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b2</maxtestedon>
+
+	<hooks>
+		<hook id="ai_head_end"><![CDATA[
+?>
+<link rel="stylesheet" type="text/css" href="<?php echo $ext_info['url']; ?>/codemirror/codemirror.css" />
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/codemirror/codemirror-compressed.js"></script>
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>
+<?php
+		]]></hook>
+
+		<hook id="fn_preload_editor_end, blfn_preload_editor_end"><![CDATA[
+echo '<script type="text/javascript">if (typeof(tinyMCE) == 'undefined') { s2_highlight.init(); }</script>';
+		]]></hook>
+
+	</hooks>
+</extension>
