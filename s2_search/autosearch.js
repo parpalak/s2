@@ -1,7 +1,7 @@
 /**
  * Autosearch library
  *
- * @copyright (C) 2011 Roman Parpalak
+ * @copyright (C) 2011-2012 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
