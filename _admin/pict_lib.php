@@ -74,6 +74,8 @@ function s2_walk_dir ($dir, $created_name = false)
 		}
 	}
 
+	closedir($dir_handle);
+
 	$output = '';
 	for ($i = 0; $i < $item_count; $i++)
 	{
@@ -170,6 +172,8 @@ function s2_get_files ($dir)
 		($hook = s2_hook('fn_get_files_pre_output_item_merge')) ? eval($hook) : null;
 		$output[$item] = '<li><span data-fname="'.s2_htmlencode($dir.'/'.$item).'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.s2_htmlencode($item).'</li>';
 	}
+
+	closedir($dir_handle);
 
 	uksort($output, 'strnatcmp');
 	($hook = s2_hook('fn_get_files_pre_output_merge')) ? eval($hook) : null;
