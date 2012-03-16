@@ -7,9 +7,7 @@
 .text_wrapper,
 #tag_values,
 .tagswitcher,
-#arttext,
-#commtext,
-#tagtext,
+.full_textarea,
 .fields input,
 .input.text input,
 .input.color input,
@@ -971,9 +969,7 @@ textarea,
 .input.color input,
 .fields input[type="text"],
 .r-float select,
-#arttext,
-#commtext,
-#tagtext,
+.full_textarea,
 #search_field {
 	width: 100%;
 	margin: 0;
@@ -986,9 +982,7 @@ textarea,
 	width: 3em;
 	}
 
-#arttext,
-#commtext,
-#tagtext {
+.full_textarea {
 	height: 100%;
 	line-height: 1.2;
 	padding: 0.25em;

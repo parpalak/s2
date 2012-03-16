@@ -233,7 +233,7 @@ function s2_output_comment_form ($comment, $mode, $type)
 
 ?>
 			<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
-				<textarea id="commtext" name="comment[text]"><?php echo s2_htmlencode($comment['text']); ?></textarea>
+				<textarea id="commtext" class="full_textarea" name="comment[text]"><?php echo s2_htmlencode($comment['text']); ?></textarea>
 			</div>
 		</div>
 	</form>
