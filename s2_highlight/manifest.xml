@@ -17,7 +17,7 @@
 	<description>Highlights HTML code in the editor.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0b</minversion>
+	<minversion>1.0b2</minversion>
 	<maxtestedon>1.0b2</maxtestedon>
 
 	<hooks>
