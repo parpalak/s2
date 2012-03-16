@@ -105,7 +105,7 @@ function s2_output_tag_form ($tag, $modify_time)
 	($hook = s2_hook('fn_output_tag_form_start')) ? eval($hook) : null;
 
 ?>
-<form name="tagform" action="">
+<form class="full_tab_form" name="tagform" action="">
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
 		<hr />

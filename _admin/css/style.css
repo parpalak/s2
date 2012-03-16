@@ -40,9 +40,7 @@ body {
 #tag_table,
 .tabsheets,
 .text_wrapper,
-form[name="tagform"],
-form[name="artform"],
-form[name="commform"],
+.full_tab_form,
 .r-float,
 .l-float {
 	height: 100%;
