@@ -140,9 +140,13 @@ function s2_last_articles ($num)
 
 	$output = '';
 	foreach ($articles as $item)
+	{
+		($hook = s2_hook('fn_last_articles_loop')) ? eval($hook) : null;
+
 		$output .= '<h2 class="preview"><small><a class="preview_section" href="'.s2_link(preg_replace('#[^/]*$#', '', $item['rel_path'])).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
 			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
 			 '<div class="preview cite">'.$item['text'].'</div>';
+	}
 
 	($hook = s2_hook('fn_last_articles_end')) ? eval($hook) : null;
 
