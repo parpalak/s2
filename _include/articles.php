@@ -93,7 +93,7 @@ function s2_last_articles_array ($limit = '5')
 		'SELECT'	=> 'id, title, create_time, modify_time, excerpt, url, parent_id, ('.$raw_query_parent_title.') AS ptitle, ('.$raw_query_user.') AS author',
 		'FROM'		=> 'articles AS a',
 		'ORDER BY'	=> 'create_time DESC',
-		'WHERE'		=> '('.$raw_query_child_num.') IS NULL AND published = 1',
+		'WHERE'		=> '('.$raw_query_child_num.') IS NULL AND (create_time <> 0 OR modify_time <> 0) AND published = 1',
 		'LIMIT'		=> $limit
 	);
 
