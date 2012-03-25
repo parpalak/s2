@@ -670,7 +670,7 @@ function s2_blog_edit_post_form ($id)
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_output')) ? eval($hook) : null;
 
 ?>
-<form name="artform" action="" onsubmit="SaveArticle('save_blog'); return false;">
+<form class="full_tab_form" name="artform" action="" onsubmit="SaveArticle('save_blog'); return false;">
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_tag_col')) ? eval($hook) : null; ?>
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
