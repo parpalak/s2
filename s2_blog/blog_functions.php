@@ -924,6 +924,10 @@ function s2_blog_navigation ($cur_url)
 		if ($tags != '')
 			$s2_blog_navigation['tags'] = sprintf($lang_s2_blog['Nav tags'], S2_BLOG_TAGS_PATH).'<ul>'.$tags.'</ul>';
 
+		// Try to remove very old cache (maybe the file is not writable but removable)
+		if (isset($s2_blog_navigation_time) && $s2_blog_navigation_time < time() - 86400)
+			@unlink(S2_CACHE_DIR.'s2_blog_navigation.php');
+
 		// Output navigation array as PHP code
 		$fh = @fopen(S2_CACHE_DIR.'s2_blog_navigation.php', 'ab+');
 		if ($fh)
