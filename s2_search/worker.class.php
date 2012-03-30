@@ -77,6 +77,7 @@ if (defined('DEBUG')) echo 'Чтение индекса: ', - $start_time + ($st
 
 	protected function save_index ()
 	{
+		@unlink($this->dir.self::index_name);
 		file_put_contents($this->dir.self::index_name, '<?php //'.'a:'.count($this->fulltext_index).':{');
 		$buffer = '';
 		$length = 0;

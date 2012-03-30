@@ -172,6 +172,10 @@ class s2_search_indexer extends s2_search_worker
 
 		if ($state == 'start')
 		{
+			@unlink($this->dir.self::buffer_name);
+			@unlink($this->dir.self::buffer_pointer);
+			@unlink($this->dir.self::process_state);
+
 			file_put_contents($this->dir.self::buffer_name, '');
 			file_put_contents($this->dir.self::buffer_pointer, '0');
 
