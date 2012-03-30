@@ -881,7 +881,9 @@ function s2_blog_navigation ($cur_url)
 	if (file_exists(S2_CACHE_DIR.'s2_blog_navigation.php'))
 		include S2_CACHE_DIR.'s2_blog_navigation.php';
 
-	if (empty($s2_blog_navigation) || !isset($s2_blog_navigation_time) || $s2_blog_navigation_time < time() - 900)
+	$now = time();
+
+	if (empty($s2_blog_navigation) || !isset($s2_blog_navigation_time) || $s2_blog_navigation_time < $now - 900)
 	{
 		$s2_blog_navigation = array('last' => '<a href="'.S2_BLOG_PATH.'">'.sprintf($lang_s2_blog['Nav last'], S2_MAX_ITEMS ? S2_MAX_ITEMS : 10).'</a>');
 
@@ -925,7 +927,7 @@ function s2_blog_navigation ($cur_url)
 			$s2_blog_navigation['tags'] = sprintf($lang_s2_blog['Nav tags'], S2_BLOG_TAGS_PATH).'<ul>'.$tags.'</ul>';
 
 		// Try to remove very old cache (maybe the file is not writable but removable)
-		if (isset($s2_blog_navigation_time) && $s2_blog_navigation_time < time() - 86400)
+		if (isset($s2_blog_navigation_time) && $s2_blog_navigation_time < $now - 86400)
 			@unlink(S2_CACHE_DIR.'s2_blog_navigation.php');
 
 		// Output navigation array as PHP code
@@ -935,7 +937,7 @@ function s2_blog_navigation ($cur_url)
 			if (flock($fh, LOCK_EX | LOCK_NB))
 			{
 				ftruncate($fh, 0);
-				fwrite($fh, '<?php'."\n\n".'$s2_blog_navigation_time = '.time().';'."\n\n".'$s2_blog_navigation = '.var_export($s2_blog_navigation, true).';');
+				fwrite($fh, '<?php'."\n\n".'$s2_blog_navigation_time = '.$now.';'."\n\n".'$s2_blog_navigation = '.var_export($s2_blog_navigation, true).';');
 				fflush($fh);
 				fflush($fh);
 				flock($fh, LOCK_UN);
