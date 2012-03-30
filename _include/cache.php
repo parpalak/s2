@@ -54,15 +54,32 @@ function s2_generate_config_cache ($load = false)
 	if ($load)
 		define('S2_CONFIG_LOADED', 1);
 
+	if (defined('S2_DISABLE_CACHE'))
+		return;
+
 	// Output config as PHP code
-	@unlink(S2_CACHE_DIR.'cache_config.php');
-	$fh = @fopen(S2_CACHE_DIR.'cache_config.php', 'wb');
+	$fh = @fopen(S2_CACHE_DIR.'cache_config.php', 'a+b');
 	if (!$fh)
+	{
+		// Try to remove the file if it's not writable
+		@unlink(S2_CACHE_DIR.'cache_config.php');
+		$fh = @fopen(S2_CACHE_DIR.'cache_config.php', 'a+b');
+	}
+
+	if ($fh)
+	{
+		if (flock($fh, LOCK_EX | LOCK_NB))
+		{
+			ftruncate($fh, 0);
+			fwrite($fh, '<?php'."\n\n".'define(\'S2_CONFIG_LOADED\', 1);'."\n\n".$output."\n");
+			fflush($fh);
+			fflush($fh);
+			flock($fh, LOCK_UN);
+		}
+		fclose($fh);
+	}
+	else
 		error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
-
-	fwrite($fh, '<?php'."\n\n".'define(\'S2_CONFIG_LOADED\', 1);'."\n\n".$output."\n");
-
-	fclose($fh);
 }
 
 //
@@ -124,15 +141,32 @@ function s2_generate_hooks_cache ()
 	// Replace current hooks
 	$s2_hooks = $output;
 
+	if (defined('S2_DISABLE_CACHE'))
+		return;
+
 	// Output hooks as PHP code
-	@unlink(S2_CACHE_DIR.'cache_hooks.php');
-	$fh = @fopen(S2_CACHE_DIR.'cache_hooks.php', 'wb');
+	$fh = @fopen(S2_CACHE_DIR.'cache_hooks.php', 'a+b');
 	if (!$fh)
+	{
+		// Try to remove the file if it's not writable
+		@unlink(S2_CACHE_DIR.'cache_hooks.php');
+		$fh = @fopen(S2_CACHE_DIR.'cache_hooks.php', 'a+b');
+	}
+
+	if ($fh)
+	{
+		if (flock($fh, LOCK_EX | LOCK_NB))
+		{
+			ftruncate($fh, 0);
+			fwrite($fh, '<?php'."\n\n".'if (!defined(\'S2_HOOKS_LOADED\'))'."\n\t".'define(\'S2_HOOKS_LOADED\', 1);'."\n\n".'$s2_hooks = '.var_export($output, true).';');
+			fflush($fh);
+			fflush($fh);
+			flock($fh, LOCK_UN);
+		}
+		fclose($fh);
+	}
+	else
 		error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
-
-	fwrite($fh, '<?php'."\n\n".'if (!defined(\'S2_HOOKS_LOADED\'))'."\n\t".'define(\'S2_HOOKS_LOADED\', 1);'."\n\n".'$s2_hooks = '.var_export($output, true).';');
-
-	fclose($fh);
 }
 /*
 
