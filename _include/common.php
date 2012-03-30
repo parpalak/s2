@@ -90,8 +90,7 @@ if (!defined('S2_CONFIG_LOADED'))
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
-	s2_generate_config_cache();
-	require S2_CACHE_DIR.'cache_config.php';
+	s2_generate_config_cache(true);
 }
 
 define('S2_DB_LAST_REVISION', 8);
@@ -110,5 +109,4 @@ if (!defined('S2_HOOKS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
 	s2_generate_hooks_cache();
-	require S2_CACHE_DIR.'cache_hooks.php';
 }

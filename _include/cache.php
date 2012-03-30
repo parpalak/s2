@@ -26,7 +26,7 @@ function s2_clear_cache ()
 //
 // Generate the config cache PHP script
 //
-function s2_generate_config_cache ()
+function s2_generate_config_cache ($load = false)
 {
 	global $s2_db;
 
@@ -45,7 +45,14 @@ function s2_generate_config_cache ()
 
 	$output = '';
 	while ($row = $s2_db->fetch_row($result))
+	{
 		$output .= 'define(\''.$row[0].'\', \''.str_replace('\'', '\\\'', $row[1]).'\');'."\n";
+		if ($load)
+			define($row[0], $row[1]);
+	}
+
+	if ($load)
+		define('S2_CONFIG_LOADED', 1);
 
 	// Output config as PHP code
 	@unlink(S2_CACHE_DIR.'cache_config.php');
@@ -63,7 +70,7 @@ function s2_generate_config_cache ()
 //
 function s2_generate_hooks_cache ()
 {
-	global $s2_db;
+	global $s2_db, $s2_hooks;
 
 	$return = ($hook = s2_hook('fn_generate_hooks_cache_start')) ? eval($hook) : null;
 	if ($return != null)
@@ -113,6 +120,9 @@ function s2_generate_hooks_cache ()
 
 		$output[$cur_hook['id']][] = $load_ext_info."\n\n".$cur_hook['code']."\n\n".$unload_ext_info."\n";
 	}
+
+	// Replace current hooks
+	$s2_hooks = $output;
 
 	// Output hooks as PHP code
 	@unlink(S2_CACHE_DIR.'cache_hooks.php');
