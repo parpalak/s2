@@ -352,8 +352,6 @@ function s2_install_extension ($id)
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
-	s2_clear_cache();
-
 	s2_generate_hooks_cache();
 	global $s2_hooks;
 	require S2_CACHE_DIR.'cache_hooks.php';
@@ -536,8 +534,6 @@ function s2_uninstall_extension ($id)
 	// Regenerate the hooks cache
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
-
-	s2_clear_cache();
 
 	s2_generate_hooks_cache();
 	global $s2_hooks;

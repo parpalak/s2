@@ -48,6 +48,7 @@ function s2_generate_config_cache ()
 		$output .= 'define(\''.$row[0].'\', \''.str_replace('\'', '\\\'', $row[1]).'\');'."\n";
 
 	// Output config as PHP code
+	@unlink(S2_CACHE_DIR.'cache_config.php');
 	$fh = @fopen(S2_CACHE_DIR.'cache_config.php', 'wb');
 	if (!$fh)
 		error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
@@ -114,6 +115,7 @@ function s2_generate_hooks_cache ()
 	}
 
 	// Output hooks as PHP code
+	@unlink(S2_CACHE_DIR.'cache_hooks.php');
 	$fh = @fopen(S2_CACHE_DIR.'cache_hooks.php', 'wb');
 	if (!$fh)
 		error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
