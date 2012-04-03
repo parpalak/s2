@@ -97,7 +97,7 @@ var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
 function Init ()
 {
 	InitMovableDivs();
-	Drag.init();
+	//Drag.init();
 	Search.init();
 	Changes.init();
 
@@ -107,7 +107,7 @@ function Init ()
 	Event.add(document, keyboard_event, SaveHandler, true);
 
 	// Mouse events in the tree
-	Event.add(document.getElementById('tree'), 'mousedown', MouseDown);
+//	Event.add(document.getElementById('tree'), 'mousedown', MouseDown);
 
 	// Tooltips
 	Event.add(document, 'mouseover', function (e)
@@ -323,10 +323,7 @@ var Search = (function ()
 		{
 			var DoSearch = function ()
 			{
-				GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(search_string), function (http)
-				{
-					document.getElementById('tree').innerHTML = '<ul>' + http.responseText + '</ul>';
-				});
+				$('#tree').jstree('refresh', -1);
 			}
 
 			var search_timer;
@@ -405,7 +402,7 @@ var Search = (function ()
 			search_string = '';
 		}
 	})
-}())
+}());
 
 // Turning animated icon on or off
 function SetWait (bWait)
@@ -654,7 +651,7 @@ var TableSort = (function ()
 
 var buttonPanel = null;
 
-var Drag = (function ()
+/* var Drag = (function ()
 {
 	var draggableDiv = null;
 	var drag_html = '';
@@ -698,7 +695,7 @@ var Drag = (function ()
 		}
 	});
 }())
-
+ */
 function InitMovableDivs ()
 {
 	if (buttonPanel == null)
@@ -711,7 +708,7 @@ function InitMovableDivs ()
 
 //=======================[Expanding the tree]===================================
 
-var asExpanded = [];
+/* var asExpanded = [];
 
 function ExpandSavedItem (sId)
 {
@@ -747,29 +744,18 @@ function LoadExpand ()
 			eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
 		}
 }
-
+ */
 function CloseAll ()
 {
-	var i, aLi = document.getElementById('tree_div').getElementsByTagName('LI');
-
-	for (i = aLi.length; i-- ;)
-		if (aLi[i].className.indexOf('ExpandOpen') != -1)
-			aLi[i].className = str_replace('ExpandOpen', 'ExpandClosed', aLi[i].className);
-
-	var eLi = document.getElementById('1').parentNode.parentNode;
-	eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
+	$('#tree').jstree('close_all').jstree('toggle_node', '#node_1');
 }
 
 function OpenAll ()
 {
-	var i, aLi = document.getElementById('tree_div').getElementsByTagName('LI');
-
-	for (i = aLi.length; i-- ;)
-		if (aLi[i].className.indexOf('ExpandClosed') != -1)
-			aLi[i].className = str_replace('ExpandClosed', 'ExpandOpen', aLi[i].className);
+	$('#tree').jstree('open_all');
 }
 
-function OpenById (sId)
+/* function OpenById (sId)
 {
 	CloseAll();
 	ReleaseItem();
@@ -786,22 +772,225 @@ function OpenById (sId)
 		if (e.nodeName == 'LI' && e.className.indexOf('ExpandClosed') != -1)
 			e.className = str_replace('ExpandClosed', 'ExpandOpen', e.className);
 	}
-}
+} */
+
+$.ajaxPrefilter(function (options, originalOptions, jqXHR)
+{
+	var successCheck = function (data, textStatus, jqXHR)
+	{
+		CheckStatus(jqXHR);
+	};
+	var errorCheck = function (jqXHR, textStatus, errorThrown)
+	{
+		CheckStatus(jqXHR);
+	};
+	options.success = options.success instanceof Array ? options.success.unshift(successCheck) : (typeof(options.success) == 'function' ? [successCheck, options.success] : successCheck);
+	options.error = options.error instanceof Array ? options.error.unshift(errorCheck) : (typeof(options.error) == 'function' ? [errorCheck, options.error] : errorCheck);
+});
+
+$(document).ready(function()
+{
+	var selectedId = -1,
+		commentNum = 0,
+		isRenaming = false;
+
+	function createArticle ()
+	{
+		tree.jstree('create', null, 'last');
+	}
+
+	function editArticle ()
+	{
+		LoadArticle(sUrl + 'action=load&id=' + selectedId);
+	}
+
+	function showComments ()
+	{
+		if (commentNum)
+			LoadComments(selectedId);
+	}
+
+	function initContext ()
+	{
+		$('#context_edit').click(editArticle);
+		$('#context_comments').click(showComments);
+		$('#context_add').click(createArticle);
+		$('#context_delete').click(function () {tree.jstree('remove');});
+	}
+
+	initContext();
+
+	function rollback (data)
+	{
+		buttonPanel = null;
+		$.jstree.rollback(data);
+		buttonPanel = document.getElementById('context_buttons');
+	}
+
+	var tree = $('#tree')
+		.bind("before.jstree", function (e, data)
+		{
+//			console.log(data.func);
+			if (data.func === "remove" && !confirm(str_replace('%s', tree.jstree('get_text', data.args[0]), s2_lang.delete_item)))
+			{
+				e.stopImmediatePropagation(); 
+				return false; 
+			}
+		})
+		.bind('refresh.jstree', function ()
+		{
+			setTimeout(initContext, 0);
+		})
+		.bind('dblclick.jstree', function (e)
+		{
+			if (!isRenaming && e.target.nodeName == 'A')
+			{
+				isRenaming = true;
+				tree.jstree('rename', e.target);
+			}
+		})
+		.bind('select_node.jstree', function (e, d)
+		{
+			if (!buttonPanel)
+				return;
+
+			var curId = d.rslt.obj.attr('id').replace('node_', '');
+/* 			if (curId === selectedId)
+				tree.jstree('rename', d.rslt.obj);
+			else
+ */			{
+				$(buttonPanel).detach();
+				selectedId = curId;
+				commentNum = d.rslt.obj.attr('data-comments');
+				$('.jstree-clicked').append(buttonPanel);
+			}
+//			console.log(e, selectedId);
+		})
+		.bind('deselect_node.jstree', function (e, d)
+		{
+			$(buttonPanel).detach();
+		})
+		.bind('rename.jstree', function (e, data)
+		{
+			isRenaming = false;
+			if (data.rslt.new_name == data.rslt.old_name)
+				return;
+
+			$.ajax({
+				type : 'POST',
+				url : sUrl + 'action=rename&id=' + data.rslt.obj.attr('id').replace('node_', ''),
+				data : {title : data.rslt.new_name},
+				success : function (d)
+				{
+					if (!d.status)
+						rollback(data.rlbk);
+				},
+				error : function ()
+				{
+					rollback(data.rlbk);
+				}
+			});
+		})
+		.bind('remove.jstree', function (e, data)
+		{
+			$.ajax({
+				url : sUrl + 'action=delete&id=' + data.rslt.obj.attr('id').replace('node_', ''),
+				success : function (d)
+				{
+					if (!d.status)
+						rollback(data.rlbk);
+				},
+				error : function ()
+				{
+					rollback(data.rlbk);
+				}
+			});
+		})
+		.bind('create.jstree', function (e, data)
+		{
+			//console.log(e, data);
+			$.ajax({
+				url : sUrl + 'action=create&id=' + data.rslt.parent.attr('id').replace('node_', ''),
+				data : {title : data.rslt.name},
+				success : function (d)
+				{
+					if (!d.status)
+						rollback(data.rlbk);
+					else
+						data.rslt.obj.attr('id', d.id);
+				},
+				error : function ()
+				{
+					rollback(data.rlbk);
+				}
+			});
+		})
+		.jstree({
+			crrm : {
+				input_width_limit : 1000
+			},
+			ui : {
+				select_limit : 1,
+				initially_selected : ['node_1'],
+			},
+			hotkeys : {
+				'e' : editArticle,
+				'c' : showComments,
+				'n' : createArticle,
+			},
+			json_data : {
+				ajax : {
+					url : function (node)
+					{
+						//console.log(node);
+						return sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(Search.string());
+					},
+/* 					data : function (node)
+					{
+						console.log(2, node.attr);
+					},
+ */				}
+			},
+			core : {
+				animation : 150,
+				initially_open : ['node_1'],
+				progressive_render : true
+			},
+			plugins : ["json_data", 'dnd', "ui", "crrm", "hotkeys"]
+		});
+})
+.ajaxStart(function (event, XMLHttpRequest, ajaxOptions)
+{
+	SetWait(true);
+})
+.ajaxStop(function (event, XMLHttpRequest, ajaxOptions)
+{
+	SetWait(false);
+});
 
 function RefreshTree ()
 {
 	Search.reset();
-	GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=', function (http)
+	$('#tree').jstree('refresh', -1);
+/* 	GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=', function (http)
 	{
+		$("#tree").jstree("save_opened");
+		var jsTreeSettings = $("#tree").jstree("get_settings");
+		jsTreeSettings.json_data.data = $.parseJSON(http.responseText);
+		//jsTreeSettings.core.initially_open = ['node_1'];
+		$.jstree._reference("tree")._set_settings(jsTreeSettings);
+		$.jstree._reference("tree").refresh('node_223');
+		$("#tree").jstree("reopen");
+
 		SaveExpand()
 		document.getElementById('tree').innerHTML = '<ul>' + http.responseText + '</ul>';
 		LoadExpand();
-	});
+	}); */
 }
 
 //=======================[Highlight and renaming]===============================
 
-function HighlightItem (item)
+/* function HighlightItem (item)
 {
 	item.className = 'but_panel';
 	item.appendChild(buttonPanel);
@@ -817,8 +1006,8 @@ function ReleaseItem ()
 }
 
 var RejectName = function () {};
-
-function EditItemName (eSpan)
+ */
+/* function EditItemName (eSpan)
 {
 	var sSavedName = eSpan.firstChild.nodeValue;
 
@@ -889,7 +1078,7 @@ function EditItemName (eSpan)
 	eInput.select();
 	eSpan.firstChild.nodeValue += '___';
 	ReleaseItem();
-}
+} */
 
 //=======================[Drag & drop]==========================================
 
@@ -899,7 +1088,7 @@ var far;
 var dragging;
 
 // We have to create a "UL" child node if there is no one
-function SetItemChildren (eSpan, sInnerHTML)
+/* function SetItemChildren (eSpan, sInnerHTML)
 {
 	var eLi = eSpan.parentNode.parentNode;
 
@@ -917,8 +1106,8 @@ function SetItemChildren (eSpan, sInnerHTML)
 	}
 	ExpandSavedItem(eSpan.id);
 }
-
-// We have to remove the "UL" node if the list is empty
+ */
+/* // We have to remove the "UL" node if the list is empty
 function SetParentChildren (eParentUl, str)
 {
 	if (str != '')
@@ -930,7 +1119,7 @@ function SetParentChildren (eParentUl, str)
 		eLi.className = str_replace('ExpandOpen', 'ExpandLeaf', eLi.className);
 	}
 }
-
+ */
 function StopDrag()
 {
 	dragging = false;
@@ -988,7 +1177,7 @@ function StopDrag()
 }
 
 //=======================[Mouse events]=========================================
-
+/* 
 var mouseX, mouseY, mouseStartX, mouseStartY;
 
 function MouseDown (e)
@@ -1174,10 +1363,10 @@ function MouseOut(e)
 		Drag.set_hint('');
 	}
 }
-
+ */
 //=======================[Tree button handlers]=================================
 
-function DeleteArticle ()
+/* function DeleteArticle ()
 {
 	var eSpan = buttonPanel.parentNode;
 
@@ -1211,7 +1400,7 @@ function CreateChildArticle ()
 		EditItemName(eSpan);
 	});
 }
-
+ */
 var LoadArticle, ReloadArticle;
 
 (function ()
@@ -1271,9 +1460,9 @@ var LoadArticle, ReloadArticle;
 
 function EditArticle (iId)
 {
-	if (typeof(iId) == 'undefined')
+/* 	if (typeof(iId) == 'undefined')
 		iId = buttonPanel.parentNode.id;
-
+ */
 	LoadArticle(sUrl + 'action=load&id=' + iId);
 
 	return false;
@@ -1281,9 +1470,9 @@ function EditArticle (iId)
 
 function LoadComments (iId)
 {
-	if (typeof(iId) == 'undefined')
+/* 	if (typeof(iId) == 'undefined')
 		iId = buttonPanel.parentNode.id;
-
+ */
 	GETAsyncRequest(sUrl + 'action=load_comments&id=' + iId, function (http)
 	{
 		var eItem = document.getElementById('comm_div');

@@ -273,10 +273,10 @@ function s2_context_buttons ()
 	global $lang_common, $lang_admin;
 
 	$buttons = array(
-		'Edit'			=> '<img class="edit" src="i/1.gif" onclick="EditArticle();" alt="'.$lang_admin['Edit'].'" />',
-		'Comments'		=> '<img class="comments" src="i/1.gif" onclick="LoadComments();" alt="'.$lang_common['Comments'].'" />',
-		'Subarticle'	=> '<img class="add" src="i/1.gif" onclick="CreateChildArticle();" alt="'.$lang_admin['Create subarticle'].'" />',
-		'Delete'		=> '<img class="delete" src="i/1.gif" onclick="DeleteArticle();" alt="'.$lang_admin['Delete'].'" />',
+		'Edit'			=> '<img id="context_edit" src="i/1.gif" alt="'.$lang_admin['Edit'].'" />',
+		'Comments'		=> '<img id="context_comments" src="i/1.gif" alt="'.$lang_common['Comments'].'" />',
+		'Subarticle'	=> '<img id="context_add" src="i/1.gif" alt="'.$lang_admin['Create subarticle'].'" />',
+		'Delete'		=> '<img id="context_delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" />',
 	);
 
 	($hook = s2_hook('fn_context_buttons_start')) ? eval($hook) : null;

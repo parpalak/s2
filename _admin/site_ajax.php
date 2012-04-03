@@ -118,10 +118,10 @@ elseif ($action == 'delete')
 	$id = (int) $_GET['id'];
 
 	require 'tree.php';
+	s2_delete_branch($id);
 
-	$parent_id = s2_delete_branch($id);
-
-	echo s2_get_child_branches($parent_id);
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1));
 }
 
 elseif ($action == 'rename')
@@ -136,8 +136,10 @@ elseif ($action == 'rename')
 	$title = $_POST['title'];
 
 	require 'tree.php';
-
 	s2_rename_article($id, $title);
+
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1));
 }
 
 elseif ($action == 'create')
@@ -149,14 +151,13 @@ elseif ($action == 'create')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 	$id = (int) $_GET['id'];
+	$title = $_GET['title'];
 
 	require 'tree.php';
+	$new_id = s2_create_article($id, $title);
 
-	$return['id'] = s2_create_article($id);
-	$return['children'] = s2_get_child_branches($id);
-
-	header('Content-Type: text/xml; charset=utf-8');
-	echo '<response>'.s2_array2xml($return).'</response>';
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1, 'id' => $new_id));
 }
 
 // Load folder tree
@@ -171,7 +172,8 @@ elseif ($action == 'load_tree')
 
 	require 'tree.php';
 
-	echo s2_get_child_branches((int)$_GET['id'], true, trim($_GET['search']));
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(s2_get_child_branches((int)$_GET['id'], true, trim($_GET['search'])));
 }
 
 //=======================[Pages editor]=========================================

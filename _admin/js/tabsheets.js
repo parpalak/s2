@@ -159,6 +159,8 @@ function OnBeforeSwitch (eTab)
 		if (typeof (window.frames['preview_frame'].document.body.scrollTop) != 'undefined')
 			iPreviewBodyScrollTop = window.frames['preview_frame'].document.body.scrollTop;
 	}
+
+	$('#tree').jstree(sType != 'list_tab' ? 'disable_hotkeys' : 'enable_hotkeys');
 }
 
 function SelectTab(eTab, bAddToHistory)

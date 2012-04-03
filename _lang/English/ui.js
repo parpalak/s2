@@ -1,6 +1,5 @@
 var s2_lang = {
 	load_tree			: 'Loading site structure...',
-	no_loops			: 'One cannot move a section into subsections!',
 	delete_comment		: 'Do you want to delete the comment?',
 	delete_tag_link		: 'Do you want to break the link?',
 	new_password		: 'New password for the user “%s”:',
@@ -57,7 +56,6 @@ var s2_lang = {
 	value				: 'Size: ',
 	size				: 'Dimension: ',
 	insert				: 'Insert',
-	no_loops_img		: 'It is impossible to move a folder to subfolders!',
 
 	files_too_big		: 'The following files were not being uploaded since their size exceeds the server limit (%s):'
 };

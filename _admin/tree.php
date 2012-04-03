@@ -11,7 +11,7 @@
 // Articles tree managing
 //
 
-function s2_create_article ($id)
+function s2_create_article ($id, $title)
 {
 	global $s2_db, $s2_user, $lang_admin;
 
@@ -38,7 +38,7 @@ function s2_create_article ($id)
 	$query = array(
 		'INSERT'	=> 'parent_id, title, priority, url, user_id',
 		'INTO'		=> 'articles',
-		'VALUES'	=> $id.', \''.$lang_admin['New page'].'\', '.($max_priority).', \'new\', '.$s2_user['id']
+		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($max_priority).', \'new\', '.$s2_user['id']
 	);
 	($hook = s2_hook('fn_create_article_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -248,8 +248,6 @@ function s2_delete_branch ($id)
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	s2_delete_item_and_children($id);
-
-	return $parent_id;
 }
 
 //
@@ -375,7 +373,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 	while ($article = $s2_db->fetch_assoc($result))
 		$rows[] = $article;
 
-	$output = '';
+	$output = array();
 	for ($i = 0; $i < count($rows); $i++)
 	{
 		$article = $rows[$i];
@@ -396,11 +394,44 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 
 		if ($search && (!$children && !$article['found']))
 			continue;
-		$output .= '<li class="'.$item_type.($i == count($rows) ? ' IsLast' : '' ).($search ? ' Search'.($article['found'] ? ' Match' : '') : '').'">'.$expand.$span.$children.'</li>';
+
+		//$output .= '<li class="'.$item_type.($i == count($rows) ? ' IsLast' : '' ).($search ? ' Search'.($article['found'] ? ' Match' : '') : '').'">'.$expand.$span.$children.'</li>';
+		$item = array(
+			'data'		=> array(
+				'title'		=> $article['title'],
+//				'icon'		=> $children ? 'folder' : 'file'
+			),
+			'attr'		=> array('id' => 'node_'.$article['id']),
+		);
+
+		$class = array();
+		if ($search)
+		{
+			$class[] = 'Search';
+			if ($article['found'])
+				$class[] = 'Match';
+		}
+		if (!$article['published'])
+			$class[] = 'Hidden';
+		if (count($class))
+			$item['data']['attr']['class'] = implode(' ', $class);
+
+		if ($article['comment_num'])
+		{
+			$item['attr']['data-comments'] = $article['comment_num'];
+		}
+
+		if ($children)
+		{
+			$item['state'] = $search && $children ? 'open' : 'closed';
+			$item['children'] = $children;
+		}
+		$output[] = $item;
 	}
 
 	($hook = s2_hook('fn_get_child_branches_end')) ? eval($hook) : null;
-	return $output && !$root ? '<ul>'.$output.'</ul>' : $output;
+	//return $output && !$root ? '<ul>'.$output.'</ul>' : $output;
+	return $output;
 }
 
 //
