@@ -925,6 +925,22 @@ $(document).ready(function()
 				}
 			});
 		})
+		.bind('move_node.jstree', function (e, data)
+		{
+			//console.log(e, data);
+			$.ajax({
+				url : sUrl + 'action=move&source_id=' + data.rslt.o.attr('id').replace('node_', '') + '&new_parent_id=' + data.rslt.np.attr('id').replace('node_', '') + '&new_pos=' + data.rslt.cp,
+				success : function (d)
+				{
+					if (!d.status)
+						rollback(data.rlbk);
+				},
+				error : function ()
+				{
+					rollback(data.rlbk);
+				}
+			});
+		})
 		.jstree({
 			crrm : {
 				input_width_limit : 1000

@@ -78,7 +78,7 @@ function s2_rename_article ($id, $title)
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 }
 
-function s2_move_branch ($source_id, $dest_id, $far)
+function s2_move_branch ($source_id, $dest_id, $position)
 {
 	global $s2_db, $s2_user;
 
@@ -99,13 +99,13 @@ function s2_move_branch ($source_id, $dest_id, $far)
 			$source_parent_id = $row['parent_id'];
 			$source_user_id = $row['user_id'];
 		}
-		else
+/* 		else
 		{
 			$dest_priority = $row['priority'];
 			$dest_parent_id = $row['parent_id'];
 			$dest_user_id = $row['user_id'];
 		}
-		$item_num++;
+ */		$item_num++;
 	}
 
 	if ($item_num != 2)
@@ -114,34 +114,33 @@ function s2_move_branch ($source_id, $dest_id, $far)
 	if (!$s2_user['edit_site'])
 		s2_test_user_rights($source_user_id == $s2_user['id']);
 
-	if ($far)
+/* 	if ($far)
 	{
-		// Dragging into different folder
-		$query = array(
-			'UPDATE'	=> 'articles',
-			'SET'		=> 'priority = priority - 1',
-			'WHERE'		=> 'parent_id = '.$source_parent_id.' AND priority > '.$source_priority
-		);
-		($hook = s2_hook('fn_move_branch_pre_src_pr_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	// Dragging into different folder */
+	$query = array(
+		'UPDATE'	=> 'articles',
+		'SET'		=> 'priority = priority + 1',
+		'WHERE'		=> 'priority >= '.$position.' AND parent_id = '.$dest_id
+	);
+	($hook = s2_hook('fn_move_branch_pre_dest_priority_upd_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		$query = array(
-			'UPDATE'	=> 'articles',
-			'SET'		=> 'priority = priority + 1',
-			'WHERE'		=> 'parent_id = '.$dest_id
-		);
-		($hook = s2_hook('fn_move_branch_pre_dest_priority_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$query = array(
+		'UPDATE'	=> 'articles',
+		'SET'		=> 'priority = '.$position.', parent_id = '.$dest_id,
+		'WHERE'		=> 'id = '.$source_id
+	);
+	($hook = s2_hook('fn_move_branch_pre_parent_id_upd_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		$query = array(
-			'UPDATE'	=> 'articles',
-			'SET'		=> 'priority = 0, parent_id = '.$dest_id,
-			'WHERE'		=> 'id = '.$source_id
-		);
-		($hook = s2_hook('fn_move_branch_pre_parent_id_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
-	}
-	else
+	$query = array(
+		'UPDATE'	=> 'articles',
+		'SET'		=> 'priority = priority - 1',
+		'WHERE'		=> 'parent_id = '.$source_parent_id.' AND priority > '.$source_priority
+	);
+	($hook = s2_hook('fn_move_branch_pre_src_pr_upd_qr')) ? eval($hook) : null;
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+/* 	else
 	{
 		// Moving inside a folder
 
@@ -174,8 +173,8 @@ function s2_move_branch ($source_id, $dest_id, $far)
 		($hook = s2_hook('fn_move_branch_pre_src_pr_dn_upd_qr')) ? eval($hook) : null;
 		$s2_db->query_build($query) or error(__FILE__, __LINE__);
 	}
-
 	return $source_parent_id;
+ */
 }
 
 function s2_delete_item_and_children ($id)

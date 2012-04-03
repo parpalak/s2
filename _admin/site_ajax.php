@@ -81,30 +81,24 @@ if ($action == 'close_other_sessions')
 //=======================[Managing items]=======================================
 
 // Drag & Drop
-elseif ($action == 'drag')
+elseif ($action == 'move')
 {
 	$is_permission = ($s2_user['create_articles'] || $s2_user['edit_site']);
 	($hook = s2_hook('rq_action_drag_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	if (!isset($_GET['sid']) || !isset($_GET['did']) || !isset($_GET['far']))
+	if (!isset($_GET['source_id']) || !isset($_GET['new_parent_id']) || !isset($_GET['new_pos']))
 		die('Error in GET parameters.');
 
-	$source_id = (int) $_GET['sid'];
-	$dest_id = (int) $_GET['did'];
-	$far = (int) $_GET['far'];
+	$source_id = (int) $_GET['source_id'];
+	$new_parent_id = (int) $_GET['new_parent_id'];
+	$new_pos = (int) $_GET['new_pos'];
 
 	require 'tree.php';
+	s2_move_branch($source_id, $new_parent_id, $new_pos);
 
-	$source_parent_id = s2_move_branch($source_id, $dest_id, $far);
-
-	header('Content-Type: text/xml; charset=utf-8');
-
-	if ($far)
-		$return['destination'] = s2_get_child_branches($dest_id);
-	$return['source_parent'] = s2_get_child_branches($source_parent_id);
-
-	echo '<response>'.s2_array2xml($return).'</response>';
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1));
 }
 
 elseif ($action == 'delete')
