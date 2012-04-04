@@ -796,7 +796,7 @@ $(document).ready(function()
 
 	function createArticle ()
 	{
-		tree.jstree('create', null, 'last');
+		tree.jstree('create', null, 'last', {data : {title : s2_lang.new_page, attr : {'class' : 'Hidden'}}});
 	}
 
 	function editArticle ()
@@ -830,7 +830,7 @@ $(document).ready(function()
 	var tree = $('#tree')
 		.bind("before.jstree", function (e, data)
 		{
-			console.log(data.func);
+			//console.log(data.func);
 			if (data.func === "remove" && !confirm(str_replace('%s', tree.jstree('get_text', data.args[0]), s2_lang.delete_item)))
 			{
 				e.stopImmediatePropagation(); 

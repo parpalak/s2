@@ -1,5 +1,6 @@
 var s2_lang = {
 	load_tree			: 'Loading site structure...',
+	new_page			: 'New page',
 	delete_comment		: 'Do you want to delete the comment?',
 	delete_tag_link		: 'Do you want to break the link?',
 	new_password		: 'New password for the user “%s”:',
