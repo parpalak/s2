@@ -94,6 +94,7 @@ a.nav_mon:hover { background: #ffa; }
 	margin-right: 8px;
 	width: 16px;
 	color: transparent;
+	text-indent: -9999em;
 	background: url(i/star.gif) no-repeat 0 50%;
 	}
 
