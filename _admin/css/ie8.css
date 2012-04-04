@@ -23,6 +23,9 @@
 a, a:visited {
 	border-bottom: 1px solid #bce;
 	}
+	.jstree a {
+		border-bottom: none;
+		}
 
 .tabsheets > dt {
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#00000000', EndColorStr='#17000000')";
