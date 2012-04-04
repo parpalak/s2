@@ -207,32 +207,10 @@ function StringFromForm (aeItem)
 	return sRequest;
 }
 
-//
-// Ajax wrappers
-//
-
-function getHTTPRequestObject() 
-{
-	var xmlHttpRequest = false;
-
-	if (!xmlHttpRequest && typeof XMLHttpRequest != 'undefined')
-	{
-		try
-		{
-			xmlHttpRequest = new XMLHttpRequest();
-		}
-		catch (exception)
-		{
-			xmlHttpRequest = false;
-		}
-	}
-	return xmlHttpRequest;
-}
-
-var xmlhttp_sync = getHTTPRequestObject();
-
 function CheckStatus (xmlhttp)
 {
+	xmlhttp.s2ErrorFlag = true;
+
 	if (xmlhttp.status != 200)
 	{
 		UnknownError(xmlhttp.responseText, xmlhttp.status);
@@ -260,82 +238,26 @@ function CheckStatus (xmlhttp)
 	if (after_code)
 		setTimeout(function () {eval(after_code);}, 0);
 
+	xmlhttp.s2ErrorFlag = false;
 	return true;
-}
-
-function AsyncCallback ()
-{
-	if (this.readyState != 4)
-		return;
-
-	if (typeof SetWait == 'function')
-		SetWait(false);
-
-	if (CheckStatus(this) && this.S2CustomCallback)
-		this.S2CustomCallback(this);
-};
-
-function AjaxRequest (sRequestUrl, sParam, fCallback)
-{
-	var xmlhttp;
-
-	if (typeof SetWait == 'function')
-		SetWait(true);
-
-	if (fCallback == null)
-	{
-		xmlhttp = xmlhttp_sync;
-	}
-	else
-	{
-		xmlhttp = getHTTPRequestObject();
-		if (typeof fCallback == 'function')
-			xmlhttp.S2CustomCallback = fCallback;
-	}
-
-	xmlhttp.open(sParam == '' ? 'GET' : 'POST', sRequestUrl, fCallback != null);
-
-	if (sParam != '')
-		xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-	if (fCallback != null)
-		xmlhttp.onreadystatechange = AsyncCallback;
-
-	xmlhttp.send(sParam == '' ? null : sParam);
-
-	if (fCallback != null)
-		return;
-
-	var no_error = CheckStatus(xmlhttp);
-
-	if (typeof SetWait == 'function')
-		SetWait(false);
-
-	return {'text': xmlhttp.responseText, 'status': (no_error ? '200' : '-1')};
-}
-
-function GETSyncRequest (sRequestUrl)
-{
-	return AjaxRequest(sRequestUrl, '');
 }
 
 function GETAsyncRequest (sRequestUrl, fCallback)
 {
-	if (fCallback == null)
-		fCallback = true;
-	AjaxRequest(sRequestUrl, '', fCallback);
-}
-
-function POSTSyncRequest (sRequestUrl, sParam)
-{
-	return AjaxRequest(sRequestUrl, sParam);
+	$.get(sRequestUrl, function (data, textStatus, jqXHR)
+	{
+		if (!jqXHR.s2ErrorFlag && typeof fCallback == 'function')
+			fCallback(jqXHR);
+	});
 }
 
 function POSTAsyncRequest (sRequestUrl, sParam, fCallback)
 {
-	if (fCallback == null)
-		fCallback = true;
-	AjaxRequest(sRequestUrl, sParam, fCallback);
+	$.post(sRequestUrl, sParam, function (data, textStatus, jqXHR)
+	{
+		if (!jqXHR.s2ErrorFlag && typeof fCallback == 'function')
+			fCallback(jqXHR);
+	});
 }
 
 //
@@ -506,19 +428,20 @@ var PopupMessages = {
 function SendLoginData (eForm, fSuccess, fFailed)
 {
 	eForm.key.value = hex_md5(hex_md5(eForm.pass.value + 'Life is not so easy :-)') + ';-)' + eForm.getAttribute('data-salt'));
-	var Response = POSTSyncRequest(sUrl + 'action=login', StringFromForm(eForm));
-
-	if (Response.status == '200' && Response.text == 'OK')
-		fSuccess();
-	else if (Response.text.substr(0, 9) == 'OLD_SALT_')
+	POSTAsyncRequest(sUrl + 'action=login', StringFromForm(eForm), function (http)
 	{
-		var params = Response.text.split('_');
-		eForm.setAttribute('data-salt', params[2]);
-		eForm.challenge.value = params[3];
-		setTimeout(function () { SendLoginData (eForm, fSuccess, fFailed); }, 0);
-	}
-	else
-		fFailed(Response.text);
+		if (http.responseText == 'OK')
+			fSuccess();
+		else if (http.responseText.substr(0, 9) == 'OLD_SALT_')
+		{
+			var params = http.responseText.split('_');
+			eForm.setAttribute('data-salt', params[2]);
+			eForm.challenge.value = params[3];
+			setTimeout(function () { SendLoginData (eForm, fSuccess, fFailed); }, 0);
+		}
+		else
+			fFailed(http.responseText);
+	});
 }
 
 function SendAjaxLoginForm ()

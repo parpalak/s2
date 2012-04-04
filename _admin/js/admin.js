@@ -53,32 +53,6 @@ function SetTime (eForm, sName)
 	return false;
 }
 
-// Initialization
-
-var Event = (function ()
-{
-	var bFF = document.addEventListener,
-		bIE = !bFF && document.attachEvent != null;
-
-	bIE && window.attachEvent('onload', Init);
-	bFF && window.addEventListener('load', Init, true);
-
-	return (
-	{
-		add: function (eItem, type, handler, use_capture)
-		{
-			bFF && eItem.addEventListener(type, handler, use_capture ? true : false);
-			bIE && eItem.attachEvent('on' + type, handler);
-		},
-
-		remove: function (eItem, type, handler, use_capture)
-		{
-			bFF && eItem.removeEventListener(type, handler, use_capture ? true : false);
-			bIE && eItem.detachEvent('on' + type, handler);
-		}
-	});
-}());
-
 var is_local_storage = false;
 try
 {
@@ -96,23 +70,41 @@ var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
 
 function Init ()
 {
-	InitMovableDivs();
-	//Drag.init();
 	Search.init();
 	Changes.init();
 
-	var keyboard_event = isIE || isSafari ? 'keydown' : 'keypress';
-
 	// Ctrl + S
-	Event.add(document, keyboard_event, SaveHandler, true);
+	$(document).bind(isIE || isSafari ? 'keydown' : 'keypress', function (e)
+	{
+		var key = e.keyCode || e.which;
+		key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
+		if (e.ctrlKey && key)
+		{
+			eval(Hooks.get('fn_save_handler_start'));
 
-	// Mouse events in the tree
-//	Event.add(document.getElementById('tree'), 'mousedown', MouseDown);
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (document.artform && '#edit' == cur_page)
+				document.artform.onsubmit();
+
+			if (document.commform && '#comm' == cur_page)
+				document.commform.onsubmit();
+
+			if (document.tagform && '#tag' == cur_page)
+				SaveTag();
+
+			if (document.optform && '#admin-opt' == cur_page)
+				SaveOptions();
+
+			return false;
+		}
+	});
 
 	// Tooltips
-	Event.add(document, 'mouseover', function (e)
+	$(document).mouseover(function (e)
 	{
-		var eItem = window.event ? window.event.srcElement : e.target;
+		var eItem = e.target;
 		var title = eItem.title;
 
 		if (!title && eItem.nodeName == 'IMG')
@@ -120,8 +112,8 @@ function Init ()
 
 		if (title)
 			window.status = title;
-	});
-	Event.add(document, 'mouseout', function (e)
+	})
+	.mouseout(function ()
 	{
 		window.status = window.defaultStatus;
 	});
@@ -169,38 +161,6 @@ function Init ()
 	cur_page = document.location.hash;
 	setInterval(CheckPage, 400);
 	SetWait(false);
-}
-
-function SaveHandler (e)
-{
-	e = e || window.event;
-	var key = e.keyCode || e.which;
-	key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
-	if (e.ctrlKey && key)
-	{
-		eval(Hooks.get('fn_save_handler_start'));
-
-		if (e.preventDefault)
-			e.preventDefault();
-		if (e.stopPropagation)
-			e.stopPropagation();
-		e.returnValue = false;
-		e.cancelBubble = true;
-
-		if (document.artform && '#edit' == cur_page)
-			document.artform.onsubmit();
-
-		if (document.commform && '#comm' == cur_page)
-			document.commform.onsubmit();
-
-		if (document.tagform && '#tag' == cur_page)
-			SaveTag();
-
-		if (document.optform && '#admin-opt' == cur_page)
-			SaveOptions();
-
-		return false;
-	}
 }
 
 function Logout ()
@@ -640,111 +600,13 @@ var TableSort = (function ()
 			for (var i = aeTD.length; i-- ;)
 			{
 				eTD = aeTD[i];
-				Event.add(eTD, 'click', sort);
+				$(eTD).click(sort);
 				eTD.title = eTD.title ? eTD.title : s2_lang.click_to_sort;
 			}
 		}
 	}
 }());
 
-// Creating the button panel and div for drag
-
-var buttonPanel = null;
-
-/* var Drag = (function ()
-{
-	var draggableDiv = null;
-	var drag_html = '';
-
-	return (
-	{
-		init: function ()
-		{
-			if (draggableDiv == null)
-			{
-				draggableDiv = document.createElement('DIV');
-				document.body.appendChild(draggableDiv);
-				draggableDiv.id = 'dragged';
-				Drag.move(-99, -99);
-			}
-		},
-
-		move: function (x, y)
-		{
-			draggableDiv.style.left = x + 10 + 'px';
-			draggableDiv.style.top = y + 0 + 'px';
-		},
-
-		hide: function ()
-		{
-			draggableDiv.style.visibility = 'hidden';
-			drag_html = '';
-			Drag.move(-99, -99);
-		},
-
-		show: function (s)
-		{
-			draggableDiv.style.visibility = 'visible';
-			drag_html = s;
-			draggableDiv.innerHTML = s;
-		},
-
-		set_hint: function (s)
-		{
-			draggableDiv.innerHTML = drag_html + (s ? '<br />' + s : '');
-		}
-	});
-}())
- */
-function InitMovableDivs ()
-{
-	if (buttonPanel == null)
-	{
-		buttonPanel = document.getElementById('context_buttons');
-		buttonPanel.parentNode.removeChild(buttonPanel);
-	}
-}
-
-
-//=======================[Expanding the tree]===================================
-
-/* var asExpanded = [];
-
-function ExpandSavedItem (sId)
-{
-	var iId = parseInt(sId);
-
-	if (!isNaN(iId))
-		asExpanded[iId] = '';
-}
-
-function SaveExpand ()
-{
-	var aSpan = document.getElementById('tree_div').getElementsByTagName('SPAN');
-	var i, iId;
-
-	asExpanded = [];
-
-	for (i = aSpan.length; i-- ;)
-	{
-		iId = parseInt(aSpan[i].id);
-		if (!isNaN(iId) && aSpan[i].parentNode.parentNode.className.indexOf('ExpandOpen') != -1)
-			asExpanded[iId] = 1;
-	}
-}
-
-function LoadExpand ()
-{
-	var i, eLi, eSpan;
-
-	for (i in asExpanded)
-		if (eSpan = document.getElementById(i))
-		{
-			eLi = eSpan.parentNode.parentNode;
-			eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
-		}
-}
- */
 function CloseAll ()
 {
 	$('#tree').jstree('close_all').jstree('toggle_node', '#node_1');
@@ -754,25 +616,6 @@ function OpenAll ()
 {
 	$('#tree').jstree('open_all');
 }
-
-/* function OpenById (sId)
-{
-	CloseAll();
-	ReleaseItem();
-
-	var e = document.getElementById(sId);
-	if (!e)
-		return;
-
-	HighlightItem(e);
-
-	while (e.parentNode)
-	{
-		e = e.parentNode;
-		if (e.nodeName == 'LI' && e.className.indexOf('ExpandClosed') != -1)
-			e.className = str_replace('ExpandClosed', 'ExpandOpen', e.className);
-	}
-} */
 
 $.ajaxPrefilter(function (options, originalOptions, jqXHR)
 {
@@ -818,13 +661,18 @@ $(document).ready(function()
 		$('#context_delete').click(function () {tree.jstree('remove');});
 	}
 
+	Init();
 	initContext();
+
+	var eButtons = $('#context_buttons');
+	eButtons.detach();
 
 	function rollback (data)
 	{
-		buttonPanel = null;
+		eButtons.remove();
+		eButtons = null;
 		$.jstree.rollback(data);
-		buttonPanel = document.getElementById('context_buttons');
+		eButtons = $('#context_buttons');
 	}
 
 	var tree = $('#tree')
@@ -851,7 +699,7 @@ $(document).ready(function()
 		})
 		.bind('select_node.jstree', function (e, d)
 		{
-			if (!buttonPanel)
+			if (!eButtons)
 				return;
 
 			var curId = d.rslt.obj.attr('id').replace('node_', '');
@@ -859,16 +707,15 @@ $(document).ready(function()
 				tree.jstree('rename', d.rslt.obj);
 			else
  */			{
-				$(buttonPanel).detach();
+				eButtons.detach();
 				selectedId = curId;
 				commentNum = d.rslt.obj.attr('data-comments');
-				$('.jstree-clicked').append(buttonPanel);
+				$('.jstree-clicked').append(eButtons);
 			}
-//			console.log(e, selectedId);
 		})
 		.bind('deselect_node.jstree', function (e, d)
 		{
-			$(buttonPanel).detach();
+			eButtons.detach();
 		})
 		.bind('rename.jstree', function (e, data)
 		{
@@ -908,7 +755,6 @@ $(document).ready(function()
 		})
 		.bind('create.jstree', function (e, data)
 		{
-			//console.log(e, data);
 			$.ajax({
 				url : sUrl + 'action=create&id=' + data.rslt.parent.attr('id').replace('node_', ''),
 				data : {title : data.rslt.name},
@@ -927,7 +773,6 @@ $(document).ready(function()
 		})
 		.bind('move_node.jstree', function (e, data)
 		{
-			//console.log(e, data);
 			$.ajax({
 				url : sUrl + 'action=move&source_id=' + data.rslt.o.attr('id').replace('node_', '') + '&new_parent_id=' + data.rslt.np.attr('id').replace('node_', '') + '&new_pos=' + data.rslt.cp,
 				success : function (d)
@@ -947,25 +792,20 @@ $(document).ready(function()
 			},
 			ui : {
 				select_limit : 1,
-				initially_selected : ['node_1'],
+				initially_selected : ['node_1']
 			},
 			hotkeys : {
 				'e' : editArticle,
 				'c' : showComments,
-				'n' : createArticle,
+				'n' : createArticle
 			},
 			json_data : {
 				ajax : {
 					url : function (node)
 					{
-						//console.log(node);
 						return sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(Search.string());
 					},
-/* 					data : function (node)
-					{
-						console.log(2, node.attr);
-					},
- */				}
+				}
 			},
 			core : {
 				animation : 150,
@@ -989,435 +829,10 @@ function RefreshTree ()
 {
 	Search.reset();
 	$('#tree').jstree('refresh', -1);
-/* 	GETAsyncRequest(sUrl + 'action=load_tree&id=0&search=', function (http)
-	{
-		$("#tree").jstree("save_opened");
-		var jsTreeSettings = $("#tree").jstree("get_settings");
-		jsTreeSettings.json_data.data = $.parseJSON(http.responseText);
-		//jsTreeSettings.core.initially_open = ['node_1'];
-		$.jstree._reference("tree")._set_settings(jsTreeSettings);
-		$.jstree._reference("tree").refresh('node_223');
-		$("#tree").jstree("reopen");
-
-		SaveExpand()
-		document.getElementById('tree').innerHTML = '<ul>' + http.responseText + '</ul>';
-		LoadExpand();
-	}); */
 }
 
-//=======================[Highlight and renaming]===============================
-
-/* function HighlightItem (item)
-{
-	item.className = 'but_panel';
-	item.appendChild(buttonPanel);
-}
-
-function ReleaseItem ()
-{
-	if (buttonPanel.parentNode)
-	{
-		buttonPanel.parentNode.className = '';
-		buttonPanel.parentNode.removeChild(buttonPanel);
-	}
-}
-
-var RejectName = function () {};
- */
-/* function EditItemName (eSpan)
-{
-	var sSavedName = eSpan.firstChild.nodeValue;
-
-	RejectName = function ()
-	{
-		eSpan.firstChild.nodeValue = sSavedName;
-		eInput.onblur = null;
-		RejectName = function () {};
-		eSpan.removeChild(eInput);
-		HighlightItem(eSpan);
-		eSpan = null;
-	}
-
-	var KeyDown = function (e)
-	{
-		if (!eSpan)
-			return;
-
-		e = e || window.event;
-		var iCode = e.keyCode || e.which;
-
-		if (iCode == 13)
-		{
-			// Enter
-			var sTitle = eInput.value;
-
-			SaveExpand();
-			POSTAsyncRequest(sUrl + 'action=rename&id=' + eSpan.id, 'title=' + encodeURIComponent(sTitle), function (http)
-			{
-				if (http.responseText != '')
-					alert(http.responseText);
-				else
-				{
-					eSpan.firstChild.nodeValue = sTitle;
-					eInput.onblur = null;
-					RejectName = function () {};
-					eSpan.removeChild(eInput);
-					HighlightItem(eSpan);
-					eSpan = null;
-				}
-			});
-		}
-		else if (iCode == 27)
-			// Escape
-			RejectName();
-		else
-			// It's a hack that allows to make the input as wide as the text contained
-			// '___' makes it a bit larger.
-			// str_replace changes usual spaces to non-breaking ones.
-			setTimeout(function ()
-			{
-				if (eSpan)
-					eSpan.firstChild.nodeValue = '___' + str_replace(' ', ' ', eInput.value);
-			}, 0);
-	}
-
-	var eInput = document.createElement('INPUT');
-	eInput.setAttribute('type', 'text');
-	eInput.onblur = RejectName;
-	if (isIE || isSafari)
-		eInput.onkeydown = KeyDown;
-	else
-		eInput.onkeypress = KeyDown;
-	eInput.value = sSavedName;
-
-	eSpan.insertBefore(eInput, eSpan.childNodes[1]);
-	eInput.focus();
-	eInput.select();
-	eSpan.firstChild.nodeValue += '___';
-	ReleaseItem();
-} */
-
-//=======================[Drag & drop]==========================================
-
-var sourceElement, acceptorElement, sourceParent;
-var far;
-
-var dragging;
-
-// We have to create a "UL" child node if there is no one
-/* function SetItemChildren (eSpan, sInnerHTML)
-{
-	var eLi = eSpan.parentNode.parentNode;
-
-	if (eLi.lastChild.nodeName == 'UL')
-	{
-		eLi.lastChild.innerHTML = sInnerHTML;
-		eLi.className = str_replace('ExpandClosed', 'ExpandOpen', eLi.className);
-	}
-	else
-	{
-		var eUl = document.createElement('UL');
-		eLi.className = str_replace('ExpandLeaf', 'ExpandOpen', eLi.className);
-		eLi.appendChild(eUl);
-		eUl.innerHTML = sInnerHTML;
-	}
-	ExpandSavedItem(eSpan.id);
-}
- */
-/* // We have to remove the "UL" node if the list is empty
-function SetParentChildren (eParentUl, str)
-{
-	if (str != '')
-		eParentUl.innerHTML = str;
-	else
-	{
-		var eLi = eParentUl.parentNode;
-		eLi.removeChild(eLi.lastChild);
-		eLi.className = str_replace('ExpandOpen', 'ExpandLeaf', eLi.className);
-	}
-}
- */
-function StopDrag()
-{
-	dragging = false;
-	sourceElement.className = '';
-	Drag.hide();
-
-	if (acceptorElement)
-	{
-		SaveExpand();
-
-		if (far)
-		{
-			var eItem = acceptorElement,
-				eLastAcceptor = acceptorElement,
-				eSourceLi = sourceElement.parentNode.parentNode,
-				bIsLoop = false;
-
-			while (eItem)
-			{
-				if (eItem == eSourceLi)
-				{
-					bIsLoop = true;
-					break;
-				}
-				eItem = eItem.parentNode;
-			}
-
-			if (bIsLoop)
-				PopupMessages.showUnique(s2_lang.no_loops, 'tree_no_loops');
-			else
-			{
-				GETAsyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far, function (http)
-				{
-					var xmldoc = http.responseXML;
-					SetParentChildren(sourceParent, xmldoc.getElementsByTagName('source_parent')[0].firstChild.nodeValue);
-					SetItemChildren(eLastAcceptor, xmldoc.getElementsByTagName('destination')[0].firstChild.nodeValue);
-					LoadExpand();
-				});
-			}
-		}
-		else
-		{
-			GETAsyncRequest(sUrl + 'action=drag&sid=' + sourceElement.id + '&did=' + acceptorElement.id + '&far=' + far, function (http)
-			{
-				var xmldoc = http.responseXML;
-				sourceParent.innerHTML = xmldoc.getElementsByTagName('source_parent')[0].firstChild.nodeValue;
-				LoadExpand();
-			});
-		}
-
-		acceptorElement.className = '';
-		acceptorElement.parentNode.parentNode.firstChild.className = ''
-		acceptorElement = null;
-	}
-}
-
-//=======================[Mouse events]=========================================
-/* 
-var mouseX, mouseY, mouseStartX, mouseStartY;
-
-function MouseDown (e)
-{
-	var t = window.event ? window.event.srcElement : e.target;
-
-	if (t.nodeName == 'DIV' && t.innerHTML == '')
-	{
-		// Click on the expand image
-		var node = t.parentNode;
-
-		if (node.className.indexOf('ExpandOpen') != -1)
-			node.className = str_replace('ExpandOpen', 'ExpandClosed', node.className);
-		else if (node.className.indexOf('ExpandClosed') != -1)
-			node.className = str_replace('ExpandClosed', 'ExpandOpen', node.className);
-
-		return;
-	}
-	else if (t.nodeName == 'SPAN' && !isNaN(parseInt(t.id)))
-		sourceElement = t;
-	else
-		// Do not handle span child eventss
-		return;
-
-	var oCanvas = document.getElementsByTagName('HTML')[0];
-	mouseStartX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
-	mouseStartY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
-
-	Event.add(document, 'mouseover', MouseIn);
-	Event.add(document, 'mouseout', MouseOut);
-	Event.add(document, 'mousemove', MouseMove);
-	Event.add(document, 'mouseup', MouseUp);
-
-	e.preventDefault && e.preventDefault();
-	window.event && (window.event.returnValue = false);
-	t.unselectable = true;
-}
-
-function MouseMove (e)
-{
-	var oCanvas = document.getElementsByTagName('HTML')[0];
-	mouseX = window.event ? event.clientX + oCanvas.scrollLeft : e.pageX;
-	mouseY = window.event ? event.clientY + oCanvas.scrollTop : e.pageY;
-
-	if (!dragging && (Math.abs(mouseStartY - mouseY) > 5 || Math.abs(mouseStartX - mouseX) > 5))
-	{
-		dragging = true;
-
-		clearTimeout(idTimer);
-		bIntervalPassed = true;
-
-		RejectName();
-		ReleaseItem();
-
-		sourceElement.className = 'source';
-
-		Drag.show('<strong>' + sourceElement.innerHTML + '</strong>');
-
-		sourceParent = sourceElement.parentNode.parentNode.parentNode;
-		far = 0;
-	}
-
-	Drag.move(mouseX, mouseY);
-}
-
-var idTimer, bIntervalPassed = true;
-
-function MouseUp (e)
-{
-	var is_drop = dragging;
-	if (dragging)
-		StopDrag();
-
-	RejectName();
-
-	if (bMouseInTagvalues)
-	{
-		AddArticleToTag(sourceElement.id);
-		TagvaluesMouseOut();
-	}
-	else if (!bIntervalPassed)
-	{
-		// Double click
-		clearTimeout(idTimer);
-		bIntervalPassed = true;
-
-		if (!is_drop)
-		{
-			var sJob = sUrl + 'action=preview&id=' + sourceElement.id;
-			setTimeout(function()
-			{
-				var wnd = window.open(sJob, 's2_preview_window', 'scrollbars=yes,toolbar=yes', 'True');
-			}, 0);
-		}
-	}
-	else
-	{
-		// Single click
-		var sJob = '';
-		if (sourceElement == buttonPanel.parentNode)
-			// Highlighted item
-			sJob = !is_drop ? sourceElement.id : '';
-		else
-		{
-			ReleaseItem();
-			HighlightItem(sourceElement);
-		}
-
-		bIntervalPassed = false;
-		idTimer = setTimeout(function ()
-		{
-			bIntervalPassed = true;
-			if (sJob)
-				EditItemName(document.getElementById(sJob));
-		}, 400);
-	}
-	sourceElement = null;
-
-	Event.remove(document, 'mouseover', MouseIn);
-	Event.remove(document, 'mouseout', MouseOut);
-	Event.remove(document, 'mousemove', MouseMove);
-	Event.remove(document, 'mouseup', MouseUp);
-}
-
-// Rollovers
-
-function MouseIn (e)
-{
-	if (sourceElement == null ||
-		sourceElement.id == '1' ||
-		Search.string())
-		return;
-
-	var t = window.event ? window.event.srcElement : e.target;
-
-	if (t.nodeName != 'SPAN' ||
-		isNaN(parseInt(t.id)) ||
-		t == acceptorElement ||
-		t == sourceElement)
-		return;
-
-	acceptorElement = t;
-	if (far)
-	{
-		t.className = 'over_far';
-		Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, s2_lang.move));
-	}
-	else
-	{
-		if (t.parentNode.parentNode.parentNode != sourceParent)
-		{
-			far = 1;
-			t.className = 'over_far';
-			Drag.set_hint(str_replace('%s', acceptorElement.innerHTML, s2_lang.move));
-		}
-		else
-		{
-			if (mouseStartY > mouseY)
-			{
-				Drag.set_hint(s2_lang.move_up);
-				t.className = 'over_top';
-				t.parentNode.parentNode.firstChild.className = 'over_top';
-			}
-			else
-			{
-				Drag.set_hint(s2_lang.move_down);
-				t.className = 'over_bottom';
-				t.parentNode.parentNode.firstChild.className = 'over_bottom';
-			}
-		}
-	}
-}
-
-function MouseOut(e)
-{
-	var t = window.event ? window.event.srcElement : e.target;
-
-	if (sourceElement != null && t == acceptorElement && t != sourceElement)
-	{
-		t.className = '';
-		t.parentNode.parentNode.firstChild.className = '';
-		acceptorElement = null;
-		Drag.set_hint('');
-	}
-}
- */
 //=======================[Tree button handlers]=================================
 
-/* function DeleteArticle ()
-{
-	var eSpan = buttonPanel.parentNode;
-
-	if (!confirm(str_replace('%s', eSpan.innerText ? eSpan.innerText : eSpan.textContent, s2_lang.delete_item)))
-		return;
-
-	GETAsyncRequest(sUrl + 'action=delete&id=' + eSpan.id, function (http)
-	{
-		SaveExpand()
-		ReleaseItem();
-		SetParentChildren(eSpan.parentNode.parentNode.parentNode, http.responseText);
-		LoadExpand();
-	});
-}
-
-function CreateChildArticle ()
-{
-	var eSpan = buttonPanel.parentNode;
-
-	GETAsyncRequest(sUrl + 'action=create&id=' + eSpan.id, function (http)
-	{
-		var eLi = eSpan.parentNode.parentNode;
-		var xmldoc = http.responseXML;
-
-		ReleaseItem();
-		SetItemChildren(eSpan, xmldoc.getElementsByTagName('children')[0].firstChild.nodeValue);
-
-		eSpan = document.getElementById(xmldoc.getElementsByTagName('id')[0].firstChild.nodeValue);
-
-		HighlightItem(eSpan);
-		EditItemName(eSpan);
-	});
-}
- */
 var LoadArticle, ReloadArticle;
 
 (function ()
@@ -1426,8 +841,10 @@ var LoadArticle, ReloadArticle;
 
 	function RequestArticle (sURI)
 	{
+		//console.log('pre-request');
 		GETAsyncRequest(sURI, function (http)
 		{
+			//console.log('callback-start');
 			eval(Hooks.get('request_article_start'));
 
 			document.getElementById('form_div').innerHTML = http.responseText;
@@ -1436,6 +853,7 @@ var LoadArticle, ReloadArticle;
 			sLoadedURI = sURI;
 
 			eval(Hooks.get('request_article_end'));
+			//console.log('callback-end');
 		});
 	}
 
@@ -1477,19 +895,12 @@ var LoadArticle, ReloadArticle;
 
 function EditArticle (iId)
 {
-/* 	if (typeof(iId) == 'undefined')
-		iId = buttonPanel.parentNode.id;
- */
 	LoadArticle(sUrl + 'action=load&id=' + iId);
-
 	return false;
 }
 
 function LoadComments (iId)
 {
-/* 	if (typeof(iId) == 'undefined')
-		iId = buttonPanel.parentNode.id;
- */
 	GETAsyncRequest(sUrl + 'action=load_comments&id=' + iId, function (http)
 	{
 		var eItem = document.getElementById('comm_div');
@@ -1940,7 +1351,7 @@ var bMouseInTagvalues = false;
 
 function TagvaluesMouseIn ()
 {
-	if (!sourceElement || !eCurrentTag)
+/* 	if (!sourceElement || !eCurrentTag)
 		return;
 
 	bMouseInTagvalues = true;
@@ -1948,19 +1359,19 @@ function TagvaluesMouseIn ()
 	Drag.set_hint(str_replace('%s', aName[aName.length - 2], s2_lang.add_to_tag));
 
 	document.getElementById('tag_values').style.backgroundColor = '#d2e5fc';
-	eCurrentTag.style.backgroundColor = '#d2e5fc';
+	eCurrentTag.style.backgroundColor = '#d2e5fc'; */
 }
 
 function TagvaluesMouseOut ()
 {
-	bMouseInTagvalues = false;
+/* 	bMouseInTagvalues = false;
 	if (sourceElement)
 		Drag.set_hint('');
 
 	document.getElementById('tag_values').style.backgroundColor = '';
 
 	if (eCurrentTag)
-		eCurrentTag.style.backgroundColor = '';
+		eCurrentTag.style.backgroundColor = ''; */
 }
 
 function AddArticleToTag (iId)
