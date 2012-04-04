@@ -830,7 +830,7 @@ $(document).ready(function()
 	var tree = $('#tree')
 		.bind("before.jstree", function (e, data)
 		{
-//			console.log(data.func);
+			console.log(data.func);
 			if (data.func === "remove" && !confirm(str_replace('%s', tree.jstree('get_text', data.args[0]), s2_lang.delete_item)))
 			{
 				e.stopImmediatePropagation(); 
@@ -897,7 +897,7 @@ $(document).ready(function()
 				url : sUrl + 'action=delete&id=' + data.rslt.obj.attr('id').replace('node_', ''),
 				success : function (d)
 				{
-					if (!d.status)
+					if (!d || !d.status)
 						rollback(data.rlbk);
 				},
 				error : function ()
@@ -970,7 +970,8 @@ $(document).ready(function()
 			core : {
 				animation : 150,
 				initially_open : ['node_1'],
-				progressive_render : true
+				progressive_render : true,
+				open_parents : false
 			},
 			plugins : ["json_data", 'dnd', "ui", "crrm", "hotkeys"]
 		});

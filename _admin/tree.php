@@ -235,6 +235,9 @@ function s2_delete_branch ($id)
 	else
 		die('Item not found!');
 
+	if ($parent_id == S2_ROOT_ID)
+		die('Can\'t delete root item!');
+
 	if (!$s2_user['edit_site'])
 		s2_test_user_rights($user_id == $s2_user['id']);
 
@@ -422,7 +425,8 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 
 		if ($children)
 		{
-			$item['state'] = $search && $children ? 'open' : 'closed';
+			if ($search)
+				$item['state'] = 'open';
 			$item['children'] = $children;
 		}
 		$output[] = $item;
