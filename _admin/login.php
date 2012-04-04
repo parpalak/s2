@@ -404,17 +404,19 @@ function s2_get_login_form ($message = '')
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
-var shake, time = 0;
-
-function shift_form (time)
-{
-	document.forms['loginform'].style.left = parseInt(-150.0 * Math.exp(-time/5.5) * Math.sin(3.14159 * time/4.0)) + 'px';
-}
+var shake = null;
 
 function SendForm ()
 {
+	var formStyle = document.forms['loginform'].style;
+
+	function shift_form (time)
+	{
+		formStyle.left = parseInt(-150.0 * Math.exp(-time * 0.006) * Math.sin(0.026179938 * time)) + 'px';
+	}
+
 	clearInterval(shake);
-	shift_form(time = 0);
+	shift_form(0);
 
 	SendLoginData(document.forms['loginform'], function ()
 	{
@@ -422,12 +424,18 @@ function SendForm ()
 	}, function (sText)
 	{
 		document.getElementById('message').innerHTML = sText;
-		shift_form(1);
-		time = 2;
-		shake = setInterval(function () {
-			shift_form(time);
-			if (++time > 32)
+		var time = new Date().getTime();
+		shake = setInterval(function ()
+		{
+			var now = (new Date().getTime()) - time;
+			if (now > 835)
+			{
+				shift_form(0);
 				clearInterval(shake);
+				shake = null;
+			}
+			else
+				shift_form(now);
 		}, 30);
 	});
 }
@@ -440,7 +448,7 @@ function LoginInit ()
 	document.forms['loginform'].login.onkeyup =
 	document.forms['loginform'].pass.onkeyup = function (e)
 	{
-		if (time > 1 && time < 32)
+		if (shake)
 			return;
 
 		if (login != document.forms['loginform'].login.value || password != document.forms['loginform'].pass.value)
