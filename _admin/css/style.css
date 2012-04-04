@@ -569,6 +569,7 @@ body > .tabsheets {
 		vertical-align: top;
 		color: #000;
 		background: url(../i/icons.png);
+		border: none;
 		}
 		img#context_edit { background-position: -32px -32px;}
 		img#context_add { background-position: -32px 0px;}
