@@ -207,40 +207,59 @@ function StringFromForm (aeItem)
 	return sRequest;
 }
 
-function CheckStatus (xmlhttp)
+//
+// Ajax wrappers
+//
+
+$.ajaxPrefilter(function (options, originalOptions, jqXHR)
 {
-	xmlhttp.s2ErrorFlag = true;
-
-	if (xmlhttp.status != 200)
+	function checkStatus (xmlhttp)
 	{
-		UnknownError(xmlhttp.responseText, xmlhttp.status);
-		return false;
+		xmlhttp.s2ErrorFlag = true;
+
+		if (xmlhttp.status != 200)
+		{
+			UnknownError(xmlhttp.responseText, xmlhttp.status);
+			return false;
+		}
+
+		var s2_status = xmlhttp.getResponseHeader('X-S2-Status');
+
+		if (s2_status && s2_status != 'Success')
+		{
+			if (s2_status == 'Lost' || s2_status == 'Expired' || s2_status == 'Wrong_IP')
+				PopupMessages.showUnique(xmlhttp.responseText, 'expired_session');
+			else if (s2_status == 'Forbidden')
+				PopupMessages.showUnique(xmlhttp.responseText, 'forbidden_action');
+			else
+				PopupMessages.show(xmlhttp.responseText);
+
+			return false;
+		}
+
+		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
+		if (exec_code)
+			eval(exec_code);
+		var after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
+		if (after_code)
+			setTimeout(function () {eval(after_code);}, 0);
+
+		xmlhttp.s2ErrorFlag = false;
+		return true;
 	}
 
-	var s2_status = xmlhttp.getResponseHeader('X-S2-Status');
-
-	if (s2_status && s2_status != 'Success')
+	var successCheck = function (data, textStatus, jqXHR)
 	{
-		if (s2_status == 'Lost' || s2_status == 'Expired' || s2_status == 'Wrong_IP')
-			PopupMessages.showUnique(xmlhttp.responseText, 'expired_session');
-		else if (s2_status == 'Forbidden')
-			PopupMessages.showUnique(xmlhttp.responseText, 'forbidden_action');
-		else
-			PopupMessages.show(xmlhttp.responseText);
+		checkStatus(jqXHR);
+	};
+	var errorCheck = function (jqXHR, textStatus, errorThrown)
+	{
+		checkStatus(jqXHR);
+	};
 
-		return false;
-	}
-
-	var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
-	if (exec_code)
-		eval(exec_code);
-	var after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
-	if (after_code)
-		setTimeout(function () {eval(after_code);}, 0);
-
-	xmlhttp.s2ErrorFlag = false;
-	return true;
-}
+	options.success = options.success instanceof Array ? options.success.unshift(successCheck) : (typeof(options.success) == 'function' ? [successCheck, options.success] : successCheck);
+	options.error = options.error instanceof Array ? options.error.unshift(errorCheck) : (typeof(options.error) == 'function' ? [errorCheck, options.error] : errorCheck);
+});
 
 function GETAsyncRequest (sRequestUrl, fCallback)
 {
