@@ -63,12 +63,20 @@ if ($action == 'load_tree')
 	($hook = s2_hook('prq_action_load_tree_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
+	$path = isset($_GET['path']) ? $_GET['path'] : false;
+	while (strpos($path, '..') !== false)
+		$path = str_replace('..', '', $path);
+
+	$return = s2_walk_dir($path);
+	if ($path === false)
+		$return = array(
+			'data'		=> $lang_pictures['Pictures'],
+			'attr'		=> array('id' => 'node_1', 'data-path' => ''),
+			'children'	=> $return
+		);
+
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array(
-		'data' => $lang_pictures['Pictures'],
-		'attr' => array('id' => 'node_1', 'data-path' => ''),
-		'children' => s2_walk_dir(''))
-	);
+	echo json_encode($return);
 }
 
 elseif ($action == 'create_subfolder')
@@ -130,12 +138,13 @@ elseif ($action == 'delete_files')
 	($hook = s2_hook('prq_action_delete_file_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	if (!isset($_GET['fname']) || !is_array($_GET['fname']))
+	if (!isset($_GET['path']) || !isset($_GET['fname']) || !is_array($_GET['fname']))
 		die('Error in GET parameters.');
 
-	foreach ($_GET['fname'] as $path)
+	$dir = (string) $_GET['path'];
+	foreach ($_GET['fname'] as $fname)
 	{
-		$path = (string) $path;
+		$path = $dir.'/'.((string) $fname);
 		while (strpos($path, '..') !== false)
 			$path = str_replace('..', '', $path);
 

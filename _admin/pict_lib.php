@@ -123,7 +123,7 @@ function s2_get_files ($dir)
 				'icon'		=> $display_preview ? S2_PATH.'/_admin/pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item) : ''
 			),
 			'attr'		=> array(
-				'data-fname'	=> $dir.'/'.$item,
+				'data-fname'	=> $item,
 				'data-dim'		=> $dim,
 				'data-fsize'	=> s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item))
 			)
@@ -239,7 +239,7 @@ function s2_upload_form ()
 ?>
 				<form target="submit_result" enctype="multipart/form-data" action="<?php echo S2_PATH; ?>/_admin/pict_ajax.php?action=upload" method="post" onsubmit="UploadSubmit(this);">
 					<?php echo $lang_pictures['Upload']; ?> <?php echo $lang_pictures['Upload to']; ?> <span id="fold_name"><strong><?php echo $lang_pictures['Pictures']; ?></strong></span>
-					<input name="pictures[]" multiple="true" min="1" max="999" size="20" type="file" onchange="UploadChange(this);" />
+					<input name="pictures[]" multiple="true" min="1" max="999" size="20" type="file" onchange="UploadChange(this);" /><br />
 					<?php printf($lang_pictures['Upload limit'], s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))), s2_frendly_filesize(s2_return_bytes(ini_get('post_max_size'))))?><br />
 					<input type="hidden" name="dir" value="" />
 				</form>

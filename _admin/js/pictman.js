@@ -74,7 +74,7 @@ $(document).ready(function()
 	initContext();
 	eButtons.detach();
 
-	function rollback (data)
+	function folderRollback (data)
 	{
 		eButtons.remove();
 		eButtons = null;
@@ -114,6 +114,7 @@ $(document).ready(function()
 			}
 
 			var newPath = d.rslt.obj.attr('data-path');
+
 			if (path != newPath)
 			{
 				path = newPath;
@@ -136,17 +137,23 @@ $(document).ready(function()
 				success : function (d)
 				{
 					if (!d || !d.status)
-						rollback(data.rlbk);
+						folderRollback(data.rlbk);
 					else
 					{
-						path = d.new_path;
-						data.rslt.obj.attr('data-path', path);
-						$('#fold_name').html('<b>' + folderTree.jstree('get_text', data.rslt.obj) + '</b>');
+						var len = data.rslt.obj.attr('data-path').length;
+						data.rslt.obj.attr('data-path', d.new_path).find('li').each(function ()
+						{
+							$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len));
+						});
+
+						var eSelected = folderTree.jstree('get_selected');
+						path = eSelected.attr('data-path');
+						$('#fold_name').html('<b>' + folderTree.jstree('get_text', eSelected) + '</b>');
 					}
 				},
 				error : function ()
 				{
-					rollback(data.rlbk);
+					folderRollback(data.rlbk);
 				}
 			});
 		})
@@ -157,11 +164,11 @@ $(document).ready(function()
 				success : function (d)
 				{
 					if (!d || !d.status)
-						rollback(data.rlbk);
+						folderRollback(data.rlbk);
 				},
 				error : function ()
 				{
-					rollback(data.rlbk);
+					folderRollback(data.rlbk);
 				}
 			});
 		})
@@ -172,7 +179,7 @@ $(document).ready(function()
 				success : function (d)
 				{
 					if (!d.status)
-						rollback(data.rlbk);
+						folderRollback(data.rlbk);
 					else
 					{
 						data.rslt.obj.attr('data-path', d.path);
@@ -181,27 +188,32 @@ $(document).ready(function()
 				},
 				error : function ()
 				{
-					rollback(data.rlbk);
+					folderRollback(data.rlbk);
 				}
 			});
 		})
 		.bind('move_node.jstree', function (e, data)
 		{
+			//console.log(data.rslt.o.attr('data-fname'));
 			$.ajax({
 				url : sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path')) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')),
 				success : function (d)
 				{
 					if (!d || !d.status)
-						rollback(data.rlbk);
+						folderRollback(data.rlbk);
 					else
 					{
-						path = d.new_path;
-						data.rslt.o.attr('data-path', path);
+						var len = data.rslt.o.attr('data-path').length;
+						data.rslt.o.attr('data-path', d.new_path).find('li').each(function ()
+						{
+							$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len)); 
+						});
+						path = folderTree.jstree('get_selected').attr('data-path');
 					}
 				},
 				error : function ()
 				{
-					rollback(data.rlbk);
+					folderRollback(data.rlbk);
 				}
 			});
 		})
@@ -217,7 +229,17 @@ $(document).ready(function()
 				'n' : function () { createFolder(); return false; }
 			},
 			json_data : {
-				ajax : { url : sUrl + 'action=load_tree' }
+				ajax : {
+					url : function (node)
+					{
+						return sUrl + 'action=load_tree' + (node.attr ? '&path=' + encodeURIComponent(node.attr('data-path')) : '');
+					}
+				}
+			},
+			crrm : { 
+				move : {
+					check_move : function (m) { return typeof(m.np.attr('data-path')) != 'undefined'; }
+				}
 			},
 			core : {
 				animation : 150,
@@ -268,14 +290,14 @@ $(document).ready(function()
 
 			if (fileTree.jstree('get_selected').length == 1)
 			{
-				str = s2_lang.file + sPicturePrefix + d.rslt.obj.attr('data-fname');
+				str = s2_lang.file + sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
 				if (d.rslt.obj.attr('data-fsize'))
 					str += "<br />" + s2_lang.value + d.rslt.obj.attr('data-fsize');
 				if (d.rslt.obj.attr('data-dim'))
 				{
 					var a = d.rslt.obj.attr('data-dim').split('*');
 					str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
-					a[2] = sPicturePrefix + d.rslt.obj.attr('data-fname');
+					a[2] = sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
 					fExecDouble = function ()
 					{
 						if (window.top.ReturnImage)
@@ -296,7 +318,7 @@ $(document).ready(function()
 				return;
 
 			$.ajax({
-				url : sUrl + 'action=rename_file&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(data.rslt.obj.attr('data-fname')),
+				url : sUrl + 'action=rename_file&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(path + '/' + data.rslt.obj.attr('data-fname')),
 				success : function (d)
 				{
 					fileTree.jstree('deselect_all');
@@ -315,7 +337,7 @@ $(document).ready(function()
 			data.rslt.obj.each(function () { fileNames.push('fname[]=' + encodeURIComponent($(this).attr('data-fname'))); });
 
 			$.ajax({
-				url : sUrl + 'action=delete_files&' + fileNames.join('&'),
+				url : sUrl + 'action=delete_files&path=' + encodeURIComponent(path) + '&' + fileNames.join('&'),
 				success : function (d)
 				{
 					if (!d || !d.status)
@@ -327,21 +349,6 @@ $(document).ready(function()
 				}
 			});
 		})
-/* 		.bind('move_node.jstree', function (e, data)
-		{
-			$.ajax({
-				url : sUrl + 'action=move&source_id=' + data.rslt.o.attr('id').replace('node_', '') + '&new_parent_id=' + data.rslt.np.attr('id').replace('node_', '') + '&new_pos=' + data.rslt.cp,
-				success : function (d)
-				{
-					if (!d.status)
-						rollback(data.rlbk);
-				},
-				error : function ()
-				{
-					rollback(data.rlbk);
-				}
-			});
-		}) */
 		.jstree({
 			ui : {
 				select_limit : -1
@@ -367,12 +374,12 @@ $(document).ready(function()
 					}
 				}
 			},
-/* 			core : {
-				animation : 0,
-				progressive_render : true,
-				open_parents : false
+			crrm : { 
+				move : {
+					check_move : function (m) { return false; }
+				}
 			},
- */			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
+			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
 		});
 
 	// Tooltips
