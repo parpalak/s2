@@ -176,6 +176,9 @@ elseif ($action == 'rename_folder')
 		die;
 	}
 
+	if (!is_dir(S2_IMG_PATH.$path))
+		die('It is not a directory');
+
 	if (rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name))
 	{
 		header('Content-Type: application/json; charset=utf-8');
