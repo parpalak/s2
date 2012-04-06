@@ -98,11 +98,11 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->
 <script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 <?php ($hook = s2_hook('ai_pre_js_include')) ? eval($hook) : null; ?>
-<script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/tabsheets.js"></script>
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/jquery.hotkeys.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>
+<script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/admin.js"></script>
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';

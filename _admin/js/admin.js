@@ -778,7 +778,7 @@ $(document).ready(function()
 			},
 			ui : {
 				select_limit : 1,
-				initially_selected : ['node_1']
+				initially_select : ['node_1']
 			},
 			hotkeys : {
 				'e' : editArticle,
@@ -790,7 +790,7 @@ $(document).ready(function()
 					url : function (node)
 					{
 						return sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(Search.string());
-					},
+					}
 				}
 			},
 			core : {
