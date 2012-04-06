@@ -783,7 +783,7 @@ $(document).ready(function()
 			hotkeys : {
 				'e' : editArticle,
 				'c' : showComments,
-				'n' : createArticle
+				'n' : function () { createArticle(); return false; }
 			},
 			json_data : {
 				ajax : {

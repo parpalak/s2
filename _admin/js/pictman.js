@@ -17,7 +17,7 @@ $(document).ready(function()
 
 	function createFolder ()
 	{
-		folderTree.jstree('create', null, 'first', {data : {title : s2_lang.new_page}});
+		folderTree.jstree('create', null, 'first', {data : {title : 'new'}});
 	}
 
 	function initContext ()
@@ -46,7 +46,6 @@ $(document).ready(function()
 		.bind('before.jstree', function (e, data)
 		{
 			//console.log(data.func);
-			if (data.func === 'remove') console.log(data);
 			if (data.func === 'remove' && (!data.args[0].attr('data-path') || !confirm(str_replace('%s', folderTree.jstree('get_text', data.args[0]), s2_lang.delete_item))))
 			{
 				e.stopImmediatePropagation(); 
@@ -163,7 +162,7 @@ $(document).ready(function()
 				initially_select : ['node_1']
 			},
 			hotkeys : {
-				'n' : createFolder
+				'n' : function () { createFolder(); return false; }
 			},
 			json_data : {
 				ajax : { url : sUrl + 'action=load_tree' }
@@ -213,7 +212,7 @@ $(document).ready(function()
 		{
 			fExecDouble = function () {};
 			var str = '';
-			//console.log(fileTree.jstree('get_selected'));
+
 			if (fileTree.jstree('get_selected').length == 1)
 			{
 				str = s2_lang.file + sPicturePrefix + d.rslt.obj.attr('data-fname');
@@ -234,7 +233,8 @@ $(document).ready(function()
 					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
 			}
-			eFileInfo.innerHTML = str;
+
+			$('#finfo').html(str);
 		})
 		.bind('rename.jstree', function (e, data)
 		{
@@ -358,9 +358,6 @@ function str_replace(substr, newsubstr, str)
 
 function Init ()
 {
-	eFileInfo = document.getElementById("finfo");
-	eFilePanel = document.getElementById("files");
-
 	if (document.addEventListener)
 	{
 		document.getElementById('brd').addEventListener('dragover', function (e)
@@ -503,9 +500,9 @@ function FileUploaded ()
 		return;
 
 	var body = window.frames['submit_result'].document.body.innerHTML;
-
 	if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
 		PopupMessages.show(body);
 
 	refreshFiles();
+	was_upload = false;
 }

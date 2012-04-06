@@ -134,7 +134,11 @@ function s2_get_files ($dir)
 
 	closedir($dir_handle);
 
-//	uksort($output, 'strnatcmp');
+	function _s2_sortcmp ($a, $b)
+	{
+		return strnatcmp($a['data']['title'], $b['data']['title']);
+	}
+	usort($output, '_s2_sortcmp');
 
 	($hook = s2_hook('fn_get_files_end')) ? eval($hook) : null;
 
@@ -243,9 +247,7 @@ function s2_upload_form ()
 ?>
 				<form target="submit_result" enctype="multipart/form-data" action="<?php echo S2_PATH; ?>/_admin/pict_ajax.php?action=upload" method="post" onsubmit="UploadSubmit(this);">
 					<?php echo $lang_pictures['Upload']; ?> <?php echo $lang_pictures['Upload to']; ?> <span id="fold_name"><strong><?php echo $lang_pictures['Pictures']; ?></strong></span>
-					<div id="file_upload_input">
-						<input name="pictures[]" multiple="true" min="1" max="999" size="20" type="file" onchange="UploadChange(this);" />
-					</div>
+					<input name="pictures[]" multiple="true" min="1" max="999" size="20" type="file" onchange="UploadChange(this);" />
 					<?php printf($lang_pictures['Upload limit'], s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))), s2_frendly_filesize(s2_return_bytes(ini_get('post_max_size'))))?><br />
 					<input type="hidden" name="dir" value="" />
 				</form>
