@@ -9,11 +9,52 @@
  */
 
 var refreshFiles = function () {};
+var getCurDir = function () {};
+
+function strNatCmp (a, b)
+{
+	function chunkify(t)
+	{
+		var tz = [], x = 0, y = -1, n = 0, i, j;
+
+		while (i = (j = t.charAt(x++)).charCodeAt(0))
+		{
+			var m = (i == 46 || (i >=48 && i <= 57));
+			if (m !== n)
+			{
+				tz[++y] = "";
+				n = m;
+			}
+			tz[y] += j;
+		}
+		return tz;
+	}
+
+	var aa = chunkify(a.toLowerCase());
+	var bb = chunkify(b.toLowerCase());
+  
+	for (x = 0; aa[x] && bb[x]; x++)
+		if (aa[x] !== bb[x])
+		{
+			var c = Number(aa[x]), d = Number(bb[x]);
+			if (c == aa[x] && d == bb[x])
+				return c - d;
+			else
+				return (aa[x] > bb[x]) ? 1 : -1;
+		}
+
+	return aa.length - bb.length;
+}
 
 $(document).ready(function()
 {
 	var path = '',
 		isRenaming = false;
+
+	getCurDir = function ()
+	{
+		return path;
+	}
 
 	function createFolder ()
 	{
@@ -94,8 +135,14 @@ $(document).ready(function()
 				url : sUrl + 'action=rename_folder&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(data.rslt.obj.attr('data-path')),
 				success : function (d)
 				{
-					if (!d.status)
+					if (!d || !d.status)
 						rollback(data.rlbk);
+					else
+					{
+						path = d.new_path;
+						data.rslt.obj.attr('data-path', path);
+						$('#fold_name').html('<b>' + folderTree.jstree('get_text', data.rslt.obj) + '</b>');
+					}
 				},
 				error : function ()
 				{
@@ -141,11 +188,16 @@ $(document).ready(function()
 		.bind('move_node.jstree', function (e, data)
 		{
 			$.ajax({
-				url : sUrl + 'action=move&source_id=' + data.rslt.o.attr('id').replace('node_', '') + '&new_parent_id=' + data.rslt.np.attr('id').replace('node_', '') + '&new_pos=' + data.rslt.cp,
+				url : sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path')) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')),
 				success : function (d)
 				{
-					if (!d.status)
+					if (!d || !d.status)
 						rollback(data.rlbk);
+					else
+					{
+						path = d.new_path;
+						data.rslt.o.attr('data-path', path);
+					}
 				},
 				error : function ()
 				{
@@ -173,7 +225,8 @@ $(document).ready(function()
 				progressive_render : true,
 				open_parents : false
 			},
-			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
+			sort : function (a, b) { return strNatCmp(this.get_text(a), this.get_text(b)); },
+			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys' , 'sort']
 		});
 
 	function removeFiles ()
@@ -226,9 +279,9 @@ $(document).ready(function()
 					fExecDouble = function ()
 					{
 						if (window.top.ReturnImage)
-							window.top.ReturnImage(a[2], a[0],  a[1]);
+							window.top.ReturnImage(a[2], a[0],	a[1]);
 						else if (opener.ReturnImage)
-							opener.ReturnImage(a[2], a[0],  a[1]);
+							opener.ReturnImage(a[2], a[0],	a[1]);
 					}
 					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
@@ -306,7 +359,6 @@ $(document).ready(function()
 					{
 						if (data.length)
 						{
-							sCurDir = path;
 							$('#loadstatus').text('');
 							return data;
 						}
@@ -464,7 +516,7 @@ function SendDroppedFile (file)
 
 	var data = new FormData();
 	data.append('pictures[]', file);
-	data.append('dir', sCurDir);
+	data.append('dir', getCurDir());
 	data.append('ajax', '1');
 
 	xhr.open('POST', sUrl + 'action=upload');
@@ -480,7 +532,7 @@ var was_upload = false;
 
 function UploadSubmit (eForm)
 {
-	eForm.dir.value = sCurDir;
+	eForm.dir.value = getCurDir();
 	was_upload = true;
 }
 

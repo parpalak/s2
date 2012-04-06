@@ -182,7 +182,7 @@ elseif ($action == 'rename_folder')
 	if (rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name))
 	{
 		header('Content-Type: application/json; charset=utf-8');
-		echo json_encode(array('status' => 1));
+		echo json_encode(array('status' => 1, 'new_path' => $parent_path.'/'.$folder_name));
 	}
 	else
 	{
@@ -196,6 +196,9 @@ elseif ($action == 'rename_file')
 	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_rename_file_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
+
+	if (!isset($_GET['path']) || !isset($_GET['name']))
+		die('Error in GET parameters.');
 
 	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
@@ -240,11 +243,14 @@ elseif ($action == 'rename_file')
 	}
 }
 
-elseif ($action == 'drag')
+elseif ($action == 'move_folder')
 {
 	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_drag_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
+
+	if (!isset($_GET['spath']) || !isset($_GET['dpath']))
+		die('Error in GET parameters.');
 
 	$spath = $_GET['spath'];
 	while (strpos($spath, '..') !== false)
@@ -256,12 +262,8 @@ elseif ($action == 'drag')
 
 	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.s2_basename($spath));
 
-	header('Content-Type: text/xml; charset=utf-8');
-
-	echo '<response>';
-	echo '<destination><![CDATA['.str_replace(']]>', ']]&gt;', s2_walk_dir($dpath)).']]></destination>';
-	echo '<source_parent><![CDATA['.str_replace(']]>', ']]&gt;', s2_walk_dir(s2_dirname($spath))).']]></source_parent>';
-	echo '</response>';
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1, 'new_path' => $dpath.'/'.s2_basename($spath)));
 }
 
 elseif ($action == 'load_files')

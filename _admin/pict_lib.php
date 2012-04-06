@@ -99,7 +99,6 @@ function s2_get_files ($dir)
 	if (!($dir_handle = opendir(S2_IMG_PATH.$dir)))
 		return array('message' => sprintf('<p>'.$lang_pictures['Directory not open'].'</p>', S2_IMG_PATH.$dir));
 
-	$i = 0;
 	$output = array();
 	while (($item = readdir($dir_handle)) !== false)
 	{
@@ -124,7 +123,6 @@ function s2_get_files ($dir)
 				'icon'		=> $display_preview ? S2_PATH.'/_admin/pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item) : ''
 			),
 			'attr'		=> array(
-				'id'			=> 'file_'.(++$i),
 				'data-fname'	=> $dir.'/'.$item,
 				'data-dim'		=> $dim,
 				'data-fsize'	=> s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item))
@@ -133,12 +131,6 @@ function s2_get_files ($dir)
 	}
 
 	closedir($dir_handle);
-
-	function _s2_sortcmp ($a, $b)
-	{
-		return strnatcmp($a['data']['title'], $b['data']['title']);
-	}
-	usort($output, '_s2_sortcmp');
 
 	($hook = s2_hook('fn_get_files_end')) ? eval($hook) : null;
 
