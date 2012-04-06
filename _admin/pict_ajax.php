@@ -57,18 +57,39 @@ ob_start();
 if (S2_COMPRESS)
 	ob_start('ob_gzhandler');
 
-if ($action == 'create_subfolder')
+if ($action == 'load_tree')
+{
+	$is_permission = $s2_user['view'];
+	($hook = s2_hook('prq_action_load_tree_start')) ? eval($hook) : null;
+	s2_test_user_rights($is_permission);
+
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array(
+		'data' => $lang_pictures['Pictures'],
+		'attr' => array('id' => 'node_1', 'data-path' => ''),
+		'children' => s2_walk_dir(''))
+	);
+}
+
+elseif ($action == 'create_subfolder')
 {
 	$is_permission = $s2_user['create_articles'];
 	($hook = s2_hook('prq_action_create_subfolder_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	$path = $_GET['path'];
+	if (!isset($_GET['path']) || !isset($_GET['name']))
+		die('Error in GET parameters.');
 
+	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
-	$name = 'new_folder';
+	$name = $_GET['name'];
+	$name = str_replace('\\', '', $name);
+	$name = str_replace('/', '', $name);
+	while (strpos($name, '..') !== false)
+		$name = str_replace('..', '', $name);
+
 	if (file_exists(S2_IMG_PATH.$path.'/'.$name))
 	{
 		$i = 1;
@@ -79,7 +100,8 @@ if ($action == 'create_subfolder')
 	mkdir(S2_IMG_PATH.$path.'/'.$name);
 	chmod(S2_IMG_PATH.$path.'/'.$name, 0777);
 
-	echo s2_walk_dir($path, $name);
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1, 'name' => $name, 'path' => $path.'/'.$name));
 }
 
 elseif ($action == 'delete_folder')
@@ -88,32 +110,40 @@ elseif ($action == 'delete_folder')
 	($hook = s2_hook('prq_action_delete_folder_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	$path = $_GET['path'];
+	if (!isset($_GET['path']))
+		die('Error in GET parameters.');
 
+	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
 	if ($path != '')
-	{
 		s2_unlink_recursive(S2_IMG_PATH.$path);
-		$path = s2_dirname($path);
-	}
-	echo s2_walk_dir($path);
+
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1));
 }
 
-elseif ($action == 'delete_file')
+elseif ($action == 'delete_files')
 {
 	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_delete_file_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	$path = $_GET['path'];
-	while (strpos($path, '..') !== false)
-		$path = str_replace('..', '', $path);
+	if (!isset($_GET['fname']) || !is_array($_GET['fname']))
+		die('Error in GET parameters.');
 
-	unlink(S2_IMG_PATH.$path);
+	foreach ($_GET['fname'] as $path)
+	{
+		$path = (string) $path;
+		while (strpos($path, '..') !== false)
+			$path = str_replace('..', '', $path);
 
-	echo s2_get_files(s2_dirname($path));
+		unlink(S2_IMG_PATH.$path);
+	}
+
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1));
 }
 
 elseif ($action == 'rename_folder')
@@ -121,6 +151,9 @@ elseif ($action == 'rename_folder')
 	$is_permission = $s2_user['edit_site'];
 	($hook = s2_hook('prq_action_rename_folder_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
+
+	if (!isset($_GET['path']) || !isset($_GET['name']))
+		die('Error in GET parameters.');
 
 	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
@@ -145,12 +178,8 @@ elseif ($action == 'rename_folder')
 
 	if (rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name))
 	{
-		header('Content-Type: text/xml; charset=utf-8');
-
-		echo '<response>';
-			echo '<subtree><![CDATA['.str_replace(']]>', ']]&gt;', s2_walk_dir($parent_path, $folder_name)).']]></subtree>';
-			echo '<files><![CDATA['.str_replace(']]>', ']]&gt;', s2_get_files($parent_path.'/'.$folder_name)).']]></files>';
-		echo '</response>';
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode(array('status' => 1));
 	}
 	else
 	{
@@ -232,17 +261,21 @@ elseif ($action == 'drag')
 	echo '</response>';
 }
 
-elseif ($action == 'load_items')
+elseif ($action == 'load_files')
 {
 	$is_permission = $s2_user['view'];
 	($hook = s2_hook('prq_action_load_items_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
+	if (!isset($_GET['path']))
+		die('Error in GET parameters.');
+
 	$path = $_GET['path'];
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
-	echo s2_get_files($path);
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(s2_get_files($path));
 }
 
 elseif ($action == 'move_file')

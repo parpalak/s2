@@ -56,8 +56,7 @@ function s2_walk_dir ($dir, $created_name = false)
 		return '';
 	}
 
-	$spans = $subdirs = array();
-	$item_count = 0;
+	$output = array();
 
 	while (($item = readdir($dir_handle)) !== false)
 	{
@@ -68,24 +67,19 @@ function s2_walk_dir ($dir, $created_name = false)
 		if (is_dir(S2_IMG_PATH.$dir.'/'.$item))
 		{
 			($hook = s2_hook('fn_walk_dir_format_item_start')) ? eval($hook) : null;
-			$item_count++;
-			$spans[] = '<div><span data-path="'.s2_htmlencode($dir.'/'.$item).'"'.($created_name === $item ? ' selected="selected"' : '').'>'.s2_htmlencode($item).'</span></div>';
-			$subdirs[] = s2_walk_dir($dir.'/'.$item);
+
+			$output[] = array(
+				'data'		=> $item,
+				'attr'		=> array('data-path' => $dir.'/'.$item),
+				'children'	=> s2_walk_dir($dir.'/'.$item)
+			);
 		}
 	}
 
 	closedir($dir_handle);
 
-	$output = '';
-	for ($i = 0; $i < $item_count; $i++)
-	{
-		($hook = s2_hook('fn_walk_dir_pre_item_merge')) ? eval($hook) : null;
-		$subdir = $subdirs[$i] ? '<ul>'.$subdirs[$i].'</ul>' : '';
-		$expand = '<div></div>';
-		$output .= '<li class="'.($subdir ? 'ExpandClosed' : 'ExpandLeaf').($i == $item_count - 1 ? ' IsLast' : '').'">'.$expand.$spans[$i].$subdir.'</li>';
-	}
-
 	($hook = s2_hook('fn_walk_dir_end')) ? eval($hook) : null;
+
 	return $output;
 }
 
@@ -93,7 +87,6 @@ function s2_get_files ($dir)
 {
 	global $allowed_extensions, $lang_pictures;
 
-	$max_size = 80;
 	$display_preview = function_exists('imagetypes');
 
 	($hook = s2_hook('fn_get_files_start')) ? eval($hook) : null;
@@ -101,16 +94,13 @@ function s2_get_files ($dir)
 	clearstatcache();
 
 	if (!is_dir(S2_IMG_PATH.$dir))
-		return;
+		return array('message' => 'Invalid directory');
 
 	if (!($dir_handle = opendir(S2_IMG_PATH.$dir)))
-	{
-		printf('<p>'.$lang_pictures['Directory not open'].'</p>', S2_IMG_PATH.$dir);
-		return;
-	}
+		return array('message' => sprintf('<p>'.$lang_pictures['Directory not open'].'</p>', S2_IMG_PATH.$dir));
 
+	$i = 0;
 	$output = array();
-
 	while (($item = readdir($dir_handle)) !== false)
 	{
 		($hook = s2_hook('fn_get_files_loop_start')) ? eval($hook) : null;
@@ -120,67 +110,35 @@ function s2_get_files ($dir)
 
 		$dim = '';
 
-		$preview = '<img src="i/file.png" vspace="16" hspace="16" align="center" alt="" />';
 		if (strpos($item, '.') !== false && in_array(end(explode('.', $item)), $allowed_extensions))
 		{
-			($hook = s2_hook('fn_get_files_pre_get_file_info')) ? eval($hook) : null;
-
 			$image_info = getImageSize(S2_IMG_PATH.$dir.'/'.$item);
-			$sx = $image_info[0];
-			$sy = $image_info[1];
-			$dim = ' data-dim="'.$sx.'*'.$sy.'"';
-			if ($sx < $sy)
-			{
-				if ($sy > $max_size)
-				{
-					$dy = $max_size;
-					$dx = round($dy * $sx / $sy); 
-				}
-				else
-				{
-					$dx = $sx;
-					$dy = $sy;
-				}
-			}
-			else
-			{
-				if ($sx > $max_size)
-				{
-					$dx = $max_size;
-					$dy = round($dx * $sy / $sx); 
-				}
-				else
-				{
-					$dx = $sx;
-					$dy = $sy;
-				}
-			}
-
-			$v = (int)(($max_size - $dy)/2);
-			$v = $v > 0 ? ' vspace="'.$v.'"' : '';
-
-			$h = (int)(($max_size - $dx)/2);
-			$h = $h > 0 ? ' hspace="'.$h.'"' : '';
-
-			($hook = s2_hook('fn_get_files_pre_view_merge')) ? eval($hook) : null;
-			if ($display_preview)
-				$preview = '<img src="pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item).'" align="middle"'.$v.$h.' alt="" />';
+			$dim = $image_info[0].'*'.$image_info[1];
 		}
 
-		$delete_button = '<img class="delete" src="i/1.gif" onclick="DeleteFile(\''.s2_htmlencode(addslashes($dir.'/'.$item)).'\');" alt="'.$lang_pictures['Delete'].'" />';
-
 		($hook = s2_hook('fn_get_files_pre_output_item_merge')) ? eval($hook) : null;
-		$output[$item] = '<li><span data-fname="'.s2_htmlencode($dir.'/'.$item).'"'.$dim.' data-fsize="'.s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item)).'">'.$delete_button.$preview.'</span>'.s2_htmlencode($item).'</li>';
+
+		$output[] = array(
+			'data'		=> array(
+				'title'		=> $item,
+				'icon'		=> $display_preview ? S2_PATH.'/_admin/pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item) : ''
+			),
+			'attr'		=> array(
+				'id'			=> 'file_'.(++$i),
+				'data-fname'	=> $dir.'/'.$item,
+				'data-dim'		=> $dim,
+				'data-fsize'	=> s2_frendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item))
+			)
+		);
 	}
 
 	closedir($dir_handle);
 
-	uksort($output, 'strnatcmp');
-	($hook = s2_hook('fn_get_files_pre_output_merge')) ? eval($hook) : null;
-	$output = implode('', $output);
+//	uksort($output, 'strnatcmp');
 
 	($hook = s2_hook('fn_get_files_end')) ? eval($hook) : null;
-	return $output ? '<ul>'.$output.'</ul><br clear="both" />' : '<p>'.$lang_pictures['Empty directory'].'</p>';
+
+	return count($output) ? $output : array('message' => $lang_pictures['Empty directory']);
 }
 
 //

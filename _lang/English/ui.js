@@ -46,7 +46,7 @@ var s2_lang = {
 	move_down			: 'Move down',
 	add_to_tag			: 'Add to the tag “%s”',
 
-	delete_file			: 'Do you want to delete the file “%s”?',
+	delete_file			: 'Do you want to delete “%s”?',
 	delete_item			: 'Do you want to delete “%s” with all containing elements?',
 
 	create_subfolder	: 'Create subfolder',

@@ -22,12 +22,9 @@
 	-webkit-border-radius: 2px;
 	border-radius: 2px;
 	margin-left: 310px;
-	padding: 0 1em;
+	padding: 1em;
 	}
 
-#brd.accept_drag {
-	border: 1px solid #f66;
-	}
 
 .treetree {
 	width: 300px;
@@ -37,47 +34,61 @@
 	z-index: 1;
 	}
 
-#files span {
+#files.jstree a {
 	display: block;
 	position: relative;
-	width: 80px;
-	height: 80px;
-	border: 1px solid #fff;
+	height: auto;
 	text-align: center;
-	margin: 0 0 5px;
-	padding: 0;
-	background: #fff;
+	margin: 0;
 	}
+	#files.jstree .jstree-clicked,
+	#files.jstree .jstree-hovered {
+		padding: 0 1px;
+		}
 	#files span[data-fsize] {
 		border-color: #ccc;
 		}
 		#files span.but_panel[data-fsize] {
 			border-color: #7cc;
 			}
+#files.jstree a.jstree-loading .jstree-icon,
+#files .jstree-leaf > ins {
+	display: none;
+	}
+#files.jstree a > .jstree-icon {
+	width: 80px;
+	height: 80px;
+	display: block;
+	border: 1px solid #ddd;
+	margin: 2px auto;
+	}
 
 #files ul {
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
-	text-align: center;
 	font: 0.917em/1 Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	}
-	#files li {
-		float: left;
-		padding: 10px;
-		margin: 0 0 0 10px;
-		height: 90px;
-		width: 82px;
+	#files .jstree-leaf {
+		display: inline-block;
+		vertical-align: top;
+		margin: 0 10px 5px;
+		height: 110px;
+		background: none;
 		text-wrap: suppress;
 		word-wrap: break-word;
 		}
 		#files li input {
-			width: 76px;
+			width: 84px !important;
+			min-width: 0;
 			font: 1em/1 Tahoma, Verdana, Arial, Helvetica, sans-serif;
 			text-align: center;
-			margin-top: -4px;
-			border: 1px solid #999;
-			padding: 2px;
+			margin: 0 !important;
+			padding: 0 !important;
+			height: auto !important;
+			position: relative !important;
+			left: 0 !important;
+			top: -2px !important;
 			}
 
 #file-wrap {
@@ -126,6 +137,3 @@
 	line-height: 1.6;
 	}
 
-.treetree ul li.ExpandLeaf > div:first-child {
-	background-position: -36px -18px;
-	}

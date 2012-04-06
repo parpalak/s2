@@ -46,7 +46,7 @@ var s2_lang = {
 	move_down			: 'Опустить',
 	add_to_tag			: 'Добавить к ключевому слову «%s»',
 
-	delete_file			: 'Удалить файл «%s»?',
+	delete_file			: 'Удалить «%s»?',
 	delete_item			: 'Удалить «%s» и все дочерние элементы?',
 
 	create_subfolder	: 'Создать подпапку',

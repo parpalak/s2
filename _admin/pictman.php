@@ -68,6 +68,9 @@ s2_test_user_rights($is_permission);
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.hotkeys.js"></script>
+<script type="text/javascript" src="js/jquery.jstree.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/pictman.js"></script>
 <script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
@@ -90,14 +93,13 @@ if ($s2_user['create_articles'])
 
 ?>
 			</div>
-			<ul>
-				<li class="ExpandOpen IsLast"><div></div><div><span data-path=""><?php echo $lang_pictures['Pictures'];?></span></div><ul><?php echo s2_walk_dir(''); ?></ul></li>
-			</ul>
+			<div id="folders"></div>
 			<div id="finfo"></div>
 		</div>
 		<div id="file-wrap">
 			<div id="brd">
 				<div id="files"></div>
+				<div id="loadstatus"></div>
 			</div>
 		</div>
 	</div>
