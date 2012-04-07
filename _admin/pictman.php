@@ -58,6 +58,11 @@ $is_permission = $s2_user['view'];
 ($hook = s2_hook('apm_start')) ? eval($hook) : null;
 s2_test_user_rights($is_permission);
 
+function s2_jsvarencode ($var)
+{
+	return str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", '') , $var);
+}
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -79,6 +84,7 @@ var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
 var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
 var iMaxFileSize = <?php echo s2_return_bytes(ini_get('upload_max_filesize')); ?>;
 var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))); ?>';
+SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
 </head>
 

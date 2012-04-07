@@ -170,7 +170,7 @@ $padding = 2.5;
 <?php ($hook = s2_hook('ai_pre_pictures')) ? eval($hook) : null; ?>
 		<dt id="pict_tab"><?php echo $lang_admin['Pictures']; ?></dt>
 		<dd class="inactive">
-			<div class="reducer no-scroll">
+			<div class="reducer no-scroll" style="padding: 0;">
 				<iframe src="" frameborder="0" id="pict_frame" name="pict_frame"></iframe>
 			</div>
 		</dd>

@@ -8,12 +8,20 @@
 	box-sizing: border-box;
 	}
 
+#tree_div {
+	padding: 0.833em;
+	}
+
 #brd,
-.treetree {
+#folders {
 	border: 1px solid #eee;
 	border-color: #aaa #f6f6f6 #f6f6f6 #aaa;
 	background: #fff;
 	color: #000;
+	}
+
+#brd,
+.treetree {
 	overflow: auto;
 	}
 
@@ -21,17 +29,19 @@
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
 	border-radius: 2px;
-	margin-left: 310px;
+	margin-left: 300px;
 	padding: 1em;
 	}
 
-
 .treetree {
-	width: 300px;
-	padding-right: 20px;
+	width: 290px;
 	float: left;
 	position: relative;
 	z-index: 1;
+	}
+
+#folders .jstree-leaf[data-fname] {
+	display: none;
 	}
 
 #files.jstree a {
@@ -45,23 +55,17 @@
 	#files.jstree .jstree-hovered {
 		padding: 0 1px;
 		}
-	#files span[data-fsize] {
-		border-color: #ccc;
+	#files.jstree a.jstree-loading .jstree-icon,
+	#files .jstree-leaf > ins {
+		display: none;
 		}
-		#files span.but_panel[data-fsize] {
-			border-color: #7cc;
-			}
-#files.jstree a.jstree-loading .jstree-icon,
-#files .jstree-leaf > ins {
-	display: none;
-	}
-#files.jstree a > .jstree-icon {
-	width: 80px;
-	height: 80px;
-	display: block;
-	border: 1px solid #ddd;
-	margin: 2px auto;
-	}
+	#files.jstree a > .jstree-icon {
+		width: 80px;
+		height: 80px;
+		display: block;
+		border: 1px solid #ddd;
+		margin: 2px auto;
+		}
 
 #files ul {
 	list-style-type: none;
@@ -131,9 +135,12 @@
 
 #finfo,
 #fupload {
-	padding: 1em 0;
-	margin-left: 20px;
 	clear: both;
 	line-height: 1.6;
+	}
+
+#fupload,
+#folders {
+	margin: 0 0 1em;
 	}
 
