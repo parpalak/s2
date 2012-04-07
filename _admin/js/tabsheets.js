@@ -101,11 +101,7 @@ function OnSwitch (eTab)
 	else if (sType == 'list_tab')
 	{
 		if (document.getElementById('tree').innerHTML == '')
-		{
 			document.getElementById('tree').innerHTML = ' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;' + s2_lang.load_tree;
-			
-			RefreshTree();
-		}
 	}
 	else if (sType == 'pict_tab')
 	{
