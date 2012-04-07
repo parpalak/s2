@@ -6,6 +6,14 @@
  * @package S2
  */
 
+function str_replace (substr, newsubstr, str)
+{
+	newsubstr = newsubstr.replace(/\$/g, '$$$$');
+	while (str.indexOf(substr) >= 0)
+		str = str.replace(substr, newsubstr);
+	return str;
+}
+
 function hex_md5 (string)
 {
 	// Based on http://www.webtoolkit.info/javascript-md5.html

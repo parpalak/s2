@@ -67,7 +67,7 @@ $(document).ready(function()
 		$('#context_delete').click(function () {folderTree.jstree('remove', folderTree.jstree('get_selected'));});
 	}
 
-	Init();
+	initFileDrop();
 
 	var eButtons = $('<span><img src="i/1.gif" id="context_add" alt="' + s2_lang.create_subfolder + '" /><img src="i/1.gif" id="context_delete" alt="' + s2_lang.delete_folder + '" /></span>').attr('id', 'context_buttons');
 	$('body').append(eButtons);
@@ -443,23 +443,17 @@ $(document).ready(function()
 	SetWait(false);
 });
 
-function str_replace(substr, newsubstr, str)
-{
-	while (str.indexOf(substr) >= 0)
-		str = str.replace(substr, newsubstr);
-	return str;
-}
-
-function Init ()
+function initFileDrop ()
 {
 	if (document.addEventListener)
 	{
-		document.getElementById('brd').addEventListener('dragover', function (e)
+		var brd = document.getElementById('brd');
+		brd.addEventListener('dragover', function (e)
 		{
 			e.preventDefault();
 		}, false);
 
-		document.getElementById('brd').addEventListener('dragenter', function (e)
+		brd.addEventListener('dragenter', function (e)
 		{
 			var dt = e.dataTransfer;
 			if (!dt)
@@ -480,12 +474,12 @@ function Init ()
 			e.preventDefault();
 		}, false);
 
-		document.getElementById('brd').addEventListener('dragleave', function (e)
+		brd.addEventListener('dragleave', function (e)
 		{
 			document.getElementById('brd').className = '';
 			e.preventDefault();
 		}, false);
-		document.getElementById('brd').addEventListener('drop', function (e)
+		brd.addEventListener('drop', function (e)
 		{
 			var dt = e.dataTransfer;
 			if (!dt || !dt.files)
