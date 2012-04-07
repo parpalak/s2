@@ -99,13 +99,7 @@ function s2_move_branch ($source_id, $dest_id, $position)
 			$source_parent_id = $row['parent_id'];
 			$source_user_id = $row['user_id'];
 		}
-/* 		else
-		{
-			$dest_priority = $row['priority'];
-			$dest_parent_id = $row['parent_id'];
-			$dest_user_id = $row['user_id'];
-		}
- */		$item_num++;
+		$item_num++;
 	}
 
 	if ($item_num != 2)
@@ -114,9 +108,6 @@ function s2_move_branch ($source_id, $dest_id, $position)
 	if (!$s2_user['edit_site'])
 		s2_test_user_rights($source_user_id == $s2_user['id']);
 
-/* 	if ($far)
-	{
-	// Dragging into different folder */
 	$query = array(
 		'UPDATE'	=> 'articles',
 		'SET'		=> 'priority = priority + 1',
@@ -140,41 +131,6 @@ function s2_move_branch ($source_id, $dest_id, $position)
 	);
 	($hook = s2_hook('fn_move_branch_pre_src_pr_upd_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
-/* 	else
-	{
-		// Moving inside a folder
-
-		if ($source_priority < $dest_priority)
-		{
-			$query = array(
-				'UPDATE'	=> 'articles',
-				'SET'		=> 'priority = priority - 1',
-				'WHERE'		=> 'parent_id = '.$source_parent_id.' AND priority > '.$source_priority.' AND priority <= '.$dest_priority
-			);
-			($hook = s2_hook('fn_move_branch_pre_shift_pr_dn_upd_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
-		}
-		else
-		{
-			$query = array(
-				'UPDATE'	=> 'articles',
-				'SET'		=> 'priority = priority + 1',
-				'WHERE'		=> 'parent_id = '.$source_parent_id.' AND priority < '.$source_priority.' AND priority >= '.$dest_priority
-			);
-			($hook = s2_hook('fn_move_branch_pre_shift_pr_up_upd_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
-		}
-
-		$query = array(
-			'UPDATE'	=> 'articles',
-			'SET'		=> 'priority = '.$dest_priority,
-			'WHERE'		=> 'id = '.$source_id
-		);
-		($hook = s2_hook('fn_move_branch_pre_src_pr_dn_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
-	}
-	return $source_parent_id;
- */
 }
 
 function s2_delete_item_and_children ($id)
@@ -371,37 +327,19 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 	($hook = s2_hook('fn_get_child_branches_pre_get_art_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$rows = array();
-	while ($article = $s2_db->fetch_assoc($result))
-		$rows[] = $article;
-
 	$output = array();
-	for ($i = 0; $i < count($rows); $i++)
+	while ($article = $s2_db->fetch_assoc($result))
 	{
-		$article = $rows[$i];
-
-		// This element will have onclick event handler and proper styles
-		$expand = '<div></div>';
-		$strike = $article['published'] ? '' : ' style="text-decoration: line-through;"';
-		// Custom attribute
-		$comments = $article['comment_num'] ? ' comments="'.$article['comment_num'].'"' : '';
-		$span = '<div><span class="additional">'.s2_date($article['create_time']).'</span><span id="'.$article['id'].'"'.$strike.$comments.'>'.s2_htmlencode($article['title']).'</span></div>';
-
 		$children = (!$search || $article['child_num']) ? s2_get_child_branches($article['id'], false, $search) : '';
-
-		// File or folder
-		$item_type = $search ? ($article['child_num'] ? 'ExpandOpen' : 'ExpandLeaf') : ($children ? ($id != S2_ROOT_ID ? 'ExpandClosed' : 'ExpandOpen') : 'ExpandLeaf');
 
 		($hook = s2_hook('fn_get_child_branches_after_get_branch')) ? eval($hook) : null;
 
 		if ($search && (!$children && !$article['found']))
 			continue;
 
-		//$output .= '<li class="'.$item_type.($i == count($rows) ? ' IsLast' : '' ).($search ? ' Search'.($article['found'] ? ' Match' : '') : '').'">'.$expand.$span.$children.'</li>';
 		$item = array(
 			'data'		=> array(
 				'title'		=> $article['title'],
-//				'icon'		=> $children ? 'folder' : 'file'
 			),
 			'attr'		=> array('id' => 'node_'.$article['id']),
 		);
@@ -433,7 +371,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 	}
 
 	($hook = s2_hook('fn_get_child_branches_end')) ? eval($hook) : null;
-	//return $output && !$root ? '<ul>'.$output.'</ul>' : $output;
+
 	return $output;
 }
 
