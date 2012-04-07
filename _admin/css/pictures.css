@@ -44,6 +44,8 @@
 	display: none;
 	}
 
+#folders.jstree .jstree-leaf > a > .jstree-icon { background: url(../i/tree.png) -55px -19px no-repeat; }
+
 #files.jstree a {
 	display: block;
 	position: relative;
@@ -65,6 +67,10 @@
 		display: block;
 		border: 1px solid #ddd;
 		margin: 2px auto;
+		}
+	#files.jstree a .no-preview {
+		background: url(../i/file.png) center no-repeat;
+		border-color: transparent;
 		}
 
 #files ul {
@@ -101,38 +107,6 @@
 	margin-left: -310px;
 	}
 
-.delete {
-	display: none;
-	}
-
-#files .but_panel {
-	-moz-box-shadow: 0 0 3px 1px #7cc;
-	-webkit-box-shadow: 0 0 3px 1px #7cc;
-	box-shadow: 0 0 4px #7cc;
-	background: #c2e1ff;
-	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#e2f1ff), to(#c2e1ff));
-	background: -moz-linear-gradient(#e2f1ff, #c2e1ff);
-	background: linear-gradient(#e2f1ff, #c2e1ff);
-	border-color: #7cc;
-	}
-	#files .but_panel .delete {
-		display: block;
-		position: absolute;
-		right: 0;
-		top: 0;
-		z-index: 1;
-		height: 16px;
-		width: 16px;
-		background: url(../i/icons.png) 0 -32px;
-		}
-	#files .but_panel img:hover {
-		border: none;
-		outline: none;
-		}
-		#files .but_panel img.delete:hover {
-			background-color: #fff;
-			}
-
 #finfo,
 #fupload {
 	clear: both;
@@ -143,4 +117,3 @@
 #folders {
 	margin: 0 0 1em;
 	}
-

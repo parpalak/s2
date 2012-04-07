@@ -120,7 +120,7 @@ function s2_get_files ($dir)
 		$output[] = array(
 			'data'		=> array(
 				'title'		=> $item,
-				'icon'		=> $display_preview ? S2_PATH.'/_admin/pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item) : ''
+				'icon'		=> $display_preview && $dim ? S2_PATH.'/_admin/pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item) : 'no-preview'
 			),
 			'attr'		=> array(
 				'data-fname'	=> $item,
