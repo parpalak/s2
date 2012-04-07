@@ -100,8 +100,8 @@ function OnSwitch (eTab)
 	}
 	else if (sType == 'list_tab')
 	{
-		if (document.getElementById('tree').innerHTML == '')
-			document.getElementById('tree').innerHTML = ' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;' + s2_lang.load_tree;
+		if ($('#tree').html() == '')
+			$('#tree').html(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;' + s2_lang.load_tree);
 	}
 	else if (sType == 'pict_tab')
 	{
@@ -109,23 +109,36 @@ function OnSwitch (eTab)
 	}
 	else if (sType == 'admin-user_tab')
 	{
-		LoadUserList();
+		LoadTable('load_userlist', 'user_div');
 	}
 	else if (sType == 'tag_tab')
 	{
-		LoadTags();
+		if ($('#tag_div').html() == '')
+			GETAsyncRequest(sUrl + 'action=load_tags', function (http)
+			{
+				$('#tag_div').html(http.responseText);
+			});
 	}
 	else if (sType == 'admin-opt_tab')
 	{
-		LoadOptions();
+		GETAsyncRequest(sUrl + 'action=load_options', function (http)
+		{
+			$('#opt_div').html(http.responseText);
+		});
 	}
 	else if (sType == 'admin-ext_tab')
 	{
-		LoadExtensions();
+		GETAsyncRequest(sUrl + 'action=load_extensions', function (http)
+		{
+			$('#ext_div').html(http.responseText);
+		});
 	}
 	else if (sType == 'admin-stat_tab')
 	{
-		LoadStatInfo();
+		GETAsyncRequest(sUrl + 'action=load_stat_info', function (http)
+		{
+			$('#stat_div').html(http.responseText);
+		});
 	}
 	else if (sType == 'admin_tab')
 	{

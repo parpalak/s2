@@ -195,7 +195,7 @@ function Logout ()
 
 function CloseOtherSessions ()
 {
-	GETAsyncRequest(sUrl + 'action=close_other_sessions' /*, function () {} */);
+	GETAsyncRequest(sUrl + 'action=close_other_sessions');
 	return false;
 }
 
@@ -1368,11 +1368,6 @@ function Preview ()
 
 //=======================[Users tab]============================================
 
-function LoadUserList ()
-{
-	LoadTable('load_userlist', 'user_div');
-}
-
 function AddUser (eForm)
 {
 	var sUser = eForm.userlogin.value;
@@ -1519,15 +1514,6 @@ function DeleteTag (iId, sName)
 
 //=======================[Options tab]==========================================
 
-function LoadOptions ()
-{
-	GETAsyncRequest(sUrl + 'action=load_options', function (http)
-	{
-		document.getElementById('opt_div').innerHTML = http.responseText;
-	});
-	return false;
-}
-
 function SaveOptions ()
 {
 	var sRequest = StringFromForm(document.optform);
@@ -1536,15 +1522,6 @@ function SaveOptions ()
 }
 
 //=======================[Extensions tab]=======================================
-
-function LoadExtensions ()
-{
-	GETAsyncRequest(sUrl + 'action=load_extensions', function (http)
-	{
-		document.getElementById('ext_div').innerHTML = http.responseText;
-	});
-	return false;
-}
 
 function FlipExtension (sId)
 {
@@ -1581,16 +1558,5 @@ function InstallExtension (sId, sMessage)
 		document.getElementById('ext_div').innerHTML = http.responseText;
 	});
 
-	return false;
-}
-
-//=======================[Stat tab]=============================================
-
-function LoadStatInfo ()
-{
-	GETAsyncRequest(sUrl + 'action=load_stat_info', function (http)
-	{
-		document.getElementById('stat_div').innerHTML = http.responseText;
-	});
 	return false;
 }
