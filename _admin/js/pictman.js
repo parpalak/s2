@@ -383,7 +383,8 @@ $(document).ready(function()
 				select_limit : -1
 			},
 			hotkeys : {
-				'del' : removeFiles
+				'del' : removeFiles,
+				'ctrl+a' : function () { $.jstree._reference(fileTree)._get_children(-1).each(function () { fileTree.jstree('select_node', this); }); return false; }
 			},
 			json_data : {
 				ajax : {
@@ -398,7 +399,7 @@ $(document).ready(function()
 							$('#loadstatus').text('');
 							return data;
 						}
-						$('#loadstatus').text(data.message ? data.message : s2_lang.unknown_error);
+						$('#loadstatus').text(data.message || s2_lang.unknown_error);
 						return false;
 					}
 				}
@@ -434,11 +435,11 @@ $(document).ready(function()
 		window.status = window.defaultStatus;
 	});
 })
-.ajaxStart(function (event, XMLHttpRequest, ajaxOptions)
+.ajaxStart(function ()
 {
 	SetWait(true);
 })
-.ajaxStop(function (event, XMLHttpRequest, ajaxOptions)
+.ajaxStop(function ()
 {
 	SetWait(false);
 });

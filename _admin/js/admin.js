@@ -30,14 +30,6 @@ var Hooks = (function ()
 
 // Helper functions
 
-function str_replace (substr, newsubstr, str)
-{
-	newsubstr = newsubstr.replace(/\$/g, '$$$$');
-	while (str.indexOf(substr) >= 0)
-		str = str.replace(substr, newsubstr);
-	return str;
-}
-
 function SetTime (eForm, sName)
 {
 	var d = new Date();
@@ -797,9 +789,13 @@ $(document).ready(function()
 				animation : 150,
 				initially_open : ['node_1'],
 				progressive_render : true,
-				open_parents : false
+				open_parents : false,
+				strings : {
+					loading : s2_lang.load_tree,
+					new_node : s2_lang.new_page
+				}
 			},
-			plugins : ["json_data", 'dnd', "ui", "crrm", "hotkeys"]
+			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
 		});
 })
 .ajaxStart(function (event, XMLHttpRequest, ajaxOptions)
