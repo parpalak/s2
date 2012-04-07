@@ -617,16 +617,10 @@ $(document).ready(function()
 			if (!eButtons)
 				return;
 
-			var curId = d.rslt.obj.attr('id').replace('node_', '');
-/* 			if (curId === selectedId)
-				tree.jstree('rename', d.rslt.obj);
-			else
- */			{
-				eButtons.detach();
-				selectedId = curId;
-				commentNum = d.rslt.obj.attr('data-comments');
-				$('.jstree-clicked').append(eButtons);
-			}
+			eButtons.detach();
+			selectedId = d.rslt.obj.attr('id').replace('node_', '');
+			commentNum = d.rslt.obj.attr('data-comments');
+			$('.jstree-clicked').append(eButtons);
 		})
 		.bind('deselect_node.jstree', function (e, d)
 		{
@@ -703,7 +697,10 @@ $(document).ready(function()
 		})
 		.jstree({
 			crrm : {
-				input_width_limit : 1000
+				input_width_limit : 1000,
+				move : {
+					check_move : function (m) { console.log(m); return (typeof(m.np.attr('id')) != 'undefined' && m.np.attr('id').substring(0, 5) == 'node_'); }
+				}
 			},
 			ui : {
 				select_limit : 1,

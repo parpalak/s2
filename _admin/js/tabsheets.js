@@ -130,7 +130,7 @@ function OnSwitch (eTab)
 	{
 		GETAsyncRequest(sUrl + 'action=load_extensions', function (http)
 		{
-			$('#ext_div').html(http.responseText);
+			document.getElementById('ext_div').innerHTML = http.responseText;
 		});
 	}
 	else if (sType == 'admin-stat_tab')

@@ -261,7 +261,7 @@ $(document).ready(function()
 					}
 				}
 			},
-			crrm : { 
+			crrm : {
 				move : {
 					check_move : function (m) { return (typeof(m.np.attr('data-path')) != 'undefined' && m.np.attr('data-path') != path); }
 				}
