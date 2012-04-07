@@ -55,7 +55,7 @@ var s2_lang = {
 	folder				: 'Folder',
 	value				: 'Size: ',
 	size				: 'Dimension: ',
-	insert				: 'Insert',
+	insert				: '← Insert',
 
 	files_too_big		: 'The following files were not being uploaded since their size exceeds the server limit (%s):'
 };
