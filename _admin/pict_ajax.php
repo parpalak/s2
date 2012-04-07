@@ -37,7 +37,7 @@ $s2_user = s2_authenticate_user($session_id);
 
 if ($action == 'preview')
 {
-	$file = $_GET['file'];
+	$file = (string) $_GET['file'];
 
 	while (strpos($file, '..') !== false)
 		$file = str_replace('..', '', $file);
@@ -63,8 +63,8 @@ if ($action == 'load_tree')
 	($hook = s2_hook('prq_action_load_tree_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	$path = isset($_GET['path']) ? $_GET['path'] : false;
-	while (strpos($path, '..') !== false)
+	$path = isset($_GET['path']) ? (string) $_GET['path'] : false;
+	while ($path && strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
 	$return = s2_walk_dir($path);
@@ -88,11 +88,11 @@ elseif ($action == 'create_subfolder')
 	if (!isset($_GET['path']) || !isset($_GET['name']))
 		die('Error in GET parameters.');
 
-	$path = $_GET['path'];
+	$path = (string) $_GET['path'];
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
-	$name = $_GET['name'];
+	$name = (string) $_GET['name'];
 	$name = str_replace('\\', '', $name);
 	$name = str_replace('/', '', $name);
 	while (strpos($name, '..') !== false)
@@ -121,7 +121,7 @@ elseif ($action == 'delete_folder')
 	if (!isset($_GET['path']))
 		die('Error in GET parameters.');
 
-	$path = $_GET['path'];
+	$path = (string) $_GET['path'];
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
@@ -164,11 +164,11 @@ elseif ($action == 'rename_folder')
 	if (!isset($_GET['path']) || !isset($_GET['name']))
 		die('Error in GET parameters.');
 
-	$path = $_GET['path'];
+	$path = (string) $_GET['path'];
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
-	$folder_name = $_GET['name'];
+	$folder_name = (string) $_GET['name'];
 	$folder_name = str_replace('\\', '', $folder_name);
 	$folder_name = str_replace('/', '', $folder_name);
 	while (strpos($folder_name, '..') !== false)
@@ -209,11 +209,11 @@ elseif ($action == 'rename_file')
 	if (!isset($_GET['path']) || !isset($_GET['name']))
 		die('Error in GET parameters.');
 
-	$path = $_GET['path'];
+	$path = (string) $_GET['path'];
 	while (strpos($path, '..') !== false)
 		$path = str_replace('..', '', $path);
 
-	$filename = $_GET['name'];
+	$filename = (string) $_GET['name'];
 	$filename = str_replace('\\', '', $filename);
 	$filename = str_replace('/', '', $filename);
 	while (strpos($filename, '..') !== false)
@@ -261,11 +261,11 @@ elseif ($action == 'move_folder')
 	if (!isset($_GET['spath']) || !isset($_GET['dpath']))
 		die('Error in GET parameters.');
 
-	$spath = $_GET['spath'];
+	$spath = (string) $_GET['spath'];
 	while (strpos($spath, '..') !== false)
 		$spath = str_replace('..', '', $spath);
 
-	$dpath = $_GET['dpath'];
+	$dpath = (string) $_GET['dpath'];
 	while (strpos($dpath, '..') !== false)
 		$dpath = str_replace('..', '', $dpath);
 
@@ -273,6 +273,35 @@ elseif ($action == 'move_folder')
 
 	header('Content-Type: application/json; charset=utf-8');
 	echo json_encode(array('status' => 1, 'new_path' => $dpath.'/'.s2_basename($spath)));
+}
+elseif ($action == 'move_files')
+{
+	$is_permission = $s2_user['edit_site'];
+	($hook = s2_hook('prq_action_drag_start')) ? eval($hook) : null;
+	s2_test_user_rights($is_permission);
+
+	if (!isset($_GET['spath']) || !isset($_GET['dpath']) || !isset($_GET['fname']) || !is_array($_GET['fname']))
+		die('Error in GET parameters.');
+
+	$spath = (string) $_GET['spath'];
+	while (strpos($spath, '..') !== false)
+		$spath = str_replace('..', '', $spath);
+
+	$dpath = (string) $_GET['dpath'];
+	while (strpos($dpath, '..') !== false)
+		$dpath = str_replace('..', '', $dpath);
+
+	foreach ($_GET['fname'] as $fname)
+	{
+		$fname = (string) $fname;
+		while (strpos($fname, '..') !== false)
+			$fname = str_replace('..', '', $fname);
+
+		rename(S2_IMG_PATH.$spath.'/'.s2_basename($fname), S2_IMG_PATH.$dpath.'/'.s2_basename($fname));
+	}
+
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(array('status' => 1));
 }
 
 elseif ($action == 'load_files')
@@ -290,25 +319,6 @@ elseif ($action == 'load_files')
 
 	header('Content-Type: application/json; charset=utf-8');
 	echo json_encode(s2_get_files($path));
-}
-
-elseif ($action == 'move_file')
-{
-	$is_permission = $s2_user['edit_site'];
-	($hook = s2_hook('prq_action_move_file_start')) ? eval($hook) : null;
-	s2_test_user_rights($is_permission);
-
-	$spath = $_GET['spath'];
-	while (strpos($spath, '..') !== false)
-		$spath = str_replace('..', '', $spath);
-
-	$dpath = $_GET['dpath'];
-	while (strpos($dpath, '..') !== false)
-		$dpath = str_replace('..', '', $dpath);
-
-	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.s2_basename($spath));
-
-	echo s2_get_files(s2_dirname($spath));
 }
 
 elseif ($action == 'upload')

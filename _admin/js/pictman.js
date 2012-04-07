@@ -137,19 +137,20 @@ $(document).ready(function()
 				success : function (d)
 				{
 					if (!d || !d.status)
-						folderRollback(data.rlbk);
-					else
 					{
-						var len = data.rslt.obj.attr('data-path').length;
-						data.rslt.obj.attr('data-path', d.new_path).find('li').each(function ()
-						{
-							$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len));
-						});
-
-						var eSelected = folderTree.jstree('get_selected');
-						path = eSelected.attr('data-path');
-						$('#fold_name').html('<b>' + folderTree.jstree('get_text', eSelected) + '</b>');
+						folderRollback(data.rlbk);
+						return;
 					}
+
+					var len = data.rslt.obj.attr('data-path').length;
+					data.rslt.obj.attr('data-path', d.new_path).find('li').each(function ()
+					{
+						$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len));
+					});
+
+					var eSelected = folderTree.jstree('get_selected');
+					path = eSelected.attr('data-path');
+					$('#fold_name').html('<b>' + folderTree.jstree('get_text', eSelected) + '</b>');
 				},
 				error : function ()
 				{
@@ -194,28 +195,52 @@ $(document).ready(function()
 		})
 		.bind('move_node.jstree', function (e, data)
 		{
-			//console.log(data.rslt.o.attr('data-fname'));
-			$.ajax({
-				url : sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path')) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')),
-				success : function (d)
-				{
-					if (!d || !d.status)
-						folderRollback(data.rlbk);
-					else
+			if (typeof(data.rslt.o.attr('data-path')) != 'undefined')
+				$.ajax({
+					url : sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path')) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')),
+					success : function (d)
 					{
-						var len = data.rslt.o.attr('data-path').length;
-						data.rslt.o.attr('data-path', d.new_path).find('li').each(function ()
+						if (!d || !d.status)
+							folderRollback(data.rlbk);
+						else
 						{
-							$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len)); 
-						});
-						path = folderTree.jstree('get_selected').attr('data-path');
+							var len = data.rslt.o.attr('data-path').length;
+							data.rslt.o.attr('data-path', d.new_path).find('li').each(function ()
+							{
+								$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len)); 
+							});
+							path = folderTree.jstree('get_selected').attr('data-path');
+						}
+					},
+					error : function ()
+					{
+						folderRollback(data.rlbk);
 					}
-				},
-				error : function ()
-				{
-					folderRollback(data.rlbk);
-				}
-			});
+				});
+			else
+			{
+				var fileNames = [];
+				data.rslt.o.each(function () { fileNames.push('fname[]=' + encodeURIComponent($(this).attr('data-fname'))); });
+
+				$.ajax({
+					url : sUrl + 'action=move_files&spath=' + encodeURIComponent(path) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')) + '&' + fileNames.join('&'),
+					success : function (d)
+					{
+						folderRollback(data.rlbk);
+
+						if (!fileTree.children().length)
+							fileTree.html('<ul></ul>'); // jstree fix (doesn't work after all roots disappearing)
+
+						if (!d || !d.status)
+							fileTree.jstree('refresh', -1);
+					},
+					error : function ()
+					{
+						folderRollback(data.rlbk);
+						fileTree.jstree('refresh', -1);
+					}
+				});
+			}
 		})
 		.jstree({
 			crrm : {
@@ -245,7 +270,11 @@ $(document).ready(function()
 				animation : 150,
 				initially_open : ['node_1'],
 				progressive_render : true,
-				open_parents : false
+				open_parents : false,
+				strings : {
+					loading : s2_lang.load,
+					new_node : 'new'
+				}
 			},
 			sort : function (a, b) { return strNatCmp(this.get_text(a), this.get_text(b)); },
 			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys' , 'sort']
@@ -369,7 +398,7 @@ $(document).ready(function()
 							$('#loadstatus').text('');
 							return data;
 						}
-						$('#loadstatus').text(data.message ? data.message : 'Unknown error');
+						$('#loadstatus').text(data.message ? data.message : s2_lang.unknown_error);
 						return false;
 					}
 				}
@@ -377,6 +406,12 @@ $(document).ready(function()
 			crrm : { 
 				move : {
 					check_move : function (m) { return false; }
+				}
+			},
+			core : {
+				strings : {
+					loading : s2_lang.load,
+					multiple_selection : s2_lang.multiple_files
 				}
 			},
 			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
