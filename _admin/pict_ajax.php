@@ -223,7 +223,7 @@ elseif ($action == 'rename_file')
 	if (($ext_pos = strrpos($filename, '.')) !== false)
 		 $extension = substr($filename, $ext_pos + 1);
 
-	if ($extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' '.S2_ALLOWED_EXTENSIONS.' ', ' '.$extension.' '))
+	if (!$s2_user['edit_users'] && $extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' '.S2_ALLOWED_EXTENSIONS.' ', ' '.$extension.' '))
 	{
 		$s2_db->close();
 
