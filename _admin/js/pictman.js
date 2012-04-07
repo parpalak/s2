@@ -263,7 +263,7 @@ $(document).ready(function()
 			},
 			crrm : { 
 				move : {
-					check_move : function (m) { return typeof(m.np.attr('data-path')) != 'undefined'; }
+					check_move : function (m) { return (typeof(m.np.attr('data-path')) != 'undefined' && m.np.attr('data-path') != path); }
 				}
 			},
 			core : {
@@ -384,7 +384,14 @@ $(document).ready(function()
 			},
 			hotkeys : {
 				'del' : removeFiles,
-				'ctrl+a' : function () { $.jstree._reference(fileTree)._get_children(-1).each(function () { fileTree.jstree('select_node', this); }); return false; }
+				'ctrl+a' : function ()
+				{
+					$.jstree._reference(fileTree)._get_children(-1).each(function ()
+					{
+						fileTree.jstree('select_node', this);
+					});
+					return false;
+				}
 			},
 			json_data : {
 				ajax : {
