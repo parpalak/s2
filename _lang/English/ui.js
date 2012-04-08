@@ -3,7 +3,6 @@ var s2_lang = {
 	load_tree			: 'Loading site structure...',
 	new_page			: 'New page',
 	delete_comment		: 'Do you want to delete the comment?',
-	delete_tag_link		: 'Do you want to break the link?',
 	new_password		: 'New password for the user “%s”:',
 	new_email			: 'New e-mail for the user “%s”:',
 	new_name			: 'New name for the user “%s”:',
@@ -41,8 +40,6 @@ var s2_lang = {
 	conflicted_action	: 'Open my text in a new window and load here another’s one',
 	conflicted_text		: 'Your text version',
 	conflicted_text_info: 'The text containing your changes has been moved here, and another’s one has been loaded to the editor. You can copy the necessary fragments and paste them to the editor. Do not close this page until you copy the text, otherwise the text will be lost.',
-
-	add_to_tag			: 'Add to the tag “%s”',
 
 	multiple_files		: 'Several files',
 	delete_file			: 'Do you want to delete “%s”?',

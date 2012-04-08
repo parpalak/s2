@@ -24,9 +24,6 @@ $lang_admin = array(
 
 // List tab
 'Site'						=> 'Site',
-'Choose tag'				=> 'Select a&nbsp;tag from the list on the right or&nbsp;add a new one using the <a href="#tag">tags’ tab</a>. Then drop here pages from the tree on the left.',
-'Show tags'					=> 'Show tags',
-'Hide tags'					=> 'Hide tags',
 'Expand'					=> 'Expand',
 'Collapse'					=> 'Collapse',
 'Refresh'					=> 'Refresh',

@@ -127,15 +127,7 @@ SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 	<dl class="tabsheets">
 		<dt id="list_tab"><?php echo $lang_admin['Site']; ?></dt>
 		<dd class="inactive">
-			<div class="reducer" id="tree_div">
-				<div id="tag_table" class="closed">
-					<div class="tagswitcher">
-						<i class="closed" title="<?php echo $lang_admin['Show tags']; ?>" ></i>
-						<i class="opened" title="<?php echo $lang_admin['Hide tags']; ?>" ></i>
-					</div>
-					<div id="tag_values"><p><?php echo $lang_admin['Choose tag']; ?></p></div>
-					<div id="tag_names"><ul id="tag_list"></ul></div>
-				</div>
+			<div class="reducer">
 <?php
 
 $padding = 2.5;

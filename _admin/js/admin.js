@@ -110,37 +110,6 @@ function Init ()
 		window.status = window.defaultStatus;
 	});
 
-	// Tags list
-	var eTagValues = document.getElementById('tag_values');
-	eTagValues.onmouseover = TagvaluesMouseIn;
-	eTagValues.onmouseout = TagvaluesMouseOut;
-
-	var eTagTable = document.getElementById('tag_table');
-	var fTagSwitch = function ()
-	{
-		if (eTagTable.className == 'closed')
-		{
-			eTagTable.className = 'opened';
-			GETAsyncRequest(sUrl + 'action=load_tagnames', function (http)
-			{
-				document.getElementById('tag_list').innerHTML = http.responseText;
-			});
-		}
-		else
-			eTagTable.className = 'closed';
-
-		if (is_local_storage)
-			localStorage.setItem('s2_tags_opened', eTagTable.className == 'closed' ? 0 : 1);
-		return false;
-	};
-
-	if (is_local_storage && parseInt(localStorage.getItem('s2_tags_opened')))
-		fTagSwitch();
-
-	var aeI = eTagTable.getElementsByTagName('I');
-	for (var i = aeI.length; i-- ;)
-		aeI[i].onclick = fTagSwitch;
-
 	// Prevent from loosing unsaved data
 	window.onbeforeunload = function ()
 	{
@@ -1251,87 +1220,6 @@ function LoadCommentsTable (sAction, iId, sMode)
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
 		TableSort(eItem);
-	});
-	return false;
-}
-
-
-//=======================[Tags for articles]====================================
-
-var iCurrentTagId, eCurrentTag = null;
-
-function ChooseTag (eItem)
-{
-	if (eCurrentTag)
-	{
-		eCurrentTag.className = '';
-		eCurrentTag.onmouseover = null;
-		eCurrentTag.onmouseout = null;
-	}
-	eCurrentTag = eItem;
-	eCurrentTag.onmouseover = TagvaluesMouseIn;
-	eCurrentTag.onmouseout = TagvaluesMouseOut;
-	eCurrentTag.className = 'cur_tag';
-	iCurrentTagId = eCurrentTag.getAttribute('data-tagid');
-
-	GETAsyncRequest(sUrl + 'action=load_tagvalues&id=' + iCurrentTagId, function (http)
-	{
-		document.getElementById('tag_values').innerHTML = http.responseText;
-	});
-
-	return false;
-}
-
-var bMouseInTagvalues = false;
-
-function TagvaluesMouseIn ()
-{
-/* 	if (!sourceElement || !eCurrentTag)
-		return;
-
-	bMouseInTagvalues = true;
-	var aName = eCurrentTag.innerHTML.split(' (');
-	Drag.set_hint(str_replace('%s', aName[aName.length - 2], s2_lang.add_to_tag));
-
-	document.getElementById('tag_values').style.backgroundColor = '#d2e5fc';
-	eCurrentTag.style.backgroundColor = '#d2e5fc'; */
-}
-
-function TagvaluesMouseOut ()
-{
-/* 	bMouseInTagvalues = false;
-	if (sourceElement)
-		Drag.set_hint('');
-
-	document.getElementById('tag_values').style.backgroundColor = '';
-
-	if (eCurrentTag)
-		eCurrentTag.style.backgroundColor = ''; */
-}
-
-function AddArticleToTag (iId)
-{
-	GETAsyncRequest(sUrl + 'action=add_to_tag&tag_id=' + iCurrentTagId + '&article_id=' + iId, function (http)
-	{
-		document.getElementById('tag_values').innerHTML = http.responseText;
-		eCurrentTag.childNodes[1].innerHTML = parseInt(eCurrentTag.childNodes[1].innerHTML) + 1;
-	});
-	return false;
-}
-
-function DeleteArticleFromTag (iId, e)
-{
-	if (!confirm(s2_lang.delete_tag_link))
-		return false;
-
-	if (e.stopPropagation)
-		e.stopPropagation();
-	e.cancelBubble = true;
-
-	GETAsyncRequest(sUrl + 'action=delete_from_tag&id=' + iId, function (http)
-	{
-		document.getElementById('tag_values').innerHTML = http.responseText;
-		eCurrentTag.childNodes[1].innerHTML = parseInt(eCurrentTag.childNodes[1].innerHTML) - 1;
 	});
 	return false;
 }
