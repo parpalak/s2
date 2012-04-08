@@ -105,7 +105,7 @@ $counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(is_file(
 		<hook id="rq_custom_action"><![CDATA[
 if ($action == 's2_search_makeindex')
 {
-	$is_permission = $s2_user['edit_site'];
+	$is_permission = $s2_user['create_articles'] || $s2_user['edit_site'];
 	$save_action = isset($_GET['save_action']) ? $_GET['save_action'] : '';
 	$id = isset($_GET['id']) ? $_GET['id'] : '';
 	$save_action = ($save_action == 'save') ? '' : $save_action.'_';
