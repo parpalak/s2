@@ -107,7 +107,8 @@ function s2_save_article ($page, $flags)
 	while ($row = $s2_db->fetch_row($result))
 		$old_tags[] = $row[0];
 
-	if ($new_tags != $old_tags)
+	// Compare old and new tags
+	if (implode(',', $old_tags) != implode(',', $new_tags))
 	{
 		// Deleting old links
 		$query = array(
@@ -119,6 +120,7 @@ function s2_save_article ($page, $flags)
 		if ($s2_db->affected_rows() == -1)
 			$error = true;
 
+		// Inserting new links
 		foreach ($new_tags as $tag_id)
 		{
 			$query = array(
@@ -186,7 +188,7 @@ function s2_output_article_form ($id)
 	$current_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'DISTINCT t.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as current',
+		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as current',
 		'FROM'		=> 'tags AS t',
 		'ORDER BY'	=> 'used DESC'
 	);
@@ -233,17 +235,20 @@ function s2_output_article_form ($id)
 	$templates['+'] = $add_option;
 
 	// Options for author select
-	$query = array(
-		'SELECT'	=> 'id, login',
-		'FROM'		=> 'users',
-		'WHERE'		=> 'create_articles = 1'
-	);
-	($hook = s2_hook('fn_output_article_form_pre_get_usr_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	if ($s2_user['edit_site'])
+	{
+		$query = array(
+			'SELECT'	=> 'id, login',
+			'FROM'		=> 'users',
+			'WHERE'		=> 'create_articles = 1'
+		);
+		($hook = s2_hook('fn_output_article_form_pre_get_usr_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$users = array(0 => '');
-	while ($user = $s2_db->fetch_assoc($result))
-		 $users[$user['id']] = $user['login'];
+		$users = array(0 => '');
+		while ($user = $s2_db->fetch_assoc($result))
+			 $users[$user['id']] = $user['login'];
+	}
 
 	($hook = s2_hook('fn_output_article_form_pre_output')) ? eval($hook) : null;
 

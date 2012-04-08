@@ -349,5 +349,7 @@ function s2_get_tag_ids ($tag_str)
 			$real_tags[$k] = $new_tag;
 		}
 
+	ksort($ids);
+
 	return $ids;
 }
