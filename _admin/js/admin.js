@@ -1202,6 +1202,17 @@ function SaveComment (sType)
 	return false;
 }
 
+function LoadTable (sAction, sID)
+{
+	GETAsyncRequest(sUrl + 'action=' + sAction, function (http)
+	{
+		var eItem = document.getElementById(sID);
+		eItem.innerHTML = http.responseText;
+		TableSort(eItem);
+	});
+	return false;
+}
+
 function LoadCommentsTable (sAction, iId, sMode)
 {
 	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + iId + '&mode=' + sMode, function (http)
