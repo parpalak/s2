@@ -35,11 +35,9 @@ function BlogAddTag (iId)
 function LoadPosts ()
 {
 	var sRequest = StringFromForm(document.blogform);
-	POSTAsyncRequest(sUrl + "action=load_blog_posts", sRequest, function(http)
+	POSTAsyncRequest(sUrl + "action=load_blog_posts", sRequest, function(http, data)
 	{
-		var eItem = document.getElementById('blog_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#blog_div').html(data);
 	});
 	return false;
 }
@@ -84,7 +82,6 @@ function LoadBlogComments (iId)
 	{
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
 		SelectTab(document.getElementById('comm_tab'), true);
 	});
 	return false;
@@ -99,7 +96,6 @@ function DeleteBlogComment (iId, sMode)
 	{
 		var eItem = document.getElementById('comm_div');
 		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
 	});
 	return false 
 }
