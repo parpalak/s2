@@ -754,22 +754,47 @@ var LoadArticle, ReloadArticle;
 (function ()
 {
 	var sLoadedURI;
+	var s2Tags = [];
 
 	function RequestArticle (sURI)
 	{
-		//console.log('pre-request');
-		GETAsyncRequest(sURI, function (http)
+		GETAsyncRequest(sURI, function (http, data)
 		{
-			//console.log('callback-start');
 			eval(Hooks.get('request_article_start'));
 
-			document.getElementById('form_div').innerHTML = http.responseText;
+			s2Tags = data.tags;
+			$('#form_div').html(data.form);
+
+			$(document.forms['artform'].elements['page[tags]'])
+				.autocomplete({
+					delay: 0,
+					minLength: 0,
+					source: function (request, response)
+					{
+						response($.ui.autocomplete.filter(s2Tags, (', ' + request.term).match(/,\s*([^,]*)$/)[1]));
+					},
+					focus: function ()
+					{
+						return false;
+					},
+					select: function (event, ui)
+					{
+						var terms = this.value.split(/,\s*/);
+
+						terms.pop();
+						terms.push(ui.item.value);
+						terms.push('');
+
+						this.value = terms.join(', ');
+						return false;
+					}
+				});
+
 			Changes.commit(document.artform);
 			SelectTab(document.getElementById('edit_tab'), true);
 			sLoadedURI = sURI;
 
 			eval(Hooks.get('request_article_end'));
-			//console.log('callback-end');
 		});
 	}
 
@@ -838,14 +863,11 @@ function SaveArticle(sAction)
 	var sRequest = StringFromForm(document.forms['artform']),
 		sPagetext = document.forms['artform'].elements['page[text]'].value;
 
-	POSTAsyncRequest(sUrl + 'action=' + sAction, sRequest, function(http)
+	POSTAsyncRequest(sUrl + 'action=' + sAction, sRequest, function (http, data)
 	{
-		if (http.responseXML)
+		if (typeof data.status != undefined)
 		{
-			var xmldoc = http.responseXML,
-				sStatus = xmldoc.getElementsByTagName('status')[0].firstChild.nodeValue;
-
-			if (sStatus == 'conflict')
+			if (data.status == 'conflict')
 			{
 				PopupMessages.show(s2_lang.conflicted_revisions, [
 					{
@@ -867,16 +889,13 @@ function SaveArticle(sAction)
 			if (!document.forms['artform'].getAttribute('data-save-process'))
 				return;
 
-			var sUrlStatus = xmldoc.getElementsByTagName('url_status')[0].firstChild.nodeValue,
-				sRevision = xmldoc.getElementsByTagName('revision')[0].firstChild.nodeValue;
-
 			var eItem = document.getElementById("url_input_label");
-			if (sUrlStatus == 'empty')
+			if (data.url_status == 'empty')
 			{
 				eItem.className = 'error';
 				eItem.title = eItem.getAttribute('title_empty');
 			}
-			else if (sUrlStatus == 'not_unique')
+			else if (data.url_status == 'not_unique')
 			{
 				eItem.className = 'error';
 				eItem.title = eItem.getAttribute('title_unique');
@@ -887,7 +906,7 @@ function SaveArticle(sAction)
 				eItem.title = '';
 			}
 
-			document.forms['artform'].elements['page[revision]'].value = sRevision;
+			document.forms['artform'].elements['page[revision]'].value = data.revision;
 
 			eItem = document.getElementById('pub');
 			eItem.parentNode.className = eItem.checked ? 'ok' : '';

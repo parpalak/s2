@@ -187,7 +187,8 @@ elseif ($action == 'load')
 
 	require 'edit.php';
 
-	s2_output_article_form($id);
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(s2_output_article_form($id));
 }
 
 // Saving data to DB
@@ -208,8 +209,8 @@ elseif ($action == 'save')
 
 	($hook = s2_hook('rq_action_save_article_end')) ? eval($hook) : null;
 
-	header('Content-Type: text/xml; charset=utf-8');
-	echo '<response>'.s2_array2xml($return).'</response>';
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode($return);
 }
 
 elseif ($action == 'preview')

@@ -102,6 +102,7 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/jquery.hotkeys.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="js/admin.js"></script>
 <script type="text/javascript">

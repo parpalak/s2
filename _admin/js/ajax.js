@@ -336,7 +336,7 @@ function GETAsyncRequest (sRequestUrl, fCallback)
 	$.get(sRequestUrl, function (data, textStatus, jqXHR)
 	{
 		if (!jqXHR.s2ErrorFlag && typeof fCallback == 'function')
-			fCallback(jqXHR);
+			fCallback(jqXHR, data);
 	});
 }
 
@@ -345,7 +345,7 @@ function POSTAsyncRequest (sRequestUrl, sParam, fCallback)
 	$.post(sRequestUrl, sParam, function (data, textStatus, jqXHR)
 	{
 		if (!jqXHR.s2ErrorFlag && typeof fCallback == 'function')
-			fCallback(jqXHR);
+			fCallback(jqXHR, data);
 	});
 }
 

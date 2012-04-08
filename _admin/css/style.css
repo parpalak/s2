@@ -118,7 +118,8 @@ a > img {
 .js,
 .js:active,
 .js:hover,
-.js:visited {
+.js:visited,
+.ui-autocomplete a {
 	background: -moz-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
 	background: -ms-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
 	background: -o-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
@@ -1244,3 +1245,40 @@ form center {
 #jstree-marker  { background: url(../i/tree.png) -41px -21px no-repeat !important; text-indent: -100px; }
 
 .jstree .jstree-locked a { color:silver; cursor:default; }
+
+#vakata-dragged,
+.ui-autocomplete {
+	-moz-box-shadow: 1px 1px 4px -1px #666;
+	-webkit-box-shadow: 1px 1px 4px -1px #666;
+	box-shadow: 1px 1px 4px -1px #666;
+	}
+
+.ui-autocomplete  {
+	background: #fff;
+	position: absolute;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: block;
+	border: 1px solid #ccc;
+	word-wrap: break-word;
+	max-width: 400px;
+	}
+	.ui-autocomplete .ui-menu-item {
+		display: inline-block;
+		white-space: nowrap;
+		padding: 0.25em 0.125em;
+		}
+	.ui-autocomplete a {
+		margin: 1px 5px;
+		padding: 0 0;
+		}
+	.ui-autocomplete a.ui-state-hover {
+		cursor: pointer;
+		margin: 0;
+		padding: 1px 5px;
+		background: #eef;
+		-moz-border-radius: 8px;
+		-webkit-border-radius: 8px;
+		border-radius: 8px;
+		}

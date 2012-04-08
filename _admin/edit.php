@@ -74,6 +74,8 @@ function s2_save_article ($page, $flags)
 		$revision++;
 	}
 
+	$error = false;
+
 	$query = array(
 		'UPDATE'	=> 'articles',
 		'SET'		=> "title = '".$s2_db->escape($page['title'])."', meta_keys = '".$s2_db->escape($page['meta_keys'])."', meta_desc = '".$s2_db->escape($page['meta_desc'])."', excerpt = '".$s2_db->escape($page['excerpt'])."', pagetext = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, template = '".$s2_db->escape($page['template'])."', revision = '".$s2_db->escape($revision)."'",
@@ -86,6 +88,52 @@ function s2_save_article ($page, $flags)
 	($hook = s2_hook('fn_save_article_pre_upd_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	if ($s2_db->affected_rows() == -1)
+		$error = true;
+
+	// Dealing with tags
+	$new_tags_str = isset($page['tags']) ? $page['tags'] : '';
+	$new_tags = s2_get_tag_ids($new_tags_str);
+
+	$query = array(
+		'SELECT'	=> 'tag_id',
+		'FROM'		=> 'article_tag AS at',
+		'WHERE'		=> 'article_id = '.$id,
+		'ORDER BY'	=> 'id'
+	);
+	($hook = s2_hook('fn_save_article_pre_get_tags_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$old_tags = array();
+	while ($row = $s2_db->fetch_row($result))
+		$old_tags[] = $row[0];
+
+	if ($new_tags != $old_tags)
+	{
+		// Deleting old links
+		$query = array(
+			'DELETE'	=> 'article_tag',
+			'WHERE'		=> 'article_id = '.$id
+		);
+		($hook = s2_hook('fn_save_article_pre_del_tags_qr')) ? eval($hook) : null;
+		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		if ($s2_db->affected_rows() == -1)
+			$error = true;
+
+		foreach ($new_tags as $tag_id)
+		{
+			$query = array(
+				'INSERT'	=> 'article_id, tag_id',
+				'INTO'		=> 'article_tag',
+				'VALUES'	=> $id.', '.$tag_id
+			);
+			($hook = s2_hook('fn_save_article_pre_ins_tags_qr')) ? eval($hook) : null;
+			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			if ($s2_db->affected_rows() == -1)
+				$error = true;
+		}
+	}
+
+	if ($error)
 		die($lang_admin['Not saved correct']);
 
 	return array($parent_id, $revision, 'ok');
@@ -118,9 +166,45 @@ function s2_output_article_form ($id)
 	if (!$page['published'])
 		s2_test_user_rights($s2_user['view_hidden'] || $s2_user['id'] == $page['user_id']);
 
+	$create_time = s2_array_from_time($page['create_time']);
+	$modify_time = s2_array_from_time($page['modify_time']);
+
+	// Fetching tags
+	$subquery = array(
+		'SELECT'	=> 'count(*)',
+		'FROM'		=> 'article_tag AS at',
+		'WHERE'		=> 't.tag_id = at.tag_id'
+	);
+	$used_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+	$subquery = array(
+		'SELECT'	=> 'count(*)',
+		'FROM'		=> 'article_tag AS at',
+		'WHERE'		=> 't.tag_id = at.tag_id AND at.article_id = '.$id,
+		'LIMIT'		=> '1'
+	);
+	$current_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
 	$query = array(
-		'SELECT'	=> 'count(id)',
-		'FROM'		=> 'articles',
+		'SELECT'	=> 'DISTINCT t.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as current',
+		'FROM'		=> 'tags AS t',
+		'ORDER BY'	=> 'used DESC'
+	);
+	($hook = s2_hook('fn_output_article_form_pre_chk_url_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$all_tags = $tags = array();
+	while ($tag = $s2_db->fetch_assoc($result))
+	{
+		$all_tags[] = $tag['name'];
+		if ($tag['current'])
+			$tags[] = $tag['name'];
+	}
+
+	// Check the URL for errors
+	$query = array(
+		'SELECT'	=> 'count(a.id)',
+		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'url = \''.$page['url'].'\' AND parent_id = '.$page['parent_id']
 	);
 	($hook = s2_hook('fn_output_article_form_pre_chk_url_qr')) ? eval($hook) : null;
@@ -132,12 +216,10 @@ function s2_output_article_form ($id)
 	elseif ($page['url'] == '' && $page['parent_id'] != S2_ROOT_ID)
 		$url_error = $lang_admin['URL empty'];
 
-	$create_time = s2_array_from_time($page['create_time']);
-	$modify_time = s2_array_from_time($page['modify_time']);
-
+	// Options for template select
 	$query = array(
-		'SELECT'	=> 'DISTINCT template',
-		'FROM'		=> 'articles'
+		'SELECT'	=> 'DISTINCT a.template',
+		'FROM'		=> 'articles AS a'
 	);
 	($hook = s2_hook('fn_output_article_form_pre_get_tpl_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -150,6 +232,7 @@ function s2_output_article_form ($id)
 			$templates[$row[0]] = $row[0];
 	$templates['+'] = $add_option;
 
+	// Options for author select
 	$query = array(
 		'SELECT'	=> 'id, login',
 		'FROM'		=> 'users',
@@ -164,6 +247,7 @@ function s2_output_article_form ($id)
 
 	($hook = s2_hook('fn_output_article_form_pre_output')) ? eval($hook) : null;
 
+	ob_start();
 ?>
 <form class="full_tab_form" name="artform" action="" onsubmit="SaveArticle('save'); return false;">
 <?php ($hook = s2_hook('fn_output_article_form_pre_btn_col')) ? eval($hook) : null; ?>
@@ -262,6 +346,11 @@ function s2_output_article_form ($id)
 				<td><input type="text" name="page[excerpt]" size="100" value="<?php echo s2_htmlencode($page['excerpt']); ?>" /></td>
 			</tr>
 <?php ($hook = s2_hook('fn_output_article_form_after_cite')) ? eval($hook) : null; ?>
+			<tr>
+				<td class="label" title="<?php echo $lang_admin['Tags help']; ?>"><?php echo $lang_admin['Tags']; ?></td>
+				<td><input type="text" name="page[tags]" size="100" value="<?php echo s2_htmlencode(implode(', ', $tags)); ?>" /></td>
+			</tr>
+<?php ($hook = s2_hook('fn_output_article_form_after_tags')) ? eval($hook) : null; ?>
 		</table>
 <?php ($hook = s2_hook('fn_output_article_form_after_fields1')) ? eval($hook) : null; ?>
 		<table class="fields">
@@ -283,7 +372,7 @@ function s2_output_article_form ($id)
 	($hook = s2_hook('fn_output_article_form_after_fields2')) ? eval($hook) : null;
 
 	s2_toolbar();
-	$padding = 14.1;
+	$padding = 15.5;
 	($hook = s2_hook('fn_output_article_form_pre_text')) ? eval($hook) : null;
 
 ?>
@@ -294,4 +383,5 @@ function s2_output_article_form ($id)
 </form>
 <?
 
+	return array('form' => ob_get_clean(), 'tags' => $all_tags);
 }

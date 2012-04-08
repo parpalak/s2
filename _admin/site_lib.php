@@ -193,9 +193,9 @@ function s2_preload_editor ()
 	for ($i = 0; $i < $max; $i++)
 	{
 		$query = array (
-			'SELECT'	=> 'id',
-			'FROM'		=> 'articles',
-			'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$id
+			'SELECT'	=> 'a.id',
+			'FROM'		=> 'articles AS a',
+			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[$i]).'\' AND parent_id = '.$id
 		);
 		($hook = s2_hook('fn_preload_editor_loop_pre_get_parents_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -207,10 +207,7 @@ function s2_preload_editor ()
 
 	($hook = s2_hook('fn_preload_editor_pre_output')) ? eval($hook) : null;
 
-	require 'edit.php';
-
-	s2_output_article_form($id);
-	echo '<script type="text/javascript">document.location.hash = "#edit"; Changes.commit(document.artform);</script>';
+	echo '<script type="text/javascript">document.location.hash = "#edit"; EditArticle('.$id.');</script>';
 
 	($hook = s2_hook('fn_preload_editor_end')) ? eval($hook) : null;
 }
@@ -282,4 +279,75 @@ function s2_context_buttons ()
 	($hook = s2_hook('fn_context_buttons_start')) ? eval($hook) : null;
 
 	echo '<span id="context_buttons">'.implode('', $buttons).'</span>';
+}
+
+function s2_get_tag_ids ($tag_str)
+{
+	global $s2_db;
+
+	// String cleanup, lower-case copy
+	$dirty_tags = explode(',', $tag_str);
+	$fake_tags = array();
+	foreach ($dirty_tags as $k => $tag)
+	{
+		$tag = trim($tag);
+		$dirty_tags[$k] = $tag;
+		$fake_tags[] = utf8_strtolower($tag);
+	}
+
+	// Case-independent
+	array_unique($fake_tags);
+
+	if (empty($fake_tags))
+		return array();
+
+	// New copies: normal, escaped for DB query and lowered
+	$tags = $escaped_tags = $lowered_tags = array();
+	foreach ($fake_tags as $k => $lowered_tag)
+		if ($tag = $dirty_tags[$k])
+		{
+			$tags[] = $tag;
+			$escaped_tags[] = $s2_db->escape($tag);
+			$lowered_tags[] = $lowered_tag;
+		}
+
+	// Fetching real tags
+	$query = array(
+		'SELECT'	=> 't.tag_id, t.name',
+		'FROM'		=> 'tags AS t',
+		'WHERE'		=> 't.name in (\''.implode('\', \'', $escaped_tags).'\')'
+	);
+	($hook = s2_hook('fn_get_tag_ids_pre_tags_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$ids = $real_tags = array();
+	while ($real_tag = $s2_db->fetch_assoc($result))
+	{
+		$lowered_real_tag = utf8_strtolower($real_tag['name']);
+
+		foreach ($lowered_tags as $k => $lowered_tag)
+			if ($lowered_real_tag == $lowered_tag)
+			{
+				$ids[$k] = $real_tag['tag_id'];
+				$real_tags[$k] = $real_tag['name'];
+			}
+	}
+
+	// Inserting new tags
+	foreach ($tags as $k => $new_tag)
+		if (!isset($ids[$k]))
+		{
+			$query = array(
+				'INSERT'	=> 'name, description, modify_time, url',
+				'INTO'		=> 'tags',
+				'VALUES'	=> '\''.$new_tag.'\', \'\', \'0\', \''.$new_tag.'\''
+			);
+			($hook = s2_hook('fn_get_tag_ids_pre_ins_tag_qr')) ? eval($hook) : null;
+			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+			$ids[$k] = $s2_db->insert_id();
+			$real_tags[$k] = $new_tag;
+		}
+
+	return $ids;
 }
