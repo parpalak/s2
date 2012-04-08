@@ -1155,8 +1155,8 @@ var slEditorSelection = null;
 function GetImage ()
 {
 	slEditorSelection = get_selection(document.artform['page[text]']);
-	LoadPictureManager();
 	SelectTab(document.getElementById('pict_tab'), true);
+	loadPictman();
 	return false;
 }
 
@@ -1214,16 +1214,17 @@ function LoadCommentsTable (sAction, iId, sMode)
 
 //=======================[Inserting pictures]===================================
 
-var bPictureManagerLoaded = false;
 
-function LoadPictureManager ()
+var loadPictman = (function ()
 {
-	if (bPictureManagerLoaded)
-		return;
-
-	var wnd = window.open('pictman.php', 'pict_frame', '', 'True');
-	bPictureManagerLoaded = true;
-}
+	var wnd = null;
+	return function ()
+	{
+		if (!wnd)
+			wnd = window.open('pictman.php', 'pict_frame', '', 'True');
+		wnd.focus();
+	};
+}());
 
 function ReturnImage(s, w, h)
 {
