@@ -663,10 +663,7 @@ elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) =
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	if ($row = $s2_db->fetch_assoc($result))
-	{
-		s2_blog_edit_post_form($row['id']);
-		echo '<script type="text/javascript">document.location.hash = "#edit"; Changes.commit(document.artform);</script>';
-	}
+		echo '<script type="text/javascript">document.location.hash = "#edit"; EditRecord('.$row['id'].')</script>';
 
 	($hook = s2_hook('blfn_preload_editor_end')) ? eval($hook) : null;
 
