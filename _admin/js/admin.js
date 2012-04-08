@@ -500,8 +500,6 @@ var Changes = (function ()
 	}
 
 	$(function () { $('body').on('click', '.sort > thead td', sort); });
-
-	return function () {};
 }());
 
 function CloseAll ()
@@ -560,7 +558,6 @@ $(document).ready(function()
 	var tree = $('#tree')
 		.bind("before.jstree", function (e, data)
 		{
-			//console.log(data.func);
 			if (data.func === "remove" && !confirm(str_replace('%s', tree.jstree('get_text', data.args[0]), s2_lang.delete_item)))
 			{
 				e.stopImmediatePropagation(); 
