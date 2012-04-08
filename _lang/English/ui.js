@@ -22,8 +22,6 @@ var s2_lang = {
 	unknown_error		: 'Unknown error',
 	server_response		: 'Something is broken. Please report the conditions when error occurs to administrators or developers and attach the server response:',
 
-	click_to_sort		: 'Click to sort',
-
 	unsaved				: 'Do you want to save the changed page before opening a new one?',
 	save_and_open		: 'Save and open',
 	discard_and_open	: 'Do not save and open',

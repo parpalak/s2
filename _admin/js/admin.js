@@ -60,7 +60,7 @@ var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
 var isSafari = ua.indexOf('safari') != -1;
 var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
 
-function Init ()
+$(function ()
 {
 	Search.init();
 	Changes.init();
@@ -93,6 +93,25 @@ function Init ()
 		}
 	});
 
+	$('body').on('keydown', '.full_tab_form input[type="text"], .full_tab_form input[type="checkbox"], .full_tab_form select', function(e)
+	{
+		if (e.keyCode == 13)
+		{
+			var inputs = $(this).parents('form').eq(0).find(':input:visible');
+			var idx = inputs.index(this);
+
+			if (idx == inputs.length - 1)
+				inputs[0].select()
+			else
+			{
+				inputs[idx + 1].focus();
+				if (inputs[idx + 1].select)
+					inputs[idx + 1].select();
+			}
+			return false;
+		}
+	});
+
 	// Tooltips
 	$(document).mouseover(function (e)
 	{
@@ -117,12 +136,10 @@ function Init ()
 			return s2_lang.unsaved_exit;
 	}
 
-	TableSort();
-
 	cur_page = document.location.hash;
 	setInterval(CheckPage, 400);
 	SetWait(false);
-}
+});
 
 function Logout ()
 {
@@ -358,7 +375,7 @@ var Changes = (function ()
 // originally written by paul sowden <paul@idontsmoke.co.uk> | http://idontsmoke.co.uk
 // modified and localized by alexander shurkayev <alshur@ya.ru> | http://htmlcoder.visions.ru
 
-var TableSort = (function ()
+(function ()
 {
 	var sort_case_sensitive = false;
 
@@ -433,7 +450,7 @@ var TableSort = (function ()
 
 	function sort (e)
 	{
-		var el = window.event ? window.event.srcElement : e.currentTarget;
+		var el = e.currentTarget;
 		while (el.tagName.toLowerCase() != "td")
 			el = el.parentNode;
 
@@ -482,27 +499,9 @@ var TableSort = (function ()
 			tbody.appendChild(a[i][1]);
 	}
 
-	return function (e)
-	{
-		if (!document.getElementsByTagName)
-			return;
+	$(function () { $('body').on('click', '.sort > thead td', sort); });
 
-		aeTHead = (e ? e : document).getElementsByTagName('thead');
-		for (var j = aeTHead.length; j-- ;)
-		{
-			var node, eTHead = aeTHead[j];
-			if (eTHead.parentNode.className != 'sort')
-				continue;
-
-			aeTD = eTHead.getElementsByTagName('td');
-			for (var i = aeTD.length; i-- ;)
-			{
-				eTD = aeTD[i];
-				$(eTD).click(sort);
-				eTD.title = eTD.title ? eTD.title : s2_lang.click_to_sort;
-			}
-		}
-	}
+	return function () {};
 }());
 
 function CloseAll ()
@@ -545,7 +544,6 @@ $(document).ready(function()
 		$('#context_delete').click(function () {tree.jstree('remove');});
 	}
 
-	Init();
 	initContext();
 
 	var eButtons = $('#context_buttons');
@@ -701,11 +699,11 @@ $(document).ready(function()
 			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
 		});
 })
-.ajaxStart(function (event, XMLHttpRequest, ajaxOptions)
+.ajaxStart(function ()
 {
 	SetWait(true);
 })
-.ajaxStop(function (event, XMLHttpRequest, ajaxOptions)
+.ajaxStop(function ()
 {
 	SetWait(false);
 });
@@ -746,7 +744,7 @@ var LoadArticle, ReloadArticle;
 					{
 						return false;
 					},
-					select: function (event, ui)
+					select: function (e, ui)
 					{
 						var terms = this.value.split(/,\s*/);
 
@@ -811,11 +809,9 @@ function EditArticle (iId)
 
 function LoadComments (iId)
 {
-	GETAsyncRequest(sUrl + 'action=load_comments&id=' + iId, function (http)
+	GETAsyncRequest(sUrl + 'action=load_comments&id=' + iId, function (http, data)
 	{
-		var eItem = document.getElementById('comm_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#comm_div').html(data);
 		SelectTab(document.getElementById('comm_tab'), true);
 	});
 	return false;
@@ -1180,11 +1176,9 @@ function DeleteComment (iId, sMode)
 	if (!confirm(s2_lang.delete_comment))
 		return false;
 
-	GETAsyncRequest(sUrl + 'action=delete_comment&id=' + iId + '&mode=' + sMode, function (http)
+	GETAsyncRequest(sUrl + 'action=delete_comment&id=' + iId + '&mode=' + sMode, function (http, data)
 	{
-		var eItem = document.getElementById('comm_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#comm_div').html(data);
 	});
 
 	return false;
@@ -1193,33 +1187,27 @@ function DeleteComment (iId, sMode)
 function SaveComment (sType)
 {
 	var sRequest = StringFromForm(document.commform);
-	POSTAsyncRequest(sUrl + 'action=save_comment&type=' + sType, sRequest, function (http)
+	POSTAsyncRequest(sUrl + 'action=save_comment&type=' + sType, sRequest, function (http, data)
 	{
-		var eItem = document.getElementById('comm_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#comm_div').html(data);
 	});
 	return false;
 }
 
 function LoadTable (sAction, sID)
 {
-	GETAsyncRequest(sUrl + 'action=' + sAction, function (http)
+	GETAsyncRequest(sUrl + 'action=' + sAction, function (http, data)
 	{
-		var eItem = document.getElementById(sID);
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#' + sID).html(data);
 	});
 	return false;
 }
 
 function LoadCommentsTable (sAction, iId, sMode)
 {
-	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + iId + '&mode=' + sMode, function (http)
+	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + iId + '&mode=' + sMode, function (http, data)
 	{
-		var eItem = document.getElementById('comm_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#comm_div').html(data);
 	});
 	return false;
 }
@@ -1284,12 +1272,10 @@ function AddUser (eForm)
 		return false;
 	}
 
-	GETAsyncRequest(sUrl + 'action=add_user&name=' + encodeURIComponent(sUser), function (http)
+	GETAsyncRequest(sUrl + 'action=add_user&name=' + encodeURIComponent(sUser), function (http, data)
 	{
 		eForm.userlogin.value = '';
-		var eItem = document.getElementById('user_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#user_div').html(data);
 	});
 
 	return false;
@@ -1297,11 +1283,9 @@ function AddUser (eForm)
 
 function SetPermission (sUser, sPermission)
 {
-	GETAsyncRequest(sUrl + 'action=user_set_permission&name=' + encodeURIComponent(sUser) + '&permission=' + sPermission, function (http)
+	GETAsyncRequest(sUrl + 'action=user_set_permission&name=' + encodeURIComponent(sUser) + '&permission=' + sPermission, function (http, data)
 	{
-		var eItem = document.getElementById('user_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#user_div').html(data);
 	});
 	return false;
 }
@@ -1325,11 +1309,9 @@ function SetUserEmail (sUser, sEmail)
 	if (typeof s != 'string')
 		return false;
 
-	GETAsyncRequest(sUrl + 'action=user_set_email&login=' + encodeURIComponent(sUser) + '&email=' + encodeURIComponent(s), function (http)
+	GETAsyncRequest(sUrl + 'action=user_set_email&login=' + encodeURIComponent(sUser) + '&email=' + encodeURIComponent(s), function (http, data)
 	{
-		var eItem = document.getElementById('user_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#user_div').html(data);
 	});
 	return false;
 }
@@ -1340,11 +1322,9 @@ function SetUserName (sUser, sName)
 	if (typeof s != 'string')
 		return false;
 
-	GETAsyncRequest(sUrl + 'action=user_set_name&login=' + encodeURIComponent(sUser) + '&name=' + encodeURIComponent(s), function (http)
+	GETAsyncRequest(sUrl + 'action=user_set_name&login=' + encodeURIComponent(sUser) + '&name=' + encodeURIComponent(s), function (http, data)
 	{
-		var eItem = document.getElementById('user_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#user_div').html(data);
 	});
 	return false;
 }
@@ -1354,11 +1334,9 @@ function DeleteUser (sUser)
 	if (!confirm(str_replace('%s', sUser, s2_lang.delete_user)))
 		return false;
 
-	GETAsyncRequest(sUrl + 'action=delete_user&name=' + encodeURIComponent(sUser), function (http)
+	GETAsyncRequest(sUrl + 'action=delete_user&name=' + encodeURIComponent(sUser), function (http, data)
 	{
-		var eItem = document.getElementById('user_div');
-		eItem.innerHTML = http.responseText;
-		TableSort(eItem);
+		$('#user_div').html(data);
 	});
 	return false;
 }

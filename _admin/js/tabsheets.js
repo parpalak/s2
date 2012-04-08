@@ -109,13 +109,12 @@ function OnSwitch (eTab)
 	}
 	else if (sType == 'admin-user_tab')
 	{
-		GETAsyncRequest(sUrl + 'action=load_userlist', function (http)
+		GETAsyncRequest(sUrl + 'action=load_userlist', function (http, data)
 		{
 			var eItem = $('#user_div');
 			if (eItem.html() == '')
 				eItem.hide();
-			eItem.html(http.responseText).slideDown('fast');
-			TableSort(eItem[0]);
+			eItem.html(data).slideDown('fast');
 		});
 	}
 	else if (sType == 'tag_tab')
