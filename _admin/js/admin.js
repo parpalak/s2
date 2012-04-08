@@ -96,20 +96,7 @@ $(function ()
 	$('body').on('keydown', '.full_tab_form input[type="text"], .full_tab_form input[type="checkbox"], .full_tab_form select', function(e)
 	{
 		if (e.keyCode == 13)
-		{
-			var inputs = $(this).parents('form').eq(0).find(':input:visible');
-			var idx = inputs.index(this);
-
-			if (idx == inputs.length - 1)
-				inputs[0].select()
-			else
-			{
-				inputs[idx + 1].focus();
-				if (inputs[idx + 1].select)
-					inputs[idx + 1].select();
-			}
 			return false;
-		}
 	});
 
 	// Tooltips
