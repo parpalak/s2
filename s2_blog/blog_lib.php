@@ -93,8 +93,8 @@ function s2_blog_save_post ($page, $flags)
 		$error = true;
 
 	// Dealing with tags
-
-	$new_tags = isset($_POST['keywords']) ? $_POST['keywords'] : '|';
+	$new_tags_str = isset($page['tags']) ? $page['tags'] : '';
+	$new_tags = s2_get_tag_ids($new_tags_str);
 
 	$query = array(
 		'SELECT'	=> 'tag_id',
@@ -104,12 +104,13 @@ function s2_blog_save_post ($page, $flags)
 	);
 	($hook = s2_hook('fn_s2_blog_save_post_pre_get_tags_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$old_tags = '|';
+
+	$old_tags = array();
 	while ($row = $s2_db->fetch_row($result))
-		$old_tags .= $row[0].'|';
+		$old_tags[] = $row[0];
 
 	// Compare old and new tags
-	if ($old_tags != $new_tags)
+	if (implode(',', $old_tags) != implode(',', $new_tags))
 	{
 		// Deleting old links
 		$query = array(
@@ -122,24 +123,17 @@ function s2_blog_save_post ($page, $flags)
 			$error = true;
 
 		// Inserting new links
-		if ($new_tags != '' && $new_tags != '|')
+		foreach ($new_tags as $tag_id)
 		{
-			foreach (explode('|', substr($new_tags, 1, -1)) as $tag_id)
-			{
-				$tag_id = (int) $tag_id;
-				if (!$tag_id)
-					continue;
-
-				$query = array(
-					'INSERT'	=> 'post_id, tag_id',
-					'INTO'		=> 's2_blog_post_tag',
-					'VALUES'	=> $id.', '.$tag_id
-				);
-				($hook = s2_hook('fn_s2_blog_save_post_pre_ins_tags_qr')) ? eval($hook) : null;
-				$s2_db->query_build($query) or error(__FILE__, __LINE__);
-				if ($s2_db->affected_rows() == -1)
-					$error = true;
-			}
+			$query = array(
+				'INSERT'	=> 'post_id, tag_id',
+				'INTO'		=> 's2_blog_post_tag',
+				'VALUES'	=> $id.', '.$tag_id
+			);
+			($hook = s2_hook('fn_s2_blog_save_post_pre_ins_tags_qr')) ? eval($hook) : null;
+			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			if ($s2_db->affected_rows() == -1)
+				$error = true;
 		}
 	}
 
@@ -619,26 +613,39 @@ function s2_blog_edit_post_form ($id)
 	$create_time = s2_array_from_time($page['create_time']);
 	$modify_time = s2_array_from_time($page['modify_time']);
 
-	$query = array(
-		'SELECT'	=> 'tag_id',
-		'FROM'		=> 's2_blog_post_tag',
-		'WHERE'		=> 'post_id = '.$id,
-		'ORDER BY'	=> 'id'
+	// Fetching tags
+	$subquery = array(
+		'SELECT'	=> 'count(*)',
+		'FROM'		=> 's2_blog_post_tag AS pt',
+		'WHERE'		=> 't.tag_id = pt.tag_id'
 	);
-	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_tags_get_qr')) ? eval($hook) : null;
+	$used_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+	$subquery = array(
+		'SELECT'	=> 'count(*)',
+		'FROM'		=> 's2_blog_post_tag AS pt',
+		'WHERE'		=> 't.tag_id = pt.tag_id AND pt.post_id = '.$id,
+		'LIMIT'		=> '1'
+	);
+	$current_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+	$query = array(
+		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as current',
+		'FROM'		=> 'tags AS t',
+		'ORDER BY'	=> 'used DESC'
+	);
+	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_chk_url_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$i = 0;
-	$tag_order = array();
-	$tag_string = '|';
-	while ($row = $s2_db->fetch_row($result))
+	$all_tags = $tags = array();
+	while ($tag = $s2_db->fetch_assoc($result))
 	{
-		$tag_order[$row[0]] = ++$i;
-		$tag_string .= $row[0].'|';
+		$all_tags[] = $tag['name'];
+		if ($tag['current'])
+			$tags[] = $tag['name'];
 	}
 
-	list($tag_names, $tag_urls, $tag_count) = s2_blog_tag_list();
-
+	// Fetching labels
 	$query = array(
 		'SELECT'	=> 'label',
 		'FROM'		=> 's2_blog_posts',
@@ -652,6 +659,7 @@ function s2_blog_edit_post_form ($id)
 	while ($row = $s2_db->fetch_row($result))
 		$labels[] = $row[0];
 
+	// Options for author select
 	if ($s2_user['edit_site'])
 	{
 		$query = array( 
@@ -669,24 +677,9 @@ function s2_blog_edit_post_form ($id)
 
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_output')) ? eval($hook) : null;
 
+	ob_start();
 ?>
 <form class="full_tab_form" name="artform" action="" onsubmit="SaveArticle('save_blog'); return false;">
-<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_tag_col')) ? eval($hook) : null; ?>
-	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
-		<?php echo $lang_admin['Tags:']; ?>
-		<hr />
-		<div class="text_wrapper" style="padding-bottom: 2.5em;">
-			<div class="tags_list">
-<?php
-
-	foreach ($tag_names as $tag_id => $tag)
-		echo "\t\t\t\t".'<span id="tag_'.$tag_id.'">'.(isset($tag_order[$tag_id]) ? $tag_order[$tag_id] : '').'</span> <a href="#" onclick="return BlogAddTag(\''.$tag_id.'\');">'.$tag.' ('.$tag_count[$tag_id].')</a><br />'."\n";
-
-?>
-				<input type="hidden" name="keywords" value="<?php echo $tag_string; ?>" />
-			</div>
-		</div>
-	</div>
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_btn_col')) ? eval($hook) : null; ?>
 	<div class="r-float">
 <?php
@@ -769,6 +762,11 @@ function s2_blog_edit_post_form ($id)
 				<td><input type="text" name="page[title]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['title']); ?>" /></td>
 			</tr>
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_title')) ? eval($hook) : null; ?>
+			<tr>
+				<td class="label" title="<?php echo $lang_admin['Tags help']; ?>"><?php echo $lang_admin['Tags']; ?></td>
+				<td><input type="text" name="page[tags]" size="100" value="<?php echo s2_htmlencode(implode(', ', $tags)); ?>" /></td>
+			</tr>
+<?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_tags')) ? eval($hook) : null; ?>
 		</table>
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_fields1')) ? eval($hook) : null; ?>
 		<table class="fields">
@@ -778,7 +776,7 @@ function s2_blog_edit_post_form ($id)
 					<?php echo s2_get_time_input('page[create_time]', $create_time); ?>
 					<a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[create_time]');"><?php echo $lang_admin['Now']; ?></a>
 				</nobr></td>
-				<td class="label"><?php echo $lang_admin['Modify time']; ?></td>
+				<td class="label" title="<?php echo $lang_admin['Modify time help']; ?>"><?php echo $lang_admin['Modify time']; ?></td>
 				<td><nobr>
 					<?php echo s2_get_time_input('page[modify_time]', $modify_time); ?>
 					<a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[modify_time]');"><?php echo $lang_admin['Now']; ?></a>
@@ -790,7 +788,7 @@ function s2_blog_edit_post_form ($id)
 	($hook = s2_hook('fn_s2_blog_edit_post_form_after_fields2')) ? eval($hook) : null;
 
 	s2_toolbar();
-	$padding = 8;
+	$padding = 9.6;
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_text')) ? eval($hook) : null;
 
 ?>
@@ -800,5 +798,5 @@ function s2_blog_edit_post_form ($id)
 	</div>
 </form>
 <?
-
+	return array('form' => ob_get_clean(), 'tags' => $all_tags);
 }
