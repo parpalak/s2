@@ -37,7 +37,7 @@ var s2_tpl_edit = (function ()
 		key_handler: function ()
 		{
 			if (document.forms['s2_tpl_edit_form'] && '#admin-tpl' == cur_page)
-				s2_tpl_edit.save();
+				document.forms['s2_tpl_edit_form'].onsubmit();
 		}
 	});
 

@@ -31,10 +31,10 @@ function s2_tpl_edit_form ($template_filename = '')
 	($hook = s2_hook('fn_s2_tpl_edit_form_start')) ? eval($hook) : null;
 
 ?>
-<form class="full_tab_form" name="s2_tpl_edit_form" action="">
+<form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo $lang_s2_tpl_edit['Wrong filename']; ?>');">
 	<div class="r-float" title="<?php echo $lang_s2_tpl_edit['Click template']; ?>">
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_submit')) ? eval($hook) : null; ?>
-		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_s2_tpl_edit['Save']; ?>" onclick="return s2_tpl_edit.save('<?php echo $lang_s2_tpl_edit['Wrong filename']; ?>');" />
+		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_s2_tpl_edit['Save']; ?>" />
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
