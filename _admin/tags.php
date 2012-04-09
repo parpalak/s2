@@ -105,7 +105,7 @@ function s2_output_tag_form ($tag, $modify_time)
 	($hook = s2_hook('fn_output_tag_form_start')) ? eval($hook) : null;
 
 ?>
-<form class="full_tab_form" name="tagform" action="">
+<form class="full_tab_form" name="tagform" action="" onsubmit="return SaveTag();">
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
 		<hr />
@@ -166,7 +166,7 @@ function s2_output_tag_form ($tag, $modify_time)
 <?php ($hook = s2_hook('fn_output_tag_form_after_replace_tag')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_output_tag_form_pre_submit')) ? eval($hook) : null; ?>
-		<input class="bitbtn savetag" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" onclick="return SaveTag();" />
+		<input class="bitbtn savetag" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
 <?php ($hook = s2_hook('fn_output_tag_form_after_submit')) ? eval($hook) : null; ?>
 		<hr />
 <?php

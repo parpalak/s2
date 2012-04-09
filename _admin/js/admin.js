@@ -72,22 +72,11 @@ $(function ()
 		key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
 		if (e.ctrlKey && key)
 		{
-			eval(Hooks.get('fn_save_handler_start'));
-
 			e.preventDefault();
 			e.stopPropagation();
 
-			if (document.artform && '#edit' == cur_page)
-				document.artform.onsubmit();
-
-			if (document.commform && '#comm' == cur_page)
-				document.commform.onsubmit();
-
-			if (document.tagform && '#tag' == cur_page)
-				SaveTag();
-
-			if (document.optform && '#admin-opt' == cur_page)
-				SaveOptions();
+			if (document.activeElement && document.activeElement.form && document.activeElement.form.onsubmit)
+				document.activeElement.form.onsubmit();
 
 			return false;
 		}
