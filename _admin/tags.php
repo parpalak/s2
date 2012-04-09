@@ -178,10 +178,17 @@ function s2_output_tag_form ($tag, $modify_time)
 
 ?>
 		<input class="bitbtn deltag" type="button" title="<?php printf($lang_admin['Delete tag'], s2_htmlencode($tag['name'])); ?>" value="<?php echo $lang_admin['Delete']; ?>" onclick="return DeleteTag(<?php echo $tag['id'], ', \'', s2_htmlencode(addslashes($tag['name'])), '\''; ?>);" />
+<?php ($hook = s2_hook('fn_output_tag_form_after_delete')) ? eval($hook) : null; ?>
+		<br />
+		<br />
+		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag['url'])); ?>"><?php echo $lang_admin['Preview ready']; ?></a>
 <?php
 
 	}
-	($hook = s2_hook('fn_output_tag_form_after_delete')) ? eval($hook) : null; ?>
+
+	($hook = s2_hook('fn_output_tag_form_after_preview')) ? eval($hook) : null;
+
+?>
 	</div>
 	<div class="l-float">
 		<table class="fields">
