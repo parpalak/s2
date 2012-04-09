@@ -259,24 +259,6 @@ var SetBackground = (function ()
 	return set;
 }());
 
-function StringFromForm (aeItem)
-{
-	var sRequest = 'ajax=1', i, eItem;
-
-	for (i = aeItem.length; i-- ;)
-	{
-		eItem = aeItem[i];
-		if (!eItem.name)
-			continue;
-		if (eItem.nodeName == 'INPUT' && (eItem.type != 'checkbox' || eItem.checked))
-			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
-		if (eItem.nodeName == 'TEXTAREA' || eItem.nodeName == 'SELECT')
-			sRequest += '&' + eItem.name + '=' + encodeURIComponent(eItem.value);
-	}
-
-	return sRequest;
-}
-
 //
 // Ajax wrappers
 //
@@ -517,7 +499,7 @@ var PopupMessages = {
 function SendLoginData (eForm, fSuccess, fFailed)
 {
 	eForm.key.value = hex_md5(hex_md5(eForm.pass.value + 'Life is not so easy :-)') + ';-)' + eForm.getAttribute('data-salt'));
-	POSTAsyncRequest(sUrl + 'action=login', StringFromForm(eForm), function (http)
+	POSTAsyncRequest(sUrl + 'action=login', $(eForm).serialize(), function (http)
 	{
 		if (http.responseText == 'OK')
 			fSuccess();

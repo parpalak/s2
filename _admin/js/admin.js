@@ -338,7 +338,7 @@ var Changes = (function ()
 
 		commit: function (arg)
 		{
-			curr_md5 = hex_md5((typeof(arg) == 'string') ? arg : StringFromForm(arg));
+			curr_md5 = hex_md5((typeof arg == 'string') ? arg : $(arg).serialize());
 
 			if (is_local_storage)
 			{
@@ -353,7 +353,7 @@ var Changes = (function ()
 		{
 			eval(Hooks.get('fn_changes_present'));
 
-			return curr_md5 != hex_md5(StringFromForm(eForm));
+			return curr_md5 != hex_md5($(eForm).serialize());
 		}
 	});
 }());
@@ -807,7 +807,7 @@ function SaveArticle(sAction)
 
 	document.forms['artform'].setAttribute('data-save-process', 1);
 
-	var sRequest = StringFromForm(document.forms['artform']),
+	var sRequest = $(document.forms['artform']).serialize(),
 		sPagetext = document.forms['artform'].elements['page[text]'].value;
 
 	POSTAsyncRequest(sUrl + 'action=' + sAction, sRequest, function (http, data)
@@ -836,28 +836,19 @@ function SaveArticle(sAction)
 			if (!document.forms['artform'].getAttribute('data-save-process'))
 				return;
 
-			var eItem = document.getElementById("url_input_label");
+			var eItem = $('#url_input_label');
 			if (data.url_status == 'empty')
-			{
-				eItem.className = 'error';
-				eItem.title = eItem.getAttribute('title_empty');
-			}
+				eItem.attr('class', 'error').attr('title', eItem.attr('title_empty'));
 			else if (data.url_status == 'not_unique')
-			{
-				eItem.className = 'error';
-				eItem.title = eItem.getAttribute('title_unique');
-			}
+				eItem.attr('class', 'error').attr('title', eItem.attr('title_unique'));
 			else
-			{
-				eItem.className = '';
-				eItem.title = '';
-			}
+				eItem.attr('class', '').attr('title', '');
 
 			document.forms['artform'].elements['page[revision]'].value = data.revision;
 
-			eItem = document.getElementById('pub');
+			eItem = $('#publiched_checkbox')[0];
 			eItem.parentNode.className = eItem.checked ? 'ok' : '';
-			document.getElementById('preview_link').style.display = eItem.checked ? 'inline' : 'none';
+			$('#preview_link').css('display', eItem.checked ? 'inline' : 'none');
 
 			Changes.commit(document.forms['artform']);
 
@@ -1168,8 +1159,7 @@ function DeleteComment (iId, sMode)
 
 function SaveComment (sType)
 {
-	var sRequest = StringFromForm(document.commform);
-	POSTAsyncRequest(sUrl + 'action=save_comment&type=' + sType, sRequest, function (http, data)
+	POSTAsyncRequest(sUrl + 'action=save_comment&type=' + sType, $(document.forms['commform']).serialize(), function (http, data)
 	{
 		$('#comm_div').html(data);
 	});
@@ -1351,16 +1341,15 @@ function LoadTag (iId)
 
 function SaveTag ()
 {
-	if (document.tagform['tag[name]'].value == '')
+	if (document.forms['tagform'].elements['tag[name]'].value == '')
 	{
 		PopupMessages.showUnique(s2_lang.empty_tag, 'tag_without_name');
 		return false;
 	}
 
-	var sRequest = StringFromForm(document.forms['tagform']);
-	POSTAsyncRequest(sUrl + 'action=save_tag', sRequest, function (http)
+	POSTAsyncRequest(sUrl + 'action=save_tag', $(document.forms['tagform']).serialize(), function (http, data)
 	{
-		document.getElementById('tag_div').innerHTML = http.responseText;
+		$('#tag_div').html(data);
 	});
 	return false;
 }
@@ -1381,8 +1370,7 @@ function DeleteTag (iId, sName)
 
 function SaveOptions ()
 {
-	var sRequest = StringFromForm(document.optform);
-	POSTAsyncRequest(sUrl + 'action=save_options', sRequest);
+	POSTAsyncRequest(sUrl + 'action=save_options', $(document.forms['optform']).serialize());
 	return false;
 }
 

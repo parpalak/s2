@@ -201,6 +201,9 @@ elseif ($action == 'save')
 	if (!isset($_POST['page']))
 		die('Error in POST parameters.');
 
+	if (!isset($_POST['page']['url']))
+		$_POST['page']['url'] = '';
+
 	require 'edit.php';
 
 	list($parent_id, $return['revision'], $return['status']) = s2_save_article($_POST['page'], isset($_POST['flags']) ? $_POST['flags'] : array());
