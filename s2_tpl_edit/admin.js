@@ -8,15 +8,13 @@
 
 var s2_tpl_edit = (function ()
 {
-	var instance, scrolltop = null;
-
 	return (
 	{
 		load: function (sFilename)
 		{
-			GETAsyncRequest(sUrl + 'action=s2_tpl_edit_load&filename=' + encodeURIComponent(sFilename), function (http)
+			GETAsyncRequest(sUrl + 'action=s2_tpl_edit_load&filename=' + encodeURIComponent(sFilename), function (http, data)
 			{
-				document.getElementById('s2_tpl_edit_div').innerHTML = http.responseText;
+				$('#s2_tpl_edit_div').html(data);
 			});
 			return false;
 		},
@@ -29,10 +27,9 @@ var s2_tpl_edit = (function ()
 				return false;
 			}
 
-			var sRequest = StringFromForm(document.forms['s2_tpl_edit_form']);
-			POSTAsyncRequest(sUrl + 'action=s2_tpl_edit_save', sRequest, function (http)
+			POSTAsyncRequest(sUrl + 'action=s2_tpl_edit_save', $(document.forms['s2_tpl_edit_form']).serialize(), function (http, data)
 			{
-				document.getElementById('s2_tpl_edit_div').innerHTML = http.responseText;
+				$('#s2_tpl_edit_div').html(data);
 			});
 			return false;
 		},
