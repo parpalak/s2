@@ -712,7 +712,18 @@ var LoadArticle, ReloadArticle;
 					minLength: 0,
 					source: function (request, response)
 					{
-						response($.ui.autocomplete.filter(s2Tags, (', ' + request.term).match(/,\s*([^,]*)$/)[1]));
+						var a = this.element[0].value.split(','),
+							offset = -1,
+							pos = get_selection(this.element[0]).start;
+
+						for (var i = 0; i < a.length; i++)
+						{
+							offset += a[i].length + 1;
+							if (offset >= pos)
+								break;
+						}
+
+						response($.ui.autocomplete.filter(s2Tags, $.trim(a[i])));
 					},
 					focus: function ()
 					{
@@ -720,13 +731,23 @@ var LoadArticle, ReloadArticle;
 					},
 					select: function (e, ui)
 					{
-						var terms = this.value.split(/,\s*/);
+						var a = this.value.split(','),
+							offset = -1,
+							pos = get_selection(this).start;
 
-						terms.pop();
-						terms.push(ui.item.value);
-						terms.push('');
+						for (var i = 0; i < a.length; i++)
+						{
+							offset += a[i].length + 1;
+							if (offset >= pos)
+								break;
+						}
 
-						this.value = terms.join(', ');
+						a[i] = (i ? ' ' : '') + ui.item.value;
+						if ($.trim(a[a.length - 1]))
+							a.push(' ');
+
+						this.value = a.join(',');
+
 						return false;
 					}
 				});
