@@ -357,13 +357,13 @@ var Changes = (function ()
 
 	function _sort(a, b)
 	{
-		var a = a[0];
-		var b = b[0];
-		var _a = (a + '').replace(/,/, '.');
-		var _b = (b + '').replace(/,/, '.');
-		if (Number(_a) && Number(_b)) return sort_numbers(_a, _b);
-		else if (!sort_case_sensitive) return sort_insensitive(a, b);
-		else return sort_sensitive(a, b);
+		var a = a[0], b = b[0], _a = (a + '').replace(/,/, '.'), _b = (b + '').replace(/,/, '.');
+		if (Number(_a) && Number(_b))
+			return sort_numbers(_a, _b);
+		else if (!sort_case_sensitive)
+			return sort_insensitive(a, b);
+		else
+			return sort_sensitive(a, b);
 	}
 
 	function sort_numbers(a, b)
@@ -373,17 +373,20 @@ var Changes = (function ()
 
 	function sort_insensitive(a, b)
 	{
-		var anew = a.toLowerCase();
-		var bnew = b.toLowerCase();
-		if (anew < bnew) return -1;
-		if (anew > bnew) return 1;
+		var anew = a.toLowerCase(), bnew = b.toLowerCase();
+		if (anew < bnew)
+			return -1;
+		if (anew > bnew)
+			return 1;
 		return 0;
 	}
 
 	function sort_sensitive(a, b)
 	{
-		if (a < b) return -1;
-		if (a > b) return 1;
+		if (a < b)
+			return -1;
+		if (a > b)
+			return 1;
 		return 0;
 	}
 
@@ -530,9 +533,9 @@ $(document).ready(function()
 	}
 
 	var tree = $('#tree')
-		.bind("before.jstree", function (e, data)
+		.bind('before.jstree', function (e, data)
 		{
-			if (data.func === "remove" && !confirm(str_replace('%s', tree.jstree('get_text', data.args[0]), s2_lang.delete_item)))
+			if (data.func === 'remove' && !confirm(str_replace('%s', tree.jstree('get_text', data.args[0]), s2_lang.delete_item)))
 			{
 				e.stopImmediatePropagation(); 
 				return false; 
@@ -903,46 +906,42 @@ function TagSelection (sTag)
 
 function get_selection (e)
 {
-	// Mozilla and DOM 3.0
 	if ('selectionStart' in e)
 	{
 		var l = e.selectionEnd - e.selectionStart;
 		return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substring(e.selectionStart, e.selectionEnd) };
 	}
-	// IE
 	else if (document.selection)
 	{
 		e.focus();
-		var r = document.selection.createRange();
-		var tr = e.createTextRange();
-		var tr2 = tr.duplicate();
+		var r = document.selection.createRange(),
+			tr = e.createTextRange(),
+			tr2 = tr.duplicate();
+
 		tr2.moveToBookmark(r.getBookmark());
 		tr.setEndPoint('EndToStart', tr2);
 		if (r == null || tr == null)
 			return { start: e.value.length, end: e.value.length, length: 0, text: '' };
 
 		//for some reason IE doesn't always count the \n and \r in the length
-		var text_part = r.text.replace(/[\r\n]/g, '.'); 
-		var text_whole = e.value.replace(/[\r\n]/g, '.');
-		var the_start = text_whole.indexOf(text_part, tr.text.length);
+		var text_part = r.text.replace(/[\r\n]/g, '.'),
+			text_whole = e.value.replace(/[\r\n]/g, '.'),
+			the_start = text_whole.indexOf(text_part, tr.text.length);
 
 		return { start: the_start, end: the_start + text_part.length, length: text_part.length, text: r.text };
 	}
-	//Browser not supported
 	else
 		return { start: e.value.length, end: e.value.length, length: 0, text: '' };
 }
 
 function set_selection (e, start_pos, end_pos)
 {
-	// Mozilla and DOM 3.0
 	if ('selectionStart' in e)
 	{
 		e.focus();
 		e.selectionStart = start_pos;
 		e.selectionEnd = end_pos;
 	}
-	// IE
 	else if (document.selection)
 	{
 		e.focus();
