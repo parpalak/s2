@@ -18,6 +18,9 @@
 	border-color: #aaa #f6f6f6 #f6f6f6 #aaa;
 	background: #fff;
 	color: #000;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
 	}
 
 #brd,
@@ -26,9 +29,6 @@
 	}
 
 #brd {
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
-	border-radius: 2px;
 	margin-left: 300px;
 	padding: 1em;
 	}

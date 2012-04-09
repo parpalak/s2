@@ -46,7 +46,7 @@ function strNatCmp (a, b)
 	return aa.length - bb.length;
 }
 
-$(document).ready(function()
+$(function()
 {
 	var path = '',
 		isRenaming = false;
@@ -280,11 +280,6 @@ $(document).ready(function()
 			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys' , 'sort']
 		});
 
-	function removeFiles ()
-	{
-		fileTree.jstree('remove');
-	}
-
 	refreshFiles = function ()
 	{
 		fileTree.jstree('refresh', -1);
@@ -319,20 +314,20 @@ $(document).ready(function()
 
 			if (fileTree.jstree('get_selected').length == 1)
 			{
-				str = s2_lang.file + sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
+				var filePath = sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
+				str = s2_lang.file + '<a href="' + filePath + '" target="_blank">' + filePath + ' &uarr;</a>';
 				if (d.rslt.obj.attr('data-fsize'))
 					str += "<br />" + s2_lang.value + d.rslt.obj.attr('data-fsize');
 				if (d.rslt.obj.attr('data-dim'))
 				{
 					var a = d.rslt.obj.attr('data-dim').split('*');
 					str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
-					a[2] = sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
 					fExecDouble = function ()
 					{
 						if (window.top.ReturnImage)
-							window.top.ReturnImage(a[2], a[0],	a[1]);
+							window.top.ReturnImage(filePath, a[0],	a[1]);
 						else if (opener.ReturnImage)
-							opener.ReturnImage(a[2], a[0],	a[1]);
+							opener.ReturnImage(filePath, a[0],	a[1]);
 					}
 					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
@@ -383,7 +378,10 @@ $(document).ready(function()
 				select_limit : -1
 			},
 			hotkeys : {
-				'del' : removeFiles,
+				'del' : function ()
+				{
+					fileTree.jstree('remove');
+				},
 				'ctrl+a' : function ()
 				{
 					$.jstree._reference(fileTree)._get_children(-1).each(function ()
