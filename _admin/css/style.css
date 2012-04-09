@@ -125,8 +125,9 @@ a > img {
 	background-size: 8px 1px;
 	background-repeat: repeat-x;
 	background-position: 0 100%;
-	outline: none;
 	}
+
+a:hover { outline: none; }
 
 a.cur_link{
 	font-weight: bold;
@@ -1119,6 +1120,7 @@ form center {
 	border: 1px solid #ccc;
 	word-wrap: break-word;
 	max-width: 400px;
+	cursor: default;
 	}
 	.ui-autocomplete .ui-menu-item {
 		display: inline-block;
