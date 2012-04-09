@@ -288,7 +288,10 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 			'data'		=> array(
 				'title'		=> $article['title'],
 			),
-			'attr'		=> array('id' => 'node_'.$article['id']),
+			'attr'		=> array(
+				'id'		=> 'node_'.$article['id'],
+				'data-date'	=> s2_date($article['create_time']),
+			),
 		);
 
 		$class = array();

@@ -1033,16 +1033,21 @@ form center {
 			text-shadow: 0px 1px 0 #fff;
 			}
 
-/*
- * jsTree default theme 1.0
- * Supported features: dots/no-dots, icons/no-icons, focused, loading
- * Supported plugins: ui (hovered, clicked), checkbox, contextmenu, search
- */
-
 .jstree a { background: none; }
 .jstree li,
 .jstree ins { background: url(../i/tree.png) no-repeat transparent; }
 .jstree li { background-position: -90px 0; background-repeat: repeat-y; }
+.jstree li:before {
+	content: attr(data-date);
+	color: #ccc;
+	position: absolute;
+	right: 0;
+	padding-right: 0.5em;
+	z-index: 0;
+	}
+	.jstree li:hover:before {
+		color: #aaa;
+		}
 .jstree li.jstree-last { background: transparent; }
 .jstree .jstree-open > ins { background-position: -72px 0; }
 .jstree .jstree-closed > ins { background-position: -54px 0; }
