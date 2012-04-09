@@ -514,12 +514,15 @@ body > .tabsheets {
 			background: -o-linear-gradient(#ebebeb, #d6d6d6);
 			background: -ms-linear-gradient(#ebebeb, #d6d6d6);
 			background: linear-gradient(#ebebeb, #d6d6d6);
+			cursor: default;
 			color: #840;
-			cursor: pointer;
-			cursor: hand;
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 			vertical-align: middle;
 			}
+			.sort .sortable {
+				cursor: pointer;
+				cursor: hand;
+				}
 			.sort .curcol_up:before,
 			.sort .curcol_down:before {
 				content: '\2193 ';

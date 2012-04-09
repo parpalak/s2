@@ -146,7 +146,7 @@ function s2_show_comments ($mode, $id = 0)
 			$output_subheader = $mode != 'all' ? '<a href="#" title="'.sprintf($lang_admin['All comments to'], s2_htmlencode($title)).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>' : '';
 			$output_body = 
 				'<table class="sort" width="100%">'.
-					'<thead><tr><td width="8%">'.$lang_admin['Name'].'</td><td>'.$lang_admin['Comment'].'</td><td width="8%">'.$lang_admin['Date'].'</td><td width="8%">'.$lang_admin['IP'].'</td><td width="10%">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
+					'<thead><tr><td width="8%" class="sortable">'.$lang_admin['Name'].'</td><td class="sortable">'.$lang_admin['Comment'].'</td><td width="8%" class="sortable curcol_down">'.$lang_admin['Date'].'</td><td width="8%" class="sortable">'.$lang_admin['IP'].'</td><td width="10%" class="sortable">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
 					'<tbody>'.implode('', strpos($mode, 'last') !== false ? array_reverse($comments_tables[$article_id]) : $comments_tables[$article_id]).'</tbody>'.
 				'</table>';
 

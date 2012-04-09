@@ -444,28 +444,26 @@ var Changes = (function ()
 		var dad = el.parentNode,
 			table = dad.parentNode.parentNode,
 			up,
-			aeTD = dad.getElementsByTagName("td");
+			curcol;
 
-		for (var i = aeTD.length; i-- ;)
+		el = $(el);
+
+		$(dad).children('td').each(function (i)
 		{
-			var node = aeTD[i];
-			if (node == el)
+			if (this == el[0])
 			{
-				var curcol = i;
-				if (node.className == "curcol_down")
-				{
-					up = 1;
-					node.className = "curcol_up";
-				}
+				curcol = i;
+				up = el.hasClass('curcol_down');
+				if (up)
+					el.removeClass('curcol_down').addClass('curcol_up');
+				else if (el.hasClass('curcol_up'))
+					el.removeClass('curcol_up').addClass('curcol_down');
 				else
-				{
-					up = 0;
-					node.className = "curcol_down";
-				}
+					el.addClass('curcol_down');
 			}
-			else if (node.className == "curcol_down" || node.className == "curcol_up")
-				node.className = "";
-		}
+			else
+				$(this).removeClass('curcol_down').removeClass('curcol_up');
+		});
 
 		var a = new Array(),
 			tbody = table.getElementsByTagName("tbody")[0],
@@ -486,7 +484,7 @@ var Changes = (function ()
 			tbody.appendChild(a[i][1]);
 	}
 
-	$(function () { $('body').on('click', '.sort > thead td', sort); });
+	$(function () { $('body').on('click', 'td.sortable', sort); });
 }());
 
 function CloseAll ()

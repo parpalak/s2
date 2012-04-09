@@ -142,9 +142,9 @@ function s2_get_user_list ()
 	}
 
 	$thead = array(
-		'login'		=> '<td>'.$lang_admin['Login'].'</td>',
-		'name'		=> '<td>'.$lang_admin['Name'].'</td>',
-		'email'		=> '<td>'.$lang_admin['Email'].'</td>',
+		'login'		=> '<td class="sortable">'.$lang_admin['Login'].'</td>',
+		'name'		=> '<td class="sortable">'.$lang_admin['Name'].'</td>',
+		'email'		=> '<td class="sortable">'.$lang_admin['Email'].'</td>',
 	);
 
 	($hook = s2_hook('fn_get_user_list_pre_loop_thead_perm')) ? eval($hook) : null;
