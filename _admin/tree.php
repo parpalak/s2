@@ -235,7 +235,28 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 		$condition = array();
 		foreach (explode(' ', $search) as $word)
 			if ($word != '')
-				$condition[] = '(title LIKE \'%'.$s2_db->escape($word).'%\' OR pagetext LIKE \'%'.$s2_db->escape($word).'%\')';
+			{
+				if ($word{0} != ':' && strlen($word) > 1)
+					$condition[] = '(title LIKE \'%'.$s2_db->escape($word).'%\' OR pagetext LIKE \'%'.$s2_db->escape($word).'%\')';
+				else
+				{
+					$subquery = array(
+						'SELECT'	=> 'count(*)',
+						'FROM'		=> 'article_tag AS at',
+						'JOINS'		=> array(
+							array(
+								'INNER JOIN'	=> 'tags AS t',
+								'ON'			=> 't.tag_id = at.tag_id'
+							)
+						),
+						'WHERE'		=> 'a.id = at.article_id AND t.name LIKE \'%'.$s2_db->escape(substr($word, 1)).'%\'',
+						'LIMIT'		=> '1'
+					);
+					$tag_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+					$condition[] = '('.$tag_query.')';
+				}
+			}
+
 		if (count($condition))
 		{
 			$query['SELECT'] .= ', ('.implode(' AND ', $condition).') as found';
