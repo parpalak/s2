@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Feedback
+ *
+ * Adds a simple feedback form
+ *
+ * @copyright (C) 2012 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_feedback
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_feedback</id>
+	<title>Feedback</title>
+	<version>1.0a</version>
+	<description>Adds a simple feedback form.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b2</maxtestedon>
+
+	<hooks>
+		<hook id="idx_template_pre_replace"><![CDATA[
+if (strpos($template, '<!-- s2_feedback -->') !== false)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
+	include $ext_info['path'].'/functions.php';
+	$replace['<!-- s2_feedback -->'] = s2_feedback_form($ext_info['url'].'/feedback.php');
+}
+		]]></hook>
+
+	</hooks>
+
+</extension>
