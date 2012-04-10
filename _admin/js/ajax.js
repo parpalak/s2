@@ -228,11 +228,9 @@ var SetBackground = (function ()
 		ctx.putImageData(imgData, 0, 0);
 
 		back_img = 'url(' + canvas.toDataURL('image/png') + ')';
-
-		set(color);
 	}
 
-	setTimeout(Noise, 0);
+	Noise();
 
 	var head = document.getElementsByTagName('head')[0],
 		style = document.createElement('style');
@@ -253,7 +251,6 @@ var SetBackground = (function ()
 				style.removeChild(style.firstChild);
 			style.appendChild(document.createTextNode(css_rule));
 		}
-		return false;
 	}
 
 	return set;
@@ -263,55 +260,41 @@ var SetBackground = (function ()
 // Ajax wrappers
 //
 
-$.ajaxPrefilter(function (options, originalOptions, jqXHR)
+function checkAjaxStatus (XHR)
 {
-	function checkStatus (xmlhttp)
+	XHR.s2ErrorFlag = true;
+
+	if (XHR.status != 200)
 	{
-		xmlhttp.s2ErrorFlag = true;
-
-		if (xmlhttp.status != 200)
-		{
-			UnknownError(xmlhttp.responseText, xmlhttp.status);
-			return false;
-		}
-
-		var s2_status = xmlhttp.getResponseHeader('X-S2-Status');
-
-		if (s2_status && s2_status != 'Success')
-		{
-			if (s2_status == 'Lost' || s2_status == 'Expired' || s2_status == 'Wrong_IP')
-				PopupMessages.showUnique(xmlhttp.responseText, 'expired_session');
-			else if (s2_status == 'Forbidden')
-				PopupMessages.showUnique(xmlhttp.responseText, 'forbidden_action');
-			else
-				PopupMessages.show(xmlhttp.responseText);
-
-			return false;
-		}
-
-		var exec_code = xmlhttp.getResponseHeader('X-S2-JS');
-		if (exec_code)
-			eval(exec_code);
-		var after_code = xmlhttp.getResponseHeader('X-S2-JS-delayed');
-		if (after_code)
-			setTimeout(function () {eval(after_code);}, 0);
-
-		xmlhttp.s2ErrorFlag = false;
-		return true;
+		UnknownError(XHR.responseText, XHR.status);
+		return false;
 	}
 
-	var successCheck = function (data, textStatus, jqXHR)
-	{
-		checkStatus(jqXHR);
-	};
-	var errorCheck = function (jqXHR, textStatus, errorThrown)
-	{
-		checkStatus(jqXHR);
-	};
+	var status = XHR.getResponseHeader('X-S2-Status');
 
-	options.success = options.success instanceof Array ? options.success.unshift(successCheck) : (typeof(options.success) == 'function' ? [successCheck, options.success] : successCheck);
-	options.error = options.error instanceof Array ? options.error.unshift(errorCheck) : (typeof(options.error) == 'function' ? [errorCheck, options.error] : errorCheck);
-});
+	if (status && status != 'Success')
+	{
+		if (status == 'Lost' || status == 'Expired' || status == 'Wrong_IP')
+			PopupMessages.showUnique(XHR.responseText, 'expired_session');
+		else if (status == 'Forbidden')
+			PopupMessages.showUnique(XHR.responseText, 'forbidden_action');
+		else
+			PopupMessages.show(XHR.responseText);
+
+		return false;
+	}
+
+	var code = XHR.getResponseHeader('X-S2-JS');
+	if (code)
+		eval(code);
+
+	code = XHR.getResponseHeader('X-S2-JS-delayed');
+	if (code)
+		setTimeout(function () {eval(code);}, 0);
+
+	XHR.s2ErrorFlag = false;
+	return true;
+}
 
 function GETAsyncRequest (sRequestUrl, fCallback)
 {
@@ -341,6 +324,7 @@ function DisplayError (sError)
 	document.body.appendChild(eDiv);
 	eDiv.setAttribute('id', 'error_dialog');
 	eDiv.innerHTML = '<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div><input type="button" id="close_error_button" value="Ok"></div>';
+
 
 	var eButton = document.getElementById('close_error_button');
 	eButton.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
@@ -475,6 +459,7 @@ var PopupMessages = {
 	{
 		this.show(sMessage, null, null, sId);
 	},
+
 
 	hide: function (sId)
 	{

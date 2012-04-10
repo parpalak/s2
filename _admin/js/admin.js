@@ -682,6 +682,15 @@ $(document).ready(function()
 	SetWait(false);
 });
 
+$.ajaxPrefilter(function (options, originalOptions, jqXHR)
+{
+	var successCheck = function (data, textStatus, jqXHR) { checkAjaxStatus(jqXHR); },
+		errorCheck = function (jqXHR, textStatus, errorThrown) { checkAjaxStatus(jqXHR); };
+
+	options.success = options.success instanceof Array ? options.success.unshift(successCheck) : (typeof(options.success) == 'function' ? [successCheck, options.success] : successCheck);
+	options.error = options.error instanceof Array ? options.error.unshift(errorCheck) : (typeof(options.error) == 'function' ? [errorCheck, options.error] : errorCheck);
+});
+
 function RefreshTree ()
 {
 	Search.reset();
