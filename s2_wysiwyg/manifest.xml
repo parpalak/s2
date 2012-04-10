@@ -80,8 +80,8 @@ echo 's2_wysiwyg_set_path("'.$_GET['path'].'");'."\n";
 return '<hr />';
 		]]></hook>
 
-		<hook id="fn_output_article_form_pre_text,fn_s2_blog_post_form_pre_text"><![CDATA[
-$padding -= 2.4;
+		<hook id="fn_output_article_form_pre_text,fn_s2_blog_edit_post_form_pre_text"><![CDATA[
+$padding -= 1.8;
 		]]></hook>
 
 		<hook id="fn_s2_blog_edit_post_form_pre_output"><![CDATA[
