@@ -54,9 +54,10 @@ var s2_highlight = (function ()
 				instance.save();
 		},
 
-		addtag: function (sOpenTag, sCloseTag)
+		addtag: function (data)
 		{
-			var text = instance.getSelection();
+			var sOpenTag = data.openTag, sCloseTag = data.closeTag,
+				text = instance.getSelection();
 
 			if (text.substring(0, sOpenTag.length) == sOpenTag && text.substring(text.length - sCloseTag.length) == sCloseTag)
 				text = text.substring(sOpenTag.length, text.length - sCloseTag.length);
@@ -74,8 +75,10 @@ var s2_highlight = (function ()
 			return true;
 		},
 
-		paragraph: function (sOpenTag, sCloseTag)
+		paragraph: function (data)
 		{
+			var sOpenTag = data.openTag, sCloseTag = data.closeTag;
+
 			if (instance.somethingSelected())
 				instance.replaceSelection(instance.getSelection().replace(/^(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)?([\s\S]*?)(?:<\/(?:p|blockquote|h[2-4])>)?[ ]*$/, sOpenTag + '$1' + sCloseTag));
 			else
@@ -146,18 +149,18 @@ var s2_highlight = (function ()
 
 if (typeof(tinyMCE) == 'undefined')
 {
-	Hooks.add('request_article_start', 's2_highlight.close();');
-	Hooks.add('request_article_end', 's2_highlight.init();');
+	Hooks.add('request_article_start', s2_highlight.close);
+	Hooks.add('request_article_end', s2_highlight.init);
 
-	Hooks.add('fn_before_switch_start', 's2_highlight.beforeswitch(sType);');
-	Hooks.add('fn_tab_switch_start', 's2_highlight.tabswitch(sType);');
+	Hooks.add('fn_before_switch_start', s2_highlight.beforeswitch);
+	Hooks.add('fn_tab_switch_start', s2_highlight.tabswitch);
 
-	Hooks.add('fn_insert_paragraph_start', 's2_highlight.paragraph(sOpenTag, sCloseTag);');
-	Hooks.add('fn_insert_tag_start', 's2_highlight.addtag(sOpenTag, sCloseTag);');
-	Hooks.add('fn_paragraph_start', 's2_highlight.smart();');
+	Hooks.add('fn_insert_paragraph_start', s2_highlight.paragraph);
+	Hooks.add('fn_insert_tag_start', s2_highlight.addtag);
+	Hooks.add('fn_paragraph_start', s2_highlight.smart);
 
-	Hooks.add('fn_preview_start', 's2_highlight.flip();');
-	Hooks.add('fn_changes_present', 's2_highlight.flip();');
-	Hooks.add('fn_save_article_start', 's2_highlight.flip();');
-	Hooks.add('fn_check_changes_start', 's2_highlight.flip();');
+	Hooks.add('fn_preview_start', s2_highlight.flip);
+	Hooks.add('fn_changes_present', s2_highlight.flip);
+	Hooks.add('fn_save_article_start', s2_highlight.flip);
+	Hooks.add('fn_check_changes_start', s2_highlight.flip);
 }
