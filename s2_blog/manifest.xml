@@ -860,7 +860,7 @@ if ($request_uri == S2_BLOG_URL.'/rss.xml')
 		]]></hook>
 
 		<hook id="s2_search_action_makeindex"><![CDATA[
-if ($save_action = 'save_blog_' && $id)
+if ($save_action == 'save_blog_' && $id)
 	$chapter = 's2_blog_'.$id;
 		]]></hook>
 
