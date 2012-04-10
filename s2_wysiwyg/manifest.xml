@@ -51,7 +51,7 @@ $s2_db->query_build($query) or error(__FILE__, __LINE__);
 	]]></uninstall>
 
 	<hooks>
-		<hook id="ai_head_end"><![CDATA[
+		<hook id="ai_after_js_include"><![CDATA[
 ?>
 <script type="text/javascript">
 	var s2_wysiwyg_type = <?php echo S2_WYSIWYG_TYPE; ?>;
@@ -73,7 +73,7 @@ s2_add_js_header_delayed('tinyMCE.execCommand("mceAddControl", false, "arttext")
 		]]></hook>
 
 		<hook id="fn_preload_editor_end, blfn_preload_editor_end"><![CDATA[
-echo '<script type="text/javascript">s2_wysiwyg_set_path("'.$_GET['path'].'");</script>';
+echo 's2_wysiwyg_set_path("'.$_GET['path'].'");'."\n";
 		]]></hook>
 
 		<hook id="fn_toolbar_start"><![CDATA[
