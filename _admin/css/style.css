@@ -789,11 +789,13 @@ textarea,
 		background-clip: padding-box;
 		vertical-align: top;
 		}
-		.toolbar img:hover {
+		.toolbar img:hover,
+		.toolbar img.pressed {
 			border-color: #fff #aaa #aaa #fff;
 			background-color: rgba(255,255,255,0.5);
 			}
-		.toolbar img:active:hover {
+		.toolbar img:active:hover,
+		.toolbar img.pressed {
 			border-color: #aaa #fff #fff #aaa;
 			}
 	.toolbar .separator {
