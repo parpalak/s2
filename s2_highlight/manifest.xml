@@ -22,9 +22,7 @@
 
 	<hooks>
 		<hook id="ai_head_end"><![CDATA[
-?>
-<link rel="stylesheet" type="text/css" href="<?php echo $ext_info['url']; ?>/codemirror/codemirror.css" />
-<?php
+echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/codemirror/codemirror.css" />'."\n";
 		]]></hook>
 
 		<hook id="ai_after_js_include" priority="8"><![CDATA[
@@ -34,5 +32,8 @@
 <?php
 		]]></hook>
 
+		<hook id="fn_toolbar_end"><![CDATA[
+$toolbar = str_replace('</div>', '<img class="separator" src="i/1.gif" alt="" />'."\n\t".'<img id="s2_highlight_toggle_button" src="i/1.gif" alt="" />'."\n\t".'</div>', $toolbar);
+		]]></hook>
 	</hooks>
 </extension>

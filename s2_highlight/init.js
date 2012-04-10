@@ -10,14 +10,21 @@
 
 var s2_highlight = (function ()
 {
-	var instance, scrolltop = null;
+	var instance, scrolltop = null, enabled = false;
 
 	return (
 	{
-		init: function ()
+		get_instance: function ()
 		{
 			instance = CodeMirror.fromTextArea(document.forms['artform'].elements['page[text]'],
 				{mode: "text/html", smartIndent: false, indentUnit: 4, indentWithTabs: true, lineWrapping: true});
+		},
+
+		init: function ()
+		{
+			$('#s2_highlight_toggle_button').click(s2_highlight.toggle);
+			if (enabled)
+				s2_highlight.get_instance()
 		},
 
 		close: function ()
@@ -27,6 +34,15 @@ var s2_highlight = (function ()
 				instance.toTextArea();
 				instance = null;
 			}
+		},
+
+		toggle: function (sType)
+		{
+			$('#s2_highlight_toggle_button').toggleClass('pressed');
+			if (enabled = !enabled)
+				s2_highlight.get_instance();
+			else
+				s2_highlight.close();
 		},
 
 		beforeswitch: function (sType)
@@ -56,6 +72,9 @@ var s2_highlight = (function ()
 
 		addtag: function (data)
 		{
+			if (!instance)
+				return false;
+
 			var sOpenTag = data.openTag, sCloseTag = data.closeTag,
 				text = instance.getSelection();
 
@@ -71,12 +90,18 @@ var s2_highlight = (function ()
 
 		smart: function ()
 		{
+			if (!instance)
+				return false;
+
 			instance.setValue(SmartParagraphs(instance.getValue()));
 			return true;
 		},
 
 		paragraph: function (data)
 		{
+			if (!instance)
+				return false;
+
 			var sOpenTag = data.openTag, sCloseTag = data.closeTag;
 
 			if (instance.somethingSelected())
@@ -147,7 +172,7 @@ var s2_highlight = (function ()
 	});
 }());
 
-if (typeof(tinyMCE) == 'undefined')
+if (typeof tinyMCE == 'undefined')
 {
 	Hooks.add('request_article_start', s2_highlight.close);
 	Hooks.add('request_article_end', s2_highlight.init);
