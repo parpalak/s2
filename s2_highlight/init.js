@@ -22,9 +22,12 @@ var s2_highlight = (function ()
 
 		init: function ()
 		{
-			$('#s2_highlight_toggle_button').click(s2_highlight.toggle);
+			var button = $('#s2_highlight_toggle_button').click(s2_highlight.toggle);
 			if (enabled)
-				s2_highlight.get_instance()
+			{
+				button.toggleClass('pressed');
+				s2_highlight.get_instance();
+			}
 		},
 
 		close: function ()
