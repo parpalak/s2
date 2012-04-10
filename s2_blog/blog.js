@@ -101,5 +101,5 @@ function AdjustPreviewLink (sAction)
 	eA.setAttribute('href', sLink.replace(/\/\d*\/\d*\/\d*\/[^\/]*$/, '/' + sYear + '/' + sMonth + '/' + sDay + '/' + sURL))
 }
 
-Hooks.add('fn_s2_counter_draw_chart_pre_rss', 'settings_file += ",../_extensions/s2_blog/rss.xml?" + Math.random();');
-Hooks.add('fn_save_article_end', 'AdjustPreviewLink(sAction);');
+Hooks.add('fn_s2_counter_draw_filter_rss', function (data) { return data + ",../_extensions/s2_blog/rss.xml?" + Math.random();});
+Hooks.add('fn_save_article_end', AdjustPreviewLink);
