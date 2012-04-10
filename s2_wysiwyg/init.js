@@ -115,8 +115,8 @@ function s2_wysisyg_addjs ()
 theme_advanced_buttons1: "code", theme_advanced_buttons2: "", theme_advanced_buttons3 : "" });</script>';
 }
 
-Hooks.add('fn_preview_start', 'tinyMCE.triggerSave();');
-Hooks.add('fn_changes_present', 'tinyMCE.triggerSave();');
-Hooks.add('fn_save_article_start', 'tinyMCE.triggerSave();');
-Hooks.add('fn_check_changes_start', 'tinyMCE.triggerSave();');
-Hooks.add('fn_popup_window_pre_mgr', 'head += s2_wysisyg_addjs();');
+Hooks.add('fn_preview_start', function() { tinyMCE.triggerSave(); });
+Hooks.add('fn_changes_present', function() { tinyMCE.triggerSave(); });
+Hooks.add('fn_save_article_start', function() { tinyMCE.triggerSave(); });
+Hooks.add('fn_check_changes_start', function() { tinyMCE.triggerSave(); } );
+Hooks.add('fn_popup_window_filter_head', function (head) { return head + s2_wysisyg_addjs(); });
