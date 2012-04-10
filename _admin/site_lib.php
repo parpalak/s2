@@ -220,6 +220,8 @@ function s2_toolbar ()
 		return;
 	}
 
+	ob_start();
+
 ?>
 <hr />
 <div class="toolbar">
@@ -260,6 +262,11 @@ function s2_toolbar ()
 </div>
 <?php
 
+	$toolbar = ob_get_clean();
+
+	($hook = s2_hook('fn_toolbar_end')) ? eval($hook) : null;
+
+	echo $toolbar;
 }
 
 function s2_context_buttons ()
