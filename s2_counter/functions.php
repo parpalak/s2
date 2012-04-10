@@ -2,7 +2,7 @@
 /**
  * Functions of the counter extension
  *
- * @copyright (C) 2007-2011 Roman Parpalak
+ * @copyright (C) 2007-2012 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_counter
  */
@@ -146,7 +146,7 @@ function s2_counter_process ($dir)
 	fflush($f_day_info);
 	fflush($f_day_info);
 
-	flock($f_day_info,LOCK_UN);
+	flock($f_day_info, LOCK_UN);
 	fclose($f_day_info);
 
 	$total_hits = s2_counter_get_total_hits($dir);
