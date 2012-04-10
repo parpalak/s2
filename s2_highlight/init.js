@@ -10,7 +10,8 @@
 
 var s2_highlight = (function ()
 {
-	var instance, scrolltop = null, enabled = false;
+	var instance, scrolltop = null,
+		enabled = is_local_storage && localStorage.getItem('s2_highlight_on') == '1';
 
 	return (
 	{
@@ -46,6 +47,7 @@ var s2_highlight = (function ()
 				s2_highlight.get_instance();
 			else
 				s2_highlight.close();
+			is_local_storage && localStorage.setItem('s2_highlight_on', enabled ? '1' : '0');
 		},
 
 		beforeswitch: function (sType)
