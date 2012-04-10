@@ -350,8 +350,11 @@ if (!empty($s2_blog_links))
 		]]></hook>
 
 		<hook id="ai_head_end"><![CDATA[
-echo '<script type="text/javascript" src="'.$ext_info['url'].'/blog.js"></script>'."\n";
 echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/admin.css" />'."\n";
+		]]></hook>
+
+		<hook id="ai_after_js_include"><![CDATA[
+echo '<script type="text/javascript" src="'.$ext_info['url'].'/blog.js"></script>'."\n";
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[
@@ -663,7 +666,7 @@ elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) =
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	if ($row = $s2_db->fetch_assoc($result))
-		echo '<script type="text/javascript">document.location.hash = "#edit"; EditRecord('.$row['id'].')</script>';
+		echo 'document.location.hash = "#edit";'."\n".'setTimeout(function () { EditRecord('.$row['id'].'); }, 0);'."\n";
 
 	($hook = s2_hook('blfn_preload_editor_end')) ? eval($hook) : null;
 
