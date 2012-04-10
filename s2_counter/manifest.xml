@@ -47,7 +47,7 @@ if (!defined('S2_COUNTER_FUNCTIONS_LOADED'))
 s2_counter_rss_count($ext_info['path']);
 		]]></hook>
 
-		<hook id="ai_head_end"><![CDATA[
+		<hook id="ai_after_js_include"><![CDATA[
 echo '<script type="text/javascript" src="'.$ext_info['url'].'/draw_chart.js"></script>'."\n";
 		]]></hook>
 
