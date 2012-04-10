@@ -27,7 +27,7 @@
 <?php
 		]]></hook>
 
-		<hook id="ai_after_js_include"><![CDATA[
+		<hook id="ai_after_js_include" priority="8"><![CDATA[
 ?>
 <script type="text/javascript" src="<?php echo $ext_info['url']; ?>/codemirror/codemirror-compressed.js"></script>
 <script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>
