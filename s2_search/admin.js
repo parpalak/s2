@@ -44,4 +44,4 @@ var s2_search = {
 	}
 }
 
-Hooks.add('fn_save_article_end', 's2_search.refresh_index(sAction, document.forms["artform"].elements["page[id]"].value);');
+Hooks.add('fn_save_article_end', function (sAction) { s2_search.refresh_index(sAction, document.forms["artform"].elements["page[id]"].value); });
