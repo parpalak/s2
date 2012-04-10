@@ -37,7 +37,7 @@ if (!$s2_tpl_edit_cached)
 	copy($path, S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_id);
 		]]></hook>
 
-		<hook id="ai_head_end"><![CDATA[
+		<hook id="ai_after_js_include"><![CDATA[
 echo '<script type="text/javascript" src="'.$ext_info['url'].'/admin.js"></script>'."\n";
 		]]></hook>
 
