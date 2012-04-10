@@ -96,6 +96,7 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
 <!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->
+<style>body {background-color: <?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>;}</style>
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>
 </head>
 
