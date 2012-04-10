@@ -32,15 +32,7 @@ var s2_tpl_edit = (function ()
 				$('#s2_tpl_edit_div').html(data);
 			});
 			return false;
-		},
-
-		key_handler: function ()
-		{
-			if (document.forms['s2_tpl_edit_form'] && '#admin-tpl' == cur_page)
-				document.forms['s2_tpl_edit_form'].onsubmit();
 		}
 	});
 
 }());
-
-Hooks.add('fn_save_handler_start', 's2_tpl_edit.key_handler();');
