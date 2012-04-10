@@ -24,13 +24,14 @@
 		<hook id="ai_head_end"><![CDATA[
 ?>
 <link rel="stylesheet" type="text/css" href="<?php echo $ext_info['url']; ?>/codemirror/codemirror.css" />
-<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/codemirror/codemirror-compressed.js"></script>
-<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>
 <?php
 		]]></hook>
 
-		<hook id="fn_preload_editor_end, blfn_preload_editor_end"><![CDATA[
-echo '<script type="text/javascript">if (typeof(tinyMCE) == 'undefined') { s2_highlight.init(); }</script>';
+		<hook id="ai_after_js_include"><![CDATA[
+?>
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/codemirror/codemirror-compressed.js"></script>
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>
+<?php
 		]]></hook>
 
 	</hooks>
