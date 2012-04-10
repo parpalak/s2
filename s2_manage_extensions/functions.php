@@ -64,8 +64,6 @@ function s2_manage_extensions_refresh_hooks ($id)
 		require S2_ROOT.'_include/cache.php';
 
 	s2_generate_hooks_cache();
-	global $s2_hooks;
-	require S2_CACHE_DIR.'cache_hooks.php';
 
 	($hook = s2_hook('manage_extensions_refresh_hooks_end')) ? eval($hook) : null;
 
