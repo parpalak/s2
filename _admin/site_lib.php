@@ -175,10 +175,7 @@ function s2_preload_editor ()
 		return;
 
 	if (empty($_GET['path']) || $_GET['path'] == '/')
-	{
-		echo $lang_admin['Empty editor info'];
 		return;
-	}
 
 	$request_array = explode('/', $_GET['path']);   //   []/[dir1]/[dir2]/[dir3]/[file1]
 
@@ -207,7 +204,7 @@ function s2_preload_editor ()
 
 	($hook = s2_hook('fn_preload_editor_pre_output')) ? eval($hook) : null;
 
-	echo '<script type="text/javascript">document.location.hash = "#edit"; EditArticle('.$id.');</script>';
+	echo 'setTimeout(function () { EditArticle('.$id.'); }, 0);';
 
 	($hook = s2_hook('fn_preload_editor_end')) ? eval($hook) : null;
 }

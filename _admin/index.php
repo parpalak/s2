@@ -96,24 +96,6 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
 <!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->
-<script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
-<?php ($hook = s2_hook('ai_pre_js_include')) ? eval($hook) : null; ?>
-<script type="text/javascript" src="js/tabsheets.js"></script>
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/jquery.hotkeys.js"></script>
-<script type="text/javascript" src="js/jquery.jstree.js"></script>
-<script type="text/javascript" src="js/jquery-ui-1.8.18.custom.min.js"></script>
-<script type="text/javascript" src="js/ajax.js"></script>
-<script type="text/javascript" src="js/admin.js"></script>
-<script type="text/javascript">
-var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
-var cur_date = new Date();
-var username = '<?php echo s2_jsvarencode($login); ?>';
-var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.getTime();
-var template = '<?php echo s2_jsvarencode($template); ?>';
-SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
-<?php ($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null; ?>
-</script>
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>
 </head>
 
@@ -151,7 +133,7 @@ $padding = 2.5;
 <?php ($hook = s2_hook('ai_pre_edit')) ? eval($hook) : null; ?>
 		<dt id="edit_tab"><?php echo $lang_admin['Editor']; ?></dt>
 		<dd class="inactive">
-			<div class="reducer" id="form_div"><?php s2_preload_editor(); ?></div>
+			<div class="reducer" id="form_div"><?php echo $lang_admin['Empty editor info']; ?></div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_review')) ? eval($hook) : null; ?>
 		<dt id="view_tab"><?php echo $lang_admin['Preview']; ?></dt>
@@ -170,7 +152,7 @@ $padding = 2.5;
 <?php ($hook = s2_hook('ai_pre_comments')) ? eval($hook) : null; ?>
 		<dt id="comm_tab"><?php echo $lang_common['Comments']; ?></dt>
 		<dd class="inactive">
-			<div class="reducer" id="comm_div"><?php echo s2_for_premoderation(); ?></div>
+			<div class="reducer" id="comm_div"><?php $premoderation = s2_for_premoderation(); echo $premoderation['content']; ?></div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_tags')) ? eval($hook) : null; ?>
 		<dt id="tag_tab"><?php echo $lang_common['Tags']; ?></dt>
@@ -232,14 +214,36 @@ if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 
 ?>
 	</dl>
-	<script type="text/javascript">Make_Tabsheet();</script>
+<?php ($hook = s2_hook('ai_after_tabs')) ? eval($hook) : null; ?>
+<script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
+<?php ($hook = s2_hook('ai_pre_js_include')) ? eval($hook) : null; ?>
+<script type="text/javascript" src="js/tabsheets.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.hotkeys.js"></script>
+<script type="text/javascript" src="js/jquery.jstree.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript" src="js/ajax.js"></script>
+<script type="text/javascript" src="js/admin.js"></script>
+<?php ($hook = s2_hook('ai_after_js_include')) ? eval($hook) : null; ?>
+<script type="text/javascript">
+var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
+var cur_date = new Date();
+var username = '<?php echo s2_jsvarencode($login); ?>';
+var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.getTime();
+var template = '<?php echo s2_jsvarencode($template); ?>';
+
+SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
+Make_Tabsheet();
+
 <?php
+	s2_preload_editor();
+	if (isset($premoderation['script']))
+		echo $premoderation['script'];
+	echo s2_get_sessions($login, $session_id);
 
-($hook = s2_hook('ai_after_tabs')) ? eval($hook) : null;
-
-echo s2_get_sessions($login, $session_id);
-
+	($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null;
 ?>
+</script>
 </body>
 </html>
 <?php

@@ -166,7 +166,7 @@ function s2_for_premoderation ()
 	global $s2_db, $s2_user, $lang_admin;
 
 	if (!S2_PREMODERATION || !$s2_user['hide_comments'])
-		return s2_comment_menu_links();
+		return array('content' => s2_comment_menu_links());
 
 	// Check if there are new comments
 	$query = array(
@@ -180,11 +180,12 @@ function s2_for_premoderation ()
 
 	($hook = s2_hook('fn_for_premoderation_pre_comm_check')) ? eval($hook) : null;
 	if (!$new_comment_count)
-		return s2_comment_menu_links();
+		return array('content' => s2_comment_menu_links());
 
-	$output = s2_comment_menu_links('new');
-	$output .= '<script type="text/javascript">PopupMessages.show(\''.$lang_admin['Unchecked comments'].'\', [{name: \''.$lang_admin['View comments'].'\', action: function () {SelectTab(document.getElementById(\'comm_tab\'), true); LoadTable(\'load_new_comments\', \'comm_div\');}, once: true}]);</script>';
-	$output .= s2_show_comments('new');
+	$output = array(
+		'content'	=> s2_comment_menu_links('new').s2_show_comments('new'),
+		'script'	=> 'PopupMessages.show(\''.$lang_admin['Unchecked comments'].'\', [{name: \''.$lang_admin['View comments'].'\', action: function () {SelectTab(document.getElementById(\'comm_tab\'), true); LoadTable(\'load_new_comments\', \'comm_div\');}, once: true}]);'."\n",
+	);
 
 	($hook = s2_hook('fn_for_premoderation_end')) ? eval($hook) : null;
 	return $output;

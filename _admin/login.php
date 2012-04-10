@@ -357,7 +357,7 @@ function s2_get_sessions ($login, $challenge)
 	if (count($sessions) <= 1)
 		return '';
 
-	return '<script type="text/javascript">PopupMessages.show(\''.sprintf($lang_admin['Other sessions'], implode('<br />', $sessions)).'\', [{name: \''.$lang_admin['Close other sessions'].'\', action: function () { CloseOtherSessions(); }, once: true}]);</script>';
+	return 'PopupMessages.show(\''.sprintf($lang_admin['Other sessions'], implode('<br />', $sessions)).'\', [{name: \''.$lang_admin['Close other sessions'].'\', action: function () { CloseOtherSessions(); }, once: true}]);'."\n";
 }
 
 // Returns ajax login form
