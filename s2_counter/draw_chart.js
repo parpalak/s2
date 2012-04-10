@@ -30,7 +30,9 @@ var s2_counter_draw = (function ()
 			hits.addParam("wmode", "opaque");
 			var settings_file = "../_extensions/s2_counter/traffic.xml?" + Math.random();
 
-			eval(Hooks.get('fn_s2_counter_draw_chart_pre_hits'));
+			var result = Hooks.run('fn_s2_counter_draw_filter_hits', settings_file);
+			if (result)
+				settings_file = result;
 
 			hits.addVariable("settings_file", encodeURIComponent(settings_file));
 		}
@@ -43,7 +45,9 @@ var s2_counter_draw = (function ()
 			rss.addParam("wmode", "opaque");
 			settings_file = "../_extensions/s2_counter/rss.xml?" + Math.random();
 
-			eval(Hooks.get('fn_s2_counter_draw_chart_pre_rss'));
+			var result = Hooks.run('fn_s2_counter_draw_filter_rss', settings_file);
+			if (result)
+				settings_file = result;
 
 			rss.addVariable("settings_file", encodeURIComponent(settings_file));
 		}
