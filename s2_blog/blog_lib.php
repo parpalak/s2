@@ -719,7 +719,7 @@ function s2_blog_edit_post_form ($id)
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_checkboxes')) ? eval($hook) : null; ?>
 		<input type="hidden" name="page[id]" value="<?php echo $id; ?>" />
 		<input type="hidden" name="page[revision]" value="<?php echo $page['revision']; ?>" />
-		<label for="fav"><input type="checkbox" id="fav" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"'?> />
+		<label for="favorite_checkbox"><input type="checkbox" id="favorite_checkbox" name="flags[favorite]" value="1"<? if ($page['favorite']) echo ' checked="checked"'?> />
 		<?php echo $lang_common['Favorite']; ?></label>
 		<label for="com"><input type="checkbox" id="com" name="flags[commented]" value="1"<? if ($page['commented']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Commented']; ?></label>
@@ -743,7 +743,7 @@ function s2_blog_edit_post_form ($id)
 		<label id="url_input_label"<?php if ($url_error) echo ' class="error" title="'.$url_error.'"'; ?> title_unique="<?php echo $lang_admin['URL not unique']; ?>" title_empty="<?php echo $lang_admin['URL empty']; ?>"><?php echo $lang_admin['URL part']; ?><br />
 		<input type="text" name="page[url]" size="15" maxlength="255" value="<?php echo $page['url']; ?>" /></label>
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_published')) ? eval($hook) : null; ?>
-		<label for="pub"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="pub" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"'?> />
+		<label for="publiched_checkbox"<?php if ($page['published']) echo ' class="ok"'; ?>><input type="checkbox" id="publiched_checkbox" name="flags[published]" value="1"<? if ($page['published']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Published']; ?></label>
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_save')) ? eval($hook) : null; ?>
 		<input class="bitbtn save" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>"<?php if (!$s2_user['edit_site'] && $s2_user['id'] != $page['user_id']) echo ' disabled="disabled"'; ?> />

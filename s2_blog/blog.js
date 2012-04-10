@@ -34,8 +34,7 @@ function BlogAddTag (iId)
 
 function LoadPosts ()
 {
-	var sRequest = StringFromForm(document.blogform);
-	POSTAsyncRequest(sUrl + "action=load_blog_posts", sRequest, function(http, data)
+	POSTAsyncRequest(sUrl + "action=load_blog_posts", $(document.forms['blogform']).serialize(), function(http, data)
 	{
 		$('#blog_div').html(data);
 	});
