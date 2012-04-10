@@ -6,32 +6,6 @@
  * @package s2_blog
  */
 
-function BlogAddTag (iId)
-{
-	var sPostTags = document.artform.keywords.value;
-
-	if (sPostTags.indexOf('|' + iId + '|') != -1)
-	{
-		sPostTags = sPostTags.replace('|' + iId + '|', '|');
-		document.getElementById('tag_' + iId).innerHTML = '';
-
-		if (sPostTags != '|')
-		{
-			var aTags = sPostTags.slice(1, -1).split('|');
-			for (var i = aTags.length; i-- ;)
-				document.getElementById('tag_' + aTags[i]).innerHTML = i + 1;
-		}
-	}
-	else
-	{
-		sPostTags = sPostTags + iId + '|';
-		document.getElementById('tag_' + iId).innerHTML = sPostTags.slice(1, -1).split('|').length;
-	}
-
-	document.artform.keywords.value = sPostTags;
-	return false;
-}
-
 function LoadPosts ()
 {
 	POSTAsyncRequest(sUrl + "action=load_blog_posts", $(document.forms['blogform']).serialize(), function(http, data)
@@ -58,7 +32,7 @@ function DeleteRecord (eItem, iId, sWarning)
 		if (http.responseText)
 			alert(http.responseText)
 		else
-			eItem.parentNode.parentNode.parentNode.parentNode.removeChild(eItem.parentNode.parentNode.parentNode);
+			$(eItem).parent().parent().parent().remove();
 	});
 	return false;
 }
@@ -73,14 +47,11 @@ function CreateBlankRecord ()
 	return false;
 }
 
-// Blog comments
-
 function LoadBlogComments (iId)
 {
-	GETAsyncRequest(sUrl + "action=load_blog_comments&id=" + iId, function (http)
+	GETAsyncRequest(sUrl + "action=load_blog_comments&id=" + iId, function (http, data)
 	{
-		var eItem = document.getElementById('comm_div');
-		eItem.innerHTML = http.responseText;
+		$('#comm_div').html(data);
 		SelectTab(document.getElementById('comm_tab'), true);
 	});
 	return false;
@@ -91,10 +62,9 @@ function DeleteBlogComment (iId, sMode)
 	if (!confirm(s2_lang.delete_comment))
 		return false;
 
-	GETAsyncRequest(sUrl + "action=delete_blog_comment&id=" + iId + '&mode=' + sMode, function (http)
+	GETAsyncRequest(sUrl + "action=delete_blog_comment&id=" + iId + '&mode=' + sMode, function (http, data)
 	{
-		var eItem = document.getElementById('comm_div');
-		eItem.innerHTML = http.responseText;
+		$('#comm_div').html(data);
 	});
 	return false 
 }
