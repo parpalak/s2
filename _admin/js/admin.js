@@ -16,14 +16,22 @@ var Hooks = (function ()
 
 	return (
 	{
-		add: function (hook, code)
+		add: function (hook, func)
 		{
-			hooks[hook] = typeof(hooks[hook]) != 'string' ? code : hooks[hook] + code;
+ 			if (typeof hooks[hook] == 'undefined')
+				hooks[hook] = [];
+			hooks[hook].push(func);
 		},
 
-		get: function (hook)
+		run: function (hook, data)
 		{
-			return hooks[hook] || null;
+			if (!hooks[hook])
+				return null;
+
+			for (var i = hooks[hook].length; i-- ;)
+				var result = result || hooks[hook][i](data);
+
+			return result;
 		}
 	});
 }());
@@ -161,6 +169,48 @@ function CloseOtherSessions ()
 	return false;
 }
 
+function PopupWindow (sTitle, sHeader, sInfo, sText)
+{
+	// HTML encode for textarea
+	var div = document.createElement('div');
+	div.appendChild(document.createTextNode(sText));
+	sText = div.innerHTML;
+
+	var wnd = window.open('about:blank', '', '', 'True');
+	wnd.document.open();
+
+	var color = '#eee';
+	try
+	{
+		if (window.getComputedStyle) // All the cool bro
+			color = window.getComputedStyle(document.body, null).backgroundColor;
+		else if (document.body.currentStyle) // Heh, IE8
+			color = document.body.currentStyle.backgroundColor;
+	}
+	catch (e)
+	{
+		color = '#eee';
+	}
+
+	var head = '<title>' + sTitle + '</title>' +
+		'<style>html {height: 100%; margin: 0;} body {margin: 0 auto; padding: 9em 10% 1em; height: 100%; background: ' + color + '; font: 75% Verdana, sans-serif;} body, textarea {-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 100%;} .text {position: absolute; top: 0; width: 80%;}</style>';
+	var body = '<div class="text"><h1>' + sHeader + '</h1>' + 
+		'<p>' + sInfo + '</p></div><textarea readonly="readonly">' + sText + '</textarea>';
+
+	var result = Hooks.run('fn_popup_window_filter_head', head);
+	if (result)
+		head = result;
+
+	var result = Hooks.run('fn_popup_window_filter_body', body);
+	if (result)
+		body = result;
+
+	var text = '<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>';
+
+	wnd.document.write(text);
+	wnd.document.close();
+}
+
 // Search field events handler
 
 var Search = (function ()
@@ -296,7 +346,7 @@ var Changes = (function ()
 		if (!is_local_storage || !document.artform)
 			return;
 
-		eval(Hooks.get('fn_check_changes_start'));
+		Hooks.run('fn_check_changes_start');
 
 		var new_text = document.artform['page[text]'].value;
 
@@ -331,7 +381,7 @@ var Changes = (function ()
 
 			if (is_local_storage)
 			{
-				eval(Hooks.get('fn_changes_commit_pre_ls'));
+				Hooks.run('fn_changes_commit_pre_ls');
 
 				localStorage.removeItem('s2_curr_text');
 				saved_text = document.artform['page[text]'].value;
@@ -340,7 +390,7 @@ var Changes = (function ()
 
 		present: function (eForm)
 		{
-			eval(Hooks.get('fn_changes_present'));
+			Hooks.run('fn_changes_present');
 
 			return curr_md5 != hex_md5($(eForm).serialize());
 		}
@@ -710,7 +760,7 @@ var LoadArticle, ReloadArticle;
 	{
 		GETAsyncRequest(sURI, function (http, data)
 		{
-			eval(Hooks.get('request_article_start'));
+			Hooks.run('request_article_start');
 
 			s2Tags = data.tags;
 			$('#form_div').html(data.form);
@@ -765,7 +815,7 @@ var LoadArticle, ReloadArticle;
 			SelectTab(document.getElementById('edit_tab'), true);
 			sLoadedURI = sURI;
 
-			eval(Hooks.get('request_article_end'));
+			Hooks.run('request_article_end');
 		});
 	}
 
@@ -825,7 +875,7 @@ function LoadComments (iId)
 
 function SaveArticle(sAction)
 {
-	eval(Hooks.get('fn_save_article_start'));
+	Hooks.run('fn_save_article_start', sAction);
 
 	document.forms['artform'].setAttribute('data-save-process', 1);
 
@@ -874,7 +924,7 @@ function SaveArticle(sAction)
 
 			Changes.commit(document.forms['artform']);
 
-			eval(Hooks.get('fn_save_article_end'));
+			Hooks.run('fn_save_article_end', sAction);
 		}
 		else if (http.responseText != '')
 			alert(http.responseText);
@@ -1043,7 +1093,7 @@ function InsertParagraph (sType)
 	else
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
 
-	var result = eval(Hooks.get('fn_insert_paragraph_start'));
+	var result = Hooks.run('fn_insert_paragraph_start', {openTag: sOpenTag, closeTag: sCloseTag});
 	if (result)
 		return;
 
@@ -1113,7 +1163,7 @@ function InsertParagraph (sType)
 
 function InsertTag (sOpenTag, sCloseTag, selection)
 {
-	var result = eval(Hooks.get('fn_insert_tag_start'));
+	var result = Hooks.run('fn_insert_tag_start', {openTag: sOpenTag, closeTag: sCloseTag});
 	if (result)
 		return;
 
@@ -1153,7 +1203,7 @@ function GetImage ()
 
 function Paragraph ()
 {
-	var result = eval(Hooks.get('fn_paragraph_start'));
+	var result = Hooks.run('fn_paragraph_start');
 	if (result)
 		return;
 
@@ -1240,7 +1290,7 @@ function Preview ()
 	if (!document.artform || !document.artform['page[text]'])
 		return;
 
-	eval(Hooks.get('fn_preview_start'));
+	Hooks.run('fn_preview_start');
 
 	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
 	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);
