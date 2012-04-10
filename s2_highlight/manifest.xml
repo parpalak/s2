@@ -33,7 +33,7 @@ echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/codemirr
 		]]></hook>
 
 		<hook id="fn_toolbar_end"><![CDATA[
-$toolbar = str_replace('</div>', '<img class="separator" src="i/1.gif" alt="" />'."\n\t".'<img id="s2_highlight_toggle_button" src="i/1.gif" alt="" />'."\n\t".'</div>', $toolbar);
+$toolbar = str_replace('</div>', '<img id="s2_highlight_toggle_button" src="i/1.gif" alt="" />'."\n\t".'</div>', $toolbar);
 		]]></hook>
 	</hooks>
 </extension>

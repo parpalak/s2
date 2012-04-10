@@ -1,5 +1,5 @@
 .CodeMirror {
-  font: 1.083em/1.2 Consolas, Monaco, monospace;
+  font: 1.083em/1.2307 Consolas, Monaco, monospace;
 }
 
 .CodeMirror-wrap {
@@ -29,7 +29,7 @@
   white-space: pre !important;
 }
 .CodeMirror-lines {
-  padding: .4em;
+  padding: .2307em;
 }
 
 .CodeMirror pre {
@@ -114,4 +114,5 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 
 #s2_highlight_toggle_button {
 	background: url(icon.png) center no-repeat;
+	float: right;
 	}
