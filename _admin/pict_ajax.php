@@ -76,7 +76,7 @@ if ($action == 'load_tree')
 		);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode($return);
+	echo s2_json_encode($return);
 }
 
 elseif ($action == 'create_subfolder')
@@ -109,7 +109,7 @@ elseif ($action == 'create_subfolder')
 	chmod(S2_IMG_PATH.$path.'/'.$name, 0777);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1, 'name' => $name, 'path' => $path.'/'.$name));
+	echo s2_json_encode(array('status' => 1, 'name' => $name, 'path' => $path.'/'.$name));
 }
 
 elseif ($action == 'delete_folder')
@@ -129,7 +129,7 @@ elseif ($action == 'delete_folder')
 		s2_unlink_recursive(S2_IMG_PATH.$path);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1));
+	echo s2_json_encode(array('status' => 1));
 }
 
 elseif ($action == 'delete_files')
@@ -152,7 +152,7 @@ elseif ($action == 'delete_files')
 	}
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1));
+	echo s2_json_encode(array('status' => 1));
 }
 
 elseif ($action == 'rename_folder')
@@ -191,7 +191,7 @@ elseif ($action == 'rename_folder')
 	if (rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$folder_name))
 	{
 		header('Content-Type: application/json; charset=utf-8');
-		echo json_encode(array('status' => 1, 'new_path' => $parent_path.'/'.$folder_name));
+		echo s2_json_encode(array('status' => 1, 'new_path' => $parent_path.'/'.$folder_name));
 	}
 	else
 	{
@@ -272,7 +272,7 @@ elseif ($action == 'move_folder')
 	rename(S2_IMG_PATH.$spath, S2_IMG_PATH.$dpath.'/'.s2_basename($spath));
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1, 'new_path' => $dpath.'/'.s2_basename($spath)));
+	echo s2_json_encode(array('status' => 1, 'new_path' => $dpath.'/'.s2_basename($spath)));
 }
 elseif ($action == 'move_files')
 {
@@ -301,7 +301,7 @@ elseif ($action == 'move_files')
 	}
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1));
+	echo s2_json_encode(array('status' => 1));
 }
 
 elseif ($action == 'load_files')
@@ -318,7 +318,7 @@ elseif ($action == 'load_files')
 		$path = str_replace('..', '', $path);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(s2_get_files($path));
+	echo s2_json_encode(s2_get_files($path));
 }
 
 elseif ($action == 'upload')

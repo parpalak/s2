@@ -98,7 +98,7 @@ elseif ($action == 'move')
 	s2_move_branch($source_id, $new_parent_id, $new_pos);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1));
+	echo s2_json_encode(array('status' => 1));
 }
 
 elseif ($action == 'delete')
@@ -115,7 +115,7 @@ elseif ($action == 'delete')
 	s2_delete_branch($id);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1));
+	echo s2_json_encode(array('status' => 1));
 }
 
 elseif ($action == 'rename')
@@ -133,7 +133,7 @@ elseif ($action == 'rename')
 	s2_rename_article($id, $title);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1));
+	echo s2_json_encode(array('status' => 1));
 }
 
 elseif ($action == 'create')
@@ -151,7 +151,7 @@ elseif ($action == 'create')
 	$new_id = s2_create_article($id, $title);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(array('status' => 1, 'id' => $new_id));
+	echo s2_json_encode(array('status' => 1, 'id' => $new_id));
 }
 
 // Load folder tree
@@ -167,7 +167,7 @@ elseif ($action == 'load_tree')
 	require 'tree.php';
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(s2_get_child_branches((int)$_GET['id'], true, trim($_GET['search'])));
+	echo s2_json_encode(s2_get_child_branches((int)$_GET['id'], true, trim($_GET['search'])));
 }
 
 //=======================[Pages editor]=========================================
@@ -188,7 +188,7 @@ elseif ($action == 'load')
 	require 'edit.php';
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(s2_output_article_form($id));
+	echo s2_json_encode(s2_output_article_form($id));
 }
 
 // Saving data to DB
@@ -213,7 +213,7 @@ elseif ($action == 'save')
 	($hook = s2_hook('rq_action_save_article_end')) ? eval($hook) : null;
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode($return);
+	echo s2_json_encode($return);
 }
 
 elseif ($action == 'preview')

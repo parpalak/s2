@@ -7,14 +7,72 @@
  * @package S2
  */
 
+//
+// JSON encoding
+//
 
-function s2_array2xml ($array)
+if (!function_exists('json_encode'))
 {
-	$output = '';
-	foreach ($array as $key => $value)
-		$output .= '<'.$key.'>'.(is_array($value) ? s2_array2xml($value) : '<![CDATA['.str_replace(']]>', ']]&gt;', $value).']]>').'</'.$key.'>';
-
-	return $output;
+	function s2_json_encode ($data)
+	{
+		switch ($type = gettype($data))
+		{
+			case 'NULL':
+				return 'null';
+			case 'boolean':
+				return ($data ? 'true' : 'false');
+			case 'integer':
+			case 'double':
+			case 'float':
+				return $data;
+			case 'string':
+				return '"' . addslashes($data) . '"';
+			case 'object':
+				$data = get_object_vars($data);
+			case 'array':
+				$output_index_count = 0;
+				$output_indexed = array();
+				$output_associative = array();
+				$size = count($data);
+				if (array_keys($data) === range(0, $size - 1))
+				{
+					$output = '[';
+					for ($i = 0; $i < $size; $i++)
+					{
+						$output .= s2_json_encode($data[$i]);
+						if ($i < $size - 1)
+							$output .= ',';
+					}
+					return $output . ']';
+				}
+				else
+				{
+					$output = '{';
+					$i = 0;
+					foreach ($data as $key => $value)
+					{
+						$output .= s2_json_encode($key) . ':' . s2_json_encode($value);
+						if ($i < $size - 1)
+							$output .= ',';
+						$i++;
+					}
+					return $output . '}';
+				}
+			default:
+				return '';
+		}
+	}
+}
+else
+{
+	function s2_json_encode ($data)
+	{
+		if (defined('JSON_UNESCAPED_UNICODE'))
+			$result = json_encode($data, JSON_UNESCAPED_UNICODE);
+		else
+			$result = json_encode($data);
+		return $result;
+	}
 }
 
 //
