@@ -1,4 +1,16 @@
-"use strict";(function(){if(jQuery&&jQuery.jstree){return;}
+/*
+ * jsTree 1.0-rc3
+ * http://jstree.com/
+ *
+ * Copyright (c) 2010 Ivan Bozhanov (vakata.com)
+ *
+ * Licensed same as jquery - under the terms of either the MIT License or the GPL Version 2 License
+ *   http://www.opensource.org/licenses/mit-license.php
+ *   http://www.gnu.org/licenses/gpl.html
+ *
+ * $Date: 2011-02-09 01:17:14 +0200 (ср, 09 февр 2011) $
+ * $Revision: 236 $
+ */"use strict";(function(){if(jQuery&&jQuery.jstree){return;}
 var is_ie6=false,is_ie7=false,is_ff2=false;(function($){$.vakata={};$.vakata.css={get_css:function(rule_name,delete_flag,sheet){rule_name=rule_name.toLowerCase();var css_rules=sheet.cssRules||sheet.rules,j=0;do{if(css_rules.length&&j>css_rules.length+5){return false;}
 if(css_rules[j].selectorText&&css_rules[j].selectorText.toLowerCase()==rule_name){if(delete_flag===true){if(sheet.removeRule){sheet.removeRule(j);}
 if(sheet.deleteRule){sheet.deleteRule(j);}
