@@ -1027,17 +1027,6 @@ form center {
 .jstree li,
 .jstree ins { background: url(../i/tree.png) no-repeat transparent; }
 .jstree li { background-position: -90px 0; background-repeat: repeat-y; }
-.jstree li:before {
-	content: attr(data-date);
-	color: #ccc;
-	position: absolute;
-	right: 0;
-	padding-right: 0.5em;
-	z-index: 0;
-	}
-	.jstree li:hover:before {
-		color: #aaa;
-		}
 .jstree li.jstree-last { background: transparent; }
 .jstree .jstree-open > ins { background-position: -72px 0; }
 .jstree .jstree-closed > ins { background-position: -54px 0; }
