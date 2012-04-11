@@ -6,17 +6,19 @@
 	border: #eee solid 1px;
 	}
 
-.treetree li {
-	clear: both;
-	}
-
+.tags_list a,
+.tags_list a:active,
+.tags_list a:hover,
+.tags_list a:visited,
 .js,
 .js:active,
 .js:hover,
-.js:visited {
+.js:visited,
+.ui-autocomplete a {
 	border-bottom: 1px dashed #8AADDE;
 	}
-	.js.cur_link {
+	.js.cur_link,
+	.ui-autocomplete a.ui-state-hover {
 		border-bottom: none;
 		}
 
@@ -37,11 +39,6 @@ a, a:visited {
 
 .loginform {
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#f4f4f4', EndColorStr='#e5e5e5')";
-	}
-
-.treetree li.IsLast {
-	background-position: -72px -27px;
-	background-repeat: no-repeat;
 	}
 
 .r-float label.error {
