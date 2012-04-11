@@ -74,6 +74,19 @@ if (S2_DB_REVISION < 8)
 	$s2_db->add_index('users_online', 'login_idx', array('login'));
 }
 
+if (S2_DB_REVISION < 9)
+{
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\'S2_ADMIN_NEW_POS\', \'0\''
+	);
+
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	define('S2_ADMIN_NEW_POS', '0');
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',

@@ -547,7 +547,7 @@ $(document).ready(function()
 
 	function createArticle ()
 	{
-		tree.jstree('create', null, 'last', {data : {title : s2_lang.new_page, attr : {'class' : 'Hidden'}}});
+		tree.jstree('create', null, (new_page_pos == '1') ? 'first' : 'last', {data : {title : s2_lang.new_page, attr : {'class' : 'Hidden'}}});
 	}
 
 	function editArticle ()
@@ -1438,7 +1438,10 @@ function DeleteTag (iId, sName)
 
 function SaveOptions ()
 {
-	POSTAsyncRequest(sUrl + 'action=save_options', $(document.forms['optform']).serialize());
+	POSTAsyncRequest(sUrl + 'action=save_options', $(document.forms['optform']).serialize(), function ()
+	{
+		new_page_pos = document.forms['optform'].elements['opt[S2_ADMIN_NEW_POS]'].checked ? '1' : '0';
+	});
 	return false;
 }
 

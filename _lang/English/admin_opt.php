@@ -14,6 +14,7 @@ $lang_const_explain = array(
 'S2_MAX_ITEMS'			=> 'The number of items on the section page. 0 — do not break section content into pages.',
 'S2_START_YEAR'			=> 'Used in the copyright.',
 'S2_ADMIN_COLOR'		=> 'Background color of the control panel (examples: %s).',
+'S2_ADMIN_NEW_POS'		=> 'The created pages are placed before existing ones in the tree structure.',
 'S2_LOGIN_TIMEOUT'		=> 'Idle timeout (minutes). Users have to re-enter their login and password when this timeout expires.'
 
 );
@@ -32,6 +33,7 @@ $lang_const_names = array(
 'S2_MAX_ITEMS'			=> 'Section paging',
 'S2_START_YEAR'			=> 'Start year',
 'S2_ADMIN_COLOR'		=> 'Background color',
+'S2_ADMIN_NEW_POS'		=> 'New page position',
 'S2_LOGIN_TIMEOUT'		=> 'Timeout'
 
 );

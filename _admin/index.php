@@ -234,6 +234,7 @@ var cur_date = new Date();
 var username = '<?php echo s2_jsvarencode($login); ?>';
 var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.getTime();
 var template = '<?php echo s2_jsvarencode($template); ?>';
+var new_page_pos = '<?php echo s2_jsvarencode(S2_ADMIN_NEW_POS); ?>';
 
 Make_Tabsheet();
 

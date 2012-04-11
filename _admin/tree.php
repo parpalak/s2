@@ -26,19 +26,33 @@ function s2_create_article ($id, $title)
 	if (!$s2_db->fetch_assoc($result))
 		die('Item not found!');
 
-	$query = array(
-		'SELECT'	=> 'MAX(priority + 1)',
-		'FROM'		=> 'articles',
-		'WHERE'		=> 'parent_id = '.$id
-	);
-	($hook = s2_hook('fn_create_article_pre_get_maxpr_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$max_priority = (int) $s2_db->result($result);
+	if (S2_ADMIN_NEW_POS)
+	{
+		$query = array(
+			'UPDATE'	=> 'articles',
+			'SET'		=> 'priority = priority + 1',
+			'WHERE'		=> 'parent_id = '.$id
+		);
+		($hook = s2_hook('fn_create_article_pre_upd_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$new_priority = 0;
+	}
+	else
+	{
+		$query = array(
+			'SELECT'	=> 'MAX(priority + 1)',
+			'FROM'		=> 'articles',
+			'WHERE'		=> 'parent_id = '.$id
+		);
+		($hook = s2_hook('fn_create_article_pre_get_maxpr_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$new_priority = (int) $s2_db->result($result);
+	}
 
 	$query = array(
 		'INSERT'	=> 'parent_id, title, priority, url, user_id',
 		'INTO'		=> 'articles',
-		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($max_priority).', \'new\', '.$s2_user['id']
+		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($new_priority).', \'new\', '.$s2_user['id']
 	);
 	($hook = s2_hook('fn_create_article_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
