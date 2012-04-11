@@ -8,13 +8,23 @@
 
 var s2_tpl_edit = (function ()
 {
+	var instance = null;
+
 	return (
 	{
-		load: function (sFilename)
+		render: function (data)
 		{
-			GETAsyncRequest(sUrl + 'action=s2_tpl_edit_load&filename=' + encodeURIComponent(sFilename), function (http, data)
+			var eDiv = $('#s2_tpl_edit_div').html(data);
+			if (CodeMirror)
+				instance = CodeMirror.fromTextArea(eDiv.find('textarea')[0],
+					{mode: "application/x-httpd-php", smartIndent: false, indentUnit: 4, indentWithTabs: true, lineWrapping: true});
+		},
+
+		load: function (s)
+		{
+			GETAsyncRequest(sUrl + 'action=s2_tpl_edit_load&filename=' + encodeURIComponent(s), function (http, data)
 			{
-				$('#s2_tpl_edit_div').html(data);
+				s2_tpl_edit.render(data);
 			});
 			return false;
 		},
@@ -27,9 +37,15 @@ var s2_tpl_edit = (function ()
 				return false;
 			}
 
+			if (instance)
+			{
+				instance.toTextArea();
+				instance = null;
+			}
+
 			POSTAsyncRequest(sUrl + 'action=s2_tpl_edit_save', $(document.forms['s2_tpl_edit_form']).serialize(), function (http, data)
 			{
-				$('#s2_tpl_edit_div').html(data);
+				s2_tpl_edit.render(data);
 			});
 			return false;
 		}
