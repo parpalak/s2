@@ -420,7 +420,8 @@ $(function()
 					multiple_selection : s2_lang.multiple_files
 				}
 			},
-			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
+			sort : function (a, b) { return strNatCmp(this.get_text(a), this.get_text(b)); },
+			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys' , 'sort']
 		});
 
 	// Tooltips
