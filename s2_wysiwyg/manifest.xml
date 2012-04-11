@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_wysiwyg</id>
 	<title>WYSIWYG</title>
-	<version>1.0b2</version>
+	<version>1.0b3</version>
 	<description>Adds TinyMCE WYSIWYG editor to the admin panel.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0b</minversion>
-	<maxtestedon>1.0b2</maxtestedon>
+	<minversion>1.0b3</minversion>
+	<maxtestedon>1.0b3</maxtestedon>
 
 	<install><![CDATA[
 $s2_wysiwys_config = array(
