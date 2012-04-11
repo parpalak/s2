@@ -4,6 +4,7 @@
 .s2Skin table td {vertical-align:middle}
 
 /* Containers */
+#mce_fullscreen_tbl {background:#eee}
 .s2Skin table {direction:ltr;background:transparent}
 .s2Skin iframe {display:block;}
 .s2Skin .mceToolbar {height:26px}
