@@ -116,12 +116,12 @@ a > img {
 .js:hover,
 .js:visited,
 .ui-autocomplete a {
-	background: -moz-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
-	background: -ms-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
-	background: -o-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
-	background: -webkit-gradient(linear, 0 0, 100% 0, from(#8AADDE), color-stop(0.6, #8AADDE), color-stop(0.6, transparent));
-	background: -webkit-linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
-	background: linear-gradient(left, #8AADDE, #8AADDE 60%, transparent 60%);
+	background: -moz-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
+	background: -ms-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
+	background: -o-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
+	background: -webkit-gradient(linear, 0 0, 100% 0, from(#9bd), color-stop(0.6, #9bd), color-stop(0.6, transparent));
+	background: -webkit-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
+	background: linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
 	background-size: 8px 1px;
 	background-repeat: repeat-x;
 	background-position: 0 100%;
@@ -490,12 +490,12 @@ body > .tabsheets {
 		}
 		.sort thead {
 			background: #ddd;
-			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#ebebeb), to(#d6d6d6));
-			background: -webkit-linear-gradient(#ebebeb, #d6d6d6);
-			background: -moz-linear-gradient(#ebebeb, #d6d6d6);
-			background: -o-linear-gradient(#ebebeb, #d6d6d6);
-			background: -ms-linear-gradient(#ebebeb, #d6d6d6);
-			background: linear-gradient(#ebebeb, #d6d6d6);
+			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#ebebeb), to(#ccc));
+			background: -webkit-linear-gradient(#ebebeb, #ccc);
+			background: -moz-linear-gradient(#ebebeb, #ccc);
+			background: -o-linear-gradient(#ebebeb, #ccc);
+			background: -ms-linear-gradient(#ebebeb, #ccc);
+			background: linear-gradient(#ebebeb, #ccc);
 			cursor: default;
 			color: #840;
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
@@ -515,13 +515,13 @@ body > .tabsheets {
 				content: '\2191 ';
 				}
 			.sort .curcol_up, .sort .curcol_down {
-				background: #2491fe;
-				background: -webkit-gradient(linear, 0 0, 0 bottom, from(#2491fe), to(#41a0ff));
-				background: -webkit-linear-gradient(#2491fe, #41a0ff);
-				background: -moz-linear-gradient(#2491fe, #41a0ff);
-				background: -o-linear-gradient(#2491fe, #41a0ff);
-				background: -ms-linear-gradient(#2491fe, #41a0ff);
-				background: linear-gradient(#2491fe, #41a0ff);
+				background: #28f;
+				background: -webkit-gradient(linear, 0 0, 0 bottom, from(#28f), to(#39f));
+				background: -webkit-linear-gradient(#28f, #39f);
+				background: -moz-linear-gradient(#28f, #39f);
+				background: -o-linear-gradient(#28f, #39f);
+				background: -ms-linear-gradient(#28f, #39f);
+				background: linear-gradient(#28f, #39f);
 				color: #fff;
 				}
 
