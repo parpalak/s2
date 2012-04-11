@@ -663,7 +663,7 @@ $(document).ready(function()
 					if (!d.status)
 						rollback(data.rlbk);
 					else
-						data.rslt.obj.attr('id', d.id);
+						data.rslt.obj.attr('id', 'node_' + d.id);
 				},
 				error : function ()
 				{
