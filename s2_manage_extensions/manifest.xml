@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_manage_extensions</id>
 	<title>Manage Extensions</title>
-	<version>1.0b2</version>
+	<version>1.0b3</version>
 	<description>Adds the "Refresh hooks" button to the extension list. It can be useful for extension developers.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0b</minversion>
-	<maxtestedon>1.0b2</maxtestedon>
+	<minversion>1.0b3</minversion>
+	<maxtestedon>1.0b3</maxtestedon>
 
 	<hooks>
 
