@@ -41,7 +41,7 @@ elseif ($action == 'edit_blog_post')
 	($hook = s2_hook('blrq_action_edit_blog_post_pre_output')) ? eval($hook) : null;
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode(s2_blog_edit_post_form($id));
+	echo s2_json_encode(s2_blog_edit_post_form($id));
 }
 
 // Saving data to DB
@@ -65,7 +65,7 @@ elseif ($action == 'save_blog')
 		$result['url_status'] = s2_blog_check_url_status($create_time, $_POST['page']['url']);
 
 	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode($result);
+	echo s2_json_encode($result);
 }
 
 elseif ($action == 'create_blog_post')
