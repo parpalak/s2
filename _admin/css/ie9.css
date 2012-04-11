@@ -1,10 +1,16 @@
+.tags_list a,
+.tags_list a:active,
+.tags_list a:hover,
+.tags_list a:visited,
 .js,
 .js:active,
 .js:hover,
-.js:visited {
-	border-bottom: 1px dashed #8AADDE;
+.js:visited,
+.ui-autocomplete a {
+	border-bottom: 1px dashed #9bd;
 	}
-	.js.cur_link {
+	.js.cur_link,
+	.ui-autocomplete a.ui-state-hover {
 		border-bottom: none;
 		}
 

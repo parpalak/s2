@@ -73,6 +73,7 @@ function s2_jsvarencode ($var)
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
+<!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
