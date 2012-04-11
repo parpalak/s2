@@ -73,12 +73,7 @@ function s2_jsvarencode ($var)
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/jquery.hotkeys.js"></script>
-<script type="text/javascript" src="js/jquery.jstree.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
-<script type="text/javascript" src="js/pictman.js"></script>
-<script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 <script type="text/javascript">
 var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
 var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
@@ -86,6 +81,11 @@ var iMaxFileSize = <?php echo s2_return_bytes(ini_get('upload_max_filesize')); ?
 var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))); ?>';
 SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery-tools.js"></script>
+<script type="text/javascript" src="js/jquery.jstree.js"></script>
+<script type="text/javascript" src="js/pictman.js"></script>
+<script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 </head>
 
 <body>
