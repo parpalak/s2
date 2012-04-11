@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_blog</id>
 	<title>Blog</title>
-	<version>1.0b2</version>
+	<version>1.0b3</version>
 	<description>Adds a blog to your site.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0b2</minversion>
-	<maxtestedon>1.0b2</maxtestedon>
+	<minversion>1.0b3</minversion>
+	<maxtestedon>1.0b3</maxtestedon>
 
 	<note type="uninstall" timing="pre">Warning! All your posts and user comments will be deleted during the uninstall process. It is strongly recommended you to disable 'Blog' extension instead or to upgrade it without uninstalling.</note>
 
