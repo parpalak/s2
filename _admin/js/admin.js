@@ -73,12 +73,14 @@ $(function ()
 	Search.init();
 	Changes.init();
 
-	// Ctrl + S
 	$(document).bind(isIE || isSafari ? 'keydown' : 'keypress', function (e)
 	{
-		var key = e.keyCode || e.which;
+		var key = e.keyCode || e.which,
+			ch = String.fromCharCode(key).toLowerCase();
 		key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
-		if (e.ctrlKey && key)
+
+		// Ctrl + S
+		if (e.ctrlKey && (ch == 's' || key))
 		{
 			e.preventDefault();
 			e.stopPropagation();
@@ -88,7 +90,12 @@ $(function ()
 
 			return false;
 		}
+		else if (e.ctrlKey && tab_ids[ch])
+			SelectTab($('#' + tab_ids[ch])[0]);
 	});
+
+	var tab_ids = [];
+	$('body > dl.tabsheets > dt').each(function (i) { tab_ids[(i + 1).toString()] = $(this).attr('id'); });
 
 	$('body').on('keydown', '.full_tab_form input[type="text"], .full_tab_form input[type="checkbox"], .full_tab_form select', function(e)
 	{
