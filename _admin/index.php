@@ -222,7 +222,6 @@ SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
 <script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
 <?php ($hook = s2_hook('ai_pre_js_include')) ? eval($hook) : null; ?>
-<script type="text/javascript" src="js/tabsheets.js"></script>
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/jquery-tools.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>
