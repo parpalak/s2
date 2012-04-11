@@ -28,16 +28,14 @@ textarea {
 	border-bottom: 1px dashed #9bd;
 	}
 	.js.cur_link,
-	.ui-autocomplete a.ui-state-hover {
+	.ui-autocomplete a.ui-state-hover,
+	.jstree a {
 		border-bottom: none;
 		}
 
 a, a:visited {
 	border-bottom: 1px solid #bce;
 	}
-	.jstree a {
-		border-bottom: none;
-		}
 
 .tabsheets > dt {
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#00000000', EndColorStr='#17000000')";
