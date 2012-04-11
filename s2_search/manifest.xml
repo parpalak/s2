@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_search</id>
 	<title>Search</title>
-	<version>1.0b2</version>
+	<version>1.0b3</version>
 	<description>Full-text search with Russian morphology. Designed for small sites.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0b</minversion>
-	<maxtestedon>1.0b2</maxtestedon>
+	<minversion>1.0b3</minversion>
+	<maxtestedon>1.0b3</maxtestedon>
 
 	<note type="install">Do not forget to create search index after extension installation (Admin → Stats page).</note>
 
