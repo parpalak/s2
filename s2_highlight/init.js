@@ -17,8 +17,11 @@ var s2_highlight = (function ()
 	{
 		get_instance: function ()
 		{
-			instance = CodeMirror.fromTextArea(document.forms['artform'].elements['page[text]'],
+			var eText = document.forms['artform'].elements['page[text]'];
+			scrolltop = eText.scrollTop;
+			instance = CodeMirror.fromTextArea(eText,
 				{mode: "text/html", smartIndent: false, indentUnit: 4, indentWithTabs: true, lineWrapping: true});
+			s2_highlight.restore_scroll();
 		},
 
 		init: function ()
@@ -35,8 +38,13 @@ var s2_highlight = (function ()
 		{
 			if (instance)
 			{
+				s2_highlight.store_scroll();
+
+				var eText = instance.getTextArea();
 				instance.toTextArea();
 				instance = null;
+				if (scrolltop)
+					eText.scrollTop = scrolltop;
 			}
 		},
 
@@ -50,23 +58,32 @@ var s2_highlight = (function ()
 			is_local_storage && localStorage.setItem('s2_highlight_on', enabled ? '1' : '0');
 		},
 
-		beforeswitch: function (sType)
+		store_scroll: function ()
 		{
 			if (!instance)
 				return;
 
+			var eScrollableItem = instance.getScrollerElement();
+			if (typeof(eScrollableItem.scrollTop) != 'undefined')
+				scrolltop = eScrollableItem.scrollTop;
+		},
+
+		restore_scroll: function ()
+		{
+			if (instance && scrolltop)
+				instance.getScrollerElement().scrollTop = scrolltop;
+		},
+
+		beforeswitch: function (sType)
+		{
 			if (sType != 'edit_tab')
-			{
-				var eScrollableItem = instance.getScrollerElement();
-				if (typeof(eScrollableItem.scrollTop) != 'undefined')
-					scrolltop = eScrollableItem.scrollTop;
-			}
+				s2_highlight.store_scroll();
 		},
 
 		tabswitch: function (sType)
 		{
-			if (instance && sType == 'edit_tab' && scrolltop)
-				instance.getScrollerElement().scrollTop = scrolltop;
+			if (sType == 'edit_tab')
+				s2_highlight.restore_scroll();
 		},
 
 		flip: function ()
