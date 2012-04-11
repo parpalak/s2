@@ -93,6 +93,7 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <title><?php echo $lang_admin['Admin panel'], S2_SITE_NAME ? ' - '.S2_SITE_NAME : ''; ?></title>
 <meta http-equiv="Pragma" content="no-cache" />
 <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+<meta name="viewport" content="width=640, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
 <!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->

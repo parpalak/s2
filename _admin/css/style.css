@@ -1124,3 +1124,50 @@ form center {
 		-webkit-border-radius: 8px;
 		border-radius: 8px;
 		}
+
+@media screen and (max-width: 850px) {
+	.toolbar img {
+		padding: 0px;
+		background-origin: border-box;
+		}
+	.r-float {
+		width: 130px;
+		}
+	body {
+		font-size: 68.75%;
+		}
+	}
+
+@media screen and (max-width: 775px) {
+	.tabsheets > dt {
+		font-size: 0.909em;
+		padding: 3px 1px 6px 1px;
+		}
+	.tabsheets > dt:before {
+		margin-right: 0;
+		}
+	#admin_tab {
+		margin-left: 0;
+		}
+	}
+
+@media screen and (max-width: 710px) {
+	.toolbar img {
+		margin-left: -1px;
+		}
+	}
+
+@media screen and (max-width: 680px) {
+	#list_tab, #admin-stat_tab {
+		margin-left: 0;
+		}
+	.tabsheets > dd .reducer {
+		padding: 0;
+		}
+	.toolbar img {
+		margin-left: -3px;
+		}
+	.tabsheets > dt:before {
+		display: none;
+		}
+	}
