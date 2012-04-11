@@ -1,5 +1,15 @@
-.bitbtn {
+.bitbtn,
+.bitbtn:hover {
 	min-width: 96px;
+	border: 2px solid #eee;
+	border-color: #fff #999 #999 #fff;
+	}
+.bitbtn:active {
+	border-color: #999 #fff #fff #999;
+	}
+
+textarea {
+	overflow-y: auto;
 	}
 
 .toolbar img {
