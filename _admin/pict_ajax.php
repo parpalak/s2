@@ -27,6 +27,7 @@ elseif (defined('S2_FORCE_ADMIN_HTTPS'))
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
 require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
 require 'login.php';
+require 'site_lib.php';
 require 'pict_lib.php';
 
 $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
