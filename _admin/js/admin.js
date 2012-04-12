@@ -1277,6 +1277,7 @@ var loadPictman = (function ()
 		if (!wnd)
 			wnd = window.open('pictman.php', 'pict_frame', '', 'True');
 		wnd.focus();
+		wnd.document.body.focus();
 	};
 }());
 
