@@ -107,6 +107,8 @@ $(function()
 		})
 		.bind('select_node.jstree', function (e, d)
 		{
+			folderTree.jstree('set_focus');
+
 			if (eButtons)
 			{
 				eButtons.detach();
@@ -309,6 +311,8 @@ $(function()
 		})
 		.bind('select_node.jstree', function (e, d)
 		{
+			fileTree.jstree('set_focus');
+
 			fExecDouble = function () {};
 			var str = '';
 
