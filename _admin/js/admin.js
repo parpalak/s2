@@ -91,7 +91,14 @@ $(function ()
 			return false;
 		}
 		else if (e.ctrlKey && tab_ids[ch])
+		{
+			e.preventDefault();
+			e.stopPropagation();
+
 			SelectTab($('#' + tab_ids[ch])[0]);
+
+			return false;
+		}
 	});
 
 	var tab_ids = [];
