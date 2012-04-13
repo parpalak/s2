@@ -704,7 +704,7 @@ $(document).ready(function()
 			crrm : {
 				input_width_limit : 1000,
 				move : {
-					check_move : function (m) { console.log(m); return (typeof(m.np.attr('id')) != 'undefined' && m.np.attr('id').substring(0, 5) == 'node_'); }
+					check_move : function (m) { return (typeof(m.np.attr('id')) != 'undefined' && m.np.attr('id').substring(0, 5) == 'node_'); }
 				}
 			},
 			ui : {
