@@ -354,19 +354,19 @@ var PopupMessages = {
 			var eInnerDiv = document.createElement('DIV');
 			eDiv.appendChild(eInnerDiv);
 
-			var eImg = document.createElement('A');
-			eImg.className = 'cross';
-			eImg.setAttribute('href', '#');
-			eImg.setAttribute('tabindex', '0');
-			eImg.onclick = function () { eDiv.parentNode.removeChild(eDiv); return false; };
-			eInnerDiv.appendChild(eImg);
+			var eCross = document.createElement('A');
+			eCross.className = 'cross';
+			eCross.setAttribute('href', '#');
+			eCross.setAttribute('tabindex', '0');
+			eCross.onclick = function () { eDiv.parentNode.removeChild(eDiv); return false; };
+			eInnerDiv.appendChild(eCross);
 		}
 		else
 		{
 			var eInnerDiv = eDiv.firstChild;
-			var eImg = eInnerDiv.firstChild;
+			var eCross = eInnerDiv.firstChild;
 		}
-		eImg.focus();
+		eCross.focus();
 
 		if (sId)
 		{

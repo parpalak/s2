@@ -236,7 +236,7 @@ var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.get
 var template = '<?php echo s2_jsvarencode($template); ?>';
 var new_page_pos = '<?php echo s2_jsvarencode(S2_ADMIN_NEW_POS); ?>';
 
-Make_Tabsheet();
+makeTabsheet();
 
 <?php
 	s2_preload_editor();

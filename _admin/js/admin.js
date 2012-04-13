@@ -67,7 +67,7 @@ var ua = navigator.userAgent.toLowerCase();
 var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
 var isSafari = ua.indexOf('safari') != -1;
 var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
-var SelectTab1 = function () {};
+var selectTabN = function () {};
 
 $(function ()
 {
@@ -96,7 +96,7 @@ $(function ()
 			e.preventDefault();
 			e.stopPropagation();
 
-			SelectTab1(ch);
+			selectTabN(ch);
 
 			return false;
 		}
@@ -104,10 +104,10 @@ $(function ()
 
 	var tab_ids = [];
 	$('body > dl.tabsheets > dt').each(function (i) { tab_ids[(i + 1).toString()] = this.id; });
-	SelectTab1 = function SelectTab1 (ch) 
+	selectTabN = function  (ch) 
 	{
 		if (tab_ids[ch])
-			SelectTab($('#' + tab_ids[ch])[0]);
+			selectTab('#' + tab_ids[ch]);
 	};
 
 	$('body').on('keydown', '.full_tab_form input[type="text"], .full_tab_form input[type="checkbox"], .full_tab_form select', function(e)
@@ -348,10 +348,10 @@ function CheckPage ()
 {
 	if (document.location.hash != cur_page)
 	{
-		var new_page = document.location.hash.substring(1)
+		var new_page = document.location.hash.substring(1);
 		if (new_page.indexOf('-') != -1)
-			SelectTab(document.getElementById(new_page.split('-')[0] + '_tab'), false);
-		SelectTab(document.getElementById(new_page + '_tab'), true);
+			selectTab('#' + new_page.split('-')[0] + '_tab', false);
+		selectTab('#' + new_page + '_tab');
 	}
 }
 
@@ -833,7 +833,7 @@ var LoadArticle, ReloadArticle;
 				});
 
 			Changes.commit(document.artform);
-			SelectTab(document.getElementById('edit_tab'), true);
+			selectTab('#edit_tab');
 			sLoadedURI = sURI;
 
 			Hooks.run('request_article_end');
@@ -844,7 +844,7 @@ var LoadArticle, ReloadArticle;
 	{
 		if (document.artform && Changes.present(document.artform))
 		{
-			SelectTab(document.getElementById('edit_tab'), true);
+			selectTab('#edit_tab');
 			PopupMessages.show(s2_lang.unsaved, [
 				{
 					name: s2_lang.save_and_open,
@@ -887,7 +887,7 @@ function LoadComments (iId)
 	GETAsyncRequest(sUrl + 'action=load_comments&id=' + iId, function (http, data)
 	{
 		$('#comm_div').html(data);
-		SelectTab(document.getElementById('comm_tab'), true);
+		selectTab('#comm_tab');
 	});
 	return false;
 }
@@ -1217,7 +1217,7 @@ var slEditorSelection = null;
 function GetImage ()
 {
 	slEditorSelection = get_selection(document.artform['page[text]']);
-	SelectTab(document.getElementById('pict_tab'), true);
+	selectTab('#pict_tab');
 	loadPictman();
 	return false;
 }
@@ -1300,7 +1300,7 @@ function ReturnImage(s, w, h)
 		replace(/'/g, '&#039;').
 		replace(/"/g, '&quot;');
  
-	SelectTab(document.getElementById('edit_tab'), true);
+	selectTab('#edit_tab');
 	var sOpenTag = '<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
 	InsertTag(sOpenTag, sCloseTag, slEditorSelection);
 }
@@ -1508,64 +1508,36 @@ function InstallExtension (sId, sMessage)
 }
 
 //=======================[Tabs management]======================================
-// Originally written by Vladimir Tokmakov | Copyright (c) Art. Lebedev | http://www.artlebedev.ru/
+// Based on http://www.artlebedev.ru/tools/technogrette/js/tabsheets/
 
-function Make_Tabsheet ()
+function makeTabsheet ()
 {
-	var eToSwitch = false;
-	var aeDl = document.getElementsByTagName("DL");
 	var sActiveTab = document.location.hash + '_tab';
-
 	if (sActiveTab.indexOf('-') != -1)
 		sActiveTab += sActiveTab.split('-')[0] + '_tab';
 
-	for (var i = aeDl.length; i-- ;)
+	$('dl.tabsheets').each(function ()
 	{
-		if (aeDl[i].className != "tabsheets")
-			continue;
+		var eActive = null,
+			eFirst = null;
 
-		var aeDL_child = aeDl[i].childNodes,
-			bActivated = false;
-
-		for (var j = aeDL_child.length; j-- ;)
+		$(this).children('dt').each(function (i)
 		{
-			if (aeDL_child[j].nodeName != "DT")
-				continue;
+			this.unselectable = true;
+			$(this)
+				.click(function (e) {selectTab(e.target)})
+				.mousedown(function () {return false;});
 
-			var eDT = aeDL_child[j];
-			eDT.unselectable = true;
-			eDT.onmousedown = function (e)
-			{
-				var eTab = e ? e.target : window.event.srcElement;
-				SelectTab(eTab, true);
-				return false;
-			}
+			if (!i)
+				eFirst = this;
+			if (sActiveTab.indexOf(this.id) != -1)
+				eActive = this;
+		});
 
-			var eDD = eDT;
-			while (eDD = eDD.nextSibling)
-			{
-				if (eDD.nodeName != "DD")
-					continue;
-
-				if (!bActivated && !(-1 == sActiveTab.indexOf(eDT.id) && j > 4))
-				{
-					eDD.className = eDT.className = "active";
-					if (-1 == eDT.id.indexOf('-'))
-					{
-						eToSwitch = eDT;
-						if (sActiveTab == '_tab')
-							SetPage(eDT.id);
-					}
-					bActivated = true;
-				}
-
-				break;
-			}
-		}
-		if (eToSwitch)
-			OnSwitch(eToSwitch);
-	}
-	return true;
+		eActive = eActive || eFirst;
+		eActive.className = $(eActive).next('dd')[0].className = "active";
+		OnSwitch(eActive);
+	});
 }
 
 var iEditorScrollTop = 0, iPreviewHtmlScrollTop = null, iPreviewBodyScrollTop = null;
@@ -1686,43 +1658,30 @@ function OnBeforeSwitch (eTab)
 	$('#tree').jstree(sType != 'list_tab' ? 'disable_hotkeys' : 'enable_hotkeys');
 }
 
-function SelectTab(eTab, bAddToHistory)
+function selectTab (tab, bAddToHistory)
 {
-	var eSheet = eTab;
+	eTab = $(tab)[0];
+	var eSheet = $(tab).next('dd');
 
 	OnBeforeSwitch(eTab);
 
-	while (eSheet.nextSibling)
+	if (eSheet.hasClass('inactive'))
 	{
-		eSheet = eSheet.nextSibling;
-		if (eSheet.nodeName == "DD")
-			break;
-	}
+		eSheet.siblings('dt').attr('class', '');
+		eTab.className = 'active';
 
-	if (eSheet.className == "inactive")
-	{
-		eTab.className = "on";
-		var aeDL_child = eTab.parentNode.childNodes;
-		for (var i = aeDL_child.length; i-- ;)
-			if (aeDL_child[i].nodeName == "DT" && aeDL_child[i].className != "on")
-				aeDL_child[i].className = "";
-			else if (aeDL_child[i].nodeName == "DD" && aeDL_child[i].className != "inactive")
-			{
-				var aeDD_child = aeDL_child[i].childNodes;
-				for (var j = aeDD_child.length; j-- ;)
-					if (aeDD_child[j].nodeName == "DIV")
-						aeDD_child[j].setAttribute('data-scroll', aeDD_child[j].scrollTop);
+		eSheet.siblings('dd.active').children('div').each(function ()
+		{
+			$(this).attr('data-scroll', this.scrollTop);
+		})
+		.end().attr('class', 'inactive');
 
-				aeDL_child[i].className = "inactive";
-			}
-		eTab.className = "active";
-		eSheet.className = "active";
-		aeDD_child = eSheet.childNodes;
-		for (j = aeDD_child.length; j-- ;)
-			if (aeDD_child[j].nodeName == "DIV" && aeDD_child[j].getAttribute('data-scroll'))
-				aeDD_child[j].scrollTop = aeDD_child[j].getAttribute('data-scroll');
+		eSheet.attr('class', 'active').children('div').each(function ()
+		{
+			this.scrollTop = $(this).attr('data-scroll') || 0;
+		});
 	}
-	if (bAddToHistory)
+	if (bAddToHistory !== false)
 		SetPage(eTab.id);
 
 	OnSwitch(eTab);

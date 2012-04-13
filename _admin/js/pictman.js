@@ -63,7 +63,7 @@ $(function ()
 			if (parentWnd)
 			{
 				parentWnd.document.body.focus();
-				parentWnd.SelectTab1(ch);
+				parentWnd.selectTabN(ch);
 			}
 
 			return false;
