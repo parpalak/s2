@@ -111,7 +111,6 @@ $(function()
 	var folderTree = $('#folders')
 		.bind('before.jstree', function (e, data)
 		{
-			//console.log(data.func);
 			if (data.func === 'remove' && (!data.args[0].attr('data-path') || !confirm(str_replace('%s', folderTree.jstree('get_text', data.args[0]), s2_lang.delete_item))))
 			{
 				e.stopImmediatePropagation(); 
@@ -323,7 +322,7 @@ $(function()
 			{
 				var names = [];
 				fileTree.jstree('get_selected').each(function () { names.push(fileTree.jstree('get_text', this)); })
-				if (!confirm(str_replace('%s', names.join(', '), s2_lang.delete_file)))
+				if (names.length && !confirm(str_replace('%s', names.join(', '), s2_lang.delete_file)))
 				{
 					e.stopImmediatePropagation(); 
 					return false; 
