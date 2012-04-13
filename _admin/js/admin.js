@@ -67,6 +67,7 @@ var ua = navigator.userAgent.toLowerCase();
 var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
 var isSafari = ua.indexOf('safari') != -1;
 var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
+var SelectTab1 = function () {};
 
 $(function ()
 {
@@ -95,14 +96,19 @@ $(function ()
 			e.preventDefault();
 			e.stopPropagation();
 
-			SelectTab($('#' + tab_ids[ch])[0]);
+			SelectTab1(ch);
 
 			return false;
 		}
 	});
 
 	var tab_ids = [];
-	$('body > dl.tabsheets > dt').each(function (i) { tab_ids[(i + 1).toString()] = $(this).attr('id'); });
+	$('body > dl.tabsheets > dt').each(function (i) { tab_ids[(i + 1).toString()] = this.id; });
+	SelectTab1 = function SelectTab1 (ch) 
+	{
+		if (tab_ids[ch])
+			SelectTab($('#' + tab_ids[ch])[0]);
+	};
 
 	$('body').on('keydown', '.full_tab_form input[type="text"], .full_tab_form input[type="checkbox"], .full_tab_form select', function(e)
 	{

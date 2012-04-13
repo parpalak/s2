@@ -46,6 +46,31 @@ function strNatCmp (a, b)
 	return aa.length - bb.length;
 }
 
+var parentWnd = opener || window.top || null;
+
+$(function ()
+{
+	$(document).bind('keydown', function (e)
+	{
+		var key = e.keyCode || e.which,
+			ch = String.fromCharCode(key).toLowerCase();
+
+		if (e.ctrlKey && ch >= '1' && ch <= '9')
+		{
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (parentWnd)
+			{
+				parentWnd.document.body.focus();
+				parentWnd.SelectTab1(ch);
+			}
+
+			return false;
+		}
+	});
+});
+
 $(function()
 {
 	var path = '',
@@ -244,6 +269,10 @@ $(function()
 				});
 			}
 		})
+		.bind('focus', function ()
+		{
+			folderTree.jstree('set_focus');
+		})
 		.jstree({
 			crrm : {
 				input_width_limit : 1000
@@ -328,10 +357,8 @@ $(function()
 					str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
 					fExecDouble = function ()
 					{
-						if (window.top.ReturnImage)
-							window.top.ReturnImage(filePath, a[0],	a[1]);
-						else if (opener.ReturnImage)
-							opener.ReturnImage(filePath, a[0],	a[1]);
+						if (parentWnd.ReturnImage)
+							parentWnd.ReturnImage(filePath, a[0], a[1]);
 					}
 					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
@@ -376,6 +403,10 @@ $(function()
 					fileTree.jstree('refresh', -1);
 				}
 			});
+		})
+		.bind('focus', function ()
+		{
+			fileTree.jstree('set_focus');
 		})
 		.jstree({
 			ui : {

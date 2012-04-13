@@ -100,12 +100,12 @@ if ($s2_user['create_articles'])
 
 ?>
 			</div>
-			<div id="folders"></div>
+			<div id="folders" tabindex="0"></div>
 			<div id="finfo"></div>
 		</div>
 		<div id="file-wrap">
 			<div id="brd">
-				<div id="files"></div>
+				<div id="files" tabindex="0"></div>
 				<div id="loadstatus"></div>
 			</div>
 		</div>
