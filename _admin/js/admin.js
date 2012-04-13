@@ -714,7 +714,8 @@ $(document).ready(function()
 			hotkeys : {
 				'e' : editArticle,
 				'c' : showComments,
-				'n' : function () { createArticle(); return false; }
+				'n' : function () { createArticle(); return false; },
+				'f' : function () { $('#search_field').focus(); return false; }
 			},
 			json_data : {
 				ajax : {
