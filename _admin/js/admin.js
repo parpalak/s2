@@ -832,6 +832,38 @@ var LoadArticle, ReloadArticle;
 					}
 				});
 
+			$(document.forms['artform'].elements['page[text]']).keydown(function (e)
+			{
+				var key = e.keyCode || e.which,
+					ch = String.fromCharCode(key).toLowerCase();
+
+				if (e.ctrlKey)
+				{
+					if (ch == 'i')
+						TagSelection('em');
+					else if (ch == 'b')
+						TagSelection('strong');
+					else if (ch == 'q')
+						InsertParagraph('blockquote')
+					else if (ch == 'l')
+						InsertParagraph('')
+					else if (ch == 'e')
+						InsertParagraph('center')
+					else if (ch == 'r')
+						InsertParagraph('right')
+					else if (ch == 'j')
+						InsertParagraph('justify')
+					else if (ch == 'k')
+						InsertTag('<a href=&quot;&quot;>', '</a>');
+					else if (ch == 'p')
+						GetImage();
+					else
+						return;
+					return false;
+				}
+			});
+
+
 			Changes.commit(document.artform);
 			selectTab('#edit_tab');
 			sLoadedURI = sURI;
