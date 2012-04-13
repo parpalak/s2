@@ -382,7 +382,7 @@ function s2_output_article_form ($id)
 
 ?>
 		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
-			<textarea id="arttext" class="full_textarea" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
+			<textarea tabindex="1" id="arttext" class="full_textarea" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
 		</div>
 	</div>
 </form>

@@ -240,18 +240,20 @@ hr {
 		font-weight: bold;
 		white-space: nowrap;
 		}
-	#popup_message img {
+	#popup_message .cross {
+		display: block;
 		width: 16px;
 		height: 16px;
 		vertical-align: top;
 		background: url(../i/icons.png) 0px -16px;
+		background-size: auto;
 		margin-left: 1em;
 		float: right;
 		position: relative;
 		left: 19px;
 		margin-left: -16px
 		}
-		#popup_message img:hover {
+		#popup_message .cross:hover {
 			background-color: #fff;
 			cursor: pointer;
 			cursor: hand;

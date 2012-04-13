@@ -354,14 +354,19 @@ var PopupMessages = {
 			var eInnerDiv = document.createElement('DIV');
 			eDiv.appendChild(eInnerDiv);
 
-			var eImg = document.createElement('IMG');
-			eImg.setAttribute('src', 'i/1.gif');
-			eImg.setAttribute('alt', '');
-			eImg.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
+			var eImg = document.createElement('A');
+			eImg.className = 'cross';
+			eImg.setAttribute('href', '#');
+			eImg.setAttribute('tabindex', '0');
+			eImg.onclick = function () { eDiv.parentNode.removeChild(eDiv); return false; };
 			eInnerDiv.appendChild(eImg);
 		}
 		else
+		{
 			var eInnerDiv = eDiv.firstChild;
+			var eImg = eInnerDiv.firstChild;
+		}
+		eImg.focus();
 
 		if (sId)
 		{
@@ -399,6 +404,7 @@ var PopupMessages = {
 			var eA = document.createElement('A');
 			eA.setAttribute('class', 'action');
 			eA.setAttribute('href', '#');
+			eA.setAttribute('tabindex', '0');
 			eA.appendChild(document.createTextNode(aActions[i].name));
 			(function (action, once)
 			{

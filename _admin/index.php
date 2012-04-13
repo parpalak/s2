@@ -128,7 +128,7 @@ $padding = 2.5;
 						<input class="inactive" type="text" width="30" name="search" id="search_field" value="<?php echo $lang_admin['Search']?>" />
 					</div>
 					<?php s2_context_buttons(); ?>
-					<div id="tree" class="treetree"></div>
+					<div id="tree" class="treetree" tabindex="0"></div>
 				</div>
 			</div>
 		</dd>
