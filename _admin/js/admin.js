@@ -351,7 +351,8 @@ function CheckPage ()
 		var new_page = document.location.hash.substring(1);
 		if (new_page.indexOf('-') != -1)
 			selectTab('#' + new_page.split('-')[0] + '_tab', false);
-		selectTab('#' + new_page + '_tab');
+		if (selectTab('#' + new_page + '_tab') === false)
+			document.location.hash = cur_page;
 	}
 }
 
@@ -1692,7 +1693,10 @@ function OnBeforeSwitch (eTab)
 
 function selectTab (tab, bAddToHistory)
 {
-	eTab = $(tab)[0];
+	var eTab = $(tab)[0];
+	if (typeof eTab == 'undefined')
+		return false;
+
 	var eSheet = $(tab).next('dd');
 
 	OnBeforeSwitch(eTab);
@@ -1717,4 +1721,6 @@ function selectTab (tab, bAddToHistory)
 		SetPage(eTab.id);
 
 	OnSwitch(eTab);
+
+	return true;
 }
