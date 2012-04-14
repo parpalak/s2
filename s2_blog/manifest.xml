@@ -643,8 +643,7 @@ $new_comment_count += $s2_db->result($result);
 		<hook id="fn_preload_editor_start"><![CDATA[
 if (!empty($_GET['path']) && ($_GET['path'] == S2_BLOG_URL.'/' || $_GET['path'] == S2_BLOG_URL))
 {
-	echo $lang_admin['Empty editor info'];
-	echo '<script type="text/javascript">document.location.hash = "#blog";</script>';
+	echo 'document.location.hash = "#blog";';
 	return true;
 }
 elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
