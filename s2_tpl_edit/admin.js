@@ -15,7 +15,7 @@ var s2_tpl_edit = (function ()
 		render: function (data)
 		{
 			var eDiv = $('#s2_tpl_edit_div').html(data);
-			if (CodeMirror)
+			if (typeof CodeMirror != 'undefined')
 				instance = CodeMirror.fromTextArea(eDiv.find('textarea')[0],
 					{mode: "application/x-httpd-php", indentUnit: 4, indentWithTabs: true, lineWrapping: true});
 		},
