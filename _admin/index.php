@@ -236,16 +236,18 @@ var time_shift = Date.parse("<?php echo date('d M Y H:i:s'); ?>") - cur_date.get
 var template = '<?php echo s2_jsvarencode($template); ?>';
 var new_page_pos = '<?php echo s2_jsvarencode(S2_ADMIN_NEW_POS); ?>';
 
-makeTabsheet();
-
 <?php
+
 	s2_preload_editor();
 	if (isset($premoderation['script']))
 		echo $premoderation['script'];
 	echo s2_get_sessions($login, $session_id);
 
 	($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null;
+
 ?>
+makeTabsheet();
+<?php ($hook = s2_hook('ai_js_end')) ? eval($hook) : null; ?>
 </script>
 </body>
 </html>
