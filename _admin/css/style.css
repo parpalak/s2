@@ -17,6 +17,16 @@
 	box-sizing: border-box;
 	}
 
+.r-float label:after,
+.loginform  label:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+	}
+
 /*===========================[General styles for height: 100%]================*/
 
 html,
@@ -601,14 +611,6 @@ body > .tabsheets {
 		display: block;
 		margin: 0 0 0.5em;
 		}
-		.r-float label:after {
-			content: ".";
-			display: block;
-			clear: both;
-			visibility: hidden;
-			line-height: 0;
-			height: 0;
-			}
 		.r-float label.error {
 			-moz-box-shadow: 0 0 0 2px #f66;
 			-webkit-box-shadow: 0 0 0 2px #f66;
@@ -974,9 +976,10 @@ form center {
 /*=======================[Login screen]=======================================*/
 
 #login_wrap {
+	font-size: 75%;
 	background: #fff;
-	width: 26.5em;
-	margin: -4em auto 0;
+	width: 26em;
+	margin: -5em auto 0;
 	height: auto;
 	min-height: 0;
 	position: relative;
@@ -1004,9 +1007,9 @@ form center {
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
 	border: 1px solid #ccc;
-	-moz-box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
-	-webkit-box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
-	box-shadow: 0px 4px 15px 2px #eee, inset 0px 0px 2px 0px #fff;
+	-moz-box-shadow: 0 3px 15px -4px #aaa, inset 0 0 2px #fff;
+	-webkit-box-shadow: 0 3px 15px -4px #aaa, inset 0 0 2px #fff;
+	box-shadow: 0 3px 15px -4px #aaa, inset 0 0 2px #fff;
 	}
 	.loginform label {
 		text-align: left;
@@ -1014,15 +1017,14 @@ form center {
 		padding: 0.2em 0;
 		}
 		.loginform label > input {
+			float: right;
 			width: 15em;
 			margin: 0;
 			}
 		.loginform span {
 			display: block;
 			float: left;
-			width: 6em;
-			margin-right: 0.5em;
-			text-shadow: 0px 1px 0 #fff;
+			text-shadow: 0 1px 0 #fff;
 			}
 
 .jstree a { background: none; }
