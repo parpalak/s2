@@ -658,8 +658,15 @@ function s2_parse_page_url ($request_uri)
 	if (isset($request_array[1]) && $request_array[1] == S2_TAGS_URL)
 	{
 		// We process tags pages in a different way
-		$page = s2_make_tags_pages($request_array);
-		$template = s2_get_template('site.php');
+		$template_id = 'site.php';
+
+		$return = ($hook = s2_hook('fn_s2_parse_page_url_pre_tags')) ? eval($hook) : null;
+		if ($return)
+			$page = $return;
+		else
+			$page = s2_make_tags_pages($request_array);
+
+		$template = s2_get_template($template_id);
 		return;
 	}
 
