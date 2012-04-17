@@ -782,7 +782,7 @@ function s2_blog_last_post ($num_post)
 	foreach ($posts as $post)
 	{
 		$link = S2_BLOG_PATH.date('Y/m/d/', $post['create_time']).urlencode($post['url']);
-		$tag_prefix = $post['tags'] ? '<small>'.preg_replace('/<a.*?>(.*?)<\/a>/', "\\1", $post['tags']).' &rarr;</small> ' : '';
+		$tag_prefix = $post['tags'] ? '<small>'.str_replace('<a ', '<a class="preview_section" ', $post['tags']).' &rarr;</small> ' : '';
 
 		($hook = s2_hook('fn_s2_blog_last_post_pre_post_merge')) ? eval($hook) : null;
 
