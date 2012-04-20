@@ -184,7 +184,7 @@ function s2_for_premoderation ()
 
 	$output = array(
 		'content'	=> s2_comment_menu_links('new').s2_show_comments('new'),
-		'script'	=> 'PopupMessages.show(\''.$lang_admin['Unchecked comments'].'\', [{name: \''.$lang_admin['View comments'].'\', action: function () {SelectTab(document.getElementById(\'comm_tab\'), true); LoadTable(\'load_new_comments\', \'comm_div\');}, once: true}]);'."\n",
+		'script'	=> 'PopupMessages.show(\''.$lang_admin['Unchecked comments'].'\', [{name: \''.$lang_admin['View comments'].'\', action: function () {selectTab(\'#comm_tab\'); LoadTable(\'load_new_comments\', \'comm_div\');}, once: true}]);'."\n",
 	);
 
 	($hook = s2_hook('fn_for_premoderation_end')) ? eval($hook) : null;
