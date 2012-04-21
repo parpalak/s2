@@ -62,8 +62,9 @@ $(function ()
 
 			if (parentWnd)
 			{
-				parentWnd.document.body.focus();
 				parentWnd.selectTabN(ch);
+				parentWnd.focus();
+				parentWnd.document.body.focus();
 			}
 
 			return false;

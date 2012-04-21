@@ -101,7 +101,7 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>
 </head>
 
-<body>
+<body tabindex="0">
 	<div id="logout">
 		<div id="loading"></div>
 		<?php printf($lang_admin['Welcome'], $login)."\n"; ?><br />
