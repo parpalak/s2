@@ -1549,7 +1549,7 @@ function makeTabsheet ()
 	if (sActiveTab.indexOf('-') != -1)
 		sActiveTab += sActiveTab.split('-')[0] + '_tab';
 
-	$('dl.tabsheets').each(function ()
+	$('dl.tabsheets').each(function (j)
 	{
 		var eActive = null,
 			eFirst = null;
@@ -1568,8 +1568,14 @@ function makeTabsheet ()
 		});
 
 		eActive = eActive || eFirst;
-		eActive.className = $(eActive).next('dd')[0].className = "active";
-		OnSwitch(eActive);
+		eActive.className = $(eActive).next('dd')[0].className = 'active';
+
+		if (!j || eActive.id.indexOf(document.location.hash.substring(1)) != -1)
+		{
+			OnSwitch(eActive);
+			if (sActiveTab == '_tab')
+				SetPage(eActive.id);
+		}
 	});
 }
 
