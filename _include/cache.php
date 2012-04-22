@@ -24,7 +24,7 @@ function s2_clear_cache ()
 }
 
 //
-// Generate the config cache PHP script
+// Generate the config cache
 //
 function s2_generate_config_cache ($load = false)
 {
@@ -83,7 +83,7 @@ function s2_generate_config_cache ($load = false)
 }
 
 //
-// Generate the hooks cache PHP script
+// Generate the hooks cache
 //
 function s2_generate_hooks_cache ()
 {
@@ -168,19 +168,19 @@ function s2_generate_hooks_cache ()
 	else
 		error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
 }
-/*
+
 
 //
 // Generate the updates cache PHP script
 //
-function generate_updates_cache()
+function s2_generate_updates_cache ()
 {
-	global $s2_db, $s2_config;
+	global $s2_db;
 
-	$return = ($hook = s2_hook('ch_fn_generate_updates_cache_start')) ? eval($hook) : null;
+	$return = ($hook = s2_hook('fn_generate_updates_cache_start')) ? eval($hook) : null;
 	if ($return != null)
-		return;
-
+		return $return;
+/*
 	// Get a list of installed hotfix extensions
 	$query = array(
 		'SELECT'	=> 'e.id',
@@ -188,46 +188,64 @@ function generate_updates_cache()
 		'WHERE'		=> 'e.id LIKE \'hotfix_%\''
 	);
 
-	($hook = s2_hook('ch_fn_generate_updates_cache_qr_get_hotfixes')) ? eval($hook) : null;
+	($hook = s2_hook('fn_generate_updates_cache_qr_get_hotfixes')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	$num_hotfixes = $s2_db->num_rows($result);
 
 	$hotfixes = array();
-	for ($i = 0; $i < $num_hotfixes; ++$i)
-		$hotfixes[] = urlencode($s2_db->result($result, $i));
+	while ($hotfix = $s2_db->fetch_assoc($result))
+		$hotfixes[] = urlencode($hotfix['id']);
 
-	// Contact the punbb.informer.com updates service
-	//$result = get_remote_file('http://punbb.informer.com/update/?type=xml&version='.urlencode($s2_config['o_cur_version']).'&hotfixes='.implode(',', $hotfixes), 8);
+	$result = s2_get_remote_file('http://s2cms.ru/update/?type=xml&version='.urlencode(S2_VERSION).'&hotfixes='.implode(',', $hotfixes), 8);
+*/
+	// Contact the S2 updates service
+	$result = s2_get_remote_file('http://s2cms.ru/update/index.php?version='.urlencode(S2_VERSION), 8);
 
 	// Make sure we got everything we need
-	if ($result != null && strpos($result['content'], '</updates>') !== false)
+	if ($result != null && strpos($result['content'], '</s2_updates>') !== false)
 	{
 		if (!defined('S2_XML_FUNCTIONS_LOADED'))
 			require S2_ROOT.'_include/xml.php';
 
-		$output = xml_to_array(s2_trim($result['content']));
-		$output = current($output);
+		$update_info = s2_xml_to_array(trim($result['content']));
 
-		if (!empty($output['hotfix']) && is_array($output['hotfix']) && !is_array(current($output['hotfix'])))
-			$output['hotfix'] = array($output['hotfix']);
-
+		$output['version'] = $update_info['s2_updates']['lastversion'];
 		$output['cached'] = time();
 		$output['fail'] = false;
 	}
-	else	// If the update check failed, set the fail flag
+	else
 		$output = array('cached' => time(), 'fail' => true);
 
-	// This hook could potentially (and responsibly) be used by an extension to do its own little update check
-	($hook = s2_hook('ch_fn_generate_updates_cache_write')) ? eval($hook) : null;
+	($hook = s2_hook('fn_generate_updates_cache_write')) ? eval($hook) : null;
 
 	// Output update status as PHP code
-	$fh = @fopen(S2_CACHE_DIR.'cache_updates.php', 'wb');
-	if (!$fh)
-		error('Unable to write updates cache file to cache directory. Please make sure PHP has write access to the directory \'_cache\'.', __FILE__, __LINE__);
+	if (!defined('S2_DISABLE_CACHE'))
+	{
+		$fh = @fopen(S2_CACHE_DIR.'cache_updates.php', 'a+b');
 
-	fwrite($fh, '<?php'."\n\n".'if (!defined(\'S2_UPDATES_LOADED\')) define(\'S2_UPDATES_LOADED\', 1);'."\n\n".'$s2_updates = '.var_export($output, true).';'."\n\n".'?>');
+		if (!$fh)
+		{
+			// Try to remove the file if it's not writable
+			@unlink(S2_CACHE_DIR.'cache_updates.php');
+			$fh = @fopen(S2_CACHE_DIR.'cache_updates.php', 'a+b');
+		}
 
-	fclose($fh);
+		if ($fh)
+		{
+			if (flock($fh, LOCK_EX | LOCK_NB))
+			{
+				ftruncate($fh, 0);
+				fwrite($fh, '<?php'."\n\n".'return '.var_export($output, true).';'."\n");
+				fflush($fh);
+				fflush($fh);
+				flock($fh, LOCK_UN);
+			}
+			fclose($fh);
+		}
+		else
+			error('Unable to write updates cache file to cache directory. Please make sure PHP has write access to the directory \''.S2_CACHE_DIR.'\'.', __FILE__, __LINE__);
+	}
+
+	return $output;
 }
-*/
+
 define('S2_CACHE_FUNCTIONS_LOADED', 1);
