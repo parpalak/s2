@@ -744,12 +744,6 @@ $(document).ready(function()
 			},
 			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys']
 		});
-
-	GETAsyncRequest(sUrl + 'action=check_updates', function (http, data)
-	{
-		if (data.is_update)
-			PopupMessages.show(data.message);
-	});
 })
 .ajaxStart(function ()
 {

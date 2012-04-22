@@ -247,7 +247,21 @@ var new_page_pos = '<?php echo s2_jsvarencode(S2_ADMIN_NEW_POS); ?>';
 
 ?>
 makeTabsheet();
-<?php ($hook = s2_hook('ai_js_end')) ? eval($hook) : null; ?>
+<?php
+
+	($hook = s2_hook('ai_js_end')) ? eval($hook) : null;
+
+	if (S2_ADMIN_UPDATES)
+	{
+?>
+GETAsyncRequest(sUrl + 'action=check_updates', function (http, data)
+{
+	if (data.is_update)
+		PopupMessages.show(data.message);
+});
+<?php
+	}
+?>
 </script>
 </body>
 </html>
