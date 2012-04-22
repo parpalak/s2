@@ -11,7 +11,7 @@
 
 
 define('S2_VERSION', '1.0b3');
-define('S2_DB_REVISION', 9);
+define('S2_DB_REVISION', 10);
 define('MIN_PHP_VERSION', '4.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
@@ -954,7 +954,7 @@ else
 	$admin_uid = $s2_db->insert_id();
 
 	// Enable/disable automatic check for updates depending on PHP environment (require cURL, fsockopen or allow_url_fopen)
-	//$check_for_updates = (function_exists('curl_init') || function_exists('fsockopen') || in_array(strtolower(@ini_get('allow_url_fopen')), array('on', 'true', '1'))) ? 1 : 0;
+	$check_for_updates = (function_exists('curl_init') || function_exists('fsockopen') || in_array(strtolower(@ini_get('allow_url_fopen')), array('on', 'true', '1'))) ? 1 : 0;
 
 	// Insert config data
 	$config = array(
@@ -973,6 +973,7 @@ else
 		'S2_PREMODERATION'			=> "'0'",
 		'S2_ADMIN_COLOR'			=> "'#eeeeee'",
 		'S2_ADMIN_NEW_POS'			=> "'0'",
+		'S2_ADMIN_UPDATES'			=> "'".$check_for_updates."'",
 		'S2_LOGIN_TIMEOUT'			=> "'60'",
 		'S2_DB_REVISION'			=> "'".S2_DB_REVISION."'",
 	);

@@ -87,6 +87,21 @@ if (S2_DB_REVISION < 9)
 	define('S2_ADMIN_NEW_POS', '0');
 }
 
+if (S2_DB_REVISION < 10)
+{
+	$check_for_updates = (function_exists('curl_init') || function_exists('fsockopen') || in_array(strtolower(@ini_get('allow_url_fopen')), array('on', 'true', '1'))) ? '1' : '0';
+
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\'S2_ADMIN_UPDATES\', \''.$check_for_updates.'\''
+	);
+
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	define('S2_ADMIN_UPDATES', $check_for_updates);
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',
