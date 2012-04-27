@@ -88,17 +88,17 @@
 		text-wrap: suppress;
 		word-wrap: break-word;
 		}
-		#files li input {
+		#files .jstree-rename-input {
 			width: 84px !important;
 			min-width: 0;
-			font: 1em/1 Tahoma, Verdana, Arial, Helvetica, sans-serif;
+			font: 1em/1 Tahoma, Verdana, Arial, Helvetica, sans-serif !important;
 			text-align: center;
 			margin: 0 !important;
 			padding: 0 !important;
 			height: auto !important;
 			position: relative !important;
 			left: 0 !important;
-			top: -2px !important;
+			top: -1px !important;
 			}
 
 #file-wrap {
