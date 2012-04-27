@@ -282,7 +282,8 @@ $(function()
 				initially_select : ['node_1']
 			},
 			hotkeys : {
-				'n' : function () { createFolder(); return false; }
+				'n' : function () { createFolder(); return false; },
+				'f2' : function () { this.rename(this.data.ui.last_selected || this.data.ui.hovered); return false;}
 			},
 			json_data : {
 				ajax : {
@@ -424,7 +425,8 @@ $(function()
 						fileTree.jstree('select_node', this);
 					});
 					return false;
-				}
+				},
+				'f2' : function () { this.rename(this.data.ui.last_selected || this.data.ui.hovered); return false;}
 			},
 			json_data : {
 				ajax : {

@@ -722,7 +722,8 @@ $(document).ready(function()
 				'e' : editArticle,
 				'c' : showComments,
 				'n' : function () { createArticle(); return false; },
-				'f' : function () { $('#search_field').focus(); return false; }
+				'f' : function () { $('#search_field').focus(); return false; },
+				'f2' : function () { this.rename(this.data.ui.last_selected || this.data.ui.hovered); return false;}
 			},
 			json_data : {
 				ajax : {
