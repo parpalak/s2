@@ -19,6 +19,8 @@
 	<description>Allows to edit templates in the admin panel.</description>
 	<author>Roman Parpalak</author>
 
+	<adminaffected>1</adminaffected>
+
 	<minversion>1.0b3</minversion>
 	<maxtestedon>1.0b3</maxtestedon>
 
