@@ -102,6 +102,11 @@ if (S2_DB_REVISION < 10)
 	define('S2_ADMIN_UPDATES', $check_for_updates);
 }
 
+if (S2_DB_REVISION < 11)
+{
+	$s2_db->add_field('extensions', 'admin_affected', 'TINYINT(1) UNSIGNED', false, '0', 'author');
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',

@@ -11,7 +11,7 @@
 
 
 define('S2_VERSION', '1.0b3');
-define('S2_DB_REVISION', 10);
+define('S2_DB_REVISION', 11);
 define('MIN_PHP_VERSION', '4.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
@@ -537,6 +537,11 @@ else
 				'datatype'		=> 'VARCHAR(50)',
 				'allow_null'	=> false,
 				'default'		=> '\'\''
+			),
+			'admin_affected'		=> array(
+				'datatype'		=> 'TINYINT(1) UNSIGNED',
+				'allow_null'	=> false,
+				'default'		=> '0'
 			),
 			'uninstall'			=> array(
 				'datatype'		=> 'TEXT',

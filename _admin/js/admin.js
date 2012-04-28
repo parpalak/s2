@@ -1493,7 +1493,7 @@ function DeleteTag (iId, sName)
 	return false;
 }
 
-//=======================[Options tab]==========================================
+//=======================[Admin tabs]===========================================
 
 function SaveOptions ()
 {
@@ -1504,41 +1504,33 @@ function SaveOptions ()
 	return false;
 }
 
-//=======================[Extensions tab]=======================================
-
-function FlipExtension (sId)
+function changeExtension (sAction, sId, sMessage, iAdminAffected)
 {
-	GETAsyncRequest(sUrl + 'action=flip_extension&id=' + sId, function (http)
+	if (sAction == 'install_extension')
 	{
-		document.getElementById('ext_div').innerHTML = http.responseText;
-	});
-	return false;
-}
-
-function UninstallExtension (sId, sMessage)
-{
-	if (!confirm(str_replace('%s', sId, s2_lang.delete_extension)))
-		return false;
-
-	if (sMessage != '' && !confirm(str_replace('%s', sMessage, s2_lang.uninstall_message)))
-		return false;
-
-	GETAsyncRequest(sUrl + 'action=uninstall_extension&id=' + sId, function (http)
+		if (!confirm((sMessage != '' ? str_replace('%s', sMessage, s2_lang.install_message) : '') + str_replace('%s', sId, s2_lang.install_extension)))
+			return false;
+	}
+	else if (sAction == 'uninstall_extension')
 	{
-		document.getElementById('ext_div').innerHTML = http.responseText;
-	});
+		if (!confirm(str_replace('%s', sId, s2_lang.delete_extension)))
+			return false;
 
-	return false;
-}
+		if (sMessage != '' && !confirm(str_replace('%s', sMessage, s2_lang.uninstall_message)))
+			return false;
+	}
 
-function InstallExtension (sId, sMessage)
-{
-	if (!confirm((sMessage != '' ? str_replace('%s', sMessage, s2_lang.install_message) : '') + str_replace('%s', sId, s2_lang.install_extension)))
-		return false;
-
-	GETAsyncRequest(sUrl + 'action=install_extension&id=' + sId, function (http)
+	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + sId, function (http, data)
 	{
-		document.getElementById('ext_div').innerHTML = http.responseText;
+		$('#ext_div').html(data);
+		if (iAdminAffected)
+			PopupMessages.show(str_replace('%s', sId, s2_lang.reload_required), [
+				{
+					name: s2_lang.reload_now,
+					action: document.location.reload,
+					once: true
+				}
+			], 0, 'extensions.' + sId);
 	});
 
 	return false;

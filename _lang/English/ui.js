@@ -19,6 +19,9 @@ var s2_lang = {
 	delete_extension	: 'Do you really want to uninstall the extention “%s”?',
 	uninstall_message	: 'Read carefully before uninstalling:\n\n%s\n\nDo you want to continue uninstallation?',
 
+	reload_required		: 'Control panel is to be reloaded in order to display changes related to the extension “%s”.',
+	reload_now			: 'Reload now',
+
 	unknown_error		: 'Unknown error',
 	server_response		: 'Something is broken. Please report the conditions when error occurs to administrators or developers and attach the server response:',
 

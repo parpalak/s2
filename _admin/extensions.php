@@ -111,7 +111,8 @@ function s2_extension_list ()
 					foreach ($install_notes as $index => $cur_note)
 						$install_notes[$index] = ($index + 1).'. '.$cur_note;
 
-				$buttons['install'] = '<button class="bitbtn '.(isset($inst_exts[$entry]['version']) ? 'upgr_ext' : 'inst_ext').'" onclick="return InstallExtension(\''.s2_htmlencode(addslashes($entry)).'\', \''.implode('\\n', $install_notes).'\');" />'.(isset($inst_exts[$entry]['version']) ? $lang_admin_ext['Upgrade extension'] : $lang_admin_ext['Install extension']).'</button>';
+				$admin_affected = isset($ext_data['extension']['adminaffected']) && $ext_data['extension']['adminaffected'] == 1 ? '1' : '0';
+				$buttons['install'] = '<button class="bitbtn '.(isset($inst_exts[$entry]['version']) ? 'upgr_ext' : 'inst_ext').'" onclick="return changeExtension(\'install_extension\', \''.s2_htmlencode(addslashes($entry)).'\', \''.implode('\\n', $install_notes).'\', '.$admin_affected.');">'.(isset($inst_exts[$entry]['version']) ? $lang_admin_ext['Upgrade extension'] : $lang_admin_ext['Install extension']).'</button>';
 
 				$ext_item[] = '<div class="extension available">'.
 					'<div class="info"><h3>'.s2_htmlencode($ext_data['extension']['title']).sprintf($lang_admin_ext['Version'], $ext_data['extension']['version']).'</h3>'.
@@ -152,8 +153,8 @@ function s2_extension_list ()
 			continue;
 
 		$buttons = array(
-			'flip'		=> '<button class="bitbtn flip_ext" onclick="return FlipExtension(\''.s2_htmlencode(addslashes($id)).'\');" />'.($ext['disabled'] != '1' ? $lang_admin_ext['Disable'] : $lang_admin_ext['Enable']).'</button>',
-			'uninstall'	=> '<button class="bitbtn uninst_ext" onclick="return UninstallExtension(\''.s2_htmlencode(addslashes($id)).'\', \''.s2_htmlencode(addslashes($ext['uninstall_note'])).'\');" />'.$lang_admin_ext['Uninstall'].'</button>'
+			'flip'		=> '<button class="bitbtn flip_ext" onclick="return changeExtension(\'flip_extension\', \''.s2_htmlencode(addslashes($id)).'\', \'\', '.$ext['admin_affected'].');">'.($ext['disabled'] != '1' ? $lang_admin_ext['Disable'] : $lang_admin_ext['Enable']).'</button>',
+			'uninstall'	=> '<button class="bitbtn uninst_ext" onclick="return changeExtension(\'uninstall_extension\', \''.s2_htmlencode(addslashes($id)).'\', \''.s2_htmlencode(addslashes($ext['uninstall_note'])).'\', '.$ext['admin_affected'].');">'.$lang_admin_ext['Uninstall'].'</button>'
 		);
 
 		$extra_info = '';
@@ -290,7 +291,7 @@ function s2_install_extension ($id)
 		// Update the existing extension
 		$query = array(
 			'UPDATE'	=> 'extensions',
-			'SET'		=> 'title=\''.$s2_db->escape($ext_data['extension']['title']).'\', version=\''.$s2_db->escape($ext_data['extension']['version']).'\', description=\''.$s2_db->escape($ext_data['extension']['description']).'\', author=\''.$s2_db->escape($ext_data['extension']['author']).'\', uninstall='.$uninstall_code.', uninstall_note='.$uninstall_note.', dependencies=\'|'.implode('|', $ext_data['extension']['dependencies']).'|\'',
+			'SET'		=> 'title=\''.$s2_db->escape($ext_data['extension']['title']).'\', version=\''.$s2_db->escape($ext_data['extension']['version']).'\', description=\''.$s2_db->escape($ext_data['extension']['description']).'\', author=\''.$s2_db->escape($ext_data['extension']['author']).'\', admin_affected=\''.(isset($ext_data['extension']['adminaffected']) && $ext_data['extension']['adminaffected'] == 1 ? '1' : '0').'\', uninstall='.$uninstall_code.', uninstall_note='.$uninstall_note.', dependencies=\'|'.implode('|', $ext_data['extension']['dependencies']).'|\'',
 			'WHERE'		=> 'id=\''.$s2_db->escape($id).'\''
 		);
 
@@ -318,9 +319,9 @@ function s2_install_extension ($id)
 
 		// Add the new extension
 		$query = array(
-			'INSERT'	=> 'id, title, version, description, author, uninstall, uninstall_note, dependencies',
+			'INSERT'	=> 'id, title, version, description, author, admin_affected, uninstall, uninstall_note, dependencies',
 			'INTO'		=> 'extensions',
-			'VALUES'	=> '\''.$s2_db->escape($ext_data['extension']['id']).'\', \''.$s2_db->escape($ext_data['extension']['title']).'\', \''.$s2_db->escape($ext_data['extension']['version']).'\', \''.$s2_db->escape($ext_data['extension']['description']).'\', \''.$s2_db->escape($ext_data['extension']['author']).'\', '.$uninstall_code.', '.$uninstall_note.', \'|'.implode('|', $ext_data['extension']['dependencies']).'|\'',
+			'VALUES'	=> '\''.$s2_db->escape($ext_data['extension']['id']).'\', \''.$s2_db->escape($ext_data['extension']['title']).'\', \''.$s2_db->escape($ext_data['extension']['version']).'\', \''.$s2_db->escape($ext_data['extension']['description']).'\', \''.$s2_db->escape($ext_data['extension']['author']).'\', \''.(isset($ext_data['extension']['adminaffected']) && $ext_data['extension']['adminaffected'] == 1 ? '1' : '0').'\', '.$uninstall_code.', '.$uninstall_note.', \'|'.implode('|', $ext_data['extension']['dependencies']).'|\'',
 		);
 
 		($hook = s2_hook('fn_install_extension_comply_qr_add_ext')) ? eval($hook) : null;
