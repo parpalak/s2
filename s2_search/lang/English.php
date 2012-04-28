@@ -16,4 +16,7 @@ $lang_s2_search = array(
 'Reindex title'				=> 'May take much time. You can run it again in case of connection loss.',
 'Info link'					=> 'Search index: %1$s (%2$s)',
 
+'Indexing required'			=> 'In order to enable the site search, indexing is required.',
+'Index now'					=> 'Index now',
+
 );

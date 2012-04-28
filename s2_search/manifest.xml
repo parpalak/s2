@@ -143,5 +143,26 @@ $output .= '<fieldset><legend>'.$lang_s2_search['Search'].'</legend>'.implode(''
 $s2_const_types['S2_SEARCH_QUICK'] = 'boolean';
 		]]></hook>
 
+		<hook id="ai_js_end"><![CDATA[
+require $ext_info['path'].'/worker.class.php';
+if ((is_file(S2_CACHE_DIR.s2_search_worker::index_name) ? filesize(S2_CACHE_DIR.s2_search_worker::index_name) : 0) == 0)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
+
+?>
+PopupMessages.show('<?php echo $lang_s2_search['Indexing required']; ?>', [
+	{
+		name: '<?php echo $lang_s2_search['Index now']; ?>',
+		action: s2_search.build_index,
+		once: true
+	}
+]);
+<?php
+}
+		]]></hook>
+
 	</hooks>
 </extension>

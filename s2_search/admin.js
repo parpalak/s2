@@ -10,32 +10,36 @@ var s2_search = {
 
 	reindex_query: function ()
 	{
-		GETAsyncRequest(sUrl + 'action=s2_search_makeindex', s2_search.reindex_callback);
+		GETAsyncRequest(sUrl + 'action=s2_search_makeindex', function (http, data)
+		{
+			if (data.indexOf('go_') == 0)
+			{
+				setTimeout(s2_search.reindex_query, 50);
+				$('#s2_search_progress').html(': <b>' + data.substring(3) + '%</b>...');
+			}
+			else
+			{
+				if (data == 'stop')
+					$('#s2_search_progress').html(': 100%');
+				else if (data)
+					DisplayError(data);
+			}
+		});
 	},
 
 	reindex: function ()
 	{
 		s2_search.reindex_query();
-		document.getElementById('s2_search_progress').innerHTML = ': 0%...';
+		$('#s2_search_progress').html(': <b>0%</b>...');
 
 		return false;
 	},
 
-	reindex_callback: function (xmlhttp)
+	build_index: function ()
 	{
-		var response = xmlhttp.responseText;
-		if (response.indexOf('go_') == 0)
-		{
-			setTimeout(s2_search.reindex_query, 50);
-			document.getElementById('s2_search_progress').innerHTML = ': ' + response.substring(3) + '%...';
-		}
-		else
-		{
-			if (response == 'stop')
-				document.getElementById('s2_search_progress').innerHTML = ': 100%';
-			else if (response)
-				DisplayError(response);
-		}
+		selectTab('#admin_tab');
+		selectTab('#admin-stat_tab');
+		setTimeout(s2_search.reindex, 50);
 	},
 
 	refresh_index: function (sAction, sId)
@@ -44,4 +48,4 @@ var s2_search = {
 	}
 }
 
-Hooks.add('fn_save_article_end', function (sAction) { s2_search.refresh_index(sAction, document.forms["artform"].elements["page[id]"].value); });
+Hooks.add('fn_save_article_end', function (sAction) { s2_search.refresh_index(sAction, document.forms['artform'].elements['page[id]'].value); });
