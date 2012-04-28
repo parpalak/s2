@@ -707,6 +707,10 @@ $(document).ready(function()
 				}
 			});
 		})
+		.bind('loaded.jstree', function (e, data)
+		{
+			tree.jstree('open_node', '#node_1');
+		})
 		.jstree({
 			crrm : {
 				input_width_limit : 1000,
@@ -734,8 +738,7 @@ $(document).ready(function()
 				}
 			},
 			core : {
-				animation : 150,
-				initially_open : ['node_1'],
+				animation : 200,
 				progressive_render : true,
 				open_parents : false,
 				strings : {
@@ -1616,11 +1619,6 @@ function OnSwitch (eTab)
 	{
 		if (document.artform && document.artform['page[text]'] && iEditorScrollTop)
 			document.artform['page[text]'].scrollTop = iEditorScrollTop;
-	}
-	else if (sType == 'list_tab')
-	{
-		if ($('#tree').html() == '')
-			$('#tree').html(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;' + s2_lang.load_tree);
 	}
 	else if (sType == 'pict_tab')
 	{
