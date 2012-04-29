@@ -54,3 +54,5 @@ var s2_counter_draw = (function ()
 		rss.write("s2_counter_rss");
 	}
 }());
+
+Hooks.add('stat_tab_loaded', s2_counter_draw);
