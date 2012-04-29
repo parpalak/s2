@@ -32,8 +32,7 @@ var s2_wysiwyg_params = [
 	extended_valid_elements : "hr[class|width|size|noshade],br[clear],span[class|align|style],small,big,code[class],samp,kbd,s,nobr",
 	file_browser_callback : "s2_wysiwyg_filebrowser_callback",
 	remove_trailing_nbsp : true,
-	relative_urls : false,
-	remove_script_host : true
+	convert_urls : false
 },
 
 // "Simplified" editor
@@ -58,17 +57,11 @@ var s2_wysiwyg_params = [
 	extended_valid_elements : "hr[class|width|size|noshade],br[clear],span[class|align|style],small,big,code[class],samp,kbd,s,nobr",
 	file_browser_callback : "s2_wysiwyg_filebrowser_callback",
 	remove_trailing_nbsp : true,
-	relative_urls : false,
-	remove_script_host : true
+	convert_urls : false
 }
 ];
 
 tinyMCE.init(s2_wysiwyg_params[s2_wysiwyg_type]);
-
-function s2_wysiwyg_set_path (s)
-{
-	tinyMCE.settings.document_base_url = s;
-}
 
 var s2_wysiwyg_wFileBrowser = s2_wysiwyg_wImage = null;
 
@@ -120,3 +113,6 @@ Hooks.add('fn_changes_present', function() { tinyMCE.triggerSave(); });
 Hooks.add('fn_save_article_start', function() { tinyMCE.triggerSave(); });
 Hooks.add('fn_check_changes_start', function() { tinyMCE.triggerSave(); } );
 Hooks.add('fn_popup_window_filter_head', function (head) { return head + s2_wysisyg_addjs(); });
+
+Hooks.add('request_article_start', function () { tinyMCE.execCommand('mceRemoveControl', false, 'arttext'); });
+Hooks.add('request_article_end', function () { tinyMCE.execCommand('mceAddControl', false, 'arttext'); });
