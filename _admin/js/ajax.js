@@ -284,14 +284,6 @@ function checkAjaxStatus (XHR)
 		return false;
 	}
 
-	var code = XHR.getResponseHeader('X-S2-JS');
-	if (code)
-		eval(code);
-
-	code = XHR.getResponseHeader('X-S2-JS-delayed');
-	if (code)
-		setTimeout(function () {eval(code);}, 0);
-
 	XHR.s2ErrorFlag = false;
 	return true;
 }

@@ -595,25 +595,6 @@ function s2_hook($hook_id)
 }
 
 //
-// Custom headers X-S2-JS and X-S2-JS-delayed can contain a javascript code.
-// Browser will execute this code on ajax queries.
-//
-
-function s2_add_js_header ($header)
-{
-	static $s2_js_header = '';
-	$s2_js_header .= $header;
-	header('X-S2-JS: '.$s2_js_header);
-}
-
-function s2_add_js_header_delayed ($header)
-{
-	static $s2_js_header = '';
-	$s2_js_header .= $header;
-	header('X-S2-JS-delayed: '.$s2_js_header);
-}
-
-//
 // Turning off browser's cache
 //
 function s2_no_cache ($full = true)
