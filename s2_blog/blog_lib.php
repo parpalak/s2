@@ -792,7 +792,7 @@ function s2_blog_edit_post_form ($id)
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_text')) ? eval($hook) : null;
 
 ?>
-		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
+		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
 			<textarea id="arttext" class="full_textarea" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
 		</div>
 	</div>
