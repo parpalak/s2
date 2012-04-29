@@ -83,7 +83,7 @@ return '<hr />';
 		]]></hook>
 
 		<hook id="fn_output_article_form_pre_text,fn_s2_blog_edit_post_form_pre_text"><![CDATA[
-$padding -= 1.8;
+$padding -= 2.7;
 		]]></hook>
 
 		<hook id="fn_s2_blog_edit_post_form_pre_output"><![CDATA[
