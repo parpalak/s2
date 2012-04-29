@@ -24,6 +24,8 @@
 	<minversion>1.0b3</minversion>
 	<maxtestedon>1.0b3</maxtestedon>
 
+	<note type="install">Do not forget to set write permissions (e. g. 777) to folder “_extensions/s2_counter/data/”.</note>
+
 	<hooks>
 
 		<hook id="fn_404_header_start"><![CDATA[
@@ -57,6 +59,20 @@ echo '<script type="text/javascript" src="'.$ext_info['url'].'/draw_chart.js"></
 $output .= '<fieldset><legend>Traffic</legend><div id="s2_counter_hits"><strong>You need to upgrade your Flash Player in order to view graphs.</strong></div></fieldset>';
 $output .= '<fieldset><legend>RSS readers</legend><div id="s2_counter_rss"><strong>You need to upgrade your Flash Player in order to view graphs.</strong></div></fieldset>';
 s2_add_js_header_delayed('s2_counter_draw();');
+		]]></hook>
+
+		<hook id="ai_js_end"><![CDATA[
+if (!is_writable($ext_info['path'].'/data/'))
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
+
+?>
+PopupMessages.show('<?php printf($lang_s2_counter['Data folder not writable'], $ext_info['path'].'/data/'); ?>');
+<?php
+}
 		]]></hook>
 
 	</hooks>
