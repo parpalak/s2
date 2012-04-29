@@ -2,7 +2,7 @@
 /**
  * Functions for the attachment extension
  *
- * @copyright (C) 2010-2011 Roman Parpalak
+ * @copyright (C) 2010-2012 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_attachment
  */
@@ -61,7 +61,7 @@ function s2_attachment_add_col ($id)
 			<input type="hidden" name="id" value="<?php echo $id; ?>" />
 		</form>
 		<hr />
-		<div class="text_wrapper" style="padding-bottom: 7.0em;">
+		<div class="list_wrapper" style="padding-bottom: 7.0em;">
 			<div class="tags_list" id="s2_attachment_items"><?php echo s2_attachment_items($id); ?></div>
 		</div>
 	</div>

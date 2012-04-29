@@ -6,7 +6,7 @@
  *
  * Attaches files to every page
  *
- * @copyright (C) 2010-2011 Roman Parpalak
+ * @copyright (C) 2010-2012 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_attachment
  */
@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_attachment</id>
 	<title>Attachments</title>
-	<version>1.0a1</version>
+	<version>1.0a2</version>
 	<description>Attaches files to every page.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a1</minversion>
-	<maxtestedon>1.0a3</maxtestedon>
+	<minversion>1.0a6</minversion>
+	<maxtestedon>1.0a6</maxtestedon>
 	<note type="uninstall" timing="pre">Warning! All the attached files will be deleted during the uninstall process. It is strongly recommended you to disable 'Attachments' extension instead or to upgrade it without uninstalling.</note>
 
 	<install><![CDATA[
@@ -132,7 +132,7 @@ if (strpos($template, '<!-- s2_attachment_files -->') !== false || $s2_attachmen
 }
 		]]></hook>
 
-		<hook id="idx_template_pre_replace"><![CDATA[
+		<hook id="idx_pre_get_queries"><![CDATA[
 $replace['<!-- s2_attachment_files -->'] = !empty($page['s2_attachment_files']) ? $page['s2_attachment_files'] : '';
 if (isset($page['s2_attachment_pictures']))
 	foreach ($page['s2_attachment_pictures'] as $s2_attachment_placeholder => $s2_attachment_content)
