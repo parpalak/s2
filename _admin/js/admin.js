@@ -1628,30 +1628,30 @@ function OnSwitch (eTab)
 	else if (sType == 'tag_tab')
 	{
 		if ($('#tag_div').html() == '')
-			GETAsyncRequest(sUrl + 'action=load_tags', function (http)
+			GETAsyncRequest(sUrl + 'action=load_tags', function (http, data)
 			{
-				$('#tag_div').html(http.responseText);
+				$('#tag_div').html(data);
 			});
 	}
 	else if (sType == 'admin-opt_tab')
 	{
-		GETAsyncRequest(sUrl + 'action=load_options', function (http)
+		GETAsyncRequest(sUrl + 'action=load_options', function (http, data)
 		{
-			$('#opt_div').html(http.responseText);
+			$('#opt_div').html(data);
 		});
 	}
 	else if (sType == 'admin-ext_tab')
 	{
-		GETAsyncRequest(sUrl + 'action=load_extensions', function (http)
+		GETAsyncRequest(sUrl + 'action=load_extensions', function (http, data)
 		{
-			document.getElementById('ext_div').innerHTML = http.responseText;
+			$('#ext_div').html(data);
 		});
 	}
 	else if (sType == 'admin-stat_tab')
 	{
-		GETAsyncRequest(sUrl + 'action=load_stat_info', function (http)
+		GETAsyncRequest(sUrl + 'action=load_stat_info', function (http, data)
 		{
-			$('#stat_div').html(http.responseText);
+			$('#stat_div').html(data);
 		});
 	}
 	else if (sType == 'admin_tab')
