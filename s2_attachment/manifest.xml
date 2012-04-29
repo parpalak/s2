@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_attachment</id>
 	<title>Attachments</title>
-	<version>1.0a2</version>
+	<version>1.0b</version>
 	<description>Attaches files to every page.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0a6</minversion>
-	<maxtestedon>1.0a6</maxtestedon>
+	<minversion>1.0b3</minversion>
+	<maxtestedon>1.0b3</maxtestedon>
 	<note type="uninstall" timing="pre">Warning! All the attached files will be deleted during the uninstall process. It is strongly recommended you to disable 'Attachments' extension instead or to upgrade it without uninstalling.</note>
 
 	<install><![CDATA[
@@ -85,11 +85,14 @@ $s2_db->drop_table('s2_attachment_files');
 
 	<hooks>
 		<hook id="ai_head_end"><![CDATA[
-echo '<script type="text/javascript" src="'.$ext_info['url'].'/attach.js"></script>'."\n".
-	'<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/admin.css" />'."\n";
+echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/admin.css" />'."\n";
 		]]></hook>
 
-		<hook id="fn_output_article_form_pre_output"><![CDATA[
+		<hook id="ai_after_js_include"><![CDATA[
+echo '<script type="text/javascript" src="'.$ext_info['url'].'/attach.js"></script>'."\n";
+		]]></hook>
+
+		<hook id="fn_output_article_form_output_start"><![CDATA[
 require $ext_info['path'].'/functions.php';
 global $lang_s2_attachment, $lang_pictures;
 include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';

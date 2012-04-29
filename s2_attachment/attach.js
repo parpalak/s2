@@ -45,9 +45,9 @@ function s2_attachment_delete_file (iId, esWarning)
 	if (!confirm(decodeURIComponent(esWarning)))
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=s2_attachment_delete&id=" + iId);
-	if (Response.status == '200')
-		document.getElementById('s2_attachment_items').innerHTML = Response.text;
+	GETAsyncRequest(sUrl + 'action=s2_attachment_delete&id=' + iId, function (h, d) {
+		$('#s2_attachment_items').html(d);
+	});
 
 	return false;
 }
@@ -55,12 +55,12 @@ function s2_attachment_delete_file (iId, esWarning)
 function s2_attachment_rename_file (iId, sInfo, esName)
 {
 	var s = prompt(sInfo, decodeURIComponent(esName));
-	if (typeof(s) != 'string')
+	if (typeof s != 'string')
 		return false;
 
-	var Response = GETSyncRequest(sUrl + "action=s2_attachment_rename&id=" + iId + '&name=' + encodeURIComponent(s));
-	if (Response.status == '200')
-		document.getElementById('s2_attachment_items').innerHTML = Response.text;
+	GETAsyncRequest(sUrl + "action=s2_attachment_rename&id=" + iId + '&name=' + encodeURIComponent(s), function (h, d) {
+		$('#s2_attachment_items').html(d);
+	});
 
 	return false;
 }

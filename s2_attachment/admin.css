@@ -16,11 +16,11 @@
 		background: #ffc;
 		}
 	#s2_attachment_col li:hover .buttons {
-		display: block;
+		visibility: visible;
 		}
 	#s2_attachment_col li .buttons {
 		float: right;
-		display: none;
+		visibility: hidden;
 		}
 		#s2_attachment_col .buttons img {
 			background-image: url(../../_admin/i/icons.png);
