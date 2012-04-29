@@ -253,6 +253,8 @@ function s2_output_article_form ($id)
 	($hook = s2_hook('fn_output_article_form_pre_output')) ? eval($hook) : null;
 
 	ob_start();
+
+	($hook = s2_hook('fn_output_article_form_output_start')) ? eval($hook) : null;
 ?>
 <form class="full_tab_form" name="artform" action="" onsubmit="SaveArticle('save'); return false;">
 <?php ($hook = s2_hook('fn_output_article_form_pre_btn_col')) ? eval($hook) : null; ?>
@@ -387,6 +389,8 @@ function s2_output_article_form ($id)
 	</div>
 </form>
 <?
+
+	($hook = s2_hook('fn_output_article_form_end')) ? eval($hook) : null;
 
 	return array('form' => ob_get_clean(), 'tags' => $all_tags);
 }
