@@ -52,7 +52,7 @@ function LoadBlogComments (iId)
 	GETAsyncRequest(sUrl + "action=load_blog_comments&id=" + iId, function (http, data)
 	{
 		$('#comm_div').html(data);
-		SelectTab(document.getElementById('comm_tab'), true);
+		selectTab('#comm_tab');
 	});
 	return false;
 }
