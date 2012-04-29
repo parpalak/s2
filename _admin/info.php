@@ -57,7 +57,7 @@ function s2_get_counters ()
 	return implode('<br />', $counters);
 }
 
-function s2_stat_info()
+function s2_stat_info ()
 {
 	global $s2_db, $db_name, $db_type, $db_version, $db_prefix, $lang_admin;
 

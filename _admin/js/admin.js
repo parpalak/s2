@@ -868,7 +868,6 @@ var LoadArticle, ReloadArticle;
 				}
 			});
 
-
 			Changes.commit(document.artform);
 			selectTab('#edit_tab');
 			sLoadedURI = sURI;
