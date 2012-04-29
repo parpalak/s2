@@ -38,7 +38,7 @@ function s2_tpl_edit_form ($template_filename = '')
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
-		<div class="text_wrapper" style="padding-bottom: 3.2em;">
+		<div class="list_wrapper" style="padding-bottom: 3.2em;">
 			<div class="tags_list">
 <?php
 
@@ -103,11 +103,11 @@ function s2_tpl_edit_form ($template_filename = '')
 		</table>
 <?php
 
-	$padding = 2.4;
+	$padding = 2.6;
 	($hook = s2_hook('fn_s2_tpl_edit_form_pre_text')) ? eval($hook) : null;
 
 ?>
-		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
+		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
 			<textarea id="s2_tpl_edit_text" class="full_textarea" name="template[text]"><?php echo s2_htmlencode($template_text)?></textarea>
 		</div>
 	</div>
