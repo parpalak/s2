@@ -4,7 +4,7 @@
 .tabsheets dd .reducer,
 .r-float,
 .l-float,
-.text_wrapper,
+.list_wrapper,
 .full_textarea,
 .fields input,
 .input.text input,
@@ -44,7 +44,7 @@ body {
 	}
 
 .tabsheets,
-.text_wrapper,
+.list_wrapper,
 .full_tab_form,
 .r-float,
 .l-float {
@@ -601,6 +601,17 @@ body > .tabsheets {
 		border-radius: 0;
 		padding: 0;
 		}
+
+.l-float {
+	position: relative;
+	}
+
+.text_wrapper {
+	position: absolute;
+	bottom: 5px;
+	left: 5px;
+	right: 5px;
+	}
 
 .r-float {
 	float: right;

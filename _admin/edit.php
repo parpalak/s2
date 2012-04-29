@@ -381,7 +381,7 @@ function s2_output_article_form ($id)
 	($hook = s2_hook('fn_output_article_form_pre_text')) ? eval($hook) : null;
 
 ?>
-		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
+		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
 			<textarea tabindex="1" id="arttext" class="full_textarea" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
 		</div>
 	</div>

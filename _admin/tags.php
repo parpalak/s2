@@ -109,7 +109,7 @@ function s2_output_tag_form ($tag, $modify_time)
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
 		<hr />
-		<div class="text_wrapper" style="padding-bottom: 2.5em;">
+		<div class="list_wrapper" style="padding-bottom: 2.5em;">
 			<div class="tags_list">
 <?php
 
@@ -209,11 +209,11 @@ function s2_output_tag_form ($tag, $modify_time)
 		</table>
 <?php
 
-	$padding = 4.3;
+	$padding = 4.5;
 	($hook = s2_hook('fn_output_tag_form_pre_text')) ? eval($hook) : null;
 
 ?>
-		<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
+		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
 			<textarea id="tagtext" class="full_textarea" name="tag[description]"><?php echo s2_htmlencode($tag['description'])?></textarea>
 		</div>
 	</div>

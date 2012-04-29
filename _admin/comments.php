@@ -198,7 +198,7 @@ function s2_output_comment_form ($comment, $mode, $type)
 	($hook = s2_hook('fn_output_comment_form_start')) ? eval($hook) : null;
 
 ?>
-<div class="text_wrapper" style="padding-bottom: 2.167em">
+<div class="list_wrapper" style="padding-bottom: 2.167em">
 	<?php echo s2_comment_menu_links(); ?>
 	<form class="full_tab_form" name="commform" action="" onsubmit="SaveComment('<?php echo $type; ?>'); return false;">
 		<div class="r-float">
@@ -229,11 +229,11 @@ function s2_output_comment_form ($comment, $mode, $type)
 			<input type="hidden" name="mode" value="<?php echo s2_htmlencode($mode); ?>" />
 <?php
 
-	$padding = 4.3;
+	$padding = 4.5;
 	($hook = s2_hook('fn_output_comment_form_pre_text')) ? eval($hook) : null;
 
 ?>
-			<div class="text_wrapper" style="padding-bottom: <?php echo $padding; ?>em;">
+			<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
 				<textarea id="commtext" class="full_textarea" name="comment[text]"><?php echo s2_htmlencode($comment['text']); ?></textarea>
 			</div>
 		</div>
