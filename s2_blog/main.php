@@ -9,6 +9,8 @@
 
 $s2_blog_path = substr($request_uri, strlen(S2_BLOG_URL));
 $s2_blog_path = explode('/', $s2_blog_path);   //   []/[2006]/[12]/[31]/[newyear]
+if ($s2_blog_path[0] != '')
+	return false;
 
 $page['commented'] = 0;
 
