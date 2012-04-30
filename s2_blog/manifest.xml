@@ -244,6 +244,8 @@ foreach ($s2_blog_config as $conf_name => $conf_value)
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 }
 
+s2_generate_config_cache();
+
 // User permissions
 if ($s2_db->field_exists('users', 'edit_s2_blog'))
 	$s2_db->drop_field('users', 'edit_s2_blog');
