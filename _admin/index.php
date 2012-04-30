@@ -188,6 +188,12 @@ if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 				<dd class="inactive">
 					<div class="reducer">
 						<div id="user_div"></div>
+<?php
+
+	if ($s2_user['edit_users'])
+	{
+
+?>
 						<fieldset>
 							<legend><?php echo $lang_admin['Add user']; ?></legend>
 							<p>
@@ -197,14 +203,32 @@ if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 								</form>
 							</p>
 						</fieldset>
+<?php
+
+	}
+
+?>
 					</div>
 				</dd>
-<?php ($hook = s2_hook('ai_pre_extensions')) ? eval($hook) : null; ?>
+<?php
+
+	($hook = s2_hook('ai_pre_extensions')) ? eval($hook) : null;
+
+	if ($s2_user['edit_users'])
+	{
+
+?>
 				<dt id="admin-ext_tab"><?php echo $lang_admin['Extensions']; ?></dt>
 				<dd class="inactive">
 					<div class="reducer" id="ext_div"></div>
 				</dd>
-<?php ($hook = s2_hook('ai_after_extensions')) ? eval($hook) : null; ?>
+<?php
+
+	}
+
+	($hook = s2_hook('ai_after_extensions')) ? eval($hook) : null;
+
+?>
 			</dl>
 			</div>
 		</dd>
