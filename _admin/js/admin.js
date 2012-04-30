@@ -1526,7 +1526,7 @@ function changeExtension (sAction, sId, sMessage, iAdminAffected)
 			PopupMessages.show(str_replace('%s', sId, s2_lang.reload_required), [
 				{
 					name: s2_lang.reload_now,
-					action: document.location.reload,
+					action: function () { document.location.reload() },
 					once: true
 				}
 			], 0, 'extensions.' + sId);
