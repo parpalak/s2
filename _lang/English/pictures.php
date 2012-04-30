@@ -12,10 +12,11 @@ $lang_pictures = array(
 'Upload file error'				=> '%1$s: %2$s',
 'Is upload file error'			=> 'Access error. This file has not been uploaded.',
 'Move upload file error'		=> '%1$s: Error on file moving. Probably, there are no write permissions.',
+'Error creating folder'			=> 'The folder “%s” has not been created. Probably, there are no permissions.',
 'Empty files'					=> 'Files have not been uploaded.',
 'No POST data'					=> 'Empty post data received. Probably, the files you are trying to upload is too big.',
 'Forbidden extension'			=> 'You are not allowed to create “%s” files here. Contact administrators or developers if you really need this.',
-'File exists'					=> 'Rename failed: file or directory “%s” already exists.',
+'File exists'					=> 'Rename failed: file or folder “%s” already exists.',
 'Rename error'					=> 'Rename failed. Maybe the new name contains illegal characters or there is no enough permission for renaming.',
 
 'Upload to'						=> 'to',

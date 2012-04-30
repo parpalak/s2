@@ -106,11 +106,21 @@ elseif ($action == 'create_subfolder')
 			$i++;
 		$name = $name.$i;
 	}
-	mkdir(S2_IMG_PATH.$path.'/'.$name);
-	chmod(S2_IMG_PATH.$path.'/'.$name, 0777);
 
-	header('Content-Type: application/json; charset=utf-8');
-	echo s2_json_encode(array('status' => 1, 'name' => $name, 'path' => $path.'/'.$name));
+	if (mkdir(S2_IMG_PATH.$path.'/'.$name))
+	{
+		chmod(S2_IMG_PATH.$path.'/'.$name, 0777);
+
+		header('Content-Type: application/json; charset=utf-8');
+		echo s2_json_encode(array('status' => 1, 'name' => $name, 'path' => $path.'/'.$name));
+	}
+	else
+	{
+		$s2_db->close();
+
+		header('X-S2-Status: Error');
+		printf($lang_pictures['Error creating folder'], S2_IMG_PATH.$path.'/'.$name);
+	}
 }
 
 elseif ($action == 'delete_folder')
@@ -196,6 +206,8 @@ elseif ($action == 'rename_folder')
 	}
 	else
 	{
+		$s2_db->close();
+
 		header('X-S2-Status: Error');
 		die($lang_pictures['Rename error']);
 	}
@@ -248,6 +260,8 @@ elseif ($action == 'rename_file')
 		echo s2_get_files($parent_path);
 	else
 	{
+		$s2_db->close();
+
 		header('X-S2-Status: Error');
 		die($lang_pictures['Rename error']);
 	}
