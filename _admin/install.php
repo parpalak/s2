@@ -250,7 +250,6 @@ body {
 				<li><span><strong><?php echo $lang_install['Database type'] ?></strong><br /><?php echo $lang_install['Database type info']; if ($dual_mysql) echo '<br />'.$lang_install['Mysql type info']; if ($mysql_innodb) echo '<br />'.$lang_install['MySQL InnoDB info'] ?></span></li>
 				<li><span><strong><?php echo $lang_install['Database server'] ?></strong><br /><?php echo $lang_install['Database server info'] ?></span></li>
 				<li><span><strong><?php echo $lang_install['Database name'] ?></strong><br /><?php echo $lang_install['Database name info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Database user pass'] ?></strong><br /><?php echo $lang_install['Database username info'] ?></span></li>
 				<li><span><strong><?php echo $lang_install['Table prefix'] ?></strong><br /><?php echo $lang_install['Table prefix info'] ?></span></li>
 			</ul>
 		</div>
