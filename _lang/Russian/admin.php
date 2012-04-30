@@ -15,7 +15,7 @@ $lang_admin = array(
 'No permission'				=> 'У вас недостаточно прав для совершения этого действия.',
 'Other sessions'			=> 'Вы зашли в панель управления с нескольких браузеров. Вот ваши сеансы: <br />%s',
 'Close other sessions'		=> 'Закрыть все сеансы кроме текущего',
-'New version mesage'		=> 'Вышла новая версия движка <strong>S2 %s</strong>. Ее можно <a target="_blank" href="http://s2cms.ru/download">скачать на сайте движка &uarr;</a>.',
+'New version mesage'		=> 'Вышла новая версия <strong>S2 %s</strong>. Ее можно <a target="_blank" href="http://s2cms.ru/download">скачать на сайте движка &uarr;</a>.',
 
 // Login form
 'Password'					=> 'Пароль',
