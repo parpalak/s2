@@ -251,7 +251,7 @@ makeTabsheet();
 
 	($hook = s2_hook('ai_js_end')) ? eval($hook) : null;
 
-	if (S2_ADMIN_UPDATES)
+	if ($s2_user['edit_users'] && S2_ADMIN_UPDATES)
 	{
 ?>
 GETAsyncRequest(sUrl + 'action=check_updates', function (http, data)
