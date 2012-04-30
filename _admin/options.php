@@ -121,13 +121,13 @@ function s2_get_color_input ($name, $value, $info, $label, $onchange = '')
 //
 // Returns the options form
 //
-function s2_get_options ($message = '')
+function s2_get_options ()
 {
 	global $s2_db, $s2_user, $lang_common, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
 
 	$options = s2_read_options();
 
-	$output = $message ? '<div class="info-box">'.$message.'</div>' : '';
+	$output = '';
 
 	$style = '<div class="input select"><label for="style_select"><span>'.$lang_admin_opt['Styles'].'</span></label>'.s2_get_styles($options['S2_STYLE']).'</div>';
 	$lang = '<div class="input select"><label for="lang_select"><span>'.$lang_admin_opt['Languages'].'</span></label>'.s2_get_lang($options['S2_LANGUAGE']).'</div>';
