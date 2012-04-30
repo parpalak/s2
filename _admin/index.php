@@ -262,21 +262,22 @@ var new_page_pos = '<?php echo s2_jsvarencode(S2_ADMIN_NEW_POS); ?>';
 
 <?php
 
-	s2_preload_editor();
-	if (isset($premoderation['script']))
-		echo $premoderation['script'];
-	echo s2_get_sessions($login, $session_id);
+s2_preload_editor();
+if (isset($premoderation['script']))
+	echo $premoderation['script'];
+echo s2_get_sessions($login, $session_id);
 
-	($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null;
+($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null;
 
 ?>
 makeTabsheet();
 <?php
 
-	($hook = s2_hook('ai_js_end')) ? eval($hook) : null;
+($hook = s2_hook('ai_js_end')) ? eval($hook) : null;
 
-	if ($s2_user['edit_users'] && S2_ADMIN_UPDATES)
-	{
+if ($s2_user['edit_users'] && S2_ADMIN_UPDATES)
+{
+
 ?>
 GETAsyncRequest(sUrl + 'action=check_updates', function (http, data)
 {
@@ -284,7 +285,9 @@ GETAsyncRequest(sUrl + 'action=check_updates', function (http, data)
 		PopupMessages.show(data.message);
 });
 <?php
-	}
+
+}
+
 ?>
 </script>
 </body>
