@@ -353,6 +353,7 @@ function s2_install_extension ($id)
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
+	s2_clear_cache();
 	s2_generate_hooks_cache();
 
 	return $messages;
@@ -451,6 +452,7 @@ function s2_flip_extension ($id)
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
+	s2_clear_cache();
 	s2_generate_hooks_cache();
 
 	($hook = s2_hook('fn_flip_extension_end')) ? eval($hook) : null;
@@ -532,6 +534,7 @@ function s2_uninstall_extension ($id)
 	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
 		require S2_ROOT.'_include/cache.php';
 
+	s2_clear_cache();
 	s2_generate_hooks_cache();
 
 	($hook = s2_hook('fn_uninstall_extension_end')) ? eval($hook) : null;
