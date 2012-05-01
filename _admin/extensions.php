@@ -115,7 +115,7 @@ function s2_extension_list ()
 				$buttons['install'] = '<button class="bitbtn '.(isset($inst_exts[$entry]['version']) ? 'upgr_ext' : 'inst_ext').'" onclick="return changeExtension(\'install_extension\', \''.s2_htmlencode(addslashes($entry)).'\', \''.implode('\\n', $install_notes).'\', '.$admin_affected.');">'.(isset($inst_exts[$entry]['version']) ? $lang_admin_ext['Upgrade extension'] : $lang_admin_ext['Install extension']).'</button>';
 
 				$ext_item[] = '<div class="extension available">'.
-					'<div class="info"><h3>'.s2_htmlencode($ext_data['extension']['title']).sprintf($lang_admin_ext['Version'], $ext_data['extension']['version']).'</h3>'.
+					'<div class="info"><h3 title="'.s2_htmlencode($entry).'">'.s2_htmlencode($ext_data['extension']['title']).sprintf($lang_admin_ext['Version'], $ext_data['extension']['version']).'</h3>'.
 					'<p>'.sprintf($lang_admin_ext['Extension by'], s2_htmlencode($ext_data['extension']['author'])).'</p></div>'.
 					(($ext_data['extension']['description'] != '') ? '<p class="description">'.s2_htmlencode($ext_data['extension']['description']).'</p>' : '').
 					'<div class="options">'.implode('<br />', $buttons).'</div></div>';
@@ -162,7 +162,7 @@ function s2_extension_list ()
 		($hook = s2_hook('fn_extension_list_pre_inst_item_merge')) ? eval($hook) : null;
 
 		$ext_item[] = '<div class="extension '.($ext['disabled'] == '1' ? 'disabled' : 'enabled').'">'.
-			'<div class="info"><h3>'.s2_htmlencode($ext['title']).sprintf($lang_admin_ext['Version'], $ext['version']).'</h3>'.
+			'<div class="info"><h3 title="'.s2_htmlencode($id).'">'.s2_htmlencode($ext['title']).sprintf($lang_admin_ext['Version'], $ext['version']).'</h3>'.
 			'<p>'.sprintf($lang_admin_ext['Extension by'], s2_htmlencode($ext['author'])).'</p>'.$extra_info.'</div>'.
 			(($ext['description'] != '') ? '<p class="description">'.s2_htmlencode($ext['description']).'</p>' : '').
 			'<div class="options">'.implode(' ', $buttons).'</div></div>';
