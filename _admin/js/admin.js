@@ -552,7 +552,7 @@ var Changes = (function ()
 
 function CloseAll ()
 {
-	$('#tree').jstree('close_all').jstree('toggle_node', '#node_1');
+	$('#tree').jstree('close_all').jstree('open_node', '#node_1', false, true);
 }
 
 function OpenAll ()
@@ -727,6 +727,7 @@ $(document).ready(function()
 				'c' : showComments,
 				'n' : function () { createArticle(); return false; },
 				'f' : function () { $('#search_field').focus(); return false; },
+				'r' : RefreshTree,
 				'f2' : function () { this.rename(this.data.ui.last_selected || this.data.ui.hovered); return false;}
 			},
 			json_data : {
