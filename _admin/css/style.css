@@ -1134,7 +1134,8 @@ form center {
 		cursor: pointer;
 		margin: 0;
 		padding: 1px 5px;
-		background: #eef;
+		background: #bdf;
+		color: #000;
 		-moz-border-radius: 8px;
 		-webkit-border-radius: 8px;
 		border-radius: 8px;
