@@ -459,7 +459,7 @@ body > .tabsheets {
 			background: url(../i/icons.png) -16px -48px;
 			display: none;
 			}
-			[data-comments] #context_comments {
+			[data-comments] > a #context_comments {
 				display: inline-block;
 				}
 		#context_buttons img:hover {
