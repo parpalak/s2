@@ -622,15 +622,14 @@ function s2_blog_edit_post_form ($id)
 	$used_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$subquery = array(
-		'SELECT'	=> 'count(*)',
+		'SELECT'	=> 'id',
 		'FROM'		=> 's2_blog_post_tag AS pt',
-		'WHERE'		=> 't.tag_id = pt.tag_id AND pt.post_id = '.$id,
-		'LIMIT'		=> '1'
+		'WHERE'		=> 't.tag_id = pt.tag_id AND pt.post_id = '.$id
 	);
 	$current_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as current',
+		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as link_id',
 		'FROM'		=> 'tags AS t',
 		'ORDER BY'	=> 'used DESC'
 	);
@@ -641,9 +640,10 @@ function s2_blog_edit_post_form ($id)
 	while ($tag = $s2_db->fetch_assoc($result))
 	{
 		$all_tags[] = $tag['name'];
-		if ($tag['current'])
-			$tags[] = $tag['name'];
+		if (!empty($tag['link_id']))
+			$tags[$tag['link_id']] = $tag['name'];
 	}
+	ksort($tags);
 
 	// Fetching labels
 	$query = array(
