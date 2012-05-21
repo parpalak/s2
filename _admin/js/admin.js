@@ -860,7 +860,7 @@ var LoadArticle, ReloadArticle;
 					else if (ch == 'j')
 						InsertParagraph('justify')
 					else if (ch == 'k')
-						InsertTag('<a href=&quot;&quot;>', '</a>');
+						InsertTag('<a href="">', '</a>');
 					else if (ch == 'p')
 						GetImage();
 					else
