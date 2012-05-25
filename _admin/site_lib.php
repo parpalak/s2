@@ -26,7 +26,7 @@ if (!function_exists('json_encode'))
 			case 'float':
 				return $data;
 			case 'string':
-				return '"' . addslashes($data) . '"';
+				return '"' . str_replace(array('\\', '"', "\n", "\r", "\t"), array('\\\\', '\\"', '\\n', '\\r', '\\t'), $data) . '"';
 			case 'object':
 				$data = get_object_vars($data);
 			case 'array':
