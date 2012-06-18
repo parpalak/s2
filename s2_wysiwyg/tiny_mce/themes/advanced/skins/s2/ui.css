@@ -88,7 +88,7 @@
 .s2Skin .mce_forecolor span.mceAction, .s2Skin .mce_backcolor span.mceAction {overflow:hidden; height:16px}
 
 /* Menu */
-.s2Skin .mceMenu {position:absolute; left:0; top:0; z-index:1000; border:1px solid #D4D0C8}
+.s2Skin .mceMenu {position:absolute; left:0; top:0; z-index:1000; border:1px solid #D4D0C8; direction:ltr}
 .s2Skin .mceNoIcons span.mceIcon {width:0;}
 .s2Skin .mceNoIcons a .mceText {padding-left:10px}
 .s2Skin .mceMenu table {background:#FFF}
@@ -113,6 +113,10 @@
 /* Progress,Resize */
 .s2Skin .mceBlocker {position:absolute; left:0; top:0; z-index:1000; opacity:0.5; -ms-filter:'alpha(opacity=50)'; filter:alpha(opacity=50); background:#FFF}
 .s2Skin .mceProgress {position:absolute; left:0; top:0; z-index:1001; background:url(img/progress.gif) no-repeat; width:32px; height:32px; margin:-16px 0 0 -16px}
+
+/* Rtl */
+.mceRtl .mceListBox .mceText {text-align: right; padding: 0 4px 0 0}
+.mceRtl .mceMenuItem .mceText {text-align: right}
 
 /* Formats */
 .s2Skin .mce_formatPreview a {font-size:10px}
@@ -217,3 +221,4 @@
 .s2Skin span.mce_pagebreak {background-position:0 -40px}
 .s2Skin span.mce_restoredraft {background-position:-20px -40px}
 .s2Skin span.mce_spellchecker {background-position:-540px -20px}
+.s2Skin span.mce_visualblocks {background-position: -40px -40px}
