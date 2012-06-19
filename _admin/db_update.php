@@ -107,6 +107,19 @@ if (S2_DB_REVISION < 11)
 	$s2_db->add_field('extensions', 'admin_affected', 'TINYINT(1) UNSIGNED', false, '0', 'author');
 }
 
+if (S2_DB_REVISION < 12)
+{
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\'S2_ADMIN_CUT\', \'0\''
+	);
+
+	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	define('S2_ADMIN_CUT', '0');
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',

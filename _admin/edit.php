@@ -74,11 +74,21 @@ function s2_save_article ($page, $flags)
 		$revision++;
 	}
 
+	$excerpt = '';
+	if (S2_ADMIN_CUT)
+	{
+		$text_parts = preg_split('#(<cut\\s*/?>|<p><cut /></p>)#s', $page['text'], 2);
+		if (count($text_parts) > 1)
+			$excerpt = $text_parts[0];
+	}
+	elseif (isset($page['excerpt']))
+		$excerpt = $page['excerpt'];
+
 	$error = false;
 
 	$query = array(
 		'UPDATE'	=> 'articles',
-		'SET'		=> "title = '".$s2_db->escape($page['title'])."', meta_keys = '".$s2_db->escape($page['meta_keys'])."', meta_desc = '".$s2_db->escape($page['meta_desc'])."', excerpt = '".$s2_db->escape($page['excerpt'])."', pagetext = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, template = '".$s2_db->escape($page['template'])."', revision = '".$s2_db->escape($revision)."'",
+		'SET'		=> "title = '".$s2_db->escape($page['title'])."', meta_keys = '".$s2_db->escape($page['meta_keys'])."', meta_desc = '".$s2_db->escape($page['meta_desc'])."', excerpt = '".$s2_db->escape($excerpt)."', pagetext = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, template = '".$s2_db->escape($page['template'])."', revision = '".$s2_db->escape($revision)."'",
 		'WHERE'		=> 'id = '.$id
 	);
 
@@ -347,12 +357,25 @@ function s2_output_article_form ($id)
 				<td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta description']; ?></td>
 				<td><input type="text" name="page[meta_desc]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_desc']); ?>" /></td>
 			</tr>
-<?php ($hook = s2_hook('fn_output_article_form_pre_cite')) ? eval($hook) : null; ?>
+<?php
+
+	($hook = s2_hook('fn_output_article_form_pre_cite')) ? eval($hook) : null;
+
+	if (!S2_ADMIN_CUT)
+	{
+
+?>
 			<tr>
 				<td class="label" title="<?php echo $lang_admin['Excerpt help']; ?>"><?php echo $lang_admin['Excerpt']; ?></td>
 				<td><input type="text" name="page[excerpt]" size="100" value="<?php echo s2_htmlencode($page['excerpt']); ?>" /></td>
 			</tr>
-<?php ($hook = s2_hook('fn_output_article_form_after_cite')) ? eval($hook) : null; ?>
+<?php
+
+	}
+
+	($hook = s2_hook('fn_output_article_form_after_cite')) ? eval($hook) : null;
+
+?>
 			<tr>
 				<td class="label" title="<?php echo $lang_admin['Tags help']; ?>"><?php echo $lang_admin['Tags']; ?></td>
 				<td><input type="text" name="page[tags]" size="100" value="<?php echo s2_htmlencode(implode(', ', $tags)); ?>" /></td>
@@ -379,7 +402,7 @@ function s2_output_article_form ($id)
 	($hook = s2_hook('fn_output_article_form_after_fields2')) ? eval($hook) : null;
 
 	s2_toolbar();
-	$padding = 15.5;
+	$padding = 15.5 - S2_ADMIN_CUT * 1.9;
 	($hook = s2_hook('fn_output_article_form_pre_text')) ? eval($hook) : null;
 
 ?>
