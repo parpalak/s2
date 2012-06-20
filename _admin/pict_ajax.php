@@ -257,7 +257,10 @@ elseif ($action == 'rename_file')
 	}
 
 	if (rename(S2_IMG_PATH.$path, S2_IMG_PATH.$parent_path.'/'.$filename))
-		echo s2_get_files($parent_path);
+	{
+		header('Content-Type: application/json; charset=utf-8');
+		echo s2_json_encode(array('status' => 1, 'new_name' => $filename));
+	}
 	else
 	{
 		$s2_db->close();

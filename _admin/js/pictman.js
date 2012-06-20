@@ -380,6 +380,8 @@ $(function()
 					fileTree.jstree('deselect_all');
 					if (!d.status)
 						fileTree.jstree('refresh', -1);
+					else
+						data.rslt.obj.attr('data-fname', d.new_name);
 				},
 				error : function ()
 				{
