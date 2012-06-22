@@ -7,6 +7,10 @@
  * @package s2_latex
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_latex_image ($matches)
 {
 	global $ext_info;
