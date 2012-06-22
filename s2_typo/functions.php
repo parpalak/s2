@@ -10,6 +10,10 @@
  * @package s2_typo
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_typo_store ($matches)
 {
 	static $stack = array();
