@@ -7,6 +7,10 @@
  * @package s2_counter
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 if (!defined('S2_COUNTER_TOTAL_HITS_FNAME'))
 	define('S2_COUNTER_TOTAL_HITS_FNAME', '/data/total_hits.txt');
 
