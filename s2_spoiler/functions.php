@@ -8,6 +8,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_spoiler_store ($matches)
 {
 	static $stack = array();
