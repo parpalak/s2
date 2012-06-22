@@ -8,6 +8,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_search_rus_plural ($number, $many, $one, $two)
 {
 	$number = abs((int) $number);
