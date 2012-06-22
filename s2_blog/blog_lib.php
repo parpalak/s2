@@ -7,6 +7,10 @@
  * @package s2_blog
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 //
 // Editor tab
 //

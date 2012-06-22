@@ -7,6 +7,10 @@
  * @package s2_blog
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 if ($action == 'load_blog_posts')
 {
 	$is_permission = $s2_user['view'];

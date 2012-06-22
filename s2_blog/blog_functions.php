@@ -8,6 +8,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 // '1' -> '01'
 function s2_blog_extent_number ($n)
 {
