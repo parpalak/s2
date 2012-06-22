@@ -7,6 +7,10 @@
  * @package S2
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 ($hook = s2_hook('art_start')) ? eval($hook) : null;
 
 //

@@ -9,6 +9,10 @@
  * @package S2
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 // Session timeout
 define('S2_EXPIRE_LOGIN_TIMEOUT', (S2_LOGIN_TIMEOUT > 1 ? S2_LOGIN_TIMEOUT : 1) * 60);
 

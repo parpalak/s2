@@ -7,6 +7,10 @@
  * @package S2
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 $allowed_extensions = array ('gif', 'bmp', 'jpg', 'jpeg', 'png');
 
 function s2_dirname ($dir)

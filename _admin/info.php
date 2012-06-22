@@ -7,6 +7,10 @@
  * @package S2
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_count_articles ($id)
 {
 	global $s2_db;

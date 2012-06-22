@@ -7,6 +7,10 @@
  * @package S2
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_load_tag ($id)
 {
 	global $s2_db;

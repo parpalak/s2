@@ -7,6 +7,10 @@
  * @package S2
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 require S2_ROOT.'_include/functions.php';
 require S2_ROOT.'_include/utf8/utf8.php';
 

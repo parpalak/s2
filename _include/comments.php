@@ -8,6 +8,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 $s2_comment_fields = array(
 	'name' => 'Name',
 	'email' => 'Email',

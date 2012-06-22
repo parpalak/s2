@@ -7,6 +7,10 @@
  * @package S2
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_check_url_status ($parent_id, $url)
 {
 	global $s2_db;

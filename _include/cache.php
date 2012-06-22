@@ -10,6 +10,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 // Delete every .php file in the cache directory
 function s2_clear_cache ()
 {

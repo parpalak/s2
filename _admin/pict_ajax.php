@@ -9,6 +9,7 @@
  * @package S2
  */
 
+
 define('S2_ROOT', '../');
 
 define('S2_NO_POST_BAD_CHARS', 1);

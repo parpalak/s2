@@ -8,6 +8,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 ($hook = s2_hook('rss_start')) ? eval($hook) : null;
 
 function s2_do_rss ()

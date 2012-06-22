@@ -8,6 +8,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_comment_menu_links ($mode = false)
 {
 	global $lang_admin;

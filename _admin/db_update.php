@@ -7,6 +7,7 @@
  * @package S2
  */
 
+
 if (!defined('S2_DB_LAST_REVISION'))
 	die;
 
