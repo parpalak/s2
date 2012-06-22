@@ -7,6 +7,10 @@
  * @package s2_tpl_edit
  */
 
+
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_tpl_edit_save ($template)
 {
 	$template_id = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $template['filename']);
