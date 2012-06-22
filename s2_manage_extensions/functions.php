@@ -10,6 +10,9 @@
  */
 
 
+if (!defined('S2_ROOT'))
+	die;
+
 function s2_manage_extensions_refresh_hooks ($id)
 {
 	global $s2_db;
