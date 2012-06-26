@@ -136,7 +136,7 @@ function s2_counter_process ($dir)
 		// It's a new day!
 
 		// Logging yesterday info
-		s2_counter_append_file($dir.S2_COUNTER_ARCH_INFO_FNAME, date('Y-m-d', time() - 86400).'^'.array_sum($ips).'^'.count($ips)."\n");
+		s2_counter_append_file($dir.S2_COUNTER_ARCH_INFO_FNAME, date('Y-m-d', time() - 86400).'^'.(is_array($ips) && count($ips) ? array_sum($ips) : 0).'^'.count($ips)."\n");
 
 		// Erase yesterday info
 		unset($ips);
