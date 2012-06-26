@@ -1,14 +1,39 @@
 .CodeMirror {
 	font: 1.083em/1.2307 Consolas, Monaco, monospace;
 	height: 100%;
+	position: relative;
+	overflow: hidden;
 }
 
 .CodeMirror-scroll {
-	overflow: auto;
+	overflow-x: auto;
+	overflow-y: hidden;
 	height: 100%;
-	/* This is needed to prevent an IE[67] bug where the scrolled content
-		 is visible outside of the scrolling box. */
 	position: relative;
+	outline: none;
+}
+
+.CodeMirror-scrollbar {
+	float: right;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	margin-left: -1px;
+}
+.CodeMirror-scrollbar-inner {
+	width: 1px;
+}
+.CodeMirror-scrollbar.cm-sb-overlap {
+	position: absolute;
+	z-index: 1;
+	float: none;
+	right: 0;
+	min-width: 12px;
+}
+.CodeMirror-scrollbar.cm-sb-nonoverlap {
+	min-width: 12px;
+}
+.CodeMirror-scrollbar.cm-sb-ie7 {
+	min-width: 18px;
 }
 
 .CodeMirror-gutter {
@@ -27,6 +52,11 @@
 }
 .CodeMirror-lines {
 	padding: .2307em;
+	white-space: pre;
+	cursor: text;
+}
+.CodeMirror-lines * {
+	pointer-events: none;
 }
 
 .CodeMirror pre {
@@ -40,11 +70,14 @@
 	padding: 0; margin: 0;
 	white-space: pre;
 	word-wrap: normal;
+	line-height: inherit;
+	color: inherit;
 }
 
 .CodeMirror-wrap pre {
 	word-wrap: break-word;
 	white-space: pre-wrap;
+	word-break: normal;
 }
 .CodeMirror-wrap .CodeMirror-scroll {
 	overflow-x: hidden;
@@ -59,8 +92,18 @@
 	position: absolute;
 	visibility: hidden;
 	border-left: 1px solid black;
-	border-right:none;
-	width:0;
+	border-right: none;
+	width: 0;
+}
+.cm-keymap-fat-cursor pre.CodeMirror-cursor {
+	width: auto;
+	border: 0;
+	background: transparent;
+	background: rgba(0, 200, 0, .4);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#6600c800, endColorstr=#4c00c800);
+}
+.cm-keymap-fat-cursor pre.CodeMirror-cursor:not(#nonsense_id) {
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
 }
 .CodeMirror pre.CodeMirror-cursor.CodeMirror-overwrite {}
 .CodeMirror-focused pre.CodeMirror-cursor {
