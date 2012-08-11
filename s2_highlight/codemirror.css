@@ -6,18 +6,18 @@
 }
 
 .CodeMirror-scroll {
-	overflow-x: auto;
-	overflow-y: hidden;
+	overflow: auto;
 	height: 100%;
 	position: relative;
 	outline: none;
 }
 
 .CodeMirror-scrollbar {
-	float: right;
+	position: absolute;
+	right: 0; top: 0;
 	overflow-x: hidden;
 	overflow-y: scroll;
-	margin-left: -1px;
+	z-index: 5;
 }
 .CodeMirror-scrollbar-inner {
 	width: 1px;
@@ -49,14 +49,12 @@
 	text-align: right;
 	padding: .4em .2em .4em .4em;
 	white-space: pre !important;
+	cursor: default;
 }
 .CodeMirror-lines {
 	padding: .2307em;
 	white-space: pre;
 	cursor: text;
-}
-.CodeMirror-lines * {
-	pointer-events: none;
 }
 
 .CodeMirror pre {
@@ -149,8 +147,19 @@ span.cm-em {font-style: italic;}
 span.cm-emstrong {font-style: italic; font-weight: bold;}
 span.cm-link {text-decoration: underline;}
 
+span.cm-invalidchar {color: #f00;}
+
 div.CodeMirror span.CodeMirror-matchingbracket {color: #0f0;}
 div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
+
+@media print {
+
+	/* Hide the cursor when printing */
+	.CodeMirror pre.CodeMirror-cursor {
+		visibility: hidden;
+	}
+
+}
 
 #s2_highlight_toggle_button {
 	background: url(icon.png) center no-repeat;
