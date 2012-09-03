@@ -348,16 +348,18 @@ elseif ($action == 'upload')
 
 	$errors = array();
 
-	if (!isset($_POST['dir']))
+	if (isset($_POST['dir']))
+	{
+		$path = $_POST['dir'];
+		$path = str_replace("\0", '', $path);
+		while (strpos($path, '..') !== false)
+			$path = str_replace('..', '', $path);
+	}
+	else
 	{
 		$errors[] = $lang_pictures['No POST data'];
 		$path = '';
 	}
-	else
-		$path = $_POST['dir'];
-
-	while (strpos($path, '..') !== false)
-		$path = str_replace('..', '', $path);
 
 	clearstatcache();
 
@@ -391,6 +393,7 @@ elseif ($action == 'upload')
 			}
 
 			$filename = utf8_strtolower(s2_basename($filename));
+			$filename = str_replace("\0", '', $filename);
 			while (strpos($filename, '..') !== false)
 				$filename = str_replace('..', '', $filename);
 
