@@ -7,7 +7,7 @@
  * Converts '""' quotation marks to '«»' and '„“' and puts non-breaking space
  * characters according to Russian typography conventions.
  *
- * @copyright (C) 2010-2011 Roman Parpalak, based on code (C) by Dmitry Smirnov
+ * @copyright (C) 2010-2012 Roman Parpalak, based on code (C) by Dmitry Smirnov
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_typo
  */
