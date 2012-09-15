@@ -34,7 +34,7 @@ function s2_typo_store ($matches)
 
 function s2_typo_replace_q ($matches)
 {
-	return str_replace('"', '¬', $matches[0]);
+	return str_replace(array('"', '&quot;'), array('¬', "\xc0"), $matches[0]);
 }
 
 //
@@ -47,11 +47,13 @@ function s2_typo_make ($contents, $soft = 0)
 {
 	$nbsp = $soft ? "\xc2\xa0" : '&nbsp;';
 
+	$contents = str_replace("\xc0", '', $contents);
+
 	// Escape sensitive data
 	$contents = preg_replace_callback('#<(script|style|textarea|pre|code|kbd).*?</\\1>#s', 's2_typo_store', $contents);
 	$contents = preg_replace_callback('#<[^>]*>#sS', 's2_typo_replace_q', $contents); 
 
-	$contents = "\n".str_replace(array('&quot;'), array('"'), $contents);
+	$contents = "\n".str_replace(array('&quot;', "\xc0"), array('"', '&quot;'), $contents);
 
 	// Qutation marks
 	$contents = preg_replace ('#(?<=[(\s">]|¬|^)"([^"]*[^\s"(])"#S', '«\\1»', $contents);
