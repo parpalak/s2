@@ -411,7 +411,7 @@ else
 	require $ext_info['path'].'/lang/English.php';
 ?>
 		<label for="s2_blog_important_tag" title="<?php echo $lang_s2_blog['Important tag info']; ?>">
-			<input type="checkbox" id="s2_blog_important_tag" name="tag[s2_blog_important]" value="1"<? if (!empty($tag['s2_blog_important'])) echo ' checked="checked"' ?> />
+			<input type="checkbox" id="s2_blog_important_tag" name="tag[s2_blog_important]" value="1"<?php if (!empty($tag['s2_blog_important'])) echo ' checked="checked"' ?> />
 			<?php echo $lang_s2_blog['Important tag']; ?>
 		</label>
 		<hr />
