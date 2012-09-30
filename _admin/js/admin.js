@@ -629,10 +629,13 @@ $(document).ready(function()
 			if (!eButtons)
 				return;
 
+			var init_required = !eButtons.closest('html').length;
 			eButtons.detach();
 			selectedId = d.rslt.obj.attr('id').replace('node_', '');
 			commentNum = d.rslt.obj.attr('data-comments');
 			$('.jstree-clicked').append(eButtons);
+			if (init_required)
+				initContext();
 		})
 		.bind('deselect_node.jstree', function (e, d)
 		{
