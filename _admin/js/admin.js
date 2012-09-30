@@ -71,7 +71,6 @@ var selectTabN = function () {};
 
 $(function ()
 {
-	Search.init();
 	Changes.init();
 
 	$(document).bind(isIE || isSafari ? 'keydown' : 'keypress', function (e)
@@ -238,89 +237,91 @@ var Search = (function ()
 	var search_string = '';
 	var eInput;
 
+	function DoSearch ()
+	{
+		$(document).trigger('search.submit');
+	}
+
+	$(document).on('tree.reload', function ()
+	{
+		// Cancel search mode
+		if (!eInput)
+			return;
+		eInput.value = eInput.defaultValue;
+		eInput.className = 'inactive';
+		search_string = '';
+	});
+
+	function init ()
+	{
+		var search_timer;
+		eInput = document.getElementById('search_field');
+
+		function NewSearch ()
+		{
+			// We have to wait a while for eInput.value to change
+			setTimeout(function ()
+			{
+				if (search_string == eInput.value || eInput.className == 'inactive')
+					return;
+
+				search_string = eInput.value;
+				SetWait(true);
+				clearTimeout(search_timer);
+				search_timer = setTimeout(DoSearch, 250);
+			}, 0);
+		}
+
+		// Search field help message.
+		// It appears when the field is empty.
+		eInput.onblur = function ()
+		{
+			if (eInput.value == '')
+			{
+				eInput.className = 'inactive';
+				eInput.value = eInput.defaultValue;
+			}
+		}
+		eInput.onfocus = function ()
+		{
+			if (eInput.className == 'inactive')
+			{
+				eInput.className = '';
+				eInput.value = '';
+			}
+		}
+		eInput.oninput = NewSearch;
+
+		var KeyDown = function (e)
+		{
+			e = e || window.event;
+			var key = e.keyCode || e.which;
+
+			if (key == 13)
+			{
+				// Immediate search on enter press
+				clearTimeout(search_timer);
+				search_string = eInput.value;
+				DoSearch();
+			}
+			else
+				// We have to wait a little for eInput.value to change
+				NewSearch();
+		}
+		if (isIE || isSafari)
+			eInput.onkeydown = KeyDown;
+		else
+			eInput.onkeypress = KeyDown;
+	}
+
+	$(init);
+
 	return (
 	{
-		init: function ()
-		{
-			var DoSearch = function ()
-			{
-				$('#tree').jstree('refresh', -1);
-			}
-
-			var search_timer;
-			eInput = document.getElementById('search_field');
-
-			function NewSearch ()
-			{
-				// We have to wait a while for eInput.value to change
-				setTimeout(function ()
-				{
-					if (search_string == eInput.value || eInput.className == 'inactive')
-						return;
-
-					search_string = eInput.value;
-					SetWait(true);
-					clearTimeout(search_timer);
-					search_timer = setTimeout(DoSearch, 250);
-				}, 0);
-			}
-
-			// Search field help message.
-			// It appears when the field is empty.
-			eInput.onblur = function ()
-			{
-				if (eInput.value == '')
-				{
-					eInput.className = 'inactive';
-					eInput.value = eInput.defaultValue;
-				}
-			}
-			eInput.onfocus = function ()
-			{
-				if (eInput.className == 'inactive')
-				{
-					eInput.className = '';
-					eInput.value = '';
-				}
-			}
-			eInput.oninput = NewSearch;
-
-			var KeyDown = function (e)
-			{
-				e = e || window.event;
-				var key = e.keyCode || e.which;
-
-				if (key == 13)
-				{
-					// Immediate search on enter press
-					clearTimeout(search_timer);
-					search_string = eInput.value;
-					DoSearch();
-				}
-				else
-					// We have to wait a little for eInput.value to change
-					NewSearch();
-			}
-			if (isIE || isSafari)
-				eInput.onkeydown = KeyDown;
-			else
-				eInput.onkeypress = KeyDown;
-		},
-
 		// Get search string
 		string: function ()
 		{
 			return search_string;
-		},
-
-		// Cancel search mode
-		reset: function ()
-		{
-			if (!eInput)
-				return;
-			eInput.value = eInput.defaultValue;
-			eInput.className = 'inactive';
-			search_string = '';
 		}
 	})
 }());
@@ -582,18 +583,23 @@ $(document).ready(function()
 			LoadComments(selectedId);
 	}
 
-	function initContext ()
-	{
-		$('#context_edit').click(editArticle);
-		$('#context_comments').click(showComments);
-		$('#context_add').click(createArticle);
-		$('#context_delete').click(function () {tree.jstree('remove');});
-	}
-
-	initContext();
+	$('.toolbar .refresh').click(refreshTree);
 
 	var eButtons = $('#context_buttons');
 	eButtons.detach();
+
+	function run_search ()
+	{
+		tree.jstree('refresh', -1);
+	}
+
+	function refreshTree ()
+	{
+		$(document).trigger('tree.reload');
+		run_search();
+	}
+
+	$(document).on('search.submit', run_search);
 
 	function rollback (data)
 	{
@@ -612,10 +618,6 @@ $(document).ready(function()
 				return false; 
 			}
 		})
-		.bind('refresh.jstree', function ()
-		{
-			setTimeout(initContext, 0);
-		})
 		.bind('dblclick.jstree', function (e)
 		{
 			if (!isRenaming && e.target.nodeName == 'A')
@@ -629,13 +631,10 @@ $(document).ready(function()
 			if (!eButtons)
 				return;
 
-			var init_required = !eButtons.closest('html').length;
 			eButtons.detach();
 			selectedId = d.rslt.obj.attr('id').replace('node_', '');
 			commentNum = d.rslt.obj.attr('data-comments');
 			$('.jstree-clicked').append(eButtons);
-			if (init_required)
-				initContext();
 		})
 		.bind('deselect_node.jstree', function (e, d)
 		{
@@ -714,6 +713,19 @@ $(document).ready(function()
 		{
 			tree.jstree('open_node', '#node_1');
 		})
+		.on('click', '#context_edit, #context_comments, #context_add, #context_delete', function (e, data)
+		{
+			// Context buttons
+			var id = this.id;
+			if (id == 'context_edit')
+				editArticle();
+			else if (id == 'context_comments')
+				showComments();
+			else if (id == 'context_add')
+				createArticle();
+			else if (id == 'context_delete')
+				tree.jstree('remove');
+		})
 		.jstree({
 			crrm : {
 				input_width_limit : 1000,
@@ -730,7 +742,7 @@ $(document).ready(function()
 				'c' : showComments,
 				'n' : function () { createArticle(); return false; },
 				'f' : function () { $('#search_field').focus(); return false; },
-				'r' : RefreshTree,
+				'r' : refreshTree,
 				'f2' : function () { this.rename(this.data.ui.last_selected || this.data.ui.hovered); return false;}
 			},
 			json_data : {
@@ -770,12 +782,6 @@ $.ajaxPrefilter(function (options, originalOptions, jqXHR)
 	options.success = options.success instanceof Array ? options.success.unshift(successCheck) : (typeof(options.success) == 'function' ? [successCheck, options.success] : successCheck);
 	options.error = options.error instanceof Array ? options.error.unshift(errorCheck) : (typeof(options.error) == 'function' ? [errorCheck, options.error] : errorCheck);
 });
-
-function RefreshTree ()
-{
-	Search.reset();
-	$('#tree').jstree('refresh', -1);
-}
 
 //=======================[Tree button handlers]=================================
 
