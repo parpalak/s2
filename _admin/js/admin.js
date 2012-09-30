@@ -329,7 +329,7 @@ var Search = (function ()
 // Turning animated icon on or off
 function SetWait (bWait)
 {
-	document.getElementById('loading').style.display = bWait ? 'block' : 'none';
+	$('#loading').css('display', bWait ? 'block' : 'none');
 	document.body.style.cursor = bWait ? 'progress' : 'inherit';
 }
 
@@ -1362,9 +1362,11 @@ function Preview ()
 
 	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
 	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);
-	window.frames['preview_frame'].document.open();
-	window.frames['preview_frame'].document.write(s);
-	window.frames['preview_frame'].document.close();
+
+	var d = window.frames['preview_frame'].document;
+	d.open();
+	d.write(s);
+	d.close();
 }
 
 //=======================[Users tab]============================================
