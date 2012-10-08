@@ -670,7 +670,7 @@ function s2_blog_last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post =
 	$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'create_time, title, text, url, id, commented, modify_time, favorite, ('.$raw_query_comment.') AS comm_num, ('.$raw_query_user.') AS author, label',
+		'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.modify_time, p.favorite, ('.$raw_query_comment.') AS comm_num, ('.$raw_query_user.') AS author, p.label',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> 'published = 1',
 		'ORDER BY'	=> 'create_time DESC',
