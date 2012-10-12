@@ -89,7 +89,7 @@ body {
 	left: -55px;
 	top: 11px;
 	position: absolute;
-	background: url('../i/loading.gif') 0 0 no-repeat;
+	background: url(data:image/gif;base64,R0lGODlhKgAGAJAAAICAgAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgABACwAAAAAKgAGAAACJIQfqcvtf5CKjC47UTRXZt6BHxBs5Fh5CbZqW3iicMqZz43fBQAh+QQJCgABACwBAAAAKAAGAAACI4xvoIvtjxaIch7ZMK021d15SsaFHEiOoCYyl/uqcbjS0I0UACH5BAkKAAEALAEAAAAoAAYAAAIijI9pwK2PGkgyynmqvTg7ry0feFFjwG2dmKoq48bQ085KAQAh+QQJCgABACwBAAAAKAAGAAACI4yPqQntGxxgD0kr58l1d3N5Ichpokk22BiVlLqiXAzV9bwUACH5BAkKAAEALAEAAAApAAYAAAIjjI+pu+APU0Tz1AAzkI87v1laR5HiV6LGaK4t9l4aQ9eMVgAAIfkEBRQAAQAsAQABACgABAAAAhyEEZmHGuzeiQw6q/CatxrKZeH2dR5YiinZqEABADs=) 0 0 no-repeat;
 	}
 
 a, a:visited {
