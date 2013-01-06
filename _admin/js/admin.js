@@ -420,7 +420,7 @@ var Changes = (function ()
 // originally written by paul sowden <paul@idontsmoke.co.uk> | http://idontsmoke.co.uk
 // modified and localized by alexander shurkayev <alshur@ya.ru> | http://htmlcoder.visions.ru
 
-(function ()
+$(function ()
 {
 	var sort_case_sensitive = false;
 
@@ -526,27 +526,25 @@ var Changes = (function ()
 				$(this).removeClass('curcol_down').removeClass('curcol_up');
 		});
 
-		var a = new Array(),
+		var a = [],
 			tbody = table.getElementsByTagName("tbody")[0],
 			aeTR = tbody.getElementsByTagName("tr"),
 			size = aeTR.length;
 
 		for (i = 0; i < size; i++)
 		{
-			node = aeTR[i];
-			a[i] = new Array();
-			a[i][0] = getConcatenedTextContent(node.getElementsByTagName("td")[curcol]);
-			a[i][1] = node;
+			var node = aeTR[i];
+			a[i] = [getConcatenedTextContent(node.getElementsByTagName("td")[curcol]), node];
 		}
 
 		a.sort(_sort);
 		if (up) a.reverse();
-		for (i = 0; i < a.length; i++)
+		for (i = 0; i < size; i++)
 			tbody.appendChild(a[i][1]);
 	}
 
-	$(function () { $('body').on('click', 'td.sortable', sort); });
-}());
+	$('body').on('click', 'td.sortable', sort);
+});
 
 function CloseAll ()
 {
@@ -1163,10 +1161,8 @@ function InsertParagraph (sType)
 
 	var eTextarea = document.artform['page[text]'],
 		selection = get_selection(eTextarea),
-		sText = eTextarea.value;
-
-	if (eTextarea && typeof(eTextarea.scrollTop) != 'undefined')
-		var iScrollTop = eTextarea.scrollTop;
+		sText = eTextarea.value,
+		iScrollTop = eTextarea && eTextarea.scrollTop || 0;
 
 	if (selection.length)
 	{
