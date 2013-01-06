@@ -257,7 +257,6 @@ hr {
 		vertical-align: top;
 		background: url(../i/icons.png) 0px -16px;
 		background-size: auto;
-		margin-left: 1em;
 		float: right;
 		position: relative;
 		left: 19px;
@@ -468,11 +467,6 @@ body > .tabsheets {
 
 /*=======================[Table styles]=======================================*/
 
-/*
- * The following style definitions are based on code by Alexander Shurkayev.
- * See http://htmlcoder.visions.ru/JavaScript/?22 for details.
- */
-
 .sort {
 	background: #fff;
 	border-collapse: collapse;
@@ -647,8 +641,7 @@ table.fields {
 	width: 100%;
 	border: 0;
 	border-collapse: collapse;
-	margin: 0;
-	margin-bottom: 0.25em;
+	margin: 0 0 0.25em;
 	}
 	.fields td {
 		vertical-align: middle;
@@ -778,7 +771,7 @@ textarea,
 		width: 16px;
 		border: transparent solid 1px;
 		background: url(../i/toolbar.png) transparent;
-		-webkit-background-origin: padding-box;
+		-webkit-background-origin: padding;
 		-moz-background-origin: padding;
 		background-origin: padding-box;
 		-webkit-background-clip: padding-box;
@@ -1143,7 +1136,7 @@ form center {
 
 @media screen and (max-width: 850px) {
 	.toolbar img {
-		padding: 0px;
+		padding: 0;
 		background-origin: border-box;
 		}
 	.r-float {
