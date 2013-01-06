@@ -132,9 +132,9 @@ $(function ()
 	// Prevent from loosing unsaved data
 	window.onbeforeunload = function ()
 	{
-		if (document.artform && Changes.present(document.artform))
+		if (document.forms['artform'] && Changes.present(document.forms['artform']))
 			return s2_lang.unsaved_exit;
-	}
+	};
 
 	cur_page = document.location.hash;
 	setInterval(CheckPage, 400);
@@ -151,14 +151,14 @@ function Logout ()
 		});
 	}
 
-	if (document.artform && Changes.present(document.artform))
+	if (document.forms['artform'] && Changes.present(document.forms['artform']))
 	{
 		PopupMessages.show(s2_lang.unsaved_exit, [
 			{
 				name: s2_lang.save_and_exit,
 				action: (function ()
 				{
-					document.artform.onsubmit();
+					document.forms['artform'].onsubmit();
 					setTimeout(DoLogout, 200);
 				}),
 				once: true
@@ -217,7 +217,7 @@ function PopupWindow (sTitle, sHeader, sInfo, sText)
 	if (result)
 		head = result;
 
-	var result = Hooks.run('fn_popup_window_filter_body', body);
+	result = Hooks.run('fn_popup_window_filter_body', body);
 	if (result)
 		body = result;
 
@@ -236,10 +236,10 @@ var Search = (function ()
 
 	function DoSearch ()
 	{
-		$(document).trigger('search.submit');
+		$(document).trigger('do_search.s2');
 	}
 
-	$(document).on('tree.reload', function ()
+	$(document).on('tree_reload.s2', function ()
 	{
 		// Cancel search mode
 		if (!eInput)
@@ -278,7 +278,7 @@ var Search = (function ()
 				eInput.className = 'inactive';
 				eInput.value = eInput.defaultValue;
 			}
-		}
+		};
 		eInput.onfocus = function ()
 		{
 			if (eInput.className == 'inactive')
@@ -286,7 +286,7 @@ var Search = (function ()
 				eInput.className = '';
 				eInput.value = '';
 			}
-		}
+		};
 		eInput.oninput = NewSearch;
 
 		var KeyDown = function (e)
@@ -358,22 +358,22 @@ function CheckPage ()
 
 var Changes = (function ()
 {
-	var saved_text = curr_md5 = '';
+	var saved_text = '', curr_md5 = '';
 
 	function check_changes ()
 	{
-		if (!is_local_storage || !document.artform)
+		if (!is_local_storage || !document.forms['artform'])
 			return;
 
 		Hooks.run('fn_check_changes_start');
 
-		var new_text = document.artform['page[text]'].value;
+		var new_text = document.forms['artform'].elements['page[text]'].value;
 
 		if  (saved_text != new_text)
 			localStorage.setItem('s2_curr_text', new_text);
 		else
 			localStorage.removeItem('s2_curr_text');
-	};
+	}
 
 	function show_recovered (sText)
 	{
@@ -403,7 +403,7 @@ var Changes = (function ()
 				Hooks.run('fn_changes_commit_pre_ls');
 
 				localStorage.removeItem('s2_curr_text');
-				saved_text = document.artform['page[text]'].value;
+				saved_text = document.forms['artform'].elements['page[text]'].value;
 			}
 		},
 
@@ -590,11 +590,11 @@ $(function()
 
 	function refreshTree ()
 	{
-		$(document).trigger('tree.reload');
+		$(document).trigger('tree_reload.s2');
 		run_search();
 	}
 
-	$(document).on('search.submit', run_search);
+	$(document).on('do_search.s2', run_search);
 
 	function rollback (data)
 	{
