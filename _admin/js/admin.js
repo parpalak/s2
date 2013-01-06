@@ -808,6 +808,7 @@ var LoadArticle, ReloadArticle;
 				.autocomplete({
 					delay: 0,
 					minLength: 0,
+					open: function( e, ui ) { $('.ui-autocomplete').css({width: $(this).css('width')}); },
 					source: function (request, response)
 					{
 						var a = this.element[0].value.split(','),

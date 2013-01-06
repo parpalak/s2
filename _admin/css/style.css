@@ -1111,7 +1111,6 @@ form center {
 	display: block;
 	border: 1px solid #ccc;
 	word-wrap: break-word;
-	max-width: 400px;
 	cursor: default;
 	}
 	.ui-autocomplete .ui-menu-item {
