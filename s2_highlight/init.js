@@ -48,7 +48,7 @@ var s2_highlight = (function ()
 			}
 		},
 
-		toggle: function (sType)
+		toggle: function ()
 		{
 			$('#s2_highlight_toggle_button').toggleClass('pressed');
 			if (enabled = !enabled)
