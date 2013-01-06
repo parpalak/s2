@@ -9,22 +9,21 @@
 
 (function ()
 {
-	// Ajax requester
-	var http_request = false;
+	var xhr = false;
 
 	if (window.XMLHttpRequest)
-		http_request = new XMLHttpRequest();
+		xhr = new XMLHttpRequest();
 	else if (window.ActiveXObject)
 	{
 		try
 		{
-			http_request = new ActiveXObject("Msxml2.XMLHTTP");
+			xhr = new ActiveXObject("Msxml2.XMLHTTP");
 		}
 		catch(e)
 		{
 			try
 			{
-				http_request = new ActiveXObject("Microsoft.XMLHTTP");
+				xhr = new ActiveXObject("Microsoft.XMLHTTP");
 			}
 			catch(e){ }
 		}
@@ -34,13 +33,13 @@
 
 	function doSearch (str)
 	{
-		http_request.open('GET', s2_search_url + '/ajax.php?q=' + encodeURIComponent(str), true);
-		http_request.onreadystatechange = function ()
+		xhr.open('GET', s2_search_url + '/ajax.php?q=' + encodeURIComponent(str), true);
+		xhr.onreadystatechange = function ()
 		{
-			if (http_request.readyState == 4 && http_request.status == 200)
-				displayResults(http_request.responseText);
+			if (xhr.readyState == 4 && xhr.status == 200)
+				displayResults(xhr.responseText);
 		};
-		http_request.send(null);
+		xhr.send(null);
 		last_search = str;
 	}
 
@@ -59,51 +58,51 @@
 
 	function keyDown (e)
 	{
-		var key_code;
+		var iKey;
 		if (window.event)
-			key_code = window.event.keyCode;
+			iKey = window.event.keyCode;
 		else if (e.keyCode)
-			key_code = e.keyCode;
+			iKey = e.keyCode;
 		else if (e.which)
-			key_code = e.which;
+			iKey = e.which;
 
 		var stop_event = false;
 
-		if (key_code == 13 && eCurItem)
+		if (iKey == 13 && eCurItem)
 		{
 			var new_url = eCurItem.href;
 			setTimeout(function ()
 			{
 				location.href = new_url;
 			}, 0);
-			search_input.form.action = '';
+			SInp.form.action = '';
 			hideResults();
 			stop_event = true;
 		}
-		if (key_code == 27 && search_tips.style.display != 'none')
+		if (iKey == 27 && STips.style.display != 'none')
 		{
-			var old_value = search_input.value;
+			var old_value = SInp.value;
 			hideResults();
 			setTimeout(function ()
 			{
-				search_input.value = old_value;
-				search_input.focus();
+				SInp.value = old_value;
+				SInp.focus();
 			}, 0);
 			stop_event = true;
 		}
-		if (key_code == 38 || key_code == 40)
+		if (iKey == 38 || iKey == 40)
 		{
 			if (!eCurItem)
 			{
-				var aeItems = search_tips.getElementsByTagName('A');
+				var aeItems = STips.getElementsByTagName('A');
 				if (aeItems.length)
 				{
-					eCurItem = aeItems[key_code == 38 ? aeItems.length - 1 : 0];
+					eCurItem = aeItems[iKey == 38 ? aeItems.length - 1 : 0];
 					eCurItem.className = 'current';
-					if (search_tips.scrollTop > -20 + eCurItem.offsetTop)
-						search_tips.scrollTop = -20 + eCurItem.offsetTop;
-					if (search_tips.scrollTop < 20 + eCurItem.offsetTop + eCurItem.offsetHeight - search_tips.offsetHeight)
-						search_tips.scrollTop = 20 + eCurItem.offsetTop + eCurItem.offsetHeight - search_tips.offsetHeight;
+					if (STips.scrollTop > -20 + eCurItem.offsetTop)
+						STips.scrollTop = -20 + eCurItem.offsetTop;
+					if (STips.scrollTop < 20 + eCurItem.offsetTop + eCurItem.offsetHeight - STips.offsetHeight)
+						STips.scrollTop = 20 + eCurItem.offsetTop + eCurItem.offsetHeight - STips.offsetHeight;
 				}
 			}
 			else
@@ -112,17 +111,17 @@
 				eCurItem.className = '';
 				steps:
 				{
-					while (key_code == 38 ? eItem.previousSibling : eItem.nextSibling)
+					while (iKey == 38 ? eItem.previousSibling : eItem.nextSibling)
 					{
-						eItem = key_code == 38 ? eItem.previousSibling : eItem.nextSibling;
+						eItem = iKey == 38 ? eItem.previousSibling : eItem.nextSibling;
 						if (eItem.nodeName == 'A')
 						{
 							eCurItem = eItem;
 							eCurItem.className = 'current';
-							if (search_tips.scrollTop > -20 + eCurItem.offsetTop)
-								search_tips.scrollTop = -20 + eCurItem.offsetTop;
-							else if (search_tips.scrollTop < 20 + eCurItem.offsetTop + eCurItem.offsetHeight - search_tips.offsetHeight)
-								search_tips.scrollTop = 20 + eCurItem.offsetTop + eCurItem.offsetHeight - search_tips.offsetHeight;
+							if (STips.scrollTop > -20 + eCurItem.offsetTop)
+								STips.scrollTop = -20 + eCurItem.offsetTop;
+							else if (STips.scrollTop < 20 + eCurItem.offsetTop + eCurItem.offsetHeight - STips.offsetHeight)
+								STips.scrollTop = 20 + eCurItem.offsetTop + eCurItem.offsetHeight - STips.offsetHeight;
 							break steps;
 						}
 					}
@@ -149,7 +148,7 @@
 		}
 	}
 
-	var search_tips, key_code;
+	var STips;
 
 	function displayResults (sHTML)
 	{
@@ -159,25 +158,25 @@
 			return;
 		}
 
-		search_tips.innerHTML = sHTML;
-		search_tips.style.display = 'block';
+		STips.innerHTML = sHTML;
+		STips.style.display = 'block';
 
-		var mc = getBounds(search_input);
-		search_tips.style.top = document.documentElement.scrollTop + mc.bottom + shift_y + 'px';
-		search_tips.style.left = mc.left + shift_x + 'px';
-		search_tips.style.width = mc.width - 2 + delta_x + 'px';
+		var mc = getBounds(SInp);
+		STips.style.top = document.documentElement.scrollTop + mc.bottom + shift_y + 'px';
+		STips.style.left = mc.left + shift_x + 'px';
+		STips.style.width = mc.width - 2 + delta_x + 'px';
 
-		search_tips.scrollTop = 0;
+		STips.scrollTop = 0;
 	}
 
 	function hideResults ()
 	{
-		if (search_tips)
-			search_tips.style.display = 'none';
+		if (STips)
+			STips.style.display = 'none';
 		eCurItem = null;
 	}
 
-	function hideHandler ()
+	function hide ()
 	{
 		blur_timer = setTimeout(function ()
 		{
@@ -186,34 +185,34 @@
 		}, 20);
 	}
 
-	var search_input, search_timer, blur_timer, shift_x = 0, shift_y = 0, delta_x = 0;
+	var SInp, search_timer, blur_timer, shift_x = 0, shift_y = 0, delta_x = 0;
 
 	function init ()
 	{
-		// We have nothing to do without Ajas support
-		if (!http_request)
+		// We have nothing to do without Ajax support
+		if (!xhr)
 			return;
 
-		search_input = document.getElementById('s2_search_input');
-		if (!search_input)
-			search_input = document.getElementById('s2_search_input_ext');
-		if (!search_input)
+		SInp = document.getElementById('s2_search_input');
+		if (!SInp)
+			SInp = document.getElementById('s2_search_input_ext');
+		if (!SInp)
 			return;
 
-		var position_info = search_input.getAttribute('data-s2_search-pos');
-		if (position_info)
+		var pos_info = SInp.getAttribute('data-s2_search-pos');
+		if (pos_info)
 		{
-			position_info = position_info.split(/\s*,\s*/);
-			shift_x = position_info[0] ? parseInt(position_info[0]) : shift_x;
-			shift_y = position_info[1] ? parseInt(position_info[1]) : shift_y;
-			delta_x = position_info[2] ? parseInt(position_info[2]) : delta_x;
+			pos_info = pos_info.split(/\s*,\s*/);
+			shift_x = pos_info[0] ? parseInt(pos_info[0]) : shift_x;
+			shift_y = pos_info[1] ? parseInt(pos_info[1]) : shift_y;
+			delta_x = pos_info[2] ? parseInt(pos_info[2]) : delta_x;
 		}
 
 		// Search field events
-		search_input.onkeydown = keyDown;
-		search_input.onkeyup = function (e)
+		SInp.onkeydown = keyDown;
+		SInp.onkeyup = function (e)
 		{
-			var new_search = search_input.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+			var new_search = SInp.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 			if (last_search != new_search)
 			{
 				clearTimeout(search_timer);
@@ -226,11 +225,11 @@
 				}
 			}
 		};
-		search_input.onclick = function (e)
+		SInp.onclick = function (e)
 		{
 			clearTimeout(blur_timer);
 		};
-		search_input.form.onsubmit = function (e)
+		SInp.form.onsubmit = function (e)
 		{
 			if (eCurItem)
 			{
@@ -240,23 +239,21 @@
 				hideResults();
 				return false;
 			}
-			if (!search_input.form.action)
-				return false;
-			return true;
+			return !!SInp.form.action;
 		};
-		search_input.setAttribute('autocomplete', 'off');
+		SInp.setAttribute('autocomplete', 'off');
 
 		// Autosearch results div
-		search_tips = document.createElement('div');
-		search_tips.style.display = 'none';
-		search_tips.style.zIndex = '10';
-		search_tips.id = 's2_search_tip';
-		document.body.appendChild(search_tips);
+		STips = document.createElement('div');
+		STips.style.display = 'none';
+		STips.style.zIndex = '10';
+		STips.id = 's2_search_tip';
+		document.body.appendChild(STips);
 
 		if (typeof(document.addEventListener) == 'undefined')
-			document.attachEvent('onclick', hideHandler);
+			document.attachEvent('onclick', hide);
 		else
-			document.addEventListener('click', hideHandler, true);
+			document.addEventListener('click', hide, true);
 
 		// Add extension styles
 		var head = document.getElementsByTagName('head')[0],
@@ -272,8 +269,8 @@
 	}
 
 	if (window.attachEvent)
-		window.attachEvent('onload', init)
+		window.attachEvent('onload', init);
 	else if (window.addEventListener)
-		window.addEventListener('load', init, false)
+		window.addEventListener('load', init, false);
 
 })();
