@@ -71,17 +71,16 @@ function hex_md5 (string)
  
 	function ConvertToWordArray(string)
 	{
-		var lWordCount;
-		var lMessageLength = string.length;
-		var lNumberOfWords_temp1 = lMessageLength + 8;
-		var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64))/64;
-		var lNumberOfWords = (lNumberOfWords_temp2 + 1)*16;
-		var lWordArray = Array(lNumberOfWords - 1);
-		var lBytePosition = 0;
-		var lByteCount = 0;
+		var lMessageLength = string.length,
+			lNumberOfWords_temp1 = lMessageLength + 8,
+			lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64))/64,
+			lNumberOfWords = (lNumberOfWords_temp2 + 1)*16,
+			lWordArray = new Array(lNumberOfWords - 1),
+			lBytePosition = 0,
+			lByteCount = 0;
 		while (lByteCount < lMessageLength)
 		{
-			lWordCount = (lByteCount-(lByteCount % 4))/4;
+			var lWordCount = (lByteCount-(lByteCount % 4))/4;
 			lBytePosition = (lByteCount % 4)*8;
 			lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount)<<lBytePosition));
 			lByteCount++;
@@ -106,16 +105,15 @@ function hex_md5 (string)
 		return WordToHexValue;
 	}
  
-	var x = Array();
-	var k, AA, BB, CC, DD, a, b, c, d;
-	var S11=7, S12=12, S13=17, S14=22;
-	var S21=5, S22=9 , S23=14, S24=20;
-	var S31=4, S32=11, S33=16, S34=23;
-	var S41=6, S42=10, S43=15, S44=21;
+	var k, AA, BB, CC, DD, a, b, c, d,
+		S11=7, S12=12, S13=17, S14=22,
+		S21=5, S22=9 , S23=14, S24=20,
+		S31=4, S32=11, S33=16, S34=23,
+		S41=6, S42=10, S43=15, S44=21;
  
 	string = unescape(encodeURIComponent(string));
  
-	x = ConvertToWordArray(string);
+	var x = ConvertToWordArray(string);
  
 	a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
  
@@ -205,7 +203,7 @@ var SetBackground = (function ()
 	function Noise ()
 	{
 		if (!!!document.createElement('canvas').getContext)
-			return false;
+			return;
 
 		var canvas = document.createElement('canvas');
 		canvas.width = canvas.height = _size;
@@ -215,11 +213,12 @@ var SetBackground = (function ()
 			maxAlpha = 5.5,
 			maxLine = 4;
 
-		var repeat_num = 0;
+		var repeat_num = 0, alpha = 1;
  		for (var y = canvas.height; y--; )
 		for (var x = canvas.width, index = (x + y * imgData.width) * 4; x--; )
 		{
-			var alpha = Math.random() * maxLine < repeat_num++ ? (repeat_num = 0) + ~~(Math.random() * maxAlpha) : alpha;
+			if (Math.random() * maxLine < repeat_num++)
+				alpha =  (repeat_num = 0) + ~~(Math.random() * maxAlpha);
 			index -= 4;
 			imgData.data[index] = imgData.data[index + 1] = imgData.data[index + 2] = 0;
 			imgData.data[index + 3] = alpha;
@@ -238,7 +237,7 @@ var SetBackground = (function ()
 	style.type = 'text/css';
 	head.appendChild(style);
 
-	var set = function (c)
+	return function (c)
 	{
 		color = c;
 		var css_rule = 'body {background: ' + back_img + ' ' + color + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;} #tag_names li.cur_tag, .tabsheets > dt.active {background-color: ' + color + ';}';
@@ -251,9 +250,7 @@ var SetBackground = (function ()
 				style.removeChild(style.firstChild);
 			style.appendChild(document.createTextNode(css_rule));
 		}
-	}
-
-	return set;
+	};
 }());
 
 //
@@ -355,8 +352,8 @@ var PopupMessages = {
 		}
 		else
 		{
-			var eInnerDiv = eDiv.firstChild;
-			var eCross = eInnerDiv.firstChild;
+			eInnerDiv = eDiv.firstChild;
+			eCross = eInnerDiv.firstChild;
 		}
 		eCross.focus();
 
@@ -366,10 +363,11 @@ var PopupMessages = {
 			for (var i = aeMessages.length; i-- ;)
 				if (aeMessages[i].nodeName == 'DIV' && aeMessages[i].getAttribute('data-id') == sId)
 				{
-					aeMessages[i].style.color = 'transparent';
-					setTimeout(function () { aeMessages[i].style.color = ''; }, 200);
-					setTimeout(function () { aeMessages[i].style.color = 'transparent'; }, 350);
-					setTimeout(function () { aeMessages[i].style.color = ''; }, 500);
+					var eMessage = aeMessages[i];
+					eMessage.style.color = 'transparent';
+					setTimeout(function () { eMessage.style.color = ''; }, 200);
+					setTimeout(function () { eMessage.style.color = 'transparent'; }, 350);
+					setTimeout(function () { eMessage.style.color = ''; }, 500);
 					return;
 				}
 		}
@@ -391,7 +389,7 @@ var PopupMessages = {
 		eMessage.innerHTML = sMessage;
 
 		var max = aActions ? aActions.length : 0;
-		for (var i = 0; i < max; i++)
+		for (i = 0; i < max; i++)
 		{
 			var eA = document.createElement('A');
 			eA.setAttribute('class', 'action');
@@ -474,7 +472,7 @@ function SendAjaxLoginForm ()
 		document.getElementById('ajax_login_message').innerHTML = sText;
 		setTimeout(function ()
 		{
-			eDiv = document.getElementById('ajax_login_message');
+			var eDiv = document.getElementById('ajax_login_message');
 			if (eDiv)
 				eDiv.innerHTML = '';
 		}, 5000)
