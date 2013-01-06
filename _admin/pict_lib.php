@@ -38,6 +38,7 @@ function s2_unlink_recursive($dir, $delete_root = true)
 	}
 
 	closedir($dir_handle);
+
 	if ($delete_root)
 		@rmdir($dir);
 

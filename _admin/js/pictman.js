@@ -32,7 +32,7 @@ function strNatCmp (a, b)
 
 	var aa = chunkify(a.toLowerCase());
 	var bb = chunkify(b.toLowerCase());
-  
+
 	for (x = 0; aa[x] && bb[x]; x++)
 		if (aa[x] !== bb[x])
 		{
@@ -50,10 +50,9 @@ var parentWnd = opener || window.top || null;
 
 $(function ()
 {
-	$(document).bind('keydown', function (e)
+	$(document).keydown(function (e)
 	{
-		var key = e.keyCode || e.which,
-			ch = String.fromCharCode(key).toLowerCase();
+		var ch = String.fromCharCode(e.which).toLowerCase();
 
 		if (e.ctrlKey && ch >= '1' && ch <= '9')
 		{
@@ -70,10 +69,7 @@ $(function ()
 			return false;
 		}
 	});
-});
 
-$(function()
-{
 	var path = '',
 		isRenaming = false;
 
@@ -274,9 +270,6 @@ $(function()
 			folderTree.jstree('set_focus');
 		})
 		.jstree({
-			crrm : {
-				input_width_limit : 1000
-			},
 			ui : {
 				select_limit : 1,
 				initially_select : ['node_1']
@@ -294,6 +287,7 @@ $(function()
 				}
 			},
 			crrm : {
+				input_width_limit : 1000,
 				move : {
 					check_move : function (m) { return (typeof(m.np.attr('data-path')) != 'undefined' && m.np.attr('data-path') != path); }
 				}
@@ -466,8 +460,8 @@ $(function()
 	// Tooltips
 	$(document).mouseover(function (e)
 	{
-		var eItem = e.target;
-		var title = eItem.title;
+		var eItem = e.target,
+			title = eItem.title;
 
 		if (!title && eItem.nodeName == 'IMG')
 			title = eItem.title = eItem.alt;

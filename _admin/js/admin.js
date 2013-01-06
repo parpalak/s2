@@ -66,21 +66,18 @@ catch (e)
 var ua = navigator.userAgent.toLowerCase();
 var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
 var isSafari = ua.indexOf('safari') != -1;
-var isGecko = (ua.indexOf('gecko') != -1 && !isSafari);
 var selectTabN = function () {};
 
 $(function ()
 {
 	Changes.init();
 
-	$(document).bind(isIE || isSafari ? 'keydown' : 'keypress', function (e)
+	$(document).keydown(function (e)
 	{
-		var key = e.keyCode || e.which,
-			ch = String.fromCharCode(key).toLowerCase();
-		key = (isGecko || (window.opera && window.opera.version() >= 11.10)) ? (key == 115 ? 1 : 0) : (key == 83 ? 1 : 0);
+		var ch = String.fromCharCode(e.which).toLowerCase();
 
 		// Ctrl + S
-		if (e.ctrlKey && (ch == 's' || key))
+		if (e.ctrlKey && ch == 's')
 		{
 			e.preventDefault();
 			e.stopPropagation();
@@ -118,8 +115,8 @@ $(function ()
 	// Tooltips
 	$(document).mouseover(function (e)
 	{
-		var eItem = e.target;
-		var title = eItem.title;
+		var eItem = e.target,
+			title = eItem.title;
 
 		if (!title && eItem.nodeName == 'IMG')
 			title = eItem.title = eItem.alt;
@@ -561,7 +558,7 @@ function OpenAll ()
 	$('#tree').jstree('open_all');
 }
 
-$(document).ready(function()
+$(function()
 {
 	var selectedId = -1,
 		commentNum = 0,
