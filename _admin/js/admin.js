@@ -708,6 +708,14 @@ $(function()
 		{
 			tree.jstree('open_node', '#node_1');
 		})
+		.bind('reselect.jstree', function (e, data)
+		{
+			var e = data.inst.get_selected().first();
+			e = e.length ? e : $('.Search.Match').first().parent();
+			e = e.length ? e : $('#node_1');
+
+			data.inst.hover_node(e);
+		})
 		.on('click', '#context_edit, #context_comments, #context_add, #context_delete', function (e, data)
 		{
 			// Context buttons
