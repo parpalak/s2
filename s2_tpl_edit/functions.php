@@ -42,7 +42,7 @@ function s2_tpl_edit_form ($template_filename = '')
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
-		<div class="list_wrapper" style="padding-bottom: 3.2em;">
+		<div class="height_wrap" style="padding-bottom: 3.2em;">
 			<div class="tags_list">
 <?php
 
