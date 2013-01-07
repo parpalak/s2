@@ -201,7 +201,7 @@ function s2_output_comment_form ($comment, $mode, $type)
 	($hook = s2_hook('fn_output_comment_form_start')) ? eval($hook) : null;
 
 ?>
-<div class="list_wrapper" style="padding-bottom: 2.167em">
+<div class="height_wrap" style="padding-bottom: 2.167em">
 	<?php echo s2_comment_menu_links(); ?>
 	<form class="full_tab_form" name="commform" action="" onsubmit="SaveComment('<?php echo $type; ?>'); return false;">
 		<div class="r-float">

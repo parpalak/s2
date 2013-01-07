@@ -118,7 +118,7 @@ $padding = 2.5;
 ($hook = s2_hook('ai_pre_tree_col')) ? eval($hook) : null;
 
 ?>
-				<div class="l-float no-border" style="padding-bottom: <?php echo $padding; ?>em;">
+				<div class="height_wrap" style="padding-bottom: <?php echo $padding; ?>em;">
 					<div class="toolbar">
 						<img class="expand" src="i/1.gif" onclick="OpenAll(); return false;" alt="<?php echo $lang_admin['Expand']; ?>" />
 						<img class="separator" src="i/1.gif" alt="" />

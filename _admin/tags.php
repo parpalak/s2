@@ -113,7 +113,7 @@ function s2_output_tag_form ($tag, $modify_time)
 	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
 		<?php echo $lang_admin['Tags:']; ?>
 		<hr />
-		<div class="list_wrapper" style="padding-bottom: 2.5em;">
+		<div class="height_wrap" style="padding-bottom: 2.5em;">
 			<div class="tags_list">
 <?php
 

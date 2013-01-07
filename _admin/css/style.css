@@ -4,7 +4,7 @@
 .tabsheets dd .reducer,
 .r-float,
 .l-float,
-.list_wrapper,
+.height_wrap,
 .full_textarea,
 .fields input,
 .input.text input,
@@ -17,6 +17,7 @@
 	box-sizing: border-box;
 	}
 
+.toolbar:after,
 .r-float label:after,
 .loginform  label:after {
 	content: ".";
@@ -44,7 +45,7 @@ body {
 	}
 
 .tabsheets,
-.list_wrapper,
+.height_wrap,
 .full_tab_form,
 .r-float,
 .l-float {
@@ -588,13 +589,6 @@ body > .tabsheets {
 	border-radius: 4px;
 	padding: 5px;
 	}
-	.l-float.no-border {
-		border: none;
-		-moz-border-radius: 0;
-		-webkit-border-radius: 0;
-		border-radius: 0;
-		padding: 0;
-		}
 
 .l-float {
 	position: relative;
@@ -760,7 +754,6 @@ textarea,
 
 .toolbar {
 	padding-bottom: 5px;
-	overflow: hidden;
 	}
 	.toolbar img {
 		display: block;
@@ -831,7 +824,6 @@ textarea,
 
 #search_field {
 	float: right;
-	margin: 1px;
 	width: 300px;
 	}
 	#search_field.inactive {
@@ -944,7 +936,7 @@ form center {
 		width: 19em;
 		}
 	.extension .options,
-	.extension  .description {
+	.extension .description {
 		padding-left: 20em;
 		}
 		.extension button {
@@ -1112,6 +1104,9 @@ form center {
 	border: 1px solid #ccc;
 	word-wrap: break-word;
 	cursor: default;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 	}
 	.ui-autocomplete .ui-menu-item {
 		display: inline-block;
