@@ -382,7 +382,7 @@ function s2_output_article_form ($id)
 ?>
 			<tr>
 				<td class="label" title="<?php echo $lang_admin['Tags help']; ?>"><?php echo $lang_admin['Tags']; ?></td>
-				<td><input type="text" name="page[tags]" size="100" value="<?php echo s2_htmlencode(implode(', ', $tags)); ?>" /></td>
+				<td><input type="text" name="page[tags]" size="100" value="<?php echo !empty($tags) ? s2_htmlencode(implode(', ', $tags).', ') : ''; ?>" /></td>
 			</tr>
 <?php ($hook = s2_hook('fn_output_article_form_after_tags')) ? eval($hook) : null; ?>
 		</table>
