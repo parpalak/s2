@@ -397,69 +397,74 @@ function s2_get_login_form ($message = '')
 	($hook = s2_hook('fn_get_login_form_pre_output')) ? eval($hook) : null;
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="Pragma" content="no-cache" />
+<meta charset="UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
 <title><?php echo $lang_admin['Admin panel'], S2_SITE_NAME ? ' - '.S2_SITE_NAME : ''; ?></title>
-<link rel="stylesheet" type="text/css" href="css/style.css" />
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/ajax.js"></script>
-<script type="text/javascript">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/jquery.js"></script>
+<script src="js/ajax.js"></script>
+<script>
 var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
-var shake = null;
 
 function SendForm ()
 {
-	var formStyle = document.forms['loginform'].style;
+	var $form = $(document.forms['loginform']), shake = null;
 
-	function shift_form (time)
+	function shift (time)
 	{
-		formStyle.left = parseInt(-150.0 * Math.exp(-time * 0.006) * Math.sin(0.026179938 * time)) + 'px';
+		$form.css({left: parseInt(-150.0 * Math.exp(-time * 0.006) * Math.sin(0.026179938 * time)) + 'px'});
 	}
 
 	clearInterval(shake);
-	shift_form(0);
+	shift(0);
 
-	SendLoginData(document.forms['loginform'], function ()
+	SendLoginData($form[0], function ()
 	{
 		document.location.reload();
 	}, function (sText)
 	{
-		document.getElementById('message').innerHTML = sText;
+		$('#message').html(sText);
+
 		var time = new Date().getTime();
 		shake = setInterval(function ()
 		{
 			var now = (new Date().getTime()) - time;
 			if (now > 835)
 			{
-				shift_form(0);
+				shift(0);
 				clearInterval(shake);
 				shake = null;
 			}
 			else
-				shift_form(now);
+				shift(now);
 		}, 30);
 	});
 }
 
 function LoginInit ()
 {
-	document.forms['loginform'].login.focus();
+	var eLogin = document.forms['loginform'].elements['login'],
+		ePass = document.forms['loginform'].elements['pass'];
+
+	eLogin.focus();
+	$(ePass).removeAttr('disabled');
 
 	var login = '', password = '';
-	document.forms['loginform'].login.onkeyup =
-	document.forms['loginform'].pass.onkeyup = function (e)
+
+	eLogin.onkeyup =
+	ePass.onkeyup = function (e)
 	{
 		if (shake)
 			return;
 
-		if (login != document.forms['loginform'].login.value || password != document.forms['loginform'].pass.value)
+		if (login != $(eLogin).val() || password != $(ePass).val())
 		{
-			document.getElementById('message').innerHTML = '';
-			login = document.forms['loginform'].login.value;
-			password = document.forms['loginform'].pass.value;
+			$('#message').empty();
+			login = $(eLogin).val();
+			password = $(ePass).val();
 		}
 	};
 }
@@ -471,11 +476,11 @@ function LoginInit ()
 		<p>
 		<label>
 			<span><?php echo $lang_admin['Login']; ?></span>
-			<input type="text" name="login" size="30" maxlength="255" />
+			<input type="text" name="login" size="30" maxlength="255">
 		</label>
 		<label>
 			<span><?php echo $lang_admin['Password']; ?></span>
-			<script type="text/javascript">document.write('<input type="password" name="pass" size="30" maxlength="255" />');</script>
+			<input type="password" name="pass" size="30" maxlength="255" disabled="disabled">
 		</label>
 		</p>
 		<p>
