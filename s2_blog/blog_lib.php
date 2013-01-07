@@ -768,7 +768,7 @@ function s2_blog_edit_post_form ($id)
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_title')) ? eval($hook) : null; ?>
 			<tr>
 				<td class="label" title="<?php echo $lang_admin['Tags help']; ?>"><?php echo $lang_admin['Tags']; ?></td>
-				<td><input type="text" name="page[tags]" size="100" value="<?php echo s2_htmlencode(implode(', ', $tags)); ?>" /></td>
+				<td><input type="text" name="page[tags]" size="100" value="<?php echo !empty($tags) ? s2_htmlencode(implode(', ', $tags).', ') : ''; ?>" /></td>
 			</tr>
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_after_tags')) ? eval($hook) : null; ?>
 		</table>
