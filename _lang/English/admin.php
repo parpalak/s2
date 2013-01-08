@@ -15,7 +15,7 @@ $lang_admin = array(
 'No permission'				=> 'You do not have enough permissions to perform this action.',
 'Other sessions'			=> 'You have logged in from different browsers. Here are your sessions: <br />%s',
 'Close other sessions'		=> 'Close all sessions except the current one',
-'New version mesage'		=> '<strong>S2 %s</strong> has been released. Get the new version <a target="_blank" href="http://s2cms.ru/download">on the S2 site &uarr;</a>.',
+'New version message'		=> '<strong>S2 %s</strong> has been released. Get the new version <a target="_blank" href="http://s2cms.ru/download">on the S2 site &uarr;</a>.',
 
 // Login form
 'Password'					=> 'Password',

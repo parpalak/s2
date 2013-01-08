@@ -137,7 +137,7 @@ $replace['<!-- s2_back_forward -->'] = !empty($page['back_forward']) ? $page['ba
 $replace['<!-- s2_menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
 $replace['<!-- s2_article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';
 
-if (strpos($template, '<!-- s2_last_comments -->') !== false && ($last_comments = s2_last_artilce_comments()))
+if (strpos($template, '<!-- s2_last_comments -->') !== false && ($last_comments = s2_last_article_comments()))
 	$replace['<!-- s2_last_comments -->'] = '<div class="header">'.$lang_common['Last comments'].'</div>'.$last_comments;
 
 if (strpos($template, '<!-- s2_last_discussions -->') !== false && ($last_discussions = s2_last_discussions()))

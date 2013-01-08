@@ -152,7 +152,7 @@ function s2_paging ($page, $total_pages, $url, &$link_nav)
 	}
 
 	if ($page == $total_pages)
-		$next_link = ' <span class="arrow right" class="nav">&rarr;</span>';
+		$next_link = ' <span class="arrow right">&rarr;</span>';
 	else
 	{
 		$next_url = sprintf($url, $page + 1);
@@ -280,8 +280,6 @@ function s2_build_copyright ($request_uri = '')
 
 function s2_get_service_template ($template_id = 'service.php', $path = false)
 {
-	global $lang_common;
-
 	$return = ($hook = s2_hook('fn_get_service_template_start')) ? eval($hook) : null;
 	if ($return)
 		return $return;
@@ -391,25 +389,25 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 
 		// Grab the page
 		$content = @curl_exec($ch);
-		$responce_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
 		// Process 301/302 redirect
-		if ($content !== false && ($responce_code == '301' || $responce_code == '302') && $max_redirects > 0)
+		if ($content !== false && ($response_code == '301' || $response_code == '302') && $max_redirects > 0)
 		{
 			$headers = explode("\r\n", trim($content));
 			foreach ($headers as $header)
 				if (substr($header, 0, 10) == 'Location: ')
 				{
-					$responce = get_remote_file(substr($header, 10), $timeout, $head_only, $max_redirects - 1);
-					if ($responce !== null)
-						$responce['headers'] = array_merge($headers, $responce['headers']);
-					return $responce;
+					$response = s2_get_remote_file(substr($header, 10), $timeout, $head_only, $max_redirects - 1);
+					if ($response !== null)
+						$response['headers'] = array_merge($headers, $response['headers']);
+					return $response;
 				}
 		}
 
 		// Ignore everything except a 200 response code
-		if ($content !== false && ($responce_code == '200' || $ignore_errors))
+		if ($content !== false && ($response_code == '200' || $ignore_errors))
 		{
 			if ($head_only)
 				$result['headers'] = explode("\r\n", str_replace("\r\n\r\n", "\r\n", trim($content)));
@@ -458,10 +456,10 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 				foreach ($headers as $header)
 					if (substr($header, 0, 10) == 'Location: ')
 					{
-						$responce = get_remote_file(substr($header, 10), $timeout, $head_only, $max_redirects - 1);
-						if ($responce !== null)
-							$responce['headers'] = array_merge($headers, $responce['headers']);
-						return $responce;
+						$response = s2_get_remote_file(substr($header, 10), $timeout, $head_only, $max_redirects - 1);
+						if ($response !== null)
+							$response['headers'] = array_merge($headers, $response['headers']);
+						return $response;
 					}
 			}
 
@@ -700,7 +698,7 @@ function error()
 
 	if (!headers_sent())
 	{
-		// if no HTTP responce code is set we send 503
+		// if no HTTP response code is set we send 503
 		header('HTTP/1.1 503 Service Temporarily Unavailable');
 		header('Content-Type: text/html; charset=utf-8');
 	}

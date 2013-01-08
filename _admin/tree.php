@@ -17,7 +17,7 @@ if (!defined('S2_ROOT'))
 
 function s2_create_article ($id, $title)
 {
-	global $s2_db, $s2_user, $lang_admin;
+	global $s2_db, $s2_user;
 
 	$query = array(
 		'SELECT'	=> '1',

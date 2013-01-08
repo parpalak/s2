@@ -206,7 +206,7 @@ function s2_output_tag_form ($tag, $modify_time)
 				<td class="label"><?php echo $lang_admin['Modify time']; ?></td>
 				<td>
 					<?php echo s2_get_time_input('tag[modify_time]', $modify_time); ?>
-					<a href="#" class="js" onclick="return SetTime(document.tagform, 'tag[modify_time]');"><?php echo $lang_admin['Now']; ?></a>
+					<a href="#" class="js" onclick="return SetTime(document.forms['tagform'], 'tag[modify_time]');"><?php echo $lang_admin['Now']; ?></a>
 				</td>
 			</tr>
 <?php ($hook = s2_hook('fn_output_tag_form_after_time')) ? eval($hook) : null; ?>

@@ -140,7 +140,7 @@ function s2_validate_manifest ($xml_array, $folder_name)
 
 	$return = ($hook = s2_hook('xm_fn_validate_manifest_start')) ? eval($hook) : null;
 	if ($return != null)
-		return;
+		return $errors;
 
 	if (!isset($xml_array['extension']) || !is_array($xml_array['extension']))
 		$errors[] = $lang_admin_ext['extension root error'];

@@ -52,7 +52,7 @@ function s2_get_group_url ($parent_ids, $urls)
 						unset($parent_ids[$k]);
 				}
 
-		// Thread was cutted (published = 0). Remove the entry in $url.
+		// Thread was cut (published = 0). Remove the entry in $url.
 		foreach ($flags as $k => $flag)
 			if ($flag)
 			{
@@ -160,7 +160,7 @@ function s2_last_articles ($num)
 //
 // Fetching last comments (for template placeholders)
 //
-function s2_last_artilce_comments ()
+function s2_last_article_comments ()
 {
 	if (!S2_SHOW_COMMENTS)
 		return '';
@@ -241,7 +241,7 @@ function s2_last_discussions ()
 	($hook = s2_hook('fn_last_discussions_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$titles = $parent_ids = $urls = array();
+	$titles = $parent_ids = $urls = $nicks = $time = array();
 	while ($row = $s2_db->fetch_assoc($result))
 	{
 		$titles[] = $row['title'];
@@ -343,6 +343,7 @@ function s2_tags_list ()
 		($hook = s2_hook('fn_s2_tags_list_pre_get_tags_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
+		$tag_count = $tag_name = $tag_url = array();
 		while ($row = $s2_db->fetch_assoc($result))
 		{
 			$tag_name[$row['tag_id']] = $row['name'];

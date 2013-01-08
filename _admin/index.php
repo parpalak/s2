@@ -104,7 +104,7 @@ $template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
 <body tabindex="0">
 	<div id="logout">
 		<div id="loading"></div>
-		<?php printf($lang_admin['Welcome'], $login)."\n"; ?><br />
+		<?php printf($lang_admin['Welcome'], $login); ?><br />
 		<a href="#" title="<?php echo $lang_admin['Logout info']; ?>" onclick="return Logout();"><?php echo $lang_admin['Logout']; ?></a>
 	</div>
 <?php ($hook = s2_hook('ai_pre_site')) ? eval($hook) : null; ?>
@@ -125,7 +125,7 @@ $padding = 2.5;
 						<img class="collapse" src="i/1.gif" onclick="CloseAll(); return false;" alt="<?php echo $lang_admin['Collapse']; ?>" />
 						<img class="separator" src="i/1.gif" alt="" />
 						<img class="refresh" src="i/1.gif" alt="<?php echo $lang_admin['Refresh']; ?>" />
-						<input class="inactive" type="text" width="30" name="search" id="search_field" value="<?php echo $lang_admin['Search']?>" />
+						<input class="inactive" type="text" name="search" id="search_field" value="<?php echo $lang_admin['Search']?>" />
 					</div>
 					<?php s2_context_buttons(); ?>
 					<div id="tree" class="treetree" tabindex="0"></div>
@@ -265,7 +265,7 @@ var new_page_pos = '<?php echo s2_jsvarencode(S2_ADMIN_NEW_POS); ?>';
 s2_preload_editor();
 if (isset($premoderation['script']))
 	echo $premoderation['script'];
-echo s2_get_sessions($login, $session_id);
+echo s2_get_sessions($login);
 
 ($hook = s2_hook('ai_after_js_init')) ? eval($hook) : null;
 

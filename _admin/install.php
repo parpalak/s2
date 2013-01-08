@@ -188,14 +188,14 @@ if (!isset($_POST['form_sent']))
 		$base_url_guess = substr($base_url_guess, 0, -1);
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="Generator" content="S2 <?php echo S2_VERSION; ?>" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="Generator" content="S2 <?php echo S2_VERSION; ?>">
 <title><?php printf($lang_install['Install S2'], S2_VERSION) ?></title>
-<link rel="stylesheet" type="text/css" href="<?php echo S2_ROOT ?>_admin/css/style.css" />
-<style type="text/css">
+<link rel="stylesheet" href="<?php echo S2_ROOT ?>_admin/css/style.css">
+<style>
 html {
 	overflow: auto;
 }
@@ -460,7 +460,7 @@ else
 	{
 		$mysql_info = $s2_db->get_version();
 		if (version_compare($mysql_info['version'], MIN_MYSQL_VERSION, '<'))
-			error(sprintf($lang_install['Invalid MySQL version'], $mysql_version, MIN_MYSQL_VERSION));
+			error(sprintf($lang_install['Invalid MySQL version'], $mysql_info['version'], MIN_MYSQL_VERSION));
 	}
 
 	// Check SQLite prefix collision

@@ -201,7 +201,7 @@ function s2_authenticate_user ($challenge)
 		s2_setcookie($s2_cookie_name, '');
 		echo $lang_admin[$status.' session'];
 
-		echo s2_get_ajax_login_form();
+		s2_get_ajax_login_form();
 		die();
 	}
 
@@ -278,7 +278,7 @@ function s2_login_success ($login, $challenge)
 
 function s2_ajax_login($login, $challenge, $key)
 {
-	global $s2_db, $lang_admin;
+	global $lang_admin;
 
 	($hook = s2_hook('fn_ajax_login_start')) ? eval($hook) : null;
 
@@ -320,7 +320,7 @@ function s2_logout ($challenge)
 // HTML builders
 //
 
-function s2_get_sessions ($login, $challenge)
+function s2_get_sessions ($login)
 {
 	global $s2_db, $lang_admin;
 
@@ -401,17 +401,16 @@ function s2_get_login_form ($message = '')
 <html>
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Pragma" content="no-cache">
 <title><?php echo $lang_admin['Admin panel'], S2_SITE_NAME ? ' - '.S2_SITE_NAME : ''; ?></title>
 <link rel="stylesheet" href="css/style.css">
 <script src="js/jquery.js"></script>
 <script src="js/ajax.js"></script>
 <script>
-var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?';
+var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?', shake = null;
 
 function SendForm ()
 {
-	var $form = $(document.forms['loginform']), shake = null;
+	var $form = $(document.forms['loginform']);
 
 	function shift (time)
 	{

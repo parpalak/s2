@@ -49,7 +49,7 @@ function s2_unlink_recursive($dir, $delete_root = true)
 // Functions below outputs files tree to HTML
 //
 
-function s2_walk_dir ($dir, $created_name = false)
+function s2_walk_dir ($dir)
 {
 	global $lang_pictures;
 
@@ -235,7 +235,7 @@ function s2_make_thumbnail ($filename, $max_size = 100)
 
 function s2_upload_form ()
 {
-	global $session_id, $lang_pictures;
+	global $lang_pictures;
 
 	$return = ($hook = s2_hook('fn_upload_form_start')) ? eval($hook) : null;
 	if ($return)

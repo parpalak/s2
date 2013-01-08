@@ -42,6 +42,8 @@ $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 //=======================[Authorization]========================================
 
+$s2_user = array();
+
 if ($action == 'login')
 {
 	if ($session_id == '')
@@ -94,7 +96,7 @@ elseif ($action == 'check_updates')
 	}
 
 	if ($updates['fail'] === false && version_compare($updates['version'], S2_VERSION, '>'))
-		$return = array('is_update' => 1, 'message' => sprintf($lang_admin['New version mesage'], $updates['version']));
+		$return = array('is_update' => 1, 'message' => sprintf($lang_admin['New version message'], $updates['version']));
 	else
 		$return = array('is_update' => 0);
 
