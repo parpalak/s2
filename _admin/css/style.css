@@ -6,6 +6,7 @@
 .l-float,
 .height_wrap,
 .full_textarea,
+.CodeMirror,
 .fields input,
 .input.text input,
 .input.color input,
@@ -371,7 +372,7 @@ body > .tabsheets {
 	border-top: 1px solid #fdfdfd;
 	overflow: auto;
 	height: 100%;
-	padding: 0.833em;
+	padding: 10px;
 	}
 
 .tabsheets > .inactive {
@@ -388,7 +389,7 @@ body > .tabsheets {
 	display: block;
 	}
 
-#list_tab, #admin-stat_tab { margin-left: 0.833em; }
+#list_tab, #admin-stat_tab { margin-left: 10px; }
 #list_tab:before { background-position: -64px 0; }
 #edit_tab:before { background-position: -64px -16px; }
 #view_tab:before { background-position: -64px -32px; }
@@ -655,7 +656,7 @@ input[type="text"],
 input[type="color"],
 input[type="password"],
 textarea,
-.CodeMirror-scroll {
+.CodeMirror {
 	color: #000;
 	background: #fff;
 	border: 1px solid #ccc;
@@ -700,7 +701,7 @@ textarea,
 .full_textarea {
 	font: 1.083em/1.2307 Consolas, Monaco, monospace;
 	height: 100%;
-	padding: 0.2307em;
+	padding: 3px;
 	}
 
 .bitbtn {

@@ -406,7 +406,7 @@ function s2_output_article_form ($id)
 	($hook = s2_hook('fn_output_article_form_after_fields2')) ? eval($hook) : null;
 
 	s2_toolbar();
-	$padding = 15.5 - S2_ADMIN_CUT * 1.9;
+	$padding = S2_ADMIN_CUT ? 13.583333 : 15.5;
 	($hook = s2_hook('fn_output_article_form_pre_text')) ? eval($hook) : null;
 
 ?>
