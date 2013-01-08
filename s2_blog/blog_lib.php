@@ -792,7 +792,7 @@ function s2_blog_edit_post_form ($id)
 	($hook = s2_hook('fn_s2_blog_edit_post_form_after_fields2')) ? eval($hook) : null;
 
 	s2_toolbar();
-	$padding = 9.6;
+	$padding = 9.583333;
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_text')) ? eval($hook) : null;
 
 ?>
