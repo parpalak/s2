@@ -26,10 +26,19 @@ var s2_highlight = (function ()
 
 		init: function ()
 		{
-			var button = $('#s2_highlight_toggle_button').click(s2_highlight.toggle);
+			var $button = $('#s2_highlight_toggle_button').click(function ()
+			{
+				$(this).toggleClass('pressed');
+				if (enabled = !enabled)
+					s2_highlight.get_instance();
+				else
+					s2_highlight.close();
+				is_local_storage && localStorage.setItem('s2_highlight_on', enabled ? '1' : '0');
+			});
+
 			if (enabled)
 			{
-				button.toggleClass('pressed');
+				$button.addClass('pressed');
 				s2_highlight.get_instance();
 			}
 		},
@@ -48,42 +57,20 @@ var s2_highlight = (function ()
 			}
 		},
 
-		toggle: function ()
-		{
-			$('#s2_highlight_toggle_button').toggleClass('pressed');
-			if (enabled = !enabled)
-				s2_highlight.get_instance();
-			else
-				s2_highlight.close();
-			is_local_storage && localStorage.setItem('s2_highlight_on', enabled ? '1' : '0');
-		},
-
 		store_scroll: function ()
 		{
 			if (!instance)
 				return;
 
-			var eScrollableItem = instance.getScrollerElement();
-			if (typeof(eScrollableItem.scrollTop) != 'undefined')
-				scrolltop = eScrollableItem.scrollTop;
+			var eScroll = instance.getScrollerElement();
+			if (typeof eScroll.scrollTop != 'undefined')
+				scrolltop = eScroll.scrollTop;
 		},
 
 		restore_scroll: function ()
 		{
 			if (instance && scrolltop)
 				instance.getScrollerElement().scrollTop = scrolltop;
-		},
-
-		beforeswitch: function (sType)
-		{
-			if (sType != 'edit_tab')
-				s2_highlight.store_scroll();
-		},
-
-		tabswitch: function (sType)
-		{
-			if (sType == 'edit_tab')
-				s2_highlight.restore_scroll();
 		},
 
 		flip: function ()
@@ -199,8 +186,16 @@ if (typeof tinyMCE == 'undefined')
 	Hooks.add('request_article_start', s2_highlight.close);
 	Hooks.add('request_article_end', s2_highlight.init);
 
-	Hooks.add('fn_before_switch_start', s2_highlight.beforeswitch);
-	Hooks.add('fn_tab_switch_start', s2_highlight.tabswitch);
+	Hooks.add('fn_before_switch_start', function (sType)
+	{
+		if (sType != 'edit_tab')
+			s2_highlight.store_scroll();
+	});
+	Hooks.add('fn_tab_switch_start', function (sType)
+	{
+		if (sType == 'edit_tab')
+			s2_highlight.restore_scroll();
+	});
 
 	Hooks.add('fn_insert_paragraph_start', s2_highlight.paragraph);
 	Hooks.add('fn_insert_tag_start', s2_highlight.addtag);
