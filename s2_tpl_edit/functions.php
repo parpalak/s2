@@ -107,7 +107,7 @@ function s2_tpl_edit_form ($template_filename = '')
 		</table>
 <?php
 
-	$padding = 2.6;
+	$padding = 2.583333;
 	($hook = s2_hook('fn_s2_tpl_edit_form_pre_text')) ? eval($hook) : null;
 
 ?>
