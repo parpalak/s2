@@ -56,7 +56,7 @@ $s2_db->query_build($query) or error(__FILE__, __LINE__);
 		<hook id="ai_after_js_include"><![CDATA[
 ?>
 <script type="text/javascript">
-	var s2_wysiwyg_type = <?php echo S2_WYSIWYG_TYPE; ?>, s2_wysiwyg_lang = '<?php echo substr(S2_LANGUAGE, 0, 7) == 'Russian' ? 'ru' : 'en'; ?>';
+	var s2_wysiwyg_type = <?php echo S2_WYSIWYG_TYPE; ?>, s2_wysiwyg_cut = <?php echo S2_ADMIN_CUT; ?>, s2_wysiwyg_lang = '<?php echo substr(S2_LANGUAGE, 0, 7) == 'Russian' ? 'ru' : 'en'; ?>';
 </script>
 <script type="text/javascript" src="<?php echo $ext_info['url']; ?>/tiny_mce/tiny_mce.js"></script>
 <script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>

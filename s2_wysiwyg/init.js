@@ -19,7 +19,7 @@ var s2_wysiwyg_params = [
 	gecko_spellcheck : true,
 	convert_fonts_to_spans : true,
 	language : s2_wysiwyg_lang,
-	plugins : "table,searchreplace,paste,fullscreen,visualchars,nonbreaking,save,media,s2cut",
+	plugins : "table,searchreplace,paste,fullscreen,visualchars,nonbreaking,save,media" + (s2_wysiwyg_cut ? ',s2cut' : ''),
 	theme_advanced_buttons1 : 'newdocument,save,|,cut,copy,paste,pastetext,pasteword,|,undo,redo,|,link,unlink,anchor,|,image,media,hr,s2cut,|,charmap,nonbreaking,visualchars,|,cleanup,removeformat',
 	theme_advanced_buttons2 : "formatselect,|,bold,italic,underline,strikethrough,|,sup,sub,|,justifyleft,justifycenter,justifyright,justifyfull,|,bullist,numlist,outdent,indent,|,blockquote,|,forecolor,backcolor",
 	theme_advanced_buttons3 : "visualaid,tablecontrols,|,search,replace,|,fullscreen,code",
