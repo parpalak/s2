@@ -1118,25 +1118,25 @@ function set_selection (e, start_pos, end_pos)
 function SmartParagraphs (sText)
 {
 	sText = sText.replace(/(\r\n|\r|\n)/g, '\n');
-	var asParagraphs = sText.split(/\n{2,}/); // split on empty lines
+	var asParag = sText.split(/\n{2,}/); // split on empty lines
 
-	for (var i = asParagraphs.length; i-- ;)
+	for (var i = asParag.length; i-- ;)
 	{
 		// We are working with non-empty contents
-		if (asParagraphs[i].replace(/^\s+|\s+$/g, '') == '')
+		if (asParag[i].replace(/^\s+|\s+$/g, '') == '')
 			continue;
 
 		// rtrim
-		asParagraphs[i] = asParagraphs[i].replace(/\s+$/gm, '');
+		asParag[i] = asParag[i].replace(/\s+$/gm, '');
 
 		// Do not touch special tags
-		if (/<\/?(?:pre|script|style|ol|ul|li)[^>]*>/.test(asParagraphs[i]))
+		if (/<\/?(?:pre|script|style|ol|ul|li|cut)[^>]*>/.test(asParag[i]))
 			continue;
 
 		// Put <br /> if there are no closing tag like </h2>
 
 		// Remove old tag
-		asParagraphs[i] = asParagraphs[i].replace(/<br \/>$/gm, '').
+		asParag[i] = asParag[i].replace(/<br \/>$/gm, '').
 			// A hack. Otherwise the next regex works twice.
 			replace(/$/gm, '-').
 			// Put new tag
@@ -1145,16 +1145,16 @@ function SmartParagraphs (sText)
 			replace(/(?:<br \/>)?$/g, '');
 
 		// Put <p>...</p> tags
-		if (!/<\/?(?:blockquote|h[2-4])[^>]*>/.test(asParagraphs[i]))
+		if (!/<\/?(?:blockquote|h[2-4])[^>]*>/.test(asParag[i]))
 		{
-			if (!/<\/p>\s*$/.test(asParagraphs[i]))
-				asParagraphs[i] = asParagraphs[i].replace(/\s*$/g, '</p>');
-			if (!/^\s*<p[^>]*>/.test(asParagraphs[i]))
-				asParagraphs[i] = asParagraphs[i].replace(/^\s*/g, '<p>');
+			if (!/<\/p>\s*$/.test(asParag[i]))
+				asParag[i] = asParag[i].replace(/\s*$/g, '</p>');
+			if (!/^\s*<p[^>]*>/.test(asParag[i]))
+				asParag[i] = asParag[i].replace(/^\s*/g, '<p>');
 		}
 	}
 
-	return asParagraphs.join("\n\n");
+	return asParag.join("\n\n");
 }
 
 function InsertParagraph (sType)
@@ -1166,7 +1166,7 @@ function InsertParagraph (sType)
 
 	var result = Hooks.run('fn_insert_paragraph_start', {openTag: sOpenTag, closeTag: sCloseTag});
 	if (result)
-		return;
+		return result;
 
 	var eTextarea = document.artform['page[text]'],
 		selection = get_selection(eTextarea),
