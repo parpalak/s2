@@ -9,7 +9,7 @@ $lang_comments = array(
 'Fix error'					=> 'Fix errors before sending the comment.',
 'Email subject'				=> 'Comment to %s',
 'Comment sent'				=> 'Comment has been sent',
-'Comment sent info'			=> '<p>Your comment has been successfully sent. It will be published after the verification.</p><p>Meanwhile, you can <a href="%1$s">go back to the article</a> or&nbsp;visit <a href="%2$s">the main page</a>.</p>',
+'Comment sent info'			=> '<p>Your comment has been successfully sent. It will be published after the verification.</p><p>Meanwhile, you can <a href="%1$s" id="back_to_commented">go back to the article</a> or&nbsp;visit <a href="%2$s">the main page</a>.</p>',
 
 'Unsubscribed OK'			=> 'You have been successfully unsubscribed',
 'Unsubscribed OK info'		=> 'You have been successfully unsubscribed from mailing comments.',

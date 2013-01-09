@@ -61,7 +61,7 @@ function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subs
 	ob_start();
 
 ?>
-				<form method="post" action="<?php echo $action?>">
+				<form method="post" name="post_comment" action="<?php echo $action?>">
 					<p class="input name">
 						<?php echo $lang_common['Your name']; ?><br />
 						<input type="text" name="<?php echo s2_field_name('name');?>" value="<?php echo s2_htmlencode($name); ?>" maxlength="50" size="40" />

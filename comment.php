@@ -25,7 +25,7 @@ if (isset($_GET['go']))
 	$replace = array(
 		'<!-- s2_head_title -->'	=> $lang_comments['Comment sent'],
 		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Comment sent'].'</h1>',
-		'<!-- s2_text -->'			=> sprintf($lang_comments['Comment sent info'], $_GET['go'], s2_link('/')),
+		'<!-- s2_text -->'			=> sprintf($lang_comments['Comment sent info'], s2_htmlencode($_GET['go']), s2_link('/')),
 		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
 	);
 
@@ -287,6 +287,8 @@ $query = array(
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 while ($mrow = $s2_db->fetch_assoc($result))
 	s2_mail_comment($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, $lang_comments['Moderator mail']);
+
+setcookie('comment_form_sent', 1);
 
 if (!S2_PREMODERATION)
 {
