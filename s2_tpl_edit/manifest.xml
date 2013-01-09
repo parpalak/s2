@@ -52,7 +52,7 @@ if ($s2_user['edit_users'])
 		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/functions.php';
 ?>
-<style>#admin-tpl_tab:before { background: url(i/toolbar.png) -90px -18px transparent;}</style>
+<style>#admin-tpl_tab:before { background-position: -32px -64px; }</style>
 				<dt id="admin-tpl_tab"><?php echo $lang_s2_tpl_edit['Templates']; ?></dt>
 				<dd class="inactive">
 					<div class="reducer" id="s2_tpl_edit_div"><?php echo s2_tpl_edit_form(); ?></div>
