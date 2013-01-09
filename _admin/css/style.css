@@ -790,7 +790,7 @@ textarea,
 		background: none;
 		}
 
-.toolbar .new { background-position: -88px -16px; }
+.toolbar .cut { background-position: -88px -16px; }
 .toolbar .b { background-position: 2px -52px; }
 .toolbar .i { background-position: -16px -52px; }
 .toolbar .strike { background-position: -34px -52px; }
@@ -1065,7 +1065,7 @@ form center {
 	}
 .jstree a .jstree-icon { background-position: -55px -19px; }
 .jstree-open > a > .jstree-icon { background-position: -73px -19px; }
-.jstree-leaf > a > .jstree-icon { background: url(../i/toolbar.png) -91px -18px; }
+.jstree-leaf > a > .jstree-icon { background: url(../i/icons.png) -33px -64px; }
 
 #vakata-dragged {
 	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;

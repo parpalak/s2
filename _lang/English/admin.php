@@ -94,6 +94,8 @@ $lang_admin = array(
 
 'NOBR'						=> 'Disable line breaking',
 
+'Cut'						=> 'Insert <cut> tag to show excerpt',
+
 'Input time format'			=> '[hour]:[minute], [month]/[day]/[year]', // Determines order of the input fields
 
 // Preview tab

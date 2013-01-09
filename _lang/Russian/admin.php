@@ -94,6 +94,8 @@ $lang_admin = array(
 
 'NOBR'						=> 'Запретить перенос строк',
 
+'Cut'						=> 'Обозначить выдержку тегом <cut>',
+
 'Input time format'			=> '[hour]:[minute], [day].[month].[year]', // Determines order of the input fields
 
 // Preview tab

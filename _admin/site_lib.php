@@ -297,6 +297,10 @@ function s2_toolbar ()
 	<img class="sup" src="i/1.gif" alt="<?php echo $lang_admin['SUP']; ?>" onclick="return TagSelection('sup');" />
 	<img class="sub" src="i/1.gif" alt="<?php echo $lang_admin['SUB']; ?>" onclick="return TagSelection('sub');" />
 	<img class="separator" src="i/1.gif" alt="" />
+	<img class="nobr" src="i/1.gif" alt="<?php echo $lang_admin['NOBR']; ?>" onclick="return TagSelection('nobr');" />
+	<img class="separator" src="i/1.gif" alt="" />
+	<img class="cut" src="i/1.gif" alt="<?php echo $lang_admin['Cut']; ?>" onclick="return InsertTag('<cut>', '');" />
+	<img class="separator" src="i/1.gif" alt="" />
 	<img class="a" src="i/1.gif" alt="<?php echo $lang_admin['Link']; ?>" onclick="return InsertTag('<a href=&quot;&quot;>', '</a>');" />
 	<img class="img" src="i/1.gif" alt="<?php echo $lang_admin['Image']; ?>" onclick="return GetImage();" />
 	<img class="separator" src="i/1.gif" alt="" />
@@ -317,8 +321,6 @@ function s2_toolbar ()
 	<img class="separator" src="i/1.gif" alt="" />
 	<img class="pre" src="i/1.gif" alt="<?php echo $lang_admin['PRE']; ?>" onclick="return TagSelection('pre');" />
 	<img class="code" src="i/1.gif" alt="<?php echo $lang_admin['CODE']; ?>" onclick="return TagSelection('code');" />
-	<img class="separator" src="i/1.gif" alt="" />
-	<img class="nobr" src="i/1.gif" alt="<?php echo $lang_admin['NOBR']; ?>" onclick="return TagSelection('nobr');" />
 	<img class="separator" src="i/1.gif" alt="" />
 	<img class="parag" src="i/1.gif" alt="<?php echo $lang_admin['Paragraphs info']; ?>" onclick="return Paragraph();" />
 </div>
