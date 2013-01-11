@@ -38,6 +38,13 @@ var s2_tpl_edit = (function ()
 
 			$(frm['template[filename]']).change(name_change);
 		}
+
+		$('#s2_tpl_edit_file_list').on('dragstart', function(e)
+		{
+			var link = $(e.target).attr('data-copy');
+			if (link)
+				e.originalEvent.dataTransfer.setData('text/plain', link);
+		});
 	});
 
 	return (
@@ -60,9 +67,8 @@ var s2_tpl_edit = (function ()
 			return false;
 		},
 
-		save: function (sMessage)
+		save: function (sMessage, frm)
 		{
-			var frm = document.forms['s2_tpl_edit_form'];
 			if (!/^[0-9a-zA-Z\._\-]+$/.test(frm.elements['template[filename]'].value))
 			{
 				PopupMessages.showUnique(sMessage, 's2_tpl_edit_wrong_filename');

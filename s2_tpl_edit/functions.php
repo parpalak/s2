@@ -68,7 +68,16 @@ function s2_tpl_edit_file_list ($template_filename)
 
 	$return = '';
 	foreach ($templates as $filename => $name)
-		$return .= '<a href="#" '.($filename == $template_filename ? 'class="cur_link" ' : '').'onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
+	{
+		if (substr($filename, -3) == '.js')
+			$link = '<script type="text/javascript" src="<?php echo S2_BASE_URL; ?>/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'"></script>';
+		elseif (substr($filename, -4) == '.css')
+			$link = '<link rel="stylesheet" type="text/css" href="<?php echo S2_BASE_URL; ?>/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'" />';
+		else
+			$link = '<?php include S2_ROOT.\'/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'\'; ?>';
+
+		$return .= '<a href="#" '.($filename == $template_filename ? 'class="cur_link" ' : '').'draggable="true" unselectable="on" data-copy="'.s2_htmlencode($link).'" onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
+	}
 
 	return $return;
 }
@@ -80,10 +89,10 @@ function s2_tpl_edit_form ()
 	($hook = s2_hook('fn_s2_tpl_edit_form_start')) ? eval($hook) : null;
 
 ?>
-<form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo $lang_s2_tpl_edit['Wrong filename']; ?>');">
+<form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo $lang_s2_tpl_edit['Wrong filename']; ?>', this);">
 	<div class="r-float" title="<?php echo $lang_s2_tpl_edit['Click template']; ?>">
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_submit')) ? eval($hook) : null; ?>
-		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_s2_tpl_edit['Save']; ?>" />
+		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
 		<hr />
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
