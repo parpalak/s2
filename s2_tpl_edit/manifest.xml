@@ -97,7 +97,8 @@ elseif ($action == 's2_tpl_edit_save')
 		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/functions.php';
 
-	s2_tpl_edit_form(s2_tpl_edit_save($s2_tpl_edit_template));
+	$s2_tpl_edit_template_id = s2_tpl_edit_save($s2_tpl_edit_template);
+	s2_tpl_edit_file_list($s2_tpl_edit_template_id);
 }
 		]]></hook>
 

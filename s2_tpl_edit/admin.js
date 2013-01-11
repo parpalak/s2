@@ -14,10 +14,34 @@ var s2_tpl_edit = (function ()
 	{
 		render: function (data)
 		{
-			var eDiv = $('#s2_tpl_edit_div').html(data);
+			$('#s2_tpl_edit_div').html(data);
 			if (typeof CodeMirror != 'undefined')
-				instance = CodeMirror.fromTextArea(eDiv.find('textarea')[0],
-					{mode: "application/x-httpd-php", indentUnit: 4, indentWithTabs: true, lineWrapping: true});
+			{
+				var frm = document.forms['s2_tpl_edit_form'].elements,
+					filename = $(frm['template[filename]'])
+						.change(function () { s2_tpl_edit.update_style($(this).val()) })
+						.val();
+
+				instance = CodeMirror.fromTextArea(frm['template[text]'],
+					{mode: s2_tpl_edit.detect_mode(filename), indentUnit: 4, indentWithTabs: true, lineWrapping: true});
+			}
+		},
+
+		detect_mode: function (filename)
+		{
+			switch (filename.split('.').pop())
+			{
+				case 'css':
+					return 'text/css';
+				case 'js':
+					return 'text/javascript';
+			}
+			return 'application/x-httpd-php';
+		},
+
+		update_style: function (filename)
+		{
+			instance.setOption("mode", s2_tpl_edit.detect_mode(filename));
 		},
 
 		load: function (s)
@@ -31,21 +55,19 @@ var s2_tpl_edit = (function ()
 
 		save: function (sMessage)
 		{
-			if (!/^[0-9a-zA-Z\._\-]+$/.test(document.forms['s2_tpl_edit_form'].elements['template[filename]'].value))
+			var frm = document.forms['s2_tpl_edit_form'];
+			if (!/^[0-9a-zA-Z\._\-]+$/.test(frm.elements['template[filename]'].value))
 			{
 				PopupMessages.showUnique(sMessage, 's2_tpl_edit_wrong_filename');
 				return false;
 			}
 
 			if (instance)
-			{
-				instance.toTextArea();
-				instance = null;
-			}
+				instance.save();
 
-			POSTAsyncRequest(sUrl + 'action=s2_tpl_edit_save', $(document.forms['s2_tpl_edit_form']).serialize(), function (http, data)
+			POSTAsyncRequest(sUrl + 'action=s2_tpl_edit_save', $(frm).serialize(), function (http, data)
 			{
-				s2_tpl_edit.render(data);
+				$('#s2_tpl_edit_file_list').html(data);
 			});
 			return false;
 		}

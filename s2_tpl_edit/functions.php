@@ -28,35 +28,20 @@ function s2_tpl_edit_save ($template)
 	return $template_id;
 }
 
-function s2_tpl_edit_form ($template_filename = '')
+function s2_tpl_edit_file_list ($template_filename)
 {
-	global $s2_db, $lang_admin, $lang_templates, $lang_s2_tpl_edit;
-
-	($hook = s2_hook('fn_s2_tpl_edit_form_start')) ? eval($hook) : null;
-
-?>
-<form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo $lang_s2_tpl_edit['Wrong filename']; ?>');">
-	<div class="r-float" title="<?php echo $lang_s2_tpl_edit['Click template']; ?>">
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_submit')) ? eval($hook) : null; ?>
-		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_s2_tpl_edit['Save']; ?>" />
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
-		<hr />
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
-		<div class="height_wrap" style="padding-bottom: 3.2em;">
-			<div class="tags_list">
-<?php
+	global $lang_templates, $s2_db;
 
 	$templates = $lang_templates;
 	unset($templates['+']);
-	$template_text = '';
 
-	($hook = s2_hook('fn_s2_tpl_edit_form_pre_get_tpl')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_tpl_edit_file_list_pre_get_tpl')) ? eval($hook) : null;
 
 	$query = array(
 		'SELECT'	=> 'DISTINCT template',
 		'FROM'		=> 'articles'
 	);
-	($hook = s2_hook('fn_output_article_form_pre_get_tpl_qr')) ? eval($hook) : null;
+	($hook = s2_hook('fn_s2_tpl_edit_file_list_pre_get_tpl_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 	while ($row = $s2_db->fetch_row($result))
@@ -84,14 +69,41 @@ function s2_tpl_edit_form ($template_filename = '')
 	foreach ($templates as $filename => $name)
 		echo '<a href="#" '.($filename == $template_filename ? 'class="cur_link" ' : '').'onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
 
+}
+
+function s2_tpl_edit_form ($template_filename = '')
+{
+	global $lang_admin, $lang_s2_tpl_edit;
+
+	$template_text = '';
+
+	($hook = s2_hook('fn_s2_tpl_edit_form_start')) ? eval($hook) : null;
+
+?>
+<form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo $lang_s2_tpl_edit['Wrong filename']; ?>');">
+	<div class="r-float" title="<?php echo $lang_s2_tpl_edit['Click template']; ?>">
+<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_submit')) ? eval($hook) : null; ?>
+		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_s2_tpl_edit['Save']; ?>" />
+<?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
+		<hr />
+<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
+		<div class="height_wrap" style="padding-bottom: 3.2em;">
+			<div class="tags_list" id="s2_tpl_edit_file_list">
+<?php
+
+	s2_tpl_edit_file_list($template_filename);
+
 	if (!$template_text && $template_filename)
 	{
 		// Ensure the template is cached
 		clearstatcache();
+		$is_template = true;
 		if (!file_exists(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename))
-			s2_get_template($template_filename);
-		$template_text = file_get_contents(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename);
+			$is_template = s2_get_template($template_filename, false, true);
+		if ($is_template)
+			$template_text = file_get_contents(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename);
 	}
+
 ?>
 			</div>
 		</div>
