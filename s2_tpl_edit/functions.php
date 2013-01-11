@@ -66,16 +66,16 @@ function s2_tpl_edit_file_list ($template_filename)
 		closedir($dir_handle);
 	}
 
+	$return = '';
 	foreach ($templates as $filename => $name)
-		echo '<a href="#" '.($filename == $template_filename ? 'class="cur_link" ' : '').'onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
+		$return .= '<a href="#" '.($filename == $template_filename ? 'class="cur_link" ' : '').'onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
 
+	return $return;
 }
 
-function s2_tpl_edit_form ($template_filename = '')
+function s2_tpl_edit_form ()
 {
 	global $lang_admin, $lang_s2_tpl_edit;
-
-	$template_text = '';
 
 	($hook = s2_hook('fn_s2_tpl_edit_form_start')) ? eval($hook) : null;
 
@@ -91,7 +91,45 @@ function s2_tpl_edit_form ($template_filename = '')
 			<div class="tags_list" id="s2_tpl_edit_file_list">
 <?php
 
-	s2_tpl_edit_file_list($template_filename);
+	echo s2_tpl_edit_file_list('');
+
+?>
+			</div>
+		</div>
+	</div>
+	<div class="l-float">
+		<table class="fields">
+<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_fname')) ? eval($hook) : null; ?>
+			<tr>
+				<td class="label"><?php echo $lang_s2_tpl_edit['File name']; ?></td>
+				<td><input type="text" name="template[filename]" size="50" maxlength="255" value="" /></td>
+			</tr>
+<?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_fname')) ? eval($hook) : null; ?>
+		</table>
+<?php
+
+	$padding = 2.583333;
+	($hook = s2_hook('fn_s2_tpl_edit_form_pre_text')) ? eval($hook) : null;
+
+?>
+		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
+			<textarea id="s2_tpl_edit_text" class="full_textarea" name="template[text]"></textarea>
+		</div>
+	</div>
+</form>
+<?php
+
+}
+
+function s2_tpl_edit_content ($template_filename = '')
+{
+	$template_text = '';
+	$return = array (
+		'filename'	=> $template_filename,
+		'menu'		=> s2_tpl_edit_file_list($template_filename),
+	);
+
+	($hook = s2_hook('fn_s2_tpl_edit_content_start')) ? eval($hook) : null;
 
 	if (!$template_text && $template_filename)
 	{
@@ -103,31 +141,7 @@ function s2_tpl_edit_form ($template_filename = '')
 		if ($is_template)
 			$template_text = file_get_contents(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename);
 	}
+	$return['text'] = $template_text;
 
-?>
-			</div>
-		</div>
-	</div>
-	<div class="l-float">
-		<table class="fields">
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_fname')) ? eval($hook) : null; ?>
-			<tr>
-				<td class="label"><?php echo $lang_s2_tpl_edit['File name']; ?></td>
-				<td><input type="text" name="template[filename]" size="50" maxlength="255" value="<?php echo s2_htmlencode($template_filename); ?>" /></td>
-			</tr>
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_fname')) ? eval($hook) : null; ?>
-		</table>
-<?php
-
-	$padding = 2.583333;
-	($hook = s2_hook('fn_s2_tpl_edit_form_pre_text')) ? eval($hook) : null;
-
-?>
-		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
-			<textarea id="s2_tpl_edit_text" class="full_textarea" name="template[text]"><?php echo s2_htmlencode($template_text)?></textarea>
-		</div>
-	</div>
-</form>
-<?php
-
+	return $return;
 }

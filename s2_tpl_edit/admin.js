@@ -10,45 +10,52 @@ var s2_tpl_edit = (function ()
 {
 	var instance = null;
 
+	function detect_mode (filename)
+	{
+		switch (filename.split('.').pop())
+		{
+			case 'css':
+				return 'text/css';
+			case 'js':
+				return 'text/javascript';
+		}
+		return 'application/x-httpd-php';
+	}
+
+	function name_change ()
+	{
+		instance.setOption("mode", detect_mode($(this).val()));
+	}
+
+	$(function ()
+	{
+		if (typeof CodeMirror != 'undefined')
+		{
+			var frm = document.forms['s2_tpl_edit_form'].elements;
+
+			instance = CodeMirror.fromTextArea(frm['template[text]'],
+				{mode: detect_mode(''), indentUnit: 4, indentWithTabs: true, lineWrapping: true});
+
+			$(frm['template[filename]']).change(name_change);
+		}
+	});
+
 	return (
 	{
-		render: function (data)
-		{
-			$('#s2_tpl_edit_div').html(data);
-			if (typeof CodeMirror != 'undefined')
-			{
-				var frm = document.forms['s2_tpl_edit_form'].elements,
-					filename = $(frm['template[filename]'])
-						.change(function () { s2_tpl_edit.update_style($(this).val()) })
-						.val();
-
-				instance = CodeMirror.fromTextArea(frm['template[text]'],
-					{mode: s2_tpl_edit.detect_mode(filename), indentUnit: 4, indentWithTabs: true, lineWrapping: true});
-			}
-		},
-
-		detect_mode: function (filename)
-		{
-			switch (filename.split('.').pop())
-			{
-				case 'css':
-					return 'text/css';
-				case 'js':
-					return 'text/javascript';
-			}
-			return 'application/x-httpd-php';
-		},
-
-		update_style: function (filename)
-		{
-			instance.setOption("mode", s2_tpl_edit.detect_mode(filename));
-		},
-
 		load: function (s)
 		{
 			GETAsyncRequest(sUrl + 'action=s2_tpl_edit_load&filename=' + encodeURIComponent(s), function (http, data)
 			{
-				s2_tpl_edit.render(data);
+				var frm = document.forms['s2_tpl_edit_form'].elements;
+				frm['template[filename]'].value = data.filename;
+				frm['template[text]'].value = data.text;
+				$('#s2_tpl_edit_file_list').html(data.menu);
+
+				if (instance)
+				{
+					instance.setValue(data.text);
+					instance.setOption("mode", detect_mode(data.filename));
+				}
 			});
 			return false;
 		},

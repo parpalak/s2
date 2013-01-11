@@ -70,7 +70,7 @@ if ($action == 's2_tpl_edit_load')
 
 	if (!isset($_GET['filename']))
 		die('Error in GET parameters.');
-	$filename = $_GET['filename'];
+	$filename = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $_GET['filename']);
 
 	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
 		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
@@ -78,7 +78,8 @@ if ($action == 's2_tpl_edit_load')
 		require $ext_info['path'].'/lang/English.php';
 	require $ext_info['path'].'/functions.php';
 
-	s2_tpl_edit_form($filename);
+	header('Content-Type: application/json; charset=utf-8');
+	echo s2_json_encode(s2_tpl_edit_content($filename));
 }
 
 elseif ($action == 's2_tpl_edit_save')
@@ -98,7 +99,7 @@ elseif ($action == 's2_tpl_edit_save')
 	require $ext_info['path'].'/functions.php';
 
 	$s2_tpl_edit_template_id = s2_tpl_edit_save($s2_tpl_edit_template);
-	s2_tpl_edit_file_list($s2_tpl_edit_template_id);
+	echo s2_tpl_edit_file_list($s2_tpl_edit_template_id);
 }
 		]]></hook>
 
