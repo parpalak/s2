@@ -39,12 +39,14 @@ var s2_tpl_edit = (function ()
 			$(frm['template[filename]']).change(name_change);
 		}
 
-		$('#s2_tpl_edit_file_list').on('dragstart', function(e)
+		var $menu = $('#s2_tpl_edit_file_list').on('dragstart', function(e)
 		{
 			var link = $(e.target).attr('data-copy');
 			if (link)
-				e.originalEvent.dataTransfer.setData('text/plain', link);
+				e.originalEvent.dataTransfer.setData('Text', link);
 		});
+		if ($.browser.opera)
+			$menu.find('a').prop('unselectable', 'on');
 	});
 
 	return (
@@ -56,7 +58,9 @@ var s2_tpl_edit = (function ()
 				var frm = document.forms['s2_tpl_edit_form'].elements;
 				frm['template[filename]'].value = data.filename;
 				frm['template[text]'].value = data.text;
-				$('#s2_tpl_edit_file_list').html(data.menu);
+				$menu = $('#s2_tpl_edit_file_list').html(data.menu);
+				if ($.browser.opera)
+					$menu.find('a').prop('unselectable', 'on');
 
 				if (instance)
 				{
@@ -80,7 +84,9 @@ var s2_tpl_edit = (function ()
 
 			POSTAsyncRequest(sUrl + 'action=s2_tpl_edit_save', $(frm).serialize(), function (http, data)
 			{
-				$('#s2_tpl_edit_file_list').html(data);
+				var $menu = $('#s2_tpl_edit_file_list').html(data);
+				if ($.browser.opera)
+					$menu.find('a').prop('unselectable', 'on');
 			});
 			return false;
 		}
