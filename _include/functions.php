@@ -216,7 +216,7 @@ function s2_process_multipart_mixed (&$src, &$dest, $dir = false)
 //
 // Searches for a template file (in the style or 'template' directory)
 //
-function s2_get_template ($raw_template_id, $default_path = false)
+function s2_get_template ($raw_template_id, $default_path = false, $return_error = false)
 {
 	global $lang_common, $request_uri;
 
@@ -236,8 +236,11 @@ function s2_get_template ($raw_template_id, $default_path = false)
 			$path = S2_ROOT.'_styles/'.S2_STYLE.'/templates/'.$template_id;
 		elseif (file_exists($default_path.$template_id))
 			$path = $default_path.$template_id;
-		else 
-			error(sprintf($lang_common['Template not found'], $default_path.$template_id));
+		else
+			if ($return_error)
+				return false;
+			else
+				error(sprintf($lang_common['Template not found'], $default_path.$template_id));
 	}
 
 	ob_start();
