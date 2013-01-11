@@ -105,7 +105,7 @@ function s2_blog_all_tags ()
 			$tags[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a> ('.$num.')';
 
 	($hook = s2_hook('fn_s2_blog_all_tags_end')) ? eval($hook) : null;
-	return implode('<br />', $tags);
+	return '<div class="tags_list">'.implode('<br />', $tags).'</div>';
 }
 
 function s2_blog_comment_text ($n)
