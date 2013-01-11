@@ -409,11 +409,12 @@ body {
 				}
 
 .tags_list {
-	font-size: 0.8571em;
 	color: #666;
 	line-height: 1.75;
-	}
-
+	-webkit-columns: 15em;
+	-moz-columns: 15em;
+	columns: 15em;
+}
 .paging a, .paging .current {
 	display: inline-block;
 	line-height: 1.75em;
