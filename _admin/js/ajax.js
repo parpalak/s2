@@ -359,17 +359,12 @@ var PopupMessages = {
 
 		if (sId)
 		{
-			var aeMessages = eInnerDiv.childNodes;
-			for (var i = aeMessages.length; i-- ;)
-				if (aeMessages[i].nodeName == 'DIV' && aeMessages[i].getAttribute('data-id') == sId)
-				{
-					var eMessage = aeMessages[i];
-					eMessage.style.color = 'transparent';
-					setTimeout(function () { eMessage.style.color = ''; }, 200);
-					setTimeout(function () { eMessage.style.color = 'transparent'; }, 350);
-					setTimeout(function () { eMessage.style.color = ''; }, 500);
-					return;
-				}
+			var $message = $(eInnerDiv).children('div[data-id="' + sId + '"]');
+			if ($message.length)
+			{
+				$message.fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+				return;
+			}
 		}
 
 		var eMessage = document.createElement('DIV');
@@ -462,19 +457,15 @@ function SendLoginData (eForm, fSuccess, fFailed)
 
 function SendAjaxLoginForm ()
 {
-	document.forms['loginform'].login.value = username;
+	var frm = document.forms['loginform'];
+	frm.elements['login'].value = username;
+	$('#ajax_login_message').clearQueue().hide();
 
-	SendLoginData(document.forms['loginform'], function ()
+	SendLoginData(frm, function ()
 	{
-		PopupMessages.hide('expired_session')
+		PopupMessages.hide('expired_session');
 	}, function (sText)
 	{
-		document.getElementById('ajax_login_message').innerHTML = sText;
-		setTimeout(function ()
-		{
-			var eDiv = document.getElementById('ajax_login_message');
-			if (eDiv)
-				eDiv.innerHTML = '';
-		}, 5000)
+		$('#ajax_login_message').hide().html(sText).fadeIn(100).delay(5000).fadeOut(100);
 	});
 }
