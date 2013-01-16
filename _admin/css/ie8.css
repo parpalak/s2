@@ -55,3 +55,7 @@ a, a:visited {
 .r-float label.ok {
 	outline: 2px solid #bfb;
 	}
+
+.error_dialog .error_back {
+	filter: alpha(opacity=60);
+	}

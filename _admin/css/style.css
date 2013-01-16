@@ -189,7 +189,6 @@ hr {
 		background: #000;
 		-moz-opacity: 0.6;
 		opacity: 0.6;
-		filter: alpha(opacity=60);
 		}
 		.error_dialog .error_window {
 			-moz-border-radius: 10px;
