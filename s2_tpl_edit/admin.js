@@ -45,7 +45,7 @@ var s2_tpl_edit = (function ()
 			if (link)
 				e.originalEvent.dataTransfer.setData('Text', link);
 		});
-		if ($.browser.opera)
+		if (window.opera)
 			$menu.find('a').prop('unselectable', 'on');
 	});
 
@@ -59,7 +59,7 @@ var s2_tpl_edit = (function ()
 				frm['template[filename]'].value = data.filename;
 				frm['template[text]'].value = data.text;
 				$menu = $('#s2_tpl_edit_file_list').html(data.menu);
-				if ($.browser.opera)
+				if (window.opera)
 					$menu.find('a').prop('unselectable', 'on');
 
 				if (instance)
@@ -85,7 +85,7 @@ var s2_tpl_edit = (function ()
 			POSTAsyncRequest(sUrl + 'action=s2_tpl_edit_save', $(frm).serialize(), function (http, data)
 			{
 				var $menu = $('#s2_tpl_edit_file_list').html(data);
-				if ($.browser.opera)
+				if (window.opera)
 					$menu.find('a').prop('unselectable', 'on');
 			});
 			return false;
