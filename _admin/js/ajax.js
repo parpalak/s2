@@ -333,33 +333,26 @@ var PopupMessages = {
 
 	show : function (sMessage, aActions, iTime, sId)
 	{
-		var eDiv = document.getElementById('popup_message');
-		if (!eDiv)
+		var $popup = $('#popup_message'), $list, $cross;
+
+		if (!$popup.length)
 		{
-			eDiv = document.createElement('DIV');
-			document.body.appendChild(eDiv);
-			eDiv.setAttribute('id', 'popup_message');
-
-			var eInnerDiv = document.createElement('DIV');
-			eDiv.appendChild(eInnerDiv);
-
-			var eCross = document.createElement('A');
-			eCross.className = 'cross';
-			eCross.setAttribute('href', '#');
-			eCross.setAttribute('tabindex', '0');
-			eCross.onclick = function () { eDiv.parentNode.removeChild(eDiv); return false; };
-			eInnerDiv.appendChild(eCross);
+			$cross = $('<a>').attr({'class': 'cross', 'href': '#', 'tabindex': '0'})
+				.click(function () { $popup.remove(); return false; });
+			$list = $('<div>').addClass('message-list').append($cross);
+			$popup = $('<div>').attr('id', 'popup_message').append($list);
+			$('body').append($popup);
 		}
 		else
 		{
-			eInnerDiv = eDiv.firstChild;
-			eCross = eInnerDiv.firstChild;
+			$list = $popup.children();
+			$cross = $list.children('.cross');
 		}
-		eCross.focus();
+		$cross[0].focus();
 
 		if (sId)
 		{
-			var $message = $(eInnerDiv).children('div[data-id="' + sId + '"]');
+			var $message = $list.children('div[data-id="' + sId + '"]');
 			if ($message.length)
 			{
 				$message.fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
@@ -367,46 +360,39 @@ var PopupMessages = {
 			}
 		}
 
-		var eMessage = document.createElement('DIV');
-		eMessage.setAttribute('data-id', sId || '');
-		eInnerDiv.appendChild(eMessage);
+		$message = $('<div>').attr({class: 'message', 'data-id': sId || ''}).appendTo($list);
 
 		if (iTime)
 		{
 			setTimeout(function ()
 			{
-				eMessage.parentNode.removeChild(eMessage);
-				if (eInnerDiv.childNodes.length == 1 && eDiv.parentNode)
-					eDiv.parentNode.removeChild(eDiv);
+				$message.remove();
+				if (!$list.children('.message').length)
+					$popup.remove();
 			}, iTime * 1000);
 		}
 
-		eMessage.innerHTML = sMessage;
+		$message.html(sMessage);
 
 		var max = aActions ? aActions.length : 0;
 		for (i = 0; i < max; i++)
 		{
-			var eA = document.createElement('A');
-			eA.setAttribute('class', 'action');
-			eA.setAttribute('href', '#');
-			eA.setAttribute('tabindex', '0');
-			eA.appendChild(document.createTextNode(aActions[i].name));
+			var eA = $('<a>').attr({'class': 'action', 'href': '#', 'tabindex': '0'}).text(aActions[i].name);
 			(function (action, once)
 			{
-				eA.onclick = function ()
+				eA.click(function ()
 				{
 					action();
 					if (once)
 					{
-						eMessage.parentNode.removeChild(eMessage);
-						if (eInnerDiv.childNodes.length == 1)
-							eDiv.parentNode.removeChild(eDiv);
+						$message.remove();
+						if (!$list.children('.message').length)
+							$popup.remove();
 					}
 					return false;
-				}
+				});
 			}(aActions[i].action, aActions[i].once));
-			eMessage.appendChild(document.createTextNode('\u00a0 '));
-			eMessage.appendChild(eA);
+			$message.append('\u00a0 ').append(eA);
 		}
 	},
 
@@ -418,17 +404,18 @@ var PopupMessages = {
 
 	hide: function (sId)
 	{
-		var eDiv = document.getElementById('popup_message');
-		if (!eDiv || !sId)
+		if (!sId)
 			return;
 
-		var aeMessages = eDiv.firstChild.childNodes;
-		for (var i = aeMessages.length; i-- ;)
-			if (aeMessages[i].nodeName == 'DIV' && aeMessages[i].getAttribute('data-id') == sId)
-				aeMessages[i].parentNode.removeChild(aeMessages[i]);
+		var $popup = $('#popup_message'),
+			$list = $popup.children();
 
-		if (eDiv.firstChild.childNodes.length == 1 && eDiv.parentNode)
-			eDiv.parentNode.removeChild(eDiv);
+		if (!$popup.length)
+			return;
+
+		$list.children('div[data-id="' + sId + '"]').remove();
+		if (!$list.children('.message').length)
+			$($popup).remove();
 	}
 };
 

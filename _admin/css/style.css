@@ -230,7 +230,7 @@ hr {
 	left: 5%;
 	height: 1px;
 	}
-	#popup_message > div {
+	#popup_message .message-list {
 		display: inline-block;
 		vertical-align: top;
 		text-align: left;
@@ -246,9 +246,9 @@ hr {
 		overflow: hidden;
 		font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 		}
-		#popup_message > div > div {
-			padding: 2px 0;
-			}
+	#popup_message .message {
+		padding: 2px 0;
+		}
 	#popup_message .action {
 		font-weight: bold;
 		white-space: nowrap;
@@ -257,8 +257,7 @@ hr {
 		display: block;
 		width: 16px;
 		height: 16px;
-		vertical-align: top;
-		background: url(../i/icons.png) 0px -16px;
+		background: url(../i/icons.png) 0 -16px;
 		background-size: auto;
 		float: right;
 		position: relative;
