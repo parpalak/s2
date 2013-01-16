@@ -309,15 +309,18 @@ function POSTAsyncRequest (sRequestUrl, sParam, fCallback)
 
 function DisplayError (sError)
 {
-	var eDiv = document.createElement('DIV');
-	document.body.appendChild(eDiv);
-	eDiv.setAttribute('id', 'error_dialog');
-	eDiv.innerHTML = '<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div><input type="button" id="close_error_button" value="Ok"></div>';
+	var $button = $('<input>').attr({type: "button", tabindex: "0", class: "close_error_button"}).val('Ok'),
+		$div = $('<div>').addClass('error_dialog')
+		.append('<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div>')
+		.append($button).appendTo($('body'));
 
+	$button.click(function ()
+	{
+		$div.remove();
+		$('.close_error_button').last().focus();
+	});
 
-	var eButton = document.getElementById('close_error_button');
-	eButton.onclick = function () { eDiv.parentNode.removeChild(eDiv); };
-	setTimeout(function () { eButton.focus() }, 40);
+	setTimeout(function () { $button.focus() }, 100);
 }
 
 function UnknownError (sError, iStatus)
