@@ -309,7 +309,7 @@ function POSTAsyncRequest (sRequestUrl, sParam, fCallback)
 
 function DisplayError (sError)
 {
-	var $button = $('<input>').attr({type: "button", tabindex: "0", class: "close_error_button"}).val('Ok'),
+	var $button = $('<input>').attr({'type': 'button', 'tabindex': "0", 'class': 'close_error_button'}).val('Ok'),
 		$div = $('<div>').addClass('error_dialog')
 		.append('<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div>')
 		.append($button).appendTo($('body'));
@@ -363,7 +363,7 @@ var PopupMessages = {
 			}
 		}
 
-		$message = $('<div>').attr({class: 'message', 'data-id': sId || ''}).appendTo($list);
+		$message = $('<div>').attr({'class': 'message', 'data-id': sId || ''}).appendTo($list);
 
 		if (iTime)
 		{
