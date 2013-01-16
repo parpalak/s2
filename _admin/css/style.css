@@ -1023,9 +1023,16 @@ form center {
 			text-shadow: 0 1px 0 #fff;
 			}
 
-.jstree a { background: none; }
+#folders.jstree .jstree-leaf > a > .jstree-icon,
 .jstree li,
-.jstree ins { background: url(../i/tree.png) no-repeat transparent; }
+.jstree ins,
+#vakata-dragged ins.jstree-ok,
+#vakata-dragged ins.jstree-invalid,
+#jstree-marker {
+	background: url(data:image/png;base64,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) no-repeat transparent;
+}
+
+.jstree a { background: none; }
 .jstree li { background-position: -90px 0; background-repeat: repeat-y; }
 .jstree li.jstree-last { background: transparent; }
 .jstree .jstree-open > ins { background-position: -72px 0; }
@@ -1079,11 +1086,11 @@ form center {
 	padding: 2px 2px 2px 22px !important;
 	margin: -10px 0 0 10px !important;
 	}
-	#vakata-dragged  ins { top: 2px !important; left: 2px !important; }
-	#vakata-dragged .jstree-ok { background: url(../i/tree.png) -1px -19px no-repeat !important; }
-	#vakata-dragged .jstree-invalid { background: url(../i/tree.png) -19px -19px no-repeat !important; }
+	#vakata-dragged ins { top: 2px !important; left: 2px; }
+	#vakata-dragged ins.jstree-ok { background-position: -1px -19px; }
+	#vakata-dragged ins.jstree-invalid { background-position: -19px -19px; }
 
-#jstree-marker  { background: url(../i/tree.png) -41px -21px no-repeat !important; text-indent: -100px; }
+#jstree-marker  { background-position: -41px -21px; text-indent: -100px; }
 
 .jstree .jstree-locked a { color:silver; cursor:default; }
 

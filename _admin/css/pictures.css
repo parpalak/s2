@@ -44,7 +44,7 @@
 	display: none;
 	}
 
-#folders.jstree .jstree-leaf > a > .jstree-icon { background: url(../i/tree.png) -55px -19px no-repeat; }
+#folders.jstree .jstree-leaf > a > .jstree-icon { background-position: -55px -19px; }
 
 #files.jstree a {
 	display: block;
