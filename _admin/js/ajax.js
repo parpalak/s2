@@ -325,11 +325,11 @@ function DisplayError (sError)
 
 function UnknownError (sError, iStatus)
 {
-	if (sError.indexOf('</body>') >= 0 && sError.indexOf('</html>') >= 0)
-		DisplayError(sError);
-	else
-		DisplayError(s2_lang.unknown_error + ' ' + iStatus + '<br />' +
-				s2_lang.server_response + '<br />' + sError);
+	if (sError.indexOf('</body>') == -1 || sError.indexOf('</html>') == -1)
+		sError = s2_lang.unknown_error + ' ' + iStatus + '<br />' +
+				s2_lang.server_response + '<br />' + sError;
+
+	DisplayError(sError);
 }
 
 var PopupMessages = {
@@ -426,22 +426,23 @@ var PopupMessages = {
 // Login form processing
 //
 
-function SendLoginData (eForm, fSuccess, fFailed)
+function SendLoginData (eForm, fOk, fFail)
 {
 	eForm.key.value = hex_md5(hex_md5(eForm.pass.value + 'Life is not so easy :-)') + ';-)' + eForm.getAttribute('data-salt'));
 	POSTAsyncRequest(sUrl + 'action=login', $(eForm).serialize(), function (http)
 	{
-		if (http.responseText == 'OK')
-			fSuccess();
-		else if (http.responseText.substr(0, 9) == 'OLD_SALT_')
+		var txt = http.responseText;
+		if (txt == 'OK')
+			fOk();
+		else if (txt.substr(0, 9) == 'OLD_SALT_')
 		{
-			var params = http.responseText.split('_');
+			var params = txt.split('_');
 			eForm.setAttribute('data-salt', params[2]);
 			eForm.challenge.value = params[3];
-			setTimeout(function () { SendLoginData (eForm, fSuccess, fFailed); }, 0);
+			setTimeout(function () { SendLoginData (eForm, fOk, fFail); }, 0);
 		}
 		else
-			fFailed(http.responseText);
+			fFail(txt);
 	});
 }
 
