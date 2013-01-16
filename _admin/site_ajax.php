@@ -503,16 +503,29 @@ elseif ($action == 'user_set_password')
 	if ($s2_user['login'] == $_GET['name'] || $s2_user['edit_users'])
 	{
 		$query = array(
-			'UPDATE'	=> 'users',
-			'SET'		=> 'password = \''.$s2_db->escape($_POST['pass']).'\'',
+			'SELECT'	=> 'password',
+			'FROM'		=> 'users',
 			'WHERE'		=> 'login = \''.$s2_db->escape($_GET['name']).'\'',
 		);
-		($hook = s2_hook('rq_action_user_set_password_pre_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
-		if ($s2_db->affected_rows() != 1)
-			echo 'Error while changing password';
+		($hook = s2_hook('rq_action_user_set_password_pre_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		if ($s2_db->result($result) != $_POST['pass'])
+		{
+			$query = array(
+				'UPDATE'	=> 'users',
+				'SET'		=> 'password = \''.$s2_db->escape($_POST['pass']).'\'',
+				'WHERE'		=> 'login = \''.$s2_db->escape($_GET['name']).'\'',
+			);
+			($hook = s2_hook('rq_action_user_set_password_pre_upd_qr')) ? eval($hook) : null;
+			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			if ($s2_db->affected_rows() != 1)
+				echo 'Error while changing password';
+			else
+				echo $lang_admin['Password changed'];
+		}
 		else
-			echo $lang_admin['Password changed'];
+			echo $lang_admin['Password unchanged'];
 	}
 	else
 	{

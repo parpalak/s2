@@ -177,6 +177,7 @@ $lang_admin = array(
 'Allow'						=> 'разрешить',
 'Username exists'			=> 'Учетная запись «%s» уже существует.',
 'Password changed'			=> 'Пароль изменен.',
+'Password unchanged'		=> 'Пароль совпадает с предыдущим.',
 'Change password'			=> 'Изменить пароль',
 'Delete user'				=> 'Удалить пользователя',
 'Add user'					=> 'Добавить пользователя',

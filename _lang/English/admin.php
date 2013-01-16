@@ -177,6 +177,7 @@ $lang_admin = array(
 'Allow'						=> 'Click to allow',
 'Username exists'			=> 'The username “%s” already exists.',
 'Password changed'			=> 'The password has been changed.',
+'Password unchanged'		=> 'The password coincides with the previous one.',
 'Change password'			=> 'Change the password',
 'Delete user'				=> 'Delete user',
 'Add user'					=> 'Add user',
