@@ -408,7 +408,7 @@ function s2_get_login_form ($message = '')
 <![endif]-->
 <!--[if gte IE 9]><!-->
 <script src="js/jquery.js"></script>
-<!--[endif]-->
+<!--><![endif]-->
 <script src="js/ajax.js"></script>
 <script>
 var sUrl = '<?php echo S2_PATH; ?>/_admin/site_ajax.php?', shake = null;

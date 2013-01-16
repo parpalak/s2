@@ -252,7 +252,7 @@ SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 <![endif]-->
 <!--[if gte IE 9]><!-->
 <script type="text/javascript" src="js/jquery.js"></script>
-<!--[endif]-->
+<!--><![endif]-->
 <script type="text/javascript" src="js/jquery-tools.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>
 <script type="text/javascript" src="js/admin.js"></script>
