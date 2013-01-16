@@ -72,7 +72,6 @@ function s2_jsvarencode ($var)
 <meta http-equiv="Pragma" content="no-cache" />
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
-<!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
 <!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
@@ -82,7 +81,13 @@ var iMaxFileSize = <?php echo s2_return_bytes(ini_get('upload_max_filesize')); ?
 var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))); ?>';
 SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
+<!--[if lt IE 9]>
+<script type="text/javascript" src="js/jquery-1.9.0.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/ie8.css" />
+<![endif]-->
+<!--[if gte IE 9]><!-->
 <script type="text/javascript" src="js/jquery.js"></script>
+<!--[endif]-->
 <script type="text/javascript" src="js/jquery-tools.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>
 <script type="text/javascript" src="js/pictman.js"></script>
