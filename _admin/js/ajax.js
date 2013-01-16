@@ -377,8 +377,8 @@ var PopupMessages = {
 
 		$message.html(sMessage);
 
-		var max = aActions ? aActions.length : 0;
-		for (i = 0; i < max; i++)
+		var max = aActions ? aActions.length : 0, i = 0;
+		for (; i < max; i++)
 		{
 			var eA = $('<a>').attr({'class': 'action', 'href': '#', 'tabindex': '0'}).text(aActions[i].name);
 			(function (action, once)
