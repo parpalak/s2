@@ -85,21 +85,20 @@ function ToggleFavBlog (eItem, iId)
 	return false;
 }
 
-function AdjustPreviewLink (sAction)
+Hooks.add('fn_s2_counter_draw_filter_rss', function (data) { return data + ",../_extensions/s2_blog/rss.xml?" + Math.random();});
+
+$(document).on('save_article_end.s2', function (e, sAction)
 {
 	if (sAction != 'save_blog')
 		return;
 
-	var eA = document.getElementById('preview_link'),
-		sLink = eA.getAttribute('href'),
-		eForm = document.forms['artform'],
-		sYear = eForm.elements['page[create_time][year]'].value,
-		sMonth = eForm.elements['page[create_time][mon]'].value,
-		sDay = eForm.elements['page[create_time][day]'].value,
-		sURL = eForm.elements['page[url]'].value;
+	var $a = $('#preview_link'),
+		sLink = $a.attr('href'),
+		frm = document.forms['artform'].elements,
+		sYear = frm['page[create_time][year]'].value,
+		sMonth = frm['page[create_time][mon]'].value,
+		sDay = frm['page[create_time][day]'].value,
+		sURL = frm['page[url]'].value;
 
-	eA.setAttribute('href', sLink.replace(/\/\d*\/\d*\/\d*\/[^\/]*$/, '/' + sYear + '/' + sMonth + '/' + sDay + '/' + sURL))
-}
-
-Hooks.add('fn_s2_counter_draw_filter_rss', function (data) { return data + ",../_extensions/s2_blog/rss.xml?" + Math.random();});
-Hooks.add('fn_save_article_end', AdjustPreviewLink);
+	$a.attr('href', sLink.replace(/\/\d*\/\d*\/\d*\/[^\/]*$/, '/' + sYear + '/' + sMonth + '/' + sDay + '/' + sURL))
+});
