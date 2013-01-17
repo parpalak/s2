@@ -183,26 +183,23 @@ var s2_highlight = (function ()
 
 if (typeof tinyMCE == 'undefined')
 {
-	Hooks.add('request_article_start', s2_highlight.close);
-	Hooks.add('request_article_end', s2_highlight.init);
-
-	Hooks.add('fn_before_switch_start', function (sType)
-	{
-		if (sType != 'edit_tab')
-			s2_highlight.store_scroll();
-	});
-	Hooks.add('fn_tab_switch_start', function (sType)
-	{
-		if (sType == 'edit_tab')
-			s2_highlight.restore_scroll();
-	});
+	$(document)
+		.on('request_article_start.s2', s2_highlight.close)
+		.on('request_article_end.s2', s2_highlight.init)
+		.on('check_changes_start.s2 changes_present.s2 preview_start.s2 save_article_start.s2', s2_highlight.flip)
+		.on('tab_switch_start.s2', function (e, sType)
+		{
+			if (sType == 'edit_tab')
+				s2_highlight.restore_scroll();
+		})
+		.on('before_switch_start.s2', function (e, sType)
+		{
+			if (sType != 'edit_tab')
+				s2_highlight.store_scroll();
+		});
 
 	Hooks.add('fn_insert_paragraph_start', s2_highlight.paragraph);
 	Hooks.add('fn_insert_tag_start', s2_highlight.addtag);
 	Hooks.add('fn_paragraph_start', s2_highlight.smart);
 
-	Hooks.add('fn_preview_start', s2_highlight.flip);
-	Hooks.add('fn_changes_present', s2_highlight.flip);
-	Hooks.add('fn_save_article_start', s2_highlight.flip);
-	Hooks.add('fn_check_changes_start', s2_highlight.flip);
 }
