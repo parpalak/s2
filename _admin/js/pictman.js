@@ -76,7 +76,7 @@ $(function ()
 	getCurDir = function ()
 	{
 		return path;
-	}
+	};
 
 	function createFolder ()
 	{
@@ -337,8 +337,8 @@ $(function ()
 		{
 			fileTree.jstree('set_focus');
 
-			fExecDouble = function () {};
-			var str = '';
+			var fExecDouble = function () {},
+				str = '';
 
 			if (fileTree.jstree('get_selected').length == 1)
 			{
@@ -354,7 +354,7 @@ $(function ()
 					{
 						if (parentWnd.ReturnImage)
 							parentWnd.ReturnImage(filePath, a[0], a[1]);
-					}
+					};
 					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
 			}
@@ -494,62 +494,62 @@ $.ajaxPrefilter(function (options, originalOptions, jqXHR)
 
 function initFileDrop ()
 {
-	if (document.addEventListener)
+	if (!document.addEventListener)
+		return;
+
+	var brd = document.getElementById('brd');
+	brd.addEventListener('dragover', function (e)
 	{
-		var brd = document.getElementById('brd');
-		brd.addEventListener('dragover', function (e)
-		{
-			e.preventDefault();
-		}, false);
+		e.preventDefault();
+	}, false);
 
-		brd.addEventListener('dragenter', function (e)
-		{
-			var dt = e.dataTransfer;
-			if (!dt)
-				return;
+	brd.addEventListener('dragenter', function (e)
+	{
+		var dt = e.dataTransfer;
+		if (!dt)
+			return;
 
-			if (dt.types.contains && !dt.types.contains("Files")) //FF
-				return;
-			if (dt.types.indexOf && dt.types.indexOf("Files") == -1) //Chrome
-				return;
+		if (dt.types.contains && !dt.types.contains("Files")) //FF
+			return;
+		if (dt.types.indexOf && dt.types.indexOf("Files") == -1) //Chrome
+			return;
 
-			$('#brd').addClass('accept_drag');
-			setTimeout(function () {$('#brd').removeClass('accept_drag');}, 200);
-			setTimeout(function () {$('#brd').removeClass('accept_drag');}, 600);
-			setTimeout(function () {$('#brd').removeClass('accept_drag');}, 1000);
-			setTimeout(function () {$('#brd').addClass('accept_drag');}, 400);
-			setTimeout(function () {$('#brd').addClass('accept_drag');}, 800);
+		$('#brd').addClass('accept_drag');
+		setTimeout(function () {$('#brd').removeClass('accept_drag');}, 200);
+		setTimeout(function () {$('#brd').removeClass('accept_drag');}, 600);
+		setTimeout(function () {$('#brd').removeClass('accept_drag');}, 1000);
+		setTimeout(function () {$('#brd').addClass('accept_drag');}, 400);
+		setTimeout(function () {$('#brd').addClass('accept_drag');}, 800);
 
-			e.preventDefault();
-		}, false);
+		e.preventDefault();
+	}, false);
 
-		brd.addEventListener('dragleave', function (e)
-		{
-			document.getElementById('brd').className = '';
-			e.preventDefault();
-		}, false);
-		brd.addEventListener('drop', function (e)
-		{
-			var dt = e.dataTransfer;
-			if (!dt || !dt.files)
-				return;
+	brd.addEventListener('dragleave', function (e)
+	{
+		document.getElementById('brd').className = '';
+		e.preventDefault();
+	}, false);
+	brd.addEventListener('drop', function (e)
+	{
+		var dt = e.dataTransfer;
+		if (!dt || !dt.files)
+			return;
 
-			document.getElementById('brd').className = '';
+		document.getElementById('brd').className = '';
 
-			FileCounter(0, 0);
-			var files = dt.files, not_sent = '';
-			for (var i = files.length; i-- ;)
-				if (files[i].size <= iMaxFileSize)
-					SendDroppedFile(files[i]);
-				else
-					not_sent += '<br />' + files[i].fileName;
+		FileCounter(0, 0);
+		var files = dt.files, not_sent = '';
+		for (var i = files.length; i-- ;)
+			if (files[i].size <= iMaxFileSize)
+				SendDroppedFile(files[i]);
+			else
+				not_sent += '<br />' + files[i].fileName;
 
-			if (not_sent != '')
-				PopupMessages.show(str_replace('%s', sFriendlyMaxFileSize, s2_lang.files_too_big) + not_sent);
+		if (not_sent != '')
+			PopupMessages.show(str_replace('%s', sFriendlyMaxFileSize, s2_lang.files_too_big) + not_sent);
 
-			e.preventDefault();
-		}, false);
-	}
+		e.preventDefault();
+	}, false);
 }
 
 var FileCounter = (function (inc, new_value)

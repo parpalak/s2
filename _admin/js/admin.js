@@ -63,9 +63,6 @@ catch (e)
 	is_local_storage = false;
 }
 
-var ua = navigator.userAgent.toLowerCase();
-var isIE = (ua.indexOf('msie') != -1 && ua.indexOf('opera') == -1);
-var isSafari = ua.indexOf('safari') != -1;
 var selectTabN = function () {};
 
 $(function ()
@@ -108,7 +105,7 @@ $(function ()
 
 	$('body').on('keydown', '.full_tab_form input[type="text"], .full_tab_form input[type="checkbox"], .full_tab_form select', function(e)
 	{
-		if (e.keyCode == 13)
+		if (e.which == 13)
 			return false;
 	});
 
@@ -231,8 +228,8 @@ function PopupWindow (sTitle, sHeader, sInfo, sText)
 
 var Search = (function ()
 {
-	var search_string = '';
-	var eInput;
+	var sSearch = '',
+		eInput;
 
 	function DoSearch ()
 	{
@@ -246,12 +243,12 @@ var Search = (function ()
 			return;
 		eInput.value = eInput.defaultValue;
 		eInput.className = 'inactive';
-		search_string = '';
+		sSearch = '';
 	});
 
-	function init ()
+	$(function ()
 	{
-		var search_timer;
+		var iTimer;
 		eInput = document.getElementById('search_field');
 
 		function NewSearch ()
@@ -259,66 +256,55 @@ var Search = (function ()
 			// We have to wait a while for eInput.value to change
 			setTimeout(function ()
 			{
-				if (search_string == eInput.value || eInput.className == 'inactive')
+				if (sSearch == eInput.value || eInput.className == 'inactive')
 					return;
 
-				search_string = eInput.value;
+				sSearch = eInput.value;
 				SetWait(true);
-				clearTimeout(search_timer);
-				search_timer = setTimeout(DoSearch, 250);
+				clearTimeout(iTimer);
+				iTimer = setTimeout(DoSearch, 250);
 			}, 0);
 		}
 
-		// Search field help message.
-		// It appears when the field is empty.
-		eInput.onblur = function ()
+		$(eInput).on('input', NewSearch)
+		.keydown(function (e)
 		{
-			if (eInput.value == '')
-			{
-				eInput.className = 'inactive';
-				eInput.value = eInput.defaultValue;
-			}
-		};
-		eInput.onfocus = function ()
-		{
-			if (eInput.className == 'inactive')
-			{
-				eInput.className = '';
-				eInput.value = '';
-			}
-		};
-		eInput.oninput = NewSearch;
-
-		var KeyDown = function (e)
-		{
-			e = e || window.event;
-			var key = e.keyCode || e.which;
-
-			if (key == 13)
+			if (e.which == 13)
 			{
 				// Immediate search on enter press
-				clearTimeout(search_timer);
-				search_string = eInput.value;
+				clearTimeout(iTimer);
+				sSearch = this.value;
 				DoSearch();
 			}
 			else
 				// We have to wait a little for eInput.value to change
 				NewSearch();
-		}
-		if (isIE || isSafari)
-			eInput.onkeydown = KeyDown;
-		else
-			eInput.onkeypress = KeyDown;
-	}
-
-	$(init);
+		})
+		// Search field placeholder
+		.focus(function ()
+		{
+			if (this.className == 'inactive')
+			{
+				this.className = '';
+				this.value = '';
+			}
+		})
+		.blur(function ()
+		{
+			if (this.value == '')
+			{
+				this.className = 'inactive';
+				this.value = this.defaultValue;
+			}
+		});
+	});
 
 	return (
 	{
 		// Get search string
 		string: function ()
 		{
-			return search_string;
+			return sSearch;
 		}
 	})
 }());
@@ -853,8 +839,7 @@ var LoadArticle, ReloadArticle;
 
 			$(document.forms['artform'].elements['page[text]']).keydown(function (e)
 			{
-				var key = e.keyCode || e.which,
-					ch = String.fromCharCode(key).toLowerCase();
+				var ch = String.fromCharCode(e.which).toLowerCase();
 
 				if (e.ctrlKey)
 				{
@@ -863,15 +848,15 @@ var LoadArticle, ReloadArticle;
 					else if (ch == 'b')
 						TagSelection('strong');
 					else if (ch == 'q')
-						InsertParagraph('blockquote')
+						InsertParagraph('blockquote');
 					else if (ch == 'l')
-						InsertParagraph('')
+						InsertParagraph('');
 					else if (ch == 'e')
-						InsertParagraph('center')
+						InsertParagraph('center');
 					else if (ch == 'r')
-						InsertParagraph('right')
+						InsertParagraph('right');
 					else if (ch == 'j')
-						InsertParagraph('justify')
+						InsertParagraph('justify');
 					else if (ch == 'k')
 						InsertTag('<a href="">', '</a>');
 					else if (ch == 'p')
