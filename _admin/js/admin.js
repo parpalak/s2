@@ -67,8 +67,6 @@ var selectTabN = function () {};
 
 $(function ()
 {
-	Changes.init();
-
 	$(document).keydown(function (e)
 	{
 		var ch = String.fromCharCode(e.which).toLowerCase();
@@ -129,7 +127,7 @@ $(function ()
 	// Prevent from loosing unsaved data
 	window.onbeforeunload = function ()
 	{
-		if (document.forms['artform'] && Changes.present(document.forms['artform']))
+		if (Changes.present())
 			return s2_lang.unsaved_exit;
 	};
 
@@ -148,7 +146,7 @@ function Logout ()
 		});
 	}
 
-	if (document.forms['artform'] && Changes.present(document.forms['artform']))
+	if (Changes.present())
 	{
 		PopupMessages.show(s2_lang.unsaved_exit, [
 			{
@@ -341,7 +339,6 @@ function CheckPage ()
 }
 
 // Tracking editor content changes
-
 var Changes = (function ()
 {
 	var saved_text = '', curr_md5 = '';
@@ -351,12 +348,12 @@ var Changes = (function ()
 		if (!is_local_storage || !document.forms['artform'])
 			return;
 
-		Hooks.run('fn_check_changes_start');
+		$(document).trigger('check_changes_start.s2');
 
-		var new_text = document.forms['artform'].elements['page[text]'].value;
+		var text = document.forms['artform'].elements['page[text]'].value;
 
-		if  (saved_text != new_text)
-			localStorage.setItem('s2_curr_text', new_text);
+		if  (saved_text != text)
+			localStorage.setItem('s2_curr_text', text);
 		else
 			localStorage.removeItem('s2_curr_text');
 	}
@@ -372,32 +369,38 @@ var Changes = (function ()
 		setInterval(check_changes, 5000);
 	}
 
-	return (
+	$(function ()
 	{
-		init: function ()
-		{
-			if (old_text)
-				PopupMessages.show(s2_lang.recovered_text_alert, [{name: s2_lang.recovered_open, action: function (){ show_recovered(old_text); } }]);
-		},
+		if (old_text)
+			PopupMessages.show(s2_lang.recovered_text_alert,
+				[{name: s2_lang.recovered_open, action: function (){ show_recovered(old_text); } }]);
 
-		commit: function (arg)
+		$(document).on('request_article_end.s2 save_article_end.s2', function ()
 		{
-			curr_md5 = hex_md5((typeof arg == 'string') ? arg : $(arg).serialize());
+			var frm = document.forms['artform'];
+			curr_md5 = hex_md5($(frm).serialize());
 
 			if (is_local_storage)
 			{
-				Hooks.run('fn_changes_commit_pre_ls');
+				$(document).trigger('changes_commit_pre_ls.s2');
 
 				localStorage.removeItem('s2_curr_text');
-				saved_text = document.forms['artform'].elements['page[text]'].value;
+				saved_text = frm.elements['page[text]'].value;
 			}
-		},
+		});
+	});
 
-		present: function (eForm)
+	return (
+	{
+		present: function ()
 		{
-			Hooks.run('fn_changes_present');
+			var frm = document.forms['artform'];
+			if (!frm)
+				return false
 
-			return curr_md5 != hex_md5($(eForm).serialize());
+			$(document).trigger('changes_present.s2');
+
+			return curr_md5 != hex_md5($(frm).serialize());
 		}
 	});
 }());
@@ -412,7 +415,9 @@ $(function ()
 
 	function _sort(a, b)
 	{
-		var a = a[0], b = b[0], _a = (a + '').replace(/,/, '.'), _b = (b + '').replace(/,/, '.');
+		a = a[0];
+		b = b[0];
+		var _a = (a + '').replace(/,/, '.'), _b = (b + '').replace(/,/, '.');
 		if (Number(_a) && Number(_b))
 			return sort_numbers(_a, _b);
 		else if (!sort_case_sensitive)
@@ -785,7 +790,7 @@ var LoadArticle, ReloadArticle;
 	{
 		GETAsyncRequest(sURI, function (http, data)
 		{
-			Hooks.run('request_article_start');
+			$(document).trigger('request_article_start.s2');
 
 			s2Tags = data.tags;
 			$('#form_div').html(data.form);
@@ -867,17 +872,16 @@ var LoadArticle, ReloadArticle;
 				}
 			});
 
-			Changes.commit(document.artform);
 			selectTab('#edit_tab');
 			sLoadedURI = sURI;
 
-			Hooks.run('request_article_end');
+			$(document).trigger('request_article_end.s2');
 		});
 	}
 
 	LoadArticle = function (sURI)
 	{
-		if (document.artform && Changes.present(document.artform))
+		if (Changes.present())
 		{
 			selectTab('#edit_tab');
 			PopupMessages.show(s2_lang.unsaved, [
@@ -931,12 +935,13 @@ function LoadComments (iId)
 
 function SaveArticle(sAction)
 {
-	Hooks.run('fn_save_article_start', sAction);
+	$(document).trigger('save_article_start.s2');
 
-	document.forms['artform'].setAttribute('data-save-process', 1);
+	var frm = document.forms['artform'],
+		sRequest = $(frm).serialize(),
+		sPagetext = frm.elements['page[text]'].value;
 
-	var sRequest = $(document.forms['artform']).serialize(),
-		sPagetext = document.forms['artform'].elements['page[text]'].value;
+	$(frm).attr('data-save-process', 1);
 
 	POSTAsyncRequest(sUrl + 'action=' + sAction, sRequest, function (http, data)
 	{
@@ -958,10 +963,12 @@ function SaveArticle(sAction)
 				return;
 			}
 
+			var frm = document.forms['artform'];
+
 			// If the form was reloaded, we do not have to update it.
 			// (for example, if user had modified the page
 			// then opened another page and chose "Save and open") 
-			if (!document.forms['artform'].getAttribute('data-save-process'))
+			if (!frm.getAttribute('data-save-process'))
 				return;
 
 			var eItem = $('#url_input_label');
@@ -972,15 +979,13 @@ function SaveArticle(sAction)
 			else
 				eItem.attr('class', '').attr('title', '');
 
-			document.forms['artform'].elements['page[revision]'].value = data.revision;
+			frm.elements['page[revision]'].value = data.revision;
 
 			eItem = $('#publiched_checkbox')[0];
 			eItem.parentNode.className = eItem.checked ? 'ok' : '';
 			$('#preview_link').css('display', eItem.checked ? 'inline' : 'none');
 
-			Changes.commit(document.forms['artform']);
-
-			Hooks.run('fn_save_article_end', sAction);
+			$(document).trigger('save_article_end.s2', sAction);
 		}
 		else if (http.responseText != '')
 			alert(http.responseText);
@@ -1345,7 +1350,7 @@ function Preview ()
 	if (!document.artform || !document.artform['page[text]'])
 		return;
 
-	Hooks.run('fn_preview_start');
+	$(document).trigger('preview_start.s2');
 
 	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
 	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);
@@ -1579,7 +1584,7 @@ function OnSwitch (eTab)
 {
 	var sType = eTab.id;
 
-	Hooks.run('fn_tab_switch_start', sType);
+	$(document).trigger('tab_switch_start.s2', sType);
 
 	if (sType == 'view_tab')
 	{
@@ -1671,7 +1676,7 @@ function OnBeforeSwitch (eTab)
 {
 	var sType = eTab.id;
 
-	Hooks.run('fn_before_switch_start', sType);
+	$(document).trigger('before_switch_start.s2', sType);
 
 	if (sType != 'edit_tab' && document.artform && document.artform['page[text]'] && typeof(document.artform['page[text]'].scrollTop) != 'undefined')
 		iEditorScrollTop = document.artform['page[text]'].scrollTop;
