@@ -46,7 +46,8 @@ function strNatCmp (a, b)
 	return aa.length - bb.length;
 }
 
-var parentWnd = opener || window.top || null;
+var parentWnd = opener || window.top || null,
+	fExecDouble = function () {};
 
 $(function ()
 {
@@ -337,8 +338,7 @@ $(function ()
 		{
 			fileTree.jstree('set_focus');
 
-			var fExecDouble = function () {},
-				str = '';
+			var str = '';
 
 			if (fileTree.jstree('get_selected').length == 1)
 			{
@@ -358,6 +358,8 @@ $(function ()
 					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
 			}
+			else
+				fExecDouble = function () {};
 
 			$('#finfo').html(str);
 		})
