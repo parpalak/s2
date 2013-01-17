@@ -939,6 +939,7 @@ function SaveArticle(sAction)
 
 	var frm = document.forms['artform'],
 		sRequest = $(frm).serialize(),
+		sId = frm.elements['page[id]'].value,
 		sPagetext = frm.elements['page[text]'].value;
 
 	$(frm).attr('data-save-process', 1);
@@ -962,6 +963,8 @@ function SaveArticle(sAction)
 				]);
 				return;
 			}
+
+			$(document).trigger('save_article_done.s2', [sAction, sId]);
 
 			var frm = document.forms['artform'];
 
