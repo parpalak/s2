@@ -57,9 +57,6 @@ $(function ()
 
 		if (e.ctrlKey && ch >= '1' && ch <= '9')
 		{
-			e.preventDefault();
-			e.stopPropagation();
-
 			if (parentWnd)
 			{
 				parentWnd.selectTabN(ch);
