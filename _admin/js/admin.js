@@ -1659,7 +1659,7 @@ function OnSwitch (eTab)
 		GETAsyncRequest(sUrl + 'action=load_stat_info', function (http, data)
 		{
 			$('#stat_div').html(data);
-			Hooks.run('stat_tab_loaded');
+			$(document).trigger('stat_tab_loaded.s2');
 		});
 	}
 	else if (sType == 'admin_tab')
