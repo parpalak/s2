@@ -108,11 +108,9 @@ function s2_wysisyg_addjs ()
 theme_advanced_buttons1: "code", theme_advanced_buttons2: "", theme_advanced_buttons3 : "" });</script>';
 }
 
-Hooks.add('fn_preview_start', function() { tinyMCE.triggerSave(); });
-Hooks.add('fn_changes_present', function() { tinyMCE.triggerSave(); });
-Hooks.add('fn_save_article_start', function() { tinyMCE.triggerSave(); });
-Hooks.add('fn_check_changes_start', function() { tinyMCE.triggerSave(); } );
 Hooks.add('fn_popup_window_filter_head', function (head) { return head + s2_wysisyg_addjs(); });
 
-Hooks.add('request_article_start', function () { tinyMCE.execCommand('mceRemoveControl', false, 'arttext'); });
-Hooks.add('request_article_end', function () { tinyMCE.execCommand('mceAddControl', false, 'arttext'); });
+$(document)
+	.on('request_article_start.s2', function () { tinyMCE.execCommand('mceRemoveControl', false, 'arttext'); })
+	.on('request_article_end.s2', function () { tinyMCE.execCommand('mceAddControl', false, 'arttext'); })
+	.on('check_changes_start.s2 changes_present.s2 preview_start.s2 save_article_start.s2', function() { tinyMCE.triggerSave(); });
