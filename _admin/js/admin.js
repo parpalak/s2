@@ -183,30 +183,14 @@ function CloseOtherSessions ()
 function PopupWindow (sTitle, sHeader, sInfo, sText)
 {
 	// HTML encode for textarea
-	var div = document.createElement('div');
-	div.appendChild(document.createTextNode(sText));
-	sText = div.innerHTML;
+	sText = $('<div>').text(sText).html();
 
-	var wnd = window.open('about:blank', '', '', 'True');
-	wnd.document.open();
-
-	var color = '#eee';
-	try
-	{
-		if (window.getComputedStyle) // All the cool bro
-			color = window.getComputedStyle(document.body, null).backgroundColor;
-		else if (document.body.currentStyle) // Heh, IE8
-			color = document.body.currentStyle.backgroundColor;
-	}
-	catch (e)
-	{
-		color = '#eee';
-	}
-
-	var head = '<title>' + sTitle + '</title>' +
-		'<style>html {height: 100%; margin: 0;} body {margin: 0 auto; padding: 9em 10% 1em; height: 100%; background: ' + color + '; font: 75% Verdana, sans-serif;} body, textarea {-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 100%;} .text {position: absolute; top: 0; width: 80%;}</style>';
-	var body = '<div class="text"><h1>' + sHeader + '</h1>' + 
-		'<p>' + sInfo + '</p></div><textarea readonly="readonly">' + sText + '</textarea>';
+	var wnd = window.open('about:blank', '', '', 'True'),
+		color = $('body').css('background-color'),
+		head = '<title>' + sTitle + '</title>' +
+			'<style>html {height: 100%; margin: 0;} body {margin: 0 auto; padding: 9em 10% 1em; height: 100%; background: ' + color + '; font: 75% Verdana, sans-serif;} body, textarea {-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 100%;} .text {position: absolute; top: 0; width: 80%;}</style>',
+		body = '<div class="text"><h1>' + sHeader + '</h1>' +
+			'<p>' + sInfo + '</p></div><textarea readonly="readonly">' + sText + '</textarea>';
 
 	var result = Hooks.run('fn_popup_window_filter_head', head);
 	if (result)
@@ -216,9 +200,8 @@ function PopupWindow (sTitle, sHeader, sInfo, sText)
 	if (result)
 		body = result;
 
-	var text = '<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>';
-
-	wnd.document.write(text);
+	wnd.document.open();
+	wnd.document.write('<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>');
 	wnd.document.close();
 }
 
@@ -701,11 +684,11 @@ $(function()
 		})
 		.bind('reselect.jstree', function (e, data)
 		{
-			var e = data.inst.get_selected().first();
-			e = e.length ? e : $('.Search.Match').first().parent();
-			e = e.length ? e : $('#node_1');
+			var $e = data.inst.get_selected().first();
+			$e = $e.length ? $e : $('.Search.Match').first().parent();
+			$e = $e.length ? $e : $('#node_1');
 
-			data.inst.hover_node(e);
+			data.inst.hover_node($e);
 		})
 		.on('click', '#context_edit, #context_comments, #context_add, #context_delete', function (e, data)
 		{
@@ -907,12 +890,12 @@ var LoadArticle, ReloadArticle;
 		}
 
 		RequestArticle(sURI);
-	}
+	};
 
 	ReloadArticle = function ()
 	{
 		RequestArticle(sLoadedURI);
-	}
+	};
 }());
 
 function EditArticle (iId)
@@ -1161,7 +1144,7 @@ function InsertParagraph (sType)
 	if (result)
 		return result;
 
-	var eTextarea = document.artform['page[text]'],
+	var eTextarea = document.forms['artform'].elements['page[text]'],
 		selection = get_selection(eTextarea),
 		sText = eTextarea.value,
 		iScrollTop = eTextarea && eTextarea.scrollTop || 0;
@@ -1177,7 +1160,7 @@ function InsertParagraph (sType)
 	}
 	else
 	{
-		var start_pos = sText.lastIndexOf('\r\n\r\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
+		start_pos = sText.lastIndexOf('\r\n\r\n', selection.start - 1) + 1; // First char on the new line (incl. -1 + 1 = 0)
 		if (start_pos)
 			start_pos += 3;
 		else
@@ -1194,15 +1177,15 @@ function InsertParagraph (sType)
 			return false;
 		}
 
-		var end_pos = sText.indexOf('\r\n\r\n', selection.start);
+		end_pos = sText.indexOf('\r\n\r\n', selection.start);
 		if (end_pos == -1)
 			end_pos = sText.indexOf('\n\n', selection.start);
 		if (end_pos == -1)
 			end_pos = sText.length;
 
-		var sEnd = sText.substring(start_pos, end_pos);
-		var old_length = sEnd.length;
-		var start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
+		var sEnd = sText.substring(start_pos, end_pos),
+			old_length = sEnd.length,
+			start_len_diff = sEnd.replace(/(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)?/, sOpenTag).length - old_length;
 
 		// Move cursor right if needed to put inside the tag
 		var new_cursor = Math.max(sOpenTag.length + start_pos, start_len_diff + selection.start);
@@ -1257,7 +1240,7 @@ var slEditorSelection = null;
 
 function GetImage ()
 {
-	slEditorSelection = get_selection(document.artform['page[text]']);
+	slEditorSelection = get_selection(document.forms['artform'].elements['page[text]']);
 	selectTab('#pict_tab');
 	loadPictman();
 	return false;
@@ -1269,7 +1252,8 @@ function Paragraph ()
 	if (result)
 		return;
 
-	document.artform['page[text]'].value = SmartParagraphs(document.artform['page[text]'].value);
+	var txt = document.forms['artform'].elements['page[text]'];
+	txt.value = SmartParagraphs(txt.value);
 }
 
 //=======================[Comment management]===================================
@@ -1331,7 +1315,8 @@ var loadPictman = (function ()
 
 function ReturnImage(s, w, h)
 {
-	if (!document.artform || !document.artform['page[text]'])
+	var frm = document.forms['artform'];
+	if (!frm || !frm.elements['page[text]'])
 		return;
 
 	s = encodeURI(s).
@@ -1350,15 +1335,16 @@ function ReturnImage(s, w, h)
 
 function Preview ()
 {
-	if (!document.artform || !document.artform['page[text]'])
+	var frm = document.forms['artform'];
+	if (!frm || !frm.elements['page[text]'])
 		return;
 
 	$(document).trigger('preview_start.s2');
 
-	var s = str_replace('<!-- s2_text -->', document.artform['page[text]'].value, template);
-	s = str_replace('<!-- s2_title -->', '<h1>' + document.artform['page[title]'].value + '</h1>', s);
+	var d = window.frames['preview_frame'].document,
+		s = str_replace('<!-- s2_text -->', frm.elements['page[text]'].value, template);
+	s = str_replace('<!-- s2_title -->', '<h1>' + frm.elements['page[title]'].value + '</h1>', s);
 
-	var d = window.frames['preview_frame'].document;
 	d.open();
 	d.write(s);
 	d.close();
@@ -1368,7 +1354,7 @@ function Preview ()
 
 function AddUser (eForm)
 {
-	var sUser = eForm.userlogin.value;
+	var sUser = eForm.elements['userlogin'].value;
 	if (sUser == '')
 		return false;
 
@@ -1380,7 +1366,7 @@ function AddUser (eForm)
 
 	GETAsyncRequest(sUrl + 'action=add_user&name=' + encodeURIComponent(sUser), function (http, data)
 	{
-		eForm.userlogin.value = '';
+		eForm.elements['userlogin'].value = '';
 		$('#user_div').html(data);
 	});
 
@@ -1451,36 +1437,35 @@ function DeleteUser (sUser)
 
 function LoadTags ()
 {
- 	var eDiv = document.getElementById('tag_div');
-
-	if (eDiv.innerHTML != '')
+	if ($('#tag_div').html() != '')
 		return false;
 
-	GETAsyncRequest(sUrl + 'action=load_tags', function (http)
+	GETAsyncRequest(sUrl + 'action=load_tags', function (http, data)
 	{
-		document.getElementById('tag_div').innerHTML = http.responseText;
+		$('#tag_div').html(data);
 	});
 	return false;
 }
 
 function LoadTag (iId)
 {
-	GETAsyncRequest(sUrl + 'action=load_tag&id=' + iId, function (http)
+	GETAsyncRequest(sUrl + 'action=load_tag&id=' + iId, function (http, data)
 	{
-		document.getElementById('tag_div').innerHTML = http.responseText;
+		$('#tag_div').html(data);
 	});
 	return false;
 }
 
 function SaveTag ()
 {
-	if (document.forms['tagform'].elements['tag[name]'].value == '')
+	var frm = document.forms['tagform'];
+	if (frm.elements['tag[name]'].value == '')
 	{
 		PopupMessages.showUnique(s2_lang.empty_tag, 'tag_without_name');
 		return false;
 	}
 
-	POSTAsyncRequest(sUrl + 'action=save_tag', $(document.forms['tagform']).serialize(), function (http, data)
+	POSTAsyncRequest(sUrl + 'action=save_tag', $(frm).serialize(), function (http, data)
 	{
 		$('#tag_div').html(data);
 	});
@@ -1492,9 +1477,9 @@ function DeleteTag (iId, sName)
 	if (!confirm(str_replace('%s', sName, s2_lang.delete_tag)))
 		return false;
 
-	GETAsyncRequest(sUrl + 'action=delete_tag&id=' + iId, function (http)
+	GETAsyncRequest(sUrl + 'action=delete_tag&id=' + iId, function (http, data)
 	{
-		document.getElementById('tag_div').innerHTML = http.responseText;
+		$('#tag_div').html(data);
 	});
 	return false;
 }
@@ -1609,14 +1594,14 @@ function OnSwitch (eTab)
 					if (try_num-- > 0 && window.frames['preview_frame'].document.body.scrollTop != iPreviewBodyScrollTop)
 						setTimeout(repeater, 30);
 				}
-			}
+			};
 			repeater();
 		}
 	}
 	else if (sType == 'edit_tab')
 	{
-		if (document.artform && document.artform['page[text]'] && iEditorScrollTop)
-			document.artform['page[text]'].scrollTop = iEditorScrollTop;
+		if (document.forms['artform'] && document.forms['artform'].elements['page[text]'] && iEditorScrollTop)
+			document.forms['artform'].elements['page[text]'].scrollTop = iEditorScrollTop;
 	}
 	else if (sType == 'pict_tab')
 	{
