@@ -74,9 +74,6 @@ $(function ()
 		// Ctrl + S
 		if (e.ctrlKey && ch == 's')
 		{
-			e.preventDefault();
-			e.stopPropagation();
-
 			if (document.activeElement && document.activeElement.form && document.activeElement.form.onsubmit)
 				document.activeElement.form.onsubmit();
 
@@ -84,11 +81,7 @@ $(function ()
 		}
 		else if (e.ctrlKey && tab_ids[ch])
 		{
-			e.preventDefault();
-			e.stopPropagation();
-
 			selectTabN(ch);
-
 			return false;
 		}
 	});
