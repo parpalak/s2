@@ -17,11 +17,11 @@ if(typeof deconcept=="undefined"){var deconcept=new Object();}if(typeof deconcep
  * @package s2_counter
  */
 
-var s2_counter_draw = (function ()
+$(function ()
 {
 	var hits, rss;
 
-	return function ()
+	$(document).on('stat_tab_loaded.s2', function ()
 	{
 		if (!hits)
 		{
@@ -45,14 +45,12 @@ var s2_counter_draw = (function ()
 			rss.addParam("wmode", "opaque");
 			settings_file = "../_extensions/s2_counter/rss.xml?" + Math.random();
 
-			var result = Hooks.run('fn_s2_counter_draw_filter_rss', settings_file);
+			result = Hooks.run('fn_s2_counter_draw_filter_rss', settings_file);
 			if (result)
 				settings_file = result;
 
 			rss.addVariable("settings_file", encodeURIComponent(settings_file));
 		}
 		rss.write("s2_counter_rss");
-	}
-}());
-
-Hooks.add('stat_tab_loaded', s2_counter_draw);
+	});
+});
