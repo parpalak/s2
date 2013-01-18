@@ -15,14 +15,14 @@
 <extension for="S2" engine="1.0">
 	<id>s2_counter</id>
 	<title>Counter</title>
-	<version>1.0b2</version>
+	<version>1.0b3</version>
 	<description>A simple hits/hosts and RSS subscribers counter.</description>
 	<author>Roman Parpalak</author>
 
 	<adminaffected>1</adminaffected>
 
-	<minversion>1.0b3</minversion>
-	<maxtestedon>1.0b3</maxtestedon>
+	<minversion>1.0b4</minversion>
+	<maxtestedon>1.0b4</maxtestedon>
 
 	<note type="install">Do not forget to set write permissions (e. g. 777) to folder “_extensions/s2_counter/data/”.</note>
 
