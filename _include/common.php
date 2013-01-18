@@ -2,7 +2,7 @@
 /**
  * Loads common data and performs various functions necessary for the site to work properly.
  *
- * @copyright (C) 2009-2012 Roman Parpalak, based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2013 Roman Parpalak, based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */

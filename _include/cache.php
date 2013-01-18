@@ -4,7 +4,7 @@
  *
  * This file contains all of the functions used to generate the cache files used by the site.
  *
- * @copyright (C) 2009-2012 Roman Parpalak, based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2013 Roman Parpalak, based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */

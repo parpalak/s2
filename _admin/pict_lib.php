@@ -2,7 +2,7 @@
 /**
  * Some functions maintaining picture displaying and management
  *
- * @copyright (C) 2007-2012 Roman Parpalak
+ * @copyright (C) 2007-2013 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
