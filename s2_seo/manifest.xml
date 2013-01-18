@@ -41,7 +41,7 @@ $query['SELECT'] .= ', s2_seo_title';
 		]]></hook>
 
 		<hook id="fn_output_article_form_pre_text"><![CDATA[
-$padding += 1.7;
+$padding += 1.91667;
 		]]></hook>
 
 		<hook id="fn_output_article_form_pre_mkeys"><![CDATA[
