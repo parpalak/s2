@@ -14,7 +14,7 @@ if (!defined('S2_ROOT'))
 require S2_ROOT.'_include/functions.php';
 require S2_ROOT.'_include/utf8/utf8.php';
 
-define('S2_VERSION', '1.0b3');
+define('S2_VERSION', '1.0b4');
 
 // Uncomment these lines for debug
 //define('S2_DEBUG', 1);
