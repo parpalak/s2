@@ -2,7 +2,7 @@
 /**
  * Displays image with hits/hosts info
  *
- * @copyright (C) 2007-2012 Roman Parpalak
+ * @copyright (C) 2007-2013 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_counter
  */
