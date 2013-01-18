@@ -13,14 +13,14 @@
 <extension for="S2" engine="1.0">
 	<id>s2_highlight</id>
 	<title>Editor Highlighting</title>
-	<version>1.0b</version>
+	<version>1.0b1</version>
 	<description>Highlights HTML code in the editor.</description>
 	<author>Roman Parpalak</author>
 
 	<adminaffected>1</adminaffected>
 
-	<minversion>1.0b3</minversion>
-	<maxtestedon>1.0b3</maxtestedon>
+	<minversion>1.0b4</minversion>
+	<maxtestedon>1.0b4</maxtestedon>
 
 	<hooks>
 		<hook id="ai_head_end"><![CDATA[
