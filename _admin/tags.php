@@ -140,7 +140,7 @@ function s2_output_tag_form ($tag, $modify_time)
 		$tag_names[$row['id']] = $row['name'];
 		$info = $row['art_count'];
 		($hook = s2_hook('fn_output_tag_form_loop_get_tags_qr')) ? eval($hook) : null;
-		echo '<a href="#" '.($row['id'] == $tag['id'] ? 'class="cur_link" ' : '').'onclick="return LoadTag(\''.$row['id'].'\');">'.s2_htmlencode($row['name']).' ('.$info.')</a><br />'."\n";
+		echo '<a href="#" class="js'.($row['id'] == $tag['id'] ? ' cur_link' : '').'" onclick="return LoadTag(\''.$row['id'].'\');">'.s2_htmlencode($row['name']).' ('.$info.')</a><br />'."\n";
 	}
 
 ?>

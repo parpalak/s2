@@ -1,7 +1,7 @@
 /* Fixing the box model for some blocks */
 .tabsheets,
 .tabsheets dd,
-.tabsheets dd .reducer,
+.tabsheets .reducer,
 .r-float,
 .l-float,
 .height_wrap,
@@ -20,7 +20,7 @@
 
 .toolbar:after,
 .r-float label:after,
-.loginform  label:after {
+.loginform label:after {
 	content: ".";
 	display: block;
 	clear: both;
@@ -35,7 +35,7 @@ html,
 .tabsheets,
 .r-float,
 .l-float,
-.tabsheets dd .no-scroll {
+.tabsheets .reducer.no-scroll {
 	overflow: hidden;
 	}
 
@@ -72,7 +72,7 @@ body {
 
 #logout {
 	text-align: center;
-	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	font: 0.917em/13px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 	position: absolute;
 	z-index: 1;
 	top: 0;
@@ -82,7 +82,6 @@ body {
 	color: #000;
 	border-left: 1px solid #ccc;
 	height: 28px;
-	line-height: 13px;
 	}
 
 #loading {
@@ -113,16 +112,12 @@ a > img {
 	}
 
 .p-js {
-	margin:  0 0 1em;
+	margin: 0 0 1em;
 	}
-	.p-js > a {
+	.p-js > .js {
 		margin-right: 12px;
 		}
 
-.tags_list a,
-.tags_list a:active,
-.tags_list a:hover,
-.tags_list a:visited,
 .js,
 .js:active,
 .js:hover,
@@ -144,7 +139,7 @@ a:hover { outline: none; }
 a.cur_link{
 	font-weight: bold;
 	}
-	a.js.cur_link {
+	.p-js a.js.cur_link {
 		-moz-border-radius: 8px;
 		-webkit-border-radius: 8px;
 		border-radius: 8px;
@@ -298,8 +293,7 @@ body > .tabsheets {
 
 .tabsheets > dt {
 	float: left;
-	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
-	line-height: 13px;
+	font: 0.917em/13px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 	height: 12px;
 	padding: 3px 5px 6px 3px;
 	cursor: default;
@@ -365,7 +359,7 @@ body > .tabsheets {
 	padding: 29px 0 0;
 	}
 
-.tabsheets > dd .reducer {
+.tabsheets .reducer {
 	position: relative;
 	z-index: 3;
 	border-top: 1px solid #fdfdfd;
@@ -439,7 +433,7 @@ body > .tabsheets {
 		margin-left: 2em;
 		display: inline;
 		}
-	#context_buttons img {
+	#context_buttons > img {
 		width: 16px;
 		height: 16px;
 		margin-left: 4px;
@@ -449,9 +443,9 @@ body > .tabsheets {
 		border: none;
 		}
 		img#context_edit { background-position: -32px -32px;}
-		img#context_add { background-position: -32px 0px;}
+		img#context_add { background-position: -32px 0;}
 			.Search #context_add { display: none; }
-		img#context_delete { background-position: 0px -32px;}
+		img#context_delete { background-position: 0 -32px;}
 		ul #context_delete,
 			.Search #context_delete { display: none;}
 			ul ul #context_delete { display: inline-block;}
@@ -459,10 +453,10 @@ body > .tabsheets {
 			background: url(../i/icons.png) -16px -48px;
 			display: none;
 			}
-			[data-comments] > a #context_comments {
+			[data-comments] > .jstree-clicked #context_comments {
 				display: inline-block;
 				}
-		#context_buttons img:hover {
+		#context_buttons > img:hover {
 			background-color: #fff;
 			}
 
@@ -704,7 +698,7 @@ textarea,
 	}
 
 .bitbtn {
-	font: 0.917em/1.2 "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	font: 0.917em/13px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 	padding: 1px 2px 2px 20px;
 	height: 22px;
 	min-width: 120px;
@@ -714,22 +708,22 @@ textarea,
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	-moz-box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
-	-webkit-box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
-	box-shadow: inset 0px 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
+	-moz-box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
+	-webkit-box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
+	box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
 	}
 	.bitbtn:hover {
 		background-color: #eaedf2;
 		border: 1px solid #778;
-		-moz-box-shadow: inset 0px 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
-		-webkit-box-shadow: inset 0px 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
-		box-shadow: inset 0px 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
+		-moz-box-shadow: inset 0 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
+		-webkit-box-shadow: inset 0 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
+		box-shadow: inset 0 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
 		}
 	.bitbtn:active {
 		border-color: #555;
-		-moz-box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
-		-webkit-box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
-		box-shadow: inset 0px -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
+		-moz-box-shadow: inset 0 -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
+		-webkit-box-shadow: inset 0 -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
+		box-shadow: inset 0 -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
 		}
 	.bitbtn[disabled], .bitbtn[disabled]:hover, .bitbtn[disabled]:active {
 		-moz-box-shadow: none;
@@ -755,7 +749,7 @@ textarea,
 .toolbar {
 	padding-bottom: 5px;
 	}
-	.toolbar img {
+	.toolbar > img {
 		display: block;
 		float: left;
 		margin: 0;
@@ -772,13 +766,13 @@ textarea,
 		background-clip: padding-box;
 		vertical-align: top;
 		}
-		.toolbar img:hover,
-		.toolbar img.pressed {
+		.toolbar > img:hover,
+		.toolbar > img.pressed {
 			border-color: #fff #aaa #aaa #fff;
 			background-color: rgba(255,255,255,0.5);
 			}
-		.toolbar img:active:hover,
-		.toolbar img.pressed {
+		.toolbar > img:active:hover,
+		.toolbar > img.pressed {
 			border-color: #aaa #fff #fff #aaa;
 			}
 	.toolbar .separator {
@@ -834,8 +828,8 @@ textarea,
 
 fieldset {
 	border: 1px solid #ccc;
-	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
 	border-radius: 4px;
 	margin: 0 0 0.5em;
 	padding: 0.5em;
@@ -843,7 +837,7 @@ fieldset {
 legend {
 	font-weight: bold;
 	color: #556;
-	text-shadow: 0px 1px 0 #fff;
+	text-shadow: 0 1px 0 #fff;
 	}
 form center {
 	padding: 1em 0;
@@ -1171,7 +1165,7 @@ form center {
 	#list_tab, #admin-stat_tab {
 		margin-left: 0;
 		}
-	.tabsheets > dd .reducer {
+	.tabsheets .reducer {
 		padding: 0;
 		}
 	.toolbar img {
