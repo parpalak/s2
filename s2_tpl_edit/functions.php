@@ -76,7 +76,7 @@ function s2_tpl_edit_file_list ($template_filename)
 		else
 			$link = '<?php include S2_ROOT.\'/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'\'; ?>';
 
-		$return .= '<a href="#" '.($filename == $template_filename ? 'class="cur_link" ' : '').'draggable="true" data-copy="'.s2_htmlencode($link).'" onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
+		$return .= '<a href="#" class="js'.($filename == $template_filename ? ' cur_link' : '').'" draggable="true" data-copy="'.s2_htmlencode($link).'" onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
 	}
 
 	return $return;
