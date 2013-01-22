@@ -59,7 +59,7 @@ if ($login === false)
 	// We didn't find a session of a logged user
 	// Most likely the user has refreshed the login page
 	s2_setcookie($s2_cookie_name, '');
-	s2_setcookie($s2_cookie_name.'_c', '', 0, S2_PATH.'/');
+	s2_setcookie($s2_cookie_name.'_c', '', 0, S2_PATH.'/comment.php', false);
 
 	// We tell him nothing
 	echo s2_get_login_form();
