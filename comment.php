@@ -138,7 +138,7 @@ if (empty($text))
 if (strlen($text) > S2_MAX_COMMENT_BYTES)
 	$errors[] = sprintf($lang_comment_errors['long_text'], S2_MAX_COMMENT_BYTES);
 
-$email = $_POST[s2_field_name('email')];
+$email = trim($_POST[s2_field_name('email')]);
 if (!s2_is_valid_email($email))
 	$errors[] = $lang_comment_errors['email'];
 
@@ -243,11 +243,33 @@ $link = s2_abs_link($path.'/'.urlencode($row['url']));
 // Everything is ok, save and send the comment
 //
 
+// Detect if there is a user logged in
+$is_logged_in = false;
+if (isset($_COOKIE[$s2_cookie_name.'_c']))
+{
+	$query = array(
+		'SELECT'	=> 'count(*)',
+		'FROM'		=> 'users AS u',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 'users_online AS o',
+				'ON'			=> 'o.login = u.login'
+			),
+		),
+		'WHERE'		=> 'u.email = \''.$s2_db->escape($email).'\' AND o.comment_cookie = \''.$s2_db->escape($_COOKIE[$s2_cookie_name.'_c']).'\''
+	);
+	($hook = s2_hook('cmnt_pre_get_logged_in_qr')) ? eval($hook) : null;
+	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+	$is_logged_in = $s2_db->result($result);
+}
+
+$is_moderate = $is_logged_in ? 0 : S2_PREMODERATION;
 // Save the comment
 $query = array(
 	'INSERT'	=> 'article_id, time, ip, nick, email, show_email, subscribed, sent, shown, good, text',
 	'INTO'		=> 'art_comments',
-	'VALUES'	=> $id.', '.time().', \''.$s2_db->escape($_SERVER['REMOTE_ADDR']).'\', \''.$s2_db->escape($name).'\', \''.$s2_db->escape($email).'\', '.$show_email.', '.$subscribed.', '.(1 - S2_PREMODERATION).', '.(1 - S2_PREMODERATION).', 0, \''.$s2_db->escape($text).'\''
+	'VALUES'	=> $id.', '.time().', \''.$s2_db->escape($_SERVER['REMOTE_ADDR']).'\', \''.$s2_db->escape($name).'\', \''.$s2_db->escape($email).'\', '.$show_email.', '.$subscribed.', '.(1 - $is_moderate).', '.(1 - $is_moderate).', 0, \''.$s2_db->escape($text).'\''
 );
 ($hook = s2_hook('cmnt_pre_save_comment_qr')) ? eval($hook) : null;
 $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -255,7 +277,7 @@ $s2_db->query_build($query) or error(__FILE__, __LINE__);
 $message = s2_bbcode_to_mail($text);
 
 // Sending the comment to subscribers
-if (!S2_PREMODERATION)
+if (!$is_moderate)
 {
 	$query = array(
 		'SELECT'	=> 'id, nick, email, ip, time',
@@ -281,8 +303,10 @@ if (!S2_PREMODERATION)
 $query = array(
 	'SELECT'	=> 'login, email',
 	'FROM'		=> 'users',
-	'WHERE'		=> 'hide_comments = 1 and email <> \'\''
+	'WHERE'		=> 'hide_comments = 1 AND email <> \'\''
 );
+if ($is_logged_in)
+	$query['WHERE'] .= ' AND email <> \''.$s2_db->escape($email).'\'';
 ($hook = s2_hook('cmnt_pre_get_moderators_qr')) ? eval($hook) : null;
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 while ($mrow = $s2_db->fetch_assoc($result))
@@ -290,7 +314,7 @@ while ($mrow = $s2_db->fetch_assoc($result))
 
 setcookie('comment_form_sent', 1);
 
-if (!S2_PREMODERATION)
+if (!$is_moderate)
 {
 	// Redirect to the last comment
 	$query = array(

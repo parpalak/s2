@@ -121,6 +121,11 @@ if (S2_DB_REVISION < 12)
 	define('S2_ADMIN_CUT', '0');
 }
 
+if (S2_DB_REVISION < 13)
+{
+	$s2_db->add_field('users_online', 'comment_cookie', 'VARCHAR(32)', false, '', 'ua');
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',

@@ -25,12 +25,17 @@ define('S2_COOKIE_EXPIRE', 14*86400 > S2_EXPIRE_LOGIN_TIMEOUT ? 14*86400 : S2_EX
 //
 // Custom cookie sender
 //
-function s2_setcookie($name, $value, $expire = 0)
+function s2_setcookie($name, $value, $expire = 0, $path = null, $secure = null)
 {
+	if ($path === null)
+		$path = S2_PATH.'/_admin/';
+	if ($secure === null)
+		$secure = defined('S2_FORCE_ADMIN_HTTPS');
+
 	if (version_compare(PHP_VERSION, '5.2.0', '>='))
-		setcookie($name, $value, $expire, S2_PATH.'/_admin/', null, defined('S2_FORCE_ADMIN_HTTPS'), true);
+		setcookie($name, $value, $expire, $path, null, $secure, true);
 	else
-		setcookie($name, $value, $expire, S2_PATH.'/_admin/; HttpOnly', null, defined('S2_FORCE_ADMIN_HTTPS'));
+		setcookie($name, $value, $expire, $path.'; HttpOnly', null, $secure);
 }
 
 //
@@ -199,6 +204,7 @@ function s2_authenticate_user ($challenge)
 
 		header('X-S2-Status: '.$status);
 		s2_setcookie($s2_cookie_name, '');
+		s2_setcookie($s2_cookie_name.'_c', '', 0, S2_PATH.'/comment.php', false);
 		echo $lang_admin[$status.' session'];
 
 		s2_get_ajax_login_form();
@@ -262,18 +268,20 @@ function s2_login_success ($login, $challenge)
 	global $s2_db, $s2_cookie_name;
 
 	$time = time();
+	$comment_cookie = md5(uniqid('comment_cookie').$time);
 
 	// Link the challenge to the user
 	$query = array(
 		'UPDATE'	=> 'users_online',
-		'SET'		=> 'login = \''.$s2_db->escape($login).'\', time = '.$time.', ua = \''.$s2_db->escape($_SERVER['HTTP_USER_AGENT']).'\', ip = \''.$s2_db->escape($_SERVER['REMOTE_ADDR']).'\'',
+		'SET'		=> 'login = \''.$s2_db->escape($login).'\', time = '.$time.', ua = \''.$s2_db->escape($_SERVER['HTTP_USER_AGENT']).'\', ip = \''.$s2_db->escape($_SERVER['REMOTE_ADDR']).'\', comment_cookie = \''.$s2_db->escape($comment_cookie).'\'',
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\''
 	);
 
 	($hook = s2_hook('fn_login_success_pre_update_challenge_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	s2_setcookie($s2_cookie_name, $challenge, ($time + S2_COOKIE_EXPIRE), S2_PATH.'/_admin/; HttpOnly', null, defined('S2_FORCE_ADMIN_HTTPS'));
+	s2_setcookie($s2_cookie_name, $challenge, ($time + S2_COOKIE_EXPIRE));
+	s2_setcookie($s2_cookie_name.'_c', $comment_cookie, ($time + S2_COOKIE_EXPIRE), S2_PATH.'/comment.php', false);
 }
 
 function s2_ajax_login($login, $challenge, $key)
@@ -314,6 +322,7 @@ function s2_logout ($challenge)
 
 	s2_delete_challenge($challenge);
 	s2_setcookie($s2_cookie_name, '');
+	s2_setcookie($s2_cookie_name.'_c', '', 0, S2_PATH.'/comment.php', false);
 }
 
 //

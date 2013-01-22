@@ -97,7 +97,7 @@ if (!defined('S2_CONFIG_LOADED'))
 	s2_generate_config_cache(true);
 }
 
-define('S2_DB_LAST_REVISION', 12);
+define('S2_DB_LAST_REVISION', 13);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION)
 	include S2_ROOT.'_admin/db_update.php';
 
