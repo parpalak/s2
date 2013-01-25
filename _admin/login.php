@@ -284,7 +284,7 @@ function s2_login_success ($login, $challenge)
 	s2_setcookie($s2_cookie_name.'_c', $comment_cookie, ($time + S2_COOKIE_EXPIRE), S2_PATH.'/comment.php', false);
 }
 
-function s2_ajax_login($login, $challenge, $key)
+function s2_ajax_login ($login, $challenge, $key)
 {
 	global $lang_admin;
 
@@ -307,7 +307,7 @@ function s2_ajax_login($login, $challenge, $key)
 	($hook = s2_hook('fn_ajax_login_pre_password_check')) ? eval($hook) : null;
 
 	// Verifying password
-	if ($key != md5($pass.';-)'.$salt))
+	if ($key !== md5($pass.';-)'.$salt))
 		return $lang_admin['Error login page'];
 
 	// Everything is Ok.

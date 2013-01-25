@@ -50,9 +50,9 @@ if ($action == 'login')
 	{
 		// We have POST data. Process it! Handle errors if they are.
 
-		$login = isset($_POST['login']) ? $_POST['login'] : '';
-		$challenge = isset($_POST['challenge']) ? $_POST['challenge'] : '';
-		$key = isset($_POST['key']) ? $_POST['key'] : '';
+		$login = isset($_POST['login']) ? (string) $_POST['login'] : '';
+		$challenge = isset($_POST['challenge']) ? (string) $_POST['challenge'] : '';
+		$key = isset($_POST['key']) ? (string) $_POST['key'] : '';
 
 		echo s2_ajax_login($login, $challenge, $key);
 	}
