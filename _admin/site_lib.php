@@ -364,7 +364,7 @@ function s2_get_tag_ids ($tag_str)
 	}
 
 	// Case-independent
-	array_unique($fake_tags);
+	$fake_tags = array_unique($fake_tags);
 
 	if (empty($fake_tags))
 		return array();
