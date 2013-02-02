@@ -70,9 +70,9 @@ function s2_tpl_edit_file_list ($template_filename)
 	foreach ($templates as $filename => $name)
 	{
 		if (substr($filename, -3) == '.js')
-			$link = '<script type="text/javascript" src="<?php echo S2_BASE_URL; ?>/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'"></script>';
+			$link = '<script type="text/javascript" src="<?php echo S2_PATH; ?>/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'"></script>';
 		elseif (substr($filename, -4) == '.css')
-			$link = '<link rel="stylesheet" type="text/css" href="<?php echo S2_BASE_URL; ?>/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'" />';
+			$link = '<link rel="stylesheet" type="text/css" href="<?php echo S2_PATH; ?>/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'" />';
 		else
 			$link = '<?php include S2_ROOT.\'/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'\'; ?>';
 
