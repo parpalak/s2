@@ -110,7 +110,7 @@
 
 	function initNavigate ()
 	{
-		if (!document.getElementsByTagName || !document.getElementById)
+		if (!document.getElementsByTagName)
 			return;
 
 		var e, i, ae = document.getElementsByTagName('LINK');
