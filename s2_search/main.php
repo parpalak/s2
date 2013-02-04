@@ -72,6 +72,51 @@ if (defined('DEBUG')) $start_time = microtime(true);
 	$page = array();
 
 	$item_num = count($weights);
+	$not_found = !$item_num;
+
+	($hook = s2_hook('s2_search_pre_tags')) ? eval($hook) : null;
+
+	if (trim($s2_search_query))
+	{
+		$s2_search_sql = array(
+			'SELECT'	=> 'count(*)',
+			'FROM'		=> 'article_tag AS at',
+			'JOINS'		=> array(
+				array(
+					'INNER JOIN'	=> 'articles AS a',
+					'ON'			=> 'a.id = at.article_id'
+				)
+			),
+			'WHERE'		=> 'at.tag_id = t.tag_id AND a.published = 1',
+			'LIMIT'		=> '1'
+		);
+		($hook = s2_hook('s2_search_pre_find_tags_sub_qr')) ? eval($hook) : null;
+		$s2_search_sub_sql = $s2_db->query_build($s2_search_sql, true) or error(__FILE__, __LINE__);
+
+		$s2_search_sql = array(
+			'SELECT'	=> 'tag_id, name, url, ('.$s2_search_sub_sql.') AS used',
+			'FROM'		=> 'tags AS t',
+			'WHERE'		=> 'name LIKE \''.$s2_db->escape(trim($s2_search_query)).'%\'',
+		);
+		($hook = s2_hook('s2_search_pre_find_tags_qr')) ? eval($hook) : null;
+		$s2_search_result = $s2_db->query_build($s2_search_sql) or error(__FILE__, __LINE__);
+
+		$s2_search_found_tags = array();
+		while ($s2_search_row = $s2_db->fetch_assoc($s2_search_result))
+		{
+			($hook = s2_hook('s2_search_find_tags_get_res')) ? eval($hook) : null;
+
+			if ($s2_search_row['used'])
+				$s2_search_found_tags[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($s2_search_row['url']).'/').'">'.$s2_search_row['name'].'</a>';
+		}
+
+		if (!empty($s2_search_found_tags))
+			echo '<p class="s2_search_not_found">'.sprintf($lang_s2_search['Found tags'], implode(', ', $s2_search_found_tags)).'</p>';
+
+		($hook = s2_hook('s2_search_find_tags_end')) ? eval($hook) : null;
+	}
+
+	($hook = s2_hook('s2_search_pre_results')) ? eval($hook) : null;
 
 	if ($item_num)
 	{
@@ -124,8 +169,9 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 		foreach ($link_nav as $rel => $href)
 			$page['link_navigation'][$rel] = $href;
 	}
-	else
-		echo '<p>'.$lang_s2_search['Not found'].'</p>';
+
+	if ($not_found)
+		echo '<p class="s2_search_not_found">'.$lang_s2_search['Not found'].'</p>';
 
 }
 
