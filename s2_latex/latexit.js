@@ -3,7 +3,7 @@
  *
  * Inspired by http://www.codecogs.com/latex/htmlequations.php
  *
- * @copyright (C) 2011-2012 Roman Parpalak
+ * @copyright (C) 2011-2013 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
