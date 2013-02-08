@@ -6,11 +6,11 @@
  * @package S2
  */
 
-function str_replace (substr, newsubstr, str)
+function str_replace (from, to, str)
 {
-	newsubstr = newsubstr.replace(/\$/g, '$$$$');
-	while (str.indexOf(substr) >= 0)
-		str = str.replace(substr, newsubstr);
+	to = to.replace(/\$/g, '$$$$');
+	while (str.indexOf(from) >= 0)
+		str = str.replace(from, to);
 	return str;
 }
 
@@ -18,12 +18,12 @@ function hex_md5 (string)
 {
 	// Based on http://www.webtoolkit.info/javascript-md5.html
 
-	function RotateLeft(lValue, iShiftBits)
+	function rot_l(lValue, iShiftBits)
 	{
 		return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
 	}
- 
-	function AddUnsigned(lX, lY)
+
+	function add_usgn(lX, lY)
 	{
 		var lX8 = (lX & 0x80000000),
 		lY8 = (lY & 0x80000000),
@@ -39,84 +39,84 @@ function hex_md5 (string)
 
 		return (lResult ^ lX8 ^ lY8);
 	}
- 
+
 	function F(x, y, z) { return (x & y) | ((~x) & z); }
 	function G(x, y, z) { return (x & z) | (y & (~z)); }
 	function H(x, y, z) { return (x ^ y ^ z); }
 	function I(x, y, z) { return (y ^ (x | (~z))); }
- 
+
 	function FF(a, b, c, d, x, s, ac)
 	{
-		a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
-		return AddUnsigned(RotateLeft(a, s), b);
+		a = add_usgn(a, add_usgn(add_usgn(F(b, c, d), x), ac));
+		return add_usgn(rot_l(a, s), b);
 	}
- 
+
 	function GG(a,b,c,d,x,s,ac)
 	{
-		a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
-		return AddUnsigned(RotateLeft(a, s), b);
+		a = add_usgn(a, add_usgn(add_usgn(G(b, c, d), x), ac));
+		return add_usgn(rot_l(a, s), b);
 	}
- 
+
 	function HH(a,b,c,d,x,s,ac)
 	{
-		a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
-		return AddUnsigned(RotateLeft(a, s), b);
+		a = add_usgn(a, add_usgn(add_usgn(H(b, c, d), x), ac));
+		return add_usgn(rot_l(a, s), b);
 	}
- 
+
 	function II(a,b,c,d,x,s,ac)
 	{
-		a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
-		return AddUnsigned(RotateLeft(a, s), b);
+		a = add_usgn(a, add_usgn(add_usgn(I(b, c, d), x), ac));
+		return add_usgn(rot_l(a, s), b);
 	}
- 
-	function ConvertToWordArray(string)
+
+	function ConvertToWordArray (s)
 	{
-		var lMessageLength = string.length,
-			lNumberOfWords_temp1 = lMessageLength + 8,
-			lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64))/64,
-			lNumberOfWords = (lNumberOfWords_temp2 + 1)*16,
-			lWordArray = new Array(lNumberOfWords - 1),
-			lBytePosition = 0,
-			lByteCount = 0;
-		while (lByteCount < lMessageLength)
+		var lMsgLen = s.length,
+			lNumWords_tmp1 = lMsgLen + 8,
+			lNumWords_tmp2 = (lNumWords_tmp1 - (lNumWords_tmp1 % 64))/64,
+			lNumWords = (lNumWords_tmp2 + 1)*16,
+			lWrdArr = new Array(lNumWords - 1),
+			lBytePos = 0,
+			lByteCnt = 0;
+		while (lByteCnt < lMsgLen)
 		{
-			var lWordCount = (lByteCount-(lByteCount % 4))/4;
-			lBytePosition = (lByteCount % 4)*8;
-			lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount)<<lBytePosition));
-			lByteCount++;
+			var lWordCount = (lByteCnt-(lByteCnt % 4))/4;
+			lBytePos = (lByteCnt % 4)*8;
+			lWrdArr[lWordCount] = (lWrdArr[lWordCount] | (s.charCodeAt(lByteCnt)<<lBytePos));
+			lByteCnt++;
 		}
-		lWordCount = (lByteCount-(lByteCount % 4))/4;
-		lBytePosition = (lByteCount % 4)*8;
-		lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80<<lBytePosition);
-		lWordArray[lNumberOfWords-2] = lMessageLength<<3;
-		lWordArray[lNumberOfWords-1] = lMessageLength>>>29;
-		return lWordArray;
+		lWordCount = (lByteCnt-(lByteCnt % 4))/4;
+		lBytePos = (lByteCnt % 4)*8;
+		lWrdArr[lWordCount] = lWrdArr[lWordCount] | (0x80<<lBytePos);
+		lWrdArr[lNumWords-2] = lMsgLen<<3;
+		lWrdArr[lNumWords-1] = lMsgLen>>>29;
+		return lWrdArr;
 	}
- 
-	function WordToHex(lValue)
+
+	function word2hex(lValue)
 	{
-		var WordToHexValue = "", WordToHexValue_temp = "", lByte, lCount;
+		var val = "", tmp = "", lByte, lCount;
 		for (lCount = 0; lCount <= 3; lCount++)
 		{
 			lByte = (lValue>>>(lCount*8)) & 255;
-			WordToHexValue_temp = "0" + lByte.toString(16);
-			WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2,2);
+			tmp = "0" + lByte.toString(16);
+			val = val + tmp.substr(tmp.length - 2,2);
 		}
-		return WordToHexValue;
+		return val;
 	}
- 
+
 	var k, AA, BB, CC, DD, a, b, c, d,
 		S11=7, S12=12, S13=17, S14=22,
 		S21=5, S22=9 , S23=14, S24=20,
 		S31=4, S32=11, S33=16, S34=23,
 		S41=6, S42=10, S43=15, S44=21;
- 
+
 	string = unescape(encodeURIComponent(string));
- 
+
 	var x = ConvertToWordArray(string);
- 
+
 	a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
- 
+
 	for (k=0; k < x.length; k += 16)
 	{
 		AA=a; BB=b; CC=c; DD=d;
@@ -184,54 +184,48 @@ function hex_md5 (string)
 		d=II(d,a,b,c,x[k+11],S42,0xBD3AF235);
 		c=II(c,d,a,b,x[k+2], S43,0x2AD7D2BB);
 		b=II(b,c,d,a,x[k+9], S44,0xEB86D391);
-		a=AddUnsigned(a,AA);
-		b=AddUnsigned(b,BB);
-		c=AddUnsigned(c,CC);
-		d=AddUnsigned(d,DD);
+		a=add_usgn(a,AA);
+		b=add_usgn(b,BB);
+		c=add_usgn(c,CC);
+		d=add_usgn(d,DD);
 	}
- 
-	var temp = WordToHex(a) + WordToHex(b) + WordToHex(c) + WordToHex(d);
- 
-	return temp.toLowerCase();
+
+	return (word2hex(a) + word2hex(b) + word2hex(c) + word2hex(d)).toLowerCase();
 }
 
 var SetBackground = (function ()
 {
-	var back_img = '', color = '#eee',
-		_size = 150;
+	var _size = 150, maxAlpha = 5.5, maxLine = 4;
 
-	function Noise ()
+	function noise ()
 	{
-		if (!!!document.createElement('canvas').getContext)
-			return;
+		if (!document.createElement('canvas').getContext)
+			return '';
 
 		var canvas = document.createElement('canvas');
 		canvas.width = canvas.height = _size;
 
 		var ctx = canvas.getContext('2d'),
-			imgData = ctx.createImageData(canvas.width, canvas.height),
-			maxAlpha = 5.5,
-			maxLine = 4;
+			img = ctx.createImageData(_size, _size),
+			repeat_num = 0, alpha = 1, x, y, idx;
 
-		var repeat_num = 0, alpha = 1;
- 		for (var y = canvas.height; y--; )
-		for (var x = canvas.width, index = (x + y * imgData.width) * 4; x--; )
+		for (y = _size; y--; )
+		for (x = _size, idx = (x + y * _size) * 4; x--; )
 		{
 			if (Math.random() * maxLine < repeat_num++)
 				alpha =  (repeat_num = 0) + ~~(Math.random() * maxAlpha);
-			index -= 4;
-			imgData.data[index] = imgData.data[index + 1] = imgData.data[index + 2] = 0;
-			imgData.data[index + 3] = alpha;
+			idx -= 4;
+			img.data[idx] = img.data[idx + 1] = img.data[idx + 2] = 0;
+			img.data[idx + 3] = alpha;
 		}
 
-		ctx.putImageData(imgData, 0, 0);
+		ctx.putImageData(img, 0, 0);
 
-		back_img = 'url(' + canvas.toDataURL('image/png') + ')';
+		return 'url(' + canvas.toDataURL('image/png') + ')';
 	}
 
-	Noise();
-
-	var head = document.getElementsByTagName('head')[0],
+	var back_img = noise(),
+		head = document.getElementsByTagName('head')[0],
 		style = document.createElement('style');
 
 	style.type = 'text/css';
@@ -239,8 +233,7 @@ var SetBackground = (function ()
 
 	return function (c)
 	{
-		color = c;
-		var css_rule = 'body {background: ' + back_img + ' ' + color + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;} #tag_names li.cur_tag, .tabsheets > dt.active {background-color: ' + color + ';}';
+		var css_rule = 'body {background: ' + back_img + ' ' + c + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;} #tag_names li.cur_tag, .tabsheets > dt.active {background-color: ' + c + ';}';
 
 		if (style.styleSheet)
 			style.styleSheet.cssText = css_rule;
