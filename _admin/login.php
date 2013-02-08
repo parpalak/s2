@@ -413,7 +413,7 @@ function s2_get_login_form ($message = '')
 <title><?php echo $lang_admin['Admin panel'], S2_SITE_NAME ? ' - '.S2_SITE_NAME : ''; ?></title>
 <link rel="stylesheet" href="css/style.css">
 <!--[if lt IE 9]>
-<script src="js/jquery-1.9.0.min.js"></script>
+<script src="js/jquery-1.9.1.min.js"></script>
 <![endif]-->
 <!--[if gte IE 9]><!-->
 <script src="js/jquery.js"></script>
