@@ -99,11 +99,6 @@ $replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
 
 $replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.s2_link('/rss.xml').'" />';
 
-// Including the style
-ob_start();
-include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
-$replace['<!-- s2_styles -->'] = ob_get_clean();
-
 // Content
 $replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
 $replace['<!-- s2_navigation_link -->'] = '';
@@ -151,6 +146,11 @@ if (strpos($template, '<!-- s2_tags_list -->') !== false)
 
 // Footer
 $replace['<!-- s2_copyright -->'] = s2_build_copyright($request_uri);
+
+// Including the style
+ob_start();
+include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
+$replace['<!-- s2_styles -->'] = ob_get_clean();
 
 ($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
 
