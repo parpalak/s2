@@ -15,12 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_latex</id>
 	<title>LaTeX</title>
-	<version>1.0b3</version>
+	<version>1.0b4</version>
 	<description>Allows to write LaTeX formulae.</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0b</minversion>
-	<maxtestedon>1.0b3</maxtestedon>
+	<maxtestedon>1.0b4</maxtestedon>
 
 	<note type="install">Do not forget to set write permissions (e. g. 777) to folder “_extensions/s2_latex/cache/”.</note>
 
