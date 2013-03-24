@@ -124,7 +124,7 @@ function s2_spoiler_flip (eItem)
 	head.appendChild(style);
 })();
 </script>
-<?
+<?php
 		$script = ob_get_clean();
 		$contents = str_replace('</body>', $script.'</body>', $contents);
 	}
