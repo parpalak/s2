@@ -415,7 +415,7 @@ function s2_output_article_form ($id)
 		</div>
 	</div>
 </form>
-<?
+<?php
 
 	($hook = s2_hook('fn_output_article_form_end')) ? eval($hook) : null;
 
