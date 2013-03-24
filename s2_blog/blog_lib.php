@@ -801,6 +801,6 @@ function s2_blog_edit_post_form ($id)
 		</div>
 	</div>
 </form>
-<?
+<?php
 	return array('form' => ob_get_clean(), 'tags' => $all_tags);
 }
