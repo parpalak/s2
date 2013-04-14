@@ -49,7 +49,7 @@ function s2_attachment_items ($id)
 
 function s2_attachment_add_col ($id)
 {
-	global $lang_s2_attachment, $lang_pictures;
+	global $lang_pictures;
 
 ?>
 	<div class="r-float" id="s2_attachment_col">
