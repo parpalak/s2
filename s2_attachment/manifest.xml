@@ -19,8 +19,10 @@
 	<description>Attaches files to every page.</description>
 	<author>Roman Parpalak</author>
 
+	<adminaffected>1</adminaffected>
+
 	<minversion>1.0b3</minversion>
-	<maxtestedon>1.0b3</maxtestedon>
+	<maxtestedon>1.0b4</maxtestedon>
 	<note type="uninstall" timing="pre">Warning! All the attached files will be deleted during the uninstall process. It is strongly recommended you to disable 'Attachments' extension instead or to upgrade it without uninstalling.</note>
 
 	<install><![CDATA[
