@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Adds news system
+ *
+ * @copyright (C) 2010-2013 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_section_news
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_section_news</id>
+	<title>Section News</title>
+	<version>1.0a1</version>
+	<description>Adds placeholder "s2_section_news" and puts there excerpts from a section with the "news.php" template.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0a1</minversion>
+	<maxtestedon>1.0b4</maxtestedon>
+
+	<install><![CDATA[
+if (!$s2_db->index_exists('articles', 'template_idx'))
+	$s2_db->add_index('articles', 'template_idx', array('template'));
+
+	]]></install>
+
+	<uninstall><![CDATA[
+	]]></uninstall>
+
+	<hooks>
+
+		<hook id="rq_start"><![CDATA[
+// Новый шаблон
+$lang_templates['news.php'] = 'Страница новостей';
+		]]></hook>
+
+		<hook id="idx_pre_get_queries"><![CDATA[
+if (strpos($template, '<!-- s2_section_news -->') !== false)
+{
+	// Fetching children
+	$s2_section_news_sq = array(
+		'SELECT'	=> '1',
+		'FROM'		=> 'articles AS a1',
+		'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
+		'LIMIT'		=> '1'
+	);
+	$s2_section_news_raw1 = $s2_db->query_build($s2_section_news_sq, true) or error(__FILE__, __LINE__);
+
+	// Fetching id of the news section
+	$s2_section_news_sq = array(
+		'SELECT'	=> 'a2.id as news_id',
+		'FROM'		=> 'articles AS a2',
+		'WHERE'		=> 'a2.published = 1 AND a2.template = \'news.php\'',
+	);
+	$s2_section_news_raw2 = $s2_db->query_build($s2_section_news_sq, true) or error(__FILE__, __LINE__);
+
+	$s2_section_news_q = array (
+		'SELECT'	=> 'title, url, ('.$s2_section_news_raw1.') IS NOT NULL AS children_exist, id, excerpt, create_time, parent_id',
+		'FROM'		=> 'articles AS a, ('.$s2_section_news_raw2.') as temp',
+		'WHERE'		=> 'parent_id = temp.news_id AND published = 1',
+		'ORDER BY'	=> 'create_time DESC',
+		'LIMIT'		=> '3'
+	);
+    ($hook = s2_hook('s2_section_news_pre_get_news')) ? eval($hook) : null;
+	$s2_section_news_result = $s2_db->query_build($s2_section_news_q) or error(__FILE__, __LINE__);
+
+	$s2_section_news_html = '<div class="info"><p class="data">%1$s</p>'."\n".
+		'<a href="%2$s">%3$s</a>'."\n".
+		'<div class="main_info">%4$s</div></div>'."\n";
+	$s2_section_news = '';
+	while ($s2_section_news_row = $s2_db->fetch_assoc($s2_section_news_result))
+	{
+		if (!$s2_section_news_row['children_exist'])
+		{
+            ($hook = s2_hook('s2_section_news_pre_merge_news')) ? eval($hook) : null;
+			$s2_section_news .= sprintf($s2_section_news_html,
+				s2_date($s2_section_news_row['create_time']),
+				S2_PATH.'/news/'.urlencode($s2_section_news_row['url']),
+				s2_htmlencode($s2_section_news_row['title']),
+				$s2_section_news_row['excerpt']
+			);
+		}
+	}
+
+	$replace['<!-- s2_section_news -->'] = $s2_section_news;
+}
+		]]></hook>
+
+	</hooks>
+</extension>
