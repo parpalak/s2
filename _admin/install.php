@@ -864,6 +864,11 @@ else
 				'allow_null'	=> false,
 				'default'		=> '\'\''
 			),
+			'comment_cookie'=> array(
+				'datatype'		=> 'VARCHAR(32)',
+				'allow_null'	=> false,
+				'default'		=> '\'\''
+			),
 		),
 		'INDEXES'		=> array(
 			'challenge_idx'		=> array('challenge'),
