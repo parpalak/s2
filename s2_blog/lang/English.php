@@ -74,6 +74,8 @@ $lang_s2_blog = array(
 'RSS description'			=> '%s. Last posts.',
 'RSS link title'			=> 'Last blog posts',
 
+'Found tags'				=> 'Tagged blog posts: %s',
+
 );
 
 $lang_s2_blog_days = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');

@@ -931,5 +931,50 @@ if (count($s2_blog_ids))
 }
 		]]></hook>
 
+		<hook id="s2_search_find_tags_end"><![CDATA[
+if (!isset($lang_s2_blog))
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		require $ext_info['path'].'/lang/English.php';
+}
+
+$s2_blog_search_sql = array(
+	'SELECT'	=> 'count(*)',
+	'FROM'		=> 's2_blog_post_tag AS pt',
+	'JOINS'		=> array(
+		array(
+			'INNER JOIN'	=> 's2_blog_posts AS p',
+			'ON'			=> 'p.id = pt.post_id'
+		)
+	),
+	'WHERE'		=> 'pt.tag_id = t.tag_id AND p.published = 1',
+	'LIMIT'		=> '1'
+);
+($hook = s2_hook('s2_blog_pre_find_tags_sub_qr')) ? eval($hook) : null;
+$s2_blog_search_sub_sql = $s2_db->query_build($s2_blog_search_sql, true) or error(__FILE__, __LINE__);
+
+$s2_blog_search_sql = array(
+	'SELECT'	=> 'tag_id, name, url, ('.$s2_blog_search_sub_sql.') AS used',
+	'FROM'		=> 'tags AS t',
+	'WHERE'		=> 'name LIKE \''.$s2_db->escape(trim($s2_search_query)).'%\'',
+);
+($hook = s2_hook('s2_blog_pre_find_tags_qr')) ? eval($hook) : null;
+$s2_blog_result = $s2_db->query_build($s2_blog_search_sql) or error(__FILE__, __LINE__);
+
+$s2_blog_found_tag = array();
+while ($s2_blog_row = $s2_db->fetch_assoc($s2_blog_result))
+{
+	($hook = s2_hook('s2_blog_find_tags_get_res')) ? eval($hook) : null;
+
+	if ($s2_blog_row['used'])
+		$s2_blog_found_tag[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($s2_blog_row['url']).'/').'">'.$s2_blog_row['name'].'</a>';
+}
+
+if (!empty($s2_blog_found_tag))
+	echo '<p class="s2_search_found_tags">'.sprintf($lang_s2_blog['Found tags'], implode(', ', $s2_blog_found_tag)).'</p>';
+		]]></hook>
+
 	</hooks>
 </extension>

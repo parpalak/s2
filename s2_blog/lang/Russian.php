@@ -74,6 +74,8 @@ $lang_s2_blog = array(
 'RSS description'			=> '%s. Последние заметки.',
 'RSS link title'			=> 'Последние заметки в блоге',
 
+'Found tags'				=> 'Ключевые слова в блоге: %s',
+
 );
 
 $lang_s2_blog_days = array('Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс');
