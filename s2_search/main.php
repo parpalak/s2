@@ -111,7 +111,7 @@ if (defined('DEBUG')) $start_time = microtime(true);
 		}
 
 		if (!empty($s2_search_found_tags))
-			echo '<p class="s2_search_not_found">'.sprintf($lang_s2_search['Found tags'], implode(', ', $s2_search_found_tags)).'</p>';
+			echo '<p class="s2_search_found_tags">'.sprintf($lang_s2_search['Found tags'], implode(', ', $s2_search_found_tags)).'</p>';
 
 		($hook = s2_hook('s2_search_find_tags_end')) ? eval($hook) : null;
 	}
@@ -126,7 +126,7 @@ if (defined('DEBUG')) $start_time = microtime(true);
 			$result_num_str = sprintf(s2_search_rus_plural($item_num, 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $item_num);
 		else
 			$result_num_str = sprintf($lang_s2_search['Found'], $item_num);
-		echo '<p>'.$result_num_str.'</p>';
+		echo '<p class="s2_search_found_num">'.$result_num_str.'</p>';
 
 		$items_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10.0;
 		$total_pages = ceil(1.0 * $item_num / $items_per_page);
