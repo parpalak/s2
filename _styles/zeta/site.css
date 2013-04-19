@@ -451,6 +451,8 @@ img[align="right"] {
 		.s2_search_form .inactive {
 			color: #999;
 			}
+.s2_search_found_tags {margin: 0;}
+.s2_search_found_num, .s2_search_not_found {margin: 1.5em 0;}
 
 /* Styles for printer */
 @media print {
