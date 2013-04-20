@@ -110,6 +110,8 @@ if (defined('DEBUG')) $start_time = microtime(true);
 				$s2_search_found_tags[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($s2_search_row['url']).'/').'">'.$s2_search_row['name'].'</a>';
 		}
 
+		($hook = s2_hook('s2_search_find_tags_pre_mrg')) ? eval($hook) : null;
+
 		if (!empty($s2_search_found_tags))
 			echo '<p class="s2_search_found_tags">'.sprintf($lang_s2_search['Found tags'], implode(', ', $s2_search_found_tags)).'</p>';
 
