@@ -310,7 +310,7 @@ if ($is_logged_in)
 ($hook = s2_hook('cmnt_pre_get_moderators_qr')) ? eval($hook) : null;
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 while ($mrow = $s2_db->fetch_assoc($result))
-	s2_mail_comment($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, $lang_comments['Moderator mail']);
+	s2_mail_moderator($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, $email);
 
 setcookie('comment_form_sent', 1);
 

@@ -160,17 +160,13 @@ function s2_check_comment_question ($key, $answer)
 //
 // Sends comments to subscribed users
 //
-function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name, $unsubscribe_link)
+function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsubscribe_link)
 {
 	global $lang_comments;
 
 	$message = $lang_comments['Email pattern'];
-	$message = str_replace('<name>', $name, $message);
-	$message = str_replace('<author>', $aut_name, $message);
-	$message = str_replace('<title>', $title, $message);
-	$message = str_replace('<url>', $url, $message);
-	$message = str_replace('<text>', $text, $message);
-	$message = str_replace('<unsubscribe>', $unsubscribe_link, $message);
+	$message = str_replace(array('<name>', '<author>', '<title>', '<url>', '<text>', '<unsubscribe>'),
+		array($name, $auth_name, $title, $url, $text, $unsubscribe_link), $message);
 
 	// Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
 	$message = str_replace(array("\n", "\0"), array("\r\n", ''), $message);
@@ -181,7 +177,44 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $aut_name, $unsubs
 	$sender_email = S2_WEBMASTER_EMAIL ? S2_WEBMASTER_EMAIL : 'example@example.com';
 	$from = S2_WEBMASTER ? "=?UTF-8?B?".base64_encode(S2_WEBMASTER)."?=".' <'.$sender_email.'>' : $sender_email;
 	$headers = 'From: '.$from."\r\n".
-		'Return-Path: '.$from."\r\n".
+		'Date: '.gmdate('r')."\r\n".
+		'MIME-Version: 1.0'."\r\n".
+		'Content-transfer-encoding: 8bit'."\r\n".
+		'Content-type: text/plain; charset=utf-8'."\r\n".
+		'X-Mailer: S2 Mailer'."\r\n".
+		'Reply-To: '.$from;
+
+	// Change the linebreaks used in the headers according to OS
+	if (strtoupper(substr(PHP_OS, 0, 3)) == 'MAC')
+		$headers = str_replace("\r\n", "\r", $headers);
+	else if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN')
+		$headers = str_replace("\r\n", "\n", $headers);
+
+	mail($email, $subject, $message, $headers);
+}
+
+//
+// Sends comments to subscribed users
+//
+function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $auth_email)
+{
+	global $lang_comments;
+
+	$message = $lang_comments['Email moderator pattern'];
+	$message = str_replace(array('<name>', '<author>', '<title>', '<url>', '<text>'),
+		array($name, $auth_name, $title, $url, $text), $message);
+
+	// Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
+	$message = str_replace(array("\n", "\0"), array("\r\n", ''), $message);
+
+	$subject = sprintf($lang_comments['Email subject'], $url);
+	$subject = "=?UTF-8?B?".base64_encode($subject)."?=";
+
+	$sender_email = S2_WEBMASTER_EMAIL ? S2_WEBMASTER_EMAIL : 'example@example.com';
+	$sender = S2_WEBMASTER ? "=?UTF-8?B?".base64_encode(S2_WEBMASTER)."?=".' <'.$sender_email.'>' : $sender_email;
+	$from = trim($auth_name) ? "=?UTF-8?B?".base64_encode($auth_name)."?=".' <'.$auth_email.'>' : $auth_email;
+	$headers = 'From: '.$from."\r\n".
+		'Sender: '.$sender."\r\n".
 		'Date: '.gmdate('r')."\r\n".
 		'MIME-Version: 1.0'."\r\n".
 		'Content-transfer-encoding: 8bit'."\r\n".

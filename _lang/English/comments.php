@@ -38,7 +38,23 @@ This e-mail was sent automatically. If you reply, the author
 of the site will receive your answer. To unsubscribe, follow the link
 
 <unsubscribe>',
-'Moderator mail'			=> '<No hyperlink, you are a moderator!>',
+'Email moderator pattern'	=>
+'Hello, <name>.
+
+You have received this e-mail, because you are the moderator.
+A new comment on
+“<title>”,
+has been received. You can find it here:
+<url>
+
+<author> is the comment author.
+
+----------------------------------------------------------------------
+<text>
+----------------------------------------------------------------------
+
+This e-mail has been sent automatically. If you reply, the author
+of the comment will receive your answer.',
 
 );
 
