@@ -969,7 +969,7 @@ while ($s2_blog_row = $s2_db->fetch_assoc($s2_blog_result))
 	($hook = s2_hook('s2_blog_find_tags_get_res')) ? eval($hook) : null;
 
 	if ($s2_blog_row['used'])
-		$s2_blog_found_tag[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($s2_blog_row['url']).'/').'">'.$s2_blog_row['name'].'</a>';
+		$s2_blog_found_tag[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($s2_blog_row['url']).'/">'.$s2_blog_row['name'].'</a>';
 }
 
 if (!empty($s2_blog_found_tag))
