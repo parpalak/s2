@@ -74,7 +74,8 @@ $lang_s2_blog = array(
 'RSS description'			=> '%s. Последние заметки.',
 'RSS link title'			=> 'Последние заметки в блоге',
 
-'Found tags'				=> 'Ключевые слова в блоге: %s',
+'Found tags'				=> 'Похожие ключевые слова в блоге: %s',
+'Found tags short'			=> '; в блоге: %s',
 
 );
 

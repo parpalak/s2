@@ -931,7 +931,7 @@ if (count($s2_blog_ids))
 }
 		]]></hook>
 
-		<hook id="s2_search_find_tags_end"><![CDATA[
+		<hook id="s2_search_find_tags_pre_mrg"><![CDATA[
 if (!isset($lang_s2_blog))
 {
 	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
@@ -973,7 +973,13 @@ while ($s2_blog_row = $s2_db->fetch_assoc($s2_blog_result))
 }
 
 if (!empty($s2_blog_found_tag))
-	echo '<p class="s2_search_found_tags">'.sprintf($lang_s2_blog['Found tags'], implode(', ', $s2_blog_found_tag)).'</p>';
+{
+	$s2_blog_search_found = count($s2_search_found_tags);
+	if ($s2_blog_search_found)
+		$s2_search_found_tags[$s2_blog_search_found - 1] .= sprintf($lang_s2_blog['Found tags short'], implode(', ', $s2_blog_found_tag));
+	else
+		echo '<p class="s2_search_found_tags">'.sprintf($lang_s2_blog['Found tags'], implode(', ', $s2_blog_found_tag)).'</p>';
+}
 		]]></hook>
 
 	</hooks>

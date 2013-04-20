@@ -74,7 +74,8 @@ $lang_s2_blog = array(
 'RSS description'			=> '%s. Last posts.',
 'RSS link title'			=> 'Last blog posts',
 
-'Found tags'				=> 'Tagged blog posts: %s',
+'Found tags'				=> 'Similar blog tags: %s',
+'Found tags short'			=> '; blog tags: %s',
 
 );
 
