@@ -158,10 +158,13 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 
 		foreach ($output as $id => &$chapter_info)
 		{
-			if (($snippets[$id]['rel'] > 0.6))
-				$chapter_info['descr'] = $snippets[$id]['snippet'];
-			elseif(!$chapter_info['descr'])
-				$chapter_info['descr'] = $snippets[$id]['start_text'];
+			if (isset($snippets[$id]))
+			{
+				if (($snippets[$id]['rel'] > 0.6))
+					$chapter_info['descr'] = $snippets[$id]['snippet'];
+				elseif(!$chapter_info['descr'])
+					$chapter_info['descr'] = $snippets[$id]['start_text'];
+			}
 
 			echo '<p>'.implode('<br />', $chapter_info).'<p>';
 		}
