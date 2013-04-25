@@ -96,7 +96,12 @@ if ($action == 's2_attachment_upload')
 
 			// Move the file to the destination directory
 			$uploadfile = S2_IMG_PATH.$path.'/'.$filename;
-			if (!rename($_FILES['pictures']['tmp_name'][$i], $uploadfile))
+
+			$result = $check_uploaded ?
+				move_uploaded_file($_FILES['pictures']['tmp_name'][$i], $uploadfile) :
+				rename($_FILES['pictures']['tmp_name'][$i], $uploadfile);
+
+			if (!$result)
 			{
 				$errors[] = sprintf($lang_pictures['Move upload file error'], $filename);
 				continue;
