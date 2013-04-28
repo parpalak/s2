@@ -72,13 +72,6 @@ function s2_last_articles_array ($limit = '5')
 	global $s2_db;
 
 	$subquery = array(
-		'SELECT'	=> 'title',
-		'FROM'		=> 'articles AS a1',
-		'WHERE'		=> 'a1.id = a.parent_id'
-	);
-	$raw_query_parent_title = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
-
-	$subquery = array(
 		'SELECT'	=> '1',
 		'FROM'		=> 'articles AS a2',
 		'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
@@ -94,10 +87,16 @@ function s2_last_articles_array ($limit = '5')
 	$raw_query_user = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'id, title, create_time, modify_time, excerpt, url, parent_id, ('.$raw_query_parent_title.') AS ptitle, ('.$raw_query_user.') AS author',
+		'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.url, a.parent_id, a1.title AS ptitle, ('.$raw_query_user.') AS author',
 		'FROM'		=> 'articles AS a',
-		'ORDER BY'	=> 'create_time DESC',
-		'WHERE'		=> '('.$raw_query_child_num.') IS NULL AND (create_time <> 0 OR modify_time <> 0) AND published = 1',
+		'JOINS'		=> array(
+			array(
+				'INNER JOIN'	=> 'articles AS a1',
+				'ON'			=> 'a1.id = a.parent_id'
+			)
+		),
+		'ORDER BY'	=> 'a.create_time DESC',
+		'WHERE'		=> '('.$raw_query_child_num.') IS NULL AND (a.create_time <> 0 OR a.modify_time <> 0) AND a.published = 1',
 		'LIMIT'		=> $limit
 	);
 
