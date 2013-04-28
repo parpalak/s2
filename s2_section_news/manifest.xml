@@ -13,7 +13,7 @@
 <extension for="S2" engine="1.0">
 	<id>s2_section_news</id>
 	<title>Section News</title>
-	<version>1.0a1</version>
+	<version>1.0b</version>
 	<description>Adds placeholder "s2_section_news" and puts there excerpts from a section with the "news.php" template.</description>
 	<author>Roman Parpalak</author>
 
@@ -34,6 +34,11 @@ if (!$s2_db->index_exists('articles', 'template_idx'))
 		<hook id="rq_start"><![CDATA[
 // Новый шаблон
 $lang_templates['news.php'] = 'Страница новостей';
+		]]></hook>
+
+		<hook id="fn_last_articles_array_pre_get_qr"><![CDATA[
+if (isset($query['JOINS']))
+	$query['WHERE'] .= ' AND a1.template <> \'news.php\' AND a.template <> \'news.php\'';
 		]]></hook>
 
 		<hook id="idx_pre_get_queries"><![CDATA[
@@ -63,7 +68,7 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 		'ORDER BY'	=> 'create_time DESC',
 		'LIMIT'		=> '3'
 	);
-    ($hook = s2_hook('s2_section_news_pre_get_news')) ? eval($hook) : null;
+	($hook = s2_hook('s2_section_news_pre_get_news')) ? eval($hook) : null;
 	$s2_section_news_result = $s2_db->query_build($s2_section_news_q) or error(__FILE__, __LINE__);
 
 	$s2_section_news_html = '<div class="info"><p class="data">%1$s</p>'."\n".
@@ -74,7 +79,8 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 	{
 		if (!$s2_section_news_row['children_exist'])
 		{
-            ($hook = s2_hook('s2_section_news_pre_merge_news')) ? eval($hook) : null;
+			($hook = s2_hook('s2_section_news_pre_merge_news')) ? eval($hook) : null;
+
 			$s2_section_news .= sprintf($s2_section_news_html,
 				s2_date($s2_section_news_row['create_time']),
 				S2_PATH.'/news/'.urlencode($s2_section_news_row['url']),
