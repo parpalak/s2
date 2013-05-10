@@ -965,9 +965,10 @@ form center {
 
 /*=======================[Login screen]=======================================*/
 
-#login_wrap {
-	font-size: 75%;
+.login_page {
 	background: #fff;
+}
+#login_wrap {
 	width: 26em;
 	margin: -5em auto 0;
 	height: auto;

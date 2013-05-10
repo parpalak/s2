@@ -483,26 +483,28 @@ function LoginInit ()
 }
 </script>
 </head>
-<body id="login_wrap" onload="LoginInit();">
-	<noscript><p><?php echo $lang_admin['Noscript']; ?></p></noscript>
-	<form name="loginform" class="loginform" method="post" action="" data-salt="<?php echo $salt ?>" onsubmit="SendForm(); return false; ">
-		<p>
-		<label>
-			<span><?php echo $lang_admin['Login']; ?></span>
-			<input type="text" name="login" size="30" maxlength="255">
-		</label>
-		<label>
-			<span><?php echo $lang_admin['Password']; ?></span>
-			<input type="password" name="pass" size="30" maxlength="255" disabled="disabled">
-		</label>
-		</p>
-		<p>
-			<input type="submit" name="button" value="<?php echo $lang_admin['Log in'];; ?>" />
-			<input type="hidden" name="key" value="" />
-			<input type="hidden" name="challenge" value="<?php echo $challenge ?>" />
-		</p>
-	</form>
-	<p id="message" class="message"></p>
+<body class="login_page" onload="LoginInit();">
+	<div id="login_wrap">
+		<noscript><p><?php echo $lang_admin['Noscript']; ?></p></noscript>
+		<form name="loginform" class="loginform" method="post" action="" data-salt="<?php echo $salt ?>" onsubmit="SendForm(); return false; ">
+			<p>
+			<label>
+				<span><?php echo $lang_admin['Login']; ?></span>
+				<input type="text" name="login" size="30" maxlength="255">
+			</label>
+			<label>
+				<span><?php echo $lang_admin['Password']; ?></span>
+				<input type="password" name="pass" size="30" maxlength="255" disabled="disabled">
+			</label>
+			</p>
+			<p>
+				<input type="submit" name="button" value="<?php echo $lang_admin['Log in'];; ?>" />
+				<input type="hidden" name="key" value="" />
+				<input type="hidden" name="challenge" value="<?php echo $challenge ?>" />
+			</p>
+		</form>
+		<p id="message" class="message"></p>
+	</div>
 </body>
 </html>
 <?php
