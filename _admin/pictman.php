@@ -82,7 +82,7 @@ var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_g
 SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
 <!--[if lt IE 9]>
-<script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.10.1.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/ie8.css" />
 <![endif]-->
 <!--[if gte IE 9]><!-->
