@@ -116,6 +116,7 @@ $replace['<!-- s2_title -->'] = !empty($page['title']) ? '<h1>'.$page['title'].'
 $replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
 $replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $page['path'] : '';
 $replace['<!-- s2_section_link -->'] = isset($page['section_link']) ? $page['section_link'] : '';
+$replace['<!-- s2_excerpt -->'] = isset($page['excerpt']) ? $page['excerpt'] : '';
 $replace['<!-- s2_text -->'] = isset($page['text']) ? $page['text'] : '';
 $replace['<!-- s2_subarticles -->'] = isset($page['subcontent']) ? $page['subcontent'] : '';
 $replace['<!-- s2_tags -->'] = !empty($page['tags']) ? $page['tags'] : '';

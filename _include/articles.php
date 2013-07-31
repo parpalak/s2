@@ -737,7 +737,7 @@ function s2_parse_page_url ($request_uri)
 	$raw_query_author = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.pagetext as text, a.create_time as date, commented, template, ('.$raw_query_children.') IS NOT NULL AS children_exist, ('.$raw_query_author.') AS author',
+		'SELECT'	=> 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.excerpt as excerpt, a.pagetext as text, a.create_time as date, commented, template, ('.$raw_query_children.') IS NOT NULL AS children_exist, ('.$raw_query_author.') AS author',
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
 	);
