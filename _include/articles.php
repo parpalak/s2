@@ -391,7 +391,7 @@ function s2_make_tags_pages ($request_array)
 {
 	global $s2_db, $lang_common;
 
-	if (!isset($request_array[2]) || $request_array[2] == '')
+	if (!isset($request_array[2]) || $request_array[2] === '')
 	{
 		// Tag list
 
@@ -422,6 +422,14 @@ function s2_make_tags_pages ($request_array)
 			list($tag_id, $tag_description, $tag_name) = $row;
 		else
 			s2_error_404();
+
+		if (!isset($request_array[3]) || $request_array[3] !== '' || isset($request_array[4]))
+		{
+			// Correcting trailing slash
+			header('HTTP/1.1 301');
+			header('Location: '.s2_abs_link('/'.S2_TAGS_URL.'/'.$request_array[2].'/'));
+			die;
+		}
 
 		if ($tag_description)
 			$tag_description .= '<hr />';
@@ -661,6 +669,14 @@ function s2_parse_page_url ($request_uri)
 
 	if (isset($request_array[1]) && $request_array[1] == S2_TAGS_URL)
 	{
+		if (!isset($request_array[2]))
+		{
+			// Correcting trailing slash
+			header('HTTP/1.1 301');
+			header('Location: '.s2_abs_link('/'.S2_TAGS_URL.'/'));
+			die;
+		}
+
 		// We process tags pages in a different way
 		$template_id = 'site.php';
 
