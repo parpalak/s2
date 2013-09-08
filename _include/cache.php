@@ -49,7 +49,7 @@ function s2_generate_config_cache ($load = false)
 	$output = '';
 	while ($row = $s2_db->fetch_row($result))
 	{
-		$output .= 'define(\''.$row[0].'\', \''.str_replace('\'', '\\\'', $row[1]).'\');'."\n";
+		$output .= 'define(\''.$row[0].'\', \''.str_replace(array('\\', '\''), array('\\\\', '\\\''), $row[1]).'\');'."\n";
 		if ($load)
 			define($row[0], $row[1]);
 	}
