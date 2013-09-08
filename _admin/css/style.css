@@ -845,18 +845,10 @@ form center {
 	}
 
 .input {
-	width: auto;
-	margin-left: 20em;
-	margin-right: 0.5em;
+	margin: 0 0 0.5em;
 	position: relative;
-	padding: 0.416em 0;
+	padding: 0 0 0 20em;
 	}
-	.input input,
-	.input.select select {
-		position: absolute;
-		top: 0.25em;
-		left: 0;
-		}
 	.input.select {
 		min-height: 1.5em;
 		}
@@ -865,29 +857,24 @@ form center {
 		font: 1em Arial, Helvetica, sans-serif;
 		}
 	.input.checkbox input {
-		margin: 0.166em 0;
+		vertical-align: middle;
 		padding: 0;
 		}
 	.input.text label {
 		padding: 0;
 		}
-	.input.checkbox label {
-		margin-left: 1.583em;
-		}
 		.input label > small {
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 			color: #666;
-			margin: 1.636em 0 0 0.273em;
-			display: block;
+			margin: 0 0 0 0.273em;
 			}
 	.input label > span,
 	.input .subhead {
-		display: block;
-		float: left;
+		display: inline-block;
 		text-align: right;
-		position: relative;
 		width: 19em;
 		margin-left: -20em;
+		padding-right: 1em;
 		font-weight: bold;
 		color: #555;
 		}

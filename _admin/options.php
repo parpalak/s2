@@ -107,17 +107,17 @@ function s2_get_lang ($current_lang)
 
 function s2_get_checkbox ($name, $is_checked, $info, $label)
 {
-	return '<div class="input checkbox"><input type="checkbox" id="'.$name.'_input" name="opt['.$name.']" value="1"'.($is_checked ? ' checked="checked"' : '').' /><label for="'.$name.'_input"><span>'.$info.'</span>'.$label.'</label></div>';
+	return '<div class="input checkbox"><label for="'.$name.'_input"><span>'.$info.'</span><input type="checkbox" id="'.$name.'_input" name="opt['.$name.']" value="1"'.($is_checked ? ' checked="checked"' : '').' />'.$label.'</label></div>';
 }
 
 function s2_get_input ($name, $value, $info, $label)
 {
-	return '<div class="input text"><label for="'.$name.'_input"><span>'.$info.'</span><small>'.$label.'</small></label><input type="text" id="'.$name.'_input" name="opt['.$name.']" size="60" maxlength="255" value="'.s2_htmlencode($value).'" /></div>';
+	return '<div class="input text"><label for="'.$name.'_input"><span>'.$info.'</span><input type="text" id="'.$name.'_input" name="opt['.$name.']" size="60" maxlength="255" value="'.s2_htmlencode($value).'" /><small>'.$label.'</small></label></div>';
 }
 
 function s2_get_color_input ($name, $value, $info, $label, $onchange = '')
 {
-	return '<div class="input color"><label for="'.$name.'_input"><span>'.$info.'</span><small>'.$label.'</small></label><input type="color" id="'.$name.'_input" name="opt['.$name.']" size="60" maxlength="20" value="'.s2_htmlencode($value).'" '.($onchange ? 'onchange="'.$onchange.'" ' : '').'/></div>';
+	return '<div class="input color"><label for="'.$name.'_input"><span>'.$info.'</span><input type="color" id="'.$name.'_input" name="opt['.$name.']" size="60" maxlength="20" value="'.s2_htmlencode($value).'" '.($onchange ? 'onchange="'.$onchange.'" ' : '').'/><small>'.$label.'</small></label></div>';
 }
 
 //
