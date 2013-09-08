@@ -696,6 +696,7 @@ textarea,
 	font: 1.083em/1.2307 Consolas, Monaco, monospace;
 	height: 100%;
 	padding: 3px;
+	vertical-align: top;
 	}
 
 .bitbtn {
