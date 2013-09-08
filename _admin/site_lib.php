@@ -34,9 +34,6 @@ if (!function_exists('json_encode'))
 			case 'object':
 				$data = get_object_vars($data);
 			case 'array':
-				$output_index_count = 0;
-				$output_indexed = array();
-				$output_associative = array();
 				$size = count($data);
 				if (array_keys($data) === range(0, $size - 1))
 				{
@@ -230,7 +227,7 @@ function s2_get_user_list ()
 // if the article is specified in GET parameters
 function s2_preload_editor ()
 {
-	global $s2_db, $lang_admin;
+	global $s2_db;
 
 	$return = ($hook = s2_hook('fn_preload_editor_start')) ? eval($hook) : null;
 	if ($return)
