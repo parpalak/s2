@@ -147,7 +147,7 @@ function s2_last_articles ($num)
 	{
 		($hook = s2_hook('fn_last_articles_loop')) ? eval($hook) : null;
 
-		$output .= '<h2 class="preview">'.($item['favorite'] ? s2_favorite_link() : '').
+		$output .= '<h2 class="preview'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').
 			'<small><a class="preview_section" href="'.s2_link(preg_replace('#[^/]*$#', '', $item['rel_path'])).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
 			'<div class="preview time">'.s2_date($item['time']).'</div>'.
 			'<div class="preview cite">'.$item['text'].'</div>';
@@ -488,7 +488,7 @@ function s2_make_tags_pages ($request_array)
 			$row = $rows[$k];
 			if ($row['children_exist'])
 			{
-				$sections[] = '<h3 class="subsection">'.($row['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($url).'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
+				$sections[] = '<h3 class="subsection'.($row['favorite'] ? ' favorite-item' : '').'">'.($row['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($url).'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
 					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
 					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
 
@@ -521,7 +521,7 @@ function s2_make_tags_pages ($request_array)
 		{
 			array_multisort($sort_array, $sort_order, $articles);
 			foreach ($articles as $item)
-				$text .= '<h3 class="article">'.($item['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
+				$text .= '<h3 class="article'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 		}
@@ -1008,7 +1008,7 @@ function s2_parse_page_url ($request_uri)
 			$page['subcontent'] = $lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '';
 
 			foreach ($subsections as $item)
-				$page['subcontent'] .= '<h3 class="subsection">'.($item['favorite'] ? s2_favorite_link() : '').
+				$page['subcontent'] .= '<h3 class="subsection'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').
 					'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="subsection date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="subsection">'.$item['excerpt'].'</p>'."\n" : '');
@@ -1056,7 +1056,7 @@ function s2_parse_page_url ($request_uri)
 			foreach ($sort_array as $index => $value)
 			{
 				$item = $subarticles[$index];
-				$page['subcontent'] .= '<h3 class="article">'.($item['favorite'] ? s2_favorite_link() : '').
+				$page['subcontent'] .= '<h3 class="article'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').
 					'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
