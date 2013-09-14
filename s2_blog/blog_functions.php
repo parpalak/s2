@@ -21,7 +21,7 @@ function s2_blog_extent_number ($n)
 // HTML formatting
 //
 
-$s2_blog_fav_link = '<a href="'.S2_BLOG_PATH.urlencode(S2_FAVORITE_URL).'/" class="favorite" title="'.$lang_s2_blog['Favorite'].'">*</a>';
+$s2_blog_fav_link = '<a href="'.S2_BLOG_PATH.urlencode(S2_FAVORITE_URL).'/" class="favorite-star" title="'.$lang_s2_blog['Favorite'].'">*</a>';
 
 function s2_blog_format_post ($author, $header, $date, $date_time, $body, $keywords, $comments, $favorite = 0)
 {

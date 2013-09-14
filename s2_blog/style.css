@@ -87,17 +87,6 @@ a.nav_mon:hover { background: #ffa; }
 	margin: 1.75em 0 5.167em;
 	}
 
-.post .favorite {
-	display: block;
-	margin-left: -24px;
-	float: left;
-	margin-right: 8px;
-	width: 16px;
-	color: transparent;
-	text-indent: -9999em;
-	background: url(i/star.gif) no-repeat 0 50%;
-	}
-
 .post .see_also {
 	font-size: 0.857em;
 	line-height: 1.75;
