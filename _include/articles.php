@@ -14,7 +14,7 @@ if (!defined('S2_ROOT'))
 ($hook = s2_hook('art_start')) ? eval($hook) : null;
 
 //
-// Get URLs for some article as if there is one article.
+// Get URLs for some articles as if there is only one.
 // Returns an array containing full URLs, keys are preserved.
 // If somewhere is a hidden parent, the URL is removed from the returning array.
 //
@@ -432,7 +432,7 @@ function s2_make_tags_pages ($request_array)
 		}
 
 		if ($tag_description)
-			$tag_description .= '<hr />';
+			$tag_description .= '<hr class="tag-separator" />';
 
 		$subquery = array(
 			'SELECT'	=> '1',
@@ -452,7 +452,7 @@ function s2_make_tags_pages ($request_array)
 					'ON'			=> 'a.id = at.article_id'
 				),
 			),
-			'WHERE'		=> 'at.tag_id = '.$tag_id.' AND published = 1'
+			'WHERE'		=> 'at.tag_id = '.$tag_id.' AND a.published = 1'
 		);
 		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_arts_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
