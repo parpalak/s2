@@ -112,7 +112,7 @@ if (isset($page['link_navigation']))
 }
 
 $replace['<!-- s2_author -->'] = !empty($page['author']) ? '<div class="author">'.$page['author'].'</div>' : '';
-$replace['<!-- s2_title -->'] = !empty($page['title']) ? '<h1>'.$page['title'].'</h1>' : '';
+$replace['<!-- s2_title -->'] = !empty($page['title']) ? '<h1'.(!empty($page['favorite']) ? ' class="favorite"' : '').'>'.$page['title'].'</h1>' : '';
 $replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
 $replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $page['path'] : '';
 $replace['<!-- s2_section_link -->'] = isset($page['section_link']) ? $page['section_link'] : '';

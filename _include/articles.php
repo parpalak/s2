@@ -87,7 +87,7 @@ function s2_last_articles_array ($limit = '5')
 	$raw_query_user = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.url, a.parent_id, a1.title AS ptitle, ('.$raw_query_user.') AS author',
+		'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS ptitle, ('.$raw_query_user.') AS author',
 		'FROM'		=> 'articles AS a',
 		'JOINS'		=> array(
 			array(
@@ -115,6 +115,7 @@ function s2_last_articles_array ($limit = '5')
 		$last[$i]['ptitle'] = $row['ptitle'];
 		$last[$i]['time'] = $row['create_time'];
 		$last[$i]['modify_time'] = $row['modify_time'];
+		$last[$i]['favorite'] = $row['favorite'];
 		$last[$i]['text'] = $row['excerpt'];
 		$last[$i]['author'] = isset($row['author']) ? $row['author'] : '';
 	}
@@ -146,9 +147,10 @@ function s2_last_articles ($num)
 	{
 		($hook = s2_hook('fn_last_articles_loop')) ? eval($hook) : null;
 
-		$output .= '<h2 class="preview"><small><a class="preview_section" href="'.s2_link(preg_replace('#[^/]*$#', '', $item['rel_path'])).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
-			 '<div class="preview time">'.s2_date($item['time']).'</div>'.
-			 '<div class="preview cite">'.$item['text'].'</div>';
+		$output .= '<h2 class="preview">'.($item['favorite'] ? s2_favorite_link() : '').
+			'<small><a class="preview_section" href="'.s2_link(preg_replace('#[^/]*$#', '', $item['rel_path'])).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
+			'<div class="preview time">'.s2_date($item['time']).'</div>'.
+			'<div class="preview cite">'.$item['text'].'</div>';
 	}
 
 	($hook = s2_hook('fn_last_articles_end')) ? eval($hook) : null;
@@ -325,6 +327,18 @@ function s2_main_page_title ()
 	return $main_title;
 }
 
+function s2_favorite_link ()
+{
+	global $lang_common;
+
+	$return = ($hook = s2_hook('fn_s2_favorite_link')) ? eval($hook) : null;
+	if ($return)
+		return $return;
+
+	return '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.$lang_common['Favorite'].'">*</a>';
+}
+
+
 // Makes tags list for the tags page and the placeholder
 function s2_tags_list ()
 {
@@ -444,7 +458,7 @@ function s2_make_tags_pages ($request_array)
 
 		$sort_order = SORT_DESC; // SORT_ASC also possible
 		$query = array(
-			'SELECT'	=> 'a.title, a.url, ('.$raw_query1.') IS NOT NULL AS children_exist, a.id, a.excerpt, a.create_time, a.parent_id',
+			'SELECT'	=> 'a.title, a.url, ('.$raw_query1.') IS NOT NULL AS children_exist, a.id, a.excerpt, a.favorite, a.create_time, a.parent_id',
 			'FROM'		=> 'article_tag AS at',
 			'JOINS'		=> array(
 				array(
@@ -468,13 +482,13 @@ function s2_make_tags_pages ($request_array)
 		$urls = s2_get_group_url($parent_ids, $urls);
 
 		$subsection_text = '';
-		$subsections = $subarticles = $sort_array = array();
+		$sections = $articles = $sort_array = array();
 		foreach ($urls as $k => $url)
 		{
 			$row = $rows[$k];
 			if ($row['children_exist'])
 			{
-				$subsections[] = '<h3 class="subsection"><a href="'.s2_link($url).'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
+				$sections[] = '<h3 class="subsection">'.($row['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($url).'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
 					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
 					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
 
@@ -482,11 +496,12 @@ function s2_make_tags_pages ($request_array)
 			}
 			else
 			{
-				$subarticles[] = array(
-					'title' => s2_htmlencode($row['title']),
-					'time' => $row['create_time'],
-					'excerpt' => $row['excerpt'],
-					'url' => $url
+				$articles[] = array(
+					'title'		=> s2_htmlencode($row['title']),
+					'time'		=> $row['create_time'],
+					'excerpt'	=> $row['excerpt'],
+					'favorite'	=> $row['favorite'],
+					'url'		=> $url
 				);
 				$sort_array[] = $row['create_time'];
 
@@ -496,17 +511,17 @@ function s2_make_tags_pages ($request_array)
 
 		($hook = s2_hook('fn_s2_make_tags_pages_pre_merge')) ? eval($hook) : null;
 
-		if (!empty($subsections))
-			$subsection_text = ($lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '').implode('', $subsections);
+		if (!empty($sections))
+			$subsection_text = ($lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '').implode('', $sections);
 
 		$text = '';
 
-		// There are articles in the section
-		if (!empty($subarticles))
+		// There are articles having the tag
+		if (!empty($articles))
 		{
-			array_multisort($sort_array, $sort_order, $subarticles);
-			foreach ($subarticles as $item)
-				$text .= '<h3 class="article"><a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
+			array_multisort($sort_array, $sort_order, $articles);
+			foreach ($articles as $item)
+				$text .= '<h3 class="article">'.($item['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 		}
@@ -867,7 +882,7 @@ function s2_parse_page_url ($request_uri)
 	$raw_query_author = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.excerpt as excerpt, a.pagetext as text, a.create_time as date, commented, template, ('.$raw_query_children.') IS NOT NULL AS children_exist, ('.$raw_query_author.') AS author',
+		'SELECT'	=> 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.excerpt as excerpt, a.pagetext as text, a.create_time as date, favorite, commented, template, ('.$raw_query_children.') IS NOT NULL AS children_exist, ('.$raw_query_author.') AS author',
 		'FROM'		=> 'articles AS a',
 		'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
 	);
@@ -901,6 +916,8 @@ function s2_parse_page_url ($request_uri)
 
 	$id = $page['id'];
 	$page['title'] = $bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
+	if (!empty($page['favorite']))
+		$page['title'] = s2_favorite_link().$page['title'];
 	$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
 	if (!empty($page['author']))
 		$page['author'] = s2_htmlencode($page['author']);
@@ -935,7 +952,7 @@ function s2_parse_page_url ($request_uri)
 
 		$sort_order = SORT_DESC;
 		$query = array(
-			'SELECT'	=> 'title, url, ('.$raw_query1.') IS NOT NULL AS children_exist, id, excerpt, create_time, parent_id',
+			'SELECT'	=> 'title, url, ('.$raw_query1.') IS NOT NULL AS children_exist, id, excerpt, favorite, create_time, parent_id',
 			'FROM'		=> 'articles AS a',
 			'WHERE'		=> 'parent_id = '.$id.' AND published = 1',
 			'ORDER BY'	=> 'priority'
@@ -943,17 +960,18 @@ function s2_parse_page_url ($request_uri)
 		($hook = s2_hook('fn_s2_parse_page_url_pre_get_children_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		$subarticles = $subsections = $menu_subsections = $menu_subarticles = array();
+		$subarticles = $subsections = $menu_subsections = $menu_subarticles = $sort_array = array();
 		while ($row = $s2_db->fetch_assoc($result))
 		{
 			if ($row['children_exist'])
 			{
 				// The child is a subsection
 				$subsections[] = array(
-					'title' => s2_htmlencode($row['title']),
-					'time' => $row['create_time'],
-					'excerpt' => $row['excerpt'],
-					'url' => $current_path.'/'.urlencode($row['url']).'/'
+					'title'		=> s2_htmlencode($row['title']),
+					'time'		=> $row['create_time'],
+					'excerpt'	=> $row['excerpt'],
+					'favorite'	=> $row['favorite'],
+					'url'		=> $current_path.'/'.urlencode($row['url']).'/'
 				);
 				$menu_subsections[] = '<li><a href="'.s2_link($current_path.'/'.urlencode($row['url']).'/').'">'.s2_htmlencode($row['title']).'</a></li>';
 
@@ -963,10 +981,11 @@ function s2_parse_page_url ($request_uri)
 			{
 				// The child is an article
 				$subarticles[] = array(
-					'title' => s2_htmlencode($row['title']),
-					'time' => $row['create_time'],
-					'excerpt' => $row['excerpt'],
-					'url' => $current_path.'/'.urlencode($row['url'])
+					'title'		=> s2_htmlencode($row['title']),
+					'time'		=> $row['create_time'],
+					'excerpt'	=> $row['excerpt'],
+					'favorite'	=> $row['favorite'],
+					'url'		=> $current_path.'/'.urlencode($row['url'])
 				);
 				$sort_array[] = $row['create_time'];
 				$menu_subarticles[] = '<li><a href="'.s2_link($current_path.'/'.urlencode($row['url'])).'">'.s2_htmlencode($row['title']).'</a></li>';
@@ -980,7 +999,7 @@ function s2_parse_page_url ($request_uri)
 
 		// There are subsections in the section
 		if (!empty($menu_subsections))
-		{ 
+		{
 			// Add them to the menu...
 			$page['menu']['subsections'] = '<div class="header">'.$lang_common['Subsections'].'</div>'."\n".
 				'<ul>'.implode("\n", $menu_subsections).'</ul>'."\n";
@@ -989,7 +1008,8 @@ function s2_parse_page_url ($request_uri)
 			$page['subcontent'] = $lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '';
 
 			foreach ($subsections as $item)
-				$page['subcontent'] .= '<h3 class="subsection"><a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
+				$page['subcontent'] .= '<h3 class="subsection">'.($item['favorite'] ? s2_favorite_link() : '').
+					'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="subsection date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="subsection">'.$item['excerpt'].'</p>'."\n" : '');
 		}
@@ -1036,7 +1056,8 @@ function s2_parse_page_url ($request_uri)
 			foreach ($sort_array as $index => $value)
 			{
 				$item = $subarticles[$index];
-				$page['subcontent'] .= '<h3 class="article"><a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
+				$page['subcontent'] .= '<h3 class="article">'.($item['favorite'] ? s2_favorite_link() : '').
+					'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
 					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
 			}
