@@ -30,7 +30,9 @@ function s2_attachment_items ($id)
 			'delete'	=> '<img onclick="return s2_attachment_delete_file('.$row['id'].', \''.str_replace('\'', '\\\'', rawurlencode(sprintf($row['name'] ? $lang_s2_attachment['Confirm delete'] : $lang_s2_attachment['Confirm delete 2'], $row['name'], $row['filename'], s2_frendly_filesize($row['size'])))).'\');" class="delete" src="i/1.gif" alt="'.$lang_s2_attachment['Delete'].'">', 
 		);
 
-		$item = '<li><div class="buttons">'.implode('', $buttons).'</div><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/'.$row['filename'].'" target="_blank" title="'.$row['filename'].', '.s2_frendly_filesize($row['size']).'">'.s2_htmlencode($row['name'] ? $row['name'] : '<'.$row['filename'].'>').'</a></li>';
+		$icon = $row['is_picture'] ? '<img class="attach-preview" src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/micro/'.$row['filename'].'.png" alt="" />' : '';
+
+		$item = '<li><div class="buttons">'.implode('', $buttons).'</div><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/'.$row['filename'].'" target="_blank" title="'.$row['filename'].', '.s2_frendly_filesize($row['size']).'">'.$icon.s2_htmlencode($row['name'] ? $row['name'] : '<'.$row['filename'].'>').'</a></li>';
 
 		if ($row['is_picture'])
 			$list_pictures .= $item;
