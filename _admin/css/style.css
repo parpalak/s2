@@ -1085,9 +1085,14 @@ form center {
 	box-shadow: 1px 1px 4px -1px #666;
 	}
 
+.ui-helper-hidden-accessible {
+	display: none;
+	}
+
 .ui-autocomplete  {
 	background: #fff;
 	position: absolute;
+	z-index: 100;
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -1108,7 +1113,7 @@ form center {
 		margin: 1px 5px;
 		padding: 0 0;
 		}
-	.ui-autocomplete a.ui-state-hover {
+	.ui-autocomplete a.ui-state-focus {
 		cursor: pointer;
 		margin: 0;
 		padding: 1px 5px;
