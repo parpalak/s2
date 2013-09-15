@@ -53,7 +53,7 @@ if ($action == 's2_attachment_delete')
 elseif ($action == 's2_attachment_rename')
 {
 	$required_rights = array('edit_site');
-	($hook = s2_hook('rq_action_s2_attachment_delete_start')) ? eval($hook) : null;
+	($hook = s2_hook('rq_action_s2_attachment_rename_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
 	require $ext_info['path'].'/functions.php';
