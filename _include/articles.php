@@ -916,11 +916,12 @@ function s2_parse_page_url ($request_uri)
 
 	$id = $page['id'];
 	$page['title'] = $bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
-	if (!empty($page['favorite']))
-		$page['title'] = s2_favorite_link().$page['title'];
 	$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
 	if (!empty($page['author']))
 		$page['author'] = s2_htmlencode($page['author']);
+
+	if (!empty($page['favorite']))
+		$page['title_prefix'][] = s2_favorite_link();
 
 	$page['link_navigation']['top'] = s2_link('/');
 	if (count($bread_crumbs_titles) > 1)
