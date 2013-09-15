@@ -49,6 +49,16 @@ if ($action == 's2_attachment_upload')
 		$errors[] = $lang_pictures['Empty files'];
 	else
 	{
+		$query = array(
+			'SELECT'	=> 'max(priority + 1)',
+			'FROM'		=> 's2_attachment_files',
+			'WHERE'		=> 'article_id = '.$id,
+		);
+		($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		$priority = (int) $s2_db->result($result);
+
 		foreach ($_FILES['pictures']['name'] as $i => $filename)
 		{
 			// Processing errors
@@ -136,10 +146,12 @@ if ($action == 's2_attachment_upload')
 			$query = array(
 				'INSERT'	=> 'article_id, name, filename, time, size, is_picture, priority',
 				'INTO'		=> 's2_attachment_files',
-				'VALUES'	=> $id.', \''.$s2_db->escape($name).'\', \''.$s2_db->escape($filename).'\', '.$now.', '.$size.', '.$is_picture.', 0',
+				'VALUES'	=> $id.', \''.$s2_db->escape($name).'\', \''.$s2_db->escape($filename).'\', '.$now.', '.$size.', '.$is_picture.', '.$priority,
 			);
 			($hook = s2_hook('s2_attachment_pre_add_file_qr')) ? eval($hook) : null;
 			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+			$priority++;
 		}
 	}
 

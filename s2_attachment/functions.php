@@ -17,7 +17,8 @@ function s2_attachment_items ($id)
 	$query = array(
 		'SELECT'	=> 'id, name, filename, size, time, article_id, is_picture',
 		'FROM'		=> 's2_attachment_files',
-		'WHERE'		=> 'article_id = '.$id
+		'WHERE'		=> 'article_id = '.$id,
+		'ORDER BY'	=> 'priority',
 	);
 	($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -32,7 +33,7 @@ function s2_attachment_items ($id)
 
 		$icon = $row['is_picture'] ? '<img class="attach-preview" src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/micro/'.$row['filename'].'.png" alt="" />' : '';
 
-		$item = '<li><div class="buttons">'.implode('', $buttons).'</div><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/'.$row['filename'].'" target="_blank" title="'.$row['filename'].', '.s2_frendly_filesize($row['size']).'">'.$icon.s2_htmlencode($row['name'] ? $row['name'] : '<'.$row['filename'].'>').'</a></li>';
+		$item = '<li data-s2_attachment-id="'.$row['id'].'"><div class="buttons">'.implode('', $buttons).'</div><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/'.$row['filename'].'" target="_blank" title="'.$row['filename'].', '.s2_frendly_filesize($row['size']).'">'.$icon.s2_htmlencode($row['name'] ? $row['name'] : '<'.$row['filename'].'>').'</a></li>';
 
 		if ($row['is_picture'])
 			$list_pictures .= $item;
@@ -42,9 +43,9 @@ function s2_attachment_items ($id)
 
 	$lists = array();
 	if ($list_pictures)
-		$lists[] = '<ul>'.$list_pictures.'</ul>';
+		$lists[] = '<ul class="s2_attachment_listing">'.$list_pictures.'</ul>';
 	if ($list_files)
-		$lists[] = '<ul>'.$list_files.'</ul>';
+		$lists[] = '<ul class="s2_attachment_listing">'.$list_files.'</ul>';
 
 	return implode('<hr />', $lists);
 }
@@ -69,6 +70,31 @@ function s2_attachment_add_col ($id)
 	</div>
 <?php
 
+}
+
+//
+// Sorting files
+//
+function s2_attachment_sort_files ($ids)
+{
+	global $s2_db;
+
+	$ids = explode(',', $ids);
+
+	foreach ($ids as $priority => $id)
+	{
+		$id = (int) $id;
+		if (!$id)
+			continue;
+
+		$query = array(
+			'UPDATE'	=> 's2_attachment_files',
+			'SET'		=> 'priority = '.$priority,
+			'WHERE'		=> 'id = '.$id
+		);
+		($hook = s2_hook('fn_s2_attachment_sort_files_pre_update')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	}
 }
 
 //
@@ -171,7 +197,8 @@ function s2_attachment_placeholder_content ($id, $placeholder_limit)
 	$query = array(
 		'SELECT'	=> 'id, name, filename, size, time, is_picture',
 		'FROM'		=> 's2_attachment_files',
-		'WHERE'		=> 'article_id = '.$id
+		'WHERE'		=> 'article_id = '.$id,
+		'ORDER BY'	=> 'priority'
 	);
 	($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);

@@ -73,12 +73,16 @@ if (!$s2_db->table_exists('s2_attachment_files'))
 		),
 		'PRIMARY KEY'	=> array('id'),
 		'INDEXES'		=> array(
-			'article_id_idx'	=> array('article_id'),
+			'article_id_idx'			=> array('article_id'),
+			'article_id_priority_idx'	=> array('article_id', 'priority'),
 		)
 	);
 
 	$s2_db->create_table('s2_attachment_files', $schema);
 }
+
+// For old installations
+$s2_db->add_index('s2_attachment_files', 'article_id_priority_idx', array('article_id', 'priority'));
 	]]></install>
 
 	<uninstall><![CDATA[

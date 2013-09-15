@@ -82,3 +82,15 @@ elseif ($action == 's2_attachment_rename')
 	$file = $s2_db->fetch_assoc($result);
 	echo s2_attachment_items($file['article_id']);
 }
+
+elseif ($action == 's2_attachment_sort')
+{
+	$required_rights = array('edit_site');
+	($hook = s2_hook('rq_action_s2_attachment_sort_start')) ? eval($hook) : null;
+	s2_test_user_rights($session_id, $required_rights);
+
+	require $ext_info['path'].'/functions.php';
+
+	$ids = isset($_GET['ids']) ? (string) $_GET['ids'] : '';
+	s2_attachment_sort_files($ids);
+}
