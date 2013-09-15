@@ -15,14 +15,14 @@
 <extension for="S2" engine="1.0">
 	<id>s2_attachment</id>
 	<title>Attachments</title>
-	<version>1.0b</version>
+	<version>1.0b1</version>
 	<description>Attaches files to every page.</description>
 	<author>Roman Parpalak</author>
 
 	<adminaffected>1</adminaffected>
 
-	<minversion>1.0b3</minversion>
-	<maxtestedon>1.0b4</maxtestedon>
+	<minversion>1.0b4</minversion>
+	<maxtestedon>1.0b5</maxtestedon>
 	<note type="uninstall" timing="pre">Warning! All the attached files will be deleted during the uninstall process. It is strongly recommended you to disable 'Attachments' extension instead or to upgrade it without uninstalling.</note>
 
 	<install><![CDATA[
