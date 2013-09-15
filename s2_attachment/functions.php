@@ -63,7 +63,7 @@ function s2_attachment_add_col ($id)
 			<input type="hidden" name="id" value="<?php echo $id; ?>" />
 		</form>
 		<hr />
-		<div class="list_wrapper" style="padding-bottom: 7.0em;">
+		<div class="height_wrap" style="padding-bottom: 6.0em;">
 			<div class="tags_list" id="s2_attachment_items"><?php echo s2_attachment_items($id); ?></div>
 		</div>
 	</div>
