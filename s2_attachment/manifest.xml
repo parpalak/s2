@@ -21,7 +21,7 @@
 
 	<adminaffected>1</adminaffected>
 
-	<minversion>1.0b4</minversion>
+	<minversion>1.0b5</minversion>
 	<maxtestedon>1.0b5</maxtestedon>
 	<note type="uninstall" timing="pre">Warning! All the attached files will be deleted during the uninstall process. It is strongly recommended you to disable 'Attachments' extension instead or to upgrade it without uninstalling.</note>
 
