@@ -211,6 +211,8 @@ function s2_attachment_placeholder_content ($id, $placeholder_limit)
 	$picture_num = 0;
 	while ($row = $s2_db->fetch_assoc($result))
 	{
+		($hook = s2_hook('fn_s2_attachment_items_loop')) ? eval($hook) : null;
+
 		if ($row['is_picture'])
 		{
 			$picture_num++;
