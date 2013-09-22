@@ -62,6 +62,14 @@ $s2_db->drop_field('articles', 's2_page_blocks');
 	]]></uninstall>
 
 	<hooks>
+		<hook id="ai_head_end"><![CDATA[
+echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/page_blocks.css" />'."\n";
+		]]></hook>
+
+		<hook id="ai_after_js_include"><![CDATA[
+echo '<script type="text/javascript" src="'.$ext_info['url'].'/page_blocks.js"></script>'."\n";
+		]]></hook>
+
 		<hook id="opt_start"><![CDATA[
 $s2_const_types['S2_PAGE_BLOCKS'] = 'string';
 		]]></hook>
@@ -76,12 +84,18 @@ if ($name == 'S2_PAGE_BLOCKS')
 		if (count($s2_page_blocks_field) != 3)
 			continue;
 
-		$s2_page_blocks_field[2] = (int) $s2_page_blocks_field[2];
+		$s2_page_blocks_type = trim($s2_page_blocks_field[2]);
+		if ($s2_page_blocks_type !== 'img')
+		{
+			$s2_page_blocks_type = (int) $s2_page_blocks_type;
+			if ($s2_page_blocks_type < 0 && $s2_page_blocks_type > 15)
+				$s2_page_blocks_type = 3;
+		}
 
 		$s2_page_blocks_config[] = array(
 			'name'		=> $s2_page_blocks_field[0],
 			'info'		=> $s2_page_blocks_field[1],
-			'height'	=> ($s2_page_blocks_field[2] > 0 && $s2_page_blocks_field[2] < 15)	 ? $s2_page_blocks_field[2] : 3,
+			'type'		=> $s2_page_blocks_type,
 		);
 	}
 
@@ -115,27 +129,10 @@ $s2_page_blocks_config = unserialize(S2_PAGE_BLOCKS);
 $s2_page_blocks_height_sum = 0;
 if (!empty($s2_page_blocks_config))
 {
+	require $ext_info['path'].'/functions.php';
+
 	$s2_page_blocks_content = unserialize($page['s2_page_blocks']);
-	$s2_page_blocks_height_sum = 0.25;
-?>
-		<table class="fields">
-<?php
-	foreach ($s2_page_blocks_config as $s2_page_blocks_field)
-	{
-		$s2_page_blocks_height_sum += 0.166666 + $s2_page_blocks_field['height'];
-		$s2_page_blocks_text = isset($s2_page_blocks_content[$s2_page_blocks_field['name']]) ? $s2_page_blocks_content[$s2_page_blocks_field['name']] : '';
-?>
-			<tr>
-				<td class="label"><?php echo $s2_page_blocks_field['info']; ?></td>
-				<td>
-					<textarea style="font-size: 1em; height: <?php echo $s2_page_blocks_field['height']; ?>em;" class="full_textarea" name="page[s2_page_blocks_<?php echo s2_htmlencode($s2_page_blocks_field['name']); ?>]"><?php echo s2_htmlencode($s2_page_blocks_text); ?></textarea>
-				</td>
-			</tr>
-<?php
-	}
-?>
-		</table>
-<?php
+	$s2_page_blocks_height_sum = s2_page_blocks_admin_content($s2_page_blocks_config, $s2_page_blocks_content, $id);
 }
 		]]></hook>
 
