@@ -16,11 +16,11 @@ var Hooks = (function ()
 
 	return (
 	{
-		add: function (hook, func)
+		add: function (hook, func, important)
 		{
  			if (typeof hooks[hook] == 'undefined')
 				hooks[hook] = [];
-			hooks[hook].push(func);
+			important ? hooks[hook].push(func) : hooks[hook].unshift(func);
 		},
 
 		run: function (hook, data)
@@ -1233,6 +1233,8 @@ var slEditorSelection = null;
 
 function GetImage ()
 {
+	$(document).trigger('pagetext_image_start.s2');
+
 	slEditorSelection = get_selection(document.forms['artform'].elements['page[text]']);
 	selectTab('#pict_tab');
 	loadPictman();
@@ -1306,8 +1308,12 @@ var loadPictman = (function ()
 	};
 }());
 
-function ReturnImage(s, w, h)
+function ReturnImage (s, w, h)
 {
+	var result = Hooks.run('fn_return_image_start', {s: s, w: w, h: h});
+	if (result)
+		return;
+
 	var frm = document.forms['artform'];
 	if (!frm || !frm.elements['page[text]'])
 		return;
