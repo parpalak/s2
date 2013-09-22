@@ -70,6 +70,8 @@ function s2_wysiwyg_filebrowser_callback (field_name, url, type, win)
 	if (type != 'image')
 		return;
 
+	$(document).trigger('s2_wysiwyg_pictman_call.s2');
+
 	var eHtml = document.getElementsByTagName('HTML')[0],
 		height = eHtml.offsetHeight ? parseInt(0.8 * eHtml.offsetHeight) : 500,
 		width = eHtml.offsetWidth ? parseInt(0.8 * eHtml.offsetWidth) : 750,
@@ -80,7 +82,7 @@ function s2_wysiwyg_filebrowser_callback (field_name, url, type, win)
 	s2_wysiwyg_wFileBrowser = window.open(s2_wysiwyg_pict_url, 's2_wysiwyg_imagewindow', 'scrollbars=yes,toolbar=yes,top=' + top + ',left=' + left + ',width=' + width + ',height=' + height, 'True');
 }
 
-function ReturnImage (s, w, h)
+function s2_wysisyg_return_image (data)
 {
 	if (s2_wysiwyg_wFileBrowser)
 		s2_wysiwyg_wFileBrowser.close();
@@ -88,9 +90,9 @@ function ReturnImage (s, w, h)
 	if (!s2_wysiwyg_wImage || s2_wysiwyg_wImage.closed)
 		return;
 
-	s2_wysiwyg_wImage.document.forms[0].elements['src'].value = s;
-	s2_wysiwyg_wImage.document.forms[0].elements['width'].value = w;
-	s2_wysiwyg_wImage.document.forms[0].elements['height'].value = h;
+	s2_wysiwyg_wImage.document.forms[0].elements['src'].value = data.s;
+	s2_wysiwyg_wImage.document.forms[0].elements['width'].value = data.w;
+	s2_wysiwyg_wImage.document.forms[0].elements['height'].value = data.h;
 }
 
 function s2_wysisyg_addjs ()
@@ -109,6 +111,7 @@ theme_advanced_buttons1: "code", theme_advanced_buttons2: "", theme_advanced_but
 }
 
 Hooks.add('fn_popup_window_filter_head', function (head) { return head + s2_wysisyg_addjs(); });
+Hooks.add('fn_return_image_start', function (data) { s2_wysisyg_return_image(data); return true; });
 
 $(document)
 	.on('request_article_start.s2', function () { tinyMCE.execCommand('mceRemoveControl', false, 'arttext'); })
