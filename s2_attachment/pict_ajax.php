@@ -10,7 +10,7 @@
 if ($action == 's2_attachment_upload')
 {
 	$required_rights = array('edit_site');
-	($hook = s2_hook('prq_action_upload_start')) ? eval($hook) : null;
+	($hook = s2_hook('s2_attachment_action_upload_start')) ? eval($hook) : null;
 	s2_test_user_rights($session_id, $required_rights);
 
 	require $ext_info['path'].'/functions.php';
@@ -54,7 +54,7 @@ if ($action == 's2_attachment_upload')
 			'FROM'		=> 's2_attachment_files',
 			'WHERE'		=> 'article_id = '.$id,
 		);
-		($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
+		($hook = s2_hook('s2_attachment_action_upload_pre_pr_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$priority = (int) $s2_db->result($result);
