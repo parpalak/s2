@@ -15,7 +15,7 @@
 <extension for="S2" engine="1.0">
 	<id>s2_page_blocks</id>
 	<title>Page blocks</title>
-	<version>1.0a</version>
+	<version>1.0a1</version>
 	<description>Adds custom fields and placeholders.</description>
 	<author>Roman Parpalak</author>
 
