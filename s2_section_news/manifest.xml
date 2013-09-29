@@ -66,7 +66,6 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 		'FROM'		=> 'articles AS a, ('.$s2_section_news_raw2.') as temp',
 		'WHERE'		=> 'parent_id = temp.news_id AND published = 1',
 		'ORDER BY'	=> 'create_time DESC',
-		'LIMIT'		=> '3'
 	);
 	($hook = s2_hook('s2_section_news_pre_get_news')) ? eval($hook) : null;
 	$s2_section_news_result = $s2_db->query_build($s2_section_news_q) or error(__FILE__, __LINE__);
@@ -74,14 +73,16 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 	$s2_section_news_html = '<div class="info"><p class="data">%1$s</p>'."\n".
 		'<a href="%2$s">%3$s</a>'."\n".
 		'<div class="main_info">%4$s</div></div>'."\n";
-	$s2_section_news = '';
+
+	$s2_section_news = array();
+
 	while ($s2_section_news_row = $s2_db->fetch_assoc($s2_section_news_result))
 	{
 		if (!$s2_section_news_row['children_exist'])
 		{
 			($hook = s2_hook('s2_section_news_pre_merge_news')) ? eval($hook) : null;
 
-			$s2_section_news .= sprintf($s2_section_news_html,
+			$s2_section_news[] = sprintf($s2_section_news_html,
 				s2_date($s2_section_news_row['create_time']),
 				S2_PATH.'/news/'.urlencode($s2_section_news_row['url']),
 				s2_htmlencode($s2_section_news_row['title']),
@@ -90,7 +91,29 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 		}
 	}
 
-	$replace['<!-- s2_section_news -->'] = $s2_section_news;
+	if (S2_MAX_ITEMS)
+	{
+		// Paging navigation
+		$page_num = isset($_GET['n']) ? intval($_GET['n']) - 1 : 0;
+		if ($page_num < 0)
+			$page_num = 0;
+
+		$start = $page_num * S2_MAX_ITEMS;
+		if ($start >= count($s2_section_news))
+			$page_num = $start = 0;
+
+		$s2_section_news_total_count = ceil(1.0 * count($s2_section_news) / S2_MAX_ITEMS);
+
+		$s2_section_news_link_nav = array();
+		$s2_section_news = array_slice($s2_section_news, $start, S2_MAX_ITEMS);
+		$s2_section_news[] = s2_paging(
+			$page_num + 1,
+			$s2_section_news_total_count,
+			s2_link(str_replace('%', '%%', $request_uri), array('n=%d')), $s2_section_news_link_nav
+		);
+	}
+
+	$replace['<!-- s2_section_news -->'] = implode('', $s2_section_news);
 }
 		]]></hook>
 
