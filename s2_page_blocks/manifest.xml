@@ -80,8 +80,8 @@ if ($name == 'S2_PAGE_BLOCKS')
 	$s2_page_blocks_config = array();
 	foreach (explode("\n", $value) as $s2_page_blocks_string)
 	{
-		$s2_page_blocks_field = preg_split('#,\s+#', trim($s2_page_blocks_string));
-		if (count($s2_page_blocks_field) != 3)
+		$s2_page_blocks_field = preg_split('#,\s+#', trim($s2_page_blocks_string), 4);
+		if (count($s2_page_blocks_field) < 3)
 			continue;
 
 		$s2_page_blocks_type = trim($s2_page_blocks_field[2]);
@@ -96,6 +96,7 @@ if ($name == 'S2_PAGE_BLOCKS')
 			'name'		=> $s2_page_blocks_field[0],
 			'info'		=> $s2_page_blocks_field[1],
 			'type'		=> $s2_page_blocks_type,
+			'pattern'	=> !empty($s2_page_blocks_field[3]) ? trim($s2_page_blocks_field[3]) : '',
 		);
 	}
 
@@ -174,7 +175,7 @@ if (!empty($s2_page_blocks_config))
 {
 	foreach ($s2_page_blocks_config as $s2_page_blocks_field)
 		if (!empty($page[$s2_page_blocks_field['name']]))
-			$replace['<!-- '.$s2_page_blocks_field['name'].' -->'] = $page[$s2_page_blocks_field['name']];
+			$replace['<!-- '.$s2_page_blocks_field['name'].' -->'] = sprintf(empty($s2_page_blocks_field['pattern']) ? '%s' : $s2_page_blocks_field['pattern'], $page[$s2_page_blocks_field['name']]);
 }
 		]]></hook>
 	</hooks>
