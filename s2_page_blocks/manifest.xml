@@ -80,7 +80,7 @@ if ($name == 'S2_PAGE_BLOCKS')
 	$s2_page_blocks_config = array();
 	foreach (explode("\n", $value) as $s2_page_blocks_string)
 	{
-		$s2_page_blocks_field = preg_split('#,\s+#', trim($s2_page_blocks_string), 4);
+		$s2_page_blocks_field = preg_split('#,\s*#', trim($s2_page_blocks_string), 4);
 		if (count($s2_page_blocks_field) < 3)
 			continue;
 
