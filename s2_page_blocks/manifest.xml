@@ -111,7 +111,7 @@ else
 	require $ext_info['path'].'/lang/English.php';
 
 $s2_page_blocks_text_config = '';
-foreach (unserialize($options['S2_PAGE_BLOCKS']) as $s2_page_blocks_field)
+foreach (!empty($options['S2_PAGE_BLOCKS']) ? unserialize($options['S2_PAGE_BLOCKS']) : array() as $s2_page_blocks_field)
 	$s2_page_blocks_text_config .= implode(', ', $s2_page_blocks_field)."\n";
 
 $fieldset = array(
@@ -121,8 +121,12 @@ $fieldset = array(
 $output .= '<fieldset><legend>'.$lang_s2_page_blocks['Page blocks'].'</legend>'.implode('', $fieldset).'</fieldset>';
 		]]></hook>
 
-		<hook id="fn_output_article_form_pre_page_get_qr"><![CDATA[
-$query['SELECT'] .= ', s2_page_blocks';
+		<hook id="fn_output_article_form_pre_page_get_qr, fn_last_articles_array_pre_get_qr"><![CDATA[
+$query['SELECT'] .= ', a.s2_page_blocks';
+		]]></hook>
+
+		<hook id="fn_last_articles_array_loop"><![CDATA[
+$last[$i]['s2_page_blocks'] = $row['s2_page_blocks'];
 		]]></hook>
 
 		<hook id="fn_output_article_form_after_fields2"><![CDATA[
