@@ -15,7 +15,7 @@ function s2_page_blocks_choose_file (sName)
 }
 
 $(document)
-	.on('pagetext_image_start.s2,s2_wysiwyg_pictman_call.s2', function () { s2_page_blocks_name = false; console.log('erlkl;w'); });
+	.on('pagetext_image_start.s2,s2_wysiwyg_pictman_call.s2', function () { s2_page_blocks_name = false; });
 
 Hooks.add('fn_return_image_start', function (data)
 {
