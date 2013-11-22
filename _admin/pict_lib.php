@@ -114,7 +114,7 @@ function s2_get_files ($dir)
 
 		$dim = '';
 
-		if (strpos($item, '.') !== false && in_array(end(explode('.', $item)), $allowed_extensions))
+		if (strpos($item, '.') !== false && in_array(pathinfo($item, PATHINFO_EXTENSION), $allowed_extensions))
 		{
 			$image_info = getImageSize(S2_IMG_PATH.$dir.'/'.$item);
 			$dim = $image_info[0].'*'.$image_info[1];
