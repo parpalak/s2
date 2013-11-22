@@ -97,8 +97,10 @@ function s2_last_articles_array ($limit = '5')
 		),
 		'ORDER BY'	=> 'a.create_time DESC',
 		'WHERE'		=> '('.$raw_query_child_num.') IS NULL AND (a.create_time <> 0 OR a.modify_time <> 0) AND a.published = 1',
-		'LIMIT'		=> $limit
 	);
+
+	if ($limit)
+		$query['LIMIT'] = $limit;
 
 	($hook = s2_hook('fn_last_articles_array_pre_get_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
