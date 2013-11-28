@@ -130,6 +130,8 @@ function s2_last_articles_array ($limit = '5')
 		else
 			unset($last[$k]);
 
+	($hook = s2_hook('fn_last_articles_array_end')) ? eval($hook) : null;
+
 	return $last;
 }
 
