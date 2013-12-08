@@ -43,17 +43,15 @@
 		last_search = str;
 	}
 
-	function getBounds (eItem)
-	{
-		var rect = eItem.getBoundingClientRect();
-		return {
-			top: rect.top,
-			right: rect.right,
-			bottom: rect.bottom,
-			left: rect.left,
-			width: eItem.offsetWidth,
-			height: eItem.offsetHeight
-		};
+	function getOffsetRect (eItem) {
+		var
+			box = eItem.getBoundingClientRect(),
+			body_box = document.body.getBoundingClientRect(),
+
+			top  = box.top - body_box.top,
+			left = box.left - body_box.left;
+
+		return {top: Math.round(top), left: Math.round(left), width: eItem.offsetWidth, height: eItem.offsetHeight};
 	}
 
 	function keyDown (e)
@@ -161,8 +159,8 @@
 		STips.innerHTML = sHTML;
 		STips.style.display = 'block';
 
-		var mc = getBounds(SInp);
-		STips.style.top = document.documentElement.scrollTop + mc.bottom + shift_y + 'px';
+		var mc = getOffsetRect(SInp);
+		STips.style.top = document.documentElement.scrollTop + mc.top + mc.height + shift_y + 'px';
 		STips.style.left = mc.left + shift_x + 'px';
 		STips.style.width = mc.width - 2 + delta_x + 'px';
 
