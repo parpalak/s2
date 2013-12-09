@@ -32,6 +32,8 @@ function s2_setcookie($name, $value, $expire = 0, $path = null, $secure = null)
 	if ($secure === null)
 		$secure = defined('S2_FORCE_ADMIN_HTTPS');
 
+	$expire = min($expire, PHP_INT_MAX); // Now we do not deal with 2037 year problem :)
+
 	if (version_compare(PHP_VERSION, '5.2.0', '>='))
 		setcookie($name, $value, $expire, $path, null, $secure, true);
 	else
