@@ -54,6 +54,8 @@ var s2_lang = {
 	value				: 'Size: ',
 	size				: 'Dimension: ',
 	insert				: '← Insert',
+	retina_help			: 'High resolution',
+	reduction			: ' &rarr; ',
 
 	files_too_big		: 'The following files were not being uploaded since their size exceeds the server limit (%s):'
 };

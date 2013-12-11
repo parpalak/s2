@@ -46,6 +46,34 @@ function strNatCmp (a, b)
 	return aa.length - bb.length;
 }
 
+var s2Retina = (function ()
+{
+	var is_local_storage = false;
+	try
+	{
+		is_local_storage = 'localStorage' in window && window['localStorage'] !== null;
+	}
+	catch (e)
+	{
+		is_local_storage = false;
+	}
+
+	var is_retina = is_local_storage && !!(localStorage.getItem('s2_use_retina') - 0);
+
+	return {
+		'set': function (val)
+		{
+			is_retina = val;
+			if (is_local_storage)
+				localStorage.setItem('s2_use_retina', 0 + is_retina);
+		},
+		'get': function ()
+		{
+			return is_retina;
+		}
+	};
+}());
+
 var parentWnd = opener || window.top || null,
 	fExecDouble = function () {};
 
@@ -341,17 +369,25 @@ $(function ()
 			{
 				var filePath = sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
 				str = s2_lang.file + '<a href="' + filePath + '" target="_blank">' + filePath + ' &uarr;</a>';
+
 				if (d.rslt.obj.attr('data-fsize'))
 					str += "<br />" + s2_lang.value + d.rslt.obj.attr('data-fsize');
+
 				if (d.rslt.obj.attr('data-dim'))
 				{
 					var a = d.rslt.obj.attr('data-dim').split('*');
+
 					str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
+					str += '<span id="s2_retina_size" style="display: ' + (s2Retina.get() ? 'inline' : 'none') + ';">' + s2_lang.reduction + Math.round(a[0]/2) + "&times;" + Math.round(a[1]/2) + '</span>';
+
+					str += '<br /><label><input type="checkbox" onclick="s2Retina.set(this.checked); $(\'#s2_retina_size\').toggle(); "' + (s2Retina.get() ? ' checked="checked"' : '') + '>' + s2_lang.retina_help + '</label>';
+
 					fExecDouble = function ()
 					{
 						if (parentWnd.ReturnImage)
-							parentWnd.ReturnImage(filePath, a[0], a[1]);
+							parentWnd.ReturnImage(filePath, s2Retina.get() ? Math.round(a[0]/2) : a[0], s2Retina.get() ? Math.round(a[1]/2) : a[1]);
 					};
+
 					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
 			}
