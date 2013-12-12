@@ -17,6 +17,7 @@ $lang_common = array(
 'Subsections'				=> 'Subsections',
 'Tags'						=> 'Tags',
 'Tags:'						=> 'Tags: %s',
+'Tags separator:'			=> ', ',
 'With this tag'				=> 'On the subject “%s”',
 'Comments'					=> 'Comments',
 'Copyright 1'				=> '© %2$s %1$s.',

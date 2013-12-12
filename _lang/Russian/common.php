@@ -17,6 +17,7 @@ $lang_common = array(
 'Subsections'				=> 'Подразделы',
 'Tags'						=> 'Ключевые слова',
 'Tags:'						=> 'Ключевые слова: %s',
+'Tags separator:'			=> ', ',
 'With this tag'				=> 'По теме «%s»',
 'Comments'					=> 'Комментарии',
 'Copyright 1'				=> '© %1$s, %2$s.',

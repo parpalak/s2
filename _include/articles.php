@@ -767,7 +767,7 @@ function s2_get_tags ($id)
 	if (empty($tags))
 		return '';
 
-	return '<p class="article_tags">'.sprintf($lang_common['Tags:'], implode(', ', $tags)).'</p>';
+	return '<p class="article_tags">'.sprintf($lang_common['Tags:'], implode($lang_common['Tags separator:'], $tags)).'</p>';
 }
 
 // Processes site pages
