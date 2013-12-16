@@ -160,7 +160,7 @@
 		STips.style.display = 'block';
 
 		var mc = getOffsetRect(SInp);
-		STips.style.top = document.documentElement.scrollTop + mc.top + mc.height + shift_y + 'px';
+		STips.style.top = mc.top + mc.height + shift_y + 'px';
 		STips.style.left = mc.left + shift_x + 'px';
 		STips.style.width = mc.width - 2 + delta_x + 'px';
 
