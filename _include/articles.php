@@ -524,6 +524,9 @@ function s2_make_tags_pages ($request_array)
 		if (!empty($articles))
 		{
 			array_multisort($sort_array, $sort_order, $articles);
+
+			($hook = s2_hook('fn_s2_make_tags_pages_pre_add_html')) ? eval($hook) : null;
+
 			foreach ($articles as $item)
 				$text .= '<h3 class="article'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
 					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
