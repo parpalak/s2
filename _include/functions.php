@@ -331,7 +331,18 @@ function s2_path_from_id ($id, $visible_for_all = false)
 	($hook = s2_hook('fn_path_from_id_pre_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	return ($row = $s2_db->fetch_row($result)) ? ($row[1] != S2_ROOT_ID ? s2_path_from_id($row[1], $visible_for_all).'/'.urlencode($row[0]) : '') : false;
+	$row = $s2_db->fetch_row($result);
+	if (!$row)
+		return false;
+
+	if ($row[1] == S2_ROOT_ID)
+		return '';
+
+	$prefix = s2_path_from_id($row[1], $visible_for_all);
+	if ($prefix === false)
+		return false;
+
+	return	$prefix.'/'.urlencode($row[0]);
 }
 
 //
