@@ -218,18 +218,11 @@ function s2_output_article_form ($id)
 	ksort($tags);
 
 	// Check the URL for errors
-	$query = array(
-		'SELECT'	=> 'count(a.id)',
-		'FROM'		=> 'articles AS a',
-		'WHERE'		=> 'url = \''.$page['url'].'\' AND parent_id = '.$page['parent_id']
-	);
-	($hook = s2_hook('fn_output_article_form_pre_chk_url_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
+	$url_status = s2_check_url_status($page['parent_id'], $page['url']);
 	$url_error = '';
-	if ($s2_db->result($result) != 1)
+	if ($url_status == 'not_unique')
 		$url_error = $lang_admin['URL not unique'];
-	elseif ($page['url'] == '' && $page['parent_id'] != S2_ROOT_ID)
+	elseif ($url_status == 'empty')
 		$url_error = $lang_admin['URL empty'];
 
 	// Options for template select
