@@ -24,6 +24,15 @@ function s2_get_group_url ($parent_ids, $urls)
 {
 	global $s2_db;
 
+	if (!S2_USE_HIERARCHY)
+	{
+		// Flat urls
+		foreach ($urls as $k => $url)
+			$urls[$k] = '/'.$url;
+
+		return $urls;
+	}
+
 	while (count($parent_ids))
 	{
 		$flags = array();
@@ -87,7 +96,7 @@ function s2_last_articles_array ($limit = '5')
 	$raw_query_user = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 	$query = array(
-		'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS ptitle, ('.$raw_query_user.') AS author',
+		'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS ptitle, a1.url AS p_url, ('.$raw_query_user.') AS author',
 		'FROM'		=> 'articles AS a',
 		'JOINS'		=> array(
 			array(
@@ -115,6 +124,7 @@ function s2_last_articles_array ($limit = '5')
 
 		$last[$i]['title'] = $row['title'];
 		$last[$i]['ptitle'] = $row['ptitle'];
+		$last[$i]['p_url'] = $row['p_url'];
 		$last[$i]['time'] = $row['create_time'];
 		$last[$i]['modify_time'] = $row['modify_time'];
 		$last[$i]['favorite'] = $row['favorite'];
@@ -152,7 +162,7 @@ function s2_last_articles ($num)
 		($hook = s2_hook('fn_last_articles_loop')) ? eval($hook) : null;
 
 		$output .= '<h2 class="preview'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').
-			'<small><a class="preview_section" href="'.s2_link(preg_replace('#[^/]*$#', '', $item['rel_path'])).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
+			'<small><a class="preview_section" href="'.s2_link(S2_USE_HIERARCHY ? preg_replace('#[^/]*$#', '', $item['rel_path']) : $item['p_url']).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
 			'<div class="preview time">'.s2_date($item['time']).'</div>'.
 			'<div class="preview cite">'.$item['text'].'</div>';
 	}
@@ -299,7 +309,7 @@ function s2_articles_by_tag ($tag_id)
 
 	while ($row = $s2_db->fetch_assoc($result))
 	{
-		$urls[] = urlencode($row['url']).($row['children_exist'] ? '/' : '');
+		$urls[] = urlencode($row['url']).(S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
 		$parent_ids[] = $row['parent_id'];
 		$title[] = $row['title'];
 	}
@@ -492,7 +502,7 @@ function s2_make_tags_pages ($request_array)
 			$row = $rows[$k];
 			if ($row['children_exist'])
 			{
-				$sections[] = '<h3 class="subsection'.($row['favorite'] ? ' favorite-item' : '').'">'.($row['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($url).'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
+				$sections[] = '<h3 class="subsection'.($row['favorite'] ? ' favorite-item' : '').'">'.($row['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($url).(S2_USE_HIERARCHY ? '/' : '').'">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
 					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
 					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
 
@@ -587,7 +597,7 @@ function s2_make_favorite_page ($request_array)
 		$row = $rows[$k];
 		if ($row['children_exist'])
 		{
-			$sections[] = '<h3 class="subsection"><a href="'.s2_link($url).'/">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
+			$sections[] = '<h3 class="subsection"><a href="'.s2_link($url).(S2_USE_HIERARCHY ? '/' : '').'">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
 				($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
 				(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
 
@@ -707,7 +717,7 @@ function s2_tagged_articles ($id)
 			$create_tag_list = true;
 		$titles[] = $row['title'];
 		$parent_ids[] = $row['parent_id'];
-		$urls[] = urlencode($row['url']).($row['children_exist'] ? '/' : '');
+		$urls[] = urlencode($row['url']).(S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
 		$tag_ids[] = $row['tag_id'];
 		$original_ids[] = $row['id'];
 	}
@@ -826,6 +836,14 @@ function s2_parse_page_url ($request_uri)
 		return;
 	}
 
+	if (!S2_USE_HIERARCHY && count($request_array) > 2)
+	{
+		// Correcting trailing slash and the rest of URL
+		header('HTTP/1.1 301');
+		header('Location: '.s2_abs_link('/'.$request_array[1]));
+		die;
+	}
+
 	$was_end_slash = '/' == substr($request_uri, -1);
 
 	$bread_crumbs_links = $bread_crumbs_titles = array();
@@ -838,38 +856,45 @@ function s2_parse_page_url ($request_uri)
 
 	($hook = s2_hook('fn_s2_parse_page_url_start')) ? eval($hook) : null;
 
-	// Walking through the page parents
-	// 1. We ensure all of them are published
-	// 2. We build "bread crumbs"
-	// 3. We determine the template of the page
-	for ($i = 0; $i < $max; $i++)
+	if (S2_USE_HIERARCHY)
 	{
-		$parent_path .= urlencode($request_array[$i]).'/';
+		// Walking through the page parents
+		// 1. We ensure all of them are published
+		// 2. We build "bread crumbs"
+		// 3. We determine the template of the page
+		for ($i = 0; $i < $max; $i++)
+		{
+			$parent_path .= urlencode($request_array[$i]).'/';
 
-		$query = array(
-			'SELECT'	=> 'id, title, template',
-			'FROM'		=> 'articles',
-			'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
-		);
-		($hook = s2_hook('fn_s2_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$query = array(
+				'SELECT'	=> 'id, title, template',
+				'FROM'		=> 'articles',
+				'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
+			);
+			($hook = s2_hook('fn_s2_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
+			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		$row = $s2_db->fetch_assoc($result);
-		if (!$row)
-			s2_error_404();
-		if ($s2_db->fetch_assoc($result))
-			error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
+			$row = $s2_db->fetch_assoc($result);
+			if (!$row)
+				s2_error_404();
+			if ($s2_db->fetch_assoc($result))
+				error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
 
-		($hook = s2_hook('fn_s2_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
+			($hook = s2_hook('fn_s2_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
 
-		$bread_crumbs_titles[] = s2_htmlencode($row['title']);
-		$parent_id = $row['id'];
-		if ($row['template'] != '')
-			$template_id = $row['template'];
+			$bread_crumbs_titles[] = s2_htmlencode($row['title']);
+			$parent_id = $row['id'];
+			if ($row['template'] != '')
+				$template_id = $row['template'];
 
-		$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($row['title']).'</a>';
+			$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($row['title']).'</a>';
+		}
 	}
-
+	else
+	{
+		$parent_path = '/';
+		$i = 1;
+	}
 	// Path to the requested page (without trailing slash)
 	$current_path = $parent_path.urlencode($request_array[$i]);
 
@@ -891,7 +916,7 @@ function s2_parse_page_url ($request_uri)
 	$query = array(
 		'SELECT'	=> 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.excerpt as excerpt, a.pagetext as text, a.create_time as date, favorite, commented, template, ('.$raw_query_children.') IS NOT NULL AS children_exist, ('.$raw_query_author.') AS author',
 		'FROM'		=> 'articles AS a',
-		'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
+		'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\''.(S2_USE_HIERARCHY ? ' AND parent_id='.$parent_id : '').' AND published=1'
 	);
 	($hook = s2_hook('fn_s2_parse_page_url_pre_get_page')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -909,11 +934,16 @@ function s2_parse_page_url ($request_uri)
 
 	if (!$template_id)
 	{
-		$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($page['title']).'</a>';
-		error(sprintf($lang_common['Error no template'], implode('<br />', $bread_crumbs_links)));
+		if (S2_USE_HIERARCHY)
+		{
+			$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($page['title']).'</a>';
+			error(sprintf($lang_common['Error no template'], implode('<br />', $bread_crumbs_links)));
+		}
+		else
+			error($lang_common['Error no template flat']);
 	}
 
-	if ($page['children_exist'] != $was_end_slash)
+	if (S2_USE_HIERARCHY && $page['children_exist'] != $was_end_slash)
 	{
 		// Correcting trailing slash
 		header('HTTP/1.1 301');
@@ -923,18 +953,22 @@ function s2_parse_page_url ($request_uri)
 
 	$id = $page['id'];
 	$page['title'] = $bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
-	$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
 	if (!empty($page['author']))
 		$page['author'] = s2_htmlencode($page['author']);
 
 	if (!empty($page['favorite']))
 		$page['title_prefix'][] = s2_favorite_link();
 
-	$page['link_navigation']['top'] = s2_link('/');
-	if (count($bread_crumbs_titles) > 1)
+	if (S2_USE_HIERARCHY)
 	{
-		$page['link_navigation']['up'] = s2_link($parent_path);
-		$page['section_link'] = '<a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>';
+		$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
+
+		$page['link_navigation']['top'] = s2_link('/');
+		if (count($bread_crumbs_titles) > 1)
+		{
+			$page['link_navigation']['up'] = s2_link($parent_path);
+			$page['section_link'] = '<a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>';
+		}
 	}
 
 	($hook = s2_hook('fn_s2_parse_page_url_pre_get_tpl')) ? eval($hook) : null;
@@ -945,7 +979,7 @@ function s2_parse_page_url ($request_uri)
 	$is_menu = strpos($template, '<!-- s2_menu -->') !== false;
 
 	// Dealing with sections, subsections, neighbours
-	if ($page['children_exist'] && (strpos($template, '<!-- s2_subarticles -->') !== false || $is_menu || strpos($template, '<!-- s2_navigation_link -->') !== false))
+	if (S2_USE_HIERARCHY && $page['children_exist'] && (strpos($template, '<!-- s2_subarticles -->') !== false || $is_menu || strpos($template, '<!-- s2_navigation_link -->') !== false))
 	{
 		// It's a section. We have to fetch subsections and articles.
 
@@ -1075,7 +1109,7 @@ function s2_parse_page_url ($request_uri)
 		}
 	}
 
-	if (!$page['children_exist'] && ($is_menu || strpos($template, '<!-- s2_back_forward -->') !== false || strpos($template, '<!-- s2_navigation_link -->') !== false))
+	if (S2_USE_HIERARCHY && !$page['children_exist'] && ($is_menu || strpos($template, '<!-- s2_back_forward -->') !== false || strpos($template, '<!-- s2_navigation_link -->') !== false))
 	{
 		// It's an article. We have to fetch other articles in the parent section
 

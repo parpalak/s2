@@ -4,7 +4,8 @@ $lang_common = array(
 
 'Error encountered'			=> 'An error was encountered',
 'DB repeat items'			=> 'Database error: there are several items supposed to be unique.',
-'Error no template'			=> 'Neither section has a template.<br /><br />You have to choose a tepmlate differs from “inherited” at least for one item from listed below:<br />%s',
+'Error no template'			=> 'No parent section has a template.<br /><br />You have to set a tepmlate differs from “inherited” at least for one item from listed below:<br />%s',
+'Error no template flat'	=> 'Page has no template.<br /><br />You have to set a tepmlate differs from “inherited” for this page.',
 'Template not found'		=> 'The template file <strong>%s</strong> was not found. If this error recur, try to reinstall S2.',
 'Error 404'					=> 'Error 404',
 'Error 404 text'			=> 'This page never existed or&nbsp;has been removed. Go to&nbsp;<a href="%1$s">the main page</a> and&nbsp;find the necessary information, or&nbsp;write webmaster.',

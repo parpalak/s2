@@ -338,9 +338,14 @@ function s2_path_from_id ($id, $visible_for_all = false)
 	if ($row[1] == S2_ROOT_ID)
 		return '';
 
-	$prefix = s2_path_from_id($row[1], $visible_for_all);
-	if ($prefix === false)
-		return false;
+	if (S2_USE_HIERARCHY)
+	{
+		$prefix = s2_path_from_id($row[1], $visible_for_all);
+		if ($prefix === false)
+			return false;
+	}
+	else
+		$prefix = '';
 
 	return	$prefix.'/'.urlencode($row[0]);
 }

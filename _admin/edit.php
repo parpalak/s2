@@ -28,7 +28,7 @@ function s2_check_url_status ($parent_id, $url)
 			$query = array(
 				'SELECT'	=> 'count(id)',
 				'FROM'		=> 'articles AS a',
-				'WHERE'		=> 'a.url = \''.$url.'\' AND a.parent_id = '.$parent_id
+				'WHERE'		=> 'a.url = \''.$url.'\''.(S2_USE_HIERARCHY ? ' AND a.parent_id = '.$parent_id : '')
 			);
 			($hook = s2_hook('fn_check_url_status_pre_qr')) ? eval($hook) : null;
 			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -60,7 +60,7 @@ function s2_save_article ($page, $flags)
 	);
 	($hook = s2_hook('fn_save_article_pre_get_art_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-	
+
 	if ($row = $s2_db->fetch_row($result))
 		list($user_id, $parent_id, $revision, $pagetext) = $row;
 	else
@@ -239,6 +239,10 @@ function s2_output_article_form ($id)
 	while ($row = $s2_db->fetch_row($result))
 		if (!isset($templates[$row[0]]))
 			$templates[$row[0]] = $row[0];
+
+	if (!S2_USE_HIERARCHY)
+		unset($templates['']);
+
 	$templates['+'] = $add_option;
 
 	// Options for author select

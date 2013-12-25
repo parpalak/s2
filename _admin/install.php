@@ -11,7 +11,7 @@
 
 
 define('S2_VERSION', '1.0b5');
-define('S2_DB_REVISION', 13);
+define('S2_DB_REVISION', 14);
 define('MIN_PHP_VERSION', '4.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
@@ -971,6 +971,7 @@ else
 		'S2_WEBMASTER'				=> "''",
 		'S2_WEBMASTER_EMAIL'		=> "'".$email."'",
 		'S2_START_YEAR'				=> "'".date('Y')."'",
+		'S2_USE_HIERARCHY'			=> "'1'",
 		'S2_MAX_ITEMS'				=> "'0'",
 		'S2_FAVORITE_URL'			=> "'favorite'",
 		'S2_TAGS_URL'				=> "'tags'",

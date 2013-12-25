@@ -242,6 +242,9 @@ function s2_preload_editor ()
 	if ($request_array[count($request_array) - 1] == '')
 		unset($request_array[count($request_array) - 1]);
 
+	if (!S2_USE_HIERARCHY)
+		$request_array = array($request_array[1]);
+
 	$id = S2_ROOT_ID;
 	$max = count($request_array);
 
@@ -251,7 +254,7 @@ function s2_preload_editor ()
 		$query = array (
 			'SELECT'	=> 'a.id',
 			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[$i]).'\' AND parent_id = '.$id
+			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[$i]).'\''.(S2_USE_HIERARCHY ? ' AND parent_id = '.$id : '')
 		);
 		($hook = s2_hook('fn_preload_editor_loop_pre_get_parents_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);

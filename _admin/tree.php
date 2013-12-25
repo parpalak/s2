@@ -54,9 +54,9 @@ function s2_create_article ($id, $title)
 	}
 
 	$query = array(
-		'INSERT'	=> 'parent_id, title, priority, url, user_id',
+		'INSERT'	=> 'parent_id, title, priority, url, user_id, template',
 		'INTO'		=> 'articles',
-		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($new_priority).', \'new\', '.$s2_user['id']
+		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($new_priority).', \'new\', '.$s2_user['id'].', '.(S2_USE_HIERARCHY ? '' : '\'site.php\''),
 	);
 	($hook = s2_hook('fn_create_article_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
