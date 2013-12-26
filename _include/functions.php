@@ -683,7 +683,7 @@ function s2_404_header ()
 	if ($return != null)
 		return;
 
-	header('HTTP/1.1 404 Not Found');
+	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 	s2_no_cache();
 }
 
@@ -691,7 +691,7 @@ function s2_error_404 ()
 {
 	global $lang_common;
 
-	header('HTTP/1.1 404 Not Found');
+	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 	header('Content-Type: text/html; charset=utf-8');
 
 	$template = s2_get_service_template('error404.php');
@@ -718,7 +718,7 @@ function error()
 	if (!headers_sent())
 	{
 		// if no HTTP response code is set we send 503
-		header('HTTP/1.1 503 Service Temporarily Unavailable');
+		header($_SERVER['SERVER_PROTOCOL'].' 503 Service Temporarily Unavailable');
 		header('Content-Type: text/html; charset=utf-8');
 	}
 

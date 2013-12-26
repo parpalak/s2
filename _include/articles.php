@@ -454,7 +454,7 @@ function s2_make_tags_pages ($request_array)
 		if (!isset($request_array[3]) || $request_array[3] !== '' || isset($request_array[4]))
 		{
 			// Correcting trailing slash
-			header('HTTP/1.1 301');
+			header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 			header('Location: '.s2_abs_link('/'.S2_TAGS_URL.'/'.$request_array[2].'/'));
 			die;
 		}
@@ -795,7 +795,7 @@ function s2_parse_page_url ($request_uri)
 		if (!isset($request_array[2]))
 		{
 			// Correcting trailing slash
-			header('HTTP/1.1 301');
+			header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 			header('Location: '.s2_abs_link('/'.S2_TAGS_URL.'/'));
 			die;
 		}
@@ -818,7 +818,7 @@ function s2_parse_page_url ($request_uri)
 		if (!isset($request_array[2]) || $request_array[2] !== '' || count($request_array) > 3)
 		{
 			// Correcting trailing slash and the rest of URL
-			header('HTTP/1.1 301');
+			header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 			header('Location: '.s2_abs_link('/'.S2_FAVORITE_URL.'/'));
 			die;
 		}
@@ -946,7 +946,7 @@ function s2_parse_page_url ($request_uri)
 	if (S2_USE_HIERARCHY && $page['children_exist'] != $was_end_slash)
 	{
 		// Correcting trailing slash
-		header('HTTP/1.1 301');
+		header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 		header('Location: '.s2_abs_link($current_path.(!$was_end_slash ? '/' : '')));
 		die;
 	}

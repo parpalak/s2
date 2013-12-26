@@ -189,7 +189,7 @@ $etag = '"'.md5($etag).'"';
 
 if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
 {
-	header('HTTP/1.1 304 Not Modified');
+	header($_SERVER['SERVER_PROTOCOL'].' 304 Not Modified');
 	exit;
 }
 

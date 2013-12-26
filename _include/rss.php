@@ -106,7 +106,7 @@ function s2_do_rss ()
 	{
 		($hook = s2_hook('fn_do_rss_pre_not_modified')) ? eval($hook) : null;
 
-		header('HTTP/1.1 304 Not Modified');
+		header($_SERVER['SERVER_PROTOCOL'].' 304 Not Modified');
 
 		ob_end_clean();
 		if (S2_COMPRESS)
