@@ -32,7 +32,7 @@
 				localStorage.removeItem('comment_text_' + path);
 			}
 			else
-				frm['Message'].value = frm['Message'].value || localStorage.getItem('comment_text_' + document.location.pathname);
+				frm['Message'].value = frm['Message'].value || localStorage.getItem('comment_text_' + document.location.pathname) || '';
 
 			if (!frm)
 				return;
