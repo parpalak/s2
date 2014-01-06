@@ -56,7 +56,7 @@
 
 			frm['Name'].value = frm['Name'].value || localStorage.getItem('comment_name');
 			frm['Email'].value = frm['Email'].value || localStorage.getItem('comment_email');
-			frm['ShowEmail'].checked = frm['ShowEmail'].checked || !!localStorage.getItem('comment_showemail');
+			frm['ShowEmail'].checked = frm['ShowEmail'].checked || !!(localStorage.getItem('comment_showemail') - 0);
 
 			save();
 			setInterval(save, 5000);
