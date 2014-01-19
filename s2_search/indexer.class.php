@@ -31,7 +31,7 @@ class s2_search_indexer extends s2_search_worker
 	{
 		$contents = strip_tags($contents);
 
-		$contents = str_replace('&nbsp;', ' ' , $contents);
+		$contents = str_replace(array('&nbsp;', "\xc2\xa0"), ' ' , $contents);
 		$contents = preg_replace('#&[^;]{1,20};#', '', $contents);
 		$contents = utf8_strtolower($contents);
 		$contents = preg_replace('#[^\-а-яё0-9a-z\^]+#u', ' ', $contents);
