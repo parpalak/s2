@@ -22,16 +22,14 @@
 	<minversion>1.0b</minversion>
 	<maxtestedon>1.0b4</maxtestedon>
 
-	<note type="install">Do not forget to set write permissions (e. g. 777) to folder “_extensions/s2_latex/cache/”.</note>
-
 	<hooks>
 
 		<hook id="idx_template_pre_replace, fn_get_service_template_pre_replace"><![CDATA[
-$replace['<!-- s2_styles -->'] .= "\n".'<script type="text/javascript" src="'.$ext_info['url'].'/latexit.js"></script>'."\n".'<script type="text/javascript">var s2_latex_url = "'.$ext_info['url'].'";</script>';
+$replace['<!-- s2_styles -->'] .= "\n".'<script type="text/javascript" src="http://tex.s2cms.ru/latex.js"></script>';
 		]]></hook>
 
 		<hook id="ai_pre_get_tpl_styles"><![CDATA[
-echo "\n".'<script type="text/javascript" src="'.$ext_info['url'].'/latexit.js"></script>'."\n".'<script type="text/javascript">var s2_latex_url = "'.$ext_info['url'].'";</script>';
+echo "\n".'<script type="text/javascript" src="http://tex.s2cms.ru/latex.js"></script>';
 		]]></hook>
 
 		<hook id="fn_comment_form_pre_syntax_info"><![CDATA[
@@ -52,20 +50,6 @@ $rss_description = s2_latex_make($rss_description);
 		<hook id="fn_do_rss_loop_pre_output" priority="4"><![CDATA[
 $item['title'] = s2_latex_make($item['title']);
 $item['text'] = s2_latex_make($item['text']);
-		]]></hook>
-
-		<hook id="ai_js_end"><![CDATA[
-if (!is_writable($ext_info['path'].'/cache/'))
-{
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
-
-?>
-PopupMessages.show('<?php printf($lang_s2_latex['Cache not writable'], $ext_info['path'].'/cache/'); ?>');
-<?php
-}
 		]]></hook>
 	</hooks>
 </extension>

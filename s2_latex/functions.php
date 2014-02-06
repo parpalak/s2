@@ -11,16 +11,21 @@
 if (!defined('S2_ROOT'))
 	die;
 
+function s2_encodeURIComponent($str)
+{
+	$revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
+	return strtr(rawurlencode($str), $revert);
+}
+
 function s2_latex_image ($matches)
 {
-	global $ext_info;
 	$formula = str_replace(array('&nbsp;', '&lt;', '&gt;', '&amp;'), array(' ', '<', '>', '&'), $matches[1]);
-	return '<img class="s2_latex" border="0" align="middle" src="'.S2_PATH.'/_extensions/s2_latex/latex.php?type=gif&amp;latex='.rawurlencode($formula).'" alt="'.s2_htmlencode($formula).'" />';
+	return '<img border="0" style="vertical-align: middle;" src="http://tex.s2cms.ru/png/'.s2_htmlencode(s2_encodeURIComponent($formula)).'" alt="'.s2_htmlencode($formula).'" />';
 }
 
 function s2_latex_make ($text)
 {
-	return preg_replace_callback('#\$\$([^<>\$]*)\$\$#Ss', 's2_latex_image', $text);
+	return preg_replace_callback('#\\$\\$([^<>\\$]*)\\$\\$#Ss', 's2_latex_image', $text);
 }
 
 define('S2_LATEX_FUNCTIONS_LOADED', 1);
