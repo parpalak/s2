@@ -222,15 +222,19 @@ body {
 		<fieldset>
 			<legend><?php echo $lang_install['Choose language legend'] ?></legend>
 			<div class="input select">
-				<label for="fld0"><span><?php echo $lang_install['Installer language'] ?></span> <small><?php echo $lang_install['Choose language help'] ?></small></label>
-				<select id="fld0" name="lang">
+				<label for="fld0">
+					<span><?php echo $lang_install['Installer language'] ?>
+					</span><select id="fld0" name="lang">
 <?php
 
 		foreach ($languages as $lang)
-			echo "\t\t\t\t".'<option value="'.$lang.'"'.($language == $lang ? ' selected="selected"' : '').'>'.$lang.'</option>'."\n";
+			echo "\t\t\t\t\t".'<option value="'.$lang.'"'.($language == $lang ? ' selected="selected"' : '').'>'.$lang.'</option>'."\n";
 
 ?>
-				</select>
+					</select>
+					<br />
+					<small><?php echo $lang_install['Choose language help'] ?></small>
+				</label>
 			</div>
 		</fieldset>
 		<center><input type="submit" name="changelang" value="<?php echo $lang_install['Choose language'] ?>" /></center>
@@ -256,34 +260,54 @@ body {
 		<fieldset>
 			<legend><?php echo $lang_install['Part1 legend'] ?></legend>
 				<div class="input select required">
-					<label for="fld1"><span><?php echo $lang_install['Database type'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Database type help'] ?></small></label>
-					<select id="fld1" name="req_db_type">
+					<label for="fld1">
+						<span><?php echo $lang_install['Database type'] ?> <em><?php echo $lang_install['Required'] ?></em>
+						</span><select id="fld1" name="req_db_type">
 <?php
 
 	foreach ($db_extensions as $db_type)
-		echo "\t\t\t\t\t".'<option value="'.$db_type[0].'">'.$db_type[1].'</option>'."\n";
+		echo "\t\t\t\t\t\t".'<option value="'.$db_type[0].'">'.$db_type[1].'</option>'."\n";
 
-?>					</select>
+?>
+						</select>
+						<br />
+						<small><?php echo $lang_install['Database type help'] ?></small>
+					</label>
 				</div>
 				<div class="input text required">
-					<label for="fld2"><span><?php echo $lang_install['Database server'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Database server help'] ?></small></label>
-					<input id="fld2" type="text" name="req_db_host" value="localhost" size="50" maxlength="100" />
+					<label for="fld2">
+						<span><?php echo $lang_install['Database server'] ?> <em><?php echo $lang_install['Required'] ?></em>
+						</span><input id="fld2" type="text" name="req_db_host" value="localhost" size="50" maxlength="100" />
+						<small><?php echo $lang_install['Database server help'] ?></small>
+					</label>
 				</div>
 				<div class="input text required">
-					<label for="fld3"><span><?php echo $lang_install['Database name'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Database name help'] ?></small></label>
-					<input id="fld3" type="text" name="req_db_name" size="35" maxlength="50" />
+					<label for="fld3">
+						<span><?php echo $lang_install['Database name'] ?> <em><?php echo $lang_install['Required'] ?></em>
+						</span><input id="fld3" type="text" name="req_db_name" size="35" maxlength="50" />
+						<small><?php echo $lang_install['Database name help'] ?></small>
+					</label>
 				</div>
 				<div class="input text">
-					<label for="fld4"><span><?php echo $lang_install['Database username'] ?></span> <small><?php echo $lang_install['Database username help'] ?></small></label>
-					<input id="fld4" type="text" name="db_username" size="35" maxlength="50" />
+					<label for="fld4">
+						<span><?php echo $lang_install['Database username'] ?>
+						</span><input id="fld4" type="text" name="db_username" size="35" maxlength="50" />
+						<small><?php echo $lang_install['Database username help'] ?></small>
+					</label>
 				</div>
 				<div class="input text">
-					<label for="fld5"><span><?php echo $lang_install['Database password'] ?></span> <small><?php echo $lang_install['Database password help'] ?></small></label>
-					<input id="fld5" type="password" name="db_password" size="35" />
+					<label for="fld5">
+						<span><?php echo $lang_install['Database password'] ?>
+						</span><input id="fld5" type="password" name="db_password" size="35" />
+						<small><?php echo $lang_install['Database password help'] ?></small>
+					</label>
 				</div>
 				<div class="input text">
-					<label for="fld6"><span><?php echo $lang_install['Table prefix'] ?></span> <small><?php echo $lang_install['Table prefix help'] ?></small></label>
-					<input id="fld6" type="text" name="db_prefix" size="20" maxlength="30" />
+					<label for="fld6">
+						<span><?php echo $lang_install['Table prefix'] ?>
+						</span><input id="fld6" type="text" name="db_prefix" size="20" maxlength="30" />
+						<small><?php echo $lang_install['Table prefix help'] ?></small>
+					</label>
 				</div>
 		</fieldset>
 
@@ -299,16 +323,25 @@ body {
 		<fieldset>
 			<legend><?php echo $lang_install['Part2 legend'] ?></legend>
 				<div class="input text required">
-					<label for="fld7"><span><?php echo $lang_install['Admin username'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Username help'] ?></small></label>
-					<input id="fld7" type="text" name="req_username" size="35" maxlength="40" value="admin" />
+					<label for="fld7">
+						<span><?php echo $lang_install['Admin username'] ?> <em><?php echo $lang_install['Required'] ?></em>
+						</span><input id="fld7" type="text" name="req_username" size="35" maxlength="40" value="admin" />
+						<small><?php echo $lang_install['Username help'] ?></small>
+					</label>
 				</div>
 				<div class="input text required">
-					<label for="fld8"><span><?php echo $lang_install['Admin password'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Password help'] ?></small></label>
-					<input id="fld8" type="password" name="req_password" size="35" maxlength="200" />
+					<label for="fld8">
+						<span><?php echo $lang_install['Admin password'] ?> <em><?php echo $lang_install['Required'] ?></em>
+						</span><input id="fld8" type="password" name="req_password" size="35" maxlength="200" />
+						<small><?php echo $lang_install['Password help'] ?></small>
+					</label>
 				</div>
 				<div class="input text">
-					<label for="fld10"><span><?php echo $lang_install['Admin e-mail'] ?></span> <small><?php echo $lang_install['E-mail address help'] ?></small></label>
-					<span class="fld-input"><input id="fld10" type="text" name="adm_email" size="50" maxlength="80" />
+					<label for="fld10">
+						<span><?php echo $lang_install['Admin e-mail'] ?>
+						</span><input id="fld10" type="text" name="adm_email" size="50" maxlength="80" />
+						<small><?php echo $lang_install['E-mail address help'] ?></small>
+					</label>
 				</div>
 		</fieldset>
 		<h2><?php echo $lang_install['Part3'] ?></h2>
@@ -321,8 +354,11 @@ body {
 		<fieldset>
 			<legend><?php echo $lang_install['Part3 legend'] ?></legend>
 				<div class="input text required">
-					<label for="fld13"><span><?php echo $lang_install['Base URL'] ?> <em><?php echo $lang_install['Required'] ?></em></span> <small><?php echo $lang_install['Base URL help'] ?></small></label>
-					<span class="fld-input"><input id="fld13" type="text" name="req_base_url" value="<?php echo $base_url_guess ?>" size="60" maxlength="100" /></span>
+					<label for="fld13">
+						<span><?php echo $lang_install['Base URL'] ?> <em><?php echo $lang_install['Required'] ?></em>
+						</span><input id="fld13" type="text" name="req_base_url" value="<?php echo $base_url_guess ?>" size="60" maxlength="100" />
+						<small><?php echo $lang_install['Base URL help'] ?></small>
+					</label>
 				</div>
 <?php
 
@@ -331,14 +367,19 @@ body {
 
 ?>
 				<div class="input select">
-					<label for="fld14"><span><?php echo $lang_install['Default language'] ?></span> <small><?php echo $lang_install['Default language help'] ?></small></label>
-					<select id="fld14" name="req_language">
+					<label for="fld14">
+						<span><?php echo $lang_install['Default language'] ?></span>
+						<select id="fld14" name="req_language">
 <?php
 
 		foreach ($languages as $lang)
 			echo "\t\t\t\t\t".'<option value="'.$lang.'"'.($language == $lang ? ' selected="selected"' : '').'>'.$lang.'</option>'."\n";
 
-?>					</select>
+?>
+						</select>
+						<br />
+						<small><?php echo $lang_install['Default language help'] ?></small>
+					</label>
 				</div>
 <?php
 

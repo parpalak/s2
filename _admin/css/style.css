@@ -878,12 +878,13 @@ form center {
 		padding-right: 1em;
 		font-weight: bold;
 		color: #555;
+		position: relative;
 		}
 		.input label > span > em {
 			color: #f00;
 			position: absolute;
-			right: 0;
-			top: 1.25em;
+			right: 1em;
+			top: 1.167em;
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 			}
 
