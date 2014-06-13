@@ -427,7 +427,7 @@ function s2_blog_get_favorite_posts ()
 {
 	global $s2_db, $s2_blog_fav_link, $ext_info;
 
-	$s2_blog_fav_link = '<span class="favorite">*</span>';
+	$s2_blog_fav_link = '<span class="favorite-star">*</span>';
 
 	$query_add = array(
 		'WHERE'		=> 'favorite = 1'
