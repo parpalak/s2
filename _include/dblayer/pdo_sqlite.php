@@ -2,7 +2,7 @@
 /**
  * A database layer class that relies on the SQLite PHP extension.
  *
- * @copyright (C) 2011-2013 Roman Parpalak
+ * @copyright (C) 2011-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -138,7 +138,7 @@ class DBLayer
 	function query($sql, $unbuffered = false)
 	{
 		if (defined('S2_SHOW_QUERIES'))
-			$q_start = $this->get_microtime();
+			$q_start = microtime(true);
 
 		try
 		{
@@ -166,7 +166,7 @@ class DBLayer
 		$this->row_count = $this->query_result ? $this->query_result->rowCount() : 0;
 
 		if (defined('S2_SHOW_QUERIES'))
-			$this->saved_queries[] = array($sql, $this->get_microtime() - $q_start);
+			$this->saved_queries[] = array($sql, microtime(true) - $q_start);
 
 		++$this->num_queries;
 
@@ -384,13 +384,6 @@ class DBLayer
 			'name'		=> 'SQLite',
 			'version'	=> $ver
 		);
-	}
-
-
-	function get_microtime()
-	{
-		list($usec, $sec) = explode(' ', microtime());
-		return ((float)$usec + (float)$sec);
 	}
 
 

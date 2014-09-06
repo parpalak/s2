@@ -2,7 +2,7 @@
 /**
  * A database layer class that relies on the MySQLi PHP extension.
  *
- * @copyright (C) 2009-2013 Roman Parpalak, based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2014 Roman Parpalak, based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -72,14 +72,14 @@ class DBLayer
 	function query($sql, $unbuffered = false)
 	{
 		if (defined('S2_SHOW_QUERIES'))
-			$q_start = $this->get_microtime();
+			$q_start = microtime(true);
 
 		$this->query_result = @mysqli_query($this->link_id, $sql);
 
 		if ($this->query_result)
 		{
 			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, $this->get_microtime() - $q_start);
+				$this->saved_queries[] = array($sql, microtime(true) - $q_start);
 
 			++$this->num_queries;
 
@@ -275,13 +275,6 @@ class DBLayer
 			'name'		=> 'MySQL Improved',
 			'version'	=> preg_replace('/^([^-]+).*$/', '\\1', $this->result($result))
 		);
-	}
-
-
-	function get_microtime()
-	{
-		list($usec, $sec) = explode(' ', microtime());
-		return ((float)$usec + (float)$sec);
 	}
 
 

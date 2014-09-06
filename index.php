@@ -2,14 +2,12 @@
 /**
  * Processing all public pages of the site.
  *
- * @copyright (C) 2009-2013 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2014 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
 
-
-list($usec, $sec) = explode(' ', microtime());
-$s2_start = ((float)$usec + (float)$sec);
+$s2_start = microtime(true);
 
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
@@ -177,8 +175,7 @@ foreach ($replace as $what => $to)
 // Execution time
 if (defined('S2_DEBUG'))
 {
-	list($usec, $sec) = explode(' ', microtime());
-	$page['generate_time'] = 't = '.s2_number_format(((float)$usec + (float)$sec - $s2_start), true, 3).'; q = '.$s2_db->get_num_queries();
+	$page['generate_time'] = 't = '.s2_number_format(microtime(true) - $s2_start, true, 3).'; q = '.$s2_db->get_num_queries();
 	$template = str_replace('<!-- s2_querytime -->', $page['generate_time'], $template);
 	$etag .= md5($page['generate_time']);
 }
