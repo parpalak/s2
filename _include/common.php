@@ -74,16 +74,31 @@ if (!defined('S2_ALLOWED_EXTENSIONS'))
 if (defined('S2_NO_DB'))
 	return;
 
-// Load the appropriate DB layer class
-if ($db_type == 'mysql' || $db_type == 'mysql_innodb' ||
-	$db_type == 'mysqli' || $db_type == 'mysqli_innodb' ||
-	$db_type == 'pgsql' || $db_type == 'pdo_sqlite')
-	require S2_ROOT.'_include/dblayer/'.$db_type.'.php';
-else
-	error('\''.$db_type.'\' is not a valid database type. Please check settings in config.php.', __FILE__, __LINE__);
+spl_autoload_register(function ($className)
+{
+	$className = ltrim($className, '\\');
+	$fileName  = '';
+	$namespace = '';
+	if ($lastNsPos = strrpos($className, '\\')) {
+		$namespace = substr($className, 0, $lastNsPos);
+		$className = substr($className, $lastNsPos + 1);
+		$fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+	}
+	$fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+
+	require $fileName;
+}
+);
 
 // Create the database adapter object (and open/connect to/select db)
-$s2_db = new DBLayer($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect);
+try
+{
+	$s2_db = DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect);
+}
+catch (Exception $e)
+{
+	error($e->getMessage(), $e->getFile(), $e->getLine());
+}
 
 // Load cached config
 if (file_exists(S2_CACHE_DIR.'cache_config.php'))

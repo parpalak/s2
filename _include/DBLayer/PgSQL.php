@@ -8,24 +8,12 @@
  */
 
 
-// Make sure we have built in support for PostgreSQL
-if (!function_exists('pg_connect'))
-	exit('This PHP environment doesn\'t have PostgreSQL support built in. PostgreSQL support is required if you want to use a PostgreSQL database to run this site. Consult the PHP documentation for further assistance.');
-
-
-class DBLayer
+class DBLayer_PgSQL extends DBLayer_Abstract
 {
-	var $prefix;
 	var $link_id;
 	var $query_result;
 	var $last_query_text = array();
 	var $in_transaction = 0;
-
-	var $saved_queries = array();
-	var $num_queries = 0;
-
-	var $error_no = false;
-	var $error_msg = 'Unknown';
 
 	var $datatype_transformations = array(
 		'/^(TINY|SMALL)INT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i'			=>	'SMALLINT',
@@ -37,9 +25,13 @@ class DBLayer
 	);
 
 
-	function DBLayer($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect)
+	public function __construct($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect)
 	{
-		$this->prefix = $db_prefix;
+		// Make sure we have built in support for PostgreSQL
+		if (!function_exists('pg_connect'))
+			throw new Exception('This PHP environment doesn\'t have PostgreSQL support built in. PostgreSQL support is required if you want to use a PostgreSQL database to run this site. Consult the PHP documentation for further assistance.');
+
+		parent::__construct($db_prefix);
 
 		if ($db_host)
 		{
@@ -278,18 +270,6 @@ class DBLayer
 	}
 
 
-	function get_num_queries()
-	{
-		return $this->num_queries;
-	}
-
-
-	function get_saved_queries()
-	{
-		return $this->saved_queries;
-	}
-
-
 	function free_result($query_id = false)
 	{
 		if (!$query_id)
@@ -302,16 +282,6 @@ class DBLayer
 	function escape($str)
 	{
 		return is_array($str) ? '' : pg_escape_string($str);
-	}
-
-
-	function error()
-	{
-		$result['error_sql'] = @current(@end($this->saved_queries));
-		$result['error_no'] = $this->error_no;
-		$result['error_msg'] = $this->error_msg;
-
-		return $result;
 	}
 
 
@@ -334,12 +304,6 @@ class DBLayer
 		}
 		else
 			return false;
-	}
-
-
-	function set_names($names)
-	{
-		return $this->query('SET NAMES \''.$this->escape($names).'\'');
 	}
 
 

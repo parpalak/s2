@@ -10,9 +10,9 @@
  */
 
 
-define('S2_VERSION', '1.0b5');
+define('S2_VERSION', '2.0a1');
 define('S2_DB_REVISION', 14);
-define('MIN_PHP_VERSION', '4.3.0');
+define('MIN_PHP_VERSION', '5.0.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
 define('S2_ROOT', '../');
@@ -461,31 +461,32 @@ else
 	if (!file_exists(S2_ROOT.'_lang/'.$default_lang.'/common.php'))
 		error($lang_install['Invalid language']);
 
+	require S2_ROOT.'_include/DBLayer/Abstract.php';
 	// Load the appropriate DB layer class
 	switch ($db_type)
 	{
 		case 'mysql':
-			require S2_ROOT.'_include/dblayer/mysql.php';
+			require S2_ROOT.'_include/DBLayer/MySQL.php';
 			break;
 
 		case 'mysql_innodb':
-			require S2_ROOT.'_include/dblayer/mysql_innodb.php';
+			require S2_ROOT.'_include/DBLayer/MySQLInnodb.php';
 			break;
 
 		case 'mysqli':
-			require S2_ROOT.'_include/dblayer/mysqli.php';
+			require S2_ROOT.'_include/DBLayer/MySQLi.php';
 			break;
 
 		case 'mysqli_innodb':
-			require S2_ROOT.'_include/dblayer/mysqli_innodb.php';
+			require S2_ROOT.'_include/DBLayer/MySQLiInnoDB.php';
 			break;
 
 		case 'pgsql':
-			require S2_ROOT.'_include/dblayer/pgsql.php';
+			require S2_ROOT.'_include/DBLayer/PgSQL.php';
 			break;
 
 		case 'pdo_sqlite':
-			require S2_ROOT.'_include/dblayer/pdo_sqlite.php';
+			require S2_ROOT.'_include/DBLayer/PDOSQLite.php';
 			break;
 
 		default:
@@ -493,7 +494,14 @@ else
 	}
 
 	// Create the database object (and connect/select db)
-	$s2_db = new DBLayer($db_host, $db_username, $db_password, $db_name, $db_prefix, false);
+	try
+	{
+		$s2_db = DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, false);
+	}
+	catch (Exception $e)
+	{
+		error($e->getMessage(), $e->getFile(), $e->getLine());
+	}
 
 
 	// If MySQL, make sure it's at least 4.1.2

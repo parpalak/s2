@@ -8,31 +8,25 @@
  */
 
 
-// Make sure we have built in support for MySQL
-if (!function_exists('mysqli_connect'))
-	exit('This PHP environment doesn\'t have Improved MySQL (mysqli) support built in. Improved MySQL support is required if you want to use a MySQL 4.1 (or later) database to run this site. Consult the PHP documentation for further assistance.');
-
-
-class DBLayer
+class DBLayer_MySQli extends DBLayer_Abstract
 {
-	var $prefix;
+	const ENGINE = 'MyISAM';
+
 	var $link_id;
 	var $query_result;
-
-	var $saved_queries = array();
-	var $num_queries = 0;
-
-	var $error_no = false;
-	var $error_msg = 'Unknown';
 
 	var $datatype_transformations = array(
 		'/^SERIAL$/'	=>	'INT(10) UNSIGNED AUTO_INCREMENT'
 	);
 
 
-	function DBLayer($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect)
+	public function __construct($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect)
 	{
-		$this->prefix = $db_prefix;
+		// Make sure we have built in support for MySQL
+		if (!function_exists('mysqli_connect'))
+			throw new Exception('This PHP environment doesn\'t have Improved MySQL (mysqli) support built in. Improved MySQL support is required if you want to use a MySQL 4.1 (or later) database to run this site. Consult the PHP documentation for further assistance.');
+
+		parent::__construct($db_prefix);
 
 		// Was a custom port supplied with $db_host?
 		if (strpos($db_host, ':') !== false)
@@ -55,19 +49,6 @@ class DBLayer
 
 		return $this->link_id;
 	}
-
-
-	function start_transaction()
-	{
-		return;
-	}
-
-
-	function end_transaction()
-	{
-		return;
-	}
-
 
 	function query($sql, $unbuffered = false)
 	{
@@ -96,74 +77,6 @@ class DBLayer
 			return false;
 		}
 	}
-
-
-	function query_build($query, $return_query_string = false, $unbuffered = false)
-	{
-		$sql = '';
-
-		if (isset($query['SELECT']))
-		{
-			$sql = 'SELECT '.$query['SELECT'].' FROM '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['FROM'];
-
-			if (isset($query['JOINS']))
-			{
-				foreach ($query['JOINS'] as $cur_join)
-					$sql .= ' '.key($cur_join).' '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).current($cur_join).' ON '.$cur_join['ON'];
-			}
-
-			if (!empty($query['WHERE']))
-				$sql .= ' WHERE '.$query['WHERE'];
-			if (!empty($query['GROUP BY']))
-				$sql .= ' GROUP BY '.$query['GROUP BY'];
-			if (!empty($query['HAVING']))
-				$sql .= ' HAVING '.$query['HAVING'];
-			if (!empty($query['ORDER BY']))
-				$sql .= ' ORDER BY '.$query['ORDER BY'];
-			if (!empty($query['LIMIT']))
-				$sql .= ' LIMIT '.$query['LIMIT'];
-		}
-		else if (isset($query['INSERT']))
-		{
-			$sql = 'INSERT INTO '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['INTO'];
-
-			if (!empty($query['INSERT']))
-				$sql .= ' ('.$query['INSERT'].')';
-
-			if (is_array($query['VALUES']))
-				$sql .= ' VALUES('.implode('),(', $query['VALUES']).')';
-			else
-				$sql .= ' VALUES('.$query['VALUES'].')';
-		}
-		else if (isset($query['UPDATE']))
-		{
-			$query['UPDATE'] = (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['UPDATE'];
-
-			$sql = 'UPDATE '.$query['UPDATE'].' SET '.$query['SET'];
-
-			if (!empty($query['WHERE']))
-				$sql .= ' WHERE '.$query['WHERE'];
-		}
-		else if (isset($query['DELETE']))
-		{
-			$sql = 'DELETE FROM '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['DELETE'];
-
-			if (!empty($query['WHERE']))
-				$sql .= ' WHERE '.$query['WHERE'];
-		}
-		else if (isset($query['REPLACE']))
-		{
-			$sql = 'REPLACE INTO '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['INTO'];
-
-			if (!empty($query['REPLACE']))
-				$sql .= ' ('.$query['REPLACE'].')';
-
-			$sql .= ' VALUES('.$query['VALUES'].')';
-		}
-
-		return ($return_query_string) ? $sql : $this->query($sql, $unbuffered);
-	}
-
 
 	function result($query_id = 0, $row = 0, $col = 0)
 	{
@@ -213,18 +126,6 @@ class DBLayer
 	}
 
 
-	function get_num_queries()
-	{
-		return $this->num_queries;
-	}
-
-
-	function get_saved_queries()
-	{
-		return $this->saved_queries;
-	}
-
-
 	function free_result($query_id = false)
 	{
 		return ($query_id) ? @mysqli_free_result($query_id) : false;
@@ -234,16 +135,6 @@ class DBLayer
 	function escape($str)
 	{
 		return is_array($str) ? '' : mysqli_real_escape_string($this->link_id, $str);
-	}
-
-
-	function error()
-	{
-		$result['error_sql'] = @current(@end($this->saved_queries));
-		$result['error_no'] = $this->error_no;
-		$result['error_msg'] = $this->error_msg;
-
-		return $result;
 	}
 
 
@@ -258,12 +149,6 @@ class DBLayer
 		}
 		else
 			return false;
-	}
-
-
-	function set_names($names)
-	{
-		return $this->query('SET NAMES \''.$this->escape($names).'\'');
 	}
 
 
@@ -355,7 +240,7 @@ class DBLayer
 		}
 
 		// We remove the last two characters (a newline and a comma) and add on the ending
-		$query = substr($query, 0, strlen($query) - 2)."\n".') ENGINE = '.(isset($schema['ENGINE']) ? $schema['ENGINE'] : 'MyISAM').' CHARACTER SET utf8';
+		$query = substr($query, 0, strlen($query) - 2)."\n".') ENGINE = '.(isset($schema['ENGINE']) ? $schema['ENGINE'] : self::ENGINE).' CHARACTER SET utf8';
 
 		$this->query($query) or error(__FILE__, __LINE__);
 	}

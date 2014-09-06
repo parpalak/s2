@@ -1,6 +1,6 @@
 <?php
 /**
- * A database layer class that relies on the SQLite PHP extension.
+ * A database layer class that relies on the PDO PHP extension.
  *
  * @copyright (C) 2011-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
@@ -8,28 +8,12 @@
  */
 
 
-// Make sure we have support for PDO
-if (!class_exists('PDO'))
-	exit('This PHP environment does not have PDO support built in. PDO support is required if you want to use a PDO_SQLite database to run this site. Consult the PHP documentation for further assistance.');
-
-// Make sure we have support for PDO_SQLite
-if (!in_array('sqlite', PDO::getAvailableDrivers()))
-	exit('This PHP environment does not have PDO_SQLite support built in. PDO_SQLite support is required if you want to use a PDO_SQLite database to run this site. Consult the PHP documentation for further assistance.');
-
-
-class DBLayer
+class DBLayer_PDOSQLite extends DBLayer_Abstract
 {
-	var $prefix;
 	var $link_id;
 	var $query_result;
 	var $row_count;
 	var $in_transaction = 0;
-
-	var $saved_queries = array();
-	var $num_queries = 0;
-
-	var $error_no = false;
-	var $error_msg = 'Unknown';
 
 	var $datatype_transformations = array(
 		'/^SERIAL$/'															=>	'INTEGER',
@@ -38,12 +22,20 @@ class DBLayer
 	);
 
 
-	function DBLayer($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect)
+	public function __construct($db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect)
 	{
+		// Make sure we have support for PDO
+		if (!class_exists('PDO'))
+			throw new Exception('This PHP environment does not have PDO support built in. PDO support is required if you want to use a PDO_SQLite database to run this site. Consult the PHP documentation for further assistance.');
+
+		// Make sure we have support for PDO_SQLite
+		if (!in_array('sqlite', PDO::getAvailableDrivers()))
+			throw new Exception('This PHP environment does not have PDO_SQLite support built in. PDO_SQLite support is required if you want to use a PDO_SQLite database to run this site. Consult the PHP documentation for further assistance.');
+
 		// Prepend $db_name with the path to the site root directory
 		$db_name = S2_ROOT.$db_name;
 
-		$this->prefix = $db_prefix;
+		parent::__construct($db_prefix);
 
 		if (!file_exists($db_name))
 		{
@@ -174,97 +166,6 @@ class DBLayer
 	}
 
 
-	function query_build($query, $return_query_string = false, $unbuffered = false)
-	{
-		$sql = '';
-
-		if (isset($query['SELECT']))
-		{
-			$sql = 'SELECT '.$query['SELECT'].' FROM '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['FROM'];
-
-			if (isset($query['JOINS']))
-			{
-				foreach ($query['JOINS'] as $cur_join)
-					$sql .= ' '.key($cur_join).' '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).current($cur_join).' ON '.$cur_join['ON'];
-			}
-
-			if (!empty($query['WHERE']))
-				$sql .= ' WHERE '.$query['WHERE'];
-			if (!empty($query['GROUP BY']))
-				$sql .= ' GROUP BY '.$query['GROUP BY'];
-			if (!empty($query['HAVING']))
-				$sql .= ' HAVING '.$query['HAVING'];
-			if (!empty($query['ORDER BY']))
-				$sql .= ' ORDER BY '.$query['ORDER BY'];
-			if (!empty($query['LIMIT']))
-				$sql .= ' LIMIT '.$query['LIMIT'];
-		}
-		else if (isset($query['INSERT']))
-		{
-			$sql = 'INSERT INTO '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['INTO'];
-
-			if (!empty($query['INSERT']))
-				$sql .= ' ('.$query['INSERT'].')';
-
-			if (is_array($query['VALUES']))
-			{
-				$new_query = $query;
-				if ($return_query_string)
-				{
-					$query_set = array();
-					foreach ($query['VALUES'] as $cur_values)
-					{
-						$new_query['VALUES'] = $cur_values;
-						$query_set[] = $this->query_build($new_query, true, $unbuffered);
-					}
-
-					$sql = implode('; ', $query_set);
-				}
-				else
-				{
-					$result_set = null;
-					foreach ($query['VALUES'] as $cur_values)
-					{
-						$new_query['VALUES'] = $cur_values;
-						$result_set = $this->query_build($new_query, false, $unbuffered);
-					}
-
-					return $result_set;
-				}
-			}
-			else
-				$sql .= ' VALUES('.$query['VALUES'].')';
-		}
-		else if (isset($query['UPDATE']))
-		{
-			$query['UPDATE'] = (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['UPDATE'];
-
-			$sql = 'UPDATE '.$query['UPDATE'].' SET '.$query['SET'];
-
-			if (!empty($query['WHERE']))
-				$sql .= ' WHERE '.$query['WHERE'];
-		}
-		else if (isset($query['DELETE']))
-		{
-			$sql = 'DELETE FROM '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['DELETE'];
-
-			if (!empty($query['WHERE']))
-				$sql .= ' WHERE '.$query['WHERE'];
-		}
-		else if (isset($query['REPLACE']))
-		{
-			$sql = 'REPLACE INTO '.(isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix).$query['INTO'];
-
-			if (!empty($query['REPLACE']))
-				$sql .= ' ('.$query['REPLACE'].')';
-
-			$sql .= ' VALUES('.$query['VALUES'].')';
-		}
-
-		return ($return_query_string) ? $sql : $this->query($sql, $unbuffered);
-	}
-
-
 	function result($query_id = 0, $row = 0, $col = 0)
 	{
 		if ($query_id)
@@ -310,18 +211,6 @@ class DBLayer
 	}
 
 
-	function get_num_queries()
-	{
-		return $this->num_queries;
-	}
-
-
-	function get_saved_queries()
-	{
-		return $this->saved_queries;
-	}
-
-
 	function free_result(&$query_id)
 	{
 		if (!$query_id)
@@ -336,16 +225,6 @@ class DBLayer
 	function escape($str)
 	{
 		return is_array($str) ? '' : substr($this->link_id->quote($str), 1, -1);
-	}
-
-
-	function error()
-	{
-		$result['error_sql'] = @current(@end($this->saved_queries));
-		$result['error_no'] = $this->error_no;
-		$result['error_msg'] = $this->error_msg;
-
-		return $result;
 	}
 
 
@@ -387,7 +266,7 @@ class DBLayer
 	}
 
 
-	function array_insert(&$input, $offset, $element, $key = null)
+	private static function array_insert(&$input, $offset, $element, $key = null)
 	{
 		if ($key == null)
 			$key = $offset;
@@ -570,7 +449,7 @@ class DBLayer
 		$query .= ' DEFAULT '.$default_value;
 
 		$old_columns = array_keys($table['columns']);
-		$this->array_insert($table['columns'], $after_field, $query.',', $field_name);
+		self::array_insert($table['columns'], $after_field, $query.',', $field_name);
 
 		$new_table = 'CREATE TABLE '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).' (';
 
