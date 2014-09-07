@@ -92,9 +92,8 @@ else
 	$return = ($hook = s2_hook('idx_get_content')) ? eval($hook) : null;
 	if (!$return)
 	{
-		if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
-			require S2_ROOT.'_include/articles.php';
-		s2_parse_page_url($request_uri);
+		$controller = new Page_Common;
+		$controller->render(array('request_uri' => $request_uri));
 	}
 }
 

@@ -128,6 +128,17 @@ function s2_abs_link ($path = '', $params = array())
 	return S2_BASE_URL.S2_URL_PREFIX.$path.(!empty($params) && is_array($params) ? (S2_URL_PREFIX ? '&amp;' : '?').implode('&amp;', $params) : '');
 }
 
+function s2_favorite_link ()
+{
+	global $lang_common;
+
+	$return = ($hook = s2_hook('fn_s2_favorite_link')) ? eval($hook) : null;
+	if ($return)
+		return $return;
+
+	return '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.$lang_common['Favorite'].'">*</a>';
+}
+
 // Creates paging navigation (1  2  3 ... total_pages - 1  total_pages)
 // $url must have the following form http://example.com/page?num=%d
 function s2_paging ($page, $total_pages, $url, &$link_nav)
