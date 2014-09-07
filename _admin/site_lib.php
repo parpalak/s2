@@ -245,7 +245,7 @@ function s2_preload_editor ()
 	if (!S2_USE_HIERARCHY)
 		$request_array = array($request_array[1]);
 
-	$id = S2_ROOT_ID;
+	$id = Model::ROOT_ID;
 	$max = count($request_array);
 
 	// Walking through page parents

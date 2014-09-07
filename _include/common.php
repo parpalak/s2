@@ -57,8 +57,6 @@ if (get_magic_quotes_gpc())
 // Strip out "bad" UTF-8 characters
 s2_remove_bad_characters();
 
-define('S2_ROOT_ID', 0);
-
 // If the cache directory is not specified, we use the default setting
 if (!defined('S2_CACHE_DIR'))
 	define('S2_CACHE_DIR', S2_ROOT.'_cache/');

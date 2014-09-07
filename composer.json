@@ -1,0 +1,18 @@
+{
+	"config": {
+		"vendor-dir": "_vendor"
+	},
+	"name": "s2cms/s2",
+	"description": "Small and fast CMS",
+	"minimum-stability": "stable",
+	"license": "GPL",
+	"authors": [
+		{
+			"name": "Roman Parpalak",
+			"email": "roman@written.ru"
+		}
+	],
+	"require": {
+		"altorouter/altorouter": "dev-master"
+	}
+}

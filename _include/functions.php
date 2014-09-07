@@ -311,46 +311,6 @@ function s2_get_service_template ($template_id = 'service.php', $path = false)
 
 
 //
-// Returns the full path for an article
-//
-function s2_path_from_id ($id, $visible_for_all = false)
-{
-	global $s2_db;
-
-	if ($id < 0)
-		return false;
-
-	if ($id == S2_ROOT_ID)
-		return '';
-
-	$query = array(
-		'SELECT'	=> 'url, parent_id',
-		'FROM'		=> 'articles',
-		'WHERE'		=> 'id = '.$id.($visible_for_all ? ' AND published = 1' : '')
-	);
-	($hook = s2_hook('fn_path_from_id_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-	$row = $s2_db->fetch_row($result);
-	if (!$row)
-		return false;
-
-	if ($row[1] == S2_ROOT_ID)
-		return '';
-
-	if (S2_USE_HIERARCHY)
-	{
-		$prefix = s2_path_from_id($row[1], $visible_for_all);
-		if ($prefix === false)
-			return false;
-	}
-	else
-		$prefix = '';
-
-	return	$prefix.'/'.urlencode($row[0]);
-}
-
-//
 // Encodes the contents of $str so that they are safe to output on an (X)HTML page
 //
 function s2_htmlencode($str)
@@ -803,4 +763,13 @@ function error()
 		$GLOBALS['s2_db']->close();
 
 	exit;
+}
+
+
+function s2_redirect ($url, $external = false)
+{
+	$url = $external ? $url : s2_abs_link($url);
+	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
+	header('Location: '.$url);
+	die;
 }

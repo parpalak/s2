@@ -251,7 +251,7 @@ elseif ($action == 'preview')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 
-	$path = s2_path_from_id((int) $_GET['id'], true);
+	$path = Model::path_from_id((int) $_GET['id'], true);
 	if ($path === false)
 		echo $lang_admin['Preview not found'];
 	else

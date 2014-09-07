@@ -209,7 +209,7 @@ function s2_delete_branch ($id)
 	else
 		die('Item not found!');
 
-	if ($parent_id == S2_ROOT_ID)
+	if ($parent_id == Model::ROOT_ID)
 		die('Can\'t delete root item!');
 
 	if (!$s2_user['edit_site'])

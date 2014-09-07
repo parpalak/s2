@@ -12,6 +12,9 @@ $s2_start = microtime(true);
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
 
+// Composer
+require S2_ROOT.'_vendor/autoload.php';
+
 ($hook = s2_hook('idx_start')) ? eval($hook) : null;
 
 header('X-Powered-By: S2/'.S2_VERSION);
@@ -39,37 +42,60 @@ if (substr($request_uri, -3) == '---')
 	die;
 }
 
-($hook = s2_hook('idx_pre_rss')) ? eval($hook) : null;
-
-//
-// Process RSS request (last articles)
-//
-if ($request_uri == '/rss.xml')
-{
-	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/articles.php';
-	if (!defined('S2_RSS_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/rss.php';
-	s2_no_cache(false);
-	s2_do_rss();
-
-	$s2_db->close();
-	die;
-}
-
 if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
 	require S2_ROOT.'_include/comments.php';
 
-//
-// Obtaining the content (array $page) and the template ($template string)
-// These variables must be set from now
-//
-$return = ($hook = s2_hook('idx_get_content')) ? eval($hook) : null;
-if (!$return)
+// TODO delete
+// ($hook = s2_hook('idx_pre_rss')) ? eval($hook) : null;
+
+$router = new AltoRouter(array(
+	array('GET', '/rss.xml', 'Page_RSS'),
+
+	// Favorite
+	array('GET', '/'.S2_FAVORITE_URL, function () {
+		s2_redirect('/'.S2_FAVORITE_URL.'/');
+	}),
+	array('GET', '/'.S2_FAVORITE_URL.'/', 'Page_Favorite'),
+
+	// Tags
+	array('GET', '/'.S2_TAGS_URL, function () {
+		s2_redirect('/'.S2_TAGS_URL.'/');
+	}),
+	array('GET', '/'.S2_TAGS_URL.'/', 'Page_Tags'),
+	array('GET', '/'.S2_TAGS_URL.'/[:name][/:slash]?', 'Page_Tag'),
+));
+
+($hook = s2_hook('idx_new_routes')) ? eval($hook) : null;
+
+// match current request
+$match = $router->match($request_uri);
+
+if (!empty($match))
 {
-	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/articles.php';
-	s2_parse_page_url($request_uri);
+	$target = $match['target'];
+	if (is_callable($target))
+	{
+		$target();
+	}
+	else
+	{
+		$controller = new $target;
+		$controller->render($match['params']);
+	}
+}
+else
+{
+	//
+	// Obtaining the content (array $page) and the template ($template string)
+	// These variables must be set from now
+	//
+	$return = ($hook = s2_hook('idx_get_content')) ? eval($hook) : null;
+	if (!$return)
+	{
+		if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
+			require S2_ROOT.'_include/articles.php';
+		s2_parse_page_url($request_uri);
+	}
 }
 
 s2_no_cache(false);
@@ -131,17 +157,17 @@ $replace['<!-- s2_back_forward -->'] = !empty($page['back_forward']) ? $page['ba
 $replace['<!-- s2_menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
 $replace['<!-- s2_article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';
 
-if (strpos($template, '<!-- s2_last_comments -->') !== false && ($last_comments = s2_last_article_comments()))
+if (strpos($template, '<!-- s2_last_comments -->') !== false && ($last_comments = Placeholder::last_article_comments()))
 	$replace['<!-- s2_last_comments -->'] = '<div class="header">'.$lang_common['Last comments'].'</div>'.$last_comments;
 
-if (strpos($template, '<!-- s2_last_discussions -->') !== false && ($last_discussions = s2_last_discussions()))
+if (strpos($template, '<!-- s2_last_discussions -->') !== false && ($last_discussions = Placeholder::last_discussions()))
 	$replace['<!-- s2_last_discussions -->'] = '<div class="header">'.$lang_common['Last discussions'].'</div>'.$last_discussions;
 
 if (strpos($template, '<!-- s2_last_articles -->') !== false)
-	$replace['<!-- s2_last_articles -->'] = s2_last_articles(5);
+	$replace['<!-- s2_last_articles -->'] = Placeholder::last_articles(5);
 
 if (strpos($template, '<!-- s2_tags_list -->') !== false)
-	$replace['<!-- s2_tags_list -->'] = s2_tags_list();
+	$replace['<!-- s2_tags_list -->'] = Placeholder::tags_list();
 
 // Footer
 $replace['<!-- s2_copyright -->'] = s2_build_copyright($request_uri);

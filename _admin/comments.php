@@ -305,7 +305,7 @@ function s2_toggle_hide_comment ($id)
 		($hook = s2_hook('fn_toggle_hide_comment_pre_get_page_info_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-		if (($article = $s2_db->fetch_assoc($result)) && ($path = s2_path_from_id($article['parent_id'], true)) !== false)
+		if (($article = $s2_db->fetch_assoc($result)) && ($path = Model::path_from_id($article['parent_id'], true)) !== false)
 		{
 			$link = s2_abs_link($path.'/'.urlencode($article['url']));
 

@@ -202,7 +202,7 @@ if (!$row = $s2_db->fetch_assoc($result))
 	$errors[] = $lang_comment_errors['no_item'];
 else
 {
-	$path = s2_path_from_id($row['parent_id'], true);
+	$path = Model::path_from_id($row['parent_id'], true);
 	($hook = s2_hook('cmnt_pre_path_check')) ? eval($hook) : null;
 	if ($path === false)
 		$errors[] = $lang_comment_errors['no_item'];
