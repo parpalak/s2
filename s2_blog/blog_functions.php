@@ -394,9 +394,7 @@ function s2_blog_posts_by_tag ($tag)
 	else
 		s2_error_404();
 
-	if (!defined('S2_ARTICLES_FUNCTIONS_LOADED'))
-		include S2_ROOT.'_include/articles.php';
-	$art_links = s2_articles_by_tag($tag_id);
+	$art_links = Page_Common::articles_by_tag($tag_id);
 	if (count($art_links))
 		$tag_descr .= '<p>'.$lang_s2_blog['Articles by tag'].'<br />'.implode('<br />', $art_links).'</p>';
 

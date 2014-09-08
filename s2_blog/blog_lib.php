@@ -467,7 +467,15 @@ function s2_blog_output_post_list ($criteria)
 		$conditions[] = '(p.published = 1 OR p.user_id = '.$s2_user['id'].')';
 
 	if (!empty($criteria['author']) && trim($criteria['author']))
-		$conditions[] = 'p.user_id in (SELECT u.id FROM '.$s2_db->prefix.'users AS u WHERE u.login LIKE \'%'.$s2_db->escape(trim($criteria['author'])).'%\')';
+	{
+		$sub_query = array(
+			'SELECT'    => 'u.id',
+			'FROM'      => 'users AS u',
+			'WHERE'     => 'u.login LIKE \'%'.$s2_db->escape(trim($criteria['author'])).'%\'',
+		);
+		$raw_sub_query = $s2_db->query_build($sub_query, true);
+		$conditions[] = 'p.user_id in ('.$raw_sub_query.')';
+	}
 
 	$key_search = isset($criteria['key']) ? trim($criteria['key']) : '';
 
@@ -481,7 +489,15 @@ function s2_blog_output_post_list ($criteria)
 				$tag_ids[] = $tag_id;
 
 		if (!empty($tag_ids))
-			$conditions[] = 'p.id in (SELECT pt.post_id FROM '.$s2_db->prefix.'s2_blog_post_tag AS pt WHERE pt.tag_id IN ('.implode(', ', $tag_ids).'))';
+		{
+			$sub_query = array(
+				'SELECT'    => 'pt.post_id',
+				'FROM'      => 's2_blog_post_tag AS pt',
+				'WHERE'     => 'pt.tag_id IN ('.implode(', ', $tag_ids).')',
+			);
+			$raw_sub_query = $s2_db->query_build($sub_query, true);
+			$conditions[] = 'p.id in ('.$raw_sub_query.')';
+		}
 		else
 			$conditions = array('NULL');
 	}
@@ -491,8 +507,15 @@ function s2_blog_output_post_list ($criteria)
 	$condition = count($conditions) ? implode(' AND ', $conditions) : '1';
 	$message = empty($messages) ? '' : '<div class="info-box"><p>'.implode('</p><p>', $messages).'</p></div>';
 
+	$sub_query = array(
+		'SELECT'    => 'count(c.post_id)',
+		'FROM'      => 's2_blog_comments AS c',
+		'WHERE'     => 'c.post_id = p.id',
+	);
+	$raw_sub_query = $s2_db->query_build($sub_query, true);
+
 	$query = array(
-		'SELECT'	=> 'id, title, published, commented, (SELECT count(c.post_id) FROM '.$s2_db->prefix.'s2_blog_comments AS c WHERE c.post_id = p.id) as comment_count, create_time, label, favorite, user_id',
+		'SELECT'	=> 'id, title, published, commented, ('.$raw_sub_query.') as comment_count, create_time, label, favorite, user_id',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> $condition,
 		'ORDER BY'	=> 'create_time DESC'
