@@ -186,14 +186,4 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 
 $page['text'] = ob_get_clean();
 $page['title'] = $lang_s2_search['Search'];
-
-$s2_search_sql = array(
-	'SELECT'	=> 'title',
-	'FROM'		=> 'articles',
-	'WHERE'		=> 'parent_id = '.S2_ROOT_ID,
-);
-($hook = s2_hook('s2_search_pre_crumbs_fetch_qr')) ? eval($hook) : null;
-$s2_search_result = $s2_db->query_build($s2_search_sql) or error(__FILE__, __LINE__);
-list($s2_search_main) = $s2_db->fetch_row($s2_search_result);
-
-$page['path'] = sprintf($lang_s2_search['Crumbs'], $s2_search_main, s2_link('/'), $lang_s2_search['Search']);
+$page['path'] = sprintf($lang_s2_search['Crumbs'], Model::main_page_title(), s2_link('/'), $lang_s2_search['Search']);

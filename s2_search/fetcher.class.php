@@ -96,7 +96,7 @@ class s2_search_fetcher implements s2_search_generic_fetcher
 		if (!$article)
 			return array();
 
-		$parent_path = s2_path_from_id($article['parent_id'], true);
+		$parent_path = Model::path_from_id($article['parent_id'], true);
 		if ($parent_path === false)
 			return array();
 
