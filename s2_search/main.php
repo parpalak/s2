@@ -39,7 +39,12 @@ function s2_search_display_url ($s)
 $s2_search_query = isset($_GET['q']) ? $_GET['q'] : '';
 $cur_page = isset($_GET['p']) ? (int) $_GET['p'] : 1;
 
-$template = s2_get_template('service.php');
+try {
+	$template = s2_get_template('service.php');
+}
+catch (Exception $e) {
+	error($e->getMessage());
+}
 
 ob_start();
 
