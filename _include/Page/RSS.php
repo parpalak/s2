@@ -8,9 +8,9 @@
  */
 
 
-class Page_RSS implements Page_Abstract
+class Page_RSS extends Page_Abstract
 {
-	public function render ($params)
+	public function __construct (array $params = array())
 	{
 		global $s2_db;
 		s2_no_cache(false);
@@ -31,9 +31,9 @@ class Page_RSS implements Page_Abstract
 		if (S2_COMPRESS)
 			ob_start('ob_gzhandler');
 
-		$rss_title = S2_SITE_NAME;
-		$rss_link = s2_abs_link('/');
-		$rss_description = sprintf($lang_common['RSS description'], S2_SITE_NAME);
+		$rss_title = $this->title();
+		$rss_link = $this->link();
+		$rss_description = $this->description();
 
 		($hook = s2_hook('fn_do_rss_pre_output')) ? eval($hook) : null;
 
@@ -56,8 +56,7 @@ class Page_RSS implements Page_Abstract
 		$max_time = 0;
 		$items = '';
 
-		$return = ($hook = s2_hook('fn_do_rss_pre_get_articles')) ? eval($hook) : null;
-		$articles = $return ? $return : Placeholder::last_articles_array(10);
+		$articles = $this->content();
 
 		foreach ($articles as $item)
 		{
@@ -130,6 +129,39 @@ class Page_RSS implements Page_Abstract
 		header('Content-Type: text/xml; charset=utf-8');
 
 		ob_end_flush();
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function content()
+	{
+		return Placeholder::last_articles_array(10);
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function title()
+	{
+		return S2_SITE_NAME;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	protected function link()
+	{
+		return s2_abs_link('/');
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function description()
+	{
+		global $lang_common;
+		return sprintf($lang_common['RSS description'], S2_SITE_NAME);
 	}
 }
  

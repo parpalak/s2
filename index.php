@@ -79,8 +79,7 @@ if (!empty($match))
 	}
 	else
 	{
-		$controller = new $target;
-		$controller->render($match['params']);
+		$controller = new $target($match['params']);
 	}
 }
 else
@@ -89,13 +88,15 @@ else
 	// Obtaining the content (array $page) and the template ($template string)
 	// These variables must be set from now
 	//
-	$return = ($hook = s2_hook('idx_get_content')) ? eval($hook) : null;
-	if (!$return)
+	$controller = ($hook = s2_hook('idx_get_content')) ? eval($hook) : null;
+	if (!$controller)
 	{
-		$controller = new Page_Common;
-		$controller->render(array('request_uri' => $request_uri));
+		$controller = new Page_Common(array('request_uri' => $request_uri));
 	}
 }
+
+if (isset($controller))
+	$template = $controller->getTemplate();
 
 s2_no_cache(false);
 

@@ -8,16 +8,16 @@
  */
 
 
-class Page_Common implements Page_Abstract
+class Page_Common extends Page_Abstract
 {
-	public function render ($params)
+	public function __construct (array $params = array())
 	{
-		global $template, $page;
 		$this->s2_parse_page_url($params['request_uri']);
 	}
 
 	//
 	// Returns the array of links to the articles with the tag specified
+	// TODO move
 	//
 	public static function articles_by_tag ($tag_id)
 	{
@@ -197,7 +197,7 @@ class Page_Common implements Page_Abstract
 	// Processes site pages
 	private function s2_parse_page_url ($request_uri)
 	{
-		global $page, $s2_db, $template, $lang_common;
+		global $page, $s2_db, $lang_common;
 
 		$request_array = explode('/', $request_uri);   //   []/[dir1]/[dir2]/[dir3]/[file1]
 
@@ -213,7 +213,7 @@ class Page_Common implements Page_Abstract
 		$parent_id = Model::ROOT_ID;
 		$parent_num = count($request_array) - 1 - (int) $was_end_slash;
 
-		$template_id = '';
+		$this->template_id = '';
 
 		($hook = s2_hook('fn_s2_parse_page_url_start')) ? eval($hook) : null;
 
@@ -246,7 +246,7 @@ class Page_Common implements Page_Abstract
 				$bread_crumbs_titles[] = s2_htmlencode($row['title']);
 				$parent_id = $row['id'];
 				if ($row['template'] != '')
-					$template_id = $row['template'];
+					$this->template_id = $row['template'];
 
 				$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($row['title']).'</a>';
 			}
@@ -291,9 +291,9 @@ class Page_Common implements Page_Abstract
 			error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
 
 		if ($page['template'])
-			$template_id = $page['template'];
+			$this->template_id = $page['template'];
 
-		if (!$template_id)
+		if (!$this->template_id)
 		{
 			if (S2_USE_HIERARCHY)
 			{
@@ -335,12 +335,12 @@ class Page_Common implements Page_Abstract
 		($hook = s2_hook('fn_s2_parse_page_url_pre_get_tpl')) ? eval($hook) : null;
 
 		// Getting page template
-		$template = s2_get_template($template_id);
+		$this->obtainTemplate();
 
-		$is_menu = strpos($template, '<!-- s2_menu -->') !== false;
+		$is_menu = strpos($this->template, '<!-- s2_menu -->') !== false;
 
 		// Dealing with sections, subsections, neighbours
-		if (S2_USE_HIERARCHY && $page['children_exist'] && (strpos($template, '<!-- s2_subarticles -->') !== false || $is_menu || strpos($template, '<!-- s2_navigation_link -->') !== false))
+		if (S2_USE_HIERARCHY && $page['children_exist'] && (strpos($this->template, '<!-- s2_subarticles -->') !== false || $is_menu || strpos($this->template, '<!-- s2_navigation_link -->') !== false))
 		{
 			// It's a section. We have to fetch subsections and articles.
 
@@ -470,7 +470,7 @@ class Page_Common implements Page_Abstract
 			}
 		}
 
-		if (S2_USE_HIERARCHY && !$page['children_exist'] && ($is_menu || strpos($template, '<!-- s2_back_forward -->') !== false || strpos($template, '<!-- s2_navigation_link -->') !== false))
+		if (S2_USE_HIERARCHY && !$page['children_exist'] && ($is_menu || strpos($this->template, '<!-- s2_back_forward -->') !== false || strpos($this->template, '<!-- s2_navigation_link -->') !== false))
 		{
 			// It's an article. We have to fetch other articles in the parent section
 
@@ -535,14 +535,14 @@ class Page_Common implements Page_Abstract
 		}
 
 		// Tags
-		if (strpos($template, '<!-- s2_article_tags -->') !== false)
+		if (strpos($this->template, '<!-- s2_article_tags -->') !== false)
 			$page['article_tags'] = self::tagged_articles($id);
 
-		if (strpos($template, '<!-- s2_tags -->') !== false)
+		if (strpos($this->template, '<!-- s2_tags -->') !== false)
 			$page['tags'] = self::get_tags($id);
 
 		// Comments
-		if ($page['commented'] && S2_SHOW_COMMENTS && strpos($template, '<!-- s2_comments -->') !== false)
+		if ($page['commented'] && S2_SHOW_COMMENTS && strpos($this->template, '<!-- s2_comments -->') !== false)
 		{
 			$query = array(
 				'SELECT'	=> 'nick, time, email, show_email, good, text',

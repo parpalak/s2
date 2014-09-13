@@ -7,16 +7,15 @@
  * @package S2
  */
 
-class Page_Tag implements Page_Abstract
+
+class Page_Tag extends Page_Abstract
 {
-	public function render ($params)
+	public function __construct (array $params = array())
 	{
 		global $template, $page;
 
 		// We process tags pages in a different way
-		$template_id = 'site.php';
 		$page = self::s2_make_tags_pages($params['name'], !empty($params['slash']));
-		$template = s2_get_template($template_id);
 	}
 
 	//

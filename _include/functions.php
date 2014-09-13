@@ -227,7 +227,7 @@ function s2_process_multipart_mixed (&$src, &$dest, $dir = false)
 //
 // Searches for a template file (in the style or 'template' directory)
 //
-function s2_get_template ($raw_template_id, $default_path = false, $return_error = false)
+function s2_get_template ($raw_template_id, $default_path = false)
 {
 	global $lang_common, $request_uri;
 
@@ -248,10 +248,7 @@ function s2_get_template ($raw_template_id, $default_path = false, $return_error
 		elseif (file_exists($default_path.$template_id))
 			$path = $default_path.$template_id;
 		else
-			if ($return_error)
-				return false;
-			else
-				error(sprintf($lang_common['Template not found'], $default_path.$template_id));
+			throw new Exception(sprintf($lang_common['Template not found'], $default_path.$template_id));
 	}
 
 	ob_start();
@@ -299,7 +296,12 @@ function s2_get_service_template ($template_id = 'service.php', $path = false)
 		return $return;
 
 	$template_id = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $template_id);
-	$template = s2_get_template($template_id, $path);
+	try {
+		$template = s2_get_template($template_id, $path);
+	}
+	catch (Exception $e) {
+		error($e->getMessage());
+	}
 
 	$replace['<!-- s2_meta -->'] = '<meta name="Generator" content="S2 '.S2_VERSION.'" />';
 	$replace['<!-- s2_site_title -->'] = S2_SITE_NAME;

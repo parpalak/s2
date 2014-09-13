@@ -74,7 +74,12 @@ $s2_user = s2_get_user_info($login);
 
 // Preparing the template for the preview tab
 $return = ($hook = s2_hook('ai_pre_get_template')) ? eval($hook) : null;
-$template = $return ? $return : s2_get_template('site.php');
+try {
+	$template = $return ? $return : s2_get_template('site.php');
+}
+catch (Exception $e) {
+	error($e->getMessage());
+}
 
 function s2_jsvarencode ($var)
 {

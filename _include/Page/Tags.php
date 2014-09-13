@@ -8,16 +8,14 @@
  */
 
 
-class Page_Tags implements Page_Abstract
+class Page_Tags extends Page_Abstract
 {
-	public function render ($params)
+	public function __construct (array $params = array())
 	{
-		global $template, $page;
+		global $page;
 
 		// We process tags pages in a different way
-		$template_id = 'site.php';
 		$page = self::s2_make_tags_pages();
-		$template = s2_get_template($template_id);
 	}
 
 	//
