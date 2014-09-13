@@ -146,7 +146,12 @@ function s2_tpl_edit_content ($template_filename = '')
 		clearstatcache();
 		$is_template = true;
 		if (!file_exists(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename))
-			$is_template = s2_get_template($template_filename, false, true);
+		try {
+			$is_template = s2_get_template($template_filename, false);
+		}
+		catch (Exception $e) {
+			$is_template = false;
+		}
 		if ($is_template)
 			$template_text = file_get_contents(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename);
 	}
