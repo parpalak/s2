@@ -6,7 +6,7 @@
  *
  * Allows to add a blog to your S2 site
  *
- * @copyright (C) 2007-2013 Roman Parpalak
+ * @copyright (C) 2007-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  */
@@ -277,39 +277,40 @@ define('S2_BLOG_PATH', s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLO
 define('S2_BLOG_TAGS_PATH', S2_BLOG_PATH.urlencode(S2_TAGS_URL).'/');
 		]]></hook>
 
-		<hook id="idx_get_content" priority="9"><![CDATA[
-if (substr($request_uri, 0, strlen(S2_BLOG_URL)) == S2_BLOG_URL)
-{
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
-	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
-		include $ext_info['path'].'/blog_functions.php';
-	return include $ext_info['path'].'/main.php';
-}
+		<hook id="idx_new_routes"><![CDATA[
+$router->map('GET', S2_BLOG_URL, function () { s2_redirect(S2_BLOG_URL.'/'); });
+$router->map('GET', S2_BLOG_URL.'/', '\\s2_extensions\\s2_blog\\Page_Main');
+$router->map('GET', S2_BLOG_URL.'/skip/[i:page]', '\\s2_extensions\\s2_blog\\Page_Main');
+
+$router->map('GET', S2_BLOG_URL.'/rss.xml', '\\s2_extensions\\s2_blog\\Page_RSS');
+
+$router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL, function () { s2_redirect(S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/'); });
+$router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/', '\\s2_extensions\\s2_blog\\Page_Favorite');
+
+$router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL, function () { s2_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'); });
+$router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL.'/', '\\s2_extensions\\s2_blog\\Page_Tags');
+$router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL.'/[:tag]([/:slash])?', '\\s2_extensions\\s2_blog\\Page_Tag');
+
+$router->map('GET', S2_BLOG_URL.'/[i:year]/', '\\s2_extensions\\s2_blog\\Page_Year');
+$router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/', '\\s2_extensions\\s2_blog\\Page_Month');
+$router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/', '\\s2_extensions\\s2_blog\\Page_Day');
+$router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/[:url]', '\\s2_extensions\\s2_blog\\Page_Post');
 		]]></hook>
 
 		<hook id="idx_pre_get_queries"><![CDATA[
 if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
 {
-	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
-		include $ext_info['path'].'/blog_functions.php';
-	$s2_blog_recent_comments = s2_blog_recent_comments($request_uri);
+	$s2_blog_recent_comments = s2_extensions\s2_blog\Placeholder::recent_comments($request_uri);
 	$replace['<!-- s2_blog_last_comments -->'] = $s2_blog_recent_comments ? '<div class="header">'.$lang_s2_blog['Last comments'].'</div>'.$s2_blog_recent_comments : '';
 }
 if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
 {
-	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
-		include $ext_info['path'].'/blog_functions.php';
-	$s2_blog_last_discussions = s2_blog_recent_discussions($request_uri);
+	$s2_blog_last_discussions = s2_extensions\s2_blog\Placeholder::recent_discussions($request_uri);
 	$replace['<!-- s2_blog_last_discussions -->'] = $s2_blog_last_discussions ? '<div class="header">'.$lang_s2_blog['Last discussions'].'</div>'.$s2_blog_last_discussions : '';
 }
 if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 {
-	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
-		include $ext_info['path'].'/blog_functions.php';
-	$replace['<!-- s2_blog_last_post -->'] = s2_blog_last_post(1);
+	$replace['<!-- s2_blog_last_post -->'] = s2_extensions\s2_blog\Placeholder::last_post(1);
 }
 $replace['<!-- s2_blog_calendar -->'] = !empty($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
 		]]></hook>
@@ -792,54 +793,6 @@ if (isset($_GET['blog_unsubscribe']))
 		<hook id="fn_comment_form_pre_output"><![CDATA[
 if (defined('S2_BLOG_HANDLED') || isset($_GET['type']) && $_GET['type'] == 's2_blog')
 	$action = S2_BASE_URL.'/comment.php?type=s2_blog';
-		]]></hook>
-
-		<hook id="idx_pre_rss"><![CDATA[
-if ($request_uri == S2_BLOG_URL.'/rss.xml')
-{
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
-	if (!defined('S2_BLOG_FUNCTIONS_LOADED'))
-		include $ext_info['path'].'/blog_functions.php';
-	if (!defined('S2_RSS_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/rss.php';
-	s2_no_cache(false);
-	s2_do_rss();
-
-	$s2_db->close();
-	die;
-}
-		]]></hook>
-
-		<hook id="fn_do_rss_pre_output"><![CDATA[
-if ($request_uri == S2_BLOG_URL.'/rss.xml')
-{
-	global $lang_s2_blog;
-
-	$rss_title = S2_BLOG_TITLE;
-	$rss_link = s2_abs_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/');
-	$rss_description = sprintf($lang_s2_blog['RSS description'], S2_BLOG_TITLE);
-}
-		]]></hook>
-
-		<hook id="fn_do_rss_pre_get_articles"><![CDATA[
-if ($request_uri == S2_BLOG_URL.'/rss.xml')
-{
-	$s2_blog_posts = s2_blog_last_posts_array();
-	$s2_blog_items = array();
-	foreach ($s2_blog_posts as $s2_blog_post)
-		$s2_blog_items[] = array(
-			'title'			=> $s2_blog_post['title'],
-			'text'			=> $s2_blog_post['text'].(!empty($s2_blog_post['tags']) ? '<p>'.sprintf($lang_s2_blog['Tags:'], $s2_blog_post['tags']).'</p>' : ''),
-			'time'			=> $s2_blog_post['create_time'],
-			'modify_time'	=> $s2_blog_post['modify_time'],
-			'rel_path'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $s2_blog_post['create_time']).urlencode($s2_blog_post['url']),
-			'author'		=> $s2_blog_post['author'],
-		);
-	return $s2_blog_items;
-}
 		]]></hook>
 
 		<hook id="idx_pre_meta_merge"><![CDATA[
