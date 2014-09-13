@@ -72,21 +72,22 @@ if (!defined('S2_ALLOWED_EXTENSIONS'))
 if (defined('S2_NO_DB'))
 	return;
 
-spl_autoload_register(function ($className)
+spl_autoload_register(function ($class)
 {
-	$className = ltrim($className, '\\');
-	$fileName  = '';
-	$namespace = '';
-	if ($lastNsPos = strrpos($className, '\\')) {
-		$namespace = substr($className, 0, $lastNsPos);
-		$className = substr($className, $lastNsPos + 1);
-		$fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+	$class = ltrim($class, '\\');
+	$dir = '';
+	if ($lastNsPos = strrpos($class, '\\'))
+	{
+		$ns_array = explode('\\', $class);
+		$class = array_pop($ns_array);
+		if (count($ns_array) == 2 && $ns_array[0] == 's2_extensions')
+			$ns_array = array('_extensions', $ns_array[1], '_include');
+		$dir  = S2_ROOT . implode(DIRECTORY_SEPARATOR, $ns_array) . DIRECTORY_SEPARATOR;
 	}
-	$fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+	$file = $dir . str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
 
-	require $fileName;
-}
-);
+	require $file;
+});
 
 // Create the database adapter object (and open/connect to/select db)
 try
