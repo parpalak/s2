@@ -4,9 +4,9 @@
 /**
  * LaTeX
  *
- * Integrates site with latex.codecogs.com service
+ * Integrates site with tex.s2cms.ru service
  *
- * @copyright (C) 2011-2013 Roman Parpalak
+ * @copyright (C) 2011-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_latex
  */
@@ -42,7 +42,6 @@ echo $lang_s2_latex['Comment syntax'];
 
 		<hook id="fn_do_rss_pre_output" priority="4"><![CDATA[
 require $ext_info['path'].'/functions.php';
-
 $rss_title = s2_latex_make($rss_title);
 $rss_description = s2_latex_make($rss_description);
 		]]></hook>
