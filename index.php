@@ -45,9 +45,6 @@ if (substr($request_uri, -3) == '---')
 if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
 	require S2_ROOT.'_include/comments.php';
 
-// TODO delete
-// ($hook = s2_hook('idx_pre_rss')) ? eval($hook) : null;
-
 $router = new AltoRouter(array(
 	array('GET', '/rss.xml', 'Page_RSS'),
 
@@ -95,7 +92,7 @@ else
 	}
 }
 
-if (isset($controller))
+if ($controller instanceof Page_Abstract)
 	$template = $controller->getTemplate();
 
 s2_no_cache(false);

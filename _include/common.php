@@ -69,9 +69,6 @@ define('S2_IMG_PATH', S2_ROOT.S2_IMG_DIR);
 if (!defined('S2_ALLOWED_EXTENSIONS'))
 	define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav avi flv mpg mpeg mkv zip 7z doc pdf');
 
-if (defined('S2_NO_DB'))
-	return;
-
 spl_autoload_register(function ($class)
 {
 	$class = ltrim($class, '\\');
@@ -88,6 +85,9 @@ spl_autoload_register(function ($class)
 
 	require $file;
 });
+
+if (defined('S2_NO_DB'))
+	return;
 
 // Create the database adapter object (and open/connect to/select db)
 try
