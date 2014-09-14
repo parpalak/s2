@@ -911,7 +911,7 @@ $s2_blog_search_sub_sql = $s2_db->query_build($s2_blog_search_sql, true) or erro
 $s2_blog_search_sql = array(
 	'SELECT'	=> 'tag_id, name, url, ('.$s2_blog_search_sub_sql.') AS used',
 	'FROM'		=> 'tags AS t',
-	'WHERE'		=> 'name LIKE \''.$s2_db->escape(trim($s2_search_query)).'%\'',
+	'WHERE'		=> 'name LIKE \''.$s2_db->escape(trim($this->query)).'%\'',
 );
 ($hook = s2_hook('s2_blog_pre_find_tags_qr')) ? eval($hook) : null;
 $s2_blog_result = $s2_db->query_build($s2_blog_search_sql) or error(__FILE__, __LINE__);
