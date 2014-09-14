@@ -6,7 +6,7 @@
  *
  * Adds full-text search with russian morphology to small sites.
  *
- * @copyright (C) 2011-2013 Roman Parpalak
+ * @copyright (C) 2011-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
@@ -61,14 +61,7 @@ $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		<hook id="idx_get_content"><![CDATA[
 if ($request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
-{
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
-	require $ext_info['path'].'/main.php';
-	return true;
-}
+	return new \s2_extensions\s2_search\Page(array());
 		]]></hook>
 
 		<hook id="fn_s2_error_404_pre_replace,idx_template_pre_replace"><![CDATA[
@@ -99,9 +92,8 @@ if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 else
 	require $ext_info['path'].'/lang/English.php';
-require $ext_info['path'].'/worker.class.php';
 $s2_search_reindex = '<a href="#" onclick="return s2_search.reindex();" class="js" title="'.$lang_s2_search['Reindex title'].'">'.$lang_s2_search['Reindex'].'</a><span id="s2_search_progress"></span>';
-$counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(is_file(S2_CACHE_DIR.s2_search_worker::index_name) ? filesize(S2_CACHE_DIR.s2_search_worker::index_name) : 0), $s2_search_reindex);
+$counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0), $s2_search_reindex);
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[
@@ -115,13 +107,8 @@ if ($action == 's2_search_makeindex')
 	($hook = s2_hook('s2_search_action_makeindex')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	require $ext_info['path'].'/stemmer.class.php';
-	require $ext_info['path'].'/worker.class.php';
-	require $ext_info['path'].'/indexer.class.php';
-	require $ext_info['path'].'/fetcher.class.php';
-
-	$fetcher = new s2_search_fetcher();
-	$finder = new s2_search_indexer(S2_CACHE_DIR, $fetcher);
+	$fetcher = new \s2_extensions\s2_search\Fetcher();
+	$finder = new \s2_extensions\s2_search\Indexer(S2_CACHE_DIR, $fetcher);
 	if (!$chapter)
 		echo $finder->index();
 	else
@@ -146,8 +133,7 @@ $s2_const_types['S2_SEARCH_QUICK'] = 'boolean';
 		]]></hook>
 
 		<hook id="ai_js_end"><![CDATA[
-require $ext_info['path'].'/worker.class.php';
-if ((is_file(S2_CACHE_DIR.s2_search_worker::index_name) ? filesize(S2_CACHE_DIR.s2_search_worker::index_name) : 0) == 0)
+if ((is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0) == 0)
 {
 	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
 		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';

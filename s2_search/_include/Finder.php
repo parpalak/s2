@@ -2,16 +2,17 @@
 /**
  * Fulltext and keyword search
  *
- * @copyright (C) 2010-2013 Roman Parpalak
+ * @copyright (C) 2010-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
 
+namespace s2_extensions\s2_search;
 
 //define('DEBUG', 1);
 //define('MORE_DEBUG', 1);
 
-class s2_search_finder extends s2_search_worker
+class Finder extends Worker
 {
 	protected $keys;
 	protected $chapters = array();
@@ -122,7 +123,7 @@ class s2_search_finder extends s2_search_worker
 			$words_for_search = array($word);
 
 			for ($i = count($words_for_search); $i-- ;)
-				$words_for_search[] = s2_search_stemmer::stem_word($words_for_search[$i]);
+				$words_for_search[] = Stemmer::stem_word($words_for_search[$i]);
 
 			$words_for_search = array_unique($words_for_search);
 
@@ -167,7 +168,7 @@ class s2_search_finder extends s2_search_worker
 			foreach ($this->keyword_1_index[$word] as $id => $weight)
 				$this->keys[$this->chapters[$id]][$word] = $weight;
 
-		$word = s2_search_stemmer::stem_word($word);
+		$word = Stemmer::stem_word($word);
 
 		if (isset($this->keyword_base_index[$word]))
 			foreach ($this->keyword_base_index[$word] as $id => $weight)
@@ -187,10 +188,10 @@ class s2_search_finder extends s2_search_worker
 		}
 	}
 
-	public function snippets (array $ids, s2_search_generic_fetcher $fetcher)
+	public function snippets (array $ids, GenericFetcher $fetcher)
 	{
 		$snippets = array();
-		s2_search_stemmer::stem_caching(1);
+		Stemmer::stem_caching(1);
 
 		$articles = $fetcher->texts($ids);
 
@@ -203,8 +204,9 @@ class s2_search_finder extends s2_search_worker
 			$replace_to[] = $tag."\r";
 		}
 		$articles = str_replace($replace_what, $replace_to, $articles);
-		foreach ($articles as $id => &$string)
+		foreach ($articles as &$string)
 			$string = strip_tags($string);
+		unset($string);
 
 		// Preparing for breaking into lines
 		$articles = preg_replace('#(?<=[\.?!;])[ \n\t]+#sS', "\r", $articles);
@@ -216,7 +218,7 @@ class s2_search_finder extends s2_search_worker
 			foreach (array_keys($this->keys[$id]) as $word)
 				// Excluding neighbours weight
 				if (0 !== strpos($word, '*n_') && !isset($this->excluded_words[$word]))
-					$full_words[$stems[] = s2_search_stemmer::stem_word($word)] = $word;
+					$full_words[$stems[] = Stemmer::stem_word($word)] = $word;
 
 			// Breaking the text into lines
 			$lines = explode("\r", $string);
@@ -242,7 +244,7 @@ class s2_search_finder extends s2_search_worker
 			{
 				$word = utf8_strtolower($word_info[0]);
 				$stem = utf8_strtolower($matches[1][$i][0]);
-				$stemmed_word = s2_search_stemmer::stem_word($word);
+				$stemmed_word = Stemmer::stem_word($word);
 
 				// Ignore entry if the word stem differs from needed ones
 				if ($stem != $word && $stem != $stemmed_word && $stemmed_word != $full_words[$stem])
@@ -284,7 +286,6 @@ class s2_search_finder extends s2_search_worker
 						break 2;
 
 					// Choose the best line with the weight given
-					$result_weight = array();
 					$max = 0;
 					$max_index = -1;
 					foreach ($line_num_array as $line_index => $line_num)
@@ -312,7 +313,7 @@ class s2_search_finder extends s2_search_worker
 						$replace[$word] = '<i>'.$word.'</i>';
 
 					$snippet[$line_num] = strtr($lines[$line_num], $replace);
-					// Cleaning up HTML entites
+					// Cleaning up HTML entites TODO $word may be undefined
 					$snippet[$line_num] = preg_replace('#&[^;]{0,10}(?:<i>'.preg_quote($word, '#').'</i>[^;]{0,15})+;#ue', 'str_replace(array("<i>", "</i>"), "", "\\0")', $snippet[$line_num]);
 
 					// If we have found all stems, we do not need any more sentence

@@ -2,30 +2,19 @@
 /**
  * Provides data for building the search index
  *
- * @copyright (C) 2010-2013 Roman Parpalak
+ * @copyright (C) 2010-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
 
-interface s2_search_generic_fetcher
+namespace s2_extensions\s2_search;
+
+
+class Fetcher implements GenericFetcher
 {
-	// Walks through all pages and gets info about them
-	// This method should call the following method
-	// for each page available for search:
-	//
-	// s2_search_indexer::buffer_chapter($id, $title, $text,
-	//   $meta_keywords, $meta_description, $time, $url);
-	public function process (s2_search_indexer $indexer);
-
-	// Returns info about a page ID
-	public function chapter ($id);
-
-	// Returns page text for a given array of IDs
-	public function texts ($ids);
-}
-
-class s2_search_fetcher implements s2_search_generic_fetcher
-{
+	/**
+	 * @var Indexer
+	 */
 	private $indexer;
 
 	private function crawl ($parent_id, $url)
@@ -60,7 +49,7 @@ class s2_search_fetcher implements s2_search_generic_fetcher
 		($hook = s2_hook('s2_search_fetcher_crawl_end')) ? eval($hook) : null;
 	}
 
-	public function process (s2_search_indexer $indexer)
+	public function process (Indexer $indexer)
 	{
 		$this->indexer = $indexer;
 		$this->crawl(0, '');
@@ -96,7 +85,7 @@ class s2_search_fetcher implements s2_search_generic_fetcher
 		if (!$article)
 			return array();
 
-		$parent_path = Model::path_from_id($article['parent_id'], true);
+		$parent_path = \Model::path_from_id($article['parent_id'], true);
 		if ($parent_path === false)
 			return array();
 

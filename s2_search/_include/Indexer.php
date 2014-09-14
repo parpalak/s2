@@ -2,13 +2,15 @@
 /**
  * Creates search index
  *
- * @copyright (C) 2010-2013 Roman Parpalak
+ * @copyright (C) 2010-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
 
+namespace s2_extensions\s2_search;
 
-class s2_search_indexer extends s2_search_worker
+
+class Indexer extends Worker
 {
 	const process_state = 's2_search_state.txt';
 	const buffer_name = 's2_search_buffer.txt';
@@ -20,7 +22,7 @@ class s2_search_indexer extends s2_search_worker
 	protected $fetcher;
 	protected $chapter_lengths = array();
 
-	function __construct ($dir, s2_search_generic_fetcher $fetcher)
+	function __construct ($dir, GenericFetcher $fetcher)
 	{
 		parent::__construct($dir);
 		$this->fetcher = $fetcher;
@@ -57,14 +59,14 @@ class s2_search_indexer extends s2_search_worker
 		if (strpos($word, ' ') !== false)
 			$this->keyword_n_index[$word][$id] = $weight;
 		elseif (substr($word, -2) == '__' && substr($word, 0, 2) == '__')
-			$this->keyword_base_index[s2_search_stemmer::stem_word(substr($word, 2, -2))][$id] = $weight;
+			$this->keyword_base_index[Stemmer::stem_word(substr($word, 2, -2))][$id] = $weight;
 		else
 			$this->keyword_1_index[$word][$id] = $weight;
 	}
 
 	protected function add_word_to_fulltext ($id, $position, $word)
 	{
-		$word = s2_search_stemmer::stem_word($word);
+		$word = Stemmer::stem_word($word);
 
 		if (isset($this->fulltext_index[$word][$id]))
 		{
@@ -235,21 +237,25 @@ class s2_search_indexer extends s2_search_worker
 	{
 		$id = $this->table_of_contents[$chapter]['id'];
 
-		foreach ($this->fulltext_index as $word => &$data)
+		foreach ($this->fulltext_index as &$data)
 			if (isset($data[$id]))
 				unset($data[$id]);
+		unset($data);
 
-		foreach ($this->keyword_1_index as $word => &$data)
+		foreach ($this->keyword_1_index as &$data)
 			if (isset($data[$id]))
 				unset($data[$id]);
+		unset($data);
 
-		foreach ($this->keyword_base_index as $word => &$data)
+		foreach ($this->keyword_base_index as &$data)
 			if (isset($data[$id]))
 				unset($data[$id]);
+		unset($data);
 
-		foreach ($this->keyword_n_index as $word => &$data)
+		foreach ($this->keyword_n_index as &$data)
 			if (isset($data[$id]))
 				unset($data[$id]);
+		unset($data);
 	}
 
 	public function refresh ($chapter)

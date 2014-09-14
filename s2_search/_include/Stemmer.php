@@ -1,6 +1,9 @@
 <?php
 
-class s2_search_stemmer
+namespace s2_extensions\s2_search;
+
+
+class Stemmer
 {
 	protected static $use_cache = 0;
 	protected static $cache = array();
@@ -20,8 +23,6 @@ class s2_search_stemmer
 		'когда'		=> '',
 		'где'		=> '',
 		'куда'		=> '',
-		'чем'		=> '',
-		'чём'		=> '',
 		'если'		=> '',
 		'тире'		=> '',
 		'после'		=> '',
@@ -167,7 +168,6 @@ class s2_search_stemmer
 
 		'ересь'		=> 'ерес',
 		'ереси'		=> 'ерес',
-		'ересью'	=> 'ерес',
 		'ересью'	=> 'ерес',
 
 		'ищу'		=> 'иска',

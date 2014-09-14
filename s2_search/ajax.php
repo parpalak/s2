@@ -2,7 +2,7 @@
 /**
  * Ajax request processing for autosearch
  *
- * @copyright (C) 2011-2013 Roman Parpalak
+ * @copyright (C) 2011-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
@@ -18,15 +18,12 @@ header('X-Powered-By: S2/'.S2_VERSION);
 
 $s2_search_query = isset($_GET['q']) ? $_GET['q'] : '';
 
-require 'worker.class.php';
-require 'title_finder.class.php';
-
 if ($s2_search_query !== '')
 {
-	$finder = new s2_search_title_finder(S2_CACHE_DIR);
+	$finder = new \s2_extensions\s2_search\TitleFinder(S2_CACHE_DIR);
 	$toc = $finder->find($s2_search_query);
 
 	foreach ($toc as $chapter => $chapter_info)
-		echo '<a href="'.$chapter_info['url'].'">'.
+		echo '<a href="'.s2_link($chapter_info['url']).'">'.
 				preg_replace('#('.preg_quote($s2_search_query, '#').')#ui', '<em>\\1</em>', s2_htmlencode($chapter_info['title'])).'</a>';
 }

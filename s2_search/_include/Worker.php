@@ -1,14 +1,16 @@
 <?php
 /**
- * Common parent for indexer and finder
+ * Common parent for indexer and finder. Opens and saves index files.
  *
- * @copyright (C) 2010-2013 Roman Parpalak
+ * @copyright (C) 2010-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
 
+namespace s2_extensions\s2_search;
 
-abstract class s2_search_worker
+
+abstract class Worker
 {
 	const index_name = 's2_search_index.php';
 
