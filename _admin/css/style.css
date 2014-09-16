@@ -998,6 +998,7 @@ form center {
 		padding: 0.2em 0;
 		}
 		.loginform label > input {
+			font-size: 1em;
 			float: right;
 			width: 15em;
 			margin: 0;

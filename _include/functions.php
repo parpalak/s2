@@ -276,9 +276,9 @@ function s2_get_template ($raw_template_id, $default_path = false)
 	return $template;
 }
 
-function s2_build_copyright ($request_uri = '')
+function s2_build_copyright ()
 {
-	global $lang_common;
+	global $lang_common, $request_uri;
 
 	$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
 	$copyright = S2_WEBMASTER && S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : ($request_uri !== '/' ? '<a href="'.s2_link('/').'">'.$author.'</a>' : $author);

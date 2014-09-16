@@ -197,7 +197,9 @@ class Page_Common extends Page_Abstract
 	// Processes site pages
 	private function s2_parse_page_url ($request_uri)
 	{
-		global $page, $s2_db, $lang_common;
+		global $s2_db, $lang_common;
+
+		$page = &$this->page;
 
 		$request_array = explode('/', $request_uri);   //   []/[dir1]/[dir2]/[dir3]/[file1]
 

@@ -21,7 +21,7 @@ class Page_RSS extends Page_Abstract
 
 	private function do_rss ()
 	{
-		global $lang_common, $request_uri;
+		global $request_uri;
 
 		$return = ($hook = s2_hook('fn_do_rss_start')) ? eval($hook) : null;
 		if ($return)

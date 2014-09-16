@@ -12,16 +12,13 @@ class Page_Favorite extends Page_Abstract
 {
 	public function __construct (array $params = array())
 	{
-		global $page;
-
-		// We process tags pages in a different way
-		$page = self::s2_make_favorite_page();
+		$this->page = self::make_favorite_page() + $this->page;
 	}
 
 	//
 	// Builds favorite page
 	//
-	private static function s2_make_favorite_page ()
+	private static function make_favorite_page ()
 	{
 		global $s2_db, $lang_common;
 

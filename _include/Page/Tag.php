@@ -12,16 +12,13 @@ class Page_Tag extends Page_Abstract
 {
 	public function __construct (array $params = array())
 	{
-		global $template, $page;
-
-		// We process tags pages in a different way
-		$page = self::s2_make_tags_pages($params['name'], !empty($params['slash']));
+		$this->page = self::make_tags_pages($params['name'], !empty($params['slash'])) + $this->page;
 	}
 
 	//
 	// Builds tags pages
 	//
-	function s2_make_tags_pages ($tag_name, $is_slash)
+	private static function make_tags_pages ($tag_name, $is_slash)
 	{
 		global $s2_db, $lang_common;
 
