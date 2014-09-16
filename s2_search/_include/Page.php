@@ -31,7 +31,7 @@ class Page extends \Page_Abstract
 
 	private function build_page ()
 	{
-		global $lang_s2_search, $s2_db, $page;
+		global $lang_s2_search, $s2_db;
 
 		ob_start();
 
@@ -55,8 +55,6 @@ class Page extends \Page_Abstract
 			list($weights, $toc) = $finder->find($this->query);
 
 if (defined('DEBUG')) $start_time = microtime(true);
-
-			$page = array();
 
 			$item_num = count($weights);
 			$not_found = !$item_num;
@@ -159,7 +157,7 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 				$link_nav = array();
 				echo s2_paging($this->page, $total_pages, s2_link('/search', array('q='.str_replace('%', '%%', urlencode($this->query)), 'p=%d')), $link_nav);
 				foreach ($link_nav as $rel => $href)
-					$page['link_navigation'][$rel] = $href;
+					$this->page['link_navigation'][$rel] = $href;
 			}
 
 			if ($not_found)
@@ -171,10 +169,9 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 </div>
 <?php
 
-		$page['text'] = ob_get_clean();
-		$page['title'] = $lang_s2_search['Search'];
-		$page['path'] = sprintf($lang_s2_search['Crumbs'], \Model::main_page_title(), s2_link('/'), $lang_s2_search['Search']);
-
+		$this->page['text'] = ob_get_clean();
+		$this->page['title'] = $lang_s2_search['Search'];
+		$this->page['path'] = sprintf($lang_s2_search['Crumbs'], \Model::main_page_title(), s2_link('/'), $lang_s2_search['Search']);
 	}
 
 	private static function rus_plural ($number, $many, $one, $two)
