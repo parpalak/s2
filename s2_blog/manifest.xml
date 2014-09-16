@@ -300,12 +300,12 @@ $router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/[:url]', '\\s2_exte
 		<hook id="idx_pre_get_queries"><![CDATA[
 if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
 {
-	$s2_blog_recent_comments = s2_extensions\s2_blog\Placeholder::recent_comments($request_uri);
+	$s2_blog_recent_comments = s2_extensions\s2_blog\Placeholder::recent_comments();
 	$replace['<!-- s2_blog_last_comments -->'] = $s2_blog_recent_comments ? '<div class="header">'.$lang_s2_blog['Last comments'].'</div>'.$s2_blog_recent_comments : '';
 }
 if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
 {
-	$s2_blog_last_discussions = s2_extensions\s2_blog\Placeholder::recent_discussions($request_uri);
+	$s2_blog_last_discussions = s2_extensions\s2_blog\Placeholder::recent_discussions();
 	$replace['<!-- s2_blog_last_discussions -->'] = $s2_blog_last_discussions ? '<div class="header">'.$lang_s2_blog['Last discussions'].'</div>'.$s2_blog_last_discussions : '';
 }
 if (strpos($template, '<!-- s2_blog_last_post -->') !== false)

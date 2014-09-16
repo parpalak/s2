@@ -12,9 +12,9 @@ namespace s2_extensions\s2_blog;
 
 class Placeholder
 {
-	function recent_comments ($cur_url = '---')
+	function recent_comments ()
 	{
-		global $s2_db;
+		global $s2_db, $request_uri;
 
 		if (!S2_SHOW_COMMENTS)
 			return '';
@@ -45,13 +45,13 @@ class Placeholder
 		$output = '';
 		while ($row = $s2_db->fetch_assoc($result))
 			$output .= '<li><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#'.$row['count'].'">'.s2_htmlencode($row['title']).'</a>, <em>'.s2_htmlencode($row['nick']).'</em></li>';
-		$output = preg_replace('#<a href="'.preg_quote(s2_link($cur_url), '#').'(?:\\#[^"]*)?">(.*?)</a>#', '\\1', $output);
+		$output = preg_replace('#<a href="'.preg_quote(s2_link($request_uri), '#').'(?:\\#[^"]*)?">(.*?)</a>#', '\\1', $output);
 		return $output ? '<ul>'.$output.'</ul>' : '';
 	}
 
-	function recent_discussions ($cur_url = '---')
+	function recent_discussions ()
 	{
-		global $s2_db;
+		global $s2_db, $request_uri;
 
 		if (!S2_SHOW_COMMENTS)
 			return '';
@@ -83,7 +83,7 @@ class Placeholder
 		$output = '';
 		while ($row = $s2_db->fetch_assoc($result))
 			$output .= '<li><a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'" title="'.s2_htmlencode($row['nick'].' ('.s2_date_time($row['time']).')').'">'.s2_htmlencode($row['title']).'</a></li>';
-		$output = preg_replace('#<a href="'.preg_quote(s2_link($cur_url), '#').'"[^>]*>(.*?)</a>#', '\\1', $output);
+		$output = preg_replace('#<a href="'.preg_quote(s2_link($request_uri), '#').'"[^>]*>(.*?)</a>#', '\\1', $output);
 		return $output ? '<ul>'.$output.'</ul>' : '';
 	}
 

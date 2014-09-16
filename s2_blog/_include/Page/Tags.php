@@ -14,25 +14,25 @@ class Page_Tags extends Page_Abstract
 {
 	public function body (array $params = array())
 	{
-		global $page, $lang_s2_blog;
+		global $lang_s2_blog;
 
 		$this->obtainTemplate(__DIR__.'/../../templates/');
 
 		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
-			$page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
+			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// The list of tags
-		$page['text'] = self::all_tags();
+		$this->page['text'] = self::all_tags();
 
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
-			$page['path'][] = S2_BLOG_CRUMBS;
+			$this->page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
-		$page['path'][] = $lang_s2_blog['Tags'];
+			$this->page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
+		$this->page['path'][] = $lang_s2_blog['Tags'];
 
-		$page['head_title'] = $page['title'] = $lang_s2_blog['Tags'];
-		$page['link_navigation']['up'] = S2_BLOG_PATH;
+		$this->page['head_title'] = $this->page['title'] = $lang_s2_blog['Tags'];
+		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
 	}
 
 	private static function all_tags ()

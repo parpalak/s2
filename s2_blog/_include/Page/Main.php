@@ -12,7 +12,7 @@ class Page_Main extends Page_Abstract
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog, $page;
+		global $lang_s2_blog;
 
 		$s2_blog_skip = !empty($params['page']) ? (int) $params['page'] : 0;
 
@@ -20,20 +20,20 @@ class Page_Main extends Page_Abstract
 		$this->obtainTemplate(__DIR__.'../../templates/');
 
 		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
-			$page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
+			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
-		$page = self::last_posts($s2_blog_skip) + $page;
+		$this->page = self::last_posts($s2_blog_skip) + $this->page;
 
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
-			$page['path'][] = S2_BLOG_CRUMBS;
+			$this->page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = $s2_blog_skip ? '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>' : $lang_s2_blog['Blog'];
+			$this->page['path'][] = $s2_blog_skip ? '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>' : $lang_s2_blog['Blog'];
 
 		if ($s2_blog_skip)
-			$page['link_navigation']['up'] = S2_BLOG_PATH;
+			$this->page['link_navigation']['up'] = S2_BLOG_PATH;
 		elseif (S2_BLOG_URL && S2_BLOG_CRUMBS && preg_match('#href="(.*?)"#', S2_BLOG_CRUMBS, $s2_blog_matches))
-			$page['link_navigation']['up'] = $s2_blog_matches[1];
+			$this->page['link_navigation']['up'] = $s2_blog_matches[1];
 	}
 
 	private static function last_posts ($skip = 0)

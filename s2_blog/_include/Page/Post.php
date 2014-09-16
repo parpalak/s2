@@ -14,25 +14,25 @@ class Page_Post extends Page_Abstract
 {
 	public function body (array $params = array())
 	{
-		global $page, $lang_s2_blog;
+		global $lang_s2_blog;
 
 		$this->obtainTemplate(__DIR__.'/../../templates/');
 
 		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
-			$page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']);
+			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']);
 
-		$page['title'] = '';
+		$this->page['title'] = '';
 
-		$page = self::get_post($params['year'], $params['month'], $params['day'], $params['url']) + $page;
+		$this->page = self::get_post($params['year'], $params['month'], $params['day'], $params['url']) + $this->page;
 
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
-			$page['path'][] = S2_BLOG_CRUMBS;
+			$this->page['path'][] = S2_BLOG_CRUMBS;
 		if (S2_BLOG_URL)
-			$page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
-		$page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/">'.$params['year'].'</a>';
-		$page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/">'.$params['month'].'</a>';
-		$page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/'.$params['day'].'/">'.$params['day'].'</a>';
+			$this->page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
+		$this->page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/">'.$params['year'].'</a>';
+		$this->page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/">'.$params['month'].'</a>';
+		$this->page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/'.$params['day'].'/">'.$params['day'].'</a>';
 	}
 
 	private static function get_post ($year, $month, $day, $url)
