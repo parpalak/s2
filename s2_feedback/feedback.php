@@ -22,22 +22,15 @@ if (isset($_GET['go']))
 {
 	// Outputs "message sent" message
 
-	$template = s2_get_service_template();
-	$replace = array(
-		'<!-- s2_head_title -->'	=> $lang_s2_feedback['Message sent'],
-		'<!-- s2_title -->'			=> '<h1>'.$lang_s2_feedback['Message sent'].'</h1>',
-		'<!-- s2_text -->'			=> $lang_s2_feedback['Message sent text'],
-		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-	);
+	$controller = new Page_Service(array(
+		'head_title' => $lang_s2_feedback['Message sent'],
+		'title'      => $lang_s2_feedback['Message sent'],
+		'text'       => $lang_s2_feedback['Message sent text'],
+	));
 
-	($hook = s2_hook('cmnt_go_pre_tpl_replace')) ? eval($hook) : null;
+	$controller->render();
 
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	$s2_db->close();
-
-	die($template);
+	die();
 }
 
 //
@@ -65,25 +58,19 @@ if (empty($errors) && !s2_feedback_check_question(isset($_POST['key']) ? (string
 
 if (!empty($errors))
 {
-	$template = s2_get_service_template();
-	$replace['<!-- s2_head_title -->'] = $lang_common['Error'];
-	$replace['<!-- s2_title -->'] = '<h1>'.$lang_common['Error'].'</h1>';
-
 	$error_text = '<p>'.$lang_s2_feedback['Error message'].'</p><ul><li>'.implode('</li><li>', $errors).'</li></ul>';
 
-	$replace['<!-- s2_text -->'] = $error_text.s2_feedback_form('', $name, $contact, $subject, $text);
-	$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+	$error_text = $error_text.s2_feedback_form('', $name, $contact, $subject, $text);
 
-	($hook = s2_hook('cmnt_pre_error_tpl_replace')) ? eval($hook) : null;
+	$controller = new Page_Service(array(
+		'head_title' => $lang_common['Error'],
+		'title'      => $lang_common['Error'],
+		'text'       => $error_text,
+	));
 
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
+	$controller->render();
 
-	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
-
-	$s2_db->close();
-
-	die($template);
+	die();
 }
 
 //
