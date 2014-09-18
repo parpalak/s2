@@ -4,7 +4,7 @@
 /**
  * Spoiler tag
  *
- * @copyright (C) 2011 Roman Parpalak
+ * @copyright (C) 2011-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_spoiler
  */
@@ -13,16 +13,16 @@
 <extension for="S2" engine="1.0">
 	<id>s2_spoiler</id>
 	<title>Spoiler</title>
-	<version>1.0b</version>
+	<version>1.0b1</version>
 	<description>Adds spoiler tag support</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0a</minversion>
-	<maxtestedon>1.0b</maxtestedon>
+	<maxtestedon>2.0dev</maxtestedon>
 
 	<hooks>
 
-		<hook id="idx_template_after_replace, cmnt_preview_pre_output"><![CDATA[
+		<hook id="idx_template_after_replace"><![CDATA[
 if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 else
