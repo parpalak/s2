@@ -12,13 +12,13 @@ class Page_Tag extends Page_Abstract
 {
 	public function __construct (array $params = array())
 	{
-		$this->page = self::make_tags_pages($params['name'], !empty($params['slash'])) + $this->page;
+		$this->page = $this->make_tags_pages($params['name'], !empty($params['slash'])) + $this->page;
 	}
 
 	//
 	// Builds tags pages
 	//
-	private static function make_tags_pages ($tag_name, $is_slash)
+	private function make_tags_pages ($tag_name, $is_slash)
 	{
 		global $s2_db, $lang_common;
 
@@ -35,7 +35,7 @@ class Page_Tag extends Page_Abstract
 		if ($row = $s2_db->fetch_row($result))
 			list($tag_id, $tag_description, $tag_name) = $row;
 		else {
-			s2_error_404();
+			$this->error_404();
 			die;
 		}
 

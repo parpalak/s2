@@ -7,8 +7,6 @@
  * @package S2
  */
 
-$s2_start = microtime(true);
-
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
 

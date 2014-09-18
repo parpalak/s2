@@ -2,7 +2,7 @@
 /**
  * Loads common functions used throughout the site.
  *
- * @copyright (C) 2009-2013 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2014 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -289,38 +289,6 @@ function s2_build_copyright ()
 		sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
 }
 
-function s2_get_service_template ($template_id = 'service.php', $path = false)
-{
-	$return = ($hook = s2_hook('fn_get_service_template_start')) ? eval($hook) : null;
-	if ($return)
-		return $return;
-
-	$template_id = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $template_id);
-	try {
-		$template = s2_get_template($template_id, $path);
-	}
-	catch (Exception $e) {
-		error($e->getMessage());
-	}
-
-	$replace['<!-- s2_meta -->'] = '<meta name="Generator" content="S2 '.S2_VERSION.'" />';
-	$replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
-
-	// Including the style
-	ob_start();
-	include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
-	$replace['<!-- s2_styles -->'] = ob_get_clean();
-
-	// Footer
-	$replace['<!-- s2_copyright -->'] = s2_build_copyright();
-
-	($hook = s2_hook('fn_get_service_template_pre_replace')) ? eval($hook) : null;
-
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	return $template;
-}
 
 
 //
@@ -658,29 +626,6 @@ function s2_404_header ()
 
 	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 	s2_no_cache();
-}
-
-function s2_error_404 ()
-{
-	global $lang_common;
-
-	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-	header('Content-Type: text/html; charset=utf-8');
-
-	$template = s2_get_service_template('error404.php');
-	$replace = array(
-		'<!-- s2_head_title -->'	=> $lang_common['Error 404'],
-		'<!-- s2_title -->'			=> '<h1>'.$lang_common['Error 404'].'</h1>',
-		'<!-- s2_text -->'			=> sprintf($lang_common['Error 404 text'], s2_link('/')),
-		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-	);
-
-	($hook = s2_hook('fn_s2_error_404_pre_replace')) ? eval($hook) : null;
-
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	die($template);
 }
 
 // Display a simple error message

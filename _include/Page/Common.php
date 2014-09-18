@@ -239,7 +239,7 @@ class Page_Common extends Page_Abstract
 
 				$row = $s2_db->fetch_assoc($result);
 				if (!$row)
-					s2_error_404();
+					$this->error_404();
 				if ($s2_db->fetch_assoc($result))
 					error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
 
@@ -288,7 +288,7 @@ class Page_Common extends Page_Abstract
 
 		// Error handling
 		if (!$page)
-			s2_error_404();
+			$this->error_404();
 		if ($s2_db->fetch_assoc($result))
 			error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
 

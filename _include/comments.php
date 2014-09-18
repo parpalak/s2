@@ -82,7 +82,7 @@ function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subs
 						<?php printf($lang_common['Comment question'], '&#x003'.$a.';&#x003'.$b.';&#x002b;&#x003'.$c.';'); ?><br />
 						<input class="comm_input" type="text" name="<?php echo s2_field_name('quest'); ?>" maxlength="50" size="40" id="quest" />
 					</p>
-					<input type="hidden" name="<?php echo s2_field_name('id')?>" value="<?php echo intval($id); ?>" />
+					<input type="hidden" name="<?php echo s2_field_name('id')?>" value="<?php echo s2_htmlencode($id); ?>" />
 					<input type="hidden" name="<?php echo s2_field_name('key')?>" value="<?php echo $key; ?>" />
 					<p class="input buttons">
 						<input type="submit" name="submit" value="<?php echo $lang_common['Submit']; ?>" />
@@ -101,55 +101,6 @@ function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subs
 <?php
 
 	return ob_get_clean();
-}
-
-function s2_comment_error ($errors)
-{
-	global $lang_common, $lang_comments, $lang_comment_errors;
-
-	header('Content-Type: text/html; charset=utf-8');
-
-	ob_start();
-
-?>
-	<p><?php echo $lang_comment_errors['Error message']; ?></p>
-	<ul>
-<?php
-	foreach ($errors as $error)
-		echo "\t\t".'<li>'.$error.'</li>'."\n";
-?>
-	</ul>
-<?php
-
-	if (!empty($_POST[s2_field_name('text')]))
-	{
-		echo "\t".'<p>'.$lang_comments['Save comment'].'</p>'."\n";
-
-?>
-	<textarea style="width: 100%;" cols="80" rows="10"><?php echo s2_htmlencode($_POST[s2_field_name('text')]) ?></textarea>
-<?php
-
-	}
-
-	if (S2_ENABLED_COMMENTS)
-		echo "\t".'<p>'.$lang_comments['Go back'].'</p>'."\n";
-
-	$text = ob_get_clean();
-
-	$template = s2_get_service_template();
-	$replace = array(
-		'<!-- s2_head_title -->'	=> $lang_common['Error'],
-		'<!-- s2_title -->'			=> '<h1>'.$lang_common['Error'].'</h1>',
-		'<!-- s2_text -->'			=> $text,
-		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-	);
-
-	($hook = s2_hook('cmnt_pre_sent_comment_output')) ? eval($hook) : null;
-
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	die($template);
 }
 
 function s2_check_comment_question ($key, $answer)

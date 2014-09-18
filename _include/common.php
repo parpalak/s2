@@ -11,6 +11,8 @@
 if (!defined('S2_ROOT'))
 	die;
 
+$s2_start = microtime(true);
+
 require S2_ROOT.'_include/functions.php';
 require S2_ROOT.'_include/utf8/utf8.php';
 

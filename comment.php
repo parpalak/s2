@@ -19,26 +19,15 @@ header('X-Powered-By: S2/'.S2_VERSION);
 if (isset($_GET['go']))
 {
 	// Outputs "comment saved" message (used if the premoderation mode is enabled)
-	header('Content-Type: text/html; charset=utf-8');
+	$controller = new Page_Service(array(
+		'head_title' => $lang_comments['Comment sent'],
+		'title'      => '<h1>'.$lang_comments['Comment sent'].'</h1>',
+		'text'       => sprintf($lang_comments['Comment sent info'], s2_htmlencode($_GET['go']), s2_link('/')),
+	));
 
-	$template = s2_get_service_template();
-	$replace = array(
-		'<!-- s2_head_title -->'	=> $lang_comments['Comment sent'],
-		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Comment sent'].'</h1>',
-		'<!-- s2_text -->'			=> sprintf($lang_comments['Comment sent info'], s2_htmlencode($_GET['go']), s2_link('/')),
-		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-	);
+	$controller->render();
 
-	($hook = s2_hook('cmnt_go_pre_tpl_replace')) ? eval($hook) : null;
-
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	($hook = s2_hook('cmnt_go_pre_output')) ? eval($hook) : null;
-
-	$s2_db->close();
-
-	die($template);
+	die();
 }
 
 if (isset($_GET['unsubscribe']))
@@ -47,10 +36,14 @@ if (isset($_GET['unsubscribe']))
 
 	if (isset($_GET['id']) && isset($_GET['mail']))
 	{
+		list($id, $class) = explode('.', $_GET['id']);
+		$id = (int) $id;
+		$class = (string) $class;
+
 		$query = array(
 			'SELECT'	=> 'id, nick, email, ip, time',
 			'FROM'		=> 'art_comments',
-			'WHERE'		=> 'article_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
+			'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
 		);
 		($hook = s2_hook('cmnt_unsubscribe_pre_get_receivers_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -65,52 +58,33 @@ if (isset($_GET['unsubscribe']))
 			$query = array(
 				'UPDATE'	=> 'art_comments',
 				'SET'		=> 'subscribed = 0',
-				'WHERE'		=> 'article_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
+				'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
 			);
 			($hook = s2_hook('cmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
 			$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-			$template = s2_get_service_template();
-			$replace = array(
-				'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
-				'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
-				'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
-				'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-			);
+			$controller = new Page_Service(array(
+				'head_title' => $lang_comments['Unsubscribed OK'],
+				'title'      => $lang_comments['Unsubscribed OK info'],
+				'text'       => $error_text . '<p>' . $lang_comments['Fix error'] . '</p>' . s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text),
+			));
 
-			($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
+			$controller->render();
 
-			foreach ($replace as $what => $to)
-				$template = str_replace($what, $to, $template);
-
-			$s2_db->close();
-
-			die($template);
+			die();
 		}
 	}
 
-	$template = s2_get_service_template();
-	$replace = array(
-		'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed failed'],
-		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
-		'<!-- s2_text -->'			=> $lang_comments['Unsubscribed failed info'],
-		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-	);
+	$controller = new Page_Service(array(
+		'head_title' => $lang_comments['Unsubscribed failed'],
+		'title'      => $lang_comments['Unsubscribed failed'],
+		'text'       => $lang_comments['Unsubscribed failed info'],
+	));
 
-	($hook = s2_hook('cmnt_unsubscribed_pre_tpl_replace')) ? eval($hook) : null;
+	$controller->render();
 
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	($hook = s2_hook('cmnt_unsubscribed_pre_output')) ? eval($hook) : null;
-
-	$s2_db->close();
-
-	die($template);
+	die();
 }
-
-if (!S2_ENABLED_COMMENTS)
-	s2_comment_error(array($lang_comment_errors['disabled']));
 
 if (!defined('S2_MAX_COMMENT_BYTES'))
 	define('S2_MAX_COMMENT_BYTES', 65535);
@@ -120,29 +94,32 @@ $_POST[s2_field_name('subscribed')] = $subscribed = (int) isset($_POST[s2_field_
 
 ($hook = s2_hook('cmnt_pre_post_check')) ? eval($hook) : null;
 
-// Make sure we have all the POST data
-foreach ($s2_comment_fields as $field)
-	if (!isset($_POST[$field]))
-		s2_comment_error(array($lang_comment_errors['post_error']));
-
-
 //
 // Starting input validation
 //
 
 $errors = array();
 
-$text = trim($_POST[s2_field_name('text')]);
-if (empty($text))
+if (!S2_ENABLED_COMMENTS)
+	$errors[] = $lang_comment_errors['disabled'];
+
+function get_ext_var($field)
+{
+	$field = s2_field_name($field);
+	return !empty($_POST[$field]) ? trim((string) $_POST[$field]) : '';
+}
+
+$text = get_ext_var('text');
+if ($text === '')
 	$errors[] = $lang_comment_errors['missing_text'];
 if (strlen($text) > S2_MAX_COMMENT_BYTES)
 	$errors[] = sprintf($lang_comment_errors['long_text'], S2_MAX_COMMENT_BYTES);
 
-$email = trim($_POST[s2_field_name('email')]);
+$email = get_ext_var('email');
 if (!s2_is_valid_email($email))
 	$errors[] = $lang_comment_errors['email'];
 
-$name = trim($_POST[s2_field_name('name')]);
+$name = get_ext_var('name');
 if (empty($name))
 	$errors[] = $lang_comment_errors['missing_nick'];
 if (utf8_strlen($name) > 50)
@@ -151,19 +128,17 @@ if (utf8_strlen($name) > 50)
 if (!s2_check_comment_question($_POST[s2_field_name('key')], $_POST[s2_field_name('quest')]))
 	$errors[] = $lang_comment_errors['question'];
 
-$id = (int) $_POST[s2_field_name('id')];
+list($id, $class) = explode('.', get_ext_var('id'));
+$id = (int) $id;
+$class = (string) $class;
 
 ($hook = s2_hook('cmnt_after_post_check')) ? eval($hook) : null;
 
 if (isset($_POST['preview']))
 {
 	// Handling "Preview" button
-	header('Content-Type: text/html; charset=utf-8');
 
-	$template = s2_get_service_template();
-	$replace['<!-- s2_head_title -->'] = $lang_comments['Comment preview'];
-	$replace['<!-- s2_title -->'] = '<h1>'.$lang_comments['Comment preview'].'</h1>';
-	$replace['<!-- s2_text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
+	$text_preview = s2_comment_form ($id.'.'.$class, $name, $email, $show_email, $subscribed, $text);
 
 	$name = '<strong>'.($show_email ? s2_js_mailto(s2_htmlencode($name), $email) : s2_htmlencode($name)).'</strong>';
 
@@ -171,22 +146,20 @@ if (isset($_POST['preview']))
 
 	$comments = "\t\t\t\t".'<div class="reply_info">'.sprintf($lang_common['Comment info format'], s2_date_time(time()), $name).'</div>'."\n".
 		"\t\t\t\t".'<div class="reply">'.s2_bbcode_to_html(s2_htmlencode($text)).'</div>'."\n";
-	$replace['<!-- s2_text -->'] = '<p>'.$lang_comments['Comment preview info'].'</p>'."\n".
+	$text_preview = '<p>'.$lang_comments['Comment preview info'].'</p>'."\n".
 		$comments.
 		"\t\t\t\t".'<h2>'.$lang_common['Post a comment'].'</h2>'."\n"
-		.$replace['<!-- s2_text -->'];
-	$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+		.$text_preview;
 
-	($hook = s2_hook('cmnt_preview_pre_tpl_replace')) ? eval($hook) : null;
+	$controller = new Page_Service(array(
+		'head_title' => $lang_comments['Comment preview'],
+		'title'      => $lang_comments['Comment preview'],
+		'text'       => $text_preview,
+	));
 
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
+	$controller->render();
 
-	($hook = s2_hook('cmnt_preview_pre_output')) ? eval($hook) : null;
-
-	$s2_db->close();
-
-	die($template);
+	die();
 }
 
 // What are we going to comment?
@@ -210,31 +183,20 @@ else
 
 if (!empty($errors))
 {
-	header('Content-Type: text/html; charset=utf-8');
-
-	$template = s2_get_service_template();
-	$replace['<!-- s2_head_title -->'] = $lang_common['Error'];
-	$replace['<!-- s2_title -->'] = '<h1>'.$lang_common['Error'].'</h1>';
-	$replace['<!-- s2_text -->'] = s2_comment_form ($id, $name, $email, $show_email, $subscribed, $text);
-
 	$error_text = '<p>'.$lang_comment_errors['Error message'].'</p><ul>';
 	foreach ($errors as $error)
 		$error_text .=  '<li>'.$error.'</li>';
 	$error_text .=  '</ul>';
 
-	$replace['<!-- s2_text -->'] = $error_text.'<p>'.$lang_comments['Fix error'].'</p>'.$replace['<!-- s2_text -->'];
-	$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+	$controller = new Page_Service(array(
+		'head_title' => $lang_common['Error'],
+		'title'      => $lang_common['Error'],
+		'text'       => $error_text . '<p>' . $lang_comments['Fix error'] . '</p>' . s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text),
+	));
 
-	($hook = s2_hook('cmnt_pre_error_tpl_replace')) ? eval($hook) : null;
+	$controller->render();
 
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	($hook = s2_hook('cmnt_pre_error_output')) ? eval($hook) : null;
-
-	$s2_db->close();
-
-	die($template);
+	die();
 }
 
 $link = s2_abs_link($path.'/'.urlencode($row['url']));
@@ -293,7 +255,7 @@ if (!$is_moderate)
 
 	foreach ($receivers as $receiver)
 	{
-		$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$id.'&unsubscribe='.base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36);
+		$unsubscribe_link = S2_BASE_URL.'/comment.php?mail='.urlencode($receiver['email']).'&id='.$id.'.'.$class.'&unsubscribe='.base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36);
 		($hook = s2_hook('cmnt_pre_send_mail')) ? eval($hook) : null;
 		s2_mail_comment($receiver['nick'], $receiver['email'], $message, $row['title'], $link, $name, $unsubscribe_link);
 	}
@@ -312,7 +274,7 @@ $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 while ($mrow = $s2_db->fetch_assoc($result))
 	s2_mail_moderator($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, $email);
 
-setcookie('comment_form_sent', 1);
+setcookie('comment_form_sent', $id.'.'.$class);
 
 if (!$is_moderate)
 {

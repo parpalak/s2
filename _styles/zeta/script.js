@@ -8,11 +8,13 @@
 
 		function save ()
 		{
-			var text = frm['Message'].value;
+			var text = frm['Message'].value,
+				id = 'comment_text_' + frm['RecordID'].value;
+
 			if (text)
-				localStorage.setItem('comment_text_' + document.location.pathname, text);
+				localStorage.setItem(id, text);
 			else
-				localStorage.removeItem('comment_text_' + document.location.pathname);
+				localStorage.removeItem(id);
 			localStorage.setItem('comment_name', frm['Name'].value);
 			localStorage.setItem('comment_email', frm['Email'].value);
 			localStorage.setItem('comment_showemail', frm['ShowEmail'].checked + 0);
@@ -23,16 +25,14 @@
 			if (!('localStorage' in window) || window['localStorage'] === null)
 				return;
 
-			if (document.cookie.indexOf('comment_form_sent=1') != -1)
+			if (document.cookie.indexOf('comment_form_sent=') != -1)
 			{
+				var id = document.cookie.replace(/(?:(?:^|.*;\s*)comment_form_sent\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 				document.cookie = 'comment_form_sent=0; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
-				var eLink = document.getElementById('back_to_commented'),
-					path = ((!frm && eLink) ? eLink : document.location).pathname;
-
-				localStorage.removeItem('comment_text_' + path);
+				localStorage.removeItem('comment_text_' + id);
 			}
 			else
-				frm['Message'].value = frm['Message'].value || localStorage.getItem('comment_text_' + document.location.pathname) || '';
+				frm['Message'].value = frm['Message'].value || localStorage.getItem('comment_text_' + frm['RecordID'].value) || '';
 
 			if (!frm)
 				return;

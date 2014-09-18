@@ -10,7 +10,9 @@
 abstract class Page_Abstract
 {
 	protected $template_id = 'site.php';
+	protected $error_template_id = 'error404.php';
 	protected $template = null;
+	protected $class = '';
 	protected $page = array();
 	protected $etag = null;
 
@@ -33,6 +35,24 @@ abstract class Page_Abstract
 			$this->obtainTemplate();
 
 		return $this->template;
+	}
+
+	protected function error_404 ()
+	{
+		global $lang_common;
+
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		$this->template = s2_get_template($this->error_template_id);
+
+		$this->page = array(
+			'head_title'	=> $lang_common['Error 404'],
+			'title'			=> '<h1>'.$lang_common['Error 404'].'</h1>',
+			's2_text'		=> sprintf($lang_common['Error 404 text'], s2_link('/')),
+		);
+
+		$this->render();
+
+		die();
 	}
 
 	/**
@@ -94,7 +114,7 @@ abstract class Page_Abstract
 		$replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
 
 		if (S2_ENABLED_COMMENTS && isset($page['commented']) && $page['commented'])
-			$replace['<!-- s2_comment_form -->'] = '<h2 class="comment form">'.$lang_common['Post a comment'].'</h2>'."\n".s2_comment_form($page['id']);
+			$replace['<!-- s2_comment_form -->'] = '<h2 class="comment form">'.$lang_common['Post a comment'].'</h2>'."\n".s2_comment_form($page['id'].'.'.$this->class);
 		else
 			$replace['<!-- s2_comment_form -->'] = '';
 
