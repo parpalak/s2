@@ -64,7 +64,7 @@ if ($request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
 	return new \s2_extensions\s2_search\Page(array());
 		]]></hook>
 
-		<hook id="fn_s2_error_404_pre_replace,idx_template_pre_replace"><![CDATA[
+		<hook id="idx_template_pre_replace"><![CDATA[
 if (isset($request_uri) && $request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
 {
 	$replace['<!-- s2_styles -->'] = '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/style.css" />'.(isset ($replace['<!-- s2_styles -->']) ? "\n".$replace['<!-- s2_styles -->'] : '');
