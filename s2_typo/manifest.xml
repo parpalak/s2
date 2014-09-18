@@ -7,7 +7,7 @@
  * Converts '""' quotation marks to '«»' and '„“' and puts non-breaking space
  * characters according to Russian typography conventions.
  *
- * @copyright (C) 2010-2013 Roman Parpalak, based on code (C) by Dmitry Smirnov
+ * @copyright (C) 2010-2014 Roman Parpalak, based on code (C) by Dmitry Smirnov
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_typo
  */
@@ -16,16 +16,16 @@
 <extension for="S2" engine="1.0">
 	<id>s2_typo</id>
 	<title>Russian typography</title>
-	<version>1.0b1</version>
+	<version>1.0b2</version>
 	<description>Converts '""' quotation marks to '«»' and '„“' and puts non-breaking space characters according to Russian typography conventions.</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0dev</minversion>
-	<maxtestedon>1.0b4</maxtestedon>
+	<maxtestedon>2.0dev</maxtestedon>
 
 	<hooks>
 
-		<hook id="idx_template_after_replace, cmnt_preview_pre_output"><![CDATA[
+		<hook id="idx_template_after_replace"><![CDATA[
 require $ext_info['path'].'/functions.php';
 $template = s2_typo_make($template);
 		]]></hook>
