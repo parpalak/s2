@@ -13,6 +13,7 @@ namespace s2_extensions\s2_blog;
 abstract class Page_Abstract extends \Page_Abstract
 {
 	public $template_id = 'blog.php';
+	protected $class = 's2_blog';
 
 	public function init()
 	{

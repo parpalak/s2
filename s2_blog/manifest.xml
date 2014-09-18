@@ -677,7 +677,7 @@ elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) =
 		]]></hook>
 
 		<hook id="cmnt_pre_get_page_info_qr"><![CDATA[
-if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+if ($class == 's2_blog')
 	$query = array(
 		'SELECT'	=> 'create_time, url, title, 0 AS parent_id',
 		'FROM'		=> 's2_blog_posts',
@@ -686,12 +686,12 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 		]]></hook>
 
 		<hook id="cmnt_pre_path_check"><![CDATA[
-if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+if ($class == 's2_blog')
 	$path = str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $row['create_time']);
 		]]></hook>
 
 		<hook id="cmnt_pre_save_comment_qr"><![CDATA[
-if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+if ($class == 's2_blog')
 {
 	$query['INSERT'] = 'post_id, time, ip, nick, email, show_email, subscribed, sent, shown, good, text';
 	$query['INTO'] = 's2_blog_comments';
@@ -699,7 +699,7 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 		]]></hook>
 
 		<hook id="cmnt_pre_get_subscribers_qr"><![CDATA[
-if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+if ($class == 's2_blog')
 	$query = array(
 		'SELECT'	=> 'id, nick, email, ip, time',
 		'FROM'		=> 's2_blog_comments',
@@ -707,13 +707,8 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 	);
 		]]></hook>
 
-		<hook id="cmnt_pre_send_mail"><![CDATA[
-if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
-	$unsubscribe_link = str_replace('unsubscribe', 'blog_unsubscribe', $unsubscribe_link);
-		]]></hook>
-
 		<hook id="cmnt_pre_get_comment_count_qr"><![CDATA[
-if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
+if ($class == 's2_blog')
 	$query = array(
 		'SELECT'	=> 'count(id)',
 		'FROM'		=> 's2_blog_comments',
@@ -721,78 +716,22 @@ if (isset($_GET['type']) && $_GET['type'] == 's2_blog')
 	);
 		]]></hook>
 
-		<hook id="cmnt_start"><![CDATA[
-if (isset($_GET['blog_unsubscribe']))
-{
-	header('X-Powered-By: S2/'.S2_VERSION);
-	header('Content-Type: text/html; charset=utf-8');
-
-	if (isset($_GET['id']) && isset($_GET['mail']))
-	{
-		$query = array(
-			'SELECT'	=> 'id, nick, email, ip, time',
-			'FROM'		=> 's2_blog_comments',
-			'WHERE'		=> 'post_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
-		);
-		($hook = s2_hook('blcmnt_unsubscribe_pre_get_receivers_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		$found = false;
-		while ($receiver = $s2_db->fetch_assoc($result))
-			if ($_GET['blog_unsubscribe'] == base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36))
-				$found = true;
-
-		if ($found)
-		{
-			$query = array(
-				'UPDATE'	=> 's2_blog_comments',
-				'SET'		=> 'subscribed = 0',
-				'WHERE'		=> 'post_id = '.intval($_GET['id']).' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
-			);
-			($hook = s2_hook('blcmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-			$template = s2_get_service_template();
-			$replace = array(
-				'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed OK'],
-				'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed OK'].'</h1>',
-				'<!-- s2_text -->'			=> $lang_comments['Unsubscribed OK info'],
-				'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
-			);
-
-			($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
-
-			foreach ($replace as $what => $to)
-				$template = str_replace($what, $to, $template);
-
-			$s2_db->close();
-
-			die($template);
-		}
-	}
-
-	$template = s2_get_service_template();
-	$replace = array(
-		'<!-- s2_head_title -->'	=> $lang_comments['Unsubscribed failed'],
-		'<!-- s2_title -->'			=> '<h1>'.$lang_comments['Unsubscribed failed'].'</h1>',
-		'<!-- s2_text -->'			=> $lang_comments['Unsubscribed failed info'],
-		'<!-- s2_debug -->'			=> defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '',
+		<hook id="cmnt_unsubscribe_pre_get_receivers_qr"><![CDATA[
+if ($class == 's2_blog')
+	$query = array(
+		'SELECT'	=> 'id, nick, email, ip, time',
+		'FROM'		=> 's2_blog_comments',
+		'WHERE'		=> 'post_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
 	);
-
-	($hook = s2_hook('cmnt_pre_unsubscribed_output')) ? eval($hook) : null;
-
-	foreach ($replace as $what => $to)
-		$template = str_replace($what, $to, $template);
-
-	$s2_db->close();
-
-	die($template);
-}
 		]]></hook>
 
-		<hook id="fn_comment_form_pre_output"><![CDATA[
-if (defined('S2_BLOG_HANDLED') || isset($_GET['type']) && $_GET['type'] == 's2_blog')
-	$action = S2_BASE_URL.'/comment.php?type=s2_blog';
+		<hook id="cmnt_unsubscribe_pre_upd_qr"><![CDATA[
+if ($class == 's2_blog')
+	$query = array(
+		'UPDATE'	=> 's2_blog_comments',
+		'SET'		=> 'subscribed = 0',
+		'WHERE'		=> 'post_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
+	);
 		]]></hook>
 
 		<hook id="idx_pre_meta_merge"><![CDATA[

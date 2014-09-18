@@ -22,7 +22,7 @@ class Page_Tag extends Page_Abstract
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// A tag
-		$this->page = self::posts_by_tag($params['tag']) + $this->page;
+		$this->page = $this->posts_by_tag($params['tag']) + $this->page;
 
 		// Bread crumbs
 		if (S2_BLOG_CRUMBS)
@@ -35,7 +35,7 @@ class Page_Tag extends Page_Abstract
 		$this->page['link_navigation']['up'] = S2_BLOG_TAGS_PATH;
 	}
 
-	private static function posts_by_tag ($tag)
+	private function posts_by_tag ($tag)
 	{
 		global $s2_db, $lang_s2_blog;
 
@@ -50,7 +50,7 @@ class Page_Tag extends Page_Abstract
 		if ($row = $s2_db->fetch_row($result))
 			list($tag_id, $tag_descr, $tag_name) = $row;
 		else {
-			s2_error_404();
+			$this->error_404();
 			die;
 		}
 
@@ -72,7 +72,7 @@ class Page_Tag extends Page_Abstract
 		);
 		$output = Lib::get_posts($query_add, false);
 		if ($output == '')
-			s2_error_404();
+			$this->error_404();
 
 		return array(
 			'text'			=> $tag_descr.$output,
