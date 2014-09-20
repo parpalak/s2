@@ -156,7 +156,7 @@ abstract class DBLayer_Abstract
 			$sql .= ' VALUES('.$query['VALUES'].')';
 		}
 
-		return ($return_query_string) ? $sql : $this->query($sql, $unbuffered);
+		return $return_query_string ? $sql : $this->query($sql, $unbuffered);
 	}
 
 	/**

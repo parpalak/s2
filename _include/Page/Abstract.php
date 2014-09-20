@@ -47,7 +47,7 @@ abstract class Page_Abstract
 		$this->page = array(
 			'head_title'	=> $lang_common['Error 404'],
 			'title'			=> '<h1>'.$lang_common['Error 404'].'</h1>',
-			's2_text'		=> sprintf($lang_common['Error 404 text'], s2_link('/')),
+			'text'			=> sprintf($lang_common['Error 404 text'], s2_link('/')),
 		);
 
 		$this->render();
@@ -76,7 +76,7 @@ abstract class Page_Abstract
 			(!empty($page['title']) ? $page['title'].' - ' : '').S2_SITE_NAME :
 			$page['head_title'];
 
-// Meta tags processing
+		// Meta tags processing
 		$meta_tags = array(
 			'<meta name="Generator" content="S2 '.S2_VERSION.'" />',
 		);
@@ -90,7 +90,7 @@ abstract class Page_Abstract
 
 		$replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.s2_link('/rss.xml').'" />';
 
-// Content
+		// Content
 		$replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
 		$replace['<!-- s2_navigation_link -->'] = '';
 		if (isset($page['link_navigation']))
@@ -113,14 +113,14 @@ abstract class Page_Abstract
 		$replace['<!-- s2_tags -->'] = !empty($page['tags']) ? $page['tags'] : '';
 		$replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
 
-		if (S2_ENABLED_COMMENTS && isset($page['commented']) && $page['commented'])
+		if (S2_ENABLED_COMMENTS && !empty($page['commented']))
 			$replace['<!-- s2_comment_form -->'] = '<h2 class="comment form">'.$lang_common['Post a comment'].'</h2>'."\n".s2_comment_form($page['id'].'.'.$this->class);
 		else
 			$replace['<!-- s2_comment_form -->'] = '';
 
 		$replace['<!-- s2_back_forward -->'] = !empty($page['back_forward']) ? $page['back_forward'] : '';
 
-// Aside
+		// Aside
 		$replace['<!-- s2_menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
 		$replace['<!-- s2_article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';
 
@@ -136,26 +136,26 @@ abstract class Page_Abstract
 		if (strpos($template, '<!-- s2_tags_list -->') !== false)
 			$replace['<!-- s2_tags_list -->'] = Placeholder::tags_list();
 
-// Footer
+		// Footer
 		$replace['<!-- s2_copyright -->'] = s2_build_copyright();
 
-// Including the style
+		// Including the style
 		ob_start();
 		include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
 		$replace['<!-- s2_styles -->'] = ob_get_clean();
 
 		($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
 
-// Queries
+		// Queries
 		$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
 
 		$etag = md5($template);
-// Add here placeholders to be excluded from the ETag calculation
+		// Add here placeholders to be excluded from the ETag calculation
 		$etag_skip = array('<!-- s2_comment_form -->');
 
 		($hook = s2_hook('idx_template_pre_replace')) ? eval($hook) : null;
 
-// Replacing placeholders and calculating hash for ETag header
+		// Replacing placeholders and calculating hash for ETag header
 		foreach ($replace as $what => $to)
 		{
 			if (!in_array($what, $etag_skip))
@@ -165,12 +165,12 @@ abstract class Page_Abstract
 
 		($hook = s2_hook('idx_template_after_replace')) ? eval($hook) : null;
 
-// Execution time
+		// Execution time
 		if (defined('S2_DEBUG'))
 		{
-			$page['generate_time'] = 't = '.s2_number_format(microtime(true) - $s2_start, true, 3).'; q = '.$s2_db->get_num_queries();
-			$template = str_replace('<!-- s2_querytime -->', $page['generate_time'], $template);
-			$etag .= md5($page['generate_time']);
+			$time_placeholder = 't = '.s2_number_format(microtime(true) - $s2_start, true, 3).'; q = '.$s2_db->get_num_queries();
+			$template = str_replace('<!-- s2_querytime -->', $time_placeholder, $template);
+			$etag .= md5($time_placeholder);
 		}
 
 		$s2_db->close();

@@ -631,7 +631,7 @@ function s2_404_header ()
 // Display a simple error message
 function error()
 {
-	global $s2_config, $lang_common;
+	global $lang_common;
 
 	if (!headers_sent())
 	{

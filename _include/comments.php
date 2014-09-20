@@ -31,7 +31,7 @@ function s2_field_name ($index)
 	if (isset($s2_comment_fields[$index]))
 		return $s2_comment_fields[$index];
 
-	echo $lang_comments['Error post comment'];
+	echo $lang_comments['Error post comment']; // TODO remove
 	return '';
 }
 
