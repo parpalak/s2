@@ -19,7 +19,7 @@ class Page extends \Page_Abstract
 		global $lang_s2_search;
 
 		$this->query = isset($_GET['q']) ? $_GET['q'] : '';
-		$this->page = isset($_GET['p']) ? (int) $_GET['p'] : 1;
+		$this->page_num = isset($_GET['p']) ? (int) $_GET['p'] : 1;
 
 		if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php'))
 			require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
@@ -117,17 +117,17 @@ if (defined('DEBUG')) $start_time = microtime(true);
 
 				$items_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10.0;
 				$total_pages = ceil(1.0 * $item_num / $items_per_page);
-				if ($this->page < 1 || $this->page > $total_pages)
-					$this->page = 1;
+				if ($this->page_num < 1 || $this->page_num > $total_pages)
+					$this->page_num = 1;
 
 				$i = 0;
 				$output = array();
 				foreach ($weights as $chapter => $weight)
 				{
 					$i++;
-					if ($i <= ($this->page - 1) * $items_per_page)
+					if ($i <= ($this->page_num - 1) * $items_per_page)
 						continue;
-					if ($i > $this->page * $items_per_page)
+					if ($i > $this->page_num * $items_per_page)
 						break;
 
 					$output[$chapter]['title'] = '<a class="title" href="'.s2_link($toc[$chapter]['url']).'">'.s2_htmlencode($toc[$chapter]['title']).'</a>';
@@ -155,7 +155,7 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 				}
 
 				$link_nav = array();
-				echo s2_paging($this->page, $total_pages, s2_link('/search', array('q='.str_replace('%', '%%', urlencode($this->query)), 'p=%d')), $link_nav);
+				echo s2_paging($this->page_num, $total_pages, s2_link('/search', array('q='.str_replace('%', '%%', urlencode($this->query)), 'p=%d')), $link_nav);
 				foreach ($link_nav as $rel => $href)
 					$this->page['link_navigation'][$rel] = $href;
 			}

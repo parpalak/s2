@@ -65,7 +65,7 @@ if ($request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
 		]]></hook>
 
 		<hook id="idx_template_pre_replace"><![CDATA[
-if (isset($request_uri) && $request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
+if ($this instanceof \s2_extensions\s2_search\Page)
 {
 	$replace['<!-- s2_styles -->'] = '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/style.css" />'.(isset ($replace['<!-- s2_styles -->']) ? "\n".$replace['<!-- s2_styles -->'] : '');
 	$replace['<!-- s2_search_field -->'] = '';

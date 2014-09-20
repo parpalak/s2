@@ -1,6 +1,6 @@
 .search-results form {
 	width: auto;
-	padding: 1em;
+	padding: 1px;
 	background: #eee;
 	margin: 1em 0;
 	zoom: 1;
@@ -8,11 +8,12 @@
 
 .search-results .button {
 	float: right;
+	padding: 1em 1em 0 0;
 	}
 
 .search-results .wrap {
 	overflow: hidden;
-	padding-right: 1em;
+	padding: 1em 1em 1em 1em;
 	zoom: 1;
 	}
 	.search-results .wrap input {
