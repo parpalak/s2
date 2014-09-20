@@ -846,7 +846,7 @@ form center {
 	}
 
 .input {
-	margin: 0 0 0.5em;
+	margin: 0 0 0.75em;
 	position: relative;
 	padding: 0 0 0 20em;
 	}
@@ -865,9 +865,10 @@ form center {
 		padding: 0;
 		}
 		.input label > small {
-			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+			font-size: 1em;
 			color: #666;
 			margin: 0 0 0 0.273em;
+			display: block;
 			}
 	.input label > span,
 	.input .subhead {

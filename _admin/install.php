@@ -4,15 +4,15 @@
  *
  * Used to actually install S2.
  *
- * @copyright (C) 2009-2013 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2014 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
 
 
-define('S2_VERSION', '2.0a1');
+define('S2_VERSION', '2.0dev');
 define('S2_DB_REVISION', 14);
-define('MIN_PHP_VERSION', '5.0.0');
+define('MIN_PHP_VERSION', '5.3.0');
 define('MIN_MYSQL_VERSION', '4.1.2');
 
 define('S2_ROOT', '../');
@@ -34,16 +34,8 @@ error_reporting(E_ALL);
 @set_time_limit(0);
 
 // We need some stuff
-require S2_ROOT.'_include/functions.php';
+require S2_ROOT.'_include/setup.php';
 require 'options.php';
-
-// Load UTF-8 functions
-require S2_ROOT.'_include/utf8/utf8.php';
-require S2_ROOT.'_include/utf8/ucwords.php';
-require S2_ROOT.'_include/utf8/trim.php';
-
-// Strip out "bad" UTF-8 characters
-s2_remove_bad_characters();
 
 //
 // Generate output to be used for config.php
@@ -162,17 +154,23 @@ if (!isset($_POST['form_sent']))
 	if (function_exists('mysqli_connect'))
 	{
 		$db_extensions[] = array('mysqli', 'MySQL Improved');
+	}
+	if (function_exists('mysql_connect'))
+	{
+		$db_extensions[] = array('mysql', 'MySQL Standard');
+
+		if (count($db_extensions) > 1)
+			$dual_mysql = true;
+	}
+	if (function_exists('mysqli_connect'))
+	{
 		$db_extensions[] = array('mysqli_innodb', 'MySQL Improved (InnoDB)');
 		$mysql_innodb = true;
 	}
 	if (function_exists('mysql_connect'))
 	{
-		$db_extensions[] = array('mysql', 'MySQL Standard');
 		$db_extensions[] = array('mysql_innodb', 'MySQL Standard (InnoDB)');
 		$mysql_innodb = true;
-
-		if (count($db_extensions) > 2)
-			$dual_mysql = true;
 	}
 	if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers()))
 		$db_extensions[] = array('pdo_sqlite', 'PDO SQLite');
@@ -250,12 +248,6 @@ body {
 		<h2><?php echo $lang_install['Part1'] ?></h2>
 		<div class="info-box">
 			<p><?php echo $lang_install['Part1 intro'] ?></p>
-			<ul class="spaced">
-				<li><span><strong><?php echo $lang_install['Database type'] ?></strong><br /><?php echo $lang_install['Database type info']; if ($dual_mysql) echo '<br />'.$lang_install['Mysql type info']; if ($mysql_innodb) echo '<br />'.$lang_install['MySQL InnoDB info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Database server'] ?></strong><br /><?php echo $lang_install['Database server info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Database name'] ?></strong><br /><?php echo $lang_install['Database name info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Table prefix'] ?></strong><br /><?php echo $lang_install['Table prefix info'] ?></span></li>
-			</ul>
 		</div>
 		<fieldset>
 			<legend><?php echo $lang_install['Part1 legend'] ?></legend>
@@ -271,7 +263,7 @@ body {
 ?>
 						</select>
 						<br />
-						<small><?php echo $lang_install['Database type help'] ?></small>
+						<small><?php echo $lang_install['Database type help']; if ($dual_mysql) echo '<br />'.$lang_install['Mysql type info']; if ($mysql_innodb) echo '<br />'.$lang_install['MySQL InnoDB info'] ?></small>
 					</label>
 				</div>
 				<div class="input text required">
@@ -314,11 +306,6 @@ body {
 		<h2><?php echo $lang_install['Part2'] ?></h2>
 		<div class="info-box">
 			<p><?php echo $lang_install['Part2 intro'] ?></p>
-			<ul class="spaced">
-				<li><span><strong><?php echo $lang_install['Admin username'] ?></strong><br /><?php echo $lang_install['Admin username info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Admin password'] ?></strong><br /><?php echo $lang_install['Admin password info'] ?></span></li>
-				<li><span><strong><?php echo $lang_install['Admin e-mail'] ?></strong><br /><?php echo $lang_install['Admin e-mail info'] ?></span></li>
-			</ul>
 		</div>
 		<fieldset>
 			<legend><?php echo $lang_install['Part2 legend'] ?></legend>
@@ -345,12 +332,6 @@ body {
 				</div>
 		</fieldset>
 		<h2><?php echo $lang_install['Part3'] ?></h2>
-		<div class="info-box">
-			<p><?php echo $lang_install['Part3 intro'] ?></p>
-			<ul class="spaced">
-				<li><span><strong><?php echo $lang_install['Base URL'] ?></strong><br /><?php echo $lang_install['Base URL info'] ?></span></li>
-			</ul>
-		</div>
 		<fieldset>
 			<legend><?php echo $lang_install['Part3 legend'] ?></legend>
 				<div class="input text required">
@@ -368,8 +349,8 @@ body {
 ?>
 				<div class="input select">
 					<label for="fld14">
-						<span><?php echo $lang_install['Default language'] ?></span>
-						<select id="fld14" name="req_language">
+						<span><?php echo $lang_install['Default language'] ?>
+						</span><select id="fld14" name="req_language">
 <?php
 
 		foreach ($languages as $lang)
@@ -461,37 +442,6 @@ else
 	if (!file_exists(S2_ROOT.'_lang/'.$default_lang.'/common.php'))
 		error($lang_install['Invalid language']);
 
-	require S2_ROOT.'_include/DBLayer/Abstract.php';
-	// Load the appropriate DB layer class
-	switch ($db_type)
-	{
-		case 'mysql':
-			require S2_ROOT.'_include/DBLayer/MySQL.php';
-			break;
-
-		case 'mysql_innodb':
-			require S2_ROOT.'_include/DBLayer/MySQLInnodb.php';
-			break;
-
-		case 'mysqli':
-			require S2_ROOT.'_include/DBLayer/MySQLi.php';
-			break;
-
-		case 'mysqli_innodb':
-			require S2_ROOT.'_include/DBLayer/MySQLiInnoDB.php';
-			break;
-
-		case 'pgsql':
-			require S2_ROOT.'_include/DBLayer/PgSQL.php';
-			break;
-
-		case 'pdo_sqlite':
-			require S2_ROOT.'_include/DBLayer/PDOSQLite.php';
-			break;
-
-		default:
-			error(sprintf($lang_install['No such database type'], s2_htmlencode($db_type)));
-	}
 
 	// Create the database object (and connect/select db)
 	try
@@ -1078,9 +1028,12 @@ else
 
 	$s2_db->close();
 
+	require S2_ROOT.'_include/cache.php';
+	s2_clear_cache();
+
 	$alerts = array();
 	// Check if the cache directory is writable
-	if (!is_writable(S2_ROOT.'_cache/'))
+	if (!is_writable(S2_CACHE_DIR))
 		$alerts[] = '<li><span>'.$lang_install['No cache write'].'</span></li>';
 
 	// Check if default pictures directory is writable
@@ -1163,8 +1116,8 @@ body {
 		</div>
 		<form method="post" accept-charset="utf-8" action="install.php">
 			<input type="hidden" name="generate_config" value="1" />
-			<input type="hidden" name="db_type" value="<?php echo $db_type; ?>" />
-			<input type="hidden" name="db_host" value="<?php echo $db_host; ?>" />
+			<input type="hidden" name="db_type" value="<?php echo s2_htmlencode($db_type); ?>" />
+			<input type="hidden" name="db_host" value="<?php echo s2_htmlencode($db_host); ?>" />
 			<input type="hidden" name="db_name" value="<?php echo s2_htmlencode($db_name); ?>" />
 			<input type="hidden" name="db_username" value="<?php echo s2_htmlencode($db_username); ?>" />
 			<input type="hidden" name="db_password" value="<?php echo s2_htmlencode($db_password); ?>" />
