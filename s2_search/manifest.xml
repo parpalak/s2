@@ -15,21 +15,18 @@
 <extension for="S2" engine="1.0">
 	<id>s2_search</id>
 	<title>Search</title>
-	<version>1.0b4</version>
+	<version>2.0dev</version>
 	<description>Full-text search with Russian morphology. Designed for small sites.</description>
 	<author>Roman Parpalak</author>
 
 	<adminaffected>1</adminaffected>
 
-	<minversion>1.0b4</minversion>
-	<maxtestedon>1.0b4</maxtestedon>
+	<minversion>2.0dev</minversion>
+	<maxtestedon>2.0dev</maxtestedon>
 
 	<note type="install">Do not forget to create search index after extension installation (Admin → Stats page).</note>
 
 	<install><![CDATA[
-if (version_compare(PHP_VERSION, '5.0.0', '<'))
-	return '<strong>Error!</strong> The s2_search extension does not work on PHP 4. Please upgrade to PHP 5.';
-
 $s2_search_config = array(
 	'S2_SEARCH_QUICK'		=> '0',
 );
