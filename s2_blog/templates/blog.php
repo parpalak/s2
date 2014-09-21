@@ -1,13 +1,13 @@
 <?php if (!defined('S2_ROOT')) die; ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
 <title><!-- s2_head_title --></title>
 <!-- s2_meta -->
-<link rel="stylesheet" type="text/css" media="screen" href="<?php echo $GLOBALS['ext_info']['url']; ?>/style.css" />
 <!-- s2_styles -->
 <!-- s2_navigation_link -->
+<!-- s2_rss_link -->
 </head>
 
 <body class="blog">
@@ -36,5 +36,6 @@
 		<p id="queries"><!-- s2_querytime --></p>
 		<p id="copyright"><!-- s2_copyright --></p>
 	</div>
+<!-- s2_scripts -->
 </body>
 </html>

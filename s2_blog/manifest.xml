@@ -15,14 +15,14 @@
 <extension for="S2" engine="1.0">
 	<id>s2_blog</id>
 	<title>Blog</title>
-	<version>1.0b5</version>
+	<version>2.0dev</version>
 	<description>Adds a blog to your site.</description>
 	<author>Roman Parpalak</author>
 
 	<adminaffected>1</adminaffected>
 
-	<minversion>1.0b5</minversion>
-	<maxtestedon>1.0b5</maxtestedon>
+	<minversion>2.0dev</minversion>
+	<maxtestedon>2.0dev</maxtestedon>
 
 	<note type="uninstall" timing="pre">Warning! All your posts and user comments will be deleted during the uninstall process. It is strongly recommended you to disable 'Blog' extension instead or to upgrade it without uninstalling.</note>
 
@@ -298,6 +298,7 @@ $router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/[:url]', '\\s2_exte
 		]]></hook>
 
 		<hook id="idx_pre_get_queries"><![CDATA[
+global $lang_s2_blog;
 if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
 {
 	$s2_blog_recent_comments = s2_extensions\s2_blog\Placeholder::recent_comments();
@@ -734,16 +735,8 @@ if ($class == 's2_blog')
 	);
 		]]></hook>
 
-		<hook id="idx_pre_meta_merge"><![CDATA[
-if (!isset($lang_s2_blog))
-{
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
-}
-if (defined('S2_BLOG_HANDLED'))
-	$meta_tags[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_s2_blog['RSS link title'].'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
+		<hook id="fn_get_template_pre_includes_merge"><![CDATA[
+$includes['css'][] = $ext_info['url'].'/style.css';
 		]]></hook>
 
 		<hook id="fn_s2_count_rss_count_start"><![CDATA[

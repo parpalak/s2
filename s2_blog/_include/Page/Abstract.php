@@ -27,6 +27,7 @@ abstract class Page_Abstract extends \Page_Abstract
 			require __DIR__ . '/../../lang/English.php';
 
 		$this->page['commented'] = 0;
+		$this->rss_link[] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode($lang_s2_blog['RSS link title']).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
 	}
 
 	abstract public function body (array $params);
@@ -49,7 +50,5 @@ abstract class Page_Abstract extends \Page_Abstract
 
 		if (strpos($this->template, '<!-- s2_menu -->') !== false)
 			$this->page['menu']['s2_blog_navigation'] = '<div class="header">' . $lang_s2_blog['Navigation'] . '</div>' . Placeholder::blog_navigation();
-
-		define('S2_BLOG_HANDLED', 1);
 	}
 }
