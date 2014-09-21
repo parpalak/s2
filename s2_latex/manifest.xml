@@ -25,7 +25,7 @@
 	<hooks>
 
 		<hook id="fn_get_template_pre_includes_merge"><![CDATA[
-$includes['js'][] = 'http://tex.s2cms.ru/latex.js';
+$includes['css_inline'][] = '<script src="http://tex.s2cms.ru/latex.js"></script>';
 		]]></hook>
 
 		<hook id="fn_comment_form_pre_syntax_info"><![CDATA[
