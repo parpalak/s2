@@ -86,11 +86,6 @@ function s2_jsvarencode ($var)
 	return str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", '') , $var);
 }
 
-ob_start();
-include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
-($hook = s2_hook('ai_pre_get_tpl_styles')) ? eval($hook) : null;
-$template = str_replace('<!-- s2_styles -->', ob_get_clean(), $template);
-
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">

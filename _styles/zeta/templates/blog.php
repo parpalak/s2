@@ -5,9 +5,6 @@
 <meta charset="utf-8" />
 <title><!-- s2_head_title --></title>
 <!-- s2_meta -->
-<link rel="stylesheet" media="screen" href="<?php echo $GLOBALS['ext_info']['url']; ?>/style.css" />
-<link rel="stylesheet" href="<?php echo S2_PATH.'/_styles/'.S2_STYLE ?>/site.css" />
-<script src="<?php echo S2_PATH.'/_styles/'.S2_STYLE ?>/script.js"></script>
 <!-- s2_styles -->
 <!-- s2_navigation_link -->
 </head>
@@ -38,5 +35,6 @@
 		<p id="queries"><!-- s2_querytime --></p>
 		<p id="copyright"><!-- s2_copyright --></p>
 	</div>
+<!-- s2_scripts -->
 </body>
 </html>

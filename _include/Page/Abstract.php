@@ -139,11 +139,6 @@ abstract class Page_Abstract
 		// Footer
 		$replace['<!-- s2_copyright -->'] = s2_build_copyright();
 
-		// Including the style
-		ob_start();
-		include S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
-		$replace['<!-- s2_styles -->'] = ob_get_clean();
-
 		($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
 
 		// Queries
