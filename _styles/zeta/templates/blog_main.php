@@ -7,6 +7,7 @@
 <!-- s2_meta -->
 <!-- s2_styles -->
 <!-- s2_navigation_link -->
+<!-- s2_rss_link -->
 </head>
 
 <body class="blog_main">

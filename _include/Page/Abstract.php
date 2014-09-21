@@ -15,6 +15,7 @@ abstract class Page_Abstract
 	protected $class = '';
 	protected $page = array();
 	protected $etag = null;
+	protected $rss_link = array();
 
 	abstract public function __construct (array $params = array());
 
@@ -85,10 +86,12 @@ abstract class Page_Abstract
 		if (!empty($page['meta_description']))
 			$meta_tags[] = '<meta name="description" content="'.s2_htmlencode($page['meta_description']).'" />';
 
-		($hook = s2_hook('idx_pre_meta_merge')) ? eval($hook) : null;
+		($hook = s2_hook('proc_tpl_pre_meta_merge')) ? eval($hook) : null;
 		$replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
 
-		$replace['<!-- s2_rss_link -->'] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.s2_link('/rss.xml').'" />';
+		if (empty($this->rss_link))
+			$this->rss_link[] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.s2_link('/rss.xml').'" />';
+		$replace['<!-- s2_rss_link -->'] = implode("\n", $this->rss_link);
 
 		// Content
 		$replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
