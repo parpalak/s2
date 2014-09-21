@@ -64,7 +64,6 @@ if ($request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
 		<hook id="idx_template_pre_replace"><![CDATA[
 if ($this instanceof \s2_extensions\s2_search\Page)
 {
-	$replace['<!-- s2_styles -->'] = '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/style.css" />'.(isset ($replace['<!-- s2_styles -->']) ? "\n".$replace['<!-- s2_styles -->'] : '');
 	$replace['<!-- s2_search_field -->'] = '';
 }
 else
@@ -75,9 +74,15 @@ else
 		require $ext_info['path'].'/lang/English.php';
 	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.(S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search').'">'.(S2_URL_PREFIX ? '<input type="hidden" name="search" value="1" />' : '').'<input type="text" name="q" class="inactive" id="s2_search_input" onblur="if(this.value==\'\'){this.value=this.defaultValue; this.className=\'inactive\';}" onfocus="if(this.value==this.defaultValue){this.value=this.className=\'\';}" value="'.$lang_s2_search['Search'].'"/></form>';
 }
+		]]></hook>
 
+		<hook id="fn_get_template_pre_includes_merge"><![CDATA[
+$includes['css'][] = $ext_info['url'].'/style.css';
 if (S2_SEARCH_QUICK)
-	$replace['<!-- s2_styles -->'] = (isset ($replace['<!-- s2_styles -->']) ? $replace['<!-- s2_styles -->']."\n" : '').'<script type="text/javascript" src="'.$ext_info['url'].'/autosearch.js"></script>'."\n".'<script type="text/javascript">var s2_search_url = "'.$ext_info['url'].'";</script>';
+{
+	$includes['js'][] = $ext_info['url'].'/autosearch.js';
+	$includes['js_inline'][] = '<script>var s2_search_url = "'.$ext_info['url'].'";</script>';
+}
 		]]></hook>
 
 		<hook id="ai_after_js_include"><![CDATA[
