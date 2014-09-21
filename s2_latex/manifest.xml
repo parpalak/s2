@@ -15,21 +15,17 @@
 <extension for="S2" engine="1.0">
 	<id>s2_latex</id>
 	<title>LaTeX</title>
-	<version>1.0b4</version>
+	<version>2.0dev</version>
 	<description>Allows to write LaTeX formulae.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0b</minversion>
-	<maxtestedon>1.0b4</maxtestedon>
+	<minversion>2.0dev</minversion>
+	<maxtestedon>2.0dev</maxtestedon>
 
 	<hooks>
 
-		<hook id="idx_template_pre_replace, fn_get_service_template_pre_replace"><![CDATA[
-$replace['<!-- s2_styles -->'] .= "\n".'<script type="text/javascript" src="http://tex.s2cms.ru/latex.js"></script>';
-		]]></hook>
-
-		<hook id="ai_pre_get_tpl_styles"><![CDATA[
-echo "\n".'<script type="text/javascript" src="http://tex.s2cms.ru/latex.js"></script>';
+		<hook id="fn_get_template_pre_includes_merge"><![CDATA[
+$includes['js'][] = 'http://tex.s2cms.ru/latex.js';
 		]]></hook>
 
 		<hook id="fn_comment_form_pre_syntax_info"><![CDATA[
