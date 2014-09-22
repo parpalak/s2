@@ -258,10 +258,7 @@ function s2_save_options ($opt)
 		$s2_db->query_build($query) or error(__FILE__, __LINE__);
 	}
 
-	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/cache.php';
-
-	s2_generate_config_cache();
+	S2Cache::generate_config();
 
 	return implode("\n", $return);
 }

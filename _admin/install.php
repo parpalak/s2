@@ -1028,8 +1028,7 @@ else
 
 	$s2_db->close();
 
-	require S2_ROOT.'_include/cache.php';
-	s2_clear_cache();
+	S2Cache::clear();
 
 	$alerts = array();
 	// Check if the cache directory is writable

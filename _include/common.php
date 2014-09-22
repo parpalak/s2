@@ -61,12 +61,7 @@ if (file_exists(S2_CACHE_DIR.'cache_config.php'))
 	include S2_CACHE_DIR.'cache_config.php';
 
 if (!defined('S2_CONFIG_LOADED'))
-{
-	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/cache.php';
-
-	s2_generate_config_cache(true);
-}
+	S2Cache::generate_config(true);
 
 define('S2_DB_LAST_REVISION', 14);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION)
@@ -79,9 +74,4 @@ if (file_exists(S2_CACHE_DIR.'cache_hooks.php'))
 	include S2_CACHE_DIR.'cache_hooks.php';
 
 if (!defined('S2_HOOKS_LOADED'))
-{
-	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/cache.php';
-
-	s2_generate_hooks_cache();
-}
+	S2Cache::generate_hooks();

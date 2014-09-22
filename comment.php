@@ -163,6 +163,8 @@ if (isset($_POST['preview']))
 }
 
 // What are we going to comment?
+$path = false;
+
 $query = array(
 	'SELECT'	=> 'title, parent_id, url',
 	'FROM'		=> 'articles',

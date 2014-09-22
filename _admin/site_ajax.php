@@ -88,12 +88,7 @@ elseif ($action == 'check_updates')
 
 	@$updates = include S2_CACHE_DIR.'cache_updates.php';
 	if (empty($updates) || $updates['cached'] + 7200 < time())
-	{
-		if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-			require S2_ROOT.'_include/cache.php';
-
-		$updates = s2_generate_updates_cache();
-	}
+		$updates = S2Cache::generate_updates();
 
 	if ($updates['fail'] === false && version_compare($updates['version'], S2_VERSION, '>'))
 		$return = array('is_update' => 1, 'message' => sprintf($lang_admin['New version message'], $updates['version']));
