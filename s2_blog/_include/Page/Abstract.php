@@ -43,8 +43,6 @@ abstract class Page_Abstract extends \Page_Abstract
 	{
 		global $lang_s2_blog;
 
-		if (isset($this->page['path']))
-			$this->page['path'] = implode('&nbsp;&rarr; ', $this->page['path']);
 		$this->page['meta_description'] = S2_BLOG_TITLE;
 		$this->page['head_title'] = empty($this->page['head_title']) ? S2_BLOG_TITLE : $this->page['head_title'] . ' - ' . S2_BLOG_TITLE;
 

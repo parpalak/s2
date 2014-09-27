@@ -27,13 +27,21 @@ class Page_Year extends Page_Abstract
 		$this->page = self::year_posts($params['year']) + $this->page;
 
 		// Bread crumbs
-		if (S2_BLOG_CRUMBS)
-			$this->page['path'][] = S2_BLOG_CRUMBS;
+		$this->page['path'][] = array(
+			'title' => \Model::main_page_title(),
+			'link'  => s2_link('/'),
+		);
 		if (S2_BLOG_URL)
-			$this->page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
-		$this->page['path'][] = $params['year'];
+		{
+			$this->page['path'][] = array(
+				'title' => $lang_s2_blog['Blog'],
+				'link' => S2_BLOG_PATH,
+			);
+		}
 
-		$this->page = $this->page;
+		$this->page['path'][] = array(
+			'title' => $params['year']
+		);
 	}
 
 	private static function year_posts ($year)

@@ -25,11 +25,21 @@ class Page_Tags extends Page_Abstract
 		$this->page['text'] = self::all_tags();
 
 		// Bread crumbs
-		if (S2_BLOG_CRUMBS)
-			$this->page['path'][] = S2_BLOG_CRUMBS;
+		$this->page['path'][] = array(
+			'title' => \Model::main_page_title(),
+			'link'  => s2_link('/'),
+		);
 		if (S2_BLOG_URL)
-			$this->page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
-		$this->page['path'][] = $lang_s2_blog['Tags'];
+		{
+			$this->page['path'][] = array(
+				'title' => $lang_s2_blog['Blog'],
+				'link' => S2_BLOG_PATH,
+			);
+		}
+
+		$this->page['path'][] = array(
+			'title' => $lang_s2_blog['Tags'],
+		);
 
 		$this->page['head_title'] = $this->page['title'] = $lang_s2_blog['Tags'];
 		$this->page['link_navigation']['up'] = S2_BLOG_PATH;

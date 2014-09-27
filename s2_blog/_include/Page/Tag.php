@@ -22,15 +22,30 @@ class Page_Tag extends Page_Abstract
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// A tag
-		$this->page = $this->posts_by_tag($params['tag']) + $this->page;
+		$page = $this->posts_by_tag($params['tag']);
+		$this->page['title'] = $this->page['head_title'] = s2_htmlencode($page['title']);
+		$this->page['text'] = $page['text'];
 
 		// Bread crumbs
-		if (S2_BLOG_CRUMBS)
-			$this->page['path'][] = S2_BLOG_CRUMBS;
+		$this->page['path'][] = array(
+			'title' => \Model::main_page_title(),
+			'link'  => s2_link('/'),
+		);
 		if (S2_BLOG_URL)
-			$this->page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
-		$this->page['path'][] = '<a href="'.S2_BLOG_TAGS_PATH.'">'.$lang_s2_blog['Tags'].'</a>';
-		$this->page['path'][] = $this->page['title'];
+		{
+			$this->page['path'][] = array(
+				'title' => $lang_s2_blog['Blog'],
+				'link' => S2_BLOG_PATH,
+			);
+		}
+
+		$this->page['path'][] = array(
+			'title' => $lang_s2_blog['Tags'],
+			'link'  => S2_BLOG_TAGS_PATH,
+		);
+		$this->page['path'][] = array(
+			'title' => $this->page['title'],
+		);
 
 		$this->page['link_navigation']['up'] = S2_BLOG_TAGS_PATH;
 	}
@@ -76,8 +91,7 @@ class Page_Tag extends Page_Abstract
 
 		return array(
 			'text'			=> $tag_descr.$output,
-			'title'			=> s2_htmlencode($tag_name),
-			'head_title'	=> s2_htmlencode($tag_name)
+			'title'			=> $tag_name,
 		);
 	}
 }

@@ -25,15 +25,22 @@ class Page_Main extends Page_Abstract
 		$this->page = self::last_posts($s2_blog_skip) + $this->page;
 
 		// Bread crumbs
-		if (S2_BLOG_CRUMBS)
-			$this->page['path'][] = S2_BLOG_CRUMBS;
+		$this->page['path'][] = array(
+			'title' => \Model::main_page_title(),
+			'link'  => s2_link('/'),
+		);
 		if (S2_BLOG_URL)
-			$this->page['path'][] = $s2_blog_skip ? '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>' : $lang_s2_blog['Blog'];
+		{
+			$this->page['path'][] = array(
+				'title' => $lang_s2_blog['Blog'],
+				'link' => $s2_blog_skip ? S2_BLOG_PATH : null,
+			);
+		}
 
 		if ($s2_blog_skip)
 			$this->page['link_navigation']['up'] = S2_BLOG_PATH;
-		elseif (S2_BLOG_URL && S2_BLOG_CRUMBS && preg_match('#href="(.*?)"#', S2_BLOG_CRUMBS, $s2_blog_matches))
-			$this->page['link_navigation']['up'] = $s2_blog_matches[1];
+		elseif (S2_BLOG_URL)
+			$this->page['link_navigation']['up'] = s2_link('/');
 	}
 
 	private static function last_posts ($skip = 0)

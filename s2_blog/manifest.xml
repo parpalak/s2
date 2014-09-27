@@ -227,7 +227,6 @@ if (!$s2_db->table_exists('s2_blog_post_tag'))
 $s2_blog_config = array(
 	'S2_BLOG_URL'		=> '/blog',
 	'S2_BLOG_TITLE'		=> 'My blog',
-	'S2_BLOG_CRUMBS'	=> '<a href="/">Main page</a>',
 );
 
 foreach ($s2_blog_config as $conf_name => $conf_value)
@@ -259,7 +258,7 @@ $s2_db->add_index('tags', 's2_blog_important_idx', array('s2_blog_important'));
 	<uninstall><![CDATA[
 $query = array(
 	'DELETE'	=> 'config',
-	'WHERE'		=> 'name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\', \'S2_BLOG_CRUMBS\')',
+	'WHERE'		=> 'name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\')',
 );
 $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
@@ -581,7 +580,6 @@ if (strpos($mode, 's2_blog') === 0)
 		<hook id="opt_start"><![CDATA[
 $s2_const_types['S2_BLOG_URL'] = 'string';
 $s2_const_types['S2_BLOG_TITLE'] = 'string';
-$s2_const_types['S2_BLOG_CRUMBS'] = 'string';
 		]]></hook>
 
 		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
@@ -592,7 +590,6 @@ else
 $fieldset = array(
 	'S2_BLOG_TITLE' => s2_get_input('S2_BLOG_TITLE', $options['S2_BLOG_TITLE'], $lang_s2_blog['Blog title'], $lang_s2_blog['Blog title label']),
 	'S2_BLOG_URL' => s2_get_input('S2_BLOG_URL', $options['S2_BLOG_URL'], $lang_s2_blog['Blog URL'], $lang_s2_blog['Blog URL label']),
-	'S2_BLOG_CRUMBS' => s2_get_input('S2_BLOG_CRUMBS', $options['S2_BLOG_CRUMBS'], $lang_s2_blog['Blog crumbs'], $lang_s2_blog['Blog crumbs label']),
 );
 ($hook = s2_hook('s2_blog_opt_pre_blog_fs_merge')) ? eval($hook) : null;
 $output .= '<fieldset><legend>'.$lang_s2_blog['Blog'].'</legend>'.implode('', $fieldset).'</fieldset>';

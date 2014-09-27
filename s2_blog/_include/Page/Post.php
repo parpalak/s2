@@ -26,13 +26,30 @@ class Page_Post extends Page_Abstract
 		$this->page = self::get_post($params['year'], $params['month'], $params['day'], $params['url']) + $this->page;
 
 		// Bread crumbs
-		if (S2_BLOG_CRUMBS)
-			$this->page['path'][] = S2_BLOG_CRUMBS;
+		$this->page['path'][] = array(
+			'title' => \Model::main_page_title(),
+			'link'  => s2_link('/'),
+		);
 		if (S2_BLOG_URL)
-			$this->page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
-		$this->page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/">'.$params['year'].'</a>';
-		$this->page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/">'.$params['month'].'</a>';
-		$this->page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/'.$params['day'].'/">'.$params['day'].'</a>';
+		{
+			$this->page['path'][] = array(
+				'title' => $lang_s2_blog['Blog'],
+				'link' => S2_BLOG_PATH,
+			);
+		}
+
+		$this->page['path'][] = array(
+			'title' => $params['year'],
+			'link'  => S2_BLOG_PATH.$params['year'].'/',
+		);
+		$this->page['path'][] = array(
+			'title' => $params['month'],
+			'link'  => S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/',
+		);
+		$this->page['path'][] = array(
+			'title' => $params['day'],
+			'link'  => S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/'.$params['day'],
+		);
 	}
 
 	private static function get_post ($year, $month, $day, $url)

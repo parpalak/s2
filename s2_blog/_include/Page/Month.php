@@ -28,12 +28,25 @@ class Page_Month extends Page_Abstract
 		$this->page['head_title'] = s2_month($params['month']).', '.$params['year'];
 
 		// Bread crumbs
-		if (S2_BLOG_CRUMBS)
-			$this->page['path'][] = S2_BLOG_CRUMBS;
+		$this->page['path'][] = array(
+			'title' => \Model::main_page_title(),
+			'link'  => s2_link('/'),
+		);
 		if (S2_BLOG_URL)
-			$this->page['path'][] = '<a href="'.S2_BLOG_PATH.'">'.$lang_s2_blog['Blog'].'</a>';
-		$this->page['path'][] = '<a href="'.S2_BLOG_PATH.$params['year'].'/">'.$params['year'].'</a>';
-		$this->page['path'][] = $params['month'];
+		{
+			$this->page['path'][] = array(
+				'title' => $lang_s2_blog['Blog'],
+				'link' => S2_BLOG_PATH,
+			);
+		}
+
+		$this->page['path'][] = array(
+			'title' => $params['year'],
+			'link'  => S2_BLOG_PATH.$params['year'].'/',
+		);
+		$this->page['path'][] = array(
+			'title' => $params['month'],
+		);
 	}
 
 	public static function posts_by_month ($year, $month)
