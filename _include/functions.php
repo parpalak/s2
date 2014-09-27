@@ -642,6 +642,7 @@ function s2_get_saved_queries()
 					</tr>
 				</tbody>
 			</table>
+			Peak memory = <?php echo s2_number_format(memory_get_peak_usage()); ?>, memory = <?php echo s2_number_format(memory_get_usage()); ?>
 		</div>
 <?php
 

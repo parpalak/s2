@@ -113,6 +113,7 @@ class Model
 
 	//
 	// Returns the title of the main page
+	// TODO cache
 	//
 	public static function main_page_title ()
 	{

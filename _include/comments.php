@@ -41,7 +41,7 @@ function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subs
 
 	$action = S2_BASE_URL.'/comment.php';
 
-	$key = md5(time() + 'A very secret string ;-)');
+	$key = md5(time() . 'A very secret string ;-)');
 	$a = rand(1, 8);
 	$b = rand(0, 9);
 	$c = rand(1, 9);
