@@ -171,7 +171,15 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 
 		$this->page['text'] = ob_get_clean();
 		$this->page['title'] = $lang_s2_search['Search'];
-		$this->page['path'] = sprintf($lang_s2_search['Crumbs'], \Model::main_page_title(), s2_link('/'), $lang_s2_search['Search']);
+		$this->page['path'] = array(
+			array(
+				'title' => \Model::main_page_title(),
+				'link'  => s2_link('/'),
+			),
+			array(
+				'title' => $lang_s2_search['Search'],
+			),
+		);
 	}
 
 	private static function rus_plural ($number, $many, $one, $two)

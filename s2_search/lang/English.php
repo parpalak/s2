@@ -12,7 +12,6 @@ $lang_s2_search = array(
 'Found tags'				=> 'Similar tags: %s',
 'Not found'					=> 'No results found for your query.',
 
-'Crumbs'					=> '<a href="%2$s">%1$s</a> &rarr; %3$s',
 'Reindex'					=> 'reindex',
 'Reindex title'				=> 'May be time-consuming. You can run it again in case of connection loss.',
 'Info link'					=> 'Search index: %1$s (%2$s)',
