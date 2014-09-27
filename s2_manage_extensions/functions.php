@@ -63,10 +63,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 
 
 	// Regenerate the hooks cache
-	if (!defined('S2_CACHE_FUNCTIONS_LOADED'))
-		require S2_ROOT.'_include/cache.php';
-
-	s2_generate_hooks_cache();
+	S2Cache::generate_hooks();
 
 	($hook = s2_hook('manage_extensions_refresh_hooks_end')) ? eval($hook) : null;
 
