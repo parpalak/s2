@@ -18,7 +18,15 @@ class Page_Tags extends Page_Abstract
 			'text'			=> '<div class="tags_list">'.Placeholder::tags_list().'</div>',
 			'date'			=> '',
 			'title'			=> $lang_common['Tags'],
-			'path'			=> '<a href="'.s2_link('/').'">'.s2_htmlencode(Model::main_page_title()).'</a>'.$lang_common['Crumbs separator'].$lang_common['Tags'],
+			'path'			=> array(
+				array(
+					'title' => Model::main_page_title(),
+					'link'  => s2_link('/'),
+				),
+				array(
+					'title' => $lang_common['Tags'],
+				),
+			),
 		);
 
 		($hook = s2_hook('Page_Tags_end')) ? eval($hook) : null;

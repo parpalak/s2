@@ -19,6 +19,15 @@ abstract class Page_Abstract
 
 	abstract public function __construct (array $params = array());
 
+	private function renderPartial($name, $vars)
+	{
+		extract($vars);
+		$name = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $name);
+
+		ob_start();
+		include S2_ROOT.'_include/views/'.$name.'.php';
+		return ob_get_clean();
+	}
 
 	public function obtainTemplate ($path = false)
 	{
@@ -108,7 +117,7 @@ abstract class Page_Abstract
 		$replace['<!-- s2_author -->'] = !empty($page['author']) ? '<div class="author">'.$page['author'].'</div>' : '';
 		$replace['<!-- s2_title -->'] = !empty($page['title']) ? '<h1'.(!empty($page['favorite']) ? ' class="favorite-title"' : '').'>'.(!empty($page['title_prefix']) ? implode('', $page['title_prefix']) : '').$page['title'].'</h1>' : '';
 		$replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
-		$replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $page['path'] : '';
+		$replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $this->renderPartial('breadcrumbs', array('breadcrumbs' => $page['path'])) : '';
 		$replace['<!-- s2_section_link -->'] = isset($page['section_link']) ? $page['section_link'] : '';
 		$replace['<!-- s2_excerpt -->'] = isset($page['excerpt']) ? $page['excerpt'] : '';
 		$replace['<!-- s2_text -->'] = isset($page['text']) ? $page['text'] : '';

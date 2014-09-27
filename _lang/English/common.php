@@ -14,7 +14,6 @@ $lang_common = array(
 'In this section'			=> 'In this section',
 'Read in this section'		=> 'Read in this section',
 'More in this section'		=> 'More in the section <nobr>“%s”</nobr>',
-'Crumbs separator'			=> ' &rarr; ',
 'Subsections'				=> 'Subsections',
 'Tags'						=> 'Tags',
 'Tags:'						=> 'Tags: %s',

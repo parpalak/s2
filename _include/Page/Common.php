@@ -209,7 +209,7 @@ class Page_Common extends Page_Abstract
 
 		$was_end_slash = '/' == substr($request_uri, -1);
 
-		$bread_crumbs_links = $bread_crumbs_titles = array();
+		$bread_crumbs = array();
 
 		$parent_path = '';
 		$parent_id = Model::ROOT_ID;
@@ -261,12 +261,14 @@ class Page_Common extends Page_Abstract
 
 				($hook = s2_hook('fn_s2_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
 
-				$bread_crumbs_titles[] = s2_htmlencode($cur_node['title']);
 				$parent_id = $cur_node['id'];
 				if ($cur_node['template'] != '')
 					$this->template_id = $cur_node['template'];
 
-				$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($cur_node['title']).'</a>';
+				$bread_crumbs[] = array(
+					'link'  => s2_link($parent_path),
+					'title' => $cur_node['title']
+				);
 			}
 		}
 		else
@@ -315,8 +317,15 @@ class Page_Common extends Page_Abstract
 		{
 			if (S2_USE_HIERARCHY)
 			{
-				$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($page['title']).'</a>';
-				error(sprintf($lang_common['Error no template'], implode('<br />', $bread_crumbs_links)));
+				$bread_crumbs[] = array(
+					'link'  => s2_link($parent_path),
+					'title' => $page['title'],
+				);
+
+				error(sprintf($lang_common['Error no template'], implode('<br />', array_map(function ($a)
+				{
+					return '<a href="'.$a['link'].'">'.s2_htmlencode($a['title']).'</a>';
+				}, $bread_crumbs))));
 			}
 			else
 				error($lang_common['Error no template flat']);
@@ -326,7 +335,11 @@ class Page_Common extends Page_Abstract
 			s2_redirect($current_path.(!$was_end_slash ? '/' : ''));
 
 		$id = $page['id'];
-		$page['title'] = $bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
+		$bread_crumbs[] = array(
+			'title' => $page['title']
+		);
+		$page['title'] = s2_htmlencode($page['title']);
+
 		if (!empty($page['author']))
 			$page['author'] = s2_htmlencode($page['author']);
 
@@ -335,13 +348,13 @@ class Page_Common extends Page_Abstract
 
 		if (S2_USE_HIERARCHY)
 		{
-			$page['path'] = implode($lang_common['Crumbs separator'], $bread_crumbs_links);
+			$page['path'] = $bread_crumbs;
 
 			$page['link_navigation']['top'] = s2_link('/');
-			if (count($bread_crumbs_titles) > 1)
+			if (count($bread_crumbs) > 1)
 			{
 				$page['link_navigation']['up'] = s2_link($parent_path);
-				$page['section_link'] = '<a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>';
+				$page['section_link'] = '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>';
 			}
 		}
 
@@ -527,8 +540,8 @@ class Page_Common extends Page_Abstract
 				$i++;
 			}
 
-			if (count($bread_crumbs_titles) > 1)
-				$page['menu']['articles'] = '<div class="header">'.sprintf($lang_common['More in this section'], '<a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>').'</div>'."\n".
+			if (count($bread_crumbs) > 1)
+				$page['menu']['articles'] = '<div class="header">'.sprintf($lang_common['More in this section'], '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>').'</div>'."\n".
 					'<ul>'."\n".implode("\n", $menu_articles)."\n".'</ul>'."\n";
 
 
@@ -540,7 +553,7 @@ class Page_Common extends Page_Abstract
 					$page['link_navigation']['next'] = $neighbour_urls[$curr_item + 1];
 
 				$page['back_forward'] = '<ul class="back_forward">'.
-					'<li class="up"><span class="arrow">&uarr;</span>'.(count($bread_crumbs_titles) > 1 ? ' <a href="'.s2_link($parent_path).'">'.$bread_crumbs_titles[count($bread_crumbs_titles) - 2].'</a>' : '').'</li>'.
+					'<li class="up"><span class="arrow">&uarr;</span>'.(count($bread_crumbs) > 1 ? ' <a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>' : '').'</li>'.
 					(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back"><span class="arrow">&larr;</span> ', $menu_articles[$curr_item - 1]) : '<li class="back empty"><span class="arrow">&larr;</span> </li>').
 					(isset($menu_articles[$curr_item + 1]) ? str_replace('<li>', '<li class="forward"><span class="arrow">&rarr;</span> ', $menu_articles[$curr_item + 1]) : '<li class="forward empty"><span class="arrow">&rarr;</span> </li>').
 					'</ul>';

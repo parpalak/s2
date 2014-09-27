@@ -130,7 +130,19 @@ class Page_Tag extends Page_Abstract
 			'text'			=> $tag_description.$text.$subsection_text,
 			'date'			=> '',
 			'title'			=> s2_htmlencode($tag_name),
-			'path'			=> '<a href="'.s2_link('/').'">'.s2_htmlencode(Model::main_page_title()).'</a>'.$lang_common['Crumbs separator'].'<a href="'.s2_link('/'.S2_TAGS_URL.'/').'">'.$lang_common['Tags'].'</a>'.$lang_common['Crumbs separator'].s2_htmlencode($tag_name),
+			'path'			=> array(
+				array(
+					'title' => Model::main_page_title(),
+					'link'  => s2_link('/'),
+				),
+				array(
+					'link'  => s2_link('/'.S2_TAGS_URL.'/'),
+					'title' => $lang_common['Tags'],
+				),
+				array(
+					'title' => $tag_name,
+				),
+			),
 		);
 
 		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;

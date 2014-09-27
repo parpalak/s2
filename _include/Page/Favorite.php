@@ -98,7 +98,15 @@ class Page_Favorite extends Page_Abstract
 			'text'			=> $text.$subsection_text,
 			'date'			=> '',
 			'title'			=> $lang_common['Favorite'],
-			'path'			=> '<a href="'.s2_link('/').'">'.s2_htmlencode(Model::main_page_title()).'</a>'.$lang_common['Crumbs separator'].$lang_common['Favorite'],
+			'path'			=> array(
+				array(
+					'title' => Model::main_page_title(),
+					'link'  => s2_link('/'),
+				),
+				array(
+					'title' => $lang_common['Favorite'],
+				),
+			),
 		);
 
 		($hook = s2_hook('fn_s2_make_favorite_page_end')) ? eval($hook) : null;
