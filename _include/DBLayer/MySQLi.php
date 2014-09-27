@@ -107,6 +107,15 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		return ($query_id) ? @mysqli_fetch_row($query_id) : false;
 	}
 
+	private $is_mysqli_fetch_all = null;
+
+	public function fetch_assoc_all ($query_id = 0)
+	{
+		if ($this->is_mysqli_fetch_all === null)
+			$this->is_mysqli_fetch_all = function_exists('mysqli_fetch_all');
+
+		return $this->is_mysqli_fetch_all ? mysqli_fetch_all($query_id, MYSQLI_ASSOC) : parent::fetch_assoc_all($query_id);
+	}
 
 	function num_rows($query_id = 0)
 	{

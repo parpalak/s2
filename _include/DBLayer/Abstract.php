@@ -168,9 +168,19 @@ abstract class DBLayer_Abstract
 	abstract function fetch_row($query_id);
 	abstract function fetch_assoc($query_id);
 	abstract function insert_id();
+	abstract function free_result();
 	abstract function get_version();
 	abstract function create_table($table_name, $schema, $no_prefix = false);
 	abstract function close();
+
+	public function fetch_assoc_all ($query_id = 0)
+	{
+		$return = array();
+		while ($row = $this->fetch_assoc($query_id))
+			$return[] = $row;
+
+		return $return;
+	}
 
 	public function error()
 	{

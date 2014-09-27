@@ -221,6 +221,20 @@ class Page_Common extends Page_Abstract
 
 		if (S2_USE_HIERARCHY)
 		{
+			$urls = array_unique($request_array);
+			$urls = array_map(array($s2_db, 'escape'), $urls);
+
+			$tt = microtime(true);
+			$query = array(
+				'SELECT'	=> 'id, parent_id, title, template',
+				'FROM'		=> 'articles',
+				'WHERE'		=> 'url IN (\''.implode('\', \'', $urls).'\') AND published=1'
+			);
+			($hook = s2_hook('fn_s2_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
+			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+			$nodes = $s2_db->fetch_assoc_all($result);
+
 			// Walking through the page parents
 			// 1. We ensure all of them are published
 			// 2. We build "bread crumbs"
@@ -229,28 +243,30 @@ class Page_Common extends Page_Abstract
 			{
 				$parent_path .= urlencode($request_array[$i]).'/';
 
-				$query = array(
-					'SELECT'	=> 'id, title, template',
-					'FROM'		=> 'articles',
-					'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\' AND parent_id='.$parent_id.' AND published=1'
-				);
-				($hook = s2_hook('fn_s2_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
-				$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+				$cur_node = array();
+				$found_node_num = 0;
+				foreach ($nodes as $node)
+				{
+					if ($node['parent_id'] == $parent_id)
+					{
+						$cur_node = $node;
+						$found_node_num++;
+					}
+				}
 
-				$row = $s2_db->fetch_assoc($result);
-				if (!$row)
+				if ($found_node_num == 0)
 					$this->error_404();
-				if ($s2_db->fetch_assoc($result))
+				if ($found_node_num > 1)
 					error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
 
 				($hook = s2_hook('fn_s2_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
 
-				$bread_crumbs_titles[] = s2_htmlencode($row['title']);
-				$parent_id = $row['id'];
-				if ($row['template'] != '')
-					$this->template_id = $row['template'];
+				$bread_crumbs_titles[] = s2_htmlencode($cur_node['title']);
+				$parent_id = $cur_node['id'];
+				if ($cur_node['template'] != '')
+					$this->template_id = $cur_node['template'];
 
-				$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($row['title']).'</a>';
+				$bread_crumbs_links[] = '<a href="'.s2_link($parent_path).'">'.s2_htmlencode($cur_node['title']).'</a>';
 			}
 		}
 		else
@@ -307,12 +323,7 @@ class Page_Common extends Page_Abstract
 		}
 
 		if (S2_USE_HIERARCHY && $parent_num && $page['children_exist'] != $was_end_slash)
-		{
-			// Correcting trailing slash
-			header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
-			header('Location: '.s2_abs_link($current_path.(!$was_end_slash ? '/' : '')));
-			die;
-		}
+			s2_redirect($current_path.(!$was_end_slash ? '/' : ''));
 
 		$id = $page['id'];
 		$page['title'] = $bread_crumbs_links[] = $bread_crumbs_titles[] = s2_htmlencode($page['title']);
