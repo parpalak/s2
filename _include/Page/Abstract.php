@@ -19,11 +19,11 @@ abstract class Page_Abstract
 
 	abstract public function __construct (array $params = array());
 
-	protected function renderPartial($name, $vars)
+	protected function renderPartial($name, $vars, $namespace = false)
 	{
-		$namespace_array = explode('\\', get_class($this));
+		$namespace_array = explode('\\', $namespace ? $namespace : get_class($this));
 
-		if (count($namespace_array) == 3 && $namespace_array[0] == 's2_extensions')
+		if (count($namespace_array) >=2 && $namespace_array[0] == 's2_extensions')
 			$dirs[] = S2_ROOT.'_extensions/'.$namespace_array[1].'/views/';
 
 		$name = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $name);
@@ -46,9 +46,13 @@ abstract class Page_Abstract
 		ob_start();
 
 		if (defined('S2_DEBUG_VIEW'))
+		{
 			echo '<div style="border: 1px solid rgba(255, 0, 0, 0.4); position: relative;">',
-				'<pre style="opacity: 0.4; background: red; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; "> ', $name, ' </pre>',
-				'<pre style="display: none; font-size: 12px; line-height: 1.3;">', s2_htmlencode(var_export($vars, true)), '</pre>';
+				'<pre style="opacity: 0.4; background: red; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
+				'<pre style="display: none; font-size: 12px; line-height: 1.3;">';
+			var_export($vars);
+			echo '</pre>';
+		}
 
 		if ($found_file)
 			include $found_file;
