@@ -48,7 +48,7 @@ class Page_Post extends Page_Abstract
 		);
 		$this->page['path'][] = array(
 			'title' => $params['day'],
-			'link'  => S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/'.$params['day'],
+			'link'  => S2_BLOG_PATH.$params['year'].'/'.$params['month'].'/'.$params['day'].'/',
 		);
 	}
 
