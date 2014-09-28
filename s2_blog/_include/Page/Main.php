@@ -22,7 +22,7 @@ class Page_Main extends Page_Abstract
 		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
-		$this->page = self::last_posts($s2_blog_skip) + $this->page;
+		$this->last_posts($s2_blog_skip);
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -43,7 +43,7 @@ class Page_Main extends Page_Abstract
 			$this->page['link_navigation']['up'] = s2_link('/');
 	}
 
-	private static function last_posts ($skip = 0)
+	private function last_posts ($skip = 0)
 	{
 		global $lang_common;
 
@@ -61,16 +61,7 @@ class Page_Main extends Page_Abstract
 			if ($i > $posts_per_page)
 				break;
 
-			$output .= Lib::format_post(
-				s2_htmlencode($post['author']),
-				'<a href="'.S2_BLOG_PATH.date('Y/m/d/', $post['create_time']).urlencode($post['url']).'">'.s2_htmlencode($post['title']).'</a>',
-				s2_date($post['create_time']),
-				s2_date_time($post['create_time']),
-				$post['text'],
-				$post['tags'],
-				$post['comments'],
-				$post['favorite']
-			);
+			$output .= $this->renderPartial('post', $post);
 		}
 
 		$paging = '';
@@ -80,6 +71,7 @@ class Page_Main extends Page_Abstract
 		{
 			$link_nav['prev'] = S2_BLOG_PATH.($skip > $posts_per_page ? 'skip/'.($skip - $posts_per_page) : '');
 			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
+			// TODO think about back_forward
 		}
 		if ($i > $posts_per_page)
 		{
@@ -90,6 +82,7 @@ class Page_Main extends Page_Abstract
 		if ($paging)
 			$output .= '<p class="s2_blog_pages">'.$paging.'</p>';
 
-		return array('text' => $output, 'link_navigation' => $link_nav);
+		$this->page['text'] = $output;
+		$this->page['link_navigation'] = $link_nav;
 	}
 }

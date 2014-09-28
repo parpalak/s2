@@ -20,7 +20,7 @@ class Page_Favorite extends Page_Abstract
 		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
-		$this->page['text'] = self::favorite_posts();
+		$this->favorite_posts();
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -42,7 +42,7 @@ class Page_Favorite extends Page_Abstract
 		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
 	}
 
-	public static function favorite_posts ()
+	public function favorite_posts ()
 	{
 		global $s2_blog_fav_link;
 
@@ -51,11 +51,12 @@ class Page_Favorite extends Page_Abstract
 		$query_add = array(
 			'WHERE'		=> 'favorite = 1'
 		);
-		$output = Lib::get_posts($query_add);
+		$output = $this->get_posts($query_add);
 
 		if ($output == '')
 			s2_404_header();
+		// TODO Why 404 in favorite? Where is the message?
 
-		return $output;
+		$this->page['text'] = $output;
 	}
 }

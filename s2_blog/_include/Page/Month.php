@@ -24,7 +24,7 @@ class Page_Month extends Page_Abstract
 		$this->page['title'] = '';
 
 		// Posts of a month
-		$this->page = self::posts_by_month($params['year'], $params['month']) + $this->page;
+		$this->posts_by_month($params['year'], $params['month']);
 		$this->page['head_title'] = s2_month($params['month']).', '.$params['year'];
 
 		// Bread crumbs
@@ -49,37 +49,38 @@ class Page_Month extends Page_Abstract
 		);
 	}
 
-	public static function posts_by_month ($year, $month)
+	public function posts_by_month ($year, $month)
 	{
-		global $s2_db, $lang_common, $lang_s2_blog;
+		global $lang_common, $lang_s2_blog;
 
 		$link_nav = array();
 		$paging = '';
 
-			$start_time = mktime(0, 0, 0, $month, 1, $year);
-			$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
-			$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
+		$start_time = mktime(0, 0, 0, $month, 1, $year);
+		$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
+		$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
 
-			$link_nav['up'] = S2_BLOG_PATH.date('Y/', $start_time);
+		$link_nav['up'] = S2_BLOG_PATH.date('Y/', $start_time);
 
-			if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
-			{
-				$link_nav['prev'] = S2_BLOG_PATH.date('Y/m/', $prev_time);
-				$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
-			}
-			if ($end_time < time())
-			{
-				$link_nav['next'] = S2_BLOG_PATH.date('Y/m/', $end_time);
-				$paging .= '<a href="'.$link_nav['next'].'">'.$lang_common['There'].'</a>';
-			}
+		if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
+		{
+			$link_nav['prev'] = S2_BLOG_PATH.date('Y/m/', $prev_time);
+			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
+		}
+		if ($end_time < time())
+		{
+			$link_nav['next'] = S2_BLOG_PATH.date('Y/m/', $end_time);
+			$paging .= '<a href="'.$link_nav['next'].'">'.$lang_common['There'].'</a>';
+			// TODO think about back_forward template
+		}
 
-			if ($paging)
-				$paging = '<p class="s2_blog_pages">'.$paging.'</p>';
+		if ($paging)
+			$paging = '<p class="s2_blog_pages">'.$paging.'</p>';
 
 		$query_add = array(
 			'WHERE'		=> 'p.create_time < '.$end_time.' AND p.create_time >= '.$start_time
 		);
-		$output = Lib::get_posts($query_add);
+		$output = $this->get_posts($query_add);
 
 		if ($output == '')
 		{
@@ -87,7 +88,7 @@ class Page_Month extends Page_Abstract
 			$output = '<p>'.$lang_s2_blog['Not found'].'</p>';
 		}
 
-		return array('text' => $output.$paging, 'link_navigation' => $link_nav);
+		$this->page['text'] = $output.$paging;
+		$this->page['link_navigation'] = $link_nav;
 	}
-
 }

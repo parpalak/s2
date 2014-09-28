@@ -24,7 +24,7 @@ class Page_Day extends Page_Abstract
 		$this->page['title'] = '';
 
 		// Posts of a day
-		$this->page = self::posts_by_day($params['year'], $params['month'], $params['day']) + $this->page;
+		$this->posts_by_day($params['year'], $params['month'], $params['day']);
 		$this->page['head_title'] = s2_date(mktime(0, 0, 0, $params['month'], $params['day'], $params['year']));
 
 		// Bread crumbs
@@ -53,20 +53,17 @@ class Page_Day extends Page_Abstract
 		);
 	}
 
-	public static function posts_by_day ($year, $month, $day)
+	public function posts_by_day ($year, $month, $day)
 	{
 		global $lang_s2_blog;
 
-		$link_nav = array();
-
 		$start_time = mktime(0, 0, 0, $month, $day, $year);
 		$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
-		$link_nav['up'] = S2_BLOG_PATH.date('Y/m/', $start_time);
 
 		$query_add = array(
 			'WHERE'		=> 'p.create_time < '.$end_time.' AND p.create_time >= '.$start_time
 		);
-		$output = Lib::get_posts($query_add);
+		$output = $this->get_posts($query_add);
 
 		if ($output == '')
 		{
@@ -74,6 +71,7 @@ class Page_Day extends Page_Abstract
 			$output = '<p>'.$lang_s2_blog['Not found'].'</p>';
 		}
 
-		return array('text' => $output, 'link_navigation' => $link_nav);
+		$this->page['text'] = $output;
+		$this->page['link_navigation'] = array('up' => S2_BLOG_PATH.date('Y/m/', $start_time));
 	}
 }

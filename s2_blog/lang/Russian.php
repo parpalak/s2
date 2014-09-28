@@ -17,7 +17,7 @@ $lang_s2_blog = array(
 'Navigation'				=> 'Записи',
 'Nav last'					=> 'Последние %d',
 'Nav favorite'				=> 'Избранные',
-'Nav tags'					=> 'По <a href="%s">ключевым словам</a>:',
+'Nav tags'					=> 'По %sключевым словам%s:',
 
 'See in blog'				=> 'Посмотрите в блоге',
 

@@ -22,9 +22,8 @@ class Page_Tag extends Page_Abstract
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// A tag
-		$page = $this->posts_by_tag($params['tag']);
-		$this->page['title'] = $this->page['head_title'] = s2_htmlencode($page['title']);
-		$this->page['text'] = $page['text'];
+		$this->posts_by_tag($params['tag']);
+		$this->page['title'] = $this->page['head_title'] = s2_htmlencode($this->page['title']);
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -85,13 +84,11 @@ class Page_Tag extends Page_Abstract
 			),
 			'WHERE'		=> 'pt.tag_id = '.$tag_id
 		);
-		$output = Lib::get_posts($query_add, false);
+		$output = $this->get_posts($query_add, false);
 		if ($output == '')
 			$this->error_404();
 
-		return array(
-			'text'			=> $tag_descr.$output,
-			'title'			=> $tag_name,
-		);
+		$this->page['title'] = $tag_name;
+		$this->page['text'] = $tag_descr.$output;
 	}
 }

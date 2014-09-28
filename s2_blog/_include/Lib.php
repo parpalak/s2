@@ -139,136 +139,6 @@ class Lib
 		return sprintf($html, $author, $header, $date, $date_time, $body, $comments, ($favorite ? $s2_blog_fav_link : ''));
 	}
 
-	public static function get_posts ($query_add, $sort_asc = true, $sort_field = 'create_time')
-	{
-		global $s2_db;
-
-		// Obtaining posts
-
-		$sub_query = array(
-			'SELECT'	=> 'count(*)',
-			'FROM'		=> 's2_blog_comments AS c',
-			'WHERE'		=> 'c.post_id = p.id AND shown = 1',
-		);
-		$raw_query_comment = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
-
-		$sub_query = array(
-			'SELECT'	=> 'u.name',
-			'FROM'		=> 'users AS u',
-			'WHERE'		=> 'u.id = p.user_id',
-		);
-		$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
-
-		$query = array(
-			'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, ('.$raw_query_comment.') AS comment_num, ('.$raw_query_user.') AS author, p.label',
-			'FROM'		=> 's2_blog_posts AS p',
-			'WHERE'		=> 'p.published = 1'.(!empty($query_add['WHERE']) ? ' AND '.$query_add['WHERE'] : '')
-		);
-		if (!empty($query_add['JOINS']))
-			$query['JOINS'] = $query_add['JOINS'];
-
-		($hook = s2_hook('fn_s2_blog_get_posts_pre_get_posts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-
-		$posts = $merge_labels = $labels = $ids = $sort_array = array();
-		while ($row = $s2_db->fetch_assoc($result))
-		{
-			$posts[$row['id']] = $row;
-			$ids[] = $row['id'];
-			$sort_array[] = $row[$sort_field];
-			$labels[$row['id']] = $row['label'];
-			if ($row['label'])
-				$merge_labels[$row['label']] = 1;
-		}
-		if (empty($posts))
-			return '';
-
-		$see_also = $tags = array();
-		Lib::posts_links($ids, $merge_labels, $see_also, $tags);
-
-		array_multisort($sort_array, $sort_asc ? SORT_ASC : SORT_DESC, $ids);
-
-		$output = '';
-		foreach ($ids as $id)
-		{
-			$row = $posts[$id];
-			$link = S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']);
-			$header = '<a href="'.$link.'">'.s2_htmlencode($row['title']).'</a>';
-			$date = s2_date($row['create_time']);
-			$time = s2_date_time($row['create_time']);
-			$post_tags = isset($tags[$id]) ? implode(', ', $tags[$id]) : '';
-			$text = $row['text'];
-			$author = isset($row['author']) ? s2_htmlencode($row['author']) : '';
-
-			if (!empty($labels[$id]) && isset($see_also[$labels[$id]]))
-			{
-				$label_copy = $see_also[$labels[$id]];
-				if (isset($label_copy[$id]))
-					unset($label_copy[$id]);
-				$text .= Lib::format_see_also($label_copy);
-			}
-
-			$comment = $row['commented'] ? '<a href="'.$link.'#comment">'.Lib::comment_text($row['comment_num']).'</a>' : '';
-
-			($hook = s2_hook('fn_s2_blog_get_posts_loop_pre_post_merge')) ? eval($hook) : null;
-
-			$output .= Lib::format_post($author, $header, $date, $time, $text, $post_tags, $comment, $row['favorite']);
-		}
-
-		return $output;
-	}
-/*
-	public static function posts_by_timesdfsadf ($year, $month, $day = false)
-	{
-		global $s2_db, $lang_common, $lang_s2_blog;
-
-		$link_nav = array();
-		$paging = '';
-
-		if ($day === false)
-		{
-			$start_time = mktime(0, 0, 0, $month, 1, $year);
-			$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
-			$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
-
-			$link_nav['up'] = S2_BLOG_PATH.date('Y/', $start_time);
-
-			if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
-			{
-				$link_nav['prev'] = S2_BLOG_PATH.date('Y/m/', $prev_time);
-				$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
-			}
-			if ($end_time < time())
-			{
-				$link_nav['next'] = S2_BLOG_PATH.date('Y/m/', $end_time);
-				$paging .= '<a href="'.$link_nav['next'].'">'.$lang_common['There'].'</a>';
-			}
-
-			if ($paging)
-				$paging = '<p class="s2_blog_pages">'.$paging.'</p>';
-		}
-		else
-		{
-			$start_time = mktime(0, 0, 0, $month, $day, $year);
-			$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
-			$link_nav['up'] = S2_BLOG_PATH.date('Y/m/', $start_time);
-		}
-
-		$query_add = array(
-			'WHERE'		=> 'p.create_time < '.$end_time.' AND p.create_time >= '.$start_time
-		);
-		$output = self::get_posts($query_add);
-
-		if ($output == '')
-		{
-			s2_404_header();
-			$output = '<p>'.$lang_s2_blog['Not found'].'</p>';
-		}
-
-		return array('text' => $output.$paging, 'link_navigation' => $link_nav);
-	}
-*/
-
 	public static function comment_text ($n)
 	{
 		global $lang_s2_blog;
@@ -300,7 +170,7 @@ class Lib
 		$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
 
 		$query = array(
-			'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.modify_time, p.favorite, ('.$raw_query_comment.') AS comm_num, ('.$raw_query_user.') AS author, p.label',
+			'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.modify_time, p.favorite, ('.$raw_query_comment.') AS comment_num, ('.$raw_query_user.') AS author, p.label',
 			'FROM'		=> 's2_blog_posts AS p',
 			'WHERE'		=> 'published = 1',
 			'ORDER BY'	=> 'create_time DESC',
@@ -330,7 +200,7 @@ class Lib
 		$see_also = $tags = array();
 		self::posts_links($ids, $merge_labels, $see_also, $tags);
 
-		foreach ($posts as $i => $row)
+		foreach ($posts as $i => &$post)
 		{
 			if (!empty($labels[$i]) && isset($see_also[$labels[$i]]))
 			{
@@ -339,9 +209,15 @@ class Lib
 					unset($label_copy[$i]);
 				$posts[$i]['text'] .= Lib::format_see_also($label_copy);
 			}
-			$posts[$i]['comments'] = $row['commented'] ? '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'#comment">'.self::comment_text($posts[$i]['comm_num']).'</a>' : '';
-			$posts[$i]['tags'] = isset($tags[$i]) ? implode(', ', $tags[$i]) : '';
-			$posts[$i]['author'] = isset($posts[$i]['author']) ? $posts[$i]['author'] : '';
+
+			$post['tags'] = isset($tags[$i]) ? $tags[$i] : array();
+			if (!isset($post['author']))
+				$post['author'] = '';
+
+			$link = S2_BLOG_PATH . date('Y/m/d/', $post['create_time']) . urlencode($post['url']);
+			$post['title_link'] = $link;
+			$post['link'] = $link;
+			$post['time'] = s2_date_time($post['create_time']);
 		}
 
 		return $posts;
@@ -406,8 +282,12 @@ class Lib
 
 		array_multisort($sort_array, $rows);
 
+		$tags = array();
 		foreach ($rows as $row)
-			$tags[$row['post_id']][] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($row['url']).'/">'.$row['name'].'</a>';
+			$tags[$row['post_id']][] = array(
+				'title' => $row['name'],
+				'link'  => S2_BLOG_TAGS_PATH.urlencode($row['url']).'/',
+			);
 	}
 
 	public static function format_see_also ($title_array)

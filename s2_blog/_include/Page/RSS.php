@@ -30,18 +30,28 @@ class Page_RSS extends \Page_RSS
 	{
 		global $lang_s2_blog;
 
-		$s2_blog_posts = Lib::last_posts_array();
-		$s2_blog_items = array();
-		foreach ($s2_blog_posts as $s2_blog_post)
-			$s2_blog_items[] = array(
-				'title'			=> $s2_blog_post['title'],
-				'text'			=> $s2_blog_post['text'].(!empty($s2_blog_post['tags']) ? '<p>'.sprintf($lang_s2_blog['Tags:'], $s2_blog_post['tags']).'</p>' : ''),
-				'time'			=> $s2_blog_post['create_time'],
-				'modify_time'	=> $s2_blog_post['modify_time'],
-				'rel_path'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $s2_blog_post['create_time']).urlencode($s2_blog_post['url']),
-				'author'		=> $s2_blog_post['author'],
+		$posts = Lib::last_posts_array();
+		$items = array();
+		foreach ($posts as $post)
+		{
+			if (!empty($post['tags']))
+			{
+				foreach ($post['tags'] as &$tag)
+					$tag = '<a href="'.$tag['link'].'">'.$tag['title'].'</a>';
+				unset($tag);
+			}
+
+			$items[] = array(
+				'title'       => $post['title'],
+				'text'        => $post['text'] . (!empty($post['tags']) ? '<p>' . sprintf($lang_s2_blog['Tags:'], implode(', ', $post['tags'])) . '</p>' : ''),
+				'time'        => $post['create_time'],
+				'modify_time' => $post['modify_time'],
+				'rel_path'    => str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)) . date('/Y/m/d/', $post['create_time']) . urlencode($post['url']),
+				'author'      => $post['author'],
 			);
-		return $s2_blog_items;
+		}
+
+		return $items;
 	}
 
 	/**
