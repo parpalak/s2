@@ -213,12 +213,16 @@ class Placeholder
 
 		$urls = Model::get_group_url($parent_ids, $urls);
 
-		$output = '';
 		foreach ($urls as $k => $url)
-			$output .= '<li><a href="'.s2_link($url).'#'.$counts[$k].'">'.s2_htmlencode($titles[$k]).'</a>, <em>'.s2_htmlencode($nicks[$k]).'</em></li>';
+			$output[] = array(
+				'title'  => $titles[$k],
+				'link'   => s2_link($url) . '#' . $counts[$k],
+				'author' => $nicks[$k],
+			);
 
 		($hook = s2_hook('fn_last_article_comments_end')) ? eval($hook) : null;
-		return $output ? '<ul>'.$output.'</ul>' : '';
+
+		return $output;
 	}
 
 	public static function last_discussions ()
@@ -264,11 +268,15 @@ class Placeholder
 
 		$urls = Model::get_group_url($parent_ids, $urls);
 
-		$output = '';
+		$output = array();
 		foreach ($urls as $k => $url)
-			$output .= '<li><a href="'.s2_link($url).'" title="'.s2_htmlencode($nicks[$k].' ('.s2_date_time($time[$k]).')').'">'.s2_htmlencode($titles[$k]).'</a></li>';
+			$output[] = array(
+				'title' => $titles[$k],
+				'link' => s2_link($url),
+				'hint' => $nicks[$k].' ('.s2_date_time($time[$k]).')',
+			);
 
 		($hook = s2_hook('fn_last_discussions_end')) ? eval($hook) : null;
-		return $output ? '<ul>'.$output.'</ul>' : '';
+		return $output;
 	}
 }

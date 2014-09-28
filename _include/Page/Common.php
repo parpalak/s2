@@ -61,7 +61,7 @@ class Page_Common extends Page_Abstract
 		return $urls;
 	}
 
-	private static function tagged_articles ($id)
+	private function tagged_articles ($id)
 	{
 		global $s2_db, $lang_common;
 
@@ -142,24 +142,26 @@ class Page_Common extends Page_Abstract
 		$art_by_tags = array();
 
 		foreach ($urls as $k => $url)
-			$art_by_tags[$tag_ids[$k]][] = ($original_ids[$k] == $id) ?
-				'<li class="active"><span>'.s2_htmlencode($titles[$k]).'</span></li>' :
-				'<li><a href="'.s2_link($url).'">'.s2_htmlencode($titles[$k]).'</a></li>';
+			$art_by_tags[$tag_ids[$k]][] = array(
+				'title'      => $titles[$k],
+				'link'       => $url,
+				'is_current' => $original_ids[$k] == $id,
+			);
 
 		($hook = s2_hook('fn_tagged_articles_pre_art_by_tags_merge')) ? eval($hook) : null;
 
 		// Remove tags that have only one article
 		foreach ($art_by_tags as $tag_id => $title_array)
-			if (count($title_array) > 1)
-				$art_by_tags[$tag_id] = implode ('', $title_array);
-			else
+			if (count($title_array) <= 1)
 				unset($art_by_tags[$tag_id]);
 
 		$output = array();
 		($hook = s2_hook('fn_tagged_articles_pre_menu_merge')) ? eval($hook) : null;
 		foreach ($art_by_tags as $tag_id => $articles)
-			$output[] = '<div class="header">'.sprintf($lang_common['With this tag'], '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/').'">'.$tag_names[$tag_id].'</a>').'</div>'."\n".
-				'<ul>' . $articles . '</ul>'."\n";
+			$output[] = $this->renderPartial('menu', array(
+				'title' => sprintf($lang_common['With this tag'], '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/').'">'.$tag_names[$tag_id].'</a>'),
+				'menu'  => $articles,
+			));
 
 		($hook = s2_hook('fn_tagged_articles_end')) ? eval($hook) : null;
 		return !empty($output) ? implode("\n", $output) : '';
@@ -402,7 +404,10 @@ class Page_Common extends Page_Abstract
 						'favorite'	=> $row['favorite'],
 						'url'		=> $current_path.'/'.urlencode($row['url']).'/'
 					);
-					$menu_subsections[] = '<li><a href="'.s2_link($current_path.'/'.urlencode($row['url']).'/').'">'.s2_htmlencode($row['title']).'</a></li>';
+					$menu_subsections[] = array(
+						'title' => $row['title'],
+						'link'  => s2_link($current_path.'/'.urlencode($row['url'])).'/',
+					);
 
 					($hook = s2_hook('fn_s2_parse_page_url_add_subsection')) ? eval($hook) : null;
 				}
@@ -417,7 +422,10 @@ class Page_Common extends Page_Abstract
 						'url'		=> $current_path.'/'.urlencode($row['url'])
 					);
 					$sort_array[] = $row['create_time'];
-					$menu_subarticles[] = '<li><a href="'.s2_link($current_path.'/'.urlencode($row['url'])).'">'.s2_htmlencode($row['title']).'</a></li>';
+					$menu_subarticles[] = array(
+						'title' => $row['title'],
+						'link'  => s2_link($current_path.'/'.urlencode($row['url'])),
+					);
 
 					($hook = s2_hook('fn_s2_parse_page_url_add_subarticle')) ? eval($hook) : null;
 				}
@@ -430,8 +438,10 @@ class Page_Common extends Page_Abstract
 			if (!empty($menu_subsections))
 			{
 				// Add them to the menu...
-				$page['menu']['subsections'] = '<div class="header">'.$lang_common['Subsections'].'</div>'."\n".
-					'<ul>'.implode("\n", $menu_subsections).'</ul>'."\n";
+				$page['menu']['subsections'] = $this->renderPartial('menu', array(
+					'title' => $lang_common['Subsections'],
+					'menu'  => $menu_subsections,
+				));
 
 				// ... and to the page text
 				$page['subcontent'] = $lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '';
@@ -447,8 +457,10 @@ class Page_Common extends Page_Abstract
 			if (!empty($menu_subarticles))
 			{
 				// Add them to the menu...
-				$page['menu']['articles'] = '<div class="header">'.$lang_common['In this section'].'</div>'."\n".
-					'<ul>'.implode("\n", $menu_subarticles).'</ul>'."\n";
+				$page['menu']['articles'] = $this->renderPartial('menu', array(
+					'title' => $lang_common['In this section'],
+					'menu'  => $menu_subarticles,
+				));
 
 				// ... and to the page text
 				$page['subcontent'] .= $lang_common['Read in this section'] ? '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n" : '';
@@ -525,13 +537,15 @@ class Page_Common extends Page_Abstract
 			{
 				// A neighbour
 				$url = s2_link($parent_path.urlencode($row['url']));
+
+				$menu_articles[] = array(
+					'title'      => $row['title'],
+					'link'       => $url,
+					'is_current' => $id == $row['id'],
+				);
+
 				if ($id == $row['id'])
-				{
-					$menu_articles[] = '<li class="active"><span>'.s2_htmlencode($row['title']).'</span></li>';
 					$curr_item = $i;
-				}
-				else
-					$menu_articles[] = '<li><a href="'.$url.'">'.s2_htmlencode($row['title']).'</a></li>';
 
 				$neighbour_urls[] = $url;
 
@@ -541,9 +555,10 @@ class Page_Common extends Page_Abstract
 			}
 
 			if (count($bread_crumbs) > 1)
-				$page['menu']['articles'] = '<div class="header">'.sprintf($lang_common['More in this section'], '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>').'</div>'."\n".
-					'<ul>'."\n".implode("\n", $menu_articles)."\n".'</ul>'."\n";
-
+				$page['menu']['articles'] = $this->renderPartial('menu', array(
+					'title' => sprintf($lang_common['More in this section'], '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>'),
+					'menu'  => $menu_articles,
+				));
 
 			if ($curr_item != -1)
 			{
@@ -552,17 +567,26 @@ class Page_Common extends Page_Abstract
 				if (isset($neighbour_urls[$curr_item + 1]))
 					$page['link_navigation']['next'] = $neighbour_urls[$curr_item + 1];
 
-				$page['back_forward'] = '<ul class="back_forward">'.
-					'<li class="up"><span class="arrow">&uarr;</span>'.(count($bread_crumbs) > 1 ? ' <a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>' : '').'</li>'.
-					(isset($menu_articles[$curr_item - 1]) ? str_replace('<li>', '<li class="back"><span class="arrow">&larr;</span> ', $menu_articles[$curr_item - 1]) : '<li class="back empty"><span class="arrow">&larr;</span> </li>').
-					(isset($menu_articles[$curr_item + 1]) ? str_replace('<li>', '<li class="forward"><span class="arrow">&rarr;</span> ', $menu_articles[$curr_item + 1]) : '<li class="forward empty"><span class="arrow">&rarr;</span> </li>').
-					'</ul>';
+				$page['back_forward'] = array(
+					'up'      => count($bread_crumbs) <= 1 ? null : array(
+						'title' => $bread_crumbs[count($bread_crumbs) - 2]['title'],
+						'link'  => s2_link($parent_path),
+					),
+					'back'    => empty($menu_articles[$curr_item - 1]) ? null : array(
+						'title' => $menu_articles[$curr_item - 1]['title'],
+						'link'  => $menu_articles[$curr_item - 1]['link'],
+					),
+					'forward' => empty($menu_articles[$curr_item + 1]) ? null : array(
+						'title' => $menu_articles[$curr_item + 1]['title'],
+						'link'  => $menu_articles[$curr_item + 1]['link'],
+					),
+				);
 			}
 		}
 
 		// Tags
 		if (strpos($this->template, '<!-- s2_article_tags -->') !== false)
-			$page['article_tags'] = self::tagged_articles($id);
+			$page['article_tags'] = $this->tagged_articles($id);
 
 		if (strpos($this->template, '<!-- s2_tags -->') !== false)
 			$page['tags'] = self::get_tags($id);

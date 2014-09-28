@@ -9,9 +9,9 @@ foreach ($breadcrumbs as $item)
 		echo ' &rarr; ';
 
 	if (!empty($item['link']))
-		echo '<a href="'.s2_htmlencode($item['link']).'">'.$item['title'].'</a>';
+		echo '<a href="'.s2_htmlencode($item['link']).'">'.s2_htmlencode($item['title']).'</a>';
 	else
-		echo $item['title'];
+		echo s2_htmlencode($item['title']);
 
 	$num++;
 }

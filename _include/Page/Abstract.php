@@ -19,13 +19,45 @@ abstract class Page_Abstract
 
 	abstract public function __construct (array $params = array());
 
-	private function renderPartial($name, $vars)
+	protected function renderPartial($name, $vars)
 	{
-		extract($vars);
+		$namespace_array = explode('\\', get_class($this));
+
+		if (count($namespace_array) == 3 && $namespace_array[0] == 's2_extensions')
+			$dirs[] = S2_ROOT.'_extensions/'.$namespace_array[1].'/views/';
+
 		$name = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $name);
 
+		$dirs[] = S2_ROOT.'_styles/'.S2_STYLE.'/views/';
+		$dirs[] = S2_ROOT.'_include/views/';
+		$filename = $name.'.php';
+
+		$found_file = '';
+		foreach ($dirs as $dir)
+		{
+			if (file_exists($dir.$filename))
+			{
+				$found_file = $dir.$filename;
+				extract($vars);
+				break;
+			}
+		}
+
 		ob_start();
-		include S2_ROOT.'_include/views/'.$name.'.php';
+
+		if (defined('S2_DEBUG_VIEW'))
+			echo '<div style="border: 1px solid rgba(255, 0, 0, 0.4); position: relative;">',
+				'<pre style="opacity: 0.4; background: red; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; "> ', $name, ' </pre>',
+				'<pre style="display: none; font-size: 12px; line-height: 1.3;">', s2_htmlencode(var_export($vars, true)), '</pre>';
+
+		if ($found_file)
+			include $found_file;
+		else if (defined('S2_DEBUG_VIEW'))
+			echo 'View file not found in ', var_export($dirs, true);
+
+		if (defined('S2_DEBUG_VIEW'))
+			echo '</div>';
+
 		return ob_get_clean();
 	}
 
@@ -130,17 +162,23 @@ abstract class Page_Abstract
 		else
 			$replace['<!-- s2_comment_form -->'] = '';
 
-		$replace['<!-- s2_back_forward -->'] = !empty($page['back_forward']) ? $page['back_forward'] : '';
+		$replace['<!-- s2_back_forward -->'] = !empty($page['back_forward']) ? $this->renderPartial('back_forward', array('links' => $page['back_forward'])) : '';
 
 		// Aside
 		$replace['<!-- s2_menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
 		$replace['<!-- s2_article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';
 
-		if (strpos($template, '<!-- s2_last_comments -->') !== false && ($last_comments = Placeholder::last_article_comments()))
-			$replace['<!-- s2_last_comments -->'] = '<div class="header">'.$lang_common['Last comments'].'</div>'.$last_comments;
+		if (strpos($template, '<!-- s2_last_comments -->') !== false && count($last_comments = Placeholder::last_article_comments()))
+			$replace['<!-- s2_last_comments -->'] = $this->renderPartial('menu_comments', array(
+				'title' => $lang_common['Last comments'],
+				'menu'  => $last_comments,
+			));
 
-		if (strpos($template, '<!-- s2_last_discussions -->') !== false && ($last_discussions = Placeholder::last_discussions()))
-			$replace['<!-- s2_last_discussions -->'] = '<div class="header">'.$lang_common['Last discussions'].'</div>'.$last_discussions;
+		if (strpos($template, '<!-- s2_last_discussions -->') !== false && count($last_discussions = Placeholder::last_discussions()))
+			$replace['<!-- s2_last_discussions -->'] = $this->renderPartial('menu', array(
+				'title' => $lang_common['Last discussions'],
+				'menu'  => $last_discussions,
+			));
 
 		if (strpos($template, '<!-- s2_last_articles -->') !== false)
 			$replace['<!-- s2_last_articles -->'] = Placeholder::last_articles(5);
