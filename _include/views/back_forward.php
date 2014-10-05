@@ -1,6 +1,9 @@
 <?php
-
-/** @var array $links */
+/**
+ * Content of <!-- s2_back_forward --> placeholder
+ *
+ * @var array $links
+ */
 
 ?>
 <ul class="back_forward">

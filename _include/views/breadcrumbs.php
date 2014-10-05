@@ -1,6 +1,9 @@
 <?php
-
-/** @var array $breadcrumbs */
+/**
+ * Content of <!-- breadcrumbs --> placeholder
+ *
+ * @var array $breadcrumbs
+ */
 
 $num = 0;
 foreach ($breadcrumbs as $item)

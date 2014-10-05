@@ -12,13 +12,13 @@ class Page_Favorite extends Page_Abstract
 {
 	public function __construct (array $params = array())
 	{
-		$this->page = self::make_favorite_page() + $this->page;
+		$this->page = $this->make_favorite_page() + $this->page;
 	}
 
 	//
 	// Builds favorite page
 	//
-	private static function make_favorite_page ()
+	private function make_favorite_page ()
 	{
 		global $s2_db, $lang_common;
 
@@ -49,56 +49,69 @@ class Page_Favorite extends Page_Abstract
 
 		$urls = Model::get_group_url($parent_ids, $urls);
 
-		$subsection_text = '';
-		$sections = $articles = $sort_array = array();
+		$sections = $articles = $articles_sort_array = $sections_sort_array = array();
 		foreach ($urls as $k => $url)
 		{
 			$row = $rows[$k];
 			if ($row['children_exist'])
 			{
-				$sections[] = '<h3 class="subsection"><a href="'.s2_link($url).(S2_USE_HIERARCHY ? '/' : '').'">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
-					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
-					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
+				$item = array(
+					'id'       => $row['id'],
+					'title'    => $row['title'],
+					'link'     => s2_link($url.(S2_USE_HIERARCHY ? '/' : '')),
+					'date'     => s2_date($row['create_time']),
+					'excerpt'  => $row['excerpt'],
+					'favorite' => 2,
+				);
+				$sort_field = $row['create_time'];
 
-				($hook = s2_hook('fn_s2_make_favorite_page_add_subsection')) ? eval($hook) : null;
+				($hook = s2_hook('pf_make_favorite_page_add_section')) ? eval($hook) : null;
+
+				$sections[] = $item;
+				$sections_sort_array[] = $sort_field;
 			}
 			else
 			{
-				$articles[] = array(
-					'title' => s2_htmlencode($row['title']),
-					'time' => $row['create_time'],
-					'excerpt' => $row['excerpt'],
-					'url' => $url
+				$item = array(
+					'id'       => $row['id'],
+					'title'    => $row['title'],
+					'link'     => s2_link($url),
+					'date'     => s2_date($row['create_time']),
+					'excerpt'  => $row['excerpt'],
+					'favorite' => 2,
 				);
-				$sort_array[] = $row['create_time'];
+				$sort_field = $row['create_time'];
 
-				($hook = s2_hook('fn_s2_make_favorite_page_add_subarticle')) ? eval($hook) : null;
+				($hook = s2_hook('pf_make_favorite_page_add_article')) ? eval($hook) : null;
+
+				$articles[] = $item;
+				$articles_sort_array[] = $sort_field;
 			}
 		}
 
 		($hook = s2_hook('fn_s2_make_favorite_page_pre_merge')) ? eval($hook) : null;
 
 		// There are favorite sections
+		$section_text = '';
 		if (!empty($sections))
-			$subsection_text = ($lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '').implode('', $sections);
+		{
+			// There are sections having the tag
+			array_multisort($sections_sort_array, $sort_order, $sections);
+			foreach ($sections as $item)
+				$section_text .= $this->renderPartial('subarticles_item', $item);
+		}
 
-		$text = '';
-
-		// There are favorite articles
+		$article_text = '';
 		if (!empty($articles))
 		{
-			array_multisort($sort_array, $sort_order, $articles);
+			// There are favorite articles
+			array_multisort($articles_sort_array, $sort_order, $articles);
 			foreach ($articles as $item)
-				$text .= '<h3 class="article"><a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
-					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
-					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
+				$article_text .= $this->renderPartial('subarticles_item', $item);
 		}
 
 		$page = array(
-			'text'			=> $text.$subsection_text,
-			'date'			=> '',
-			'title'			=> $lang_common['Favorite'],
-			'path'			=> array(
+			'path'  => array(
 				array(
 					'title' => Model::main_page_title(),
 					'link'  => s2_link('/'),
@@ -107,6 +120,12 @@ class Page_Favorite extends Page_Abstract
 					'title' => $lang_common['Favorite'],
 				),
 			),
+			'title' => $lang_common['Favorite'],
+			'date'  => '',
+			'text'  => $this->renderPartial('list_text', array(
+				'articles' => $article_text,
+				'sections' => $section_text,
+			)),
 		);
 
 		($hook = s2_hook('fn_s2_make_favorite_page_end')) ? eval($hook) : null;

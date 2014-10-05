@@ -19,7 +19,7 @@ abstract class Page_Abstract
 
 	abstract public function __construct (array $params = array());
 
-	protected function renderPartial($name, $vars, $namespace = false)
+	public function renderPartial($name, $vars, $namespace = false)
 	{
 		$namespace_array = explode('\\', $namespace ? $namespace : get_class($this));
 
@@ -38,7 +38,6 @@ abstract class Page_Abstract
 			if (file_exists($dir.$filename))
 			{
 				$found_file = $dir.$filename;
-				extract($vars);
 				break;
 			}
 		}
@@ -47,15 +46,18 @@ abstract class Page_Abstract
 
 		if (defined('S2_DEBUG_VIEW'))
 		{
-			echo '<div style="border: 1px solid rgba(255, 0, 0, 0.4); position: relative;">',
-				'<pre style="opacity: 0.4; background: red; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
+			echo '<div style="border: 1px solid rgba(0, 0, 0, 0.15); margin: 1px; position: relative;">',
+				'<pre style="opacity: 0.4; background: darkgray; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
 				'<pre style="display: none; font-size: 12px; line-height: 1.3;">';
 			var_export($vars);
 			echo '</pre>';
 		}
 
 		if ($found_file)
+		{
+			extract($vars);
 			include $found_file;
+		}
 		else if (defined('S2_DEBUG_VIEW'))
 			echo 'View file not found in ', var_export($dirs, true);
 
@@ -151,7 +153,7 @@ abstract class Page_Abstract
 		}
 
 		$replace['<!-- s2_author -->'] = !empty($page['author']) ? '<div class="author">'.$page['author'].'</div>' : '';
-		$replace['<!-- s2_title -->'] = !empty($page['title']) ? '<h1'.(!empty($page['favorite']) ? ' class="favorite-title"' : '').'>'.(!empty($page['title_prefix']) ? implode('', $page['title_prefix']) : '').$page['title'].'</h1>' : '';
+		$replace['<!-- s2_title -->'] = empty($page['title']) ? '' : $this->renderPartial('title', array_intersect_key($page, array('title' => 1, 'favorite' => 1)));
 		$replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
 		$replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $this->renderPartial('breadcrumbs', array('breadcrumbs' => $page['path'])) : '';
 		$replace['<!-- s2_section_link -->'] = isset($page['section_link']) ? $page['section_link'] : '';
@@ -179,16 +181,18 @@ abstract class Page_Abstract
 			));
 
 		if (strpos($template, '<!-- s2_last_discussions -->') !== false && count($last_discussions = Placeholder::last_discussions()))
-			$replace['<!-- s2_last_discussions -->'] = $this->renderPartial('menu', array(
+			$replace['<!-- s2_last_discussions -->'] = $this->renderPartial('menu_block', array(
 				'title' => $lang_common['Last discussions'],
 				'menu'  => $last_discussions,
 			));
 
 		if (strpos($template, '<!-- s2_last_articles -->') !== false)
-			$replace['<!-- s2_last_articles -->'] = Placeholder::last_articles(5);
+			$replace['<!-- s2_last_articles -->'] = Placeholder::last_articles($this, 5);
 
 		if (strpos($template, '<!-- s2_tags_list -->') !== false)
-			$replace['<!-- s2_tags_list -->'] = Placeholder::tags_list();
+			$replace['<!-- s2_tags_list -->'] = !count($tags_list = Placeholder::tags_list()) ? '' : $this->renderPartial('tags_list', array(
+				'tags' => $tags_list,
+			));
 
 		// Footer
 		$replace['<!-- s2_copyright -->'] = s2_build_copyright();
@@ -207,8 +211,13 @@ abstract class Page_Abstract
 		// Replacing placeholders and calculating hash for ETag header
 		foreach ($replace as $what => $to)
 		{
+			if (defined('S2_DEBUG_VIEW') && $to && !in_array($what, array('<!-- s2_head_title -->', '<!-- s2_navigation_link -->', '<!-- s2_rss_link -->', '<!-- s2_meta -->', '<!-- s2_styles -->')))
+				$to = '<pre style="color: red; font-size: 12px; opacity: 0.4; margin: 0; width: 100%; text-align: center; line-height: 1;">' . s2_htmlencode($what) . '</pre>' .
+					'<div style="border: 1px solid rgba(255, 0, 0, 0.4); margin: 1px;">'. $to . '</div>';
+
 			if (!in_array($what, $etag_skip))
 				$etag .= md5($to);
+
 			$template = str_replace($what, $to, $template);
 		}
 

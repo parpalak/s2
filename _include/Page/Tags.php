@@ -15,9 +15,6 @@ class Page_Tags extends Page_Abstract
 		global $lang_common;
 
 		$page = array(
-			'text'			=> '<div class="tags_list">'.Placeholder::tags_list().'</div>',
-			'date'			=> '',
-			'title'			=> $lang_common['Tags'],
 			'path'			=> array(
 				array(
 					'title' => Model::main_page_title(),
@@ -27,9 +24,12 @@ class Page_Tags extends Page_Abstract
 					'title' => $lang_common['Tags'],
 				),
 			),
+			'title'			=> $lang_common['Tags'],
+			'date'			=> '',
+			'text'			=> $this->renderPartial('tags_list', array('tags' => Placeholder::tags_list())),
 		);
 
-		($hook = s2_hook('Page_Tags_end')) ? eval($hook) : null;
+		($hook = s2_hook('pts_construct_end')) ? eval($hook) : null;
 
 		$this->page = $page + $this->page;
 	}

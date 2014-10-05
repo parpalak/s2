@@ -33,7 +33,7 @@ class Placeholder
 		$raw_query_user = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
 
 		$query = array(
-			'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS ptitle, a1.url AS p_url, ('.$raw_query_user.') AS author',
+			'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS parent_title, a1.url AS p_url, ('.$raw_query_user.') AS author',
 			'FROM'		=> 'articles AS a',
 			'JOINS'		=> array(
 				array(
@@ -60,7 +60,7 @@ class Placeholder
 			$parent_ids[$i] = $row['parent_id'];
 
 			$last[$i]['title'] = $row['title'];
-			$last[$i]['ptitle'] = $row['ptitle'];
+			$last[$i]['parent_title'] = $row['parent_title'];
 			$last[$i]['p_url'] = $row['p_url'];
 			$last[$i]['time'] = $row['create_time'];
 			$last[$i]['modify_time'] = $row['modify_time'];
@@ -85,23 +85,24 @@ class Placeholder
 	//
 	// Formatting last articles (for template placeholders)
 	//
-	public static function last_articles ($num)
+	public static function last_articles (Page_Abstract $that, $limit)
 	{
 		$return = ($hook = s2_hook('fn_last_articles_start')) ? eval($hook) : null;
 		if ($return)
 			return $return;
 
-		$articles = self::last_articles_array($num);
+		$articles = self::last_articles_array($limit);
 
 		$output = '';
-		foreach ($articles as $item)
+		foreach ($articles as &$item)
 		{
+			$item['date'] = s2_date($item['time']);
+			$item['link'] = s2_link($item['rel_path']);
+			$item['parent_link'] = s2_link(S2_USE_HIERARCHY ? preg_replace('#[^/]*$#', '', $item['rel_path']) : $item['p_url']);
+
 			($hook = s2_hook('fn_last_articles_loop')) ? eval($hook) : null;
 
-			$output .= '<h2 class="preview'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').
-				'<small><a class="preview_section" href="'.s2_link(S2_USE_HIERARCHY ? preg_replace('#[^/]*$#', '', $item['rel_path']) : $item['p_url']).'">'.$item['ptitle'].'</a> &rarr;</small> <a href="'.s2_link($item['rel_path']).'">'.s2_htmlencode($item['title']).'</a></h2>'.
-				'<div class="preview time">'.s2_date($item['time']).'</div>'.
-				'<div class="preview cite">'.$item['text'].'</div>';
+			$output .= $that->renderPartial('last_articles_item', $item);
 		}
 
 		($hook = s2_hook('fn_last_articles_end')) ? eval($hook) : null;
@@ -156,16 +157,18 @@ class Placeholder
 
 			foreach ($tag_count as $id => $num)
 				if ($num)
-					$tags[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_url[$id])).'/">'.$tag_name[$id].'</a>';
+					$tags[] = array(
+						'title' => $tag_name[$id],
+						'link'  => s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_url[$id]).'/'),
+						'num'   => $num,
+					);
 
 			$ready = true;
 		}
 
-		$output = implode('<br />', $tags);
-
 		($hook = s2_hook('fn_s2_tags_list_end')) ? eval($hook) : null;
 
-		return $output;
+		return $tags;
 	}
 
 	//
@@ -213,6 +216,7 @@ class Placeholder
 
 		$urls = Model::get_group_url($parent_ids, $urls);
 
+		$output = array();
 		foreach ($urls as $k => $url)
 			$output[] = array(
 				'title'  => $titles[$k],

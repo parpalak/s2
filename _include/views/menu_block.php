@@ -1,7 +1,10 @@
 <?php
-
-/** @var array $menu */
-/** @var string $title */
+/**
+ * Sidebar block. Used in <!-- menu -->
+ *
+ * @var string $title block title
+ * @var array $menu links
+ */
 
 ?>
 <div class="header"><?php echo $title; ?></div>
@@ -28,6 +31,7 @@ foreach ($menu as $item)
 	<li>
 		<a href="<?php echo s2_htmlencode($item['link']); ?>"<?php if (!empty($item['hint'])) echo ' title="', s2_htmlencode($item['hint']), '"'; ?>>
 			<?php echo s2_htmlencode($item['title']); ?>
+
 		</a>
 	</li>
 <?php

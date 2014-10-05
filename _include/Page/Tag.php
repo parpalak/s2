@@ -29,7 +29,7 @@ class Page_Tag extends Page_Abstract
 			'FROM'		=> 'tags',
 			'WHERE'		=> 'url = \''.$s2_db->escape($tag_name).'\''
 		);
-		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
+		($hook = s2_hook('pt_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		if ($row = $s2_db->fetch_row($result))
@@ -41,9 +41,6 @@ class Page_Tag extends Page_Abstract
 
 		if (!$is_slash)
 			s2_redirect('/'.S2_TAGS_URL.'/'.urlencode($tag_name).'/');
-
-		if ($tag_description)
-			$tag_description .= '<hr class="tag-separator" />';
 
 		$subquery = array(
 			'SELECT'	=> '1',
@@ -65,7 +62,7 @@ class Page_Tag extends Page_Abstract
 			),
 			'WHERE'		=> 'at.tag_id = '.$tag_id.' AND a.published = 1'
 		);
-		($hook = s2_hook('fn_s2_make_tags_pages_pre_get_arts_qr')) ? eval($hook) : null;
+		($hook = s2_hook('pt_make_tags_pages_pre_get_arts_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$urls = $parent_ids = $rows = array();
@@ -78,74 +75,90 @@ class Page_Tag extends Page_Abstract
 
 		$urls = Model::get_group_url($parent_ids, $urls);
 
-		$subsection_text = '';
-		$sections = $articles = $sort_array = array();
+		$sections = $articles = $articles_sort_array = $sections_sort_array = array();
 		foreach ($urls as $k => $url)
 		{
 			$row = $rows[$k];
 			if ($row['children_exist'])
 			{
-				$sections[] = '<h3 class="subsection'.($row['favorite'] ? ' favorite-item' : '').'">'.($row['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($url).(S2_USE_HIERARCHY ? '/' : '').'">'.s2_htmlencode($row['title']).'</a></h3>'."\n".
-					($row['create_time'] ? '<div class="subsection date">'.s2_date($row['create_time']).'</div>'."\n" : '').
-					(trim($row['excerpt']) ? '<p class="subsection">'.$row['excerpt'].'</p>'."\n" : '');
+				$item = array(
+					'id'       => $row['id'],
+					'title'    => $row['title'],
+					'link'     => s2_link($url.(S2_USE_HIERARCHY ? '/' : '')),
+					'date'     => s2_date($row['create_time']),
+					'excerpt'  => $row['excerpt'],
+					'favorite' => $row['favorite'],
+				);
+				$sort_field = $row['create_time'];
 
-				($hook = s2_hook('fn_s2_make_tags_pages_add_subsection')) ? eval($hook) : null;
+				($hook = s2_hook('pt_make_tags_pages_add_section')) ? eval($hook) : null;
+
+				$sections[] = $item;
+				$sections_sort_array[] = $sort_field;
 			}
 			else
 			{
-				$articles[] = array(
-					'title'		=> s2_htmlencode($row['title']),
-					'time'		=> $row['create_time'],
-					'excerpt'	=> $row['excerpt'],
-					'favorite'	=> $row['favorite'],
-					'url'		=> $url
+				$item = array(
+					'id'       => $row['id'],
+					'title'    => $row['title'],
+					'link'     => s2_link($url),
+					'date'     => s2_date($row['create_time']),
+					'excerpt'  => $row['excerpt'],
+					'favorite' => $row['favorite'],
 				);
-				$sort_array[] = $row['create_time'];
+				$sort_field = $row['create_time'];
 
-				($hook = s2_hook('fn_s2_make_tags_pages_add_subarticle')) ? eval($hook) : null;
+				($hook = s2_hook('pt_make_tags_pages_add_article')) ? eval($hook) : null;
+
+				$articles[] = $item;
+				$articles_sort_array[] = $sort_field;
 			}
 		}
 
-		($hook = s2_hook('fn_s2_make_tags_pages_pre_merge')) ? eval($hook) : null;
+		($hook = s2_hook('pt_make_tags_pages_pre_merge')) ? eval($hook) : null;
 
+		$section_text = '';
 		if (!empty($sections))
-			$subsection_text = ($lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '').implode('', $sections);
+		{
+			// There are sections having the tag
+			array_multisort($sections_sort_array, $sort_order, $sections);
+			foreach ($sections as $item)
+				$section_text .= $this->renderPartial('subarticles_item', $item);
+		}
 
-		$text = '';
-
-		// There are articles having the tag
+		$article_text = '';
 		if (!empty($articles))
 		{
-			array_multisort($sort_array, $sort_order, $articles);
-
-			($hook = s2_hook('fn_s2_make_tags_pages_pre_add_html')) ? eval($hook) : null;
-
+			// There are articles having the tag
+			array_multisort($articles_sort_array, $sort_order, $articles);
 			foreach ($articles as $item)
-				$text .= '<h3 class="article'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
-					($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
-					(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
+				$article_text .= $this->renderPartial('subarticles_item', $item);
 		}
 
 		$page = array(
-			'text'			=> $tag_description.$text.$subsection_text,
-			'date'			=> '',
-			'title'			=> s2_htmlencode($tag_name),
-			'path'			=> array(
+			'path'  => array(
 				array(
 					'title' => Model::main_page_title(),
 					'link'  => s2_link('/'),
 				),
 				array(
-					'link'  => s2_link('/'.S2_TAGS_URL.'/'),
+					'link'  => s2_link('/' . S2_TAGS_URL . '/'),
 					'title' => $lang_common['Tags'],
 				),
 				array(
 					'title' => $tag_name,
 				),
 			),
+			'title' => s2_htmlencode($tag_name),
+			'date'  => '',
+			'text'  => $this->renderPartial('list_text', array(
+				'description' => $tag_description,
+				'articles'    => $article_text,
+				'sections'    => $section_text,
+			)),
 		);
 
-		($hook = s2_hook('fn_s2_make_tags_pages_tag_end')) ? eval($hook) : null;
+		($hook = s2_hook('fn_s2_make_tags_pages_end')) ? eval($hook) : null;
 
 		return $page;
 	}

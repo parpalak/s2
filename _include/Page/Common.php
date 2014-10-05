@@ -12,7 +12,7 @@ class Page_Common extends Page_Abstract
 {
 	public function __construct (array $params = array())
 	{
-		$this->s2_parse_page_url($params['request_uri']);
+		$this->parse_page_url($params['request_uri']);
 	}
 
 	//
@@ -158,7 +158,7 @@ class Page_Common extends Page_Abstract
 		$output = array();
 		($hook = s2_hook('fn_tagged_articles_pre_menu_merge')) ? eval($hook) : null;
 		foreach ($art_by_tags as $tag_id => $articles)
-			$output[] = $this->renderPartial('menu', array(
+			$output[] = $this->renderPartial('menu_block', array(
 				'title' => sprintf($lang_common['With this tag'], '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/').'">'.$tag_names[$tag_id].'</a>'),
 				'menu'  => $articles,
 			));
@@ -167,7 +167,7 @@ class Page_Common extends Page_Abstract
 		return !empty($output) ? implode("\n", $output) : '';
 	}
 
-	private static function get_tags ($id)
+	private function get_tags ($id)
 	{
 		global $s2_db, $lang_common;
 
@@ -187,17 +187,23 @@ class Page_Common extends Page_Abstract
 
 		$tags = array();
 		while ($row = $s2_db->fetch_assoc($result))
-			$tags[] = '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($row['url']).'/').'">'.$row['name'].'</a>';
+			$tags[] = array(
+				'title' => $row['name'],
+				'link'  => s2_link('/'.S2_TAGS_URL.'/'.urlencode($row['url']).'/'),
+			);
 
 		if (empty($tags))
 			return '';
 
-		return '<p class="article_tags">'.sprintf($lang_common['Tags:'], implode($lang_common['Tags separator:'], $tags)).'</p>';
+		return $this->renderPartial('tags', array(
+			'title' => $lang_common['Tags'],
+			'tags'  => $tags,
+		));
 	}
 
 
 	// Processes site pages
-	private function s2_parse_page_url ($request_uri)
+	private function parse_page_url ($request_uri)
 	{
 		global $s2_db, $lang_common;
 
@@ -345,9 +351,6 @@ class Page_Common extends Page_Abstract
 		if (!empty($page['author']))
 			$page['author'] = s2_htmlencode($page['author']);
 
-		if (!empty($page['favorite']))
-			$page['title_prefix'][] = s2_favorite_link();
-
 		if (S2_USE_HIERARCHY)
 		{
 			$page['path'] = $bread_crumbs;
@@ -391,86 +394,75 @@ class Page_Common extends Page_Abstract
 			($hook = s2_hook('fn_s2_parse_page_url_pre_get_children_qr')) ? eval($hook) : null;
 			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-			$subarticles = $subsections = $menu_subsections = $menu_subarticles = $sort_array = array();
+			$subarticles = $subsections = $sort_array = array();
 			while ($row = $s2_db->fetch_assoc($result))
 			{
 				if ($row['children_exist'])
 				{
 					// The child is a subsection
-					$subsections[] = array(
-						'title'		=> s2_htmlencode($row['title']),
-						'time'		=> $row['create_time'],
-						'excerpt'	=> $row['excerpt'],
-						'favorite'	=> $row['favorite'],
-						'url'		=> $current_path.'/'.urlencode($row['url']).'/'
-					);
-					$menu_subsections[] = array(
-						'title' => $row['title'],
-						'link'  => s2_link($current_path.'/'.urlencode($row['url'])).'/',
+					$item = array(
+						'id'       => $row['id'],
+						'title'    => $row['title'],
+						'link'     => s2_link($current_path . '/' . urlencode($row['url']) . '/'),
+						'date'     => s2_date($row['create_time']),
+						'excerpt'  => $row['excerpt'],
+						'favorite' => $row['favorite'],
 					);
 
-					($hook = s2_hook('fn_s2_parse_page_url_add_subsection')) ? eval($hook) : null;
+					($hook = s2_hook('pc_parse_page_url_add_subsection')) ? eval($hook) : null;
+
+					$subsections[] = $item;
 				}
 				else
 				{
 					// The child is an article
-					$subarticles[] = array(
-						'title'		=> s2_htmlencode($row['title']),
-						'time'		=> $row['create_time'],
-						'excerpt'	=> $row['excerpt'],
-						'favorite'	=> $row['favorite'],
-						'url'		=> $current_path.'/'.urlencode($row['url'])
+					$item = array(
+						'id'       => $row['id'],
+						'title'    => $row['title'],
+						'link'     => s2_link($current_path . '/' . urlencode($row['url'])),
+						'date'     => s2_date($row['create_time']),
+						'excerpt'  => $row['excerpt'],
+						'favorite' => $row['favorite'],
 					);
-					$sort_array[] = $row['create_time'];
-					$menu_subarticles[] = array(
-						'title' => $row['title'],
-						'link'  => s2_link($current_path.'/'.urlencode($row['url'])),
-					);
+					$sort_field = $row['create_time'];
 
-					($hook = s2_hook('fn_s2_parse_page_url_add_subarticle')) ? eval($hook) : null;
+					($hook = s2_hook('pc_parse_page_url_add_subarticle')) ? eval($hook) : null;
+
+					$subarticles[] = $item;
+					$sort_array[] = $sort_field;
 				}
 			}
 
 			$page['menu']['articles'] = ''; // moves articles up :)
-			$page['subcontent'] = '';
 
-			// There are subsections in the section
-			if (!empty($menu_subsections))
+			$sections_text = '';
+			if (!empty($subsections))
 			{
-				// Add them to the menu...
-				$page['menu']['subsections'] = $this->renderPartial('menu', array(
+				// There are subsections in the section
+				$page['menu']['subsections'] = $this->renderPartial('menu_block', array(
 					'title' => $lang_common['Subsections'],
-					'menu'  => $menu_subsections,
+					'menu'  => $subsections,
 				));
-
-				// ... and to the page text
-				$page['subcontent'] = $lang_common['Subsections'] ? '<h2 class="subsections">'.$lang_common['Subsections'].'</h2>'."\n" : '';
 
 				foreach ($subsections as $item)
-					$page['subcontent'] .= '<h3 class="subsection'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').
-						'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
-						($item['time'] ? '<div class="subsection date">'.s2_date($item['time']).'</div>'."\n" : '').
-						(trim($item['excerpt']) ? '<p class="subsection">'.$item['excerpt'].'</p>'."\n" : '');
+					$sections_text .= $this->renderPartial('subarticles_item', $item);
 			}
 
-			// There are articles in the section
-			if (!empty($menu_subarticles))
+			$articles_text = '';
+			if (!empty($subarticles))
 			{
-				// Add them to the menu...
-				$page['menu']['articles'] = $this->renderPartial('menu', array(
+				// There are articles in the section
+				$page['menu']['articles'] = $this->renderPartial('menu_block', array(
 					'title' => $lang_common['In this section'],
-					'menu'  => $menu_subarticles,
+					'menu'  => $subarticles,
 				));
-
-				// ... and to the page text
-				$page['subcontent'] .= $lang_common['Read in this section'] ? '<h2 class="articles">'.$lang_common['Read in this section'].'</h2>'."\n" : '';
 
 				($sort_order == SORT_DESC) ? arsort($sort_array) : asort($sort_array);
 
 				if (S2_MAX_ITEMS)
 				{
 					// Paging navigation
-					$page_num = isset($_GET['~']) ? intval($_GET['~']) - 1 : 0;
+					$page_num = isset($_GET['p']) ? intval($_GET['p']) - 1 : 0;
 					if ($page_num < 0)
 						$page_num = 0;
 
@@ -481,7 +473,7 @@ class Page_Common extends Page_Abstract
 					$total_pages = ceil(1.0 * count($subarticles) / S2_MAX_ITEMS);
 
 					$link_nav = array();
-					$paging = s2_paging($page_num + 1, $total_pages, s2_link(str_replace('%', '%%', $current_path.'/'), array('~=%d')), $link_nav)."\n";
+					$paging = s2_paging($page_num + 1, $total_pages, s2_link(str_replace('%', '%%', $current_path.'/'), array('p=%d')), $link_nav)."\n";
 					foreach ($link_nav as $rel => $href)
 						$page['link_navigation'][$rel] = $href;
 
@@ -495,17 +487,16 @@ class Page_Common extends Page_Abstract
 				}
 
 				foreach ($sort_array as $index => $value)
-				{
-					$item = $subarticles[$index];
-					$page['subcontent'] .= '<h3 class="article'.($item['favorite'] ? ' favorite-item' : '').'">'.($item['favorite'] ? s2_favorite_link() : '').
-						'<a href="'.s2_link($item['url']).'">'.$item['title'].'</a></h3>'."\n".
-						($item['time'] ? '<div class="article date">'.s2_date($item['time']).'</div>'."\n" : '').
-						(trim($item['excerpt']) ? '<p class="article">'.$item['excerpt'].'</p>'."\n" : '');
-				}
+					$articles_text .= $this->renderPartial('subarticles_item', $subarticles[$index]);
 
 				if (S2_MAX_ITEMS)
-					$page['subcontent'] .= $paging;
+					$articles_text .= $paging;
 			}
+
+			$page['subcontent'] = $this->renderPartial('subarticles', array(
+				'articles' => $articles_text,
+				'sections' => $sections_text,
+			));
 		}
 
 		if (S2_USE_HIERARCHY && !$page['children_exist'] && ($is_menu || strpos($this->template, '<!-- s2_back_forward -->') !== false || strpos($this->template, '<!-- s2_navigation_link -->') !== false))
@@ -555,7 +546,7 @@ class Page_Common extends Page_Abstract
 			}
 
 			if (count($bread_crumbs) > 1)
-				$page['menu']['articles'] = $this->renderPartial('menu', array(
+				$page['menu']['articles'] = $this->renderPartial('menu_block', array(
 					'title' => sprintf($lang_common['More in this section'], '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>'),
 					'menu'  => $menu_articles,
 				));
@@ -589,7 +580,7 @@ class Page_Common extends Page_Abstract
 			$page['article_tags'] = $this->tagged_articles($id);
 
 		if (strpos($this->template, '<!-- s2_tags -->') !== false)
-			$page['tags'] = self::get_tags($id);
+			$page['tags'] = $this->get_tags($id);
 
 		// Comments
 		if ($page['commented'] && S2_SHOW_COMMENTS && strpos($this->template, '<!-- s2_comments -->') !== false)

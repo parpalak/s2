@@ -1,7 +1,10 @@
 <?php
-
-/** @var array $menu */
-/** @var string $title */
+/**
+ * Sidebar block of comments
+ *
+ * @var string $title block title
+ * @var array $menu commented items
+ */
 
 ?>
 <div class="header"><?php echo $title; ?></div>
