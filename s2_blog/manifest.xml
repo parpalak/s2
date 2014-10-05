@@ -325,7 +325,7 @@ if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
 	}
 
 	$s2_blog_last_discussions = s2_extensions\s2_blog\Placeholder::recent_discussions();
-	$replace['<!-- s2_blog_last_discussions -->'] = empty($s2_blog_last_discussions) ? '' : $this->renderPartial('menu', array(
+	$replace['<!-- s2_blog_last_discussions -->'] = empty($s2_blog_last_discussions) ? '' : $this->renderPartial('menu_block', array(
 		'title' => $lang_s2_blog['Last discussions'],
 		'menu'  => $s2_blog_last_discussions,
 	));
@@ -377,7 +377,7 @@ if (!empty($s2_blog_links))
 	else
 		require $ext_info['path'].'/lang/English.php';
 
-	$output[] = $this->renderPartial('menu', array(
+	$output[] = $this->renderPartial('menu_block', array(
 		'title' => $lang_s2_blog['See in blog'],
 		'menu'  => $s2_blog_links,
 	));

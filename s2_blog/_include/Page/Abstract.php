@@ -76,6 +76,9 @@ abstract class Page_Abstract extends \Page_Abstract
 		if (!empty($query_add['JOINS']))
 			$query['JOINS'] = $query_add['JOINS'];
 
+		if (!empty($query_add['SELECT']))
+			$query['SELECT'] .= ', '.$query_add['SELECT'];
+
 		($hook = s2_hook('fn_s2_blog_get_posts_pre_get_posts_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 

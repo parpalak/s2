@@ -49,7 +49,8 @@ class Page_Favorite extends Page_Abstract
 		$s2_blog_fav_link = '<span class="favorite-star">*</span>';
 
 		$query_add = array(
-			'WHERE'		=> 'favorite = 1'
+			'SELECT' => '2 AS favorite',
+			'WHERE'  => 'favorite = 1',
 		);
 		$output = $this->get_posts($query_add);
 

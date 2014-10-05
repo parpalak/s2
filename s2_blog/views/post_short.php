@@ -1,14 +1,15 @@
 <?php
-
-/** @var $author string */
-/** @var $title string */
-/** @var $title_link string */
-/** @var $time string */
-/** @var $text string */
-/** @var $tags array */
-/** @var $commented bool */
-/** @var $comment_num int */
-/** @var $favorite bool */
+/**
+ * @var $author string
+ * @var $title string
+ * @var $title_link string
+ * @var $time string
+ * @var $text string
+ * @var $tags array
+ * @var $commented bool
+ * @var $comment_num int
+ * @var $favorite bool
+ */
 
 foreach ($tags as &$tag)
 	$tag = '<a class="preview_section" href="'.$tag['link'].'">'.$tag['title'].'</a>';
