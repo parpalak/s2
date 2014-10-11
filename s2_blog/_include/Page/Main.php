@@ -51,7 +51,7 @@ class Page_Main extends Page_Abstract
 			$skip = 0;
 
 		$posts_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10;
-		$posts = Lib::last_posts_array($posts_per_page, $skip, true);
+		$posts = Lib::last_posts_array($this->viewer, $posts_per_page, $skip, true);
 
 		$output = '';
 		$i = 0;

@@ -6,6 +6,7 @@
 /** @var $time string */
 /** @var $text string */
 /** @var $tags array */
+/** @var $link string */
 /** @var $commented bool */
 /** @var $comment_num int */
 /** @var $favorite bool */

@@ -30,7 +30,8 @@ class Page_RSS extends \Page_RSS
 	{
 		global $lang_s2_blog;
 
-		$posts = Lib::last_posts_array();
+		$viewer = new Viewer();
+		$posts = Lib::last_posts_array($viewer);
 		$items = array();
 		foreach ($posts as $post)
 		{

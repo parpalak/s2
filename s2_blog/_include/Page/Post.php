@@ -23,7 +23,7 @@ class Page_Post extends Page_Abstract
 
 		$this->page['title'] = '';
 
-		$this->page = self::get_post($params['year'], $params['month'], $params['day'], $params['url']) + $this->page;
+		$this->get_post($params['year'], $params['month'], $params['day'], $params['url']);
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -52,12 +52,14 @@ class Page_Post extends Page_Abstract
 		);
 	}
 
-	private static function get_post ($year, $month, $day, $url)
+	private function get_post ($year, $month, $day, $url)
 	{
 		global $s2_db, $lang_s2_blog;
 
 		$start_time = mktime(0, 0, 0, $month, $day, $year);
 		$end_time = mktime(0, 0, 0, $month, $day + 1, $year);
+
+		$this->page['link_navigation'] = array('up' => S2_BLOG_PATH.date('Y/m/d/', $start_time));
 
 		$sub_query = array(
 			'SELECT'	=> 'u.name',
@@ -77,11 +79,9 @@ class Page_Post extends Page_Abstract
 		if (!$row = $s2_db->fetch_assoc($result))
 		{
 			s2_404_header();
-			return array(
-				'text'				=> '<p>'.$lang_s2_blog['Not found'].'</p>',
-				'head_title'		=> $lang_s2_blog['Not found'],
-				'link_navigation'	=> array('up' => S2_BLOG_PATH.date('Y/m/d/', $start_time))
-			);
+			$this->page['head_title'] = $lang_s2_blog['Not found'];
+			$this->page['text'] = '<p>'.$lang_s2_blog['Not found'].'</p>';
+			return;
 		}
 
 		$post_id = $row['id'];
@@ -101,10 +101,13 @@ class Page_Post extends Page_Abstract
 
 			$links = array();
 			while ($row1 = $s2_db->fetch_assoc($result))
-				$links[] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']).'">'.s2_htmlencode($row1['title']).'</a>';
+				$links[] = array(
+					'title' => $row1['title'],
+					'link'  => S2_BLOG_PATH.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']),
+				);
 
 			if (!empty($links))
-				$row['text'] .= Lib::format_see_also($links);
+				$row['text'] .= $this->renderPartial('see_also', array('links' => $links));
 		}
 
 		// Getting tags
@@ -124,39 +127,31 @@ class Page_Post extends Page_Abstract
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		$tags = array();
-		while ($row1 = $s2_db->fetch_assoc($result))
-			$tags[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($row1['url']).'/">'.$row1['name'].'</a>';
+		while ($tag = $s2_db->fetch_assoc($result))
+			$tags[] = array(
+				'title' => $tag['name'],
+				'link'  => S2_BLOG_TAGS_PATH.urlencode($tag['url']),
+			);
 
-		$output = Lib::format_post(
-			isset($row['author']) ? s2_htmlencode($row['author']) : '',
-			s2_htmlencode($row['title']),
-			s2_date($row['create_time']),
-			s2_date_time($row['create_time']),
-			$row['text'],
-			implode(', ', $tags),
-			'',
-			$row['favorite']
-		);
-		$output .= '<a name="comment"></a>';
-		if ($row['commented'] && S2_SHOW_COMMENTS)
-			$output .= self::get_comments($post_id);
+		$this->page['commented'] = $row['commented'];
+		if ($row['commented'] && S2_SHOW_COMMENTS && strpos($this->template, '<!-- s2_comments -->') !== false)
+			$this->page['comments'] = $this->get_comments($post_id);
 
-		return array(
-			'text'				=> $output,
-			'head_title'		=> s2_htmlencode($row['title']),
-			'commented'			=> $row['commented'],
-			'id'				=> $post_id,
-			'link_navigation'	=> array('up' => S2_BLOG_PATH.date('Y/m/d/', $start_time))
-		);
+		$row['time'] = s2_date_time($row['create_time']);
+		$row['commented'] = 0; // for template
+		$row['tags'] = $tags;
+
+		$this->page['text'] = $this->renderPartial('post', $row);
+
+		$this->page['id'] = $post_id;
+		$this->page['head_title'] = s2_htmlencode($row['title']);
 	}
 
-	public static function get_comments ($id)
+	private function get_comments ($id)
 	{
 		global $s2_db, $lang_common;
 
 		$comments = '';
-		$html_comment = '<div class="reply_info"><a name="%1$s" href="#%1$s">#%1$s</a>. %2$s</div>'."\n".
-			'<div class="reply%3$s">%4$s</div>'."\n";
 
 		$query = array(
 			'SELECT'	=> 'nick, time, email, show_email, good, text',
@@ -169,20 +164,11 @@ class Page_Post extends Page_Abstract
 
 		for ($i = 1; $row = $s2_db->fetch_assoc($result); $i++)
 		{
-			$nick = s2_htmlencode($row['nick']);
-			$name = '<strong>'.($row['show_email'] ? s2_js_mailto($nick, $row['email']) : $nick).'</strong>';
-
-			($hook = s2_hook('fn_s2_blog_get_comments_pre_comment_merge')) ? eval($hook) : null;
-
-			$comments .= sprintf($html_comment,
-				$i,
-				sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name),
-				($row['good'] ? ' good' : ''),
-				s2_bbcode_to_html(s2_htmlencode($row['text']))
-			);
+			$row['i'] = $i;
+			$comments .= $this->renderPartial('comment', $row);
 		}
 
-		return $comments ? '<h2 class="comment">'.$lang_common['Comments'].'</h2>'."\n".$comments : '';
+		return $comments ? '<a name="comment"></a><h2 class="comment">'.$lang_common['Comments'].'</h2>'."\n".$comments : '';
 	}
 
 }

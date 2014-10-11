@@ -44,10 +44,6 @@ class Page_Favorite extends Page_Abstract
 
 	public function favorite_posts ()
 	{
-		global $s2_blog_fav_link;
-
-		$s2_blog_fav_link = '<span class="favorite-star">*</span>';
-
 		$query_add = array(
 			'SELECT' => '2 AS favorite',
 			'WHERE'  => 'favorite = 1',

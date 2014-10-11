@@ -116,38 +116,8 @@ class Lib
 		return $output;
 	}
 
-	public static function format_post ($author, $header, $date, $date_time, $body, $keywords, $comments, $favorite = 0)
-	{
-		global $s2_blog_fav_link, $lang_s2_blog;
-
-		$html = '<div class="post author">%1$s</div>'."\n".
-			'<h2 class="post head">%7$s%2$s</h2>'."\n".
-			'<div class="post time">%4$s</div>'."\n".
-			'<div class="post body">%5$s</div>'."\n".
-			'<div class="post foot">%6$s</div>'."\n";
-
-		($hook = s2_hook('fn_s2_blog_format_post_start')) ? eval($hook) : null;
-
-		if (!S2_SHOW_COMMENTS)
-			$comments = '';
-
-		if ($keywords)
-			$comments = sprintf($lang_s2_blog['Tags:'], $keywords).($comments ? ' | '.$comments : '');
-
-		($hook = s2_hook('fn_s2_blog_format_post_end')) ? eval($hook) : null;
-
-		return sprintf($html, $author, $header, $date, $date_time, $body, $comments, ($favorite ? $s2_blog_fav_link : ''));
-	}
-
-	public static function comment_text ($n)
-	{
-		global $lang_s2_blog;
-
-		return $n ? sprintf($lang_s2_blog['Comments'], $n) : (S2_ENABLED_COMMENTS ? $lang_s2_blog['Post comment'] : '');
-	}
-
 	// Returns an array containing info about 10 last posts
-	public static function last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post = false)
+	public static function last_posts_array (\Viewer $viewer, $num_posts = 10, $skip = 0, $fake_last_post = false)
 	{
 		global $s2_db;
 
@@ -174,7 +144,7 @@ class Lib
 			'FROM'		=> 's2_blog_posts AS p',
 			'WHERE'		=> 'published = 1',
 			'ORDER BY'	=> 'create_time DESC',
-			'LIMIT'		=>((int) $num_posts).' OFFSET '.((int) $skip)
+			'LIMIT'		=> ((int) $num_posts).' OFFSET '.((int) $skip)
 		);
 		($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_ids_qr')) ? eval($hook) : null;
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
@@ -207,7 +177,7 @@ class Lib
 				$label_copy = $see_also[$labels[$i]];
 				if (isset($label_copy[$i]))
 					unset($label_copy[$i]);
-				$posts[$i]['text'] .= Lib::format_see_also($label_copy);
+				$posts[$i]['text'] .= $viewer->render('see_also', array('links' => $label_copy));
 			}
 
 			$post['tags'] = isset($tags[$i]) ? $tags[$i] : array();
@@ -255,7 +225,10 @@ class Lib
 			array_multisort($sort_array, SORT_DESC, $rows);
 
 			foreach ($rows as $row)
-				$see_also[$row['label']][$row['id']] = '<a href="'.S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']).'">'.s2_htmlencode($row['title']).'</a>';
+				$see_also[$row['label']][$row['id']] = array(
+					'title' => $row['title'],
+					'link'  => S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']),
+				);
 		}
 
 		// Obtaining tags
@@ -289,17 +262,4 @@ class Lib
 				'link'  => S2_BLOG_TAGS_PATH.urlencode($row['url']).'/',
 			);
 	}
-
-	public static function format_see_also ($title_array)
-	{
-		global $lang_s2_blog;
-
-		$html = '<p class="see_also"><b>%1$s</b><br />%2$s</p>';
-		$title_separator = '<br />';
-
-		($hook = s2_hook('fn_s2_blog_format_see_also_start')) ? eval($hook) : null;
-
-		return sprintf($html, $lang_s2_blog['See also'], implode($title_separator, $title_array));
-	}
-
 }

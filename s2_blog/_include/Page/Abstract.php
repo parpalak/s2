@@ -15,32 +15,24 @@ abstract class Page_Abstract extends \Page_Abstract
 	public $template_id = 'blog.php';
 	protected $class = 's2_blog';
 
-	public function init()
-	{
-		global $lang_s2_blog, $s2_blog_fav_link;
+	abstract public function body (array $params);
 
-		$s2_blog_fav_link = '<a href="'.S2_BLOG_PATH.urlencode(S2_FAVORITE_URL).'/" class="favorite-star" title="'.$lang_s2_blog['Favorite'].'">*</a>';
+	public function __construct (array $params = array())
+	{
+		global $lang_s2_blog;
 
 		if (file_exists(__DIR__ . '/../../lang/' . S2_LANGUAGE . '.php'))
 			require __DIR__ . '/../../lang/' . S2_LANGUAGE . '.php';
 		else
 			require __DIR__ . '/../../lang/English.php';
 
+		$this->viewer = new Viewer();
+
 		$this->page['commented'] = 0;
 		$this->rss_link[] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode($lang_s2_blog['RSS link title']).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
-	}
 
-	abstract public function body (array $params);
-
-	public function __construct (array $params = array())
-	{
-		$this->init();
 		$this->body($params);
-		$this->done();
-	}
 
-	public function done()
-	{
 		$this->page['meta_description'] = S2_BLOG_TITLE;
 		$this->page['head_title'] = empty($this->page['head_title']) ? S2_BLOG_TITLE : $this->page['head_title'] . ' - ' . S2_BLOG_TITLE;
 
@@ -115,7 +107,7 @@ abstract class Page_Abstract extends \Page_Abstract
 				$label_copy = $see_also[$labels[$id]];
 				if (isset($label_copy[$id]))
 					unset($label_copy[$id]);
-				$post['text'] .= Lib::format_see_also($label_copy);
+				$post['text'] .= $this->renderPartial('see_also', array('links' => $label_copy));
 			}
 
 

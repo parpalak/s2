@@ -22,7 +22,7 @@ class Page_Tags extends Page_Abstract
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// The list of tags
-		$this->page['text'] = self::all_tags();
+		$this->all_tags();
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -45,7 +45,7 @@ class Page_Tags extends Page_Abstract
 		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
 	}
 
-	private static function all_tags ()
+	private function all_tags ()
 	{
 		global $s2_db;
 
@@ -78,17 +78,22 @@ class Page_Tags extends Page_Abstract
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 		while ($row = $s2_db->fetch_row($result))
-			$tag_count[$row[0]]++;
+			$tag_count[$row[0]] = isset($tag_count[$row[0]]) ? $tag_count[$row[0]] + 1 : 1;
 
 		arsort($tag_count);
 
 		$tags = array();
 		foreach ($tag_count as $id => $num)
 			if ($num)
-				$tags[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($tag_url[$id]).'/">'.$tag_name[$id].'</a> ('.$num.')';
+				$tags[] = array(
+					'title' => $tag_name[$id],
+					'link'  => S2_BLOG_TAGS_PATH.urlencode($tag_url[$id]),
+					'num'   => $num,
+				);
 
 		($hook = s2_hook('fn_s2_blog_all_tags_end')) ? eval($hook) : null;
-		return '<div class="tags_list">'.implode('<br />', $tags).'</div>';
+
+		$this->page['text'] = $this->renderPartial('tags_list', array('tags' => $tags));
 	}
 
 }
