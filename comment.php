@@ -137,25 +137,27 @@ $class = (string) $class;
 if (isset($_POST['preview']))
 {
 	// Handling "Preview" button
-
-	$text_preview = s2_comment_form ($id.'.'.$class, $name, $email, $show_email, $subscribed, $text);
-
-	$name = '<strong>'.($show_email ? s2_js_mailto(s2_htmlencode($name), $email) : s2_htmlencode($name)).'</strong>';
+	$text_preview = s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text);
 
 	($hook = s2_hook('cmnt_preview_pre_comment_merge')) ? eval($hook) : null;
-
-	$comments = "\t\t\t\t".'<div class="reply_info">'.sprintf($lang_common['Comment info format'], s2_date_time(time()), $name).'</div>'."\n".
-		"\t\t\t\t".'<div class="reply">'.s2_bbcode_to_html(s2_htmlencode($text)).'</div>'."\n";
-	$text_preview = '<p>'.$lang_comments['Comment preview info'].'</p>'."\n".
-		$comments.
-		"\t\t\t\t".'<h2>'.$lang_common['Post a comment'].'</h2>'."\n"
-		.$text_preview;
 
 	$controller = new Page_Service(array(
 		'head_title' => $lang_comments['Comment preview'],
 		'title'      => $lang_comments['Comment preview'],
-		'text'       => $text_preview,
 	));
+
+	$text_preview = '<p>' . $lang_comments['Comment preview info'] . '</p>' . "\n" .
+		$controller->renderPartial('comment', array(
+			'text'       => $text,
+			'nick'       => $name,
+			'time'       => time(),
+			'email'      => $email,
+			'show_email' => $show_email,
+		)) .
+		"\t\t\t\t" . '<h2>' . $lang_common['Post a comment'] . '</h2>' . "\n" .
+		$text_preview;
+
+	$controller->setText($text_preview);
 
 	$controller->render();
 

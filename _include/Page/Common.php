@@ -598,14 +598,8 @@ class Page_Common extends Page_Abstract
 
 			for ($i = 1; $row = $s2_db->fetch_assoc($result); $i++)
 			{
-				$nick = s2_htmlencode($row['nick']);
-				$name = '<strong>'.($row['show_email'] ? s2_js_mailto($nick, $row['email']) : $nick).'</strong>';
-				$link = '<a name="'.$i.'" href="#'.$i.'">#'.$i.'</a>. ';
-
-				($hook = s2_hook('fn_s2_parse_page_url_pre_comment_merge')) ? eval($hook) : null;
-
-				$comments .= '<div class="reply_info'.($row['good'] ? ' good' : '').'">'.$link.sprintf($lang_common['Comment info format'], s2_date_time($row['time']), $name).'</div>'."\n".
-					'<div class="reply'.($row['good'] ? ' good' : '').'">'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</div>';
+				$row['i'] = $i;
+				$comments .= $this->renderPartial('comment', $row);
 			}
 
 			if ($comments)

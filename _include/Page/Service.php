@@ -16,4 +16,9 @@ class Page_Service extends Page_Abstract
 	{
 		$this->page = $params;
 	}
+
+	public function setText($text)
+	{
+		$this->page['text'] = $text;
+	}
 }
