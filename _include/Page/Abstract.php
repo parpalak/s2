@@ -16,55 +16,16 @@ abstract class Page_Abstract
 	protected $page = array();
 	protected $etag = null;
 	protected $rss_link = array();
+	protected $viewer = null;
 
 	abstract public function __construct (array $params = array());
 
-	public function renderPartial($name, $vars, $namespace = false)
+	public function renderPartial($name, $vars)
 	{
-		$namespace_array = explode('\\', $namespace ? $namespace : get_class($this));
+		if (empty($this->viewer))
+			$this->viewer = new Viewer();
 
-		if (count($namespace_array) >=2 && $namespace_array[0] == 's2_extensions')
-			$dirs[] = S2_ROOT.'_extensions/'.$namespace_array[1].'/views/';
-
-		$name = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $name);
-
-		$dirs[] = S2_ROOT.'_styles/'.S2_STYLE.'/views/';
-		$dirs[] = S2_ROOT.'_include/views/';
-		$filename = $name.'.php';
-
-		$found_file = '';
-		foreach ($dirs as $dir)
-		{
-			if (file_exists($dir.$filename))
-			{
-				$found_file = $dir.$filename;
-				break;
-			}
-		}
-
-		ob_start();
-
-		if (defined('S2_DEBUG_VIEW'))
-		{
-			echo '<div style="border: 1px solid rgba(0, 0, 0, 0.15); margin: 1px; position: relative;">',
-				'<pre style="opacity: 0.4; background: darkgray; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
-				'<pre style="display: none; font-size: 12px; line-height: 1.3;">';
-			var_export($vars);
-			echo '</pre>';
-		}
-
-		if ($found_file)
-		{
-			extract($vars);
-			include $found_file;
-		}
-		else if (defined('S2_DEBUG_VIEW'))
-			echo 'View file not found in ', var_export($dirs, true);
-
-		if (defined('S2_DEBUG_VIEW'))
-			echo '</div>';
-
-		return ob_get_clean();
+		return $this->viewer->render($name, $vars);
 	}
 
 	public function obtainTemplate ($path = false)

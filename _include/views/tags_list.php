@@ -6,7 +6,8 @@
  */
 
 foreach ($tags as &$tag)
-	$tag = '<a href="'.s2_htmlencode($tag['link']).'">'.s2_htmlencode($tag['title']).'</a>';
+	$tag = '<a href="'.s2_htmlencode($tag['link']).'">'.s2_htmlencode($tag['title']).'</a>'.(isset($tag['num']) ? ' ('.$tag['num'].')' : '');
+unset($tag);
 
 ?>
 <div class="tags_list">
