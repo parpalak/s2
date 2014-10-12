@@ -18,9 +18,15 @@ class Viewer
 		if ($ext_dir)
 			$this->dirs[] = $ext_dir.'/views/';
 
-		if ($that)
+		if ($that instanceof Page_Abstract)
 		{
 			$ext_dir = s2_ext_dir_from_ns(get_class($that));
+			if ($ext_dir)
+				$this->dirs[] = $ext_dir.'/views/';
+		}
+		elseif (is_string($that) && $that)
+		{
+			$ext_dir = s2_ext_dir_from_ns($that);
 			if ($ext_dir)
 				$this->dirs[] = $ext_dir.'/views/';
 		}

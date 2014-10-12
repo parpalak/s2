@@ -128,7 +128,6 @@ class Model
 		($hook = s2_hook('fn_s2_main_page_title_qr')) ? eval($hook) : null;
 
 		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
-		$main_title = $s2_db->result($result);
-		return $main_title;
+		return $s2_db->result($result);
 	}
 }

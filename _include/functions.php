@@ -315,10 +315,6 @@ function s2_build_copyright ()
 //
 function s2_htmlencode($str)
 {
-	$return = ($hook = s2_hook('fn_s2_htmlencode_start')) ? eval($hook) : null;
-	if ($return != null)
-		return $return;
-
 	return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
