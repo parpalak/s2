@@ -16,11 +16,11 @@
 <extension for="S2" engine="1.0">
 	<id>s2_typo</id>
 	<title>Russian typography</title>
-	<version>1.0b2</version>
+	<version>2.0dev</version>
 	<description>Converts '""' quotation marks to '«»' and '„“' and puts non-breaking space characters according to Russian typography conventions.</description>
 	<author>Roman Parpalak</author>
 
-	<minversion>1.0dev</minversion>
+	<minversion>2.0dev</minversion>
 	<maxtestedon>2.0dev</maxtestedon>
 
 	<hooks>
@@ -30,14 +30,14 @@ require $ext_info['path'].'/functions.php';
 $template = s2_typo_make($template);
 		]]></hook>
 
-		<hook id="fn_do_rss_pre_output" priority="9"><![CDATA[
+		<hook id="pr_render_pre_get_content" priority="9"><![CDATA[
 require $ext_info['path'].'/functions.php';
 
-$rss_title = s2_typo_make($rss_title, true);
-$rss_description = s2_typo_make($rss_description, true);
+$content['rss_title'] = s2_typo_make($content['rss_title'], true);
+$content['rss_description'] = s2_typo_make($content['rss_description'], true);
 		]]></hook>
 
-		<hook id="fn_do_rss_loop_pre_output" priority="9"><![CDATA[
+		<hook id="pr_render_pre_item_render" priority="9"><![CDATA[
 $item['title'] = s2_typo_make($item['title'], true);
 $item['text'] = s2_typo_make($item['text']);
 		]]></hook>
