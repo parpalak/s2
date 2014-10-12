@@ -44,7 +44,7 @@ if (!isset($s2_counter_skip) || !$s2_counter_skip)
 $replace['<!-- s2_counter_img -->'] = '<img class="s2_counter" src="'.$ext_info['url'].'/counter.php" width="88" height="31" />';
 		]]></hook>
 
-		<hook id="fn_do_rss_start"><![CDATA[
+		<hook id="pr_render_start"><![CDATA[
 if (!defined('S2_COUNTER_FUNCTIONS_LOADED'))
 	include $ext_info['path'].'/functions.php';
 
