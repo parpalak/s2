@@ -85,7 +85,7 @@ class Placeholder
 	//
 	// Formatting last articles (for template placeholders)
 	//
-	public static function last_articles (Page_Abstract $that, $limit)
+	public static function last_articles (Viewer $viewer, $limit)
 	{
 		$return = ($hook = s2_hook('fn_last_articles_start')) ? eval($hook) : null;
 		if ($return)
@@ -102,7 +102,7 @@ class Placeholder
 
 			($hook = s2_hook('fn_last_articles_loop')) ? eval($hook) : null;
 
-			$output .= $that->renderPartial('last_articles_item', $item);
+			$output .= $viewer->render('last_articles_item', $item);
 		}
 
 		($hook = s2_hook('fn_last_articles_end')) ? eval($hook) : null;

@@ -8,10 +8,11 @@
  */
 
 
-class Page_Common extends Page_Abstract
+class Page_Common extends Page_HTML implements Page_Routable
 {
 	public function __construct (array $params = array())
 	{
+		parent::__construct();
 		$this->parse_page_url($params['request_uri']);
 	}
 
@@ -365,13 +366,10 @@ class Page_Common extends Page_Abstract
 
 		($hook = s2_hook('fn_s2_parse_page_url_pre_get_tpl')) ? eval($hook) : null;
 
-		// Getting page template
-		$this->obtainTemplate();
-
-		$is_menu = strpos($this->template, '<!-- s2_menu -->') !== false;
+		$is_menu = $this->inTemplate('<!-- s2_menu -->') !== false;
 
 		// Dealing with sections, subsections, neighbours
-		if (S2_USE_HIERARCHY && $page['children_exist'] && (strpos($this->template, '<!-- s2_subarticles -->') !== false || $is_menu || strpos($this->template, '<!-- s2_navigation_link -->') !== false))
+		if (S2_USE_HIERARCHY && $page['children_exist'] && ($this->inTemplate('<!-- s2_subarticles -->') !== false || $is_menu || $this->inTemplate('<!-- s2_navigation_link -->') !== false))
 		{
 			// It's a section. We have to fetch subsections and articles.
 
@@ -499,7 +497,7 @@ class Page_Common extends Page_Abstract
 			));
 		}
 
-		if (S2_USE_HIERARCHY && !$page['children_exist'] && ($is_menu || strpos($this->template, '<!-- s2_back_forward -->') !== false || strpos($this->template, '<!-- s2_navigation_link -->') !== false))
+		if (S2_USE_HIERARCHY && !$page['children_exist'] && ($is_menu || $this->inTemplate('<!-- s2_back_forward -->') !== false || $this->inTemplate('<!-- s2_navigation_link -->') !== false))
 		{
 			// It's an article. We have to fetch other articles in the parent section
 
@@ -576,14 +574,14 @@ class Page_Common extends Page_Abstract
 		}
 
 		// Tags
-		if (strpos($this->template, '<!-- s2_article_tags -->') !== false)
+		if ($this->inTemplate('<!-- s2_article_tags -->') !== false)
 			$page['article_tags'] = $this->tagged_articles($id);
 
-		if (strpos($this->template, '<!-- s2_tags -->') !== false)
+		if ($this->inTemplate('<!-- s2_tags -->') !== false)
 			$page['tags'] = $this->get_tags($id);
 
 		// Comments
-		if ($page['commented'] && S2_SHOW_COMMENTS && strpos($this->template, '<!-- s2_comments -->') !== false)
+		if ($page['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->') !== false)
 		{
 			$query = array(
 				'SELECT'	=> 'nick, time, email, show_email, good, text',

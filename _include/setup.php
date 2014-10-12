@@ -45,7 +45,7 @@ spl_autoload_register(function ($class)
 {
 	$class = ltrim($class, '\\');
 	$dir = '';
-	if ($lastNsPos = strrpos($class, '\\'))
+	if (strpos($class, '\\'))
 	{
 		$ns_array = explode('\\', $class);
 		$class = array_pop($ns_array);

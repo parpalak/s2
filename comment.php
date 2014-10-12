@@ -137,17 +137,12 @@ $class = (string) $class;
 if (isset($_POST['preview']))
 {
 	// Handling "Preview" button
-	$text_preview = s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text);
 
 	($hook = s2_hook('cmnt_preview_pre_comment_merge')) ? eval($hook) : null;
 
-	$controller = new Page_Service(array(
-		'head_title' => $lang_comments['Comment preview'],
-		'title'      => $lang_comments['Comment preview'],
-	));
-
+	$viewer = new Viewer();
 	$text_preview = '<p>' . $lang_comments['Comment preview info'] . '</p>' . "\n" .
-		$controller->renderPartial('comment', array(
+		$viewer->render('comment', array(
 			'text'       => $text,
 			'nick'       => $name,
 			'time'       => time(),
@@ -155,9 +150,13 @@ if (isset($_POST['preview']))
 			'show_email' => $show_email,
 		)) .
 		"\t\t\t\t" . '<h2>' . $lang_common['Post a comment'] . '</h2>' . "\n" .
-		$text_preview;
+		s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text);
 
-	$controller->setText($text_preview);
+	$controller = new Page_Service(array(
+		'head_title' => $lang_comments['Comment preview'],
+		'title'      => $lang_comments['Comment preview'],
+		'text'       => $text_preview,
+	));
 
 	$controller->render();
 

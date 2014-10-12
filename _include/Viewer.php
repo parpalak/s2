@@ -10,16 +10,26 @@
 class Viewer
 {
 	private $dirs = array();
+	private $debug = false;
 
-	public function __construct ()
+	public function __construct ($that = null)
 	{
-		$namespace_array = explode('\\', get_class($this));
+		$ext_dir = s2_ext_dir_from_ns(get_class($this));
+		if ($ext_dir)
+			$this->dirs[] = $ext_dir.'/views/';
 
-		if (count($namespace_array) >=2 && $namespace_array[0] == 's2_extensions')
-			$this->dirs[] = S2_ROOT.'_extensions/'.$namespace_array[1].'/views/';
+		if ($that)
+		{
+			$ext_dir = s2_ext_dir_from_ns(get_class($that));
+			if ($ext_dir)
+				$this->dirs[] = $ext_dir.'/views/';
+		}
 
 		$this->dirs[] = S2_ROOT.'_styles/'.S2_STYLE.'/views/';
 		$this->dirs[] = S2_ROOT.'_include/views/';
+
+		if (defined('S2_DEBUG_VIEW') && $that instanceof Page_HTML)
+			$this->debug = true;
 	}
 
 	/**
@@ -44,7 +54,7 @@ class Viewer
 
 		ob_start();
 
-		if (defined('S2_DEBUG_VIEW'))
+		if ($this->debug)
 		{
 			echo '<div style="border: 1px solid rgba(0, 0, 0, 0.15); margin: 1px; position: relative;">',
 			'<pre style="opacity: 0.4; background: darkgray; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
@@ -55,10 +65,10 @@ class Viewer
 
 		if ($found_file)
 			$this->include_file($found_file, $vars);
-		else if (defined('S2_DEBUG_VIEW'))
+		elseif ($this->debug)
 			echo 'View file not found in ', s2_htmlencode(var_export($this->dirs, true));
 
-		if (defined('S2_DEBUG_VIEW'))
+		if ($this->debug)
 			echo '</div>';
 
 		return ob_get_clean();

@@ -44,7 +44,7 @@ if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
 	require S2_ROOT.'_include/comments.php';
 
 $router = new AltoRouter(array(
-	array('GET', '/rss.xml', 'Page_RSS'),
+	array('GET', '[/rss.xml:url]', 'Page_RSS'),
 
 	// Favorite
 	array('GET', '/'.S2_FAVORITE_URL, function () {
@@ -80,7 +80,7 @@ else
 		$controller = new Page_Common(array('request_uri' => $request_uri));
 }
 
-if ($controller instanceof Page_Abstract)
+if ($controller instanceof Page_Routable)
 {
 	s2_no_cache(false);
 	$controller->render();

@@ -8,21 +8,17 @@
  */
 
 
-class Page_RSS extends Page_Abstract
+class Page_RSS extends Page_Abstract implements Page_Routable
 {
+	private $url = '';
 	public function __construct (array $params = array())
 	{
-		global $s2_db;
-		s2_no_cache(false);
-		$this->do_rss();
-		$s2_db->close();
-		die;
+		$this->url = $params['url'];
+		parent::__construct();
 	}
 
-	private function do_rss ()
+	public function render ()
 	{
-		global $request_uri;
-
 		$return = ($hook = s2_hook('fn_do_rss_start')) ? eval($hook) : null;
 		if ($return)
 			return;
@@ -33,6 +29,7 @@ class Page_RSS extends Page_Abstract
 
 		$rss_title = $this->title();
 		$rss_link = $this->link();
+		$self_link = $this->url;
 		$rss_description = $this->description();
 
 		($hook = s2_hook('fn_do_rss_pre_output')) ? eval($hook) : null;
@@ -48,7 +45,7 @@ class Page_RSS extends Page_Abstract
 		<description><?php echo s2_htmlencode($rss_description); ?></description>
 		<generator>S2 <?php echo S2_VERSION; ?></generator>
 		<ttl>10</ttl>
-		<atom:link href="<?php echo s2_abs_link($request_uri); ?>" rel="self" type="application/rss+xml" />
+		<atom:link href="<?php echo s2_abs_link($self_link); ?>" rel="self" type="application/rss+xml" />
 <?php
 
 		$last_date = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
@@ -106,6 +103,9 @@ class Page_RSS extends Page_Abstract
 	</channel>
 </rss>
 <?php
+
+		global $s2_db;
+		$s2_db->close();
 
 		if (!$items && $last_date)
 		{

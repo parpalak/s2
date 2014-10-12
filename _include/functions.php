@@ -751,3 +751,12 @@ function s2_redirect ($url, $external = false)
 	header('Location: '.$url);
 	die;
 }
+
+function s2_ext_dir_from_ns ($namespace)
+{
+	$namespace_array = explode('\\', $namespace);
+	if (count($namespace_array) >= 2 && $namespace_array[0] == 's2_extensions')
+		return S2_ROOT . '_extensions/' . $namespace_array[1];
+
+	return null;
+}

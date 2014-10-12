@@ -8,10 +8,11 @@
  */
 
 
-class Page_Favorite extends Page_Abstract
+class Page_Favorite extends Page_HTML implements Page_Routable
 {
 	public function __construct (array $params = array())
 	{
+		parent::__construct();
 		$this->page = $this->make_favorite_page() + $this->page;
 	}
 

@@ -8,17 +8,13 @@
  */
 
 
-class Page_Service extends Page_Abstract
+class Page_Service extends Page_HTML
 {
 	protected $template_id = 'service.php';
 
 	public function __construct (array $params = array())
 	{
-		$this->page = $params;
-	}
-
-	public function setText($text)
-	{
-		$this->page['text'] = $text;
+		parent::__construct();
+		$this->page = $params + $this->page;
 	}
 }

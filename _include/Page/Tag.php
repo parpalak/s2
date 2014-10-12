@@ -8,11 +8,12 @@
  */
 
 
-class Page_Tag extends Page_Abstract
+class Page_Tag extends Page_HTML implements Page_Routable
 {
 	public function __construct (array $params = array())
 	{
-		$this->page = $this->make_tags_pages($params['name'], !empty($params['slash'])) + $this->page;
+		parent::__construct();
+		$this->make_tags_pages($params['name'], !empty($params['slash']));
 	}
 
 	//
@@ -160,6 +161,6 @@ class Page_Tag extends Page_Abstract
 
 		($hook = s2_hook('fn_s2_make_tags_pages_end')) ? eval($hook) : null;
 
-		return $page;
+		$this->page = $page;
 	}
 }

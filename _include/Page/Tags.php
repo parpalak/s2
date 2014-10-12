@@ -8,13 +8,17 @@
  */
 
 
-class Page_Tags extends Page_Abstract
+class Page_Tags extends Page_HTML implements Page_Routable
 {
 	public function __construct (array $params = array())
 	{
 		global $lang_common;
 
-		$page = array(
+		parent::__construct();
+
+		($hook = s2_hook('pts_construct_end')) ? eval($hook) : null;
+
+		$this->page = array(
 			'path'			=> array(
 				array(
 					'title' => Model::main_page_title(),
@@ -28,9 +32,5 @@ class Page_Tags extends Page_Abstract
 			'date'			=> '',
 			'text'			=> $this->renderPartial('tags_list', array('tags' => Placeholder::tags_list())),
 		);
-
-		($hook = s2_hook('pts_construct_end')) ? eval($hook) : null;
-
-		$this->page = $page + $this->page;
 	}
 }
