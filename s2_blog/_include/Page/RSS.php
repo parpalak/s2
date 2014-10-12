@@ -68,7 +68,7 @@ class Page_RSS extends \Page_RSS
 	 */
 	protected function link()
 	{
-		return s2_abs_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/');
+		return str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/';
 	}
 
 	/**
