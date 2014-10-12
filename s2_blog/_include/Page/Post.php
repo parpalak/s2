@@ -10,15 +10,13 @@
 namespace s2_extensions\s2_blog;
 
 
-class Page_Post extends Page_Abstract
+class Page_Post extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
 		global $lang_s2_blog;
 
-		$this->obtainTemplate(__DIR__.'/../../templates/');
-
-		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
+		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']);
 
 		$this->page['title'] = '';
@@ -106,8 +104,7 @@ class Page_Post extends Page_Abstract
 					'link'  => S2_BLOG_PATH.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']),
 				);
 
-			if (!empty($links))
-				$row['text'] .= $this->renderPartial('see_also', array('links' => $links));
+			$row['see_also'] = $links;
 		}
 
 		// Getting tags
@@ -134,7 +131,7 @@ class Page_Post extends Page_Abstract
 			);
 
 		$this->page['commented'] = $row['commented'];
-		if ($row['commented'] && S2_SHOW_COMMENTS && strpos($this->template, '<!-- s2_comments -->') !== false)
+		if ($row['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->') !== false)
 			$this->page['comments'] = $this->get_comments($post_id);
 
 		$row['time'] = s2_date_time($row['create_time']);

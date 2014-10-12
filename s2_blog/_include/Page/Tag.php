@@ -10,15 +10,13 @@
 namespace s2_extensions\s2_blog;
 
 
-class Page_Tag extends Page_Abstract
+class Page_Tag extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
 		global $lang_s2_blog;
 
-		$this->obtainTemplate(__DIR__.'/../../templates/');
-
-		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
+		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// A tag

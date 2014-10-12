@@ -28,3 +28,7 @@ unset($tag);
 </h2>
 <div class="preview time"><?php echo $time; ?></div>
 <div class="post body"><?php echo $text; ?></div>
+<?php
+
+if (!empty($see_also))
+	include 'see_also.php';

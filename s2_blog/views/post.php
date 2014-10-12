@@ -28,7 +28,12 @@ global $lang_s2_blog;
 <?php } ?>
 </h2>
 <div class="post time"><?php echo $time; ?></div>
-<div class="post body"><?php echo $text; ?></div>
+<div class="post body"><?php
+	echo $text;
+	if (!empty($see_also))
+		include 'see_also.php';
+?>
+</div>
 <div class="post foot">
 <?php
 	$footer = array();

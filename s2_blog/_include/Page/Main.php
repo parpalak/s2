@@ -8,7 +8,7 @@
 
 namespace s2_extensions\s2_blog;
 
-class Page_Main extends Page_Abstract
+class Page_Main extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
@@ -17,9 +17,8 @@ class Page_Main extends Page_Abstract
 		$s2_blog_skip = !empty($params['page']) ? (int) $params['page'] : 0;
 
 		$this->template_id = $s2_blog_skip ? 'blog.php' : 'blog_main.php';
-		$this->obtainTemplate(__DIR__.'../../templates/');
 
-		if (strpos($this->template, '<!-- s2_blog_calendar -->') !== false)
+		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		$this->last_posts($s2_blog_skip);
@@ -51,7 +50,7 @@ class Page_Main extends Page_Abstract
 			$skip = 0;
 
 		$posts_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10;
-		$posts = Lib::last_posts_array($this->viewer, $posts_per_page, $skip, true);
+		$posts = Lib::last_posts_array($posts_per_page, $skip, true);
 
 		$output = '';
 		$i = 0;

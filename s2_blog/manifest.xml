@@ -281,7 +281,7 @@ $router->map('GET', S2_BLOG_URL, function () { s2_redirect(S2_BLOG_URL.'/'); });
 $router->map('GET', S2_BLOG_URL.'/', '\\s2_extensions\\s2_blog\\Page_Main');
 $router->map('GET', S2_BLOG_URL.'/skip/[i:page]', '\\s2_extensions\\s2_blog\\Page_Main');
 
-$router->map('GET', S2_BLOG_URL.'/rss.xml', '\\s2_extensions\\s2_blog\\Page_RSS');
+$router->map('GET', '['.S2_BLOG_URL.'/rss.xml:url]', '\\s2_extensions\\s2_blog\\Page_RSS');
 
 $router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL, function () { s2_redirect(S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/'); });
 $router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/', '\\s2_extensions\\s2_blog\\Page_Favorite');
@@ -332,8 +332,8 @@ if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
 }
 if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 {
-	$s2_blog_viewer = new s2_extensions\s2_blog\Viewer();
-	$s2_blog_data = s2_extensions\s2_blog\Lib::last_posts_array($s2_blog_viewer, 1);
+	$s2_blog_viewer = new Viewer();
+	$s2_blog_data = s2_extensions\s2_blog\Lib::last_posts_array(1);
 	foreach($s2_blog_data as &$s2_blog_post)
 		$s2_blog_post = $s2_blog_viewer->render('post_short', $s2_blog_post);
 	unset($s2_blog_post);
@@ -874,7 +874,7 @@ $s2_blog_search_sub_sql = $s2_db->query_build($s2_blog_search_sql, true) or erro
 $s2_blog_search_sql = array(
 	'SELECT'	=> 'tag_id, name, url, ('.$s2_blog_search_sub_sql.') AS used',
 	'FROM'		=> 'tags AS t',
-	'WHERE'		=> 'name LIKE \''.$s2_db->escape(trim($this->query)).'%\'',
+	'WHERE'		=> 'name LIKE \''.$s2_db->escape(trim($query)).'%\'',
 );
 ($hook = s2_hook('s2_blog_pre_find_tags_qr')) ? eval($hook) : null;
 $s2_blog_result = $s2_db->query_build($s2_blog_search_sql) or error(__FILE__, __LINE__);
@@ -890,11 +890,11 @@ while ($s2_blog_row = $s2_db->fetch_assoc($s2_blog_result))
 
 if (!empty($s2_blog_found_tag))
 {
-	$s2_blog_search_found = count($s2_search_found_tags);
+	$s2_blog_search_found = count($tags);
 	if ($s2_blog_search_found)
-		$s2_search_found_tags[$s2_blog_search_found - 1] .= sprintf($lang_s2_blog['Found tags short'], implode(', ', $s2_blog_found_tag));
+		$tags[$s2_blog_search_found - 1] .= sprintf($lang_s2_blog['Found tags short'], implode(', ', $s2_blog_found_tag));
 	else
-		echo '<p class="s2_search_found_tags">'.sprintf($lang_s2_blog['Found tags'], implode(', ', $s2_blog_found_tag)).'</p>';
+		$return .= '<p class="s2_search_found_tags">'.sprintf($lang_s2_blog['Found tags'], implode(', ', $s2_blog_found_tag)).'</p>';
 }
 		]]></hook>
 

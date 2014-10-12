@@ -30,21 +30,21 @@ class Page_RSS extends \Page_RSS
 	{
 		global $lang_s2_blog;
 
-		$viewer = new Viewer();
-		$posts = Lib::last_posts_array($viewer);
+		$posts = Lib::last_posts_array();
+		$viewer = new \Viewer();
 		$items = array();
 		foreach ($posts as $post)
 		{
-			if (!empty($post['tags']))
-			{
-				foreach ($post['tags'] as &$tag)
-					$tag = '<a href="'.$tag['link'].'">'.$tag['title'].'</a>';
-				unset($tag);
-			}
-
 			$items[] = array(
 				'title'       => $post['title'],
-				'text'        => $post['text'] . (!empty($post['tags']) ? '<p>' . sprintf($lang_s2_blog['Tags:'], implode(', ', $post['tags'])) . '</p>' : ''),
+				'text'        => $post['text'] .
+					(empty($post['see_also']) ? '' : $viewer->render('see_also', array(
+						'see_also' => $post['see_also']
+					))) .
+					(empty($post['tags']) ? '' : $viewer->render('tags', array(
+						'title' => $lang_s2_blog['Tags:'],
+						'tags'  => $post['tags'],
+					))),
 				'time'        => $post['create_time'],
 				'modify_time' => $post['modify_time'],
 				'rel_path'    => str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)) . date('/Y/m/d/', $post['create_time']) . urlencode($post['url']),

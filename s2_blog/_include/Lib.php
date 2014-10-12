@@ -117,7 +117,7 @@ class Lib
 	}
 
 	// Returns an array containing info about 10 last posts
-	public static function last_posts_array (\Viewer $viewer, $num_posts = 10, $skip = 0, $fake_last_post = false)
+	public static function last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post = false)
 	{
 		global $s2_db;
 
@@ -172,12 +172,13 @@ class Lib
 
 		foreach ($posts as $i => &$post)
 		{
+			$posts[$i]['see_also'] = array();
 			if (!empty($labels[$i]) && isset($see_also[$labels[$i]]))
 			{
 				$label_copy = $see_also[$labels[$i]];
 				if (isset($label_copy[$i]))
 					unset($label_copy[$i]);
-				$posts[$i]['text'] .= $viewer->render('see_also', array('links' => $label_copy));
+				$posts[$i]['see_also'] = $label_copy;
 			}
 
 			$post['tags'] = isset($tags[$i]) ? $tags[$i] : array();

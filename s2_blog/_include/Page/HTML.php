@@ -10,10 +10,9 @@
 namespace s2_extensions\s2_blog;
 
 
-abstract class Page_Abstract extends \Page_Abstract
+abstract class Page_HTML extends \Page_HTML
 {
 	public $template_id = 'blog.php';
-	protected $class = 's2_blog';
 
 	abstract public function body (array $params);
 
@@ -26,17 +25,18 @@ abstract class Page_Abstract extends \Page_Abstract
 		else
 			require __DIR__ . '/../../lang/English.php';
 
-		$this->viewer = new Viewer();
+		$this->viewer = new \Viewer($this);
 
 		$this->page['commented'] = 0;
-		$this->rss_link[] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode($lang_s2_blog['RSS link title']).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
+		$this->page['class'] = 's2_blog';
+		$this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode($lang_s2_blog['RSS link title']).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
 
 		$this->body($params);
 
 		$this->page['meta_description'] = S2_BLOG_TITLE;
 		$this->page['head_title'] = empty($this->page['head_title']) ? S2_BLOG_TITLE : $this->page['head_title'] . ' - ' . S2_BLOG_TITLE;
 
-		if (strpos($this->template, '<!-- s2_menu -->') !== false)
+		if ($this->inTemplate('<!-- s2_menu -->'))
 			$this->page['menu']['s2_blog_navigation'] = $this->blog_navigation();
 	}
 
@@ -102,12 +102,13 @@ abstract class Page_Abstract extends \Page_Abstract
 			$post['time'] = s2_date_time($post['create_time']);
 			$post['tags'] = isset($tags[$id]) ? $tags[$id] : array();
 
+			$post['see_also'] = array();
 			if (!empty($labels[$id]) && isset($see_also[$labels[$id]]))
 			{
 				$label_copy = $see_also[$labels[$id]];
 				if (isset($label_copy[$id]))
 					unset($label_copy[$id]);
-				$post['text'] .= $this->renderPartial('see_also', array('links' => $label_copy));
+				$post['see_also'] = $label_copy;
 			}
 
 
