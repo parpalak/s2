@@ -66,7 +66,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			die;
 		}
 
-		$art_links = \Page_Common::articles_by_tag($tag_id);
+		$art_links = self::articles_by_tag($tag_id);
 		if (count($art_links))
 			$tag_descr .= '<p>'.$lang_s2_blog['Articles by tag'].'<br />'.implode('<br />', $art_links).'</p>';
 
@@ -88,5 +88,53 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 
 		$this->page['title'] = $tag_name;
 		$this->page['text'] = $tag_descr.$output;
+	}
+
+	/**
+	 * Returns the array of links to the articles with the tag specified
+	 *
+	 * @param $tag_id
+	 * @return array
+	 */
+	private static function articles_by_tag ($tag_id)
+	{
+		global $s2_db;
+
+		$subquery = array(
+			'SELECT'	=> '1',
+			'FROM'		=> 'articles AS a1',
+			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
+			'LIMIT'		=> '1'
+		);
+		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+
+		$query = array(
+			'SELECT'	=> 'a.id, a.url, a.title, a.parent_id, ('.$raw_query1.') IS NOT NULL AS children_exist',
+			'FROM'		=> 'articles AS a',
+			'JOINS'		=> array(
+				array(
+					'INNER JOIN'	=> 'article_tag AS atg',
+					'ON'			=> 'atg.article_id = a.id'
+				),
+			),
+			'WHERE'		=> 'atg.tag_id = '.$tag_id.' AND a.published = 1',
+		);
+		($hook = s2_hook('fn_articles_by_tag_pre_qr')) ? eval($hook) : null;
+		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+
+		$title = $urls = $parent_ids = array();
+
+		while ($row = $s2_db->fetch_assoc($result))
+		{
+			$urls[] = urlencode($row['url']).(S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
+			$parent_ids[] = $row['parent_id'];
+			$title[] = $row['title'];
+		}
+		$urls = \Model::get_group_url($parent_ids, $urls);
+
+		foreach ($urls as $k => $v)
+			$urls[$k] = '<a href="'.s2_link($v).'">'.$title[$k].'</a>';
+
+		return $urls;
 	}
 }

@@ -332,7 +332,7 @@ if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
 }
 if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 {
-	$s2_blog_viewer = new Viewer();
+	$s2_blog_viewer = new Viewer('s2_extensions\s2_blog');
 	$s2_blog_data = s2_extensions\s2_blog\Lib::last_posts_array(1);
 	foreach($s2_blog_data as &$s2_blog_post)
 		$s2_blog_post = $s2_blog_viewer->render('post_short', $s2_blog_post);
