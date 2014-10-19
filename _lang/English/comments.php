@@ -3,7 +3,6 @@
 $lang_comments = array(
 
 // Comment errors
-'Error post comment'		=> 'Invalid comment data',
 'Save comment'				=> 'Copy your comment somewhere to prevent its loss.',
 'Go back'					=> 'Go <a href="javascript:history.back()">back</a> and&nbsp;fix errors.',
 'Fix error'					=> 'Fix errors before sending the comment.',

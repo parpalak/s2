@@ -65,8 +65,8 @@ if (isset($_GET['unsubscribe']))
 
 			$controller = new Page_Service(array(
 				'head_title' => $lang_comments['Unsubscribed OK'],
-				'title'      => $lang_comments['Unsubscribed OK info'],
-				'text'       => $error_text . '<p>' . $lang_comments['Fix error'] . '</p>' . s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text),
+				'title'      => $lang_comments['Unsubscribed OK'],
+				'text'       => $lang_comments['Unsubscribed OK info'],
 			));
 
 			$controller->render();
@@ -89,8 +89,8 @@ if (isset($_GET['unsubscribe']))
 if (!defined('S2_MAX_COMMENT_BYTES'))
 	define('S2_MAX_COMMENT_BYTES', 65535);
 
-$_POST[s2_field_name('show_email')] = $show_email = (int) isset($_POST[s2_field_name('show_email')]);
-$_POST[s2_field_name('subscribed')] = $subscribed = (int) isset($_POST[s2_field_name('subscribed')]);
+$_POST['show_email'] = $show_email = (int) isset($_POST['show_email']);
+$_POST['subscribed'] = $subscribed = (int) isset($_POST['subscribed']);
 
 ($hook = s2_hook('cmnt_pre_post_check')) ? eval($hook) : null;
 
@@ -103,32 +103,31 @@ $errors = array();
 if (!S2_ENABLED_COMMENTS)
 	$errors[] = $lang_comment_errors['disabled'];
 
-function get_ext_var($field)
+function s2_ext_var($field)
 {
-	$field = s2_field_name($field);
 	return !empty($_POST[$field]) ? trim((string) $_POST[$field]) : '';
 }
 
-$text = get_ext_var('text');
+$text = s2_ext_var('text');
 if ($text === '')
 	$errors[] = $lang_comment_errors['missing_text'];
 if (strlen($text) > S2_MAX_COMMENT_BYTES)
 	$errors[] = sprintf($lang_comment_errors['long_text'], S2_MAX_COMMENT_BYTES);
 
-$email = get_ext_var('email');
+$email = s2_ext_var('email');
 if (!s2_is_valid_email($email))
 	$errors[] = $lang_comment_errors['email'];
 
-$name = get_ext_var('name');
+$name = s2_ext_var('name');
 if (empty($name))
 	$errors[] = $lang_comment_errors['missing_nick'];
 if (utf8_strlen($name) > 50)
 	$errors[] = $lang_comment_errors['long_nick'];
 
-if (!s2_check_comment_question($_POST[s2_field_name('key')], $_POST[s2_field_name('quest')]))
+if (!s2_check_comment_question($_POST['key'], $_POST['question']))
 	$errors[] = $lang_comment_errors['question'];
 
-list($id, $class) = explode('.', get_ext_var('id'));
+list($id, $class) = explode('.', s2_ext_var('id'));
 $id = (int) $id;
 $class = (string) $class;
 
@@ -148,14 +147,16 @@ if (isset($_POST['preview']))
 			'time'       => time(),
 			'email'      => $email,
 			'show_email' => $show_email,
-		)) .
-		"\t\t\t\t" . '<h2>' . $lang_common['Post a comment'] . '</h2>' . "\n" .
-		s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text);
+		));
 
 	$controller = new Page_Service(array(
-		'head_title' => $lang_comments['Comment preview'],
-		'title'      => $lang_comments['Comment preview'],
-		'text'       => $text_preview,
+		'head_title'   => $lang_comments['Comment preview'],
+		'title'        => $lang_comments['Comment preview'],
+		'text'         => $text_preview,
+		'id'           => $id,
+		'class'        => $class,
+		'commented'    => true,
+		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
 	));
 
 	$controller->render();
@@ -192,9 +193,13 @@ if (!empty($errors))
 	$error_text .=  '</ul>';
 
 	$controller = new Page_Service(array(
-		'head_title' => $lang_common['Error'],
-		'title'      => $lang_common['Error'],
-		'text'       => $error_text . '<p>' . $lang_comments['Fix error'] . '</p>' . s2_comment_form($id.'.'.$class, $name, $email, $show_email, $subscribed, $text),
+		'head_title'   => $lang_common['Error'],
+		'title'        => $lang_common['Error'],
+		'text'         => $error_text . '<p>' . $lang_comments['Fix error'] . '</p>',
+		'id'           => $id,
+		'class'        => $class,
+		'commented'    => true,
+		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
 	));
 
 	$controller->render();

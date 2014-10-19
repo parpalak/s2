@@ -8,16 +8,16 @@
 
 		function save ()
 		{
-			var text = frm['Message'].value,
-				id = 'comment_text_' + frm['RecordID'].value;
+			var text = frm['text'].value,
+				id = 'comment_text_' + frm['id'].value;
 
 			if (text)
 				localStorage.setItem(id, text);
 			else
 				localStorage.removeItem(id);
-			localStorage.setItem('comment_name', frm['Name'].value);
-			localStorage.setItem('comment_email', frm['Email'].value);
-			localStorage.setItem('comment_showemail', frm['ShowEmail'].checked + 0);
+			localStorage.setItem('comment_name', frm['name'].value);
+			localStorage.setItem('comment_email', frm['email'].value);
+			localStorage.setItem('comment_showemail', frm['show_email'].checked + 0);
 		}
 
 		try
@@ -32,31 +32,31 @@
 				localStorage.removeItem('comment_text_' + id);
 			}
 			else
-				frm['Message'].value = frm['Message'].value || localStorage.getItem('comment_text_' + frm['RecordID'].value) || '';
+				frm['text'].value = frm['text'].value || localStorage.getItem('comment_text_' + frm['id'].value) || '';
 
 			if (!frm)
 				return;
 
 			if (bIE)
 			{
-				frm['Name'].attachEvent('onchange', save);
-				frm['Email'].attachEvent('onchange', save);
-				frm['ShowEmail'].attachEvent('onchange', save);
-				frm['Message'].attachEvent('onchange', save);
+				frm['name'].attachEvent('onchange', save);
+				frm['email'].attachEvent('onchange', save);
+				frm['show_email'].attachEvent('onchange', save);
+				frm['text'].attachEvent('onchange', save);
 				document.forms['post_comment'].attachEvent('onsubmit', save);
 			}
 			if (bW3)
 			{
-				frm['Name'].addEventListener('change', save, false);
-				frm['Email'].addEventListener('change', save, false);
-				frm['ShowEmail'].addEventListener('change', save, false);
-				frm['Message'].addEventListener('change', save, false);
+				frm['name'].addEventListener('change', save, false);
+				frm['email'].addEventListener('change', save, false);
+				frm['show_email'].addEventListener('change', save, false);
+				frm['text'].addEventListener('change', save, false);
 				document.forms['post_comment'].addEventListener('submit', save, false);
 			}
 
-			frm['Name'].value = frm['Name'].value || localStorage.getItem('comment_name');
-			frm['Email'].value = frm['Email'].value || localStorage.getItem('comment_email');
-			frm['ShowEmail'].checked = frm['ShowEmail'].checked || !!(localStorage.getItem('comment_showemail') - 0);
+			frm['name'].value = frm['name'].value || localStorage.getItem('comment_name');
+			frm['email'].value = frm['email'].value || localStorage.getItem('comment_email');
+			frm['show_email'].checked = frm['show_email'].checked || !!(localStorage.getItem('comment_showemail') - 0);
 
 			save();
 			setInterval(save, 5000);

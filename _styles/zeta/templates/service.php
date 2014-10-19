@@ -18,6 +18,7 @@
 			<div id="content">
 				<!-- s2_title -->
 				<!-- s2_text -->
+				<!-- s2_comment_form -->
 			</div>
 			<div class="clearing"></div>
 		</div>

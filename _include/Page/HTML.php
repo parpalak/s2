@@ -92,7 +92,16 @@ abstract class Page_HTML extends Page_Abstract
 		$replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
 
 		if (S2_ENABLED_COMMENTS && !empty($page['commented']))
-			$replace['<!-- s2_comment_form -->'] = '<h2 class="comment form">'.$lang_common['Post a comment'].'</h2>'."\n".s2_comment_form($page['id'].'.'.(isset($page['class']) ? $page['class'] : ''));
+		{
+			$comment_array = array(
+				'id' => $page['id'].'.'.(isset($page['class']) ? $page['class'] : '')
+			);
+
+			if (!empty($page['comment_form']) && is_array($page['comment_form']))
+				$comment_array += $page['comment_form'];
+
+			$replace['<!-- s2_comment_form -->'] = $this->renderPartial('comment_form',  $comment_array);
+		}
 		else
 			$replace['<!-- s2_comment_form -->'] = '';
 

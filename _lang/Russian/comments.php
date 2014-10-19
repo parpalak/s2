@@ -3,7 +3,6 @@
 $lang_comments = array(
 
 // Comment errors
-'Error post comment'		=> 'Неправильный формат данных комментария',
 'Save comment'				=> 'Скопируйте на всякий случай свой комментарий, чтобы он не&nbsp;потерялся.',
 'Go back'					=> 'Вернитесь <a href="javascript:history.back()">назад</a> и&nbsp;исправьте ошибку.',
 'Fix error'					=> 'Исправьте ошибку перед отправкой комментария.',
