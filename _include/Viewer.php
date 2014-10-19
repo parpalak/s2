@@ -34,7 +34,7 @@ class Viewer
 		$this->dirs[] = S2_ROOT.'_styles/'.S2_STYLE.'/views/';
 		$this->dirs[] = S2_ROOT.'_include/views/';
 
-		if (defined('S2_DEBUG_VIEW') && $that instanceof Page_HTML)
+		if (defined('S2_DEBUG_VIEW') && ($that === null || $that instanceof Page_HTML))
 			$this->debug = true;
 	}
 
