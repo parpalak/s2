@@ -28,7 +28,7 @@
 $includes['css_inline'][] = '<script src="http://tex.s2cms.ru/latex.js"></script>';
 		]]></hook>
 
-		<hook id="fn_comment_form_pre_syntax_info"><![CDATA[
+		<hook id="v_comment_form_pre_syntax_info"><![CDATA[
 if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
 	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 else
