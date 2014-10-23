@@ -1,4 +1,4 @@
-.search-results form {
+.search-results .search-form {
 	width: auto;
 	padding: 1px;
 	background: #eee;
@@ -16,10 +16,10 @@
 	padding: 1em 1em 1em 1em;
 	zoom: 1;
 	}
-	.search-results .wrap input {
+	.search-results .search-input {
 		width: 100%;
 		}
-		* html .search-results .wrap input {
+		* html .search-results .search-input {
 			position: absolute;
 			}
 
@@ -32,7 +32,7 @@
 	text-decoration: none;
 	}
 
-.search-results small {
+.search-results small.stuff {
 	color: #999;
 	}
 
