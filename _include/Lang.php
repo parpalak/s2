@@ -9,13 +9,20 @@
 class Lang
 {
 	private static $data = array();
-	public static function load($namespace, array $values)
+
+	public static function load($namespace, array $values = array())
 	{
+		if (empty($values))
+			$values = require S2_ROOT.'_lang/'.S2_LANGUAGE.'/'.$namespace.'.php';
+
 		self::$data[$namespace] = $values;
 	}
 
 	public static function get($key, $namespace = 'common')
 	{
+		if (!isset(self::$data[$namespace]))
+			self::load($namespace);
+
 		return self::$data[$namespace][$key];
 	}
 

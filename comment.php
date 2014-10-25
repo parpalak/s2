@@ -10,7 +10,6 @@
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
 require S2_ROOT.'_include/comments.php';
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
 
 ($hook = s2_hook('cmnt_start')) ? eval($hook) : null;
 
@@ -20,9 +19,9 @@ if (isset($_GET['go']))
 {
 	// Outputs "comment saved" message (used if the premoderation mode is enabled)
 	$controller = new Page_Service(array(
-		'head_title' => $lang_comments['Comment sent'],
-		'title'      => '<h1>'.$lang_comments['Comment sent'].'</h1>',
-		'text'       => sprintf($lang_comments['Comment sent info'], s2_htmlencode($_GET['go']), s2_link('/')),
+		'head_title' => Lang::get('Comment sent', 'comments'),
+		'title'      => '<h1>'.Lang::get('Comment sent', 'comments').'</h1>',
+		'text'       => sprintf(Lang::get('Comment sent info', 'comments'), s2_htmlencode($_GET['go']), s2_link('/')),
 	));
 
 	$controller->render();
@@ -64,9 +63,9 @@ if (isset($_GET['unsubscribe']))
 			$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 			$controller = new Page_Service(array(
-				'head_title' => $lang_comments['Unsubscribed OK'],
-				'title'      => $lang_comments['Unsubscribed OK'],
-				'text'       => $lang_comments['Unsubscribed OK info'],
+				'head_title' => Lang::get('Unsubscribed OK', 'comments'),
+				'title'      => Lang::get('Unsubscribed OK', 'comments'),
+				'text'       => Lang::get('Unsubscribed OK info', 'comments'),
 			));
 
 			$controller->render();
@@ -76,9 +75,9 @@ if (isset($_GET['unsubscribe']))
 	}
 
 	$controller = new Page_Service(array(
-		'head_title' => $lang_comments['Unsubscribed failed'],
-		'title'      => $lang_comments['Unsubscribed failed'],
-		'text'       => $lang_comments['Unsubscribed failed info'],
+		'head_title' => Lang::get('Unsubscribed failed', 'comments'),
+		'title'      => Lang::get('Unsubscribed failed', 'comments'),
+		'text'       => Lang::get('Unsubscribed failed info', 'comments'),
 	));
 
 	$controller->render();
@@ -101,7 +100,7 @@ $_POST['subscribed'] = $subscribed = (int) isset($_POST['subscribed']);
 $errors = array();
 
 if (!S2_ENABLED_COMMENTS)
-	$errors[] = $lang_comment_errors['disabled'];
+	$errors[] = Lang::get('disabled', 'comments');
 
 function s2_ext_var($field)
 {
@@ -110,22 +109,22 @@ function s2_ext_var($field)
 
 $text = s2_ext_var('text');
 if ($text === '')
-	$errors[] = $lang_comment_errors['missing_text'];
+	$errors[] = Lang::get('missing_text', 'comments');
 if (strlen($text) > S2_MAX_COMMENT_BYTES)
-	$errors[] = sprintf($lang_comment_errors['long_text'], S2_MAX_COMMENT_BYTES);
+	$errors[] = sprintf(Lang::get('long_text', 'comments'), S2_MAX_COMMENT_BYTES);
 
 $email = s2_ext_var('email');
 if (!s2_is_valid_email($email))
-	$errors[] = $lang_comment_errors['email'];
+	$errors[] = Lang::get('email', 'comments');
 
 $name = s2_ext_var('name');
 if (empty($name))
-	$errors[] = $lang_comment_errors['missing_nick'];
+	$errors[] = Lang::get('missing_nick', 'comments');
 if (utf8_strlen($name) > 50)
-	$errors[] = $lang_comment_errors['long_nick'];
+	$errors[] = Lang::get('long_nick', 'comments');
 
 if (!s2_check_comment_question($_POST['key'], $_POST['question']))
-	$errors[] = $lang_comment_errors['question'];
+	$errors[] = Lang::get('question', 'comments');
 
 list($id, $class) = explode('.', s2_ext_var('id'));
 $id = (int) $id;
@@ -140,7 +139,7 @@ if (isset($_POST['preview']))
 	($hook = s2_hook('cmnt_preview_pre_comment_merge')) ? eval($hook) : null;
 
 	$viewer = new Viewer();
-	$text_preview = '<p>' . $lang_comments['Comment preview info'] . '</p>' . "\n" .
+	$text_preview = '<p>' . Lang::get('Comment preview info', 'comments') . '</p>' . "\n" .
 		$viewer->render('comment', array(
 			'text'       => $text,
 			'nick'       => $name,
@@ -150,8 +149,8 @@ if (isset($_POST['preview']))
 		));
 
 	$controller = new Page_Service(array(
-		'head_title'   => $lang_comments['Comment preview'],
-		'title'        => $lang_comments['Comment preview'],
+		'head_title'   => Lang::get('Comment preview', 'comments'),
+		'title'        => Lang::get('Comment preview', 'comments'),
 		'text'         => $text_preview,
 		'id'           => $id,
 		'class'        => $class,
@@ -176,18 +175,18 @@ $query = array(
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
 if (!$row = $s2_db->fetch_assoc($result))
-	$errors[] = $lang_comment_errors['no_item'];
+	$errors[] = Lang::get('no_item', 'comments');
 else
 {
 	$path = Model::path_from_id($row['parent_id'], true);
 	($hook = s2_hook('cmnt_pre_path_check')) ? eval($hook) : null;
 	if ($path === false)
-		$errors[] = $lang_comment_errors['no_item'];
+		$errors[] = Lang::get('no_item', 'comments');
 }
 
 if (!empty($errors))
 {
-	$error_text = '<p>'.$lang_comment_errors['Error message'].'</p><ul>';
+	$error_text = '<p>'.Lang::get('Error message', 'comments').'</p><ul>';
 	foreach ($errors as $error)
 		$error_text .=  '<li>'.$error.'</li>';
 	$error_text .=  '</ul>';
@@ -195,7 +194,7 @@ if (!empty($errors))
 	$controller = new Page_Service(array(
 		'head_title'   => Lang::get('Error'),
 		'title'        => Lang::get('Error'),
-		'text'         => $error_text . '<p>' . $lang_comments['Fix error'] . '</p>',
+		'text'         => $error_text . '<p>' . Lang::get('Fix error', 'comments') . '</p>',
 		'id'           => $id,
 		'class'        => $class,
 		'commented'    => true,

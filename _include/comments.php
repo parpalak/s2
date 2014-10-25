@@ -24,16 +24,14 @@ function s2_check_comment_question ($key, $answer)
 //
 function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsubscribe_link)
 {
-	global $lang_comments;
-
-	$message = $lang_comments['Email pattern'];
+	$message = Lang::get('Email subject', 'comments');
 	$message = str_replace(array('<name>', '<author>', '<title>', '<url>', '<text>', '<unsubscribe>'),
 		array($name, $auth_name, $title, $url, $text, $unsubscribe_link), $message);
 
 	// Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
 	$message = str_replace(array("\n", "\0"), array("\r\n", ''), $message);
 
-	$subject = sprintf($lang_comments['Email subject'], $url);
+	$subject = sprintf(Lang::get('Email subject', 'comments'), $url);
 	$subject = "=?UTF-8?B?".base64_encode($subject)."?=";
 
 	$sender_email = S2_WEBMASTER_EMAIL ? S2_WEBMASTER_EMAIL : 'example@example.com';
@@ -60,16 +58,14 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsub
 //
 function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $auth_email)
 {
-	global $lang_comments;
-
-	$message = $lang_comments['Email moderator pattern'];
+	$message = Lang::get('Email moderator pattern', 'comments');
 	$message = str_replace(array('<name>', '<author>', '<title>', '<url>', '<text>'),
 		array($name, $auth_name, $title, $url, $text), $message);
 
 	// Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
 	$message = str_replace(array("\n", "\0"), array("\r\n", ''), $message);
 
-	$subject = sprintf($lang_comments['Email subject'], $url);
+	$subject = sprintf(Lang::get('Email subject', 'comments'), $url);
 	$subject = "=?UTF-8?B?".base64_encode($subject)."?=";
 
 	$sender_email = S2_WEBMASTER_EMAIL ? S2_WEBMASTER_EMAIL : 'example@example.com';
