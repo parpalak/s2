@@ -21,7 +21,7 @@ class Page_Favorite extends Page_HTML implements Page_Routable
 	//
 	private function make_favorite_page ()
 	{
-		global $s2_db, $lang_common;
+		global $s2_db;
 
 		$subquery = array(
 			'SELECT'	=> '1',
@@ -118,10 +118,10 @@ class Page_Favorite extends Page_HTML implements Page_Routable
 					'link'  => s2_link('/'),
 				),
 				array(
-					'title' => $lang_common['Favorite'],
+					'title' => Lang::get('Favorite'),
 				),
 			),
-			'title' => $lang_common['Favorite'],
+			'title' => Lang::get('Favorite'),
 			'date'  => '',
 			'text'  => $this->renderPartial('list_text', array(
 				'articles' => $article_text,

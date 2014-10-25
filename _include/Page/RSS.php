@@ -119,8 +119,7 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 	 */
 	protected function description()
 	{
-		global $lang_common;
-		return sprintf($lang_common['RSS description'], S2_SITE_NAME);
+		return sprintf(Lang::get('RSS description'), S2_SITE_NAME);
 	}
 }
  

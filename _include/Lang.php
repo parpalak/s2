@@ -8,18 +8,25 @@
 
 class Lang
 {
-	// Returns a month defined in lang files
+	private static $data = array();
+	public static function load($namespace, array $values)
+	{
+		self::$data[$namespace] = $values;
+	}
+
+	public static function get($key, $namespace = 'common')
+	{
+		return self::$data[$namespace][$key];
+	}
+
 	public static function month ($month)
 	{
-		global $lang_month_big;
-
+		$lang_month_big = self::get('Months');
 		return $lang_month_big[$month - 1];
 	}
 
 	public static function friendly_filesize ($size)
 	{
-		global $lang_common, $lang_filesize;
-
 		$i = 0;
 		while (($size/1024) > 1)
 		{
@@ -27,7 +34,8 @@ class Lang
 			$i++;
 		}
 
-		return sprintf($lang_common['Filesize format'], Lang::number_format($size), $lang_filesize[$i]);
+		$lang_filesize = self::get('File size units');
+		return sprintf(self::get('File size format'), self::number_format($size), $lang_filesize[$i]);
 	}
 
 	/**
@@ -40,11 +48,9 @@ class Lang
 	 */
 	public static function number_format ($number, $trailing_zero = false, $decimal_count = false)
 	{
-		global $lang_common;
-
-		$result = number_format($number, $decimal_count === false ? $lang_common['Decimal count'] : $decimal_count, $lang_common['Decimal point'], $lang_common['Thousands separator']);
+		$result = number_format($number, $decimal_count === false ? self::get('Decimal count') : $decimal_count, self::get('Decimal point'), self::get('Thousands separator'));
 		if (!$trailing_zero)
-			$result = preg_replace('#'.preg_quote($lang_common['Decimal point'], '#').'?0*$#', '', $result);
+			$result = preg_replace('#'.preg_quote(self::get('Decimal point'), '#').'?0*$#', '', $result);
 
 		return $result;
 	}

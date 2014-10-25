@@ -98,8 +98,6 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 //
 function s2_bbcode_to_html ($s)
 {
-	global $lang_common;
-
 	$s = str_replace("''", '"', $s);
 	$s = str_replace("\r", '', $s);
 
@@ -107,7 +105,7 @@ function s2_bbcode_to_html ($s)
 	$s = preg_replace('#\[B\](.*?)\[/B\]#isS', '<strong>\1</strong>', $s);
 
 	while (preg_match ('/\[Q\s*=\s*([^\]]*)\].*?\[\/Q\]/isS', $s))
-		$s = preg_replace('/\s*\[Q\s*=\s*([^\]]*)\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote><strong>\\1</strong> '.$lang_common['Wrote'].'<br/><br/><em>\\2</em></blockquote>', $s);
+		$s = preg_replace('/\s*\[Q\s*=\s*([^\]]*)\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote><strong>\\1</strong> '.Lang::get('Wrote').'<br/><br/><em>\\2</em></blockquote>', $s);
 
 	while (preg_match ('/\[Q\].*?\[\/Q\]/isS', $s))
 		$s = preg_replace('/\s*\[Q\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote>\\1</blockquote>', $s);

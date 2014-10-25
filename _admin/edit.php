@@ -157,7 +157,7 @@ function s2_save_article ($page, $flags)
 
 function s2_output_article_form ($id)
 {
-	global $s2_db, $lang_templates, $lang_common, $lang_admin, $s2_user;
+	global $s2_db, $lang_templates, $lang_admin, $s2_user;
 
 	($hook = s2_hook('fn_output_article_form_start')) ? eval($hook) : null;
 
@@ -307,7 +307,7 @@ function s2_output_article_form ($id)
 		</select></label>
 <?php ($hook = s2_hook('fn_output_article_form_pre_checkboxes')) ? eval($hook) : null; ?>
 		<label for="favorite_checkbox"><input type="checkbox" id="favorite_checkbox" name="flags[favorite]" value="1"<?php if ($page['favorite']) echo ' checked="checked"' ?> />
-		<?php echo $lang_common['Favorite']; ?></label>
+		<?php echo Lang::get('Favorite'); ?></label>
 		<label for="commented_checkbox" title="<?php echo $lang_admin['Commented info']; ?>"><input type="checkbox" id="commented_checkbox" name="flags[commented]" value="1"<?php if ($page['commented']) echo ' checked="checked"' ?> />
 		<?php echo $lang_admin['Commented']; ?></label>
 <?php
@@ -316,7 +316,7 @@ function s2_output_article_form ($id)
 	{
 
 ?>
-		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadComments(<?php echo $page['id']; ?>);"><?php echo $lang_common['Comments']; ?> &rarr;</a>
+		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadComments(<?php echo $page['id']; ?>);"><?php echo Lang::get('Comments'); ?> &rarr;</a>
 <?php
 
 	}

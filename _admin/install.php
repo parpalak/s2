@@ -123,7 +123,8 @@ if (!file_exists(S2_ROOT.'_lang/'.$language.'/install.php'))
 
 // Load the language files
 require S2_ROOT.'_lang/'.$language.'/install.php';
-include S2_ROOT.'_lang/'.$language.'/common.php';
+$lang_common = include S2_ROOT.'_lang/'.$language.'/common.php';
+Lang::load('common', $lang_common);
 
 if (isset($_POST['generate_config']))
 {

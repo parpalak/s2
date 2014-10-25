@@ -12,8 +12,6 @@ class Page_Tags extends Page_HTML implements Page_Routable
 {
 	public function __construct (array $params = array())
 	{
-		global $lang_common;
-
 		parent::__construct();
 
 		($hook = s2_hook('pts_construct_end')) ? eval($hook) : null;
@@ -25,10 +23,10 @@ class Page_Tags extends Page_HTML implements Page_Routable
 					'link'  => s2_link('/'),
 				),
 				array(
-					'title' => $lang_common['Tags'],
+					'title' => Lang::get('Tags'),
 				),
 			),
-			'title'			=> $lang_common['Tags'],
+			'title'			=> Lang::get('Tags'),
 			'date'			=> '',
 			'text'			=> $this->renderPartial('tags_list', array('tags' => Placeholder::tags_list())),
 		);

@@ -335,11 +335,11 @@ function s2_toolbar ()
 
 function s2_context_buttons ()
 {
-	global $lang_common, $lang_admin;
+	global $lang_admin;
 
 	$buttons = array(
 		'Edit'			=> '<img id="context_edit" src="i/1.gif" alt="'.$lang_admin['Edit'].'" />',
-		'Comments'		=> '<img id="context_comments" src="i/1.gif" alt="'.$lang_common['Comments'].'" />',
+		'Comments'		=> '<img id="context_comments" src="i/1.gif" alt="'.Lang::get('Comments').'" />',
 		'Subarticle'	=> '<img id="context_add" src="i/1.gif" alt="'.$lang_admin['Create subarticle'].'" />',
 		'Delete'		=> '<img id="context_delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" />',
 	);

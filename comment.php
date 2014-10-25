@@ -193,8 +193,8 @@ if (!empty($errors))
 	$error_text .=  '</ul>';
 
 	$controller = new Page_Service(array(
-		'head_title'   => $lang_common['Error'],
-		'title'        => $lang_common['Error'],
+		'head_title'   => Lang::get('Error'),
+		'title'        => Lang::get('Error'),
 		'text'         => $error_text . '<p>' . $lang_comments['Fix error'] . '</p>',
 		'id'           => $id,
 		'class'        => $class,

@@ -14,8 +14,7 @@ $prefix = '';
 $class = array('preview');
 if (!empty($favorite))
 {
-	global $lang_common;
-	$prefix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.$lang_common['Favorite'].'">*</a>';
+	$prefix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">*</a>';
 	$class[] = 'favorite-item';
 }
 

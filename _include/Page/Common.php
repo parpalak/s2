@@ -18,7 +18,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 	private function tagged_articles ($id)
 	{
-		global $s2_db, $lang_common;
+		global $s2_db;
 
 		$query = array(
 			'SELECT'	=> 't.tag_id as tag_id, name, t.url as url',
@@ -114,7 +114,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 		($hook = s2_hook('fn_tagged_articles_pre_menu_merge')) ? eval($hook) : null;
 		foreach ($art_by_tags as $tag_id => $articles)
 			$output[] = $this->renderPartial('menu_block', array(
-				'title' => sprintf($lang_common['With this tag'], '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/').'">'.$tag_names[$tag_id].'</a>'),
+				'title' => sprintf(Lang::get('With this tag'), '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/').'">'.$tag_names[$tag_id].'</a>'),
 				'menu'  => $articles,
 			));
 
@@ -124,7 +124,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 	private function get_tags ($id)
 	{
-		global $s2_db, $lang_common;
+		global $s2_db;
 
 		$query = array(
 			'SELECT'	=> 'name, url',
@@ -151,7 +151,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			return '';
 
 		return $this->renderPartial('tags', array(
-			'title' => $lang_common['Tags'],
+			'title' => Lang::get('Tags'),
 			'tags'  => $tags,
 		));
 	}
@@ -160,7 +160,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 	// Processes site pages
 	private function parse_page_url ($request_uri)
 	{
-		global $s2_db, $lang_common;
+		global $s2_db;
 
 		$page = &$this->page;
 
@@ -219,7 +219,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 				if ($found_node_num == 0)
 					$this->error_404();
 				if ($found_node_num > 1)
-					error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
+					error(Lang::get('DB repeat items') . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
 
 				($hook = s2_hook('fn_s2_parse_page_url_loop_pre_build_stuff')) ? eval($hook) : null;
 
@@ -270,7 +270,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 		if (!$page)
 			$this->error_404();
 		if ($s2_db->fetch_assoc($result))
-			error($lang_common['DB repeat items'] . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
+			error(Lang::get('DB repeat items') . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
 
 		if ($page['template'])
 			$this->template_id = $page['template'];
@@ -284,13 +284,13 @@ class Page_Common extends Page_HTML implements Page_Routable
 					'title' => $page['title'],
 				);
 
-				error(sprintf($lang_common['Error no template'], implode('<br />', array_map(function ($a)
+				error(sprintf(Lang::get('Error no template'), implode('<br />', array_map(function ($a)
 				{
 					return '<a href="'.$a['link'].'">'.s2_htmlencode($a['title']).'</a>';
 				}, $bread_crumbs))));
 			}
 			else
-				error($lang_common['Error no template flat']);
+				error(Lang::get('Error no template flat'));
 		}
 
 		if (S2_USE_HIERARCHY && $parent_num && $page['children_exist'] != $was_end_slash)
@@ -391,7 +391,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			{
 				// There are subsections in the section
 				$page['menu']['subsections'] = $this->renderPartial('menu_block', array(
-					'title' => $lang_common['Subsections'],
+					'title' => Lang::get('Subsections'),
 					'menu'  => $subsections,
 				));
 
@@ -404,7 +404,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			{
 				// There are articles in the section
 				$page['menu']['articles'] = $this->renderPartial('menu_block', array(
-					'title' => $lang_common['In this section'],
+					'title' => Lang::get('In this section'),
 					'menu'  => $subarticles,
 				));
 
@@ -498,7 +498,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 			if (count($bread_crumbs) > 1)
 				$page['menu']['articles'] = $this->renderPartial('menu_block', array(
-					'title' => sprintf($lang_common['More in this section'], '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>'),
+					'title' => sprintf(Lang::get('More in this section'), '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>'),
 					'menu'  => $menu_articles,
 				));
 
@@ -554,7 +554,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			}
 
 			if ($comments)
-				$page['comments'] = '<h2 class="comment">'.$lang_common['Comments'].'</h2>'.$comments;
+				$page['comments'] = '<h2 class="comment">'.Lang::get('Comments').'</h2>'.$comments;
 		}
 
 		($hook = s2_hook('fn_s2_parse_page_url_end')) ? eval($hook) : null;

@@ -17,8 +17,6 @@ abstract class Page_HTML extends Page_Abstract
 	 */
 	protected function error_404 ()
 	{
-		global $lang_common;
-
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		try {
 			$this->template = s2_get_template($this->error_template_id);
@@ -28,9 +26,9 @@ abstract class Page_HTML extends Page_Abstract
 		}
 
 		$this->page = array(
-			'head_title'	=> $lang_common['Error 404'],
-			'title'			=> '<h1>'.$lang_common['Error 404'].'</h1>',
-			'text'			=> sprintf($lang_common['Error 404 text'], s2_link('/')),
+			'head_title'	=> Lang::get('Error 404'),
+			'title'			=> '<h1>'.Lang::get('Error 404').'</h1>',
+			'text'			=> sprintf(Lang::get('Error 404 text'), s2_link('/')),
 		);
 
 		$this->render();
@@ -42,7 +40,7 @@ abstract class Page_HTML extends Page_Abstract
 	 */
 	public function process_template ()
 	{
-		global $s2_start, $s2_db, $lang_common;
+		global $s2_start, $s2_db;
 
 		$template = &$this->template;
 		$page = &$this->page;
@@ -65,7 +63,7 @@ abstract class Page_HTML extends Page_Abstract
 		$replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
 
 		if (empty($page['rss_link']))
-			$page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.$lang_common['RSS link title'].'" href="'.s2_link('/rss.xml').'" />';
+			$page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.Lang::get('RSS link title').'" href="'.s2_link('/rss.xml').'" />';
 		$replace['<!-- s2_rss_link -->'] = implode("\n", $page['rss_link']);
 
 		// Content
@@ -113,13 +111,13 @@ abstract class Page_HTML extends Page_Abstract
 
 		if (strpos($template, '<!-- s2_last_comments -->') !== false && count($last_comments = Placeholder::last_article_comments()))
 			$replace['<!-- s2_last_comments -->'] = $this->viewer->render('menu_comments', array(
-				'title' => $lang_common['Last comments'],
+				'title' => Lang::get('Last comments'),
 				'menu'  => $last_comments,
 			));
 
 		if (strpos($template, '<!-- s2_last_discussions -->') !== false && count($last_discussions = Placeholder::last_discussions()))
 			$replace['<!-- s2_last_discussions -->'] = $this->viewer->render('menu_block', array(
-				'title' => $lang_common['Last discussions'],
+				'title' => Lang::get('Last discussions'),
 				'menu'  => $last_discussions,
 			));
 

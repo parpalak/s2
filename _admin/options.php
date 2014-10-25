@@ -131,7 +131,7 @@ function s2_get_textarea ($name, $value, $info, $label)
 //
 function s2_get_options ()
 {
-	global $s2_db, $s2_user, $lang_common, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
+	global $s2_db, $s2_user, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
 
 	$options = s2_read_options();
 
@@ -164,7 +164,7 @@ function s2_get_options ()
 		'S2_PREMODERATION' => s2_get_checkbox('S2_PREMODERATION', $options['S2_PREMODERATION'], $lang_const_names['S2_PREMODERATION'], $lang_const_explain['S2_PREMODERATION']),
 	);
 	($hook = s2_hook('fn_get_options_pre_comment_fs_merge')) ? eval($hook) : null;
-	$output .= '<fieldset><legend>'.$lang_common['Comments'].'</legend>'.implode('', $fieldset).'</fieldset>';
+	$output .= '<fieldset><legend>'.Lang::get('Comments').'</legend>'.implode('', $fieldset).'</fieldset>';
 
 	$color_links = array();
 	foreach (array ('#eeeeee', '#f4dbd5', '#f3e8d0', '#f2f2da', '#e0f3e0', '#d2f0f3', '#e7e4f4') as $color)

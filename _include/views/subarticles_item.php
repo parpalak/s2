@@ -14,11 +14,10 @@ $prefix = '';
 $class = array('subsection');
 if (!empty($favorite))
 {
-	global $lang_common;
 	if ($favorite != 2)
-		$prefix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.$lang_common['Favorite'].'">*</a>';
+		$prefix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">*</a>';
 	else
-		$prefix = '<span class="favorite-star" title="'.$lang_common['Favorite'].'">*</span>';
+		$prefix = '<span class="favorite-star" title="'.Lang::get('Favorite').'">*</span>';
 	$class[] = 'favorite-item';
 }
 

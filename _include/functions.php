@@ -18,12 +18,12 @@ if (!defined('S2_ROOT'))
 // Puts the date into a string
 function s2_date ($time)
 {
-	global $lang_month_small, $lang_common;
+	global $lang_month_small;
 
 	if (!$time)
 		return '';
 
-	$date = date($lang_common['Date format'], $time);
+	$date = date(Lang::get('Date format'), $time);
 	if (isset($lang_month_small))
 		$date = str_replace(array_keys($lang_month_small), array_values($lang_month_small), $date);
 
@@ -33,13 +33,12 @@ function s2_date ($time)
 // Puts the date and time into a string
 function s2_date_time ($time)
 {
-	global $lang_month_small, $lang_common;
-
 	if (!$time)
 		return '';
 
-	$date = date($lang_common['Time format'], $time);
-	if (isset($lang_month_small))
+	$date = date(Lang::get('Time format'), $time);
+	$lang_month_small = Lang::get('Inline Months');
+	if (!empty($lang_month_small))
 		$date = str_replace(array_keys($lang_month_small), array_values($lang_month_small), $date);
 
 	return $date;
@@ -174,7 +173,7 @@ function s2_process_multipart_mixed (&$src, &$dest, $dir = false)
 //
 function s2_get_template ($raw_template_id, $default_path = false)
 {
-	global $lang_common, $request_uri;
+	global $request_uri;
 
 	if ($default_path === false)
 		$default_path = S2_ROOT.'_include/templates/';
@@ -193,7 +192,7 @@ function s2_get_template ($raw_template_id, $default_path = false)
 		elseif (file_exists($default_path.$template_id))
 			$path = $default_path.$template_id;
 		else
-			throw new Exception(sprintf($lang_common['Template not found'], $default_path.$template_id));
+			throw new Exception(sprintf(Lang::get('Template not found'), $default_path.$template_id));
 	}
 
 	ob_start();
@@ -253,15 +252,15 @@ function s2_get_template ($raw_template_id, $default_path = false)
 
 function s2_build_copyright ()
 {
-	global $lang_common, $request_uri;
+	global $request_uri;
 
 	$author = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
 	$copyright = S2_WEBMASTER && S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : ($request_uri !== '/' ? '<a href="'.s2_link('/').'">'.$author.'</a>' : $author);
 
 	return (S2_START_YEAR != date('Y') ?
-		sprintf($lang_common['Copyright 2'], $copyright, S2_START_YEAR, date('Y')) :
-		sprintf($lang_common['Copyright 1'], $copyright, date('Y'))).' '.
-		sprintf($lang_common['Powered by'], '<a href="http://s2cms.ru/">S2</a>');
+		sprintf(Lang::get('Copyright 2'), $copyright, S2_START_YEAR, date('Y')) :
+		sprintf(Lang::get('Copyright 1'), $copyright, date('Y'))).' '.
+		sprintf(Lang::get('Powered by'), '<a href="http://s2cms.ru/">S2</a>');
 }
 
 
@@ -553,8 +552,6 @@ function s2_404_header ()
 // Display a simple error message
 function error()
 {
-	global $lang_common;
-
 	if (!headers_sent())
 	{
 		// if no HTTP response code is set we send 503
@@ -606,7 +603,7 @@ function error()
 <title>Error - <?php echo s2_htmlencode(S2_SITE_NAME); ?></title>
 </head>
 <body style="margin: 40px; font: 87.5%/130% Verdana, Arial, sans-serif; color: #333;">
-<h1><?php echo (isset($lang_common['Error encountered']) ? $lang_common['Error encountered'] : 'An error was encountered'); ?></h1>
+<h1><?php echo Lang::get('Error encountered') ? Lang::get('Error encountered') : 'An error was encountered'; ?></h1>
 <hr />
 <?php
 

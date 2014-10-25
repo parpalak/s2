@@ -153,12 +153,12 @@ $padding = 2.5;
 			</div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_comments')) ? eval($hook) : null; ?>
-		<dt id="comm_tab"><?php echo $lang_common['Comments']; ?></dt>
+		<dt id="comm_tab"><?php echo Lang::get('Comments'); ?></dt>
 		<dd class="inactive">
 			<div class="reducer" id="comm_div"><?php $premoderation = s2_for_premoderation(); echo $premoderation['content']; ?></div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_tags')) ? eval($hook) : null; ?>
-		<dt id="tag_tab"><?php echo $lang_common['Tags']; ?></dt>
+		<dt id="tag_tab"><?php echo Lang::get('Tags'); ?></dt>
 		<dd class="inactive">
 			<div class="reducer" id="tag_div"></div>
 		</dd>

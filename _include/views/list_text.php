@@ -15,9 +15,8 @@ echo $articles;
 
 if (!empty($sections))
 {
-	global $lang_common;
-	if ($lang_common['Subsections']);
-		echo '<h2 class="subsections">' . $lang_common['Subsections'] . '</h2>' . "\n";
+	if (Lang::get('Subsections'));
+		echo '<h2 class="subsections">' . Lang::get('Subsections') . '</h2>' . "\n";
 
 	echo $sections;
 }

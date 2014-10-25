@@ -67,7 +67,8 @@ define('S2_DB_LAST_REVISION', 14);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION)
 	include S2_ROOT.'_admin/db_update.php';
 
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/common.php';
+$lang_common1 = require S2_ROOT.'_lang/'.S2_LANGUAGE.'/common.php';
+Lang::load('common', $lang_common1);
 
 // Load hooks
 if (file_exists(S2_CACHE_DIR.'cache_hooks.php'))

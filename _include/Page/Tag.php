@@ -21,7 +21,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 	//
 	private function make_tags_pages ($tag_name, $is_slash)
 	{
-		global $s2_db, $lang_common;
+		global $s2_db;
 
 		// Tag preview
 
@@ -144,7 +144,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 				),
 				array(
 					'link'  => s2_link('/' . S2_TAGS_URL . '/'),
-					'title' => $lang_common['Tags'],
+					'title' => Lang::get('Tags'),
 				),
 				array(
 					'title' => $tag_name,
