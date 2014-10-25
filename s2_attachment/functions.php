@@ -28,12 +28,12 @@ function s2_attachment_items ($id)
 	{
 		$buttons = array(
 			'edit'		=> '<img onclick="return s2_attachment_rename_file('.$row['id'].', \''.$lang_s2_attachment['New filename'].'\', \''.str_replace('\'', '\\\'', rawurlencode($row['name'])).'\');" class="rename" src="i/1.gif" alt="'.$lang_s2_attachment['Rename'].'">', 
-			'delete'	=> '<img onclick="return s2_attachment_delete_file('.$row['id'].', \''.str_replace('\'', '\\\'', rawurlencode(sprintf($row['name'] ? $lang_s2_attachment['Confirm delete'] : $lang_s2_attachment['Confirm delete 2'], $row['name'], $row['filename'], s2_frendly_filesize($row['size'])))).'\');" class="delete" src="i/1.gif" alt="'.$lang_s2_attachment['Delete'].'">', 
+			'delete'	=> '<img onclick="return s2_attachment_delete_file('.$row['id'].', \''.str_replace('\'', '\\\'', rawurlencode(sprintf($row['name'] ? $lang_s2_attachment['Confirm delete'] : $lang_s2_attachment['Confirm delete 2'], $row['name'], $row['filename'], Lang::friendly_filesize($row['size'])))).'\');" class="delete" src="i/1.gif" alt="'.$lang_s2_attachment['Delete'].'">',
 		);
 
 		$icon = $row['is_picture'] ? '<img class="attach-preview" src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/micro/'.$row['filename'].'.png" alt="" />' : '';
 
-		$item = '<li data-s2_attachment-id="'.$row['id'].'"><div class="buttons">'.implode('', $buttons).'</div><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/'.$row['filename'].'" target="_blank" title="'.$row['filename'].', '.s2_frendly_filesize($row['size']).'">'.$icon.s2_htmlencode($row['name'] ? $row['name'] : '<'.$row['filename'].'>').'</a></li>';
+		$item = '<li data-s2_attachment-id="'.$row['id'].'"><div class="buttons">'.implode('', $buttons).'</div><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/'.$row['filename'].'" target="_blank" title="'.$row['filename'].', '.Lang::friendly_filesize($row['size']).'">'.$icon.s2_htmlencode($row['name'] ? $row['name'] : '<'.$row['filename'].'>').'</a></li>';
 
 		if ($row['is_picture'])
 			$list_pictures .= $item;
@@ -60,7 +60,7 @@ function s2_attachment_add_col ($id)
 			<div id="s2_attachment_file_upload_input">
 				<input name="pictures[]" multiple="true" min="1" max="999" size="9" type="file" onchange="s2_attachment_upload_change(this);" />
 			</div>
-			<?php printf($lang_pictures['Upload limit'], s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))), s2_frendly_filesize(s2_return_bytes(ini_get('post_max_size')))); ?>
+			<?php printf($lang_pictures['Upload limit'], Lang::friendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))), Lang::friendly_filesize(s2_return_bytes(ini_get('post_max_size')))); ?>
 			<input type="hidden" name="id" value="<?php echo $id; ?>" />
 		</form>
 		<hr />
@@ -226,7 +226,7 @@ function s2_attachment_placeholder_content ($id, $placeholder_limit)
 		}
 		else
 		{
-			$list_files .= '<li><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/'.$row['filename'].'">'.s2_htmlencode($row['name'] ? $row['name'] : $row['filename']).' ('.s2_frendly_filesize($row['size']).')</a></li>';
+			$list_files .= '<li><a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$id.'/'.$row['filename'].'">'.s2_htmlencode($row['name'] ? $row['name'] : $row['filename']).' ('.Lang::friendly_filesize($row['size']).')</a></li>';
 		}
 	}
 
