@@ -306,9 +306,6 @@ function s2_blog_hide_comment ($id)
 		if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
 			require S2_ROOT.'_include/comments.php';
 
-		global $lang_comments;
-		require S2_ROOT.'_lang/'.S2_LANGUAGE.'/comments.php';
-
 		// Getting some info about the post commented
 		$query = array(
 			'SELECT'	=> 'title, create_time, url',
