@@ -13,7 +13,7 @@ class Page_Favorite extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog, $lang_common;
+		global $lang_s2_blog;
 
 		$this->obtainTemplate(__DIR__.'/../../templates/');
 
@@ -35,10 +35,10 @@ class Page_Favorite extends Page_HTML implements \Page_Routable
 			);
 		}
 		$this->page['path'][] = array(
-			'title' => $lang_common['Favorite'],
+			'title' => Lang::get('Favorite'),
 		);
 
-		$this->page['head_title'] = $this->page['title'] = $lang_common['Favorite'];
+		$this->page['head_title'] = $this->page['title'] = Lang::get('Favorite');
 		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
 	}
 

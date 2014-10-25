@@ -44,8 +44,6 @@ class Page_Main extends Page_HTML implements \Page_Routable
 
 	private function last_posts ($skip = 0)
 	{
-		global $lang_common;
-
 		if ($skip < 0)
 			$skip = 0;
 
@@ -69,13 +67,13 @@ class Page_Main extends Page_HTML implements \Page_Routable
 		if ($skip > 0)
 		{
 			$link_nav['prev'] = S2_BLOG_PATH.($skip > $posts_per_page ? 'skip/'.($skip - $posts_per_page) : '');
-			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
+			$paging = '<a href="'.$link_nav['prev'].'">'.Lang::get('Here').'</a> ';
 			// TODO think about back_forward
 		}
 		if ($i > $posts_per_page)
 		{
 			$link_nav['next'] = S2_BLOG_PATH.'skip/'.($skip + $posts_per_page);
-			$paging .= '<a href="'.$link_nav['next'].'">'.$lang_common['There'].'</a>';
+			$paging .= '<a href="'.$link_nav['next'].'">'.Lang::get('There').'</a>';
 		}
 
 		if ($paging)

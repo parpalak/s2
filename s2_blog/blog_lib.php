@@ -423,7 +423,7 @@ function s2_blog_delete_comment ($id)
 
 function s2_blog_output_post_list ($criteria)
 {
-	global $s2_db, $lang_common, $lang_admin, $lang_s2_blog, $s2_user;
+	global $s2_db, $lang_admin, $lang_s2_blog, $s2_user;
 
 	$conditions = array();
 	$messages = array();
@@ -570,7 +570,7 @@ function s2_blog_output_post_list ($criteria)
 			$body .= '<tr'.$class.'><td><a href="#" onclick="return EditRecord('.$row['id'].'); ">'.s2_htmlencode($row['title']).'</a></td><td>'.$date.'</td><td>'.$tags.'</td><td>'.$row['label'].'</td><td>'.$comment.'</td><td>'.$buttons.'</td></tr>';
 		}
 
-		echo '<table width="100%" class="sort"><thead><tr><td class="sortable">'.$lang_s2_blog['Post'].'</td><td width="10%" class="sortable curcol_up">'.$lang_admin['Date'].'</td><td width="20%" class="sortable">'.$lang_s2_blog['Tags'].'</td><td width="5%" class="sortable">'.$lang_s2_blog['Label'].'</td><td width="9%" class="sortable">'.$lang_common['Comments'].'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
+		echo '<table width="100%" class="sort"><thead><tr><td class="sortable">'.$lang_s2_blog['Post'].'</td><td width="10%" class="sortable curcol_up">'.$lang_admin['Date'].'</td><td width="20%" class="sortable">'.$lang_s2_blog['Tags'].'</td><td width="5%" class="sortable">'.$lang_s2_blog['Label'].'</td><td width="9%" class="sortable">'.Lang::get('Comments').'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
 	}
 	else
 		echo '<div class="info-box"><p>'.$lang_s2_blog['No posts found'].'</p></div>';
@@ -607,7 +607,7 @@ function s2_blog_tag_list ()
 
 function s2_blog_edit_post_form ($id)
 {
-	global $s2_db, $lang_s2_blog, $lang_common, $lang_admin, $s2_user;
+	global $s2_db, $lang_s2_blog, $lang_admin, $s2_user;
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',
@@ -747,7 +747,7 @@ function s2_blog_edit_post_form ($id)
 		<input type="hidden" name="page[id]" value="<?php echo $id; ?>" />
 		<input type="hidden" name="page[revision]" value="<?php echo $page['revision']; ?>" />
 		<label for="favorite_checkbox"><input type="checkbox" id="favorite_checkbox" name="flags[favorite]" value="1"<?php if ($page['favorite']) echo ' checked="checked"'?> />
-		<?php echo $lang_common['Favorite']; ?></label>
+		<?php echo Lang::get('Favorite'); ?></label>
 		<label for="com"><input type="checkbox" id="com" name="flags[commented]" value="1"<?php if ($page['commented']) echo ' checked="checked"'?> />
 		<?php echo $lang_admin['Commented']; ?></label>
 <?php
@@ -757,7 +757,7 @@ function s2_blog_edit_post_form ($id)
 	if ($page['comment_num'])
 	{
 ?>
-		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadBlogComments(<?php echo $id; ?>);"><?php echo $lang_common['Comments']; ?> &rarr;</a>
+		<a title="<?php echo $lang_admin['Go to comments']; ?>" href="#" onclick="return LoadBlogComments(<?php echo $id; ?>);"><?php echo Lang::get('Comments'); ?> &rarr;</a>
 <?php
 	}
 	else

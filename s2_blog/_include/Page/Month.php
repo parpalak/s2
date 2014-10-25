@@ -23,7 +23,7 @@ class Page_Month extends Page_HTML implements \Page_Routable
 
 		// Posts of a month
 		$this->posts_by_month($params['year'], $params['month']);
-		$this->page['head_title'] = s2_month($params['month']).', '.$params['year'];
+		$this->page['head_title'] = \Lang::month($params['month']).', '.$params['year'];
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -49,7 +49,7 @@ class Page_Month extends Page_HTML implements \Page_Routable
 
 	public function posts_by_month ($year, $month)
 	{
-		global $lang_common, $lang_s2_blog;
+		global $lang_s2_blog;
 
 		$link_nav = array();
 		$paging = '';
@@ -63,12 +63,12 @@ class Page_Month extends Page_HTML implements \Page_Routable
 		if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
 		{
 			$link_nav['prev'] = S2_BLOG_PATH.date('Y/m/', $prev_time);
-			$paging = '<a href="'.$link_nav['prev'].'">'.$lang_common['Here'].'</a> ';
+			$paging = '<a href="'.$link_nav['prev'].'">'.Lang::get('Here').'</a> ';
 		}
 		if ($end_time < time())
 		{
 			$link_nav['next'] = S2_BLOG_PATH.date('Y/m/', $end_time);
-			$paging .= '<a href="'.$link_nav['next'].'">'.$lang_common['There'].'</a>';
+			$paging .= '<a href="'.$link_nav['next'].'">'.Lang::get('There').'</a>';
 			// TODO think about back_forward template
 		}
 

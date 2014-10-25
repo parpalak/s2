@@ -54,7 +54,7 @@ class Lib
 		}
 
 		// Header
-		$month_name = s2_month($month);
+		$month_name = \Lang::month($month);
 		if ($day == '-1')
 		{
 			// One of 12 year tables
@@ -68,10 +68,10 @@ class Lib
 				$month_name = '<a href="'.S2_BLOG_PATH.date('Y/m', $start_time).'/">'.$month_name.'</a>';
 
 			// Links in the header
-			$next_month = $end_time < time() ? '<a class="nav_mon" href="'.S2_BLOG_PATH.date('Y/m', $end_time).'/" title="'.s2_month(date('m', $end_time)).date(', Y', $end_time).'">&rarr;</a>' : '&rarr;';
+			$next_month = $end_time < time() ? '<a class="nav_mon" href="'.S2_BLOG_PATH.date('Y/m', $end_time).'/" title="'.\Lang::month(date('m', $end_time)).date(', Y', $end_time).'">&rarr;</a>' : '&rarr;';
 
 			$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
-			$prev_month = $prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR) ? '<a class="nav_mon" href="'.S2_BLOG_PATH.date('Y/m', $prev_time).'/" title="'.s2_month(date('m', $prev_time)).date(', Y', $prev_time).'">&larr;</a>' : '&larr;';
+			$prev_month = $prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR) ? '<a class="nav_mon" href="'.S2_BLOG_PATH.date('Y/m', $prev_time).'/" title="'.\Lang::month(date('m', $prev_time)).date(', Y', $prev_time).'">&larr;</a>' : '&larr;';
 
 			$header = '<tr class="nav"><th>'.$prev_month.'</th><th align="center" colspan="5">'
 				.$month_name.', <a href="'.S2_BLOG_PATH.$year.'/">'.$year.'</a></th><th>'.$next_month.'</th></tr>';

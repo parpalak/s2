@@ -146,7 +146,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
 	private function get_comments ($id)
 	{
-		global $s2_db, $lang_common;
+		global $s2_db;
 
 		$comments = '';
 
@@ -165,7 +165,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			$comments .= $this->renderPartial('comment', $row);
 		}
 
-		return $comments ? '<a name="comment"></a><h2 class="comment">'.$lang_common['Comments'].'</h2>'."\n".$comments : '';
+		return $comments ? '<a name="comment"></a><h2 class="comment">'.Lang::get('Comments').'</h2>'."\n".$comments : '';
 	}
 
 }
