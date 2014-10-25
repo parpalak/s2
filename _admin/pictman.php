@@ -78,7 +78,7 @@ function s2_jsvarencode ($var)
 var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
 var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
 var iMaxFileSize = <?php echo s2_return_bytes(ini_get('upload_max_filesize')); ?>;
-var sFriendlyMaxFileSize = '<?php echo s2_frendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))); ?>';
+var sFriendlyMaxFileSize = '<?php echo Lang::friendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))); ?>';
 SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
 <!--[if lt IE 9]>

@@ -104,7 +104,7 @@ function s2_stat_info ()
 			$total_size += $status['Data_length'] + $status['Index_length'];
 		}
 
-		$total_size = s2_frendly_filesize($total_size);
+		$total_size = Lang::friendly_filesize($total_size);
 	}
 
 	// Check for the existance of various PHP opcode caches/optimizers

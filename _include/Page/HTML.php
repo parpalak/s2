@@ -137,7 +137,7 @@ abstract class Page_HTML extends Page_Abstract
 		($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
 
 		// Queries
-		$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? s2_get_saved_queries() : '';
+		$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', array('saved_queries' => $s2_db->get_saved_queries())) : '';
 
 		$etag = md5($template);
 		// Add here placeholders to be excluded from the ETag calculation
@@ -163,7 +163,7 @@ abstract class Page_HTML extends Page_Abstract
 		// Execution time
 		if (defined('S2_DEBUG'))
 		{
-			$time_placeholder = 't = '.s2_number_format(microtime(true) - $s2_start, true, 3).'; q = '.$s2_db->get_num_queries();
+			$time_placeholder = 't = '.Lang::number_format(microtime(true) - $s2_start, true, 3).'; q = '.$s2_db->get_num_queries();
 			$template = str_replace('<!-- s2_querytime -->', $time_placeholder, $template);
 			$etag .= md5($time_placeholder);
 		}

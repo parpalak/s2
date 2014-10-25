@@ -45,32 +45,6 @@ function s2_date_time ($time)
 	return $date;
 }
 
-// Returns a month defined in lang files
-function s2_month ($month)
-{
-	global $lang_month_big;
-
-	return $lang_month_big[$month - 1];
-}
-
-//
-// Outputs integers using current language settings
-//
-function s2_number_format ($number, $trailing_zero = false, $decimal_count = false)
-{
-	global $lang_common;
-
-	$return = ($hook = s2_hook('fn_number_format_start')) ? eval($hook) : null;
-	if ($return)
-		return $return;
-
-	$result = number_format($number, $decimal_count === false ? $lang_common['Decimal count'] : $decimal_count, $lang_common['Decimal point'], $lang_common['Thousands separator']);
-	if (!$trailing_zero)
-		$result = preg_replace('#'.preg_quote($lang_common['Decimal point'], '#').'?0*$#', '', $result);
-
-	return $result;
-}
-
 function s2_return_bytes ($val)
 {
 	$val = trim($val);
@@ -86,24 +60,6 @@ function s2_return_bytes ($val)
 	}
 
 	return $val;
-}
-
-function s2_frendly_filesize ($size)
-{
-	global $lang_common, $lang_filesize;
-
-	$return = ($hook = s2_hook('fn_frendly_filesize_start')) ? eval($hook) : null;
-	if ($return)
-		return $return;
-
-	$i = 0;
-	while (($size/1024) > 1)
-	{
-		$size /= 1024;
-		$i++;
-	}
-
-	return sprintf($lang_common['Filesize format'], s2_number_format($size), $lang_filesize[$i]);
 }
 
 //
@@ -582,56 +538,6 @@ function s2_no_cache ($full = true)
 		header('Cache-Control: no-cache, must-revalidate');
 		header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 	}
-}
-
-// Display executed queries (if enabled) for debug
-function s2_get_saved_queries()
-{
-	global $s2_db;
-
-	// Get the queries so that we can print them out
-	$saved_queries = $s2_db->get_saved_queries();
-
-	ob_start();
-
-?>
-		<div id="debug">
-			<table>
-				<thead>
-					<tr>
-						<th class="tcl" scope="col">Time, ms</th>
-						<th class="tcr" scope="col">Query</th>
-					</tr>
-				</thead>
-				<tbody>
-<?php
-
-	$query_time_total = 0.0;
-	foreach ($saved_queries as $cur_query)
-	{
-		$query_time_total += $cur_query[1];
-
-?>
-					<tr>
-						<td class="tcl"><?php echo (($cur_query[1] != 0) ? s2_number_format($cur_query[1]*1000, false) : '&#160;') ?></td>
-						<td class="tcr"><?php echo s2_htmlencode($cur_query[0]) ?></td>
-					</tr>
-<?php
-
-	}
-
-?>
-					<tr class="totals">
-						<td class="tcl"><em><?php echo s2_number_format($query_time_total*1000, false) ?></em></td>
-						<td class="tcr"><em>Total query time</em></td>
-					</tr>
-				</tbody>
-			</table>
-			Peak memory = <?php echo s2_number_format(memory_get_peak_usage()); ?>, memory = <?php echo s2_number_format(memory_get_usage()); ?>
-		</div>
-<?php
-
-	return ob_get_clean();
 }
 
 function s2_404_header ()
