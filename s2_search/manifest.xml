@@ -95,7 +95,7 @@ if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
 else
 	require $ext_info['path'].'/lang/English.php';
 $s2_search_reindex = '<a href="#" onclick="return s2_search.reindex();" class="js" title="'.$lang_s2_search['Reindex title'].'">'.$lang_s2_search['Reindex'].'</a><span id="s2_search_progress"></span>';
-$counters[] = sprintf($lang_s2_search['Info link'], s2_frendly_filesize(is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0), $s2_search_reindex);
+$counters[] = sprintf($lang_s2_search['Info link'], Lang::friendly_filesize(is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0), $s2_search_reindex);
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[
