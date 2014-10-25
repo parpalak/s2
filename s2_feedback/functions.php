@@ -14,7 +14,7 @@ function s2_feedback_check_question ($key, $answer)
 
 function s2_feedback_form ($action, $name = '', $contact = '', $subject = '', $message = '')
 {
-	global $lang_common, $lang_s2_feedback;
+	global $lang_s2_feedback;
 
 	$key = md5(time() + 'some stuff :)');
 	$digita = rand(1, 8);
@@ -52,12 +52,12 @@ function s2_feedback_form ($action, $name = '', $contact = '', $subject = '', $m
 		<textarea cols="50" rows="10" name="message"><?php echo s2_htmlencode($message); ?></textarea>
 	</p>
 	<p id="qsp">
-		<?php printf($lang_common['Comment question'], '&#x003'.$digita.';&#x003'.$digitb.';&#x002b;&#x003'.$digitc.';'); ?><br />
+		<?php printf(Lang::get('Comment question'), '&#x003'.$digita.';&#x003'.$digitb.';&#x002b;&#x003'.$digitc.';'); ?><br />
 		<input class="comm_input" type="text" name="question" maxlength="50" size="40" id="quest" />
 	</p>
 	<input type="hidden" name="key" value="<?php echo $key; ?>" />
 	<p class="input buttons">
-		<input type="submit" name="submit" value="<?php echo $lang_common['Submit']; ?>" />
+		<input type="submit" name="submit" value="<?php echo Lang::get('Submit'); ?>" />
 	</p>
 </form>
 <script type="text/javascript">

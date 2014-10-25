@@ -63,8 +63,8 @@ if (!empty($errors))
 	$error_text = $error_text.s2_feedback_form('', $name, $contact, $subject, $text);
 
 	$controller = new Page_Service(array(
-		'head_title' => $lang_common['Error'],
-		'title'      => $lang_common['Error'],
+		'head_title' => Lang::get('Error'),
+		'title'      => Lang::get('Error'),
 		'text'       => $error_text,
 	));
 
