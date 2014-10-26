@@ -26,10 +26,13 @@
 		<hook id="idx_template_pre_replace"><![CDATA[
 if (strpos($template, '<!-- s2_feedback -->') !== false)
 {
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	include $ext_info['path'].'/functions.php';
 	$replace['<!-- s2_feedback -->'] = s2_feedback_form($ext_info['url'].'/feedback.php');
 }

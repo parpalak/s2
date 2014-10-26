@@ -8,14 +8,13 @@
  */
 
 namespace s2_extensions\s2_blog;
+use \Lang;
 
 
 class Page_Tags extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog;
-
 		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
@@ -30,16 +29,16 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 		if (S2_BLOG_URL)
 		{
 			$this->page['path'][] = array(
-				'title' => $lang_s2_blog['Blog'],
+				'title' => Lang::get('Blog', 's2_blog'),
 				'link' => S2_BLOG_PATH,
 			);
 		}
 
 		$this->page['path'][] = array(
-			'title' => $lang_s2_blog['Tags'],
+			'title' => Lang::get('Tags', 's2_blog'),
 		);
 
-		$this->page['head_title'] = $this->page['title'] = $lang_s2_blog['Tags'];
+		$this->page['head_title'] = $this->page['title'] = Lang::get('Tags', 's2_blog');
 		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
 	}
 

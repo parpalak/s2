@@ -35,12 +35,15 @@ echo '<link rel="stylesheet" type="text/css" href="'.$ext_info['url'].'/codemirr
 		]]></hook>
 
 		<hook id="fn_toolbar_end"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 
-$toolbar = str_replace('</div>', '<img id="s2_highlight_toggle_button" src="i/1.gif" alt="'.$lang_s2_highlight['Highlight html'].'" />'."\n\t".'</div>', $toolbar);
+$toolbar = str_replace('</div>', '<img id="s2_highlight_toggle_button" src="i/1.gif" alt="'.Lang::get('Highlight html', 's2_highlight').'" />'."\n\t".'</div>', $toolbar);
 		]]></hook>
 	</hooks>
 </extension>

@@ -8,14 +8,13 @@
  */
 
 namespace s2_extensions\s2_blog;
+use \Lang;
 
 
 class Page_Year extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog;
-
 		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], '', 0);
 
@@ -32,7 +31,7 @@ class Page_Year extends Page_HTML implements \Page_Routable
 		if (S2_BLOG_URL)
 		{
 			$this->page['path'][] = array(
-				'title' => $lang_s2_blog['Blog'],
+				'title' => Lang::get('Blog', 's2_blog'),
 				'link' => S2_BLOG_PATH,
 			);
 		}
@@ -44,12 +43,12 @@ class Page_Year extends Page_HTML implements \Page_Routable
 
 	private static function year_posts ($year)
 	{
-		global $s2_db, $lang_s2_blog;
+		global $s2_db;
 
 		$start_time = mktime(0, 0, 0, 1, 1, $year);
 		$end_time = mktime(0, 0, 0, 1, 1, $year + 1);
 
-		$page['head_title'] = $page['title'] =  sprintf($lang_s2_blog['Year'], $year);
+		$page['head_title'] = $page['title'] =  sprintf(Lang::get('Year', 's2_blog'), $year);
 
 		$page['link_navigation']['up'] = S2_BLOG_PATH;
 		if ($year > S2_START_YEAR)

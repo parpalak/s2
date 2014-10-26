@@ -8,18 +8,20 @@
  */
 
 namespace s2_extensions\s2_blog;
+use \Lang;
 
 
 class Page_RSS extends \Page_RSS
 {
 	public function __construct (array $params = array())
 	{
-		global $lang_s2_blog;
-
-		if (file_exists(__DIR__ . '/../../lang/' . S2_LANGUAGE . '.php'))
-			require __DIR__ . '/../../lang/' . S2_LANGUAGE . '.php';
-		else
-			require __DIR__ . '/../../lang/English.php';
+		Lang::load('s2_blog', function ()
+		{
+			if (file_exists(__DIR__ . '/../../lang/' . S2_LANGUAGE . '.php'))
+				return require __DIR__ . '/../../lang/' . S2_LANGUAGE . '.php';
+			else
+				return require __DIR__ . '/../../lang/English.php';
+		});
 
 		parent::__construct($params);
 	}
@@ -28,8 +30,6 @@ class Page_RSS extends \Page_RSS
 	 */
 	protected function content()
 	{
-		global $lang_s2_blog;
-
 		$posts = Lib::last_posts_array();
 		$viewer = new \Viewer();
 		$items = array();
@@ -42,7 +42,7 @@ class Page_RSS extends \Page_RSS
 						'see_also' => $post['see_also']
 					))) .
 					(empty($post['tags']) ? '' : $viewer->render('tags', array(
-						'title' => $lang_s2_blog['Tags:'],
+						'title' => Lang::get('Tags:', 's2_blog'),
 						'tags'  => $post['tags'],
 					))),
 				'time'        => $post['create_time'],
@@ -76,7 +76,6 @@ class Page_RSS extends \Page_RSS
 	 */
 	protected function description()
 	{
-		global $lang_s2_blog;
-		return sprintf($lang_s2_blog['RSS description'], S2_BLOG_TITLE);
+		return sprintf(Lang::get('RSS description', 's2_blog'), S2_BLOG_TITLE);
 	}
 }

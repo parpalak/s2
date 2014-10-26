@@ -1,6 +1,6 @@
 <?php
 
-$lang_s2_manage_extensions = array(
+return array(
 
 'Refresh hooks'			=> 'Обновить хуки',
 

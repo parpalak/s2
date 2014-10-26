@@ -45,13 +45,16 @@ $padding += 1.91667;
 		]]></hook>
 
 		<hook id="fn_output_article_form_pre_mkeys"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 ?>
 			<tr>
-				<td class="label" title="<?php echo $lang_s2_seo['Title help']; ?>"><?php echo $lang_s2_seo['Title']; ?></td>
+				<td class="label" title="<?php echo Lang::get('Title help', 's2_seo'); ?>"><?php echo Lang::get('Title', 's2_seo'); ?></td>
 				<td><input type="text" name="page[s2_seo_title]" size="100" value="<?php echo s2_htmlencode($page['s2_seo_title']); ?>" /></td>
 			</tr>
 <?php

@@ -12,7 +12,7 @@
 //
 function s2_attachment_items ($id)
 {
-	global $s2_db, $lang_s2_attachment;
+	global $s2_db;
 
 	$query = array(
 		'SELECT'	=> 'id, name, filename, size, time, article_id, is_picture',
@@ -27,8 +27,8 @@ function s2_attachment_items ($id)
 	while ($row = $s2_db->fetch_assoc($result))
 	{
 		$buttons = array(
-			'edit'		=> '<img onclick="return s2_attachment_rename_file('.$row['id'].', \''.$lang_s2_attachment['New filename'].'\', \''.str_replace('\'', '\\\'', rawurlencode($row['name'])).'\');" class="rename" src="i/1.gif" alt="'.$lang_s2_attachment['Rename'].'">', 
-			'delete'	=> '<img onclick="return s2_attachment_delete_file('.$row['id'].', \''.str_replace('\'', '\\\'', rawurlencode(sprintf($row['name'] ? $lang_s2_attachment['Confirm delete'] : $lang_s2_attachment['Confirm delete 2'], $row['name'], $row['filename'], Lang::friendly_filesize($row['size'])))).'\');" class="delete" src="i/1.gif" alt="'.$lang_s2_attachment['Delete'].'">',
+			'edit'		=> '<img onclick="return s2_attachment_rename_file('.$row['id'].', \''.Lang::get('Confirm delete', 's2_attachment').'\', \''.str_replace('\'', '\\\'', rawurlencode($row['name'])).'\');" class="rename" src="i/1.gif" alt="'.Lang::get('Confirm delete', 's2_attachment').'">',
+			'delete'	=> '<img onclick="return s2_attachment_delete_file('.$row['id'].', \''.str_replace('\'', '\\\'', rawurlencode(sprintf($row['name'] ? Lang::get('Confirm delete', 's2_attachment') : Lang::get('Confirm delete 2', 's2_attachment'), $row['name'], $row['filename'], Lang::friendly_filesize($row['size'])))).'\');" class="delete" src="i/1.gif" alt="'.Lang::get('Delete', 's2_attachment').'">',
 		);
 
 		$icon = $row['is_picture'] ? '<img class="attach-preview" src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/micro/'.$row['filename'].'.png" alt="" />' : '';
@@ -192,7 +192,7 @@ function s2_attachment_save_thumbnail ($filename, $save_to, $max_size = 100)
 //
 function s2_attachment_placeholder_content ($id, $placeholder_limit)
 {
-	global $s2_db, $lang_s2_attachment;
+	global $s2_db;
 
 	$query = array(
 		'SELECT'	=> 'id, name, filename, size, time, is_picture',
@@ -235,7 +235,7 @@ function s2_attachment_placeholder_content ($id, $placeholder_limit)
 			$list_pictures[$placeholder] = '<div class="highslide-gallery">'.$replace.'</div>';
 
 	if ($list_files)
-		$list_files = '<div class="s2_attachment_files"><h2>'.$lang_s2_attachment['Attached files'].'</h2><ul>'.$list_files.'</ul></div>';
+		$list_files = '<div class="s2_attachment_files"><h2>'.Lang::get('Attached files', 's2_attachment').'</h2><ul>'.$list_files.'</ul></div>';
 
 	return array($list_files, $list_pictures);
 }

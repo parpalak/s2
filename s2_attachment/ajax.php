@@ -14,7 +14,13 @@ if ($action == 's2_attachment_delete')
 	s2_test_user_rights($session_id, $required_rights);
 
 	require $ext_info['path'].'/functions.php';
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 	$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
@@ -57,7 +63,13 @@ elseif ($action == 's2_attachment_rename')
 	s2_test_user_rights($session_id, $required_rights);
 
 	require $ext_info['path'].'/functions.php';
-	include $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 	$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 	$name = isset($_GET['name']) ? $_GET['name'] : '';

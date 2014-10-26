@@ -1,6 +1,6 @@
 <?php
 
-$lang_s2_page_blocks = array(
+return array(
 
 	'Page blocks'				=> 'Page blocks',
 	'Page blocks setup'			=> 'Additional editor fields',

@@ -18,9 +18,7 @@ if (!defined('S2_ROOT'))
 // Converts a date like 2010/05/09 into the timestamp
 function s2_blog_parse_date ($time, $day_shift = 0)
 {
-	global $lang_s2_blog;
-
-	$regex = $lang_s2_blog['Date pattern']; // 'Y/m/d'
+	$regex = Lang::get('Date pattern', 's2_blog'); // 'Y/m/d'
 	if (!preg_match_all('#[Ymd]#', $regex, $pattern_matches))
 		return 'Error in $lang_s2_blog[\'Date pattern\']';
 
@@ -420,7 +418,7 @@ function s2_blog_delete_comment ($id)
 
 function s2_blog_output_post_list ($criteria)
 {
-	global $s2_db, $lang_admin, $lang_s2_blog, $s2_user;
+	global $s2_db, $lang_admin, $s2_user;
 
 	$conditions = array();
 	$messages = array();
@@ -429,7 +427,7 @@ function s2_blog_output_post_list ($criteria)
 	{
 		$time = s2_blog_parse_date($criteria['start_time']);
 		if ($time === false)
-			$messages[] = sprintf($lang_s2_blog['Invalid start date'], date($lang_s2_blog['Date pattern'], time() - 86400), date($lang_s2_blog['Date pattern']));
+			$messages[] = sprintf(Lang::get('Invalid start date', 's2_blog'), date(Lang::get('Date pattern', 's2_blog'), time() - 86400), date(Lang::get('Date pattern', 's2_blog')));
 		elseif ((int) $time != 0)
 			$conditions[] = 'p.create_time >= ' . ((int) $time);
 		else
@@ -440,7 +438,7 @@ function s2_blog_output_post_list ($criteria)
 	{
 		$time = s2_blog_parse_date($criteria['end_time'], 1);
 		if ($time === false)
-			$messages[] = sprintf($lang_s2_blog['Invalid end date'], date($lang_s2_blog['Date pattern'], time() - 86400), date($lang_s2_blog['Date pattern']));
+			$messages[] = sprintf(Lang::get('Invalid end date', 's2_blog'), date(Lang::get('Date pattern', 's2_blog'), time() - 86400), date(Lang::get('Date pattern', 's2_blog')));
 		elseif ((int) $time != 0)
 			$conditions[] = 'p.create_time <= ' . ((int) $time);
 		else
@@ -552,9 +550,9 @@ function s2_blog_output_post_list ($criteria)
 
 			$buttons = array();
 			if ($s2_user['edit_site'])
-				$buttons['favorite'] = '<img class="'.($row['favorite'] ? 'favorite' : 'notfavorite').'" data-class="'.(!$row['favorite'] ? 'favorite' : 'notfavorite').'" src="i/1.gif" alt="'.($row['favorite'] ? $lang_s2_blog['Undo favorite'] : $lang_s2_blog['Do favorite']).'" data-alt="'.(!$row['favorite'] ? $lang_s2_blog['Undo favorite'] : $lang_s2_blog['Do favorite']).'" onclick="return ToggleFavBlog(this, '.$row['id'].');">';
+				$buttons['favorite'] = '<img class="'.($row['favorite'] ? 'favorite' : 'notfavorite').'" data-class="'.(!$row['favorite'] ? 'favorite' : 'notfavorite').'" src="i/1.gif" alt="'.($row['favorite'] ? Lang::get('Undo favorite', 's2_blog') : Lang::get('Do favorite', 's2_blog')).'" data-alt="'.(!$row['favorite'] ? Lang::get('Undo favorite', 's2_blog') : Lang::get('Do favorite', 's2_blog')).'" onclick="return ToggleFavBlog(this, '.$row['id'].');">';
 			if ($s2_user['edit_site'] || $s2_user['id'] == $row['user_id'])
-				$buttons['delete'] = '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteRecord(this, '.$row['id'].', \''.s2_htmlencode(addslashes(sprintf($lang_s2_blog['Delete warning'], $row['title']))).'\');">';
+				$buttons['delete'] = '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteRecord(this, '.$row['id'].', \''.s2_htmlencode(addslashes(sprintf(Lang::get('Delete warning', 's2_blog'), $row['title']))).'\');">';
 
 			($hook = s2_hook('fn_s2_blog_output_post_list_pre_item_mrg')) ? eval($hook) : null;
 
@@ -567,10 +565,10 @@ function s2_blog_output_post_list ($criteria)
 			$body .= '<tr'.$class.'><td><a href="#" onclick="return EditRecord('.$row['id'].'); ">'.s2_htmlencode($row['title']).'</a></td><td>'.$date.'</td><td>'.$tags.'</td><td>'.$row['label'].'</td><td>'.$comment.'</td><td>'.$buttons.'</td></tr>';
 		}
 
-		echo '<table width="100%" class="sort"><thead><tr><td class="sortable">'.$lang_s2_blog['Post'].'</td><td width="10%" class="sortable curcol_up">'.$lang_admin['Date'].'</td><td width="20%" class="sortable">'.$lang_s2_blog['Tags'].'</td><td width="5%" class="sortable">'.$lang_s2_blog['Label'].'</td><td width="9%" class="sortable">'.Lang::get('Comments').'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
+		echo '<table width="100%" class="sort"><thead><tr><td class="sortable">'.Lang::get('Post', 's2_blog').'</td><td width="10%" class="sortable curcol_up">'.$lang_admin['Date'].'</td><td width="20%" class="sortable">'.Lang::get('Tags', 's2_blog').'</td><td width="5%" class="sortable">'.Lang::get('Label', 's2_blog').'</td><td width="9%" class="sortable">'.Lang::get('Comments').'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
 	}
 	else
-		echo '<div class="info-box"><p>'.$lang_s2_blog['No posts found'].'</p></div>';
+		echo '<div class="info-box"><p>'.Lang::get('No posts found', 's2_blog').'</p></div>';
 }
 
 function s2_blog_tag_list ()
@@ -604,7 +602,7 @@ function s2_blog_tag_list ()
 
 function s2_blog_edit_post_form ($id)
 {
-	global $s2_db, $lang_s2_blog, $lang_admin, $s2_user;
+	global $s2_db, $lang_admin, $s2_user;
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',
@@ -730,15 +728,15 @@ function s2_blog_edit_post_form ($id)
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_labels')) ? eval($hook) : null;
 
 ?>
-		<label title="<?php echo $lang_s2_blog['Label help']; ?>"><?php echo $lang_s2_blog['Labels']; ?><br />
-		<select name="page[label]" data-prev-value="<?php echo s2_htmlencode($page['label']); ?>" onchange="ChangeSelect(this, '<?php echo $lang_s2_blog['Enter new label']; ?>', '');">
+		<label title="<?php echo Lang::get('Label help', 's2_blog'); ?>"><?php echo Lang::get('Labels', 's2_blog'); ?><br />
+		<select name="page[label]" data-prev-value="<?php echo s2_htmlencode($page['label']); ?>" onchange="ChangeSelect(this, '<?php echo Lang::get('Enter new label', 's2_blog'); ?>', '');">
 <?php
 
 	foreach ($labels as $label)
-		echo "\t\t\t".'<option value="'.$label.'"'.($page['label'] == $label ? ' selected' : '').'>'.($label ? $label : $lang_s2_blog['No label']).'</option>'."\n";
+		echo "\t\t\t".'<option value="'.$label.'"'.($page['label'] == $label ? ' selected' : '').'>'.($label ? $label : Lang::get('No label', 's2_blog')).'</option>'."\n";
 
 ?>
-			<option value="+"><?php echo $lang_s2_blog['New label']; ?></option>
+			<option value="+"><?php echo Lang::get('New label', 's2_blog'); ?></option>
 		</select></label>
 <?php ($hook = s2_hook('fn_s2_blog_edit_post_form_pre_checkboxes')) ? eval($hook) : null; ?>
 		<input type="hidden" name="page[id]" value="<?php echo $id; ?>" />

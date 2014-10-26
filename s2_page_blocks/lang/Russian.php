@@ -1,6 +1,6 @@
 <?php
 
-$lang_s2_page_blocks = array(
+return array(
 
 	'Page blocks'				=> 'Блоки на&nbsp;страницах',
 	'Page blocks setup'			=> 'Дополнительные поля в&nbsp;редакторе',

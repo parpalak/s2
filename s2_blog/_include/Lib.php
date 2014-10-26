@@ -8,6 +8,7 @@
  */
 
 namespace s2_extensions\s2_blog;
+use \Lang;
 
 
 class Lib
@@ -20,7 +21,7 @@ class Lib
 
 	public static function calendar ($year, $month, $day, $url = '', $day_flags = false)
 	{
-		global $s2_db, $lang_s2_blog, $lang_s2_blog_days;
+		global $s2_db;
 
 		if ($month === '')
 			$month = 1;
@@ -30,7 +31,7 @@ class Lib
 
 		// Dealing with week days
 		$n = date('w', $start_time);
-		if ($lang_s2_blog['Sunday starts week'] != '1')
+		if (Lang::get('Sunday starts week', 's2_blog') != '1')
 		{
 			$n -= 1;
 			if ($n == -1) $n = 6;
@@ -80,12 +81,12 @@ class Lib
 		// Titles
 		$output = '<table class="cal">'.$header.'<tr>';
 		for ($i = 0; $i < 7; $i++)
-			$output .= '<th'.($i % 7 == 5 || $i % 7 == 6 ? ' class="sun"' : '').'>'.$lang_s2_blog_days[$i].'</th>';
+			$output .= '<th'.($i % 7 == 5 || $i % 7 == 6 ? ' class="sun"' : '').'>'.Lang::get('Days', 's2_blog').'</th>';
 		$output .= '</tr><tr>';
 
 		// Empty cells before
 		for ($i = 0; $i < $n; $i++)
-			$output .= '<td'.($i % 7 == 5 || $i % 7 == 6 && $lang_s2_blog['Sunday starts week'] != '1' || $i % 7 == 0 && $lang_s2_blog['Sunday starts week'] == '1' ? ' class="sun"' : '').'></td>';
+			$output .= '<td'.($i % 7 == 5 || $i % 7 == 6 && Lang::get('Sunday starts week', 's2_blog') != '1' || $i % 7 == 0 && Lang::get('Sunday starts week', 's2_blog') == '1' ? ' class="sun"' : '').'></td>';
 
 		// Days
 		for ($i = 1; $i <= $day_count; $i++)
@@ -97,7 +98,7 @@ class Lib
 			if ($i == $day)
 				// Current day
 				$classes[] = 'cur';
-			if ($n % 7 == 0 || ($n % 7 == 6) && $lang_s2_blog['Sunday starts week'] != '1' || ($n % 7 == 1) && $lang_s2_blog['Sunday starts week'] == '1')
+			if ($n % 7 == 0 || ($n % 7 == 6) && Lang::get('Sunday starts week', 's2_blog') != '1' || ($n % 7 == 1) && Lang::get('Sunday starts week', 's2_blog') == '1')
 				// Weekend
 				$classes[] = 'sun';
 			$output .= '<td'.(!empty($classes) ? ' class="'.implode(' ', $classes).'"' : '').'>'.($i == $day && !$url ? $i : $b).'</td>';
@@ -109,7 +110,7 @@ class Lib
 		while ($n % 7)
 		{
 			$n++;
-			$output .= '<td'.($n % 7 == 0 || $n % 7 == 6 && $lang_s2_blog['Sunday starts week'] != '1' || $n % 7 == 1 && $lang_s2_blog['Sunday starts week'] == '1' ? ' class="sun"' : '').'></td>';
+			$output .= '<td'.($n % 7 == 0 || $n % 7 == 6 && Lang::get('Sunday starts week', 's2_blog') != '1' || $n % 7 == 1 && Lang::get('Sunday starts week', 's2_blog') == '1' ? ' class="sun"' : '').'></td>';
 		}
 
 		$output .= '</tr></table>';

@@ -8,6 +8,7 @@
  */
 
 namespace s2_extensions\s2_search;
+use \Lang;
 
 
 class Page extends \Page_HTML implements \Page_Routable
@@ -16,15 +17,16 @@ class Page extends \Page_HTML implements \Page_Routable
 
 	public function __construct (array $params = array())
 	{
-		global $lang_s2_search;
-
 		$query = isset($_GET['q']) ? $_GET['q'] : '';
 		$this->page_num = isset($_GET['p']) ? (int) $_GET['p'] : 1;
 
-		if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php'))
-			require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
-		else
-			require __DIR__ . '/../lang/English.php';
+		Lang::load('s2_search', function ()
+		{
+			if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php'))
+				return require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
+			else
+				return require __DIR__ . '/../lang/English.php';
+		});
 
 		$this->viewer = new \Viewer($this);
 		parent::__construct();
@@ -34,8 +36,6 @@ class Page extends \Page_HTML implements \Page_Routable
 
 	private function build_page ($query)
 	{
-		global $lang_s2_search;
-
 		$content['query'] = $query;
 		
 		if ($query !== '')
@@ -61,7 +61,7 @@ if (defined('DEBUG')) $start_time = microtime(true);
 					// Feel free to suggest the code for other languages.
 					$content['num_info'] = sprintf(self::rus_plural($content['num'], 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $content['num']);
 				else
-					$content['num_info'] = sprintf($lang_s2_search['Found'], $content['num']);
+					$content['num_info'] = sprintf(Lang::get('Found', 's2_search'), $content['num']);
 
 				$items_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10.0;
 				$total_pages = ceil(1.0 * $content['num'] / $items_per_page);
@@ -111,14 +111,14 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 		}
 
 		$this->page['text'] = $this->renderPartial('search', $content);
-		$this->page['title'] = $lang_s2_search['Search'];
+		$this->page['title'] = Lang::get('Search', 's2_search');
 		$this->page['path'] = array(
 			array(
 				'title' => \Model::main_page_title(),
 				'link'  => s2_link('/'),
 			),
 			array(
-				'title' => $lang_s2_search['Search'],
+				'title' => Lang::get('Search', 's2_search'),
 			),
 		);
 	}
@@ -146,7 +146,7 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 	// TODO rename hooks
 	private function findInTags ($query)
 	{
-		global $s2_db, $lang_s2_search;
+		global $s2_db;
 
 		$return = '';
 
@@ -190,7 +190,7 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 		($hook = s2_hook('s2_search_find_tags_pre_mrg')) ? eval($hook) : null;
 
 		if (!empty($tags))
-			$return .= '<p class="s2_search_found_tags">' . sprintf($lang_s2_search['Found tags'], implode(', ', $tags)) . '</p>';
+			$return .= '<p class="s2_search_found_tags">' . sprintf(Lang::get('Found tags', 's2_search'), implode(', ', $tags)) . '</p>';
 
 		($hook = s2_hook('s2_search_find_tags_end')) ? eval($hook) : null;
 

@@ -8,13 +8,13 @@
  */
 
 namespace s2_extensions\s2_blog;
+use \Lang;
+
 
 class Page_Favorite extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog;
-
 		$this->obtainTemplate(__DIR__.'/../../templates/');
 
 		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
@@ -30,7 +30,7 @@ class Page_Favorite extends Page_HTML implements \Page_Routable
 		if (S2_BLOG_URL)
 		{
 			$this->page['path'][] = array(
-				'title' => $lang_s2_blog['Blog'],
+				'title' => Lang::get('Blog', 's2_blog'),
 				'link' => S2_BLOG_PATH,
 			);
 		}

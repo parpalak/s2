@@ -17,10 +17,13 @@ if ($action == 'load_blog_posts')
 	($hook = s2_hook('blrq_action_load_blog_posts_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	require $ext_info['path'].'/blog_lib.php';
 
 	s2_blog_output_post_list($_POST['posts']);
@@ -36,10 +39,13 @@ elseif ($action == 'edit_blog_post')
 		die('Error in GET parameters.');
 	$id = (int) $_GET['id'];
 
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	require $ext_info['path'].'/blog_lib.php';
 
 	($hook = s2_hook('blrq_action_edit_blog_post_pre_output')) ? eval($hook) : null;
@@ -58,10 +64,13 @@ elseif ($action == 'save_blog')
 	if (!isset($_POST['page']) || !isset($_POST['flags']))
 		die('Error in POST parameters.');
 
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	require $ext_info['path'].'/blog_lib.php';
 
 	list($create_time, $result['revision'], $result['status']) = s2_blog_save_post($_POST['page'], $_POST['flags']);
@@ -126,10 +135,13 @@ elseif ($action == 'load_blog_comments')
 	$id = (int)$_GET['id'];
 
 	require 'comments.php';
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 	echo s2_comment_menu_links();
 	echo s2_show_comments('s2_blog', $id);
@@ -144,10 +156,13 @@ elseif ($action == 'delete_blog_comment')
 	if (!isset($_GET['id']) || !isset($_GET['mode']))
 		die('Error in GET parameters.');
 
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	require $ext_info['path'].'/blog_lib.php';
 	require 'comments.php';
 
@@ -186,10 +201,13 @@ elseif ($action == 'hide_blog_comment')
 	if (!isset($_GET['id']) || !isset($_GET['mode']))
 		die('Error in GET parameters.');
 
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	require $ext_info['path'].'/blog_lib.php';
 	require 'comments.php';
 
@@ -212,10 +230,13 @@ elseif ($action == 'mark_blog_comment')
 
 	$post_id = s2_blog_mark_comment((int)$_GET['id']);
 
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	require 'comments.php';
 
 	echo s2_comment_menu_links($_GET['mode']);

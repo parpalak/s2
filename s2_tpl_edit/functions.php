@@ -84,13 +84,13 @@ function s2_tpl_edit_file_list ($template_filename)
 
 function s2_tpl_edit_form ()
 {
-	global $lang_admin, $lang_s2_tpl_edit;
+	global $lang_admin;
 
 	($hook = s2_hook('fn_s2_tpl_edit_form_start')) ? eval($hook) : null;
 
 ?>
-<form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo $lang_s2_tpl_edit['Wrong filename']; ?>', this);">
-	<div class="r-float" title="<?php echo $lang_s2_tpl_edit['Help']; ?>">
+<form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo Lang::get('Wrong filename', 's2_tpl_edit'); ?>', this);">
+	<div class="r-float" title="<?php echo Lang::get('Help', 's2_tpl_edit'); ?>">
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_submit')) ? eval($hook) : null; ?>
 		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
@@ -110,7 +110,7 @@ function s2_tpl_edit_form ()
 		<table class="fields">
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_fname')) ? eval($hook) : null; ?>
 			<tr>
-				<td class="label"><?php echo $lang_s2_tpl_edit['File name']; ?></td>
+				<td class="label"><?php echo Lang::get('File name', 's2_tpl_edit'); ?></td>
 				<td><input type="text" name="template[filename]" size="50" maxlength="255" value="" /></td>
 			</tr>
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_fname')) ? eval($hook) : null; ?>

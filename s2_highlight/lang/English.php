@@ -1,7 +1,7 @@
 <?php
 
-$lang_s2_highlight = array(
+return array(
 
-'Highlight html'			=> 'HTML code highlighting',
+	'Highlight html' => 'HTML code highlighting',
 
 );

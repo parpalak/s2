@@ -8,14 +8,13 @@
  */
 
 namespace s2_extensions\s2_blog;
+use Lang;
 
 
 class Page_Month extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog;
-
 		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], 0);
 
@@ -33,7 +32,7 @@ class Page_Month extends Page_HTML implements \Page_Routable
 		if (S2_BLOG_URL)
 		{
 			$this->page['path'][] = array(
-				'title' => $lang_s2_blog['Blog'],
+				'title' => Lang::get('Blog', 's2_blog'),
 				'link' => S2_BLOG_PATH,
 			);
 		}
@@ -49,8 +48,6 @@ class Page_Month extends Page_HTML implements \Page_Routable
 
 	public function posts_by_month ($year, $month)
 	{
-		global $lang_s2_blog;
-
 		$link_nav = array();
 		$paging = '';
 
@@ -83,7 +80,7 @@ class Page_Month extends Page_HTML implements \Page_Routable
 		if ($output == '')
 		{
 			s2_404_header();
-			$output = '<p>'.$lang_s2_blog['Not found'].'</p>';
+			$output = '<p>'.Lang::get('Not found', 's2_blog').'</p>';
 		}
 
 		$this->page['text'] = $output.$paging;

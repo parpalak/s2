@@ -63,13 +63,16 @@ $output .= '<fieldset><legend>RSS readers</legend><div id="s2_counter_rss"><stro
 		<hook id="ai_js_end"><![CDATA[
 if (!is_writable($ext_info['path'].'/data/'))
 {
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 ?>
-PopupMessages.show('<?php printf($lang_s2_counter['Data folder not writable'], $ext_info['path'].'/data/'); ?>');
+PopupMessages.show('<?php printf(Lang::get('Data folder not writable', 's2_counter'), $ext_info['path'].'/data/'); ?>');
 <?php
 }
 		]]></hook>

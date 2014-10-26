@@ -23,10 +23,13 @@
 	<hooks>
 
 		<hook id="idx_template_after_replace"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 require $ext_info['path'].'/functions.php';
 $template = s2_spoiler_make($template);
 		]]></hook>

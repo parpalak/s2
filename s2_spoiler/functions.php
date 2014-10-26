@@ -19,7 +19,7 @@ function s2_spoiler_store ($matches)
 	if (count($matches) < 3)
 	{
 		$stack[$i] = $matches[0];
-		return '¬ '.($i++).' ¬';
+		return 'Â¬ '.($i++).' Â¬';
 	}
 	else
 	{
@@ -31,13 +31,13 @@ function s2_spoiler_store ($matches)
 
 function s2_spoiler_markup ($matches)
 {
-	global $s2_spoiler_num, $lang_s2_spoiler;
+	global $s2_spoiler_num;
 
 	$s2_spoiler_num++;
 
 	$header = trim($matches[1]);
 	if ($header == '')
-		$header = $lang_s2_spoiler['Hidden text'];
+		$header = Lang::get('Hidden text', 's2_spoiler');
 
 	return '<div class="s2_spoiler" id="s2_spoiler_'.$s2_spoiler_num.'"><div class="s2_spoiler_head" onclick="s2_spoiler_flip(this);">'.$header.'</div><div class="s2_spoiler_body">'.$matches[2].'</div></div>';
 }
@@ -52,8 +52,8 @@ function s2_spoiler_make ($contents, $soft = 0)
 	$contents = preg_replace_callback('#<spoiler(?:\\s+title="([^"]*)")?\\s*>(.*?)</spoiler>#s', 's2_spoiler_markup', $contents);
 	$contents = preg_replace_callback('#\\[spoiler(?:\\s+title="([^"]*)")?\s*\\](.*?)\\[/spoiler\\]#s', 's2_spoiler_markup', $contents);
 
-	while (preg_match('#¬ (\d*) ¬#S', $contents))
-		$contents = preg_replace_callback ('#(¬) (\d*) ¬#S', 's2_spoiler_store', $contents);
+	while (preg_match('#Â¬ (\d*) Â¬#S', $contents))
+		$contents = preg_replace_callback ('#(Â¬) (\d*) Â¬#S', 's2_spoiler_store', $contents);
 
 	if ($s2_spoiler_num)
 	{

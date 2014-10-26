@@ -105,20 +105,23 @@ if ($name == 'S2_PAGE_BLOCKS')
 		]]></hook>
 
 		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 
 $s2_page_blocks_text_config = '';
 foreach (!empty($options['S2_PAGE_BLOCKS']) ? unserialize($options['S2_PAGE_BLOCKS']) : array() as $s2_page_blocks_field)
 	$s2_page_blocks_text_config .= implode(', ', $s2_page_blocks_field)."\n";
 
 $fieldset = array(
-	'S2_PAGE_BLOCKS' => s2_get_textarea('S2_PAGE_BLOCKS', $s2_page_blocks_text_config, $lang_s2_page_blocks['Page blocks setup'], $lang_s2_page_blocks['Page blocks setup label']),
+	'S2_PAGE_BLOCKS' => s2_get_textarea('S2_PAGE_BLOCKS', $s2_page_blocks_text_config, Lang::get('Page blocks setup', 's2_page_blocks'), Lang::get('Page blocks setup label', 's2_page_blocks')),
 );
 ($hook = s2_hook('s2_page_blocks_opt_pre_fs_merge')) ? eval($hook) : null;
-$output .= '<fieldset><legend>'.$lang_s2_page_blocks['Page blocks'].'</legend>'.implode('', $fieldset).'</fieldset>';
+$output .= '<fieldset><legend>'.Lang::get('Page blocks', 's2_page_blocks').'</legend>'.implode('', $fieldset).'</fieldset>';
 		]]></hook>
 
 		<hook id="fn_output_article_form_pre_page_get_qr, fn_last_articles_array_pre_get_qr"><![CDATA[

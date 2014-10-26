@@ -8,6 +8,7 @@
  */
 
 namespace s2_extensions\s2_blog;
+use \Lang;
 
 
 abstract class Page_HTML extends \Page_HTML
@@ -18,18 +19,19 @@ abstract class Page_HTML extends \Page_HTML
 
 	public function __construct (array $params = array())
 	{
-		global $lang_s2_blog;
-
-		if (file_exists(__DIR__ . '/../../lang/' . S2_LANGUAGE . '.php'))
-			require __DIR__ . '/../../lang/' . S2_LANGUAGE . '.php';
-		else
-			require __DIR__ . '/../../lang/English.php';
+		Lang::load('s2_blog', function ()
+		{
+			if (file_exists(__DIR__ . '/../../lang/' . S2_LANGUAGE . '.php'))
+				return require __DIR__ . '/../../lang/' . S2_LANGUAGE . '.php';
+			else
+				return require __DIR__ . '/../../lang/English.php';
+		});
 
 		$this->viewer = new \Viewer($this);
 
 		$this->page['commented'] = 0;
 		$this->page['class'] = 's2_blog';
-		$this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode($lang_s2_blog['RSS link title']).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
+		$this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode(Lang::get('RSS link title', 's2_blog')).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
 
 		$this->body($params);
 
@@ -120,7 +122,7 @@ abstract class Page_HTML extends \Page_HTML
 
 	public function blog_navigation ()
 	{
-		global $s2_db, $lang_s2_blog, $request_uri;
+		global $s2_db, $request_uri;
 
 		$cur_url = str_replace('%2F', '/', urlencode($request_uri));
 
@@ -131,11 +133,11 @@ abstract class Page_HTML extends \Page_HTML
 
 		if (empty($s2_blog_navigation) || !isset($s2_blog_navigation_time) || $s2_blog_navigation_time < $now - 900)
 		{
-			$s2_blog_navigation = array('title' => $lang_s2_blog['Navigation']);
+			$s2_blog_navigation = array('title' => Lang::get('Navigation', 's2_blog'));
 
 			// Last posts on the blog main page
 			$s2_blog_navigation['last'] = array(
-				'title'      => sprintf($lang_s2_blog['Nav last'], S2_MAX_ITEMS ? S2_MAX_ITEMS : 10),
+				'title'      => sprintf(Lang::get('Nav last', 's2_blog'), S2_MAX_ITEMS ? S2_MAX_ITEMS : 10),
 				'link'       => S2_BLOG_PATH,
 			);
 
@@ -151,13 +153,13 @@ abstract class Page_HTML extends \Page_HTML
 
 			if ($s2_db->fetch_row($result))
 				$s2_blog_navigation['favorite'] = array(
-					'title'      => $lang_s2_blog['Nav favorite'],
+					'title'      => Lang::get('Nav favorite', 's2_blog'),
 					'link'       => S2_BLOG_PATH . urlencode(S2_FAVORITE_URL) . '/',
 				);
 
 			// Fetch important tags
 			$s2_blog_navigation['tags_header'] = array(
-				'title' => $lang_s2_blog['Nav tags'],
+				'title' => Lang::get('Nav tags', 's2_blog'),
 				'link'  => S2_BLOG_TAGS_PATH,
 			);
 

@@ -14,8 +14,6 @@ function s2_feedback_check_question ($key, $answer)
 
 function s2_feedback_form ($action, $name = '', $contact = '', $subject = '', $message = '')
 {
-	global $lang_s2_feedback;
-
 	$key = md5(time() + 'some stuff :)');
 	$digita = rand(1, 8);
 	$digitb = rand(0, 9);
@@ -36,19 +34,19 @@ function s2_feedback_form ($action, $name = '', $contact = '', $subject = '', $m
 ?>
 <form method="post" action="<?php echo $action; ?>">
 	<p class="input name">
-		<?php echo $lang_s2_feedback['Name']; ?><br />
+		<?php echo Lang::get('Name', 's2_feedback'); ?><br />
 		<input type="text" name="name" maxlength="100" size="40" value="<?php echo s2_htmlencode($name); ?>" />
 	</p>
 	<p class="input">
-		<?php echo $lang_s2_feedback['Contact']; ?><br />
+		<?php echo Lang::get('Contact', 's2_feedback'); ?><br />
 		<input type="text" name="contact" maxlength="50" size="40" value="<?php echo s2_htmlencode($contact); ?>" />
 	</p>
 	<p class="input">
-		<?php echo $lang_s2_feedback['Subject']; ?><br />
+		<?php echo Lang::get('Subject', 's2_feedback'); ?><br />
 		<input type="text" name="subject" maxlength="250" size="40" value="<?php echo s2_htmlencode($subject); ?>" />
 	</p>
 	<p class="input text">
-		<?php echo $lang_s2_feedback['Text']; ?><br />
+		<?php echo Lang::get('Text', 's2_feedback'); ?><br />
 		<textarea cols="50" rows="10" name="message"><?php echo s2_htmlencode($message); ?></textarea>
 	</p>
 	<p id="qsp">

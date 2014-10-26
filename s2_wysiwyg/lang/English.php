@@ -1,9 +1,9 @@
 <?php
 
-$lang_s2_wysiwyg = array(
+return array(
 
-'WYSIWYG'					=> 'WYSIWYG',
-'WYSIWYG type'				=> 'Simplified',
-'WYSIWYG type label'		=> 'Leaves just really necessary buttons.',
+	'WYSIWYG'            => 'WYSIWYG',
+	'WYSIWYG type'       => 'Simplified',
+	'WYSIWYG type label' => 'Leaves just really necessary buttons.',
 
 );

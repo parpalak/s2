@@ -21,7 +21,7 @@ function s2_attachment_paging ($page, $total_pages, $current_path)
 
 function s2_attachment_list ($id, $current_path, $config, $page_limit, $time_format)
 {
-	global $s2_db, $lang_s2_attachment;
+	global $s2_db;
 
 	if (!$config)
 	{

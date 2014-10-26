@@ -297,36 +297,35 @@ $router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/[:url]', '\\s2_exte
 		]]></hook>
 
 		<hook id="idx_pre_get_queries"><![CDATA[
-global $lang_s2_blog;
 if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
 {
-	if (!isset($lang_s2_blog))
+	Lang::load($ext_info['id'], function () use ($ext_info)
 	{
 		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 		else
-			require $ext_info['path'].'/lang/English.php';
-	}
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 	$s2_blog_recent_comments = s2_extensions\s2_blog\Placeholder::recent_comments();
 	$replace['<!-- s2_blog_last_comments -->'] = empty($s2_blog_recent_comments) ? '' : $this->renderPartial('menu_comments', array(
-		'title' => $lang_s2_blog['Last comments'],
+		'title' => Lang::get('Last comments', 's2_blog'),
 		'menu'  => $s2_blog_recent_comments,
 	));
 }
 if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
 {
-	if (!isset($lang_s2_blog))
+	Lang::load($ext_info['id'], function () use ($ext_info)
 	{
 		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 		else
-			require $ext_info['path'].'/lang/English.php';
-	}
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 	$s2_blog_last_discussions = s2_extensions\s2_blog\Placeholder::recent_discussions();
 	$replace['<!-- s2_blog_last_discussions -->'] = empty($s2_blog_last_discussions) ? '' : $this->renderPartial('menu_block', array(
-		'title' => $lang_s2_blog['Last discussions'],
+		'title' => Lang::get('Last discussions', 's2_blog'),
 		'menu'  => $s2_blog_last_discussions,
 	));
 }
@@ -374,13 +373,16 @@ if ($row['s2_blog_is_posts'])
 // Links to blog tags
 if (!empty($s2_blog_links))
 {
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 	$output[] = $this->renderPartial('menu_block', array(
-		'title' => $lang_s2_blog['See in blog'],
+		'title' => Lang::get('See in blog', 's2_blog'),
 		'menu'  => $s2_blog_links,
 	));
 }
@@ -399,36 +401,39 @@ require $ext_info['path'].'/blog_ajax.php';
 		]]></hook>
 
 		<hook id="ai_pre_edit"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 require $ext_info['path'].'/blog_lib.php';
 ?>
-		<dt id="blog_tab"><?php echo $lang_s2_blog['Blog']; ?></dt>
+		<dt id="blog_tab"><?php echo Lang::get('Blog', 's2_blog'); ?></dt>
 		<dd class="inactive">
 			<div class="reducer">
 				<form name="blogform">
 					<table width="100%" class="fields">
 						<tr>
-							<td class="label"><?php echo $lang_s2_blog['Start time']; ?></td>
+							<td class="label"><?php echo Lang::get('Start time', 's2_blog'); ?></td>
 							<td><input style="width: 10em;" type="text" name="posts[start_time]" size="20" value="" /></td>
-							<td class="label"><?php echo $lang_s2_blog['Search label']; ?></td>
+							<td class="label"><?php echo Lang::get('Search label', 's2_blog'); ?></td>
 							<td><input type="text" name="posts[text]" size="40" value="" /></td>
-							<td align="right"><input class="bitbtn add_post" name="button" type="button" value="<?php echo $lang_s2_blog['Create new']; ?>" onclick="return CreateBlankRecord();" /></td>
+							<td align="right"><input class="bitbtn add_post" name="button" type="button" value="<?php echo Lang::get('Create new', 's2_blog'); ?>" onclick="return CreateBlankRecord();" /></td>
 						</tr>
 						<tr>
-							<td class="label"><?php echo $lang_s2_blog['End time']; ?></td>
-							<td><input style="width: 10em;" type="text" name="posts[end_time]" size="20" value="<?php echo date($lang_s2_blog['Date pattern']); ?>" /></td>
-							<td class="label"><?php echo $lang_s2_blog['Tag label']; ?></td>
+							<td class="label"><?php echo Lang::get('End time', 's2_blog'); ?></td>
+							<td><input style="width: 10em;" type="text" name="posts[end_time]" size="20" value="<?php echo date(Lang::get('Date pattern', 's2_blog')); ?>" /></td>
+							<td class="label"><?php echo Lang::get('Tag label', 's2_blog'); ?></td>
 							<td><input type="text" name="posts[key]" size="40" value="" /></td>
 							<td></td>
 						</tr>
 						<tr>
-							<td class="label"><?php echo $lang_s2_blog['Author']; ?></td>
+							<td class="label"><?php echo Lang::get('Author', 's2_blog'); ?></td>
 							<td><input style="width: 10em;" type="text" name="posts[author]" size="20" value="" /></td>
-							<td style="padding-left: 0.5em;"><label><input type="checkbox" name="posts[hidden]" value="1" checked="checked" /><?php echo $lang_s2_blog['Only hidden']; ?></label></td>
-							<td><input name="button" type="submit" value="<?php echo $lang_s2_blog['Show posts']; ?>" onclick="return LoadPosts();" /></td>
+							<td style="padding-left: 0.5em;"><label><input type="checkbox" name="posts[hidden]" value="1" checked="checked" /><?php echo Lang::get('Only hidden', 's2_blog'); ?></label></td>
+							<td><input name="button" type="submit" value="<?php echo Lang::get('Show posts', 's2_blog'); ?>" onclick="return LoadPosts();" /></td>
 							<td></td>
 						</tr>
 					</table>
@@ -440,14 +445,17 @@ require $ext_info['path'].'/blog_lib.php';
 		]]></hook>
 
 		<hook id="fn_output_tag_form_pre_url"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 ?>
-		<label for="s2_blog_important_tag" title="<?php echo $lang_s2_blog['Important tag info']; ?>">
+		<label for="s2_blog_important_tag" title="<?php echo Lang::get('Important tag info', 's2_blog'); ?>">
 			<input type="checkbox" id="s2_blog_important_tag" name="tag[s2_blog_important]" value="1"<?php if (!empty($tag['s2_blog_important'])) echo ' checked="checked"' ?> />
-			<?php echo $lang_s2_blog['Important tag']; ?>
+			<?php echo Lang::get('Important tag', 's2_blog'); ?>
 		</label>
 		<hr />
 <?php
@@ -520,11 +528,13 @@ if ($type == 'blog')
 	($hook = s2_hook('blfn_save_comment_pre_upd_qr')) ? eval($hook) : null;
 	$s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	global $lang_s2_blog;
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 
 	$article_id = $post_id;
 }
@@ -533,11 +543,13 @@ if ($type == 'blog')
 		<hook id="fn_show_comments_end"><![CDATA[
 if ($mode == 'hidden' || $mode == 'new' || $mode == 'last')
 {
-	global $lang_s2_blog;
-	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-	else
-		require $ext_info['path'].'/lang/English.php';
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
 	$output .= s2_show_comments('s2_blog_'.$mode);
 }
 		]]></hook>
@@ -545,8 +557,6 @@ if ($mode == 'hidden' || $mode == 'new' || $mode == 'last')
 		<hook id="fn_show_comments_pre_get_comm_qr"><![CDATA[
 if (strpos($mode, 's2_blog') === 0)
 {
-	global $lang_s2_blog;
-
 	$query = array(
 		'SELECT'	=> 'p.title, c.post_id AS article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.good, c.ip',
 		'FROM'		=> 's2_blog_comments AS c',
@@ -565,13 +575,13 @@ if (strpos($mode, 's2_blog') === 0)
 	{
 		// Show all hidden commetns
 		$query['WHERE'] = 'shown = 0';
-		$output = '<h2>'.$lang_s2_blog['Blog hidden comments'].'</h2>';
+		$output = '<h2>'.Lang::get('Blog hidden comments', 's2_blog').'</h2>';
 	}
 	elseif ($mode == 's2_blog_new')
 	{
 		// Show unverified commetns
 		$query['WHERE'] = 'shown = 0 AND sent = 0';
-		$output = '<h2>'.$lang_s2_blog['Blog new comments'].'</h2>';
+		$output = '<h2>'.Lang::get('Blog new comments', 's2_blog').'</h2>';
 	}
 	elseif ($mode == 's2_blog_last')
 	{
@@ -579,7 +589,7 @@ if (strpos($mode, 's2_blog') === 0)
 		unset($query['WHERE']);
 		$query['ORDER BY'] = 'time DESC';
 		$query['LIMIT'] = '20';
-		$output = '<h2>'.$lang_s2_blog['Blog last comments'].'</h2>';
+		$output = '<h2>'.Lang::get('Blog last comments', 's2_blog').'</h2>';
 	}
 }
 		]]></hook>
@@ -617,23 +627,29 @@ $s2_const_types['S2_BLOG_TITLE'] = 'string';
 		]]></hook>
 
 		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 $fieldset = array(
-	'S2_BLOG_TITLE' => s2_get_input('S2_BLOG_TITLE', $options['S2_BLOG_TITLE'], $lang_s2_blog['Blog title'], $lang_s2_blog['Blog title label']),
-	'S2_BLOG_URL' => s2_get_input('S2_BLOG_URL', $options['S2_BLOG_URL'], $lang_s2_blog['Blog URL'], $lang_s2_blog['Blog URL label']),
+	'S2_BLOG_TITLE' => s2_get_input('S2_BLOG_TITLE', $options['S2_BLOG_TITLE'], Lang::get('Blog title', 's2_blog'), Lang::get('Blog title label', 's2_blog')),
+	'S2_BLOG_URL' => s2_get_input('S2_BLOG_URL', $options['S2_BLOG_URL'], Lang::get('Blog URL', 's2_blog'), Lang::get('Blog URL label', 's2_blog')),
 );
 ($hook = s2_hook('s2_blog_opt_pre_blog_fs_merge')) ? eval($hook) : null;
-$output .= '<fieldset><legend>'.$lang_s2_blog['Blog'].'</legend>'.implode('', $fieldset).'</fieldset>';
+$output .= '<fieldset><legend>'.Lang::get('Blog', 's2_blog').'</legend>'.implode('', $fieldset).'</fieldset>';
 		]]></hook>
 
 		<hook id="fn_get_counters_end"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 
 $query = array(
 	'SELECT'	=> 'count(*)',
@@ -643,7 +659,7 @@ $query = array(
 ($hook = s2_hook('blfn_get_counters_pre_get_posts_qr')) ? eval($hook) : null;
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-$counters[] = sprintf($lang_s2_blog['Blog posts now'], $s2_db->result($result));
+$counters[] = sprintf(Lang::get('Blog posts now', 's2_blog'), $s2_db->result($result));
 
 $query = array(
 	'SELECT'	=> 'count(*)',
@@ -659,7 +675,7 @@ $query = array(
 ($hook = s2_hook('blfn_get_counters_pre_get_comm_qr')) ? eval($hook) : null;
 $result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-$counters[] = sprintf($lang_s2_blog['Blog comments now'], $s2_db->result($result));
+$counters[] = sprintf(Lang::get('Blog comments now', 's2_blog'), $s2_db->result($result));
 
 		]]></hook>
 
@@ -848,13 +864,13 @@ if (count($s2_blog_ids))
 		]]></hook>
 
 		<hook id="s2_search_find_tags_pre_mrg"><![CDATA[
-if (!isset($lang_s2_blog))
+Lang::load($ext_info['id'], function () use ($ext_info)
 {
 	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-		require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
 	else
-		require $ext_info['path'].'/lang/English.php';
-}
+		return require $ext_info['path'].'/lang/English.php';
+});
 
 $s2_blog_search_sql = array(
 	'SELECT'	=> 'count(*)',
@@ -892,9 +908,9 @@ if (!empty($s2_blog_found_tag))
 {
 	$s2_blog_search_found = count($tags);
 	if ($s2_blog_search_found)
-		$tags[$s2_blog_search_found - 1] .= sprintf($lang_s2_blog['Found tags short'], implode(', ', $s2_blog_found_tag));
+		$tags[$s2_blog_search_found - 1] .= sprintf(Lang::get('Found tags short', 's2_blog'), implode(', ', $s2_blog_found_tag));
 	else
-		$return .= '<p class="s2_search_found_tags">'.sprintf($lang_s2_blog['Found tags'], implode(', ', $s2_blog_found_tag)).'</p>';
+		$return .= '<p class="s2_search_found_tags">'.sprintf(Lang::get('Found tags', 's2_blog'), implode(', ', $s2_blog_found_tag)).'</p>';
 }
 		]]></hook>
 

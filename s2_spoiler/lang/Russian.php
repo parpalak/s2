@@ -1,7 +1,7 @@
 <?php
 
-$lang_s2_spoiler = array(
+return array(
 
-'Hidden text'			=> 'Скрытый текст',
+	'Hidden text' => 'Скрытый текст',
 
 );

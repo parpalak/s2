@@ -1,8 +1,8 @@
 <?php
 
-$lang_s2_seo = array(
+return array(
 
-'Title help'				=> 'Содержимое тега &lt;title&gt;',
-'Title'						=> 'HTML title',
+	'Title help' => 'Содержимое тега &lt;title&gt;',
+	'Title'      => 'HTML title',
 
 );

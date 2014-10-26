@@ -8,14 +8,13 @@
  */
 
 namespace s2_extensions\s2_blog;
+use Lang;
 
 
 class Page_Tag extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog;
-
 		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
@@ -31,13 +30,13 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 		if (S2_BLOG_URL)
 		{
 			$this->page['path'][] = array(
-				'title' => $lang_s2_blog['Blog'],
+				'title' => Lang::get('Blog', 's2_blog'),
 				'link' => S2_BLOG_PATH,
 			);
 		}
 
 		$this->page['path'][] = array(
-			'title' => $lang_s2_blog['Tags'],
+			'title' => Lang::get('Tags', 's2_blog'),
 			'link'  => S2_BLOG_TAGS_PATH,
 		);
 		$this->page['path'][] = array(
@@ -49,7 +48,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 
 	private function posts_by_tag ($tag)
 	{
-		global $s2_db, $lang_s2_blog;
+		global $s2_db;
 
 		$query = array(
 			'SELECT'	=> 'tag_id, description, name',
@@ -68,7 +67,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 
 		$art_links = self::articles_by_tag($tag_id);
 		if (count($art_links))
-			$tag_descr .= '<p>'.$lang_s2_blog['Articles by tag'].'<br />'.implode('<br />', $art_links).'</p>';
+			$tag_descr .= '<p>'.Lang::get('Articles by tag', 's2_blog').'<br />'.implode('<br />', $art_links).'</p>';
 
 		if ($tag_descr)
 			$tag_descr .= '<hr />';

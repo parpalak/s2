@@ -78,15 +78,18 @@ $padding -= 2.583333;
 		]]></hook>
 
 		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
 $fieldset = array(
-	'S2_WYSIWYG_TYPE' => s2_get_checkbox('S2_WYSIWYG_TYPE', $options['S2_WYSIWYG_TYPE'], $lang_s2_wysiwyg['WYSIWYG type'], $lang_s2_wysiwyg['WYSIWYG type label']),
+	'S2_WYSIWYG_TYPE' => s2_get_checkbox('S2_WYSIWYG_TYPE', $options['S2_WYSIWYG_TYPE'], Lang::get('WYSIWYG type', 's2_wysiwyg'), Lang::get('WYSIWYG type label', 's2_wysiwyg')),
 );
 ($hook = s2_hook('s2_wysiwyg_opt_pre_fs_merge')) ? eval($hook) : null;
-$output .= '<fieldset><legend>'.$lang_s2_wysiwyg['WYSIWYG'].'</legend>'.implode('', $fieldset).'</fieldset>';
+$output .= '<fieldset><legend>'.Lang::get('WYSIWYG', 's2_wysiwyg').'</legend>'.implode('', $fieldset).'</fieldset>';
 		]]></hook>
 
 		<hook id="opt_start"><![CDATA[

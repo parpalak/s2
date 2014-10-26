@@ -7,13 +7,13 @@
  */
 
 namespace s2_extensions\s2_blog;
+use \Lang;
+
 
 class Page_Main extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		global $lang_s2_blog;
-
 		$s2_blog_skip = !empty($params['page']) ? (int) $params['page'] : 0;
 
 		$this->template_id = $s2_blog_skip ? 'blog.php' : 'blog_main.php';
@@ -31,7 +31,7 @@ class Page_Main extends Page_HTML implements \Page_Routable
 		if (S2_BLOG_URL)
 		{
 			$this->page['path'][] = array(
-				'title' => $lang_s2_blog['Blog'],
+				'title' => Lang::get('Blog', 's2_blog'),
 				'link' => $s2_blog_skip ? S2_BLOG_PATH : null,
 			);
 		}

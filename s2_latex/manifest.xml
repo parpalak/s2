@@ -29,11 +29,14 @@ $includes['css_inline'][] = '<script src="http://tex.s2cms.ru/latex.js"></script
 		]]></hook>
 
 		<hook id="v_comment_form_pre_syntax_info"><![CDATA[
-if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-else
-	require $ext_info['path'].'/lang/English.php';
-echo $lang_s2_latex['Comment syntax'];
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
+echo Lang::get('Comment syntax', 's2_latex');
 		]]></hook>
 
 		<hook id="pr_render_pre_get_content" priority="4"><![CDATA[
