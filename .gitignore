@@ -1,0 +1,4 @@
+.idea
+_cache/*
+_vendor/*
+config.php
