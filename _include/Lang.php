@@ -13,7 +13,10 @@ class Lang
 	public static function load($namespace, array $values = array())
 	{
 		if (empty($values))
-			$values = require S2_ROOT.'_lang/'.S2_LANGUAGE.'/'.$namespace.'.php';
+		{
+			$language = defined('S2_LANGUAGE') ? S2_LANGUAGE : 'English';
+			$values = require S2_ROOT.'_lang/'.$language.'/'.$namespace.'.php';
+		}
 
 		self::$data[$namespace] = $values;
 	}
@@ -24,6 +27,12 @@ class Lang
 			self::load($namespace);
 
 		return self::$data[$namespace][$key];
+	}
+
+	public static function admin_code ()
+	{
+		$lang_code = self::get('Lang Code');
+		return $lang_code ? $lang_code : 'en';
 	}
 
 	public static function month ($month)

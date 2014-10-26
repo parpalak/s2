@@ -22,8 +22,8 @@ elseif (defined('S2_FORCE_ADMIN_HTTPS'))
 	die();
 }
 
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/admin.php';
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/pictures.php';
 require 'login.php';
 require 'pict_lib.php';
 
@@ -91,7 +91,7 @@ SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 <script type="text/javascript" src="js/jquery-tools.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>
 <script type="text/javascript" src="js/pictman.js"></script>
-<script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
+<script type="text/javascript" src="lang/<?php echo Lang::admin_code(); ?>/ui.js"></script>
 </head>
 
 <body>

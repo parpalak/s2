@@ -22,7 +22,7 @@ elseif (defined('S2_FORCE_ADMIN_HTTPS'))
 	die();
 }
 
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/admin.php';
 require 'login.php';
 require 'site_lib.php';
 
@@ -702,7 +702,7 @@ elseif ($action == 'load_options')
 	s2_test_user_rights($is_permission);
 
 	require 'options.php';
-	require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_opt.php';
+	require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/admin_opt.php';
 
 	echo s2_get_options();
 }
@@ -714,7 +714,7 @@ elseif ($action == 'save_options')
 	s2_test_user_rights($is_permission);
 
 	require 'options.php';
-	require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_opt.php';
+	require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/admin_opt.php';
 
 	$return = s2_save_options($_POST['opt']);
 	if ($return)

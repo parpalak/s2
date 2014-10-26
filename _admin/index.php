@@ -22,7 +22,7 @@ elseif (defined('S2_FORCE_ADMIN_HTTPS'))
 	die();
 }
 
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/admin.php';
 require 'site_lib.php';
 require 'login.php';
 require 'comments.php';
@@ -246,7 +246,7 @@ if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 <script type="text/javascript">
 SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
-<script type="text/javascript" src="../_lang/<?php echo S2_LANGUAGE; ?>/ui.js"></script>
+<script type="text/javascript" src="lang/<?php echo Lang::admin_code(); ?>/ui.js"></script>
 <?php ($hook = s2_hook('ai_pre_js_include')) ? eval($hook) : null; ?>
 <!--[if lt IE 9]>
 <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>

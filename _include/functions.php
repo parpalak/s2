@@ -18,12 +18,11 @@ if (!defined('S2_ROOT'))
 // Puts the date into a string
 function s2_date ($time)
 {
-	global $lang_month_small;
-
 	if (!$time)
 		return '';
 
 	$date = date(Lang::get('Date format'), $time);
+	$lang_month_small = Lang::get('Inline Months');
 	if (isset($lang_month_small))
 		$date = str_replace(array_keys($lang_month_small), array_values($lang_month_small), $date);
 

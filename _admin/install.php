@@ -118,11 +118,13 @@ $languages = s2_read_lang_dir();
 
 $language = isset($_GET['lang']) ? $_GET['lang'] : (isset($_POST['req_language']) ? trim($_POST['req_language']) : get_preferred_lang($languages));
 $language = preg_replace('#[\.\\\/]#', '', $language);
-if (!file_exists(S2_ROOT.'_lang/'.$language.'/install.php'))
+if (!file_exists(S2_ROOT.'_lang/'.$language.'/common.php'))
 	exit('The language pack you have chosen doesn\'t seem to exist or is corrupt. Please recheck and try again.');
 
 // Load the language files
-require S2_ROOT.'_lang/'.$language.'/install.php';
+$lang_common = require S2_ROOT.'_lang/'.$language.'/common.php';
+Lang::load('common', $lang_common);
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/install.php';
 
 if (isset($_POST['generate_config']))
 {

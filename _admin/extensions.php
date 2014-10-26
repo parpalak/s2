@@ -16,7 +16,7 @@ if (!defined('S2_ROOT'))
 if (!defined('S2_XML_FUNCTIONS_LOADED'))
 	require S2_ROOT.'_include/xml.php';
 
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin_ext.php';
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/admin_ext.php';
 
 ($hook = s2_hook('aex_start')) ? eval($hook) : null;
 

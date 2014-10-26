@@ -1,7 +1,9 @@
 <?php
 
 return array(
+	'Lang Code'              => 'ru',
 
+	// Error messages
 	'Error encountered'      => 'Произошла ошибка',
 	'DB repeat items'        => 'Ошибка в базе данных: наличие повторяющихся элементов.',
 	'Error no template'      => 'Ни у одного из разделов шаблон не найден.<br /><br />Вы должны задать шаблон, отличный от шаблона «как у раздела», хотя бы у одного элемента из перечисленных ниже:<br />%s',
@@ -10,7 +12,7 @@ return array(
 	'Error 404'              => 'Ошибка 404',
 	'Error 404 text'         => 'Эта страница никогда не&nbsp;существовала или&nbsp;была удалена. Перейдите на&nbsp;<a href="%1$s">главную</a> и&nbsp;найдите нужную страницу самостоятельно, либо&nbsp;напишите автору сайта.',
 
-// Page content
+	// Page content
 	'In this section'        => 'В этом разделе',
 	'Read in this section'   => 'Читайте в этом разделе',
 	'More in this section'   => 'Еще в разделе <nobr>«%s»</nobr>',
@@ -28,11 +30,11 @@ return array(
 
 	'Favorite'               => 'Избранное',
 
-// RSS
+	// RSS
 	'RSS description'        => '%s. Последние статьи.',
 	'RSS link title'         => 'Последние статьи на сайте',
 
-// Comments
+	// Comments
 	'Wrote'                  => 'пишет:',
 	'Comment info format'    => '%1$s. %2$s пишет:',
 	'Post a comment'         => 'Оставьте свой комментарий',
@@ -50,7 +52,7 @@ return array(
 	'Preview'                => 'Предварительный просмотр',
 	'Error'                  => 'Oшибка!',
 
-// Locale settings
+	// Locale settings
 	'Date format'            => 'j F Y года', // See http://php.net/manual/en/function.date.php for details
 	'Time format'            => 'j F Y года, H:i',
 

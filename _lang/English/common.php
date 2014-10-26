@@ -1,7 +1,9 @@
 <?php
 
 return array(
+	'Lang Code'              => 'en',
 
+	// Error messages
 	'Error encountered'      => 'An error was encountered',
 	'DB repeat items'        => 'Database error: there are several items supposed to be unique.',
 	'Error no template'      => 'No parent section has a template.<br /><br />You have to set a tepmlate differs from “inherited” at least for one item from listed below:<br />%s',
@@ -10,7 +12,7 @@ return array(
 	'Error 404'              => 'Error 404',
 	'Error 404 text'         => 'This page never existed or&nbsp;has been removed. Go to&nbsp;<a href="%1$s">the main page</a> and&nbsp;find the necessary information, or&nbsp;write webmaster.',
 
-// Page content
+	// Page content
 	'In this section'        => 'In this section',
 	'Read in this section'   => 'Read in this section',
 	'More in this section'   => 'More in the section <nobr>“%s”</nobr>',
@@ -28,11 +30,11 @@ return array(
 
 	'Favorite'               => 'Favorite',
 
-// RSS
+	// RSS
 	'RSS description'        => '%s. Last articles.',
 	'RSS link title'         => 'Last articles on the site',
 
-// Comments
+	// Comments
 	'Wrote'                  => 'Wrote:',
 	'Comment info format'    => '%1$s. %2$s wrote:',
 	'Post a comment'         => 'Post a comment',
@@ -50,7 +52,7 @@ return array(
 	'Preview'                => 'Preview',
 	'Error'                  => 'Error!',
 
-// Locale settings
+	// Locale settings
 	'Date format'            => 'F j, Y', // See http://php.net/manual/en/function.date.php for details
 	'Time format'            => 'F j, Y. h:i A',
 

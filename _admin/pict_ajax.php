@@ -25,8 +25,8 @@ elseif (defined('S2_FORCE_ADMIN_HTTPS'))
 	die();
 }
 
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/admin.php';
-require S2_ROOT.'_lang/'.S2_LANGUAGE.'/pictures.php';
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/admin.php';
+require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/pictures.php';
 require 'login.php';
 require 'site_lib.php';
 require 'pict_lib.php';
