@@ -34,6 +34,9 @@ body.e404 {
 	position: relative;
 	}
 
+input, button {
+	font-size: 1em;
+}
 code, kbd, pre, textarea {
 	font-family: Consolas, monospace;
 	font-size: 1em;
