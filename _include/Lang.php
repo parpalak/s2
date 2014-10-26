@@ -10,12 +10,24 @@ class Lang
 {
 	private static $data = array();
 
-	public static function load($namespace, array $values = array())
+	/**
+	 * @param string $namespace
+	 * @param array|callable|null $values
+	 */
+	public static function load($namespace, $values = null)
 	{
 		if (empty($values))
 		{
 			$language = defined('S2_LANGUAGE') ? S2_LANGUAGE : 'English';
 			$values = require S2_ROOT.'_lang/'.$language.'/'.$namespace.'.php';
+		}
+
+		if (is_callable($values))
+		{
+			if (isset(self::$data[$namespace]))
+				return;
+
+			$values = $values();
 		}
 
 		self::$data[$namespace] = $values;
