@@ -164,7 +164,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			$comments .= $this->renderPartial('comment', $row);
 		}
 
-		return $comments ? '<a name="comment"></a><h2 class="comment">'.Lang::get('Comments').'</h2>'."\n".$comments : '';
+		return $comments ? $this->renderPartial('comments', array('comments' => $comments)) : '';
 	}
 
 }
