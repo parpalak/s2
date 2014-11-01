@@ -554,7 +554,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			}
 
 			if ($comments)
-				$page['comments'] = '<h2 class="comment">'.Lang::get('Comments').'</h2>'.$comments;
+				$page['comments'] = $this->renderPartial('comments', array('comments' => $comments));
 		}
 
 		($hook = s2_hook('fn_s2_parse_page_url_end')) ? eval($hook) : null;
