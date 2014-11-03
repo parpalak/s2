@@ -61,7 +61,7 @@ if ($action == 's2_attachment_upload')
 			'WHERE'		=> 'article_id = '.$id,
 		);
 		($hook = s2_hook('s2_attachment_action_upload_pre_pr_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$priority = (int) $s2_db->result($result);
 
@@ -155,7 +155,7 @@ if ($action == 's2_attachment_upload')
 				'VALUES'	=> $id.', \''.$s2_db->escape($name).'\', \''.$s2_db->escape($filename).'\', '.$now.', '.$size.', '.$is_picture.', '.$priority,
 			);
 			($hook = s2_hook('s2_attachment_pre_add_file_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$s2_db->query_build($query);
 
 			$priority++;
 		}

@@ -47,7 +47,7 @@ foreach ($s2_page_blocks_config as $conf_name => $conf_value)
 		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 	]]></install>
@@ -57,7 +57,7 @@ $query = array(
 	'DELETE'	=> 'config',
 	'WHERE'		=> 'name in (\'S2_PAGE_BLOCKS\')',
 );
-$s2_db->query_build($query) or error(__FILE__, __LINE__);
+$s2_db->query_build($query);
 $s2_db->drop_field('articles', 's2_page_blocks');
 	]]></uninstall>
 

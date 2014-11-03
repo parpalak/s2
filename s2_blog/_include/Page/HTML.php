@@ -53,14 +53,14 @@ abstract class Page_HTML extends \Page_HTML
 			'FROM'   => 's2_blog_comments AS c',
 			'WHERE'  => 'c.post_id = p.id AND shown = 1',
 		);
-		$raw_query_comment = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+		$raw_query_comment = $s2_db->query_build($sub_query, true);
 
 		$sub_query = array(
 			'SELECT' => 'u.name',
 			'FROM'   => 'users AS u',
 			'WHERE'  => 'u.id = p.user_id',
 		);
-		$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+		$raw_query_user = $s2_db->query_build($sub_query, true);
 
 		$query = array(
 			'SELECT' => 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, (' . $raw_query_comment . ') AS comment_num, (' . $raw_query_user . ') AS author, p.label',
@@ -74,7 +74,7 @@ abstract class Page_HTML extends \Page_HTML
 			$query['SELECT'] .= ', '.$query_add['SELECT'];
 
 		($hook = s2_hook('fn_s2_blog_get_posts_pre_get_posts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$posts = $merge_labels = $labels = $ids = $sort_array = array();
 		while ($row = $s2_db->fetch_assoc($result))
@@ -149,7 +149,7 @@ abstract class Page_HTML extends \Page_HTML
 				'LIMIT'		=> '1'
 			);
 			($hook = s2_hook('fn_s2_blog_navigation_pre_is_favorite_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			if ($s2_db->fetch_row($result))
 				$s2_blog_navigation['favorite'] = array(
@@ -181,7 +181,7 @@ abstract class Page_HTML extends \Page_HTML
 				'ORDER BY'	=> '3 DESC',
 			);
 			($hook = s2_hook('fn_s2_blog_navigation_pre_get_tags_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			$tags = array();
 			while ($tag = $s2_db->fetch_assoc($result))

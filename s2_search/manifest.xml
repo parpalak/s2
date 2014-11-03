@@ -42,7 +42,7 @@ foreach ($s2_search_config as $conf_name => $conf_value)
 		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 	]]></install>
 
@@ -51,7 +51,7 @@ $query = array(
 	'DELETE'	=> 'config',
 	'WHERE'		=> 'name in (\'S2_SEARCH_QUICK\')',
 );
-$s2_db->query_build($query) or error(__FILE__, __LINE__);
+$s2_db->query_build($query);
 	]]></uninstall>
 
 	<hooks>

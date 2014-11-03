@@ -59,7 +59,7 @@ function s2_blog_save_post ($page, $flags)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_save_post_pre_get_post_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		list($user_id, $revision, $text) = $row;
@@ -90,7 +90,7 @@ function s2_blog_save_post ($page, $flags)
 		$query['SET'] .= ', user_id = '.intval($page['user_id']);
 
 	($hook = s2_hook('fn_s2_blog_save_post_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	if ($s2_db->affected_rows() == -1)
 		$error = true;
 
@@ -105,7 +105,7 @@ function s2_blog_save_post ($page, $flags)
 		'ORDER BY'	=> 'id'
 	);
 	($hook = s2_hook('fn_s2_blog_save_post_pre_get_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$old_tags = array();
 	while ($row = $s2_db->fetch_row($result))
@@ -120,7 +120,7 @@ function s2_blog_save_post ($page, $flags)
 			'WHERE'		=> 'post_id = '.$id
 		);
 		($hook = s2_hook('fn_s2_blog_save_post_pre_del_tags_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 		if ($s2_db->affected_rows() == -1)
 			$error = true;
 
@@ -133,7 +133,7 @@ function s2_blog_save_post ($page, $flags)
 				'VALUES'	=> $id.', '.$tag_id
 			);
 			($hook = s2_hook('fn_s2_blog_save_post_pre_ins_tags_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$s2_db->query_build($query);
 			if ($s2_db->affected_rows() == -1)
 				$error = true;
 		}
@@ -165,7 +165,7 @@ function s2_blog_check_url_status ($create_time, $url)
 			'WHERE'		=> 'url = \''.$url.'\' AND create_time < '.$end_time.' AND create_time >= '.$start_time
 		);
 		($hook = s2_hook('fn_s2_blog_check_url_status_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if ($s2_db->result($result) != 1)
 			$url_status = 'not_unique';
@@ -190,7 +190,7 @@ function s2_blog_create_post ()
 		'VALUES'	=> $now.', '.$now.', \''.$lang_admin['New page'].'\', \'\', 0, '.$s2_user['id']
 	);
 	($hook = s2_hook('fn_s2_blog_create_post_pre_ins_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return $s2_db->insert_id();
 }
@@ -205,7 +205,7 @@ function s2_blog_flip_favorite ($id)
 		'WHERE'		=> 'id = '.$id,
 	);
 	($hook = s2_hook('fn_s2_blog_flip_favorite_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 }
 
 function s2_blog_delete_post ($id)
@@ -220,7 +220,7 @@ function s2_blog_delete_post ($id)
 			'WHERE'		=> 'id = '.$id
 		);
 		($hook = s2_hook('fn_s2_blog_delete_post_pre_get_uid_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if ($row = $s2_db->fetch_row($result))
 			list($user_id) = $row;
@@ -236,21 +236,21 @@ function s2_blog_delete_post ($id)
 		'LIMIT'		=> '1'
 	);
 	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_post_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'DELETE'	=> 's2_blog_post_tag',
 		'WHERE'		=> 'post_id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_tags_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'DELETE'	=> 's2_blog_comments',
 		'WHERE'		=> 'post_id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_cmnts_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	($hook = s2_hook('fn_s2_blog_delete_post_end')) ? eval($hook) : null;
 }
@@ -270,7 +270,7 @@ function s2_blog_get_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_get_comment_pre_get_cmnnt_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$comment = $s2_db->fetch_assoc($result);
 
@@ -290,7 +290,7 @@ function s2_blog_hide_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_hide_comment_pre_get_cmnt_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$comment = $s2_db->fetch_assoc($result);
 	if (!$comment)
@@ -311,7 +311,7 @@ function s2_blog_hide_comment ($id)
 			'WHERE'		=> 'id = '.$comment['post_id'].' AND published = 1 AND commented = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_hide_comment_pre_get_post_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if ($post = $s2_db->fetch_assoc($result))
 		{
@@ -324,7 +324,7 @@ function s2_blog_hide_comment ($id)
 				'WHERE'		=> 'post_id = '.$comment['post_id'].' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($comment['email']).'\''
 			);
 			($hook = s2_hook('fn_s2_blog_toggle_hide_comment_pre_get_rcvs_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			$receivers = array();
 			while ($receiver = $s2_db->fetch_assoc($result))
@@ -347,7 +347,7 @@ function s2_blog_hide_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_hide_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return $comment['post_id'];
 }
@@ -364,7 +364,7 @@ function s2_blog_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_mark_comment_pre_get_pid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		$post_id = $row[0];
@@ -378,7 +378,7 @@ function s2_blog_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_mark_comment_pre_get_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return $post_id;
 }
@@ -395,7 +395,7 @@ function s2_blog_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_comment_pre_get_pid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		$post_id = $row[0];
@@ -407,7 +407,7 @@ function s2_blog_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_comment_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return $post_id;
 }
@@ -516,7 +516,7 @@ function s2_blog_output_post_list ($criteria)
 		'ORDER BY'	=> 'create_time DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_output_post_list_pre_fetch_posts_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$rows = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -536,7 +536,7 @@ function s2_blog_output_post_list ($criteria)
 			'ORDER BY'	=> 'id'
 		);
 		($hook = s2_hook('fn_s2_blog_output_post_list_pre_get_tags_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 		while ($row = $s2_db->fetch_assoc($result))
 			if (isset($rows[$row['post_id']]))
 				$rows[$row['post_id']]['tags'][] = $tag_names[$row['tag_id']];
@@ -580,7 +580,7 @@ function s2_blog_tag_list ()
 		'FROM'		=> 's2_blog_post_tag AS pt',
 		'WHERE'		=> 't.tag_id = pt.tag_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$raw_query = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> 'tag_id AS id, name, url, ('.$raw_query.') AS post_count',
@@ -588,7 +588,7 @@ function s2_blog_tag_list ()
 		'ORDER BY'	=> 'post_count DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_tag_list_pre_page_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$names = $urls = $counts = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -609,7 +609,7 @@ function s2_blog_edit_post_form ($id)
 		'FROM'		=> 's2_blog_comments AS c',
 		'WHERE'		=> 'p.id = c.post_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$raw_query = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> 'title, text, create_time, modify_time, published, favorite, commented, url, label, ('.$raw_query.') AS comment_num, user_id, revision',
@@ -617,7 +617,7 @@ function s2_blog_edit_post_form ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_page_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	$page = $s2_db->fetch_assoc($result);
 
 	if (!$page['published'])
@@ -641,14 +641,14 @@ function s2_blog_edit_post_form ($id)
 		'FROM'		=> 's2_blog_post_tag AS pt',
 		'WHERE'		=> 't.tag_id = pt.tag_id'
 	);
-	$used_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$used_raw_query = $s2_db->query_build($subquery, true);
 
 	$subquery = array(
 		'SELECT'	=> 'id',
 		'FROM'		=> 's2_blog_post_tag AS pt',
 		'WHERE'		=> 't.tag_id = pt.tag_id AND pt.post_id = '.$id
 	);
-	$current_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$current_raw_query = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as link_id',
@@ -656,7 +656,7 @@ function s2_blog_edit_post_form ($id)
 		'ORDER BY'	=> 'used DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_chk_url_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$all_tags = $tags = array();
 	while ($tag = $s2_db->fetch_assoc($result))
@@ -675,7 +675,7 @@ function s2_blog_edit_post_form ($id)
 		'ORDER BY'	=> 'count(label) DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_labels_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$labels = array();
 	while ($row = $s2_db->fetch_row($result))
@@ -690,7 +690,7 @@ function s2_blog_edit_post_form ($id)
 			'WHERE'		=> 'create_articles = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_edit_post_form_pre_users_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$users = array(0 => '');
 		while ($user = $s2_db->fetch_assoc($result))

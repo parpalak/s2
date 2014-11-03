@@ -21,7 +21,7 @@ function s2_attachment_items ($id)
 		'ORDER BY'	=> 'priority',
 	);
 	($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$list_files = $list_pictures = '';
 	while ($row = $s2_db->fetch_assoc($result))
@@ -93,7 +93,7 @@ function s2_attachment_sort_files ($ids)
 			'WHERE'		=> 'id = '.$id
 		);
 		($hook = s2_hook('fn_s2_attachment_sort_files_pre_update')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 	}
 }
 
@@ -201,7 +201,7 @@ function s2_attachment_placeholder_content ($id, $placeholder_limit)
 		'ORDER BY'	=> 'priority'
 	);
 	($hook = s2_hook('fn_s2_attachment_items_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$list_files = '';
 	$list_pictures = array();

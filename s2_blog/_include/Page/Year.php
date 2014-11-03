@@ -68,7 +68,7 @@ class Page_Year extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND published = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_year_posts_pre_get_days_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$day_flags = array_fill(1, 12, '');
 		while ($row = $s2_db->fetch_row($result))

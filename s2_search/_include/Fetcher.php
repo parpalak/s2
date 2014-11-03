@@ -27,7 +27,7 @@ class Fetcher implements GenericFetcher
 			'WHERE'		=> 'a2.parent_id = a.id',
 			'LIMIT'		=> '1'
 		);
-		$child_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+		$child_num_query = $s2_db->query_build($subquery, true);
 
 		$query = array(
 			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
@@ -35,7 +35,7 @@ class Fetcher implements GenericFetcher
 			'WHERE'		=> 'parent_id = '.$parent_id.' AND published = 1',
 		);
 		($hook = s2_hook('s2_search_fetcer_crawl_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		while ($article = $s2_db->fetch_assoc($result))
 		{
@@ -71,7 +71,7 @@ class Fetcher implements GenericFetcher
 			'WHERE'		=> 'a2.parent_id = a.id',
 			'LIMIT'		=> '1'
 		);
-		$child_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+		$child_num_query = $s2_db->query_build($subquery, true);
 
 		$query = array(
 			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
@@ -79,7 +79,7 @@ class Fetcher implements GenericFetcher
 			'WHERE'		=> 'id = \''.$s2_db->escape($id).'\' AND published = 1',
 		);
 		($hook = s2_hook('s2_search_fetcher_chapter_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$article = $s2_db->fetch_assoc($result);
 		if (!$article)
@@ -124,7 +124,7 @@ class Fetcher implements GenericFetcher
 				'WHERE'		=> 'id IN ('.implode(', ', $ids).') AND published = 1',
 			);
 			($hook = s2_hook('s2_search_fetcher_texts_pre_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			while ($article = $s2_db->fetch_assoc($result))
 				$articles[$article['id']] = $article['pagetext'];

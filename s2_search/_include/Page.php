@@ -168,7 +168,7 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 			'LIMIT'  => '1'
 		);
 		($hook = s2_hook('s2_search_pre_find_tags_sub_qr')) ? eval($hook) : null;
-		$s2_search_sub_sql = $s2_db->query_build($sql, true) or error(__FILE__, __LINE__);
+		$s2_search_sub_sql = $s2_db->query_build($sql, true);
 
 		$sql = array(
 			'SELECT' => 'tag_id, name, url, (' . $s2_search_sub_sql . ') AS used',
@@ -176,7 +176,7 @@ if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = 
 			'WHERE'  => 'name LIKE \'' . $s2_db->escape(trim($query)) . '%\'',
 		);
 		($hook = s2_hook('s2_search_pre_find_tags_qr')) ? eval($hook) : null;
-		$s2_search_result = $s2_db->query_build($sql) or error(__FILE__, __LINE__);
+		$s2_search_result = $s2_db->query_build($sql);
 
 		$tags = array();
 		while ($s2_search_row = $s2_db->fetch_assoc($s2_search_result))

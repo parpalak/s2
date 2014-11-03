@@ -35,7 +35,7 @@ $s2_section_news_attachment_q = array(
 	'WHERE'		=> 'f.article_id = a.id AND is_picture = 1',
 	'LIMIT'		=> '1'
 );
-$s2_section_news_attachment_raw = $s2_db->query_build($s2_section_news_attachment_q, true) or error(__FILE__, __LINE__);
+$s2_section_news_attachment_raw = $s2_db->query_build($s2_section_news_attachment_q, true);
 $s2_section_news_q['SELECT'] .= ', ('.$s2_section_news_attachment_raw.') AS s2_section_news_attachment';
 		]]></hook>
 
@@ -62,7 +62,7 @@ if ($template_id == 'news.php')
 		'WHERE'		=> 'f.article_id = a.id AND is_picture = 1',
 		'LIMIT'		=> '1'
 	);
-	$s2_section_news_attachment_raw = $s2_db->query_build($s2_section_news_attachment_q, true) or error(__FILE__, __LINE__);
+	$s2_section_news_attachment_raw = $s2_db->query_build($s2_section_news_attachment_q, true);
 	$query['SELECT'] .= ', ('.$s2_section_news_attachment_raw.') AS s2_section_news_attachment';
 }
 		]]></hook>

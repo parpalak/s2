@@ -42,7 +42,7 @@ function s2_tpl_edit_file_list ($template_filename)
 		'FROM'		=> 'articles'
 	);
 	($hook = s2_hook('fn_s2_tpl_edit_file_list_pre_get_tpl_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	while ($row = $s2_db->fetch_row($result))
 		if (!isset($templates[$row[0]]))

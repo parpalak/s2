@@ -49,7 +49,7 @@ class Lib
 				'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND published = 1'
 			);
 			($hook = s2_hook('fn_s2_blog_calendar_pre_get_days_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 			while ($row = $s2_db->fetch_row($result))
 				$day_flags[1 + intval(($row[0] - $start_time) / 86400)] = 1;
 		}
@@ -131,14 +131,14 @@ class Lib
 			'FROM'		=> 's2_blog_comments AS c',
 			'WHERE'		=> 'c.post_id = p.id AND shown = 1',
 		);
-		$raw_query_comment = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+		$raw_query_comment = $s2_db->query_build($sub_query, true);
 
 		$sub_query = array(
 			'SELECT'	=> 'u.name',
 			'FROM'		=> 'users AS u',
 			'WHERE'		=> 'u.id = p.user_id',
 		);
-		$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+		$raw_query_user = $s2_db->query_build($sub_query, true);
 
 		$query = array(
 			'SELECT'	=> 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.modify_time, p.favorite, ('.$raw_query_comment.') AS comment_num, ('.$raw_query_user.') AS author, p.label',
@@ -148,7 +148,7 @@ class Lib
 			'LIMIT'		=> ((int) $num_posts).' OFFSET '.((int) $skip)
 		);
 		($hook = s2_hook('fn_s2_blog_last_posts_array_pre_get_ids_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$posts = $merge_labels = $labels = $ids = array();
 		$i = 0;
@@ -215,7 +215,7 @@ class Lib
 				'WHERE'		=> 'p.label IN (\''.implode('\', \'', array_keys($labels)).'\') AND p.published = 1'
 			);
 			($hook = s2_hook('fn_s2_blog_posts_links_pre_get_labels_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			$rows = $sort_array = array();
 			while ($row = $s2_db->fetch_assoc($result))
@@ -246,7 +246,7 @@ class Lib
 			'WHERE'		=> 'pt.post_id IN ('.$ids.')'
 		);
 		($hook = s2_hook('fn_s2_blog_posts_links_pre_get_tags_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$rows = $sort_array = array();
 		while ($row = $s2_db->fetch_assoc($result))

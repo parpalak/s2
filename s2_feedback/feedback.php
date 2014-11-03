@@ -89,7 +89,7 @@ $query = array(
 	'FROM'		=> 'users',
 	'WHERE'		=> 'edit_users = 1 and email <> \'\''
 );
-$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+$result = $s2_db->query_build($query);
 while ($mrow = $s2_db->fetch_assoc($result))
 	s2_feedback_send($mrow['email'], Lang::get('Mail subject', 's2_feedback'), $message);
 

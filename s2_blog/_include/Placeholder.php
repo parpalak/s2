@@ -24,7 +24,7 @@ class Placeholder
 			'FROM'		=> 's2_blog_comments AS c1',
 			'WHERE'		=> 'shown = 1 AND c1.post_id = c.post_id AND c1.time < c.time'
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
+		$raw_query1 = $s2_db->query_build($subquery1, true);
 
 		$query = array(
 			'SELECT'	=> 'time, url, title, nick, create_time, ('.$raw_query1.') AS count',
@@ -40,7 +40,7 @@ class Placeholder
 			'LIMIT'		=> '5'
 		);
 		($hook = s2_hook('fn_s2_blog_recent_comments_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$output = array();
 		while ($row = $s2_db->fetch_assoc($result))
@@ -71,7 +71,7 @@ class Placeholder
 			'GROUP BY'	=> 'c.post_id',
 			'ORDER BY'	=> 'comment_num DESC',
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
+		$raw_query1 = $s2_db->query_build($subquery1, true);
 
 		$query = array(
 			'SELECT'	=> 'p.create_time, p.url, p.title, c1.comment_num AS comment_num, c2.nick, c2.time',
@@ -86,7 +86,7 @@ class Placeholder
 			'LIMIT'		=> '10',
 		);
 		($hook = s2_hook('fn_s2_blog_recent_discussions_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$output = array();
 		while ($row = $s2_db->fetch_assoc($result))

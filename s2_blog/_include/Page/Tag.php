@@ -56,7 +56,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'url = \''.$s2_db->escape($tag).'\''
 		);
 		($hook = s2_hook('fn_s2_blog_posts_by_tag_pre_get_tag_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if ($row = $s2_db->fetch_row($result))
 			list($tag_id, $tag_descr, $tag_name) = $row;
@@ -105,7 +105,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+		$raw_query1 = $s2_db->query_build($subquery, true);
 
 		$query = array(
 			'SELECT'	=> 'a.id, a.url, a.title, a.parent_id, ('.$raw_query1.') IS NOT NULL AS children_exist',
@@ -119,7 +119,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'atg.tag_id = '.$tag_id.' AND a.published = 1',
 		);
 		($hook = s2_hook('fn_articles_by_tag_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$title = $urls = $parent_ids = array();
 

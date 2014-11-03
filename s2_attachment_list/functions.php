@@ -37,7 +37,7 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit, $time_for
 		'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 		'LIMIT'		=> '1'
 	);
-	$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$raw_query1 = $s2_db->query_build($subquery, true);
 
 	$subquery = array(
 		'SELECT'	=> 'a.id',
@@ -45,7 +45,7 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit, $time_for
 		'WHERE'		=> 'f.article_id = a.id',
 		'LIMIT'		=> '1'
 	);
-	$raw_query2 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$raw_query2 = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> '*, ('.$raw_query1.') IS NOT NULL AS children_exist',
@@ -60,7 +60,7 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit, $time_for
 			'FROM'		=> 'articles AS a',
 			'WHERE'		=> 'a.parent_id = '.$id.' AND ('.$raw_query2.') IS NOT NULL AND a.published = 1',
 		);
-		$result = $s2_db->query_build($query2) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query2);
 		$item_num = $s2_db->result($result);
 
 		$total_pages = ceil(1.0 * $item_num / $page_limit);
@@ -72,7 +72,7 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit, $time_for
 		$query['LIMIT'] = $page_limit.' OFFSET '.($page_limit*($page - 1));
 	}
 	($hook = s2_hook('fn_s2_attachment_list_pre_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$rows = $ids = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -92,7 +92,7 @@ function s2_attachment_list ($id, $current_path, $config, $page_limit, $time_for
 			'ORDER BY'	=> 'time'
 		);
 		($hook = s2_hook('fn_s2_attachment_list_pre_get_files_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		while ($row = $s2_db->fetch_assoc($result))
 			$files[$row['article_id']][] = '<a href="'.S2_PATH.'/'.S2_IMG_DIR.'/'.date('Y', $row['time']).'/'.$row['article_id'].'/'.$row['filename'].'">'.s2_htmlencode($row['name'] ? $row['name'] : $row['filename']).'</a>';

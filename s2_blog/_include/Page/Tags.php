@@ -51,7 +51,7 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 			'FROM'		=> 'tags'
 		);
 		($hook = s2_hook('fn_s2_blog_all_tags_pre_get_tags_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		while ($row = $s2_db->fetch_assoc($result))
 		{
@@ -72,7 +72,7 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'p.published = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_all_tags_pre_get_posts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		while ($row = $s2_db->fetch_row($result))
 			$tag_count[$row[0]] = isset($tag_count[$row[0]]) ? $tag_count[$row[0]] + 1 : 1;

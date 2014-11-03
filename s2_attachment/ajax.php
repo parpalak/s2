@@ -31,7 +31,7 @@ if ($action == 's2_attachment_delete')
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('rq_action_s2_attachment_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$file = $s2_db->fetch_assoc($result);
 	$path = S2_IMG_PATH.'/'.date('Y', $file['time']).'/'.$file['article_id'];
@@ -51,7 +51,7 @@ if ($action == 's2_attachment_delete')
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('rq_action_s2_attachment_delete_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	echo s2_attachment_items($file['article_id']);
 }
@@ -81,7 +81,7 @@ elseif ($action == 's2_attachment_rename')
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('rq_action_s2_attachment_rename_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$query = array(
 		'SELECT'	=> 'article_id',
@@ -89,7 +89,7 @@ elseif ($action == 's2_attachment_rename')
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('rq_action_s2_attachment_rename_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$file = $s2_db->fetch_assoc($result);
 	echo s2_attachment_items($file['article_id']);

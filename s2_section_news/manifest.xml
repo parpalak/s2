@@ -51,7 +51,7 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 		'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 		'LIMIT'		=> '1'
 	);
-	$s2_section_news_raw1 = $s2_db->query_build($s2_section_news_sq, true) or error(__FILE__, __LINE__);
+	$s2_section_news_raw1 = $s2_db->query_build($s2_section_news_sq, true);
 
 	// Fetching id of the news section
 	$s2_section_news_sq = array(
@@ -59,7 +59,7 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 		'FROM'		=> 'articles AS a2',
 		'WHERE'		=> 'a2.published = 1 AND a2.template = \'news.php\'',
 	);
-	$s2_section_news_raw2 = $s2_db->query_build($s2_section_news_sq, true) or error(__FILE__, __LINE__);
+	$s2_section_news_raw2 = $s2_db->query_build($s2_section_news_sq, true);
 
 	$s2_section_news_q = array (
 		'SELECT'	=> 'title, url, ('.$s2_section_news_raw1.') IS NOT NULL AS children_exist, id, excerpt, create_time, parent_id',
@@ -68,7 +68,7 @@ if (strpos($template, '<!-- s2_section_news -->') !== false)
 		'ORDER BY'	=> 'create_time DESC',
 	);
 	($hook = s2_hook('s2_section_news_pre_get_news')) ? eval($hook) : null;
-	$s2_section_news_result = $s2_db->query_build($s2_section_news_q) or error(__FILE__, __LINE__);
+	$s2_section_news_result = $s2_db->query_build($s2_section_news_q);
 
 	$s2_section_news_html = '<div class="info"><p class="data">%1$s</p>'."\n".
 		'<a href="%2$s">%3$s</a>'."\n".

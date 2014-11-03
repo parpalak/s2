@@ -39,7 +39,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 	);
 
 	($hook = s2_hook('fn_s2_manage_extensions_refresh_hooks_pre_delete_hooks')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	// Now insert the hooks
 	if (isset($ext_data['extension']['hooks']['hook']))
@@ -56,7 +56,7 @@ function s2_manage_extensions_refresh_hooks ($id)
 				);
 
 				($hook = s2_hook('fn_s2_manage_extensions_refresh_hooks_pre_add_hook')) ? eval($hook) : null;
-				$s2_db->query_build($query) or error(__FILE__, __LINE__);
+				$s2_db->query_build($query);
 			}
 		}
 	}

@@ -63,7 +63,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			'FROM'		=> 'users AS u',
 			'WHERE'		=> 'u.id = p.user_id',
 		);
-		$raw_query_user = $s2_db->query_build($sub_query, true) or error(__FILE__, __LINE__);
+		$raw_query_user = $s2_db->query_build($sub_query, true);
 
 		$query = array(
 			'SELECT'	=> 'create_time, title, text, id, commented, label, favorite, ('.$raw_query_user.') AS author',
@@ -71,7 +71,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND url = \''.$s2_db->escape($url).'\' AND published = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_get_post_pre_get_post_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if (!$row = $s2_db->fetch_assoc($result))
 		{
@@ -94,7 +94,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 				'ORDER BY'	=> 'create_time DESC'
 			);
 			($hook = s2_hook('fn_s2_blog_get_post_pre_get_labelled_posts_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			$links = array();
 			while ($row1 = $s2_db->fetch_assoc($result))
@@ -120,7 +120,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			'ORDER BY'	=> 'pt.id'
 		);
 		($hook = s2_hook('fn_s2_blog_get_post_pre_get_labelled_posts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$tags = array();
 		while ($tag = $s2_db->fetch_assoc($result))
@@ -156,7 +156,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			'ORDER BY'	=> 'time'
 		);
 		($hook = s2_hook('fn_s2_blog_get_comments_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		for ($i = 1; $row = $s2_db->fetch_assoc($result); $i++)
 		{
