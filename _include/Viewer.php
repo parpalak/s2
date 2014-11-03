@@ -64,7 +64,7 @@ class Viewer
 		{
 			echo '<div style="border: 1px solid rgba(0, 0, 0, 0.15); margin: 1px; position: relative;">',
 			'<pre style="opacity: 0.4; background: darkgray; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display == \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
-			'<pre style="display: none; font-size: 12px; line-height: 1.3;">';
+			'<pre style="display: none; font-size: 12px; line-height: 1.3; color: #9e9; background: #003;">';
 			echo s2_htmlencode(var_export($vars, true));
 			echo '</pre>';
 		}

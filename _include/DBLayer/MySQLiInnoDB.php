@@ -40,31 +40,23 @@ class DBLayer_MySQLiInnodb extends DBLayer_MySQli
 
 		$this->query_result = @mysqli_query($this->link_id, $sql);
 
-		if ($this->query_result)
+		if (isset($q_start))
+			$this->saved_queries[] = array($sql, microtime(true) - $q_start);
+
+		if (!$this->query_result)
 		{
-			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, microtime(true) - $q_start);
-
-			++$this->num_queries;
-
-			return $this->query_result;
-		}
-		else
-		{
-			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, 0);
-
-			$this->error_no = @mysqli_errno($this->link_id);
-			$this->error_msg = @mysqli_error($this->link_id);
-
 			// Rollback transaction
 			if ($this->in_transaction)
 				mysqli_query($this->link_id, 'ROLLBACK');
 
 			--$this->in_transaction;
 
-			return false;
+			throw new DBLayer_Exception(@mysqli_error($this->link_id), @mysqli_errno($this->link_id), $sql);
 		}
+
+		++$this->num_queries;
+
+		return $this->query_result;
 	}
 
 	public function get_version()

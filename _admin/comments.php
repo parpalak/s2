@@ -67,7 +67,7 @@ function s2_show_comments ($mode, $id = 0)
 	}
 
 	($hook = s2_hook('fn_show_comments_pre_get_comm_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$article_titles = $comments_tables = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -178,7 +178,7 @@ function s2_for_premoderation ()
 		'WHERE'		=> 'shown = 0 AND sent = 0'
 	);
 	($hook = s2_hook('fn_for_premoderation_pre_comm_check_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	$new_comment_count = $s2_db->result($result);
 
 	($hook = s2_hook('fn_for_premoderation_pre_comm_check')) ? eval($hook) : null;
@@ -259,7 +259,7 @@ function s2_get_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_get_comment_pre_get_cmnt_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$comment = $s2_db->fetch_assoc($result);
 
@@ -279,7 +279,7 @@ function s2_toggle_hide_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_hide_comment_pre_get_comment_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$comment = $s2_db->fetch_assoc($result);
 	if (!$comment)
@@ -300,7 +300,7 @@ function s2_toggle_hide_comment ($id)
 			'WHERE'		=> 'id = '.$comment['article_id'].' AND published = 1 AND commented = 1'
 		);
 		($hook = s2_hook('fn_toggle_hide_comment_pre_get_page_info_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if (($article = $s2_db->fetch_assoc($result)) && ($path = Model::path_from_id($article['parent_id'], true)) !== false)
 		{
@@ -313,7 +313,7 @@ function s2_toggle_hide_comment ($id)
 				'WHERE'		=> 'article_id = '.$comment['article_id'].' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($comment['email']).'\''
 			);
 			($hook = s2_hook('fn_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			$receivers = array();
 			while ($receiver = $s2_db->fetch_assoc($result))
@@ -336,7 +336,7 @@ function s2_toggle_hide_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_hide_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return $comment['article_id'];
 }
@@ -353,7 +353,7 @@ function s2_toggle_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_mark_comment_pre_get_aid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		$article_id = $row[0];
@@ -367,7 +367,7 @@ function s2_toggle_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_mark_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return $article_id;
 }
@@ -397,7 +397,7 @@ function s2_save_comment ($comment)
 			'WHERE'		=> 'id = '.$id
 		);
 		($hook = s2_hook('fn_save_comment_pre_get_aid_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if ($row = $s2_db->fetch_row($result))
 			$article_id = $row[0];
@@ -411,7 +411,7 @@ function s2_save_comment ($comment)
 			'WHERE'		=> 'id = '.$id
 		);
 		($hook = s2_hook('fn_save_comment_pre_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 
 	($hook = s2_hook('fn_save_comment_end')) ? eval($hook) : null;
@@ -431,7 +431,7 @@ function s2_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_delete_comment_pre_get_aid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		$article_id = $row[0];
@@ -443,7 +443,7 @@ function s2_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_delete_comment_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return $article_id;
 }

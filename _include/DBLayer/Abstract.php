@@ -12,9 +12,6 @@ abstract class DBLayer_Abstract
 	protected $saved_queries = array();
 	protected $num_queries = 0;
 
-	protected $error_no = false;
-	protected $error_msg = 'Unknown';
-
 	protected $prefix = '';
 
 	private static function getClassName ($db_type)
@@ -168,7 +165,7 @@ abstract class DBLayer_Abstract
 	abstract function fetch_row($query_id);
 	abstract function fetch_assoc($query_id);
 	abstract function insert_id();
-	abstract function free_result();
+	abstract function free_result($query_id);
 	abstract function get_version();
 	abstract function create_table($table_name, $schema, $no_prefix = false);
 	abstract function close();
@@ -181,13 +178,4 @@ abstract class DBLayer_Abstract
 
 		return $return;
 	}
-
-	public function error()
-	{
-		return array(
-			'error_sql' => @current(@end($this->saved_queries)),
-			'error_no'  => $this->error_no,
-			'error_msg' => $this->error_msg,
-		);
-	}
-} 
+}

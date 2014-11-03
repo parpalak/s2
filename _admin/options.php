@@ -45,7 +45,7 @@ function s2_read_options ()
 		'FROM'		=> 'config'
 	);
 	($hook = s2_hook('fn_read_options_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$output = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -226,7 +226,7 @@ function s2_save_options ($opt)
 				'WHERE'		=> 'name = \''.$s2_db->escape($name).'\''
 			);
 			($hook = s2_hook('fn_save_options_loop_pre_update_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$s2_db->query_build($query);
 		}
 	}
 
@@ -241,7 +241,7 @@ function s2_save_options ($opt)
 			'WHERE'		=> 'name = \'S2_STYLE\''
 		);
 		($hook = s2_hook('fn_save_options_pre_style_update_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 
 	$lang = preg_replace('#[\.\\\/]#', '', $opt['lang']);
@@ -255,7 +255,7 @@ function s2_save_options ($opt)
 			'WHERE'		=> 'name = \'S2_LANGUAGE\''
 		);
 		($hook = s2_hook('fn_save_options_pre_lang_update_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 
 	S2Cache::generate_config();

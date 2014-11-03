@@ -164,7 +164,7 @@ function s2_get_user_list ()
 	);
 
 	($hook = s2_hook('fn_get_user_list_pre_select_query')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$body = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -257,7 +257,7 @@ function s2_preload_editor ()
 			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[$i]).'\''.(S2_USE_HIERARCHY ? ' AND parent_id = '.$id : '')
 		);
 		($hook = s2_hook('fn_preload_editor_loop_pre_get_parents_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$id = $s2_db->result($result);
 		if (!$id)
@@ -386,7 +386,7 @@ function s2_get_tag_ids ($tag_str)
 		'WHERE'		=> 't.name in (\''.implode('\', \'', $escaped_tags).'\')'
 	);
 	($hook = s2_hook('fn_get_tag_ids_pre_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$ids = $real_tags = array();
 	while ($real_tag = $s2_db->fetch_assoc($result))
@@ -411,7 +411,7 @@ function s2_get_tag_ids ($tag_str)
 				'VALUES'	=> '\''.$new_tag.'\', \'\', \'0\', \''.$new_tag.'\''
 			);
 			($hook = s2_hook('fn_get_tag_ids_pre_ins_tag_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$s2_db->query_build($query);
 
 			$ids[$k] = $s2_db->insert_id();
 			$real_tags[$k] = $new_tag;

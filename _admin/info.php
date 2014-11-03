@@ -23,7 +23,7 @@ function s2_count_articles ($id)
 		'WHERE'		=> 'published = 1 AND parent_id = '.$id
 	);
 	($hook = s2_hook('fn_count_articles_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	while ($row = $s2_db->fetch_row($result))
 		$n += s2_count_articles($row[0]);
 
@@ -49,7 +49,7 @@ function s2_get_counters ()
 		'WHERE'		=> 'c.shown = 1 AND a.published = 1'
 	);
 	($hook = s2_hook('fn_get_counters_pre_get_comm_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	$comments_num = $s2_db->result($result);
 
 	$counters = array(
@@ -95,7 +95,7 @@ function s2_stat_info ()
 		$db_version = 'MySQL '.$db_version;
 
 		// Calculate total db size/row count
-		$result = $s2_db->query('SHOW TABLE STATUS FROM `'.$db_name.'` LIKE \''.$db_prefix.'%\'') or error(__FILE__, __LINE__);
+		$result = $s2_db->query('SHOW TABLE STATUS FROM `'.$db_name.'` LIKE \''.$db_prefix.'%\'');
 
 		$total_records = $total_size = 0;
 		while ($status = $s2_db->fetch_assoc($result))

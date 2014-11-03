@@ -31,7 +31,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'url = \''.$s2_db->escape($tag_name).'\''
 		);
 		($hook = s2_hook('pt_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if ($row = $s2_db->fetch_row($result))
 			list($tag_id, $tag_description, $tag_name) = $row;
@@ -49,7 +49,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query1 = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+		$raw_query1 = $s2_db->query_build($subquery, true);
 
 		$sort_order = SORT_DESC; // SORT_ASC also possible
 		$query = array(
@@ -64,7 +64,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'at.tag_id = '.$tag_id.' AND a.published = 1'
 		);
 		($hook = s2_hook('pt_make_tags_pages_pre_get_arts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$urls = $parent_ids = $rows = array();
 		while ($row = $s2_db->fetch_assoc($result))

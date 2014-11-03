@@ -451,7 +451,7 @@ else
 	}
 	catch (Exception $e)
 	{
-		error($e->getMessage(), $e->getFile(), $e->getLine());
+		error($e);
 	}
 
 
@@ -959,7 +959,7 @@ else
 		'VALUES'	=> '\''.$s2_db->escape($username).'\', \''.md5($password.'Life is not so easy :-)').'\', \''.$s2_db->escape($email).'\', 1, 1, 1, 1, 1, 1, 1'
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 	$admin_uid = $s2_db->insert_id();
 
 	// Enable/disable automatic check for updates depending on PHP environment (require cURL, fsockopen or allow_url_fopen)
@@ -997,7 +997,7 @@ else
 			'VALUES'	=> '\''.$conf_name.'\', '.$conf_value.''
 		);
 
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 
 	// Insert some other default data
@@ -1007,7 +1007,7 @@ else
 		'VALUES'	=> '0, \''.$lang_install['Main Page'].'\', 0, '.$now.', 1, \'mainpage.php\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url',
@@ -1015,7 +1015,7 @@ else
 		'VALUES'	=> '1, \''.$lang_install['Section example'].'\', '.$now.', '.$now.', 1, \'site.php\', \'section1\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url, pagetext, excerpt, user_id',
@@ -1023,7 +1023,7 @@ else
 		'VALUES'	=> '2, \''.$lang_install['Page example'].'\', '.$now.', '.$now.', 1, \'\', \'page1\', \''.$s2_db->escape($lang_install['Page text']).'\', \''.$s2_db->escape($lang_install['Page text']).'\', '.$admin_uid
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$s2_db->end_transaction();
 

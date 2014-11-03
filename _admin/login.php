@@ -61,7 +61,7 @@ function s2_get_new_challenge ()
 		'VALUES'	=> '\''.$challenge.'\', \''.$salt.'\', '.$time
 	);
 	($hook = s2_hook('fn_get_challenge_pre_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	return array($challenge, $salt);
 }
@@ -76,7 +76,7 @@ function s2_update_challenge ($challenge)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_update_challenge_pre_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 function s2_delete_challenge ($challenge)
@@ -88,7 +88,7 @@ function s2_delete_challenge ($challenge)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_delete_challenge_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 function s2_close_other_sessions ($challenge)
@@ -100,7 +100,7 @@ function s2_close_other_sessions ($challenge)
 		'WHERE'		=> 'login = \''.$s2_db->escape($s2_user['login']).'\' AND NOT challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_close_other_sessions_pre_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 // Removes outdated challenges and sessions from DB
@@ -115,7 +115,7 @@ function s2_cleanup_expired_sessions ()
 		'WHERE'		=> 'time < '.$time.' AND login IS NULL'
 	);
 	($hook = s2_hook('fn_cleanup_expired_pre_remove_challenge_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$time = time() - S2_COOKIE_EXPIRE;
 
@@ -124,7 +124,7 @@ function s2_cleanup_expired_sessions ()
 		'WHERE'		=> 'time < '.$time.' AND login IS NOT NULL'
 	);
 	($hook = s2_hook('fn_cleanup_expired_pre_remove_session_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 //
@@ -141,7 +141,7 @@ function s2_get_login ($challenge)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\' AND ip = \''.$s2_db->escape($_SERVER['REMOTE_ADDR']).'\' AND login IS NOT NULL'
 	);
 	($hook = s2_hook('fn_get_login_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		list($login, $time) = $row;
@@ -168,7 +168,7 @@ function s2_get_user_info ($login)
 		'WHERE'		=> 'login = \''.$s2_db->escape($login).'\''
 	);
 	($hook = s2_hook('fn_get_user_info_pre_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	return $s2_db->fetch_assoc($result);
 }
@@ -184,7 +184,7 @@ function s2_authenticate_user ($challenge)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_authenticate_user_pre_get_time_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$status = '';
 	if ($row = $s2_db->fetch_row($result))
@@ -245,7 +245,7 @@ function s2_get_salt ($s)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($s).'\''
 	);
 	($hook = s2_hook('fn_verify_challenge_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	return ($return = $s2_db->result($result)) ? $return : false;
 }
@@ -260,7 +260,7 @@ function s2_get_password_hash ($login)
 		'WHERE'		=> 'login = \''.$s2_db->escape($login).'\''
 	);
 	($hook = s2_hook('fn_get_password_hash_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	return ($return = $s2_db->result($result)) ? $return : false;
 }
@@ -280,7 +280,7 @@ function s2_login_success ($login, $challenge)
 	);
 
 	($hook = s2_hook('fn_login_success_pre_update_challenge_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	s2_setcookie($s2_cookie_name, $challenge, ($time + S2_COOKIE_EXPIRE));
 	s2_setcookie($s2_cookie_name.'_c', $comment_cookie, ($time + S2_COOKIE_EXPIRE), S2_PATH.'/comment.php', false);
@@ -342,7 +342,7 @@ function s2_get_sessions ($login)
 		'ORDER BY'	=> 'time ASC'
 	);
 	($hook = s2_hook('fn_get_other_sessions_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$known_browsers = array('Opera', 'Firefox', 'Chrome', 'Safari', 'MSIE', 'Mozilla');
 	$browser_aliases = array('MSIE' => 'Internet Explorer');

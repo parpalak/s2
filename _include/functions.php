@@ -594,36 +594,80 @@ function error()
 		ob_start('ob_gzhandler');
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="Generator" content="S2 <?php echo S2_VERSION; ?>" />
-<title>Error - <?php echo s2_htmlencode(S2_SITE_NAME); ?></title>
+	<meta charset="utf-8" />
+	<meta name="Generator" content="S2 <?php echo S2_VERSION; ?>" />
+	<title>Error - <?php echo s2_htmlencode(S2_SITE_NAME); ?></title>
+	<style>
+		body {
+			margin: 40px;
+			font: 16px/1.3 Helvetica, Arial, sans-serif;
+			color: #333;
+		}
+		pre {
+			font-size: 16px;
+			font-family: Consolas, monospace;
+		}
+		pre.code {
+			overflow: auto;
+			background: #003;
+			color: #9e9;
+			padding: 1em;
+		}
+	</style>
 </head>
-<body style="margin: 40px; font: 87.5%/130% Verdana, Arial, sans-serif; color: #333;">
+<body>
 <h1><?php echo Lang::get('Error encountered') ? Lang::get('Error encountered') : 'An error was encountered'; ?></h1>
 <hr />
 <?php
 
-	if (isset($message))
+	if (isset($message) && !($message instanceof Exception))
 		echo '<p>'.$message.'</p>'."\n";
 
-	if ($num_args > 1)
+	if ($num_args > 1 || isset($message) && $message instanceof Exception)
 	{
 		if (defined('S2_DEBUG'))
 		{
-			if (isset($file) && isset($line))
-				echo '<p><em>The error occurred on line '.$line.' in '.$file.'</em></p>'."\n";
-
-			$db_error = isset($GLOBALS['s2_db']) ? $GLOBALS['s2_db']->error() : array();
-			if (!empty($db_error['error_msg']))
+			if (isset($message) && $message instanceof Exception)
 			{
-				echo '<p><strong>Database reported:</strong> '.s2_htmlencode($db_error['error_msg']).(($db_error['error_no']) ? ' (Errno: '.$db_error['error_no'].')' : '').'.</p>'."\n";
+				if ($message instanceof DBLayer_Exception)
+				{
+					// Spoecial report for DB
+					echo '<p>Database reported: <b>' . s2_htmlencode($message->getMessage()) . ($message->getCode() ? ' (Errno: ' . $message->getCode() . ')' : '') . '</b>.</p>' . "\n";
 
-				if ($db_error['error_sql'] != '')
-					echo '<p><strong>Failed query:</strong> <code>'.s2_htmlencode($db_error['error_sql']).'</code></p>'."\n";
+					if ($message->getQuery() != '')
+					{
+						echo '<p>Failed query: </p>' . "\n";
+						echo '<pre class="code">' . s2_htmlencode((string)$message->getQuery()) . '</pre>' . "\n";
+					}
+				}
+				else
+					echo '<p>' . s2_htmlencode($message->getMessage()) , '.</p>' . "\n";
+
+				// Output trace
+				echo '<h3>Call trace</h3>';
+				$i = 0;
+				foreach ($message->getTrace() as $trace)
+				{
+					$i++;
+					echo '<p>' . $i . '. File <b>' . $trace['file'] . '</b> on line <b>' . $trace['line'] . "</b></p>";
+					echo '<pre class="code">';
+					echo (isset($trace['class']) ? $trace['class'] . $trace['type'] : '') . $trace['function'] . '(';
+
+					$args = array();
+					foreach ($trace['args'] as $arg)
+					{
+						$args[] = var_export($arg, true);
+					}
+
+					echo implode(', ', $args) . ');' . "\n";
+					echo '</pre>';
+				}
 			}
+			else if (isset($file) && isset($line))
+				echo '<p><em>The error occurred on line '.$line.' in '.$file.'</em></p>'."\n";
 		}
 		else
 			echo '<p><strong>Note:</strong> For detailed error information (necessary for troubleshooting), enable "DEBUG mode". To enable "DEBUG mode", open up the file config.php in a text editor, add a line that looks like "define(\'S2_DEBUG\', 1);" (without the quotation marks), and re-upload the file. Once you\'ve solved the problem, it is recommended that "DEBUG mode" be turned off again (just remove the line from the file and re-upload it).</p>'."\n";

@@ -31,7 +31,7 @@ function s2_check_url_status ($parent_id, $url)
 				'WHERE'		=> 'a.url = \''.$url.'\''.(S2_USE_HIERARCHY ? ' AND a.parent_id = '.$parent_id : '')
 			);
 			($hook = s2_hook('fn_check_url_status_pre_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			if ($s2_db->result($result) != 1)
 				$url_status = 'not_unique';
@@ -59,7 +59,7 @@ function s2_save_article ($page, $flags)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_save_article_pre_get_art_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		list($user_id, $parent_id, $revision, $pagetext) = $row;
@@ -100,7 +100,7 @@ function s2_save_article ($page, $flags)
 		$query['SET'] .= ', user_id = '.intval($page['user_id']);
 
 	($hook = s2_hook('fn_save_article_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	if ($s2_db->affected_rows() == -1)
 		$error = true;
 
@@ -115,7 +115,7 @@ function s2_save_article ($page, $flags)
 		'ORDER BY'	=> 'id'
 	);
 	($hook = s2_hook('fn_save_article_pre_get_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$old_tags = array();
 	while ($row = $s2_db->fetch_row($result))
@@ -130,7 +130,7 @@ function s2_save_article ($page, $flags)
 			'WHERE'		=> 'article_id = '.$id
 		);
 		($hook = s2_hook('fn_save_article_pre_del_tags_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 		if ($s2_db->affected_rows() == -1)
 			$error = true;
 
@@ -143,7 +143,7 @@ function s2_save_article ($page, $flags)
 				'VALUES'	=> $id.', '.$tag_id
 			);
 			($hook = s2_hook('fn_save_article_pre_ins_tags_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$s2_db->query_build($query);
 			if ($s2_db->affected_rows() == -1)
 				$error = true;
 		}
@@ -166,7 +166,7 @@ function s2_output_article_form ($id)
 		'FROM'		=> 'art_comments AS c',
 		'WHERE'		=> 'a.id = c.article_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$raw_query = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> 'title, meta_keys, meta_desc, excerpt, pagetext as text, create_time, modify_time, published, favorite, commented, url, template, parent_id, user_id, revision, ('.$raw_query.') as comment_count',
@@ -174,7 +174,7 @@ function s2_output_article_form ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_output_article_form_pre_page_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	$page = $s2_db->fetch_assoc($result);
 
 	$page['id'] = $id;
@@ -191,14 +191,14 @@ function s2_output_article_form ($id)
 		'FROM'		=> 'article_tag AS at',
 		'WHERE'		=> 't.tag_id = at.tag_id'
 	);
-	$used_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$used_raw_query = $s2_db->query_build($subquery, true);
 
 	$subquery = array(
 		'SELECT'	=> 'id',
 		'FROM'		=> 'article_tag AS at',
 		'WHERE'		=> 't.tag_id = at.tag_id AND at.article_id = '.$id
 	);
-	$current_raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$current_raw_query = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as link_id',
@@ -206,7 +206,7 @@ function s2_output_article_form ($id)
 		'ORDER BY'	=> 'used DESC'
 	);
 	($hook = s2_hook('fn_output_article_form_pre_chk_url_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$all_tags = $tags = array();
 	while ($tag = $s2_db->fetch_assoc($result))
@@ -231,7 +231,7 @@ function s2_output_article_form ($id)
 		'FROM'		=> 'articles AS a'
 	);
 	($hook = s2_hook('fn_output_article_form_pre_get_tpl_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$templates = $lang_templates;
 	$add_option = $templates['+'];
@@ -254,7 +254,7 @@ function s2_output_article_form ($id)
 			'WHERE'		=> 'create_articles = 1'
 		);
 		($hook = s2_hook('fn_output_article_form_pre_get_usr_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$users = array(0 => '');
 		while ($user = $s2_db->fetch_assoc($result))

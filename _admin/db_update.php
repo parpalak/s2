@@ -19,7 +19,7 @@ if (S2_DB_REVISION < 2)
 		'VALUES'	=> '\'S2_MAX_ITEMS\', \'0\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	define('S2_MAX_ITEMS', 0);
 }
@@ -32,7 +32,7 @@ if (S2_DB_REVISION < 3)
 		'VALUES'	=> '\'S2_ADMIN_COLOR\', \'#eeeeee\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	define('S2_ADMIN_COLOR', '#eeeeee');
 }
@@ -55,7 +55,7 @@ if (S2_DB_REVISION < 5)
 		'SET'		=> 'create_articles = edit_site'
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 if (S2_DB_REVISION < 6)
@@ -83,7 +83,7 @@ if (S2_DB_REVISION < 9)
 		'VALUES'	=> '\'S2_ADMIN_NEW_POS\', \'0\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	define('S2_ADMIN_NEW_POS', '0');
 }
@@ -98,7 +98,7 @@ if (S2_DB_REVISION < 10)
 		'VALUES'	=> '\'S2_ADMIN_UPDATES\', \''.$check_for_updates.'\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	define('S2_ADMIN_UPDATES', $check_for_updates);
 }
@@ -116,7 +116,7 @@ if (S2_DB_REVISION < 12)
 		'VALUES'	=> '\'S2_ADMIN_CUT\', \'0\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	define('S2_ADMIN_CUT', '0');
 }
@@ -134,7 +134,7 @@ if (S2_DB_REVISION < 14)
 		'VALUES'	=> '\'S2_USE_HIERARCHY\', \'1\''
 	);
 
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	define('S2_USE_HIERARCHY', '1');
 }
@@ -145,6 +145,6 @@ $query = array(
 	'WHERE'		=> 'name = \'S2_DB_REVISION\''
 );
 
-$s2_db->query_build($query) or error(__FILE__, __LINE__);
+$s2_db->query_build($query);
 
 S2Cache::generate_config();

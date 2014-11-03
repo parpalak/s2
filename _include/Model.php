@@ -43,7 +43,7 @@ class Model
 				'WHERE'		=> 'id IN ('.implode(', ', array_unique($parent_ids)).') AND published = 1'
 			);
 			($hook = s2_hook('fn_get_cascade_urls_loop_pre_query')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			while ($row = $s2_db->fetch_assoc($result))
 				// So, the loop may seem not pretty much.
@@ -90,7 +90,7 @@ class Model
 			'WHERE'		=> 'id = '.$id.($visible_for_all ? ' AND published = 1' : '')
 		);
 		($hook = s2_hook('fn_path_from_id_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$row = $s2_db->fetch_row($result);
 		if (!$row)
@@ -127,7 +127,7 @@ class Model
 
 		($hook = s2_hook('fn_s2_main_page_title_qr')) ? eval($hook) : null;
 
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 		return $s2_db->result($result);
 	}
 }

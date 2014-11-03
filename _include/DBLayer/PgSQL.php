@@ -59,7 +59,7 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 			$this->link_id = @pg_connect(implode(' ', $connect_str));
 
 		if (!$this->link_id)
-			error('Unable to connect to PostgreSQL server', __FILE__, __LINE__);
+			throw new DBLayer_Exception('Unable to connect to PostgreSQL server');
 
 		// Setup the client-server character set (UTF-8)
 		if (!defined('S2_NO_SET_NAMES'))
@@ -102,32 +102,24 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		@pg_send_query($this->link_id, $sql);
 		$this->query_result = @pg_get_result($this->link_id);
 
-		if (pg_result_status($this->query_result) != PGSQL_FATAL_ERROR)
+		if (isset($q_start))
+			$this->saved_queries[] = array($sql, microtime(true) - $q_start);
+
+		if (pg_result_status($this->query_result) == PGSQL_FATAL_ERROR)
 		{
-			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, microtime(true) - $q_start);
-
-			++$this->num_queries;
-
-			$this->last_query_text[$this->query_result] = $sql;
-
-			return $this->query_result;
-		}
-		else
-		{
-			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, 0);
-
-			$this->error_no = false;
-			$this->error_msg = @pg_result_error($this->query_result);
-
 			if ($this->in_transaction)
 				@pg_query($this->link_id, 'ROLLBACK');
 
 			--$this->in_transaction;
 
-			return false;
+			throw new DBLayer_Exception(@pg_result_error($this->query_result), false, $sql);
 		}
+
+		++$this->num_queries;
+
+		$this->last_query_text[$this->query_result] = $sql;
+
+		return $this->query_result;
 	}
 
 
@@ -377,7 +369,7 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		// We remove the last two characters (a newline and a comma) and add on the ending
 		$query = substr($query, 0, strlen($query) - 2)."\n".')';
 
-		$this->query($query) or error(__FILE__, __LINE__);
+		$this->query($query);
 
 		// Add indexes
 		if (isset($schema['INDEXES']))
@@ -393,7 +385,7 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		if (!$this->table_exists($table_name, $no_prefix))
 			return;
 
-		$this->query('DROP TABLE '.($no_prefix ? '' : $this->prefix).$table_name) or error(__FILE__, __LINE__);
+		$this->query('DROP TABLE '.($no_prefix ? '' : $this->prefix).$table_name);
 	}
 
 
@@ -404,19 +396,19 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 
 		$field_type = preg_replace(array_keys($this->datatype_transformations), array_values($this->datatype_transformations), $field_type);
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ADD '.$field_name.' '.$field_type) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ADD '.$field_name.' '.$field_type);
 
 		if ($default_value !== null)
 		{
 			if (!is_int($default_value) && !is_float($default_value))
 				$default_value = '\''.$this->escape($default_value).'\'';
 
-			$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET DEFAULT '.$default_value) or error(__FILE__, __LINE__);
-			$this->query('UPDATE '.($no_prefix ? '' : $this->prefix).$table_name.' SET '.$field_name.'='.$default_value) or error(__FILE__, __LINE__);
+			$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET DEFAULT '.$default_value);
+			$this->query('UPDATE '.($no_prefix ? '' : $this->prefix).$table_name.' SET '.$field_name.'='.$default_value);
 		}
 
 		if (!$allow_null)
-			$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET NOT NULL') or error(__FILE__, __LINE__);
+			$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET NOT NULL');
 	}
 
 
@@ -428,9 +420,9 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		$field_type = preg_replace(array_keys($this->datatype_transformations), array_values($this->datatype_transformations), $field_type);
 
 		$this->add_field($table_name, 'tmp_'.$field_name, $field_type, $allow_null, $default_value, $after_field, $no_prefix);
-		$this->query('UPDATE '.($no_prefix ? '' : $this->prefix).$table_name.' SET tmp_'.$field_name.' = '.$field_name) or error(__FILE__, __LINE__);
+		$this->query('UPDATE '.($no_prefix ? '' : $this->prefix).$table_name.' SET tmp_'.$field_name.' = '.$field_name);
 		$this->drop_field($table_name, $field_name, $no_prefix);
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' RENAME COLUMN tmp_'.$field_name.' TO '.$field_name) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' RENAME COLUMN tmp_'.$field_name.' TO '.$field_name);
 
 		// Set the default value
 		if ($default_value === null)
@@ -438,10 +430,10 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		else if (!is_int($default_value) && !is_float($default_value))
 			$default_value = '\''.$this->escape($default_value).'\'';
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET DEFAULT '.$default_value) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET DEFAULT '.$default_value);
 
 		if (!$allow_null)
-			$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET NOT NULL') or error(__FILE__, __LINE__);
+			$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ALTER '.$field_name.' SET NOT NULL');
 	}
 
 
@@ -450,7 +442,7 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		if (!$this->field_exists($table_name, $field_name, $no_prefix))
 			return;
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' DROP '.$field_name) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' DROP '.$field_name);
 	}
 
 
@@ -459,7 +451,7 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		if ($this->index_exists($table_name, $index_name, $no_prefix))
 			return;
 
-		$this->query('CREATE '.($unique ? 'UNIQUE ' : '').'INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name.' ON '.($no_prefix ? '' : $this->prefix).$table_name.'('.implode(',', $index_fields).')') or error(__FILE__, __LINE__);
+		$this->query('CREATE '.($unique ? 'UNIQUE ' : '').'INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name.' ON '.($no_prefix ? '' : $this->prefix).$table_name.'('.implode(',', $index_fields).')');
 	}
 
 
@@ -468,6 +460,6 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 		if (!$this->index_exists($table_name, $index_name, $no_prefix))
 			return;
 
-		$this->query('DROP INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name) or error(__FILE__, __LINE__);
+		$this->query('DROP INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name);
 	}
 }

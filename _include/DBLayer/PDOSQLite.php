@@ -42,17 +42,17 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 			@touch($db_name);
 			@chmod($db_name, 0666);
 			if (!file_exists($db_name))
-				error('Unable to create new database file \''.$db_name.'\'. Permission denied. Please allow write permissions for the \''.dirname($db_name).'\' directory.', __FILE__, __LINE__);
+				throw new DBLayer_Exception('Unable to create new database file \''.$db_name.'\'. Permission denied. Please allow write permissions for the \''.dirname($db_name).'\' directory.');
 		}
 
 		if (!is_readable($db_name))
-			error('Unable to open database \''.$db_name.'\' for reading. Permission denied', __FILE__, __LINE__);
+			throw new DBLayer_Exception('Unable to open database \''.$db_name.'\' for reading. Permission denied');
 
 		if (!is_writable($db_name))
-			error('Unable to open database \''.$db_name.'\' for writing. Permission denied', __FILE__, __LINE__);
+			throw new DBLayer_Exception('Unable to open database \''.$db_name.'\' for writing. Permission denied');
 
 		if (!is_writable(dirname($db_name)))
-			error('Unable to write files in the \''.dirname($db_name).'\' directory. Permission denied', __FILE__, __LINE__);
+			throw new DBLayer_Exception('Unable to write files in the \''.dirname($db_name).'\' directory. Permission denied');
 
 		try
 		{
@@ -66,15 +66,13 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		}
 		catch (PDOException $e)
 		{
-			error('Unable to open database \''.$db_name.'\'. PDO_SQLite reported: '.$e->getMessage(), __FILE__, __LINE__);
+			throw new DBLayer_Exception('Unable to open database \''.$db_name.'\'. PDO_SQLite reported: '.$e->getMessage());
 		}
 	}
 
 
 	function start_transaction()
 	{
-		$retVal = false;
-
 		++$this->in_transaction;
 
 		try
@@ -83,7 +81,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		}
 		catch (PDOException $e)
 		{
-			$this->error_msg = $e->getMessage();
+			throw new DBLayer_Exception($e->getMessage());
 		}
 
 		return $retVal;
@@ -92,8 +90,6 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 
 	function end_transaction()
 	{
-		$retVal = false;
-
 		if ($this->in_transaction)
 			--$this->in_transaction;
 
@@ -103,8 +99,15 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		}
 		catch (PDOException $e)
 		{
-			$this->error_msg = $e->getMessage();
-			$this->rollback_transaction();
+			$message = $e->getMessage();
+			try {
+				$this->rollback_transaction();
+			}
+			catch (DBLayer_Exception $dbl_e)
+			{
+				$message = $message . "\n - Then rollback failed: " . $dbl_e->getMessage();
+			}
+			throw new DBLayer_Exception($message);
 		}
 
 		return $retVal;
@@ -119,8 +122,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		}
 		catch (PDOException $e)
 		{
-			$this->error_msg = ($this->error_msg ? "\n - Then rollback failed: " : '').$e->getMessage();
-			return false;
+			throw new DBLayer_Exception($e->getMessage());
 		}
 
 		return true;
@@ -138,11 +140,8 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		}
 		catch (PDOException $e)
 		{
-			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, 0);
-
-			$this->error_no = $this->link_id->errorCode();
-			$this->error_msg = end($this->link_id->errorInfo());
+			if (isset($q_start))
+				$this->saved_queries[] = array($sql, microtime(true) - $q_start);
 
 			$this->row_count = -1;
 
@@ -152,12 +151,12 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 				--$this->in_transaction;
 			}
 
-			return false;
+			throw new DBLayer_Exception(end($this->link_id->errorInfo()), $this->link_id->errorCode(), $sql);
 		}
 
 		$this->row_count = $this->query_result ? $this->query_result->rowCount() : 0;
 
-		if (defined('S2_SHOW_QUERIES'))
+		if (isset($q_start))
 			$this->saved_queries[] = array($sql, microtime(true) - $q_start);
 
 		++$this->num_queries;
@@ -255,7 +254,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 	function get_version()
 	{
 		$sql = 'SELECT sqlite_version()';
-		$result = $this->query($sql) or error(__FILE__, __LINE__);
+		$result = $this->query($sql);
 		list($ver) = $this->fetch_row($result);
 		$this->free_result($result);
 
@@ -296,7 +295,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 
 	function field_exists($table_name, $field_name, $no_prefix = false)
 	{
-		$result = $this->query('SELECT sql FROM sqlite_master WHERE name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' AND type=\'table\'') or error(__FILE__, __LINE__);
+		$result = $this->query('SELECT sql FROM sqlite_master WHERE name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' AND type=\'table\'');
 		$return = $this->result($result);
 		$this->free_result($result);
 		if (!$return)
@@ -308,7 +307,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 
 	function index_exists($table_name, $index_name, $no_prefix = false)
 	{
-		$result = $this->query('SELECT 1 FROM sqlite_master WHERE tbl_name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' AND name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_'.$this->escape($index_name).'\' AND type=\'index\'') or error(__FILE__, __LINE__);
+		$result = $this->query('SELECT 1 FROM sqlite_master WHERE tbl_name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' AND name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_'.$this->escape($index_name).'\' AND type=\'index\'');
 		$return = $this->fetch_row($result) ? true : false;
 		$this->free_result($result);
 		return $return;
@@ -352,7 +351,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		// We remove the last two characters (a newline and a comma) and add on the ending
 		$query = substr($query, 0, strlen($query) - 2)."\n".')';
 
-		$result = $this->query($query) or error(__FILE__, __LINE__);
+		$result = $this->query($query);
 		$this->free_result($result);
 
 		// Add indexes
@@ -370,7 +369,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 			return;
 
 		$sql = 'DROP TABLE '.($no_prefix ? '' : $this->prefix).$table_name;
-		$result = $this->query($sql) or error(__FILE__, __LINE__);
+		$result = $this->query($sql);
 		$this->free_result($result);
 
 		return true;
@@ -380,7 +379,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 	function get_table_info($table_name, $no_prefix = false)
 	{
 		// Grab table info
-		$result = $this->query('SELECT sql FROM sqlite_master WHERE tbl_name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' ORDER BY type DESC') or error('Unable to fetch table information', __FILE__, __LINE__, $this->error());
+		$result = $this->query('SELECT sql FROM sqlite_master WHERE tbl_name = \''.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'\' ORDER BY type DESC');
 
 		$table = array();
 		$table['indices'] = array();
@@ -432,10 +431,10 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		// Create temp table
 		$now = time();
 		$tmptable = str_replace('CREATE TABLE '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).' (', 'CREATE TABLE '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now.' (', $table['sql']);
-		$result = $this->query($tmptable) or error(__FILE__, __LINE__);
+		$result = $this->query($tmptable);
 		$this->free_result($result);
 
-		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now.' SELECT * FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name)) or error(__FILE__, __LINE__);
+		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now.' SELECT * FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name));
 		$this->free_result($result);
 
 		// Create new table sql
@@ -465,10 +464,10 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		$new_table = trim($new_table, ',')."\n".');';
 
 		// Drop old table
-		$this->drop_table($table_name, $no_prefix) or error(__FILE__, __LINE__);
+		$this->drop_table($table_name, $no_prefix);
 
 		// Create new table
-		$result = $this->query($new_table) or error(__FILE__, __LINE__);
+		$result = $this->query($new_table);
 		$this->free_result($result);
 
 		// Recreate indexes
@@ -476,17 +475,17 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		{
 			foreach ($table['indices'] as $cur_index)
 			{
-				$result = $this->query($cur_index) or error(__FILE__, __LINE__);
+				$result = $this->query($cur_index);
 				$this->free_result($result);
 			}
 		}
 
 		//Copy content back
-		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).' ('.implode(', ', $old_columns).') SELECT * FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now) or error(__FILE__, __LINE__);
+		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).' ('.implode(', ', $old_columns).') SELECT * FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now);
 		$this->free_result($result);
 
 		// Drop temp table
-		$this->drop_table($table_name.'_t'.$now, $no_prefix) or error(__FILE__, __LINE__);
+		$this->drop_table($table_name.'_t'.$now, $no_prefix);
 
 		return true;
 	}
@@ -508,10 +507,10 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		// Create temp table
 		$now = time();
 		$tmptable = str_replace('CREATE TABLE '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).' (', 'CREATE TABLE '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now.' (', $table['sql']);
-		$result = $this->query($tmptable) or error(__FILE__, __LINE__);
+		$result = $this->query($tmptable);
 		$this->free_result($result);
 
-		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now.' SELECT * FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name)) or error(__FILE__, __LINE__);
+		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now.' SELECT * FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name));
 		$this->free_result($result);
 
 		// Work out the columns we need to keep and the sql for the new table
@@ -532,10 +531,10 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		$new_table = trim($new_table, ',')."\n".');';
 
 		// Drop old table
-		$this->drop_table($table_name, $no_prefix) or error(__FILE__, __LINE__);
+		$this->drop_table($table_name, $no_prefix);
 
 		// Create new table
-		$result = $this->query($new_table) or error(__FILE__, __LINE__);
+		$result = $this->query($new_table);
 		$this->free_result($result);
 
 		// Recreate indexes
@@ -543,17 +542,17 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		{
 			foreach ($table['indices'] as $cur_index)
 			{
-				$result = $this->query($cur_index) or error(__FILE__, __LINE__);
+				$result = $this->query($cur_index);
 				$this->free_result($result);
 			}
 		}
 
 		//Copy content back
-		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).' SELECT '.implode(', ', $new_columns).' FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now) or error(__FILE__, __LINE__);
+		$result = $this->query('INSERT INTO '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).' SELECT '.implode(', ', $new_columns).' FROM '.($no_prefix ? '' : $this->prefix).$this->escape($table_name).'_t'.$now);
 		$this->free_result($result);
 
 		// Drop temp table
-		$this->drop_table($table_name.'_t'.$now, $no_prefix) or error(__FILE__, __LINE__);
+		$this->drop_table($table_name.'_t'.$now, $no_prefix);
 
 		return true;
 	}
@@ -565,7 +564,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 			return true;
 
 		$sql = 'CREATE '.($unique ? 'UNIQUE ' : '').'INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name.' ON '.($no_prefix ? '' : $this->prefix).$table_name.'('.implode(',', $index_fields).')';
-		$result = $this->query($sql) or error(__FILE__, __LINE__);
+		$result = $this->query($sql);
 		$this->free_result($result);
 
 		return true;
@@ -578,7 +577,7 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 			return true;
 
 		$sql = 'DROP INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name;
-		$result = $this->query($sql) or error(__FILE__, __LINE__);
+		$result = $this->query($sql);
 		$this->free_result($result);
 
 		return true;

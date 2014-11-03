@@ -21,7 +21,7 @@ function s2_load_tag ($id)
 		'WHERE'		=> 'tag_id = '.$id
 	);
 	($hook = s2_hook('fn_load_tag_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$tag = $s2_db->fetch_assoc($result);
 
@@ -49,7 +49,7 @@ function s2_save_tag ($tag)
 			'WHERE'		=> 'name = \''.$tag_name.'\''
 		);
 		($hook = s2_hook('fn_save_tag_pre_get_id_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 		if ($row = $s2_db->fetch_assoc($result))
 			$id = $row['tag_id'];
 	}
@@ -62,7 +62,7 @@ function s2_save_tag ($tag)
 			'WHERE'		=> 'tag_id = '.$id
 		);
 		($hook = s2_hook('fn_save_tag_pre_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 	else
 	{
@@ -72,7 +72,7 @@ function s2_save_tag ($tag)
 			'VALUES'	=> '\''.$tag_name.'\', \''.$tag_description.'\', \''.$modify_time.'\', \''.$tag_url.'\''
 		);
 		($hook = s2_hook('fn_save_tag_pre_ins_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 
 		$id = $s2_db->insert_id();
 	}
@@ -90,14 +90,14 @@ function s2_delete_tag ($id)
 		'LIMIT'		=> '1'
 	);
 	($hook = s2_hook('fn_delete_tag_pre_del_tag_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'DELETE'	=> 'article_tag',
 		'WHERE'		=> 'tag_id = '.$id,
 	);
 	($hook = s2_hook('fn_delete_tag_pre_del_links_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	($hook = s2_hook('fn_delete_tag_end')) ? eval($hook) : null;
 }
@@ -124,7 +124,7 @@ function s2_output_tag_form ($tag, $modify_time)
 		'FROM'		=> 'article_tag AS at',
 		'WHERE'		=> 't.tag_id = at.tag_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$raw_query = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> 'tag_id AS id, name, ('.$raw_query.') AS art_count',
@@ -132,7 +132,7 @@ function s2_output_tag_form ($tag, $modify_time)
 		'ORDER BY'	=> 'name'
 	);
 	($hook = s2_hook('fn_output_tag_form_pre_get_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$tag_names = array();
 	while ($row = $s2_db->fetch_assoc($result))

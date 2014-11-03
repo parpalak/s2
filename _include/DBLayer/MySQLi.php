@@ -41,7 +41,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 			$this->link_id = @mysqli_connect($p_connect.$db_host, $db_username, $db_password, $db_name);
 
 		if (!$this->link_id)
-			error('Unable to connect to MySQL and select database. MySQL reported: '.mysqli_connect_error(), __FILE__, __LINE__);
+			throw new DBLayer_Exception('Unable to connect to MySQL and select database. MySQL reported: '.mysqli_connect_error());
 
 		// Setup the client-server character set (UTF-8)
 		if (!defined('S2_NO_SET_NAMES'))
@@ -57,25 +57,15 @@ class DBLayer_MySQli extends DBLayer_Abstract
 
 		$this->query_result = @mysqli_query($this->link_id, $sql);
 
-		if ($this->query_result)
-		{
-			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, microtime(true) - $q_start);
+		if (isset($q_start))
+			$this->saved_queries[] = array($sql, microtime(true) - $q_start);
 
-			++$this->num_queries;
+		if (!$this->query_result)
+			throw new DBLayer_Exception(@mysqli_error($this->link_id), @mysqli_errno($this->link_id), $sql);
 
-			return $this->query_result;
-		}
-		else
-		{
-			if (defined('S2_SHOW_QUERIES'))
-				$this->saved_queries[] = array($sql, 0);
+		++$this->num_queries;
 
-			$this->error_no = @mysqli_errno($this->link_id);
-			$this->error_msg = @mysqli_error($this->link_id);
-
-			return false;
-		}
+		return $this->query_result;
 	}
 
 	function result($query_id = 0, $row = 0, $col = 0)
@@ -251,7 +241,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		// We remove the last two characters (a newline and a comma) and add on the ending
 		$query = substr($query, 0, strlen($query) - 2)."\n".') ENGINE = '.(isset($schema['ENGINE']) ? $schema['ENGINE'] : self::ENGINE).' CHARACTER SET utf8';
 
-		$this->query($query) or error(__FILE__, __LINE__);
+		$this->query($query);
 	}
 
 
@@ -260,7 +250,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		if (!$this->table_exists($table_name, $no_prefix))
 			return;
 
-		$this->query('DROP TABLE '.($no_prefix ? '' : $this->prefix).$table_name) or error(__FILE__, __LINE__);
+		$this->query('DROP TABLE '.($no_prefix ? '' : $this->prefix).$table_name);
 	}
 
 
@@ -274,7 +264,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		if ($default_value !== null && !is_int($default_value) && !is_float($default_value))
 			$default_value = '\''.$this->escape($default_value).'\'';
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ADD '.$field_name.' '.$field_type.($allow_null ? ' ' : ' NOT NULL').($default_value !== null ? ' DEFAULT '.$default_value : ' ').($after_field != null ? ' AFTER '.$after_field : '')) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ADD '.$field_name.' '.$field_type.($allow_null ? ' ' : ' NOT NULL').($default_value !== null ? ' DEFAULT '.$default_value : ' ').($after_field != null ? ' AFTER '.$after_field : ''));
 	}
 
 
@@ -288,7 +278,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		if ($default_value !== null && !is_int($default_value) && !is_float($default_value))
 			$default_value = '\''.$this->escape($default_value).'\'';
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' MODIFY '.$field_name.' '.$field_type.($allow_null ? ' ' : ' NOT NULL').($default_value !== null ? ' DEFAULT '.$default_value : ' ').($after_field != null ? ' AFTER '.$after_field : '')) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' MODIFY '.$field_name.' '.$field_type.($allow_null ? ' ' : ' NOT NULL').($default_value !== null ? ' DEFAULT '.$default_value : ' ').($after_field != null ? ' AFTER '.$after_field : ''));
 	}
 
 
@@ -297,7 +287,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		if (!$this->field_exists($table_name, $field_name, $no_prefix))
 			return;
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' DROP '.$field_name) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' DROP '.$field_name);
 	}
 
 
@@ -306,7 +296,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		if ($this->index_exists($table_name, $index_name, $no_prefix))
 			return;
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ADD '.($unique ? 'UNIQUE ' : '').'INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name.' ('.implode(',', $index_fields).')') or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' ADD '.($unique ? 'UNIQUE ' : '').'INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name.' ('.implode(',', $index_fields).')');
 	}
 
 
@@ -315,6 +305,6 @@ class DBLayer_MySQli extends DBLayer_Abstract
 		if (!$this->index_exists($table_name, $index_name, $no_prefix))
 			return;
 
-		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' DROP INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name) or error(__FILE__, __LINE__);
+		$this->query('ALTER TABLE '.($no_prefix ? '' : $this->prefix).$table_name.' DROP INDEX '.($no_prefix ? '' : $this->prefix).$table_name.'_'.$index_name);
 	}
 }

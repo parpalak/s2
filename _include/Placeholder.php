@@ -23,14 +23,14 @@ class Placeholder
 			'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query_child_num = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+		$raw_query_child_num = $s2_db->query_build($subquery, true);
 
 		$subquery = array(
 			'SELECT'	=> 'u.name',
 			'FROM'		=> 'users AS u',
 			'WHERE'		=> 'u.id = a.user_id'
 		);
-		$raw_query_user = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+		$raw_query_user = $s2_db->query_build($subquery, true);
 
 		$query = array(
 			'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS parent_title, a1.url AS p_url, ('.$raw_query_user.') AS author',
@@ -49,7 +49,7 @@ class Placeholder
 			$query['LIMIT'] = $limit;
 
 		($hook = s2_hook('fn_last_articles_array_pre_get_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$last = $urls = $parent_ids = array();
 		for ($i = 0; $row = $s2_db->fetch_assoc($result); $i++)
@@ -125,7 +125,7 @@ class Placeholder
 				'FROM'		=> 'tags'
 			);
 			($hook = s2_hook('fn_s2_tags_list_pre_get_tags_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			$tag_count = $tag_name = $tag_url = array();
 			while ($row = $s2_db->fetch_assoc($result))
@@ -148,7 +148,7 @@ class Placeholder
 				'WHERE'		=> 'a.published = 1'
 			);
 			($hook = s2_hook('fn_s2_tags_list_pre_get_posts_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 
 			while ($row = $s2_db->fetch_row($result))
 				$tag_count[$row[0]]++;
@@ -186,7 +186,7 @@ class Placeholder
 			'FROM'		=> 'art_comments AS c1',
 			'WHERE'		=> 'shown = 1 AND c1.article_id = c.article_id AND c1.time < c.time'
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
+		$raw_query1 = $s2_db->query_build($subquery1, true);
 
 		$query = array(
 			'SELECT'	=> 'c.time, a.url, a.title, c.nick, a.parent_id, ('.$raw_query1.') AS count',
@@ -202,7 +202,7 @@ class Placeholder
 			'LIMIT'		=> '5'
 		);
 		($hook = s2_hook('fn_last_article_comments_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$nicks = $titles = $parent_ids = $urls = $counts = array();
 		while ($row = $s2_db->fetch_assoc($result))
@@ -243,7 +243,7 @@ class Placeholder
 			'GROUP BY'	=> 'c.article_id',
 			'ORDER BY'	=> 'comment_num DESC',
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true) or error(__FILE__, __LINE__);
+		$raw_query1 = $s2_db->query_build($subquery1, true);
 
 		$query = array(
 			'SELECT'	=> 'a.url, a.title, a.parent_id, c2.nick, c2.time',
@@ -258,7 +258,7 @@ class Placeholder
 			'LIMIT'		=> '10',
 		);
 		($hook = s2_hook('fn_last_discussions_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$titles = $parent_ids = $urls = $nicks = $time = array();
 		while ($row = $s2_db->fetch_assoc($result))

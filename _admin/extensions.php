@@ -39,7 +39,7 @@ function s2_extension_list ()
 	);
 
 	($hook = s2_hook('fn_extension_list_qr_get_all_extensions')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	while ($cur_ext = $s2_db->fetch_assoc($result))
 		$inst_exts[$cur_ext['id']] = $cur_ext;
 
@@ -223,7 +223,7 @@ function s2_install_extension ($id)
 	);
 
 	($hook = s2_hook('fn_install_extension_check_dependencies')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$installed_ext = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -275,7 +275,7 @@ function s2_install_extension ($id)
 	);
 
 	($hook = s2_hook('aex_install_comply_qr_get_current_ext_version')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	if ($curr_version = $s2_db->result($result))
 	{
 		// EXT_CUR_VERSION will be available to the extension install routine (to facilitate extension upgrades)
@@ -297,7 +297,7 @@ function s2_install_extension ($id)
 		);
 
 		($hook = s2_hook('fn_install_extension_comply_qr_update_ext')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 
 		// Delete the old hooks
 		$query = array(
@@ -306,7 +306,7 @@ function s2_install_extension ($id)
 		);
 
 		($hook = s2_hook('fn_install_extension_qr_update_ext_delete_hooks')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 	else
 	{
@@ -326,7 +326,7 @@ function s2_install_extension ($id)
 		);
 
 		($hook = s2_hook('fn_install_extension_comply_qr_add_ext')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 
 	// Now insert the hooks
@@ -344,7 +344,7 @@ function s2_install_extension ($id)
 				);
 
 				($hook = s2_hook('fn_install_extension_comply_qr_add_hook')) ? eval($hook) : null;
-				$s2_db->query_build($query) or error(__FILE__, __LINE__);
+				$s2_db->query_build($query);
 			}
 		}
 	}
@@ -373,7 +373,7 @@ function s2_flip_extension ($id)
 	);
 
 	($hook = s2_hook('fn_flip_extension_qr_get_disabled_status')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_assoc($result))
 	// Are we disabling or enabling?
@@ -391,7 +391,7 @@ function s2_flip_extension ($id)
 		);
 
 		($hook = s2_hook('fn_flip_extension_qr_get_disable_dependencies')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$dependency_ids = array();
 		while ($dependency = $s2_db->fetch_assoc($result))
@@ -409,7 +409,7 @@ function s2_flip_extension ($id)
 		);
 
 		($hook = s2_hook('fn_flip_extension_qr_get_enable_dependencies')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$dependencies = $s2_db->fetch_assoc($result);
 		$dependencies = explode('|', substr($dependencies['dependencies'], 1, -1));
@@ -421,7 +421,7 @@ function s2_flip_extension ($id)
 		);
 
 		($hook = s2_hook('fn_flip_extension_qr_check_dependencies')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$installed_ext = array();
 		while ($row = $s2_db->fetch_assoc($result))
@@ -443,7 +443,7 @@ function s2_flip_extension ($id)
 	);
 
 	($hook = s2_hook('fn_flip_extension_qr_update_disabled_status')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 
 	// Regenerate the hooks cache
@@ -473,7 +473,7 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_get_ext')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$ext_data = $s2_db->fetch_assoc($result);
 	if (!$ext_data)
@@ -487,7 +487,7 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_chk_dep')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$dependencies = array();
 	while ($row = $s2_db->fetch_assoc($result))
@@ -514,7 +514,7 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_del_hooks')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'DELETE'	=> 'extensions',
@@ -522,7 +522,7 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_del_ext')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 
 	// Regenerate the hooks cache

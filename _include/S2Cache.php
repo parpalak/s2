@@ -43,7 +43,7 @@ class S2Cache
 		);
 
 		($hook = s2_hook('fn_generate_config_cache_qr_get_config')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$output = '';
 		while ($row = $s2_db->fetch_row($result))
@@ -110,7 +110,7 @@ class S2Cache
 		);
 
 		($hook = s2_hook('fn_generate_hooks_cache_qr_s2_hooks')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		$output = array();
 		while ($cur_hook = $s2_db->fetch_assoc($result))
@@ -190,7 +190,7 @@ class S2Cache
 			);
 		
 			($hook = s2_hook('fn_generate_updates_cache_qr_get_hotfixes')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$result = $s2_db->query_build($query);
 		
 			$hotfixes = array();
 			while ($hotfix = $s2_db->fetch_assoc($result))

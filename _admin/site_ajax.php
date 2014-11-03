@@ -428,7 +428,7 @@ elseif ($action == 'add_user')
 	);
 
 	($hook = s2_hook('rq_action_add_user_pre_login_verify_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	if ($s2_db->fetch_row($result))
 	{
 		// Exists
@@ -444,7 +444,7 @@ elseif ($action == 'add_user')
 			'VALUES'	=> '\''.$login.'\', \''.md5('Life is not so easy :-)').'\''
 		);
 		($hook = s2_hook('rq_action_add_user_pre_ins_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 
 	echo s2_get_user_list();
@@ -467,7 +467,7 @@ elseif ($action == 'delete_user')
 		'WHERE'		=> 'edit_users = 1 AND NOT login = \''.$s2_db->escape($login).'\'',
 	);
 	($hook = s2_hook('rq_action_delete_user_pre_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	$allow = $s2_db->result($result) > 0;
 
 	if ($allow)
@@ -477,7 +477,7 @@ elseif ($action == 'delete_user')
 			'WHERE'		=> 'login = \''.$s2_db->escape($login).'\''
 		);
 		($hook = s2_hook('rq_action_delete_user_pre_del_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 	else
 		echo '<div class="info-box"><p>'.$lang_admin['No other admin delete'].'</p></div>';
@@ -503,7 +503,7 @@ elseif ($action == 'user_set_password')
 			'WHERE'		=> 'login = \''.$s2_db->escape($_GET['name']).'\'',
 		);
 		($hook = s2_hook('rq_action_user_set_password_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 
 		if ($s2_db->result($result) != $_POST['pass'])
 		{
@@ -513,7 +513,7 @@ elseif ($action == 'user_set_password')
 				'WHERE'		=> 'login = \''.$s2_db->escape($_GET['name']).'\'',
 			);
 			($hook = s2_hook('rq_action_user_set_password_pre_upd_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query) or error(__FILE__, __LINE__);
+			$s2_db->query_build($query);
 			if ($s2_db->affected_rows() != 1)
 				echo 'Error while changing password';
 			else
@@ -551,7 +551,7 @@ elseif ($action == 'user_set_email')
 		'WHERE'		=> 'login = \''.$s2_db->escape($_GET['login']).'\'',
 	);
 	($hook = s2_hook('rq_action_user_set_email_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	echo s2_get_user_list();
 }
@@ -578,7 +578,7 @@ elseif ($action == 'user_set_name')
 		'WHERE'		=> 'login = \''.$s2_db->escape($_GET['login']).'\'',
 	);
 	($hook = s2_hook('rq_action_user_set_name_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	echo s2_get_user_list();
 }
@@ -605,7 +605,7 @@ elseif ($action == 'user_set_permission')
 			'WHERE'		=> 'edit_users = 1 AND NOT login = \''.$s2_db->escape($login).'\'',
 		);
 		($hook = s2_hook('rq_action_user_set_permission_pre_get_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 		$allow = $s2_db->result($result) > 0;
 	}
 
@@ -617,7 +617,7 @@ elseif ($action == 'user_set_permission')
 			'WHERE'		=> 'login = \''.$s2_db->escape($login).'\'',
 		);
 		($hook = s2_hook('rq_action_user_set_permission_pre_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$s2_db->query_build($query);
 	}
 	else
 		echo '<div class="info-box"><p>'.$lang_admin['No other admin'].'</p></div>';

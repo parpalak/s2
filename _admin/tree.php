@@ -25,7 +25,7 @@ function s2_create_article ($id, $title)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_create_article_pre_check_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if (!$s2_db->fetch_assoc($result))
 		die('Item not found!');
@@ -38,7 +38,7 @@ function s2_create_article ($id, $title)
 			'WHERE'		=> 'parent_id = '.$id
 		);
 		($hook = s2_hook('fn_create_article_pre_upd_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 		$new_priority = 0;
 	}
 	else
@@ -49,7 +49,7 @@ function s2_create_article ($id, $title)
 			'WHERE'		=> 'parent_id = '.$id
 		);
 		($hook = s2_hook('fn_create_article_pre_get_maxpr_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+		$result = $s2_db->query_build($query);
 		$new_priority = (int) $s2_db->result($result);
 	}
 
@@ -59,7 +59,7 @@ function s2_create_article ($id, $title)
 		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($new_priority).', \'new\', '.$s2_user['id'].', '.(S2_USE_HIERARCHY ? '\'\'' : '\'site.php\''),
 	);
 	($hook = s2_hook('fn_create_article_pre_ins_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 	$new_id = $s2_db->insert_id();
 
 	($hook = s2_hook('fn_create_article_end')) ? eval($hook) : null;
@@ -76,7 +76,7 @@ function s2_rename_article ($id, $title)
 		'FROM'		=> 'articles',
 		'WHERE'		=> 'id = '.$id
 	);
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 	($hook = s2_hook('fn_rename_article_pre_get_uid_qr')) ? eval($hook) : null;
 
 	if ($row = $s2_db->fetch_row($result))
@@ -93,7 +93,7 @@ function s2_rename_article ($id, $title)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_rename_article_pre_upd_title_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 function s2_move_branch ($source_id, $dest_id, $position)
@@ -106,7 +106,7 @@ function s2_move_branch ($source_id, $dest_id, $position)
 		'WHERE'		=> 'id IN ('.$source_id.', '.$dest_id.')'
 	);
 	($hook = s2_hook('fn_move_branch_pre_get_art_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$item_num = 0;
 	while ($row = $s2_db->fetch_assoc($result))
@@ -132,7 +132,7 @@ function s2_move_branch ($source_id, $dest_id, $position)
 		'WHERE'		=> 'priority >= '.$position.' AND parent_id = '.$dest_id
 	);
 	($hook = s2_hook('fn_move_branch_pre_dest_priority_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'UPDATE'	=> 'articles',
@@ -140,7 +140,7 @@ function s2_move_branch ($source_id, $dest_id, $position)
 		'WHERE'		=> 'id = '.$source_id
 	);
 	($hook = s2_hook('fn_move_branch_pre_parent_id_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'UPDATE'	=> 'articles',
@@ -148,7 +148,7 @@ function s2_move_branch ($source_id, $dest_id, $position)
 		'WHERE'		=> 'parent_id = '.$source_parent_id.' AND priority > '.$source_priority
 	);
 	($hook = s2_hook('fn_move_branch_pre_src_pr_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 function s2_delete_item_and_children ($id)
@@ -165,7 +165,7 @@ function s2_delete_item_and_children ($id)
 		'WHERE'		=> 'parent_id = '.$id
 	);
 	($hook = s2_hook('fn_delete_item_and_children_pre_get_ids_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	while ($row = $s2_db->fetch_row($result))
 		s2_delete_item_and_children($row[0]);
@@ -175,21 +175,21 @@ function s2_delete_item_and_children ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_delete_item_and_children_pre_del_art_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'DELETE'	=> 'article_tag',
 		'WHERE'		=> 'article_id = '.$id
 	);
 	($hook = s2_hook('fn_delete_item_and_children_pre_del_tags_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	$query = array(
 		'DELETE'	=> 'art_comments',
 		'WHERE'		=> 'article_id = '.$id
 	);
 	($hook = s2_hook('fn_delete_item_and_children_pre_del_comments_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 }
 
 function s2_delete_branch ($id)
@@ -202,7 +202,7 @@ function s2_delete_branch ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_delete_branch_pre_get_art_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
 		list($priority, $parent_id, $user_id) = $row;
@@ -221,7 +221,7 @@ function s2_delete_branch ($id)
 		'WHERE'		=> 'parent_id = '.$parent_id.' AND  priority > '.$priority
 	);
 	($hook = s2_hook('fn_delete_branch_pre_upd_pr_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$s2_db->query_build($query);
 
 	s2_delete_item_and_children($id);
 }
@@ -239,7 +239,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 		'FROM'		=> 'art_comments AS c',
 		'WHERE'		=> 'a.id = c.article_id'
 	);
-	$comment_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+	$comment_num_query = $s2_db->query_build($subquery, true);
 
 	$query = array(
 		'SELECT'	=> 'title, id, create_time, priority, published, ('.$comment_num_query.') as comment_num, parent_id',
@@ -270,7 +270,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 						'WHERE'		=> 'a.id = at.article_id AND t.name LIKE \'%'.$s2_db->escape(substr($word, 1)).'%\'',
 						'LIMIT'		=> '1'
 					);
-					$tag_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+					$tag_query = $s2_db->query_build($subquery, true);
 					$condition[] = '('.$tag_query.')';
 				}
 			}
@@ -284,13 +284,13 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 				'FROM'		=> 'articles AS a2',
 				'WHERE'		=> 'a2.parent_id = a.id'
 			);
-			$child_num_query = $s2_db->query_build($subquery, true) or error(__FILE__, __LINE__);
+			$child_num_query = $s2_db->query_build($subquery, true);
 
 			$query['SELECT'] .= ', ('.$child_num_query.') as child_num';
 		}
 	}
 	($hook = s2_hook('fn_get_child_branches_pre_get_art_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
+	$result = $s2_db->query_build($query);
 
 	$output = array();
 	while ($article = $s2_db->fetch_assoc($result))
