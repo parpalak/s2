@@ -106,7 +106,19 @@ function s2_bbcode_to_html ($s)
 	while (preg_match ('/\[Q\].*?\[\/Q\]/isS', $s))
 		$s = preg_replace('/\s*\[Q\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote>\\1</blockquote>', $s);
 
-	$s = preg_replace('#(https?://\S{2,}?)(?=[\s\),\'\><\]]|&lt;|&gt;|[\.;:](?:\s|$)|$)#ue', '\'<noindex><a href="\\1" rel="nofollow">\'.((utf8_strlen(\'\\1\') > 55) ? utf8_substr(\'\\1\', 0 , 42).\' … \'.utf8_substr(\'\\1\', -10) : \'\\1\').\'</a></noindex>\'', $s);
+	$s = preg_replace_callback(
+		'#(https?://\S{2,}?)(?=[\s\),\'\><\]]|&lt;|&gt;|[\.;:](?:\s|$)|$)#u',
+		function ($matches)
+		{
+			$href = $link = $matches[1];
+
+			if (utf8_strlen($matches[1]) > 55)
+				$link = utf8_substr($matches[1], 0 , 42).' &hellip; '.utf8_substr($matches[1], -10);
+
+			return '<noindex><a href="'.$href.'" rel="nofollow">'.$link.'</a></noindex>';
+		},
+		$s
+	);
 	$s = str_replace("\n", '<br />', $s);
 	return $s;
 }
