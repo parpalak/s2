@@ -15,7 +15,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
+		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']);
 
 		$this->page['title'] = '';
@@ -130,7 +130,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			);
 
 		$this->page['commented'] = $row['commented'];
-		if ($row['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->') !== false)
+		if ($row['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->'))
 			$this->page['comments'] = $this->get_comments($post_id);
 
 		$row['time'] = s2_date_time($row['create_time']);

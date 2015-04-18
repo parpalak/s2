@@ -15,7 +15,7 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		if ($this->inTemplate('<!-- s2_blog_calendar -->') !== false)
+		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// The list of tags
