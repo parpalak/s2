@@ -28,7 +28,9 @@
 				<!-- s2_comment_form -->
 			</div>
 			<div id="menu">
-				<!-- s2_menu -->
+				<!-- s2_menu_siblings -->
+				<!-- s2_menu_children -->
+				<!-- s2_menu_subsections -->
 				<!-- s2_article_tags -->
 			</div>
 			<div class="clearing"></div>

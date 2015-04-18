@@ -23,7 +23,9 @@
 				<!-- s2_text -->
 			</div>
 			<div id="menu">
-				<!-- s2_menu -->
+				<!-- s2_menu_siblings -->
+				<!-- s2_menu_children -->
+				<!-- s2_menu_subsections -->
 				<!-- s2_last_comments -->
 				<!-- s2_blog_last_comments -->
 			</div>

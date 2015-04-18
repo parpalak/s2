@@ -26,7 +26,7 @@
 			</div>
 			<div id="menu">
 				<!-- s2_blog_calendar -->
-				<!-- s2_menu -->
+				<!-- s2_blog_navigation -->
 			</div>
 			<div class="clearing"></div>
 		</div>

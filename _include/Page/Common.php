@@ -319,10 +319,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 		($hook = s2_hook('fn_s2_parse_page_url_pre_get_tpl')) ? eval($hook) : null;
 
-		$is_menu = $this->inTemplate('<!-- s2_menu -->') !== false;
-
 		// Dealing with sections, subsections, neighbours
-		if (S2_USE_HIERARCHY && $page['children_exist'] && ($this->inTemplate('<!-- s2_subarticles -->') !== false || $is_menu || $this->inTemplate('<!-- s2_navigation_link -->') !== false))
+		if (S2_USE_HIERARCHY && $page['children_exist'] && ($this->inTemplate('<!-- s2_subarticles -->') || $this->inTemplate('<!-- s2_menu_children -->')|| $this->inTemplate('<!-- s2_menu_subsections -->') || $this->inTemplate('<!-- s2_navigation_link -->')))
 		{
 			// It's a section. We have to fetch subsections and articles.
 
@@ -384,13 +382,11 @@ class Page_Common extends Page_HTML implements Page_Routable
 				}
 			}
 
-			$page['menu']['articles'] = ''; // moves articles up :)
-
 			$sections_text = '';
 			if (!empty($subsections))
 			{
 				// There are subsections in the section
-				$page['menu']['subsections'] = $this->renderPartial('menu_block', array(
+				$page['menu_subsections'] = $this->renderPartial('menu_block', array(
 					'title' => Lang::get('Subsections'),
 					'menu'  => $subsections,
 				));
@@ -403,7 +399,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			if (!empty($subarticles))
 			{
 				// There are articles in the section
-				$page['menu']['articles'] = $this->renderPartial('menu_block', array(
+				$page['menu_children'] = $this->renderPartial('menu_block', array(
 					'title' => Lang::get('In this section'),
 					'menu'  => $subarticles,
 				));
@@ -450,11 +446,11 @@ class Page_Common extends Page_HTML implements Page_Routable
 			));
 		}
 
-		if (S2_USE_HIERARCHY && !$page['children_exist'] && ($is_menu || $this->inTemplate('<!-- s2_back_forward -->') !== false || $this->inTemplate('<!-- s2_navigation_link -->') !== false))
+		if (S2_USE_HIERARCHY && !$page['children_exist'] && ($this->inTemplate('<!-- s2_menu_siblings -->') || $this->inTemplate('<!-- s2_back_forward -->') || $this->inTemplate('<!-- s2_navigation_link -->')))
 		{
 			// It's an article. We have to fetch other articles in the parent section
 
-			// Fetching "brothers"
+			// Fetching "siblings"
 			$subquery = array(
 				'SELECT'	=> '1',
 				'FROM'		=> 'articles AS a2',
@@ -497,7 +493,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			}
 
 			if (count($bread_crumbs) > 1)
-				$page['menu']['articles'] = $this->renderPartial('menu_block', array(
+				$page['menu_siblings'] = $this->renderPartial('menu_block', array(
 					'title' => sprintf(Lang::get('More in this section'), '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>'),
 					'menu'  => $menu_articles,
 				));
@@ -527,14 +523,14 @@ class Page_Common extends Page_HTML implements Page_Routable
 		}
 
 		// Tags
-		if ($this->inTemplate('<!-- s2_article_tags -->') !== false)
+		if ($this->inTemplate('<!-- s2_article_tags -->'))
 			$page['article_tags'] = $this->tagged_articles($id);
 
-		if ($this->inTemplate('<!-- s2_tags -->') !== false)
+		if ($this->inTemplate('<!-- s2_tags -->'))
 			$page['tags'] = $this->get_tags($id);
 
 		// Comments
-		if ($page['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->') !== false)
+		if ($page['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->'))
 		{
 			$query = array(
 				'SELECT'	=> 'nick, time, email, show_email, good, text',

@@ -35,6 +35,21 @@ abstract class Page_HTML extends Page_Abstract
 		die();
 	}
 
+	protected function simple_placeholders ()
+	{
+		return array(
+			'section_link',
+			'excerpt',
+			'text',
+			'tags',
+			'comments',
+			'menu_siblings',
+			'menu_children',
+			'menu_subsections',
+			'article_tags'
+		);
+	}
+
 	/**
 	 * Prepares the content and inserts into the template
 	 */
@@ -82,12 +97,13 @@ abstract class Page_HTML extends Page_Abstract
 		$replace['<!-- s2_title -->'] = empty($page['title']) ? '' : $this->viewer->render('title', array_intersect_key($page, array('title' => 1, 'favorite' => 1)));
 		$replace['<!-- s2_date -->'] = !empty($page['date']) ? '<div class="date">'.s2_date($page['date']).'</div>' : '';
 		$replace['<!-- s2_crumbs -->'] = isset($page['path']) ? $this->viewer->render('breadcrumbs', array('breadcrumbs' => $page['path'])) : '';
-		$replace['<!-- s2_section_link -->'] = isset($page['section_link']) ? $page['section_link'] : '';
-		$replace['<!-- s2_excerpt -->'] = isset($page['excerpt']) ? $page['excerpt'] : '';
-		$replace['<!-- s2_text -->'] = isset($page['text']) ? $page['text'] : '';
 		$replace['<!-- s2_subarticles -->'] = isset($page['subcontent']) ? $page['subcontent'] : '';
-		$replace['<!-- s2_tags -->'] = !empty($page['tags']) ? $page['tags'] : '';
-		$replace['<!-- s2_comments -->'] = isset($page['comments']) ? $page['comments'] : '';
+
+		foreach ($this->simple_placeholders() as $page_index)
+		{
+			$replace['<!-- s2_' . $page_index . ' -->'] = isset($page[$page_index]) ? $page[$page_index] : '';
+		}
+
 
 		if (S2_ENABLED_COMMENTS && !empty($page['commented']))
 		{
@@ -104,10 +120,6 @@ abstract class Page_HTML extends Page_Abstract
 			$replace['<!-- s2_comment_form -->'] = '';
 
 		$replace['<!-- s2_back_forward -->'] = !empty($page['back_forward']) ? $this->viewer->render('back_forward', array('links' => $page['back_forward'])) : '';
-
-		// Aside
-		$replace['<!-- s2_menu -->'] = !empty($page['menu']) ? implode("\n", $page['menu']) : '';
-		$replace['<!-- s2_article_tags -->'] = !empty($page['article_tags']) ? $page['article_tags'] : '';
 
 		if (strpos($template, '<!-- s2_last_comments -->') !== false && count($last_comments = Placeholder::last_article_comments()))
 			$replace['<!-- s2_last_comments -->'] = $this->viewer->render('menu_comments', array(
