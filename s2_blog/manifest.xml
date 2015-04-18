@@ -338,7 +338,8 @@ if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 	unset($s2_blog_post);
 	$replace['<!-- s2_blog_last_post -->'] = implode('', $s2_blog_data);
 }
-$replace['<!-- s2_blog_calendar -->'] = !empty($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
+$replace['<!-- s2_blog_calendar -->'] = isset($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
+$replace['<!-- s2_blog_navigation -->'] = isset($page['s2_blog_navigation']) ? $page['s2_blog_navigation'] : '';
 		]]></hook>
 
 		<hook id="fn_tagged_articles_pre_get_tags_qr"><![CDATA[
