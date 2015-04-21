@@ -198,35 +198,36 @@ function s2_get_template ($raw_template_id, $default_path = false)
 	include $path;
 	$template = ob_get_clean();
 
-	$includes = require S2_ROOT.'_styles/'.S2_STYLE.'/'.S2_STYLE.'.php';
+	$style_filename =  '_styles/' . S2_STYLE . '/' . S2_STYLE . '.php';
+	$includes = require S2_ROOT . $style_filename;
 
-	if (!empty($includes)) {
+	if (empty($includes) || !is_array($includes))
+		throw new Exception(sprintf('File "%s" must return a PHP array with the following keys: css, js, css_inline, js_inline.', $style_filename));
 
-		($hook = s2_hook('fn_get_template_pre_includes_merge')) ? eval($hook) : null;
+	($hook = s2_hook('fn_get_template_pre_includes_merge')) ? eval($hook) : null;
 
-		$css = $js = array();
-		foreach ($includes['css'] as $css_path) {
-			if (strpos($css_path, '/') === false)
-				$css_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $css_path;
+	$css = $js = array();
+	foreach ($includes['css'] as $css_path) {
+		if (strpos($css_path, '/') === false)
+			$css_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $css_path;
 
-			$css[] = '<link rel="stylesheet" href="' . $css_path . '" />';
-		}
-
-		foreach ($includes['js'] as $js_path) {
-			if (strpos($js_path, '/') === false)
-				$js_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $js_path;
-
-			$js[] = '<script src="' . $js_path . '"></script>';
-		}
-
-		$css = array_merge($css, $includes['css_inline']);
-		$js = array_merge($js, $includes['js_inline']);
-
-		($hook = s2_hook('fn_get_template_pre_includes_replace')) ? eval($hook) : null;
-
-		$template = str_replace('<!-- s2_styles -->', implode("\n", $css), $template);
-		$template = str_replace('<!-- s2_scripts -->', implode("\n", $js), $template);
+		$css[] = '<link rel="stylesheet" href="' . $css_path . '" />';
 	}
+
+	foreach ($includes['js'] as $js_path) {
+		if (strpos($js_path, '/') === false)
+			$js_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $js_path;
+
+		$js[] = '<script src="' . $js_path . '"></script>';
+	}
+
+	$css = array_merge($css, $includes['css_inline']);
+	$js = array_merge($js, $includes['js_inline']);
+
+	($hook = s2_hook('fn_get_template_pre_includes_replace')) ? eval($hook) : null;
+
+	$template = str_replace('<!-- s2_styles -->', implode("\n", $css), $template);
+	$template = str_replace('<!-- s2_scripts -->', implode("\n", $js), $template);
 
 	if ((strpos($template, '</a>') !== false) && isset($request_uri))
 	{

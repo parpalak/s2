@@ -159,8 +159,13 @@ abstract class Page_HTML extends Page_Abstract
 		foreach ($replace as $what => $to)
 		{
 			if (defined('S2_DEBUG_VIEW') && $to && !in_array($what, array('<!-- s2_head_title -->', '<!-- s2_navigation_link -->', '<!-- s2_rss_link -->', '<!-- s2_meta -->', '<!-- s2_styles -->')))
-				$to = '<pre style="color: red; font-size: 12px; opacity: 0.4; margin: 0; width: 100%; text-align: center; line-height: 1;">' . s2_htmlencode($what) . '</pre>' .
-					'<div style="border: 1px solid rgba(255, 0, 0, 0.4); margin: 1px;">'. $to . '</div>';
+			{
+
+				$title = '<pre style="color: red; font-size: 12px; opacity: 0.6; margin: 0; width: 100%; text-align: center; line-height: 1; position: absolute; left: 0; right: 0; z-index: 1000; top: 0;">' . s2_htmlencode($what) . '</pre>';
+				$to = '<div style="border: 1px solid rgba(255, 0, 0, 0.4); margin: 1px; position: relative;">'.
+					$title . $to .
+					'</div>';
+			}
 
 			if (!in_array($what, $etag_skip))
 				$etag .= md5($to);

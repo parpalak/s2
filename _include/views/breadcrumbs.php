@@ -12,9 +12,9 @@ foreach ($breadcrumbs as $item)
 		echo ' &rarr; ';
 
 	if (!empty($item['link']))
-		echo '<a href="'.s2_htmlencode($item['link']).'">'.s2_htmlencode($item['title']).'</a>';
+		echo '<a class="bread-crumb-item" href="'.s2_htmlencode($item['link']).'">'.s2_htmlencode($item['title']).'</a>';
 	else
-		echo s2_htmlencode($item['title']);
+		echo '<span class="bread-crumb-item">'.s2_htmlencode($item['title']).'</span>';
 
 	$num++;
 }

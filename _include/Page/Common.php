@@ -116,6 +116,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			$output[] = $this->renderPartial('menu_block', array(
 				'title' => sprintf(Lang::get('With this tag'), '<a href="'.s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag_urls[$tag_id]).'/').'">'.$tag_names[$tag_id].'</a>'),
 				'menu'  => $articles,
+				'class' => 'article_tags',
 			));
 
 		($hook = s2_hook('fn_tagged_articles_end')) ? eval($hook) : null;
@@ -389,6 +390,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 				$page['menu_subsections'] = $this->renderPartial('menu_block', array(
 					'title' => Lang::get('Subsections'),
 					'menu'  => $subsections,
+					'class' => 'menu_subsections',
 				));
 
 				foreach ($subsections as $item)
@@ -402,6 +404,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 				$page['menu_children'] = $this->renderPartial('menu_block', array(
 					'title' => Lang::get('In this section'),
 					'menu'  => $subarticles,
+					'class' => 'menu_children',
 				));
 
 				($sort_order == SORT_DESC) ? arsort($sort_array) : asort($sort_array);
@@ -496,6 +499,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 				$page['menu_siblings'] = $this->renderPartial('menu_block', array(
 					'title' => sprintf(Lang::get('More in this section'), '<a href="'.s2_link($parent_path).'">'.$bread_crumbs[count($bread_crumbs) - 2]['title'].'</a>'),
 					'menu'  => $menu_articles,
+					'class' => 'menu_siblings',
 				));
 
 			if ($curr_item != -1)
