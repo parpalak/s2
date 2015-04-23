@@ -110,7 +110,12 @@ class Finder extends Worker
 
 	protected static function neighbour_weight ($distance)
 	{
-		return max(13 - $distance, 3);
+		return max(23 - $distance, 13);
+	}
+
+	protected static function word_repeat_weight ($word_count)
+	{
+		return min(0.5*($word_count - 1) + 1, 4);
 	}
 
 	protected function find_fulltext ($words)
@@ -147,10 +152,11 @@ class Finder extends Worker
 							$curr_positions[$chapter][] = base_convert($position, 36, 10);
 					}
 
+					$word_count = self::word_repeat_weight(count($entries));
 					if (!isset ($this->keys[$chapter][$word]))
-						$this->keys[$chapter][$word] = count($entries) * $word_weight;
+						$this->keys[$chapter][$word] = $word_count * $word_weight;
 					else
-						$this->keys[$chapter][$word] += count($entries) * $word_weight;
+						$this->keys[$chapter][$word] += $word_count * $word_weight;
 				}
 			}
 
