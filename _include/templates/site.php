@@ -32,6 +32,7 @@
 				<!-- s2_menu_children -->
 				<!-- s2_menu_subsections -->
 				<!-- s2_article_tags -->
+				<!-- s2_blog_tags -->
 			</div>
 			<div class="clearing"></div>
 		</div>
