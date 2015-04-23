@@ -14,6 +14,8 @@ class Viewer
 
 	public function __construct ($that = null)
 	{
+		$this->dirs[] = S2_ROOT.'_styles/'.S2_STYLE.'/views/';
+
 		$ext_dir = s2_ext_dir_from_ns(get_class($this));
 		if ($ext_dir)
 			$this->dirs[] = $ext_dir.'/views/';
@@ -31,7 +33,6 @@ class Viewer
 				$this->dirs[] = $ext_dir.'/views/';
 		}
 
-		$this->dirs[] = S2_ROOT.'_styles/'.S2_STYLE.'/views/';
 		$this->dirs[] = S2_ROOT.'_include/views/';
 
 		if (defined('S2_DEBUG_VIEW') && ($that === null || $that instanceof Page_HTML))
