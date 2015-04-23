@@ -84,7 +84,7 @@ try
 
 	if ($controller instanceof Page_Routable)
 	{
-		s2_no_cache(false);
+		s2_no_cache();
 		$controller->render();
 	}
 }
