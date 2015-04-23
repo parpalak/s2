@@ -26,9 +26,14 @@ abstract class Page_HTML extends Page_Abstract
 		}
 
 		$this->page = array(
-			'head_title'	=> Lang::get('Error 404'),
-			'title'			=> '<h1>'.Lang::get('Error 404').'</h1>',
-			'text'			=> sprintf(Lang::get('Error 404 text'), s2_link('/')),
+			'head_title' => Lang::get('Error 404'),
+			'title'      => '<h1 class="error404-header">' . Lang::get('Error 404') . '</h1>',
+			'text'       => sprintf(Lang::get('Error 404 text'), s2_link('/')),
+		);
+
+		$this->page['path'][] = array(
+			'title' => \Model::main_page_title(),
+			'link'  => s2_link('/'),
 		);
 
 		$this->render();
