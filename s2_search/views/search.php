@@ -12,7 +12,7 @@
 <div class="search-results">
 	<form class="search-form" method="get" action="<?php echo S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search'; ?>">
 		<div class="button">
-			<input type="submit" name="search" value="<?php echo Lang::get('Search button', 's2_search'); ?>" />
+			<input class="search-button" type="submit" name="search" value="<?php echo Lang::get('Search button', 's2_search'); ?>" />
 		</div>
 		<div class="wrap">
 			<input class="search-input" id="s2_search_input_ext" type="text" name="q" value="<?php echo s2_htmlencode($query); ?>" />

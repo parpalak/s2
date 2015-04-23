@@ -5,6 +5,19 @@
 	margin: 1em 0;
 	zoom: 1;
 	}
+	.search-results .search-form .search-button,
+	.search-results .search-form .search-input {
+		height: 1.5em;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		box-sizing: border-box;
+		padding: 0.125em 0.25em;
+		line-height: 1.0em;
+		}
+		.search-results .search-form .search-button {
+			padding-left: 0.5em;
+			padding-right: 0.5em;
+			}
 
 .search-results .button {
 	float: right;
