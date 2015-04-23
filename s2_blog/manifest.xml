@@ -288,12 +288,12 @@ $router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/', '\\s2_extensions\\s2_bl
 
 $router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL, function () { s2_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'); });
 $router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL.'/', '\\s2_extensions\\s2_blog\\Page_Tags');
-$router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL.'/[:tag]([/:slash])?', '\\s2_extensions\\s2_blog\\Page_Tag');
+$router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL.'/[*:tag]([/:slash])?', '\\s2_extensions\\s2_blog\\Page_Tag');
 
 $router->map('GET', S2_BLOG_URL.'/[i:year]/', '\\s2_extensions\\s2_blog\\Page_Year');
 $router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/', '\\s2_extensions\\s2_blog\\Page_Month');
 $router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/', '\\s2_extensions\\s2_blog\\Page_Day');
-$router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/[:url]', '\\s2_extensions\\s2_blog\\Page_Post');
+$router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/[*:url]', '\\s2_extensions\\s2_blog\\Page_Post');
 		]]></hook>
 
 		<hook id="idx_pre_get_queries"><![CDATA[
@@ -341,6 +341,7 @@ if (isset($s2_blog_placehoders['s2_blog_last_post']))
 $replace['<!-- s2_blog_tags -->'] = isset($page['s2_blog_tags']) ? $page['s2_blog_tags'] : '';
 $replace['<!-- s2_blog_calendar -->'] = isset($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
 $replace['<!-- s2_blog_navigation -->'] = isset($page['s2_blog_navigation']) ? $page['s2_blog_navigation'] : '';
+$replace['<!-- s2_blog_back_forward -->'] = isset($page['s2_blog_back_forward']) ? $page['s2_blog_back_forward'] : '';
 		]]></hook>
 
 		<hook id="fn_s2_parse_page_url_end"><![CDATA[

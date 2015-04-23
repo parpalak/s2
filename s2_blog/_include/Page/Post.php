@@ -84,26 +84,72 @@ class Page_Post extends Page_HTML implements \Page_Routable
 		$post_id = $row['id'];
 		$label = $row['label'];
 
+		$is_back_forward = $this->inTemplate('<!-- s2_blog_back_forward -->');
+
+		$queries = array();
 		if ($label)
 		{
 			// Getting posts that have the same label
 			$query = array(
-				'SELECT'	=> 'title, create_time, url',
-				'FROM'		=> 's2_blog_posts',
-				'WHERE'		=> 'label = \''.$s2_db->escape($label).'\' AND id <> '.$post_id.' AND published = 1',
-				'ORDER BY'	=> 'create_time DESC'
+				'SELECT'   => 'title, create_time, url, "label" AS type',
+				'FROM'     => 's2_blog_posts',
+				'WHERE'    => 'label = \'' . $s2_db->escape($label) . '\' AND id <> ' . $post_id . ' AND published = 1',
+				'ORDER BY' => 'create_time DESC'
 			);
 			($hook = s2_hook('fn_s2_blog_get_post_pre_get_labelled_posts_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$queries[] = $s2_db->query_build($query, true);
+		}
 
-			$links = array();
-			while ($row1 = $s2_db->fetch_assoc($result))
-				$links[] = array(
-					'title' => $row1['title'],
-					'link'  => S2_BLOG_PATH.date('Y/m/d/', $row1['create_time']).urlencode($row1['url']),
-				);
+		if ($is_back_forward)
+		{
+			$query = array(
+				'SELECT'   => 'title, create_time, url, "next" AS type',
+				'FROM'     => 's2_blog_posts',
+				'WHERE'    => ' create_time > ' . (int) $row['create_time'] . ' AND published = 1',
+				'ORDER BY' => 'create_time ASC',
+				'LIMIT'    => '1'
+			);
+			($hook = s2_hook('fn_s2_blog_get_post_pre_get_next_posts_qr')) ? eval($hook) : null;
+			$queries[] = $s2_db->query_build($query, true);
 
-			$row['see_also'] = $links;
+			$query = array(
+				'SELECT'   => 'title, create_time, url, "prev" AS type',
+				'FROM'     => 's2_blog_posts',
+				'WHERE'    => ' create_time < ' . (int) $row['create_time'] . ' AND published = 1',
+				'ORDER BY' => 'create_time DESC',
+				'LIMIT'    => '1'
+			);
+			($hook = s2_hook('fn_s2_blog_get_post_pre_get_prev_posts_qr')) ? eval($hook) : null;
+			$queries[] = $s2_db->query_build($query, true);
+		}
+
+		$result = $s2_db->query('(' . implode(') UNION (', $queries) . ')');
+
+		$back_forward = array();
+		while ($row1 = $s2_db->fetch_assoc($result))
+		{
+			$post_info = array(
+				'title' => $row1['title'],
+				'link'  => S2_BLOG_PATH . date('Y/m/d/', $row1['create_time']) . urlencode($row1['url']),
+			);
+
+			if ($row1['type'] == 'label')
+				$row['see_also'][] = $post_info;
+			elseif ($row1['type'] == 'next')
+			{
+				$this->page['link_navigation']['next'] = $post_info['link'];
+				$back_forward['forward'] = $post_info;
+			}
+			elseif ($row1['type'] == 'prev')
+			{
+				$this->page['link_navigation']['prev'] = $post_info['link'];
+				$back_forward['back'] = $post_info;
+			}
+		}
+
+		if (!empty($back_forward))
+		{
+			$this->page['s2_blog_back_forward'] = $this->renderPartial('back_forward_post', $back_forward);
 		}
 
 		// Getting tags
