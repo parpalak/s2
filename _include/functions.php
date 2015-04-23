@@ -208,14 +208,14 @@ function s2_get_template ($raw_template_id, $default_path = false)
 
 	$css = $js = array();
 	foreach ($includes['css'] as $css_path) {
-		if (strpos($css_path, '/') === false)
+		if (s2_is_local_resource($css_path))
 			$css_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $css_path;
 
 		$css[] = '<link rel="stylesheet" href="' . $css_path . '" />';
 	}
 
 	foreach ($includes['js'] as $js_path) {
-		if (strpos($js_path, '/') === false)
+		if (s2_is_local_resource($js_path))
 			$js_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $js_path;
 
 		$js[] = '<script src="' . $js_path . '"></script>';
@@ -250,6 +250,24 @@ function s2_get_template ($raw_template_id, $default_path = false)
 
 	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
 	return $template;
+}
+
+/**
+ * @param $path
+ * @return bool
+ */
+function s2_is_local_resource ($path)
+{
+	if (substr($path, 0, 1) === '/')
+		return false;
+
+	if (substr($path, 0, 7) === 'http://')
+		return false;
+
+	if (substr($path, 0, 8) === 'https://')
+		return false;
+
+	return true;
 }
 
 function s2_build_copyright ()
