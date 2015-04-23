@@ -678,10 +678,9 @@ function error()
 					echo (isset($trace['class']) ? $trace['class'] . $trace['type'] : '') . $trace['function'] . '(';
 
 					$args = array();
-					foreach ($trace['args'] as $arg)
-					{
-						$args[] = var_export($arg, true);
-					}
+					if (!empty($trace['args']))
+						foreach ($trace['args'] as $arg)
+							$args[] = var_export($arg, true);
 
 					echo implode(', ', $args) . ');' . "\n";
 					echo '</pre>';
