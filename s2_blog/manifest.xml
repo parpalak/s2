@@ -297,8 +297,13 @@ $router->map('GET', S2_BLOG_URL.'/[i:year]/[i:month]/[i:day]/[:url]', '\\s2_exte
 		]]></hook>
 
 		<hook id="idx_pre_get_queries"><![CDATA[
-if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
-{
+$s2_blog_placehoders = array();
+
+foreach (array('s2_blog_last_comments', 's2_blog_last_discussions', 's2_blog_last_post') as $s2_blog_placehoder)
+	if ($this->inTemplate('<!-- ' . $s2_blog_placehoder . ' -->'))
+		$s2_blog_placehoders[$s2_blog_placehoder] = 1;
+
+if (!empty($s2_blog_placehoders))
 	Lang::load($ext_info['id'], function () use ($ext_info)
 	{
 		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
@@ -307,29 +312,24 @@ if (strpos($template, '<!-- s2_blog_last_comments -->') !== false)
 			return require $ext_info['path'].'/lang/English.php';
 	});
 
+if (isset($s2_blog_placehoders['s2_blog_last_comments']))
+{
 	$s2_blog_recent_comments = s2_extensions\s2_blog\Placeholder::recent_comments();
 	$replace['<!-- s2_blog_last_comments -->'] = empty($s2_blog_recent_comments) ? '' : $this->renderPartial('menu_comments', array(
 		'title' => Lang::get('Last comments', 's2_blog'),
 		'menu'  => $s2_blog_recent_comments,
 	));
 }
-if (strpos($template, '<!-- s2_blog_last_discussions -->') !== false)
+if (isset($s2_blog_placehoders['s2_blog_last_discussions']))
 {
-	Lang::load($ext_info['id'], function () use ($ext_info)
-	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-		else
-			return require $ext_info['path'].'/lang/English.php';
-	});
-
 	$s2_blog_last_discussions = s2_extensions\s2_blog\Placeholder::recent_discussions();
 	$replace['<!-- s2_blog_last_discussions -->'] = empty($s2_blog_last_discussions) ? '' : $this->renderPartial('menu_block', array(
 		'title' => Lang::get('Last discussions', 's2_blog'),
 		'menu'  => $s2_blog_last_discussions,
+		'class' => 's2_blog_last_discussions',
 	));
 }
-if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
+if (isset($s2_blog_placehoders['s2_blog_last_post']))
 {
 	$s2_blog_viewer = new Viewer('s2_extensions\s2_blog');
 	$s2_blog_data = s2_extensions\s2_blog\Lib::last_posts_array(1);
@@ -338,41 +338,13 @@ if (strpos($template, '<!-- s2_blog_last_post -->') !== false)
 	unset($s2_blog_post);
 	$replace['<!-- s2_blog_last_post -->'] = implode('', $s2_blog_data);
 }
+$replace['<!-- s2_blog_tags -->'] = isset($page['s2_blog_tags']) ? $page['s2_blog_tags'] : '';
 $replace['<!-- s2_blog_calendar -->'] = isset($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
 $replace['<!-- s2_blog_navigation -->'] = isset($page['s2_blog_navigation']) ? $page['s2_blog_navigation'] : '';
 		]]></hook>
 
-		<hook id="fn_tagged_articles_pre_get_tags_qr"><![CDATA[
-$subquery = array(
-	'SELECT'	=> 'p.id',
-	'FROM'		=> 's2_blog_posts AS p',
-	'JOINS'		=> array(
-		array(
-			'INNER JOIN'	=> 's2_blog_post_tag AS pt',
-			'ON'			=> 'p.id = pt.post_id'
-		)
-	),
-	'WHERE'		=> 'pt.tag_id = atg.tag_id AND p.published = 1',
-	'LIMIT'		=> '1'
-);
-$raw_query = $s2_db->query_build($subquery, true);
-
-$query['SELECT'] .= ', ('.$raw_query.') IS NOT NULL as s2_blog_is_posts';
-
-$s2_blog_links = array();
-		]]></hook>
-
-		<hook id="fn_tagged_articles_loop_get_tags"><![CDATA[
-if ($row['s2_blog_is_posts'])
-	$s2_blog_links[] = array(
-		'title' => $row['name'],
-		'link'  => S2_BLOG_TAGS_PATH.urlencode($row['url']).'/',
-	);
-		]]></hook>
-
-		<hook id="fn_tagged_articles_end"><![CDATA[
-// Links to blog tags
-if (!empty($s2_blog_links))
+		<hook id="fn_s2_parse_page_url_end"><![CDATA[
+if ($this->inTemplate('<!-- s2_blog_tags -->'))
 {
 	Lang::load($ext_info['id'], function () use ($ext_info)
 	{
@@ -382,9 +354,11 @@ if (!empty($s2_blog_links))
 			return require $ext_info['path'].'/lang/English.php';
 	});
 
-	$output[] = $this->renderPartial('menu_block', array(
+	$s2_blog_tags = s2_extensions\s2_blog\Placeholder::blog_tags($id);
+	$page['s2_blog_tags'] = empty($s2_blog_tags) ? '' : $this->renderPartial('menu_block', array(
 		'title' => Lang::get('See in blog', 's2_blog'),
-		'menu'  => $s2_blog_links,
+		'menu'  => $s2_blog_tags,
+		'class' => 's2_blog_tags',
 	));
 }
 		]]></hook>

@@ -7,10 +7,10 @@
 /** @var $tags_header array */
 
 ?>
-<div class="header">
+<div class="header s2_blog_navigation">
 	<?php echo $title; ?>
 </div>
-<ul>
+<ul class="s2_blog_navigation">
 	<li>
 <?php if (empty($last['is_current'])) {?>
 		<a href="<?php echo s2_htmlencode($last['link']); ?>"><?php echo $last['title']; ?></a>
@@ -31,13 +31,13 @@
 <?php } else { ?>
 			<?php printf($tags_header['title'], '', ''); ?>
 <?php } ?>
-		<ul>
+		<ul class="nav-tags-list">
 <?php
 foreach ($tags as $tag)
 	if (!$tag['is_current'])
-		echo '<li><a href="'.s2_htmlencode($tag['link']).'">'.s2_htmlencode($tag['title']).'</a></li>';
+		echo '<li class="nav-tag"><a href="'.s2_htmlencode($tag['link']).'">'.s2_htmlencode($tag['title']).'</a></li>';
 	else
-		echo '<li>', s2_htmlencode($tag['title']), '</li>';
+		echo '<li class="nav-tag">', s2_htmlencode($tag['title']), '</li>';
 ?>
 		</ul>
 	</li>

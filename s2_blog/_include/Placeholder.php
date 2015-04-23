@@ -12,7 +12,7 @@ namespace s2_extensions\s2_blog;
 
 class Placeholder
 {
-	function recent_comments ()
+	public static function recent_comments ()
 	{
 		global $s2_db, $request_uri;
 
@@ -57,7 +57,7 @@ class Placeholder
 		return $output;
 	}
 
-	function recent_discussions ()
+	public static function recent_discussions ()
 	{
 		global $s2_db, $request_uri;
 
@@ -101,5 +101,49 @@ class Placeholder
 		}
 
 		return $output;
+	}
+
+	public static function blog_tags ($id)
+	{
+		global $s2_db;
+
+		$subquery = array(
+			'SELECT'	=> 'p.id',
+			'FROM'		=> 's2_blog_posts AS p',
+			'JOINS'		=> array(
+				array(
+					'INNER JOIN'	=> 's2_blog_post_tag AS pt',
+					'ON'			=> 'p.id = pt.post_id AND p.published = 1'
+				)
+			),
+			'WHERE'		=> 'pt.tag_id = atg.tag_id',
+			'LIMIT'		=> '1'
+		);
+		$raw_query = $s2_db->query_build($subquery, true);
+
+		$query = array(
+			'SELECT'	=> 't.name, t.url as url',
+			'FROM'		=> 'tags AS t',
+			'JOINS'		=> array(
+				array(
+					'INNER JOIN'	=> 'article_tag AS atg',
+					'ON'			=> 'atg.tag_id = t.tag_id'
+				)
+			),
+			'WHERE'		=> 'atg.article_id = ' . (int) $id . ' AND ('.$raw_query.') IS NOT NULL',
+		);
+
+		$result = $s2_db->query_build($query);
+
+		$s2_blog_links = array();
+		while ($row = $s2_db->fetch_assoc($result))
+		{
+			$s2_blog_links[] = array(
+				'title' => $row['name'],
+				'link'  => S2_BLOG_TAGS_PATH.urlencode($row['url']).'/',
+			);
+		}
+
+		return $s2_blog_links;
 	}
 }

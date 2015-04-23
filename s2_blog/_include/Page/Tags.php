@@ -92,5 +92,4 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 
 		$this->page['text'] = $this->renderPartial('tags_list', array('tags' => $tags));
 	}
-
 }
