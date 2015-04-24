@@ -1,18 +1,14 @@
-div.yc {
-	margin: 0 -1em;
-	padding: 0;
+.year-block {
+	width: 197px;
+	display: inline-block;
+	vertical-align: top;
+	margin: 0 2em 1em 0;
 	}
-	div.yc div {
-		width: 197px;
-		float: left;
-		padding: 1em;
-		height: 14em;
-		}
 
-#content .yc td {
+#content .year-block td {
 	border: 0 none;
 	}
-#content .yc > tbody > tr > td {
+.year-block > tbody > tr > td {
 	vertical-align: top;
 	padding: 0 1em;
 	}

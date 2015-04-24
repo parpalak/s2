@@ -21,7 +21,7 @@ class Page_Year extends Page_HTML implements \Page_Routable
 		$this->page['title'] = '';
 
 		// Posts of a year
-		$this->page = self::year_posts($params['year']) + $this->page;
+		$this->page = $this->year_posts($params['year']) + $this->page;
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -41,7 +41,7 @@ class Page_Year extends Page_HTML implements \Page_Routable
 		);
 	}
 
-	private static function year_posts ($year)
+	private function year_posts ($year)
 	{
 		global $s2_db;
 
@@ -74,17 +74,13 @@ class Page_Year extends Page_HTML implements \Page_Routable
 		while ($row = $s2_db->fetch_row($result))
 			$day_flags[(int) date('m', $row[0])][(int) date('j', $row[0])] = 1;
 
-		$output = '<table class="yc" align="center"><tr>';
+		$content = array();
 		for ($i = 1; $i <= 12; $i++)
-		{
-			$output .= '<td>'.Lib::calendar($year, Lib::extend_number($i), '-1', '', $day_flags[$i]).'</td>';
-			if (!($i % 2) && ($i != 12))
-				$output .= '</tr><tr>';
-		}
-		$output .= '</tr></table>';
+			$content[] = Lib::calendar($year, Lib::extend_number($i), '-1', '', $day_flags[$i]);
 
-		$page['text'] = $output;
+		$page['text'] = $this->renderPartial('year', array(
+			'content' => $content
+		));
 		return $page;
 	}
-
 }
