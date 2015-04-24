@@ -231,7 +231,7 @@ function s2_get_template ($raw_template_id, $default_path = false)
 
 	if ((strpos($template, '</a>') !== false) && isset($request_uri))
 	{
-		$template = preg_replace_callback('#<a href="([^"]*?)">([^<]*?)</a>#',
+		$template = preg_replace_callback('#<a href="([^"]*)">([^<]*)</a>#',
 			function ($matches) use ($request_uri)
 			{
 				$real_request_uri = s2_link($request_uri);
