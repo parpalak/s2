@@ -48,7 +48,7 @@ class Page_Favorite extends Page_HTML implements \Page_Routable
 			'SELECT' => '2 AS favorite',
 			'WHERE'  => 'favorite = 1',
 		);
-		$output = $this->get_posts($query_add);
+		$output = $this->get_posts($query_add, false);
 
 		if ($output == '')
 			s2_404_header();
