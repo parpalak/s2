@@ -559,16 +559,6 @@ function s2_no_cache ($full = true)
 	}
 }
 
-function s2_404_header ()
-{
-	$return = ($hook = s2_hook('fn_404_header_start')) ? eval($hook) : null;
-	if ($return != null)
-		return;
-
-	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-	s2_no_cache();
-}
-
 // Display a simple error message
 function error()
 {
@@ -706,7 +696,7 @@ function error()
 }
 
 
-function s2_redirect ($url, $external = false)
+function s2_permanent_redirect ($url, $external = false)
 {
 	$url = $external ? $url : s2_abs_link($url);
 	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');

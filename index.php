@@ -50,13 +50,13 @@ try
 
 		// Favorite
 		array('GET', '/' . S2_FAVORITE_URL, function () {
-			s2_redirect('/' . S2_FAVORITE_URL . '/');
+			s2_permanent_redirect('/' . S2_FAVORITE_URL . '/');
 		}),
 		array('GET', '/' . S2_FAVORITE_URL . '/', 'Page_Favorite'),
 
 		// Tags
 		array('GET', '/' . S2_TAGS_URL, function () {
-			s2_redirect('/' . S2_TAGS_URL . '/');
+			s2_permanent_redirect('/' . S2_TAGS_URL . '/');
 		}),
 		array('GET', '/' . S2_TAGS_URL . '/', 'Page_Tags'),
 		array('GET', '/' . S2_TAGS_URL . '/[:name][/:slash]?', 'Page_Tag'),

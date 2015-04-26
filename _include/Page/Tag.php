@@ -41,7 +41,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 		}
 
 		if (!$is_slash)
-			s2_redirect('/'.S2_TAGS_URL.'/'.urlencode($tag_name).'/');
+			s2_permanent_redirect('/'.S2_TAGS_URL.'/'.urlencode($tag_name).'/');
 
 		$subquery = array(
 			'SELECT'	=> '1',

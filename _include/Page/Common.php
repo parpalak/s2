@@ -169,7 +169,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 		// Correcting trailing slash and the rest of URL
 		if (!S2_USE_HIERARCHY && count($request_array) > 2)
-			s2_redirect('/'.$request_array[1]);
+			s2_permanent_redirect('/'.$request_array[1]);
 
 		$was_end_slash = '/' == substr($request_uri, -1);
 
@@ -295,7 +295,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 		}
 
 		if (S2_USE_HIERARCHY && $parent_num && $page['children_exist'] != $was_end_slash)
-			s2_redirect($current_path.(!$was_end_slash ? '/' : ''));
+			s2_permanent_redirect($current_path.(!$was_end_slash ? '/' : ''));
 
 		$id = $page['id'];
 		$bread_crumbs[] = array(

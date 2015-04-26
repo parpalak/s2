@@ -13,10 +13,29 @@ abstract class Page_HTML extends Page_Abstract
 	protected $error_template_id = 'error404.php';
 
 	/**
-	 * Call this if there is nothing to display.
+	 * Call this if there is nothing to display
+	 * and you want to show custom page.
+	 */
+	protected function s2_404_header ()
+	{
+		$return = ($hook = s2_hook('fn_404_header_start')) ? eval($hook) : null;
+		if ($return != null)
+			return;
+
+		$this->checkRedirect();
+
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		s2_no_cache();
+	}
+
+	/**
+	 * Call this if there is nothing to display
+	 * and you want to show standard 404 page.
 	 */
 	protected function error_404 ()
 	{
+		$this->checkRedirect();
+
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		try {
 			$this->template = s2_get_template($this->error_template_id);
@@ -38,6 +57,21 @@ abstract class Page_HTML extends Page_Abstract
 
 		$this->render();
 		die();
+	}
+
+	protected function checkRedirect ()
+	{
+		global $request_uri, $s2_redirect;
+
+		if (empty($s2_redirect))
+			return;
+
+		$new_url = preg_replace(array_keys($s2_redirect), array_values($s2_redirect), $request_uri);
+		if ($new_url != $request_uri)
+		{
+			$is_external = (substr($new_url, 0, 7) === 'http://' || substr($new_url, 0, 8) === 'https://');
+			s2_permanent_redirect($new_url, $is_external);
+		}
 	}
 
 	protected function simple_placeholders ()
