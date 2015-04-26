@@ -79,7 +79,7 @@ class Page_Month extends Page_HTML implements \Page_Routable
 
 		if ($output == '')
 		{
-			s2_404_header();
+			$this->s2_404_header();
 			$output = '<p>'.Lang::get('Not found', 's2_blog').'</p>';
 		}
 

@@ -51,7 +51,7 @@ class Page_Favorite extends Page_HTML implements \Page_Routable
 		$output = $this->get_posts($query_add, false);
 
 		if ($output == '')
-			s2_404_header();
+			$this->s2_404_header();
 		// TODO Why 404 in favorite? Where is the message?
 
 		$this->page['text'] = $output;

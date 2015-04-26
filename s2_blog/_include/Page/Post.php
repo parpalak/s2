@@ -75,7 +75,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
 		if (!$row = $s2_db->fetch_assoc($result))
 		{
-			s2_404_header();
+			$this->s2_404_header();
 			$this->page['head_title'] = Lang::get('Not found', 's2_blog');
 			$this->page['text'] = '<p>'.Lang::get('Not found', 's2_blog').'</p>';
 			return;
