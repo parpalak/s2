@@ -42,7 +42,7 @@
 			$tag = '<a href="'.$tag['link'].'">'.$tag['title'].'</a>';
 		unset($tag);
 
-		$footer['tags'] = sprintf(Lang::get('Tags:', 's2_blog'), implode(', ', $tags));
+		$footer['tags'] = Lang::get('Tags') . ': ' . implode(', ', $tags);
 	}
 
 	if ($commented && S2_SHOW_COMMENTS)

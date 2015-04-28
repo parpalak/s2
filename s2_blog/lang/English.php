@@ -7,8 +7,6 @@ return array(
 
 	'Favorite'             => 'Favorite posts',
 	'See also'             => 'See also:',
-	'Tags'                 => 'Tags',
-	'Tags:'                => 'Tags: %s',
 	'Last comments'        => 'Last blog comments',
 	'Last discussions'     => 'Last blog discussions',
 	'Articles by tag'      => 'Related articles:',

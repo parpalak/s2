@@ -42,7 +42,7 @@ class Page_RSS extends \Page_RSS
 						'see_also' => $post['see_also']
 					))) .
 					(empty($post['tags']) ? '' : $viewer->render('tags', array(
-						'title' => Lang::get('Tags:', 's2_blog'),
+						'title' => Lang::get('Tags'),
 						'tags'  => $post['tags'],
 					))),
 				'time'        => $post['create_time'],

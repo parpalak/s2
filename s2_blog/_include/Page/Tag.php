@@ -36,7 +36,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 		}
 
 		$this->page['path'][] = array(
-			'title' => Lang::get('Tags', 's2_blog'),
+			'title' => Lang::get('Tags'),
 			'link'  => S2_BLOG_TAGS_PATH,
 		);
 		$this->page['path'][] = array(

@@ -565,7 +565,7 @@ function s2_blog_output_post_list ($criteria)
 			$body .= '<tr'.$class.'><td><a href="#" onclick="return EditRecord('.$row['id'].'); ">'.s2_htmlencode($row['title']).'</a></td><td>'.$date.'</td><td>'.$tags.'</td><td>'.$row['label'].'</td><td>'.$comment.'</td><td>'.$buttons.'</td></tr>';
 		}
 
-		echo '<table width="100%" class="sort"><thead><tr><td class="sortable">'.Lang::get('Post', 's2_blog').'</td><td width="10%" class="sortable curcol_up">'.$lang_admin['Date'].'</td><td width="20%" class="sortable">'.Lang::get('Tags', 's2_blog').'</td><td width="5%" class="sortable">'.Lang::get('Label', 's2_blog').'</td><td width="9%" class="sortable">'.Lang::get('Comments').'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
+		echo '<table width="100%" class="sort"><thead><tr><td class="sortable">'.Lang::get('Post', 's2_blog').'</td><td width="10%" class="sortable curcol_up">'.$lang_admin['Date'].'</td><td width="20%" class="sortable">'.Lang::get('Tags').'</td><td width="5%" class="sortable">'.Lang::get('Label', 's2_blog').'</td><td width="9%" class="sortable">'.Lang::get('Comments').'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
 	}
 	else
 		echo '<div class="info-box"><p>'.Lang::get('No posts found', 's2_blog').'</p></div>';
