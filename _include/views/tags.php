@@ -1,6 +1,7 @@
 <?php
 /**
- * Content of <!-- s2_last_articles --> placeholder
+ * Content of <!-- s2_tags --> placeholder.
+ * Also used in the s2_blog RSS feed.
  *
  * @var string $title
  * @var array $tags

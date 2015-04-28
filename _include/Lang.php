@@ -38,7 +38,7 @@ class Lang
 		if (!isset(self::$data[$namespace]))
 			self::load($namespace);
 
-		return self::$data[$namespace][$key];
+		return isset(self::$data[$namespace][$key]) ? self::$data[$namespace][$key] : sprintf('<b>No lang entry for `%s`</b>', $key);
 	}
 
 	public static function admin_code ()
