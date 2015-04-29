@@ -277,16 +277,16 @@ define('S2_BLOG_TAGS_PATH', S2_BLOG_PATH.urlencode(S2_TAGS_URL).'/');
 		]]></hook>
 
 		<hook id="idx_new_routes"><![CDATA[
-$router->map('GET', S2_BLOG_URL, function () { s2_redirect(S2_BLOG_URL.'/'); });
+$router->map('GET', S2_BLOG_URL, function () { s2_permanent_redirect(S2_BLOG_URL.'/'); });
 $router->map('GET', S2_BLOG_URL.'/', '\\s2_extensions\\s2_blog\\Page_Main');
 $router->map('GET', S2_BLOG_URL.'/skip/[i:page]', '\\s2_extensions\\s2_blog\\Page_Main');
 
 $router->map('GET', '['.S2_BLOG_URL.'/rss.xml:url]', '\\s2_extensions\\s2_blog\\Page_RSS');
 
-$router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL, function () { s2_redirect(S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/'); });
+$router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL, function () { s2_permanent_redirect(S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/'); });
 $router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/', '\\s2_extensions\\s2_blog\\Page_Favorite');
 
-$router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL, function () { s2_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'); });
+$router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL, function () { s2_permanent_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'); });
 $router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL.'/', '\\s2_extensions\\s2_blog\\Page_Tags');
 $router->map('GET', S2_BLOG_URL.'/'.S2_TAGS_URL.'/[*:tag]([/:slash])?', '\\s2_extensions\\s2_blog\\Page_Tag');
 
