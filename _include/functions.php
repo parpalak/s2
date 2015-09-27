@@ -202,16 +202,16 @@ function s2_get_template ($raw_template_id, $default_path = false)
 	$includes = require S2_ROOT . $style_filename;
 
 	if (empty($includes) || !is_array($includes))
-		throw new Exception(sprintf('File "%s" must return a PHP array with the following keys: css, js, css_inline, js_inline.', $style_filename));
+		throw new Exception(sprintf('File "%s" must return a PHP array with the following keys: css, js, css_inline, js_inline, favicon.', $style_filename));
 
 	($hook = s2_hook('fn_get_template_pre_includes_merge')) ? eval($hook) : null;
 
-	$css = $js = array();
+	$link = $js = array();
 	foreach ($includes['css'] as $css_path) {
 		if (s2_is_local_resource($css_path))
 			$css_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $css_path;
 
-		$css[] = '<link rel="stylesheet" href="' . $css_path . '" />';
+		$link[] = '<link rel="stylesheet" href="' . $css_path . '" />';
 	}
 
 	foreach ($includes['js'] as $js_path) {
@@ -221,12 +221,20 @@ function s2_get_template ($raw_template_id, $default_path = false)
 		$js[] = '<script src="' . $js_path . '"></script>';
 	}
 
-	$css = array_merge($css, $includes['css_inline']);
+	$link = array_merge($link, $includes['css_inline']);
 	$js = array_merge($js, $includes['js_inline']);
+
+	if (isset($includes['favicon'])) {
+		$favicon_path = $includes['favicon'];
+		if (s2_is_local_resource($favicon_path)) {
+			$favicon_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $favicon_path;
+		}
+		$link[] = '<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="' . $favicon_path . '">';
+	}
 
 	($hook = s2_hook('fn_get_template_pre_includes_replace')) ? eval($hook) : null;
 
-	$template = str_replace('<!-- s2_styles -->', implode("\n", $css), $template);
+	$template = str_replace('<!-- s2_styles -->', implode("\n", $link), $template);
 	$template = str_replace('<!-- s2_scripts -->', implode("\n", $js), $template);
 
 	if ((strpos($template, '</a>') !== false) && isset($request_uri))
