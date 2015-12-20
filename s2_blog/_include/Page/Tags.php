@@ -13,6 +13,14 @@ use \Lang;
 
 class Page_Tags extends Page_HTML implements \Page_Routable
 {
+	public function __construct (array $params = array())
+	{
+		if (empty($params['slash']))
+			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/');
+
+		parent::__construct($params);
+	}
+
 	public function body (array $params = array())
 	{
 		if ($this->inTemplate('<!-- s2_blog_calendar -->'))

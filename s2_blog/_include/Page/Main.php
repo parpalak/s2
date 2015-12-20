@@ -12,6 +12,14 @@ use \Lang;
 
 class Page_Main extends Page_HTML implements \Page_Routable
 {
+	public function __construct (array $params = array())
+	{
+		if (empty($params['slash']))
+			s2_permanent_redirect(S2_BLOG_URL.'/');
+
+		parent::__construct($params);
+	}
+
 	public function body (array $params = array())
 	{
 		$s2_blog_skip = !empty($params['page']) ? (int) $params['page'] : 0;

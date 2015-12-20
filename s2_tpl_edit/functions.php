@@ -147,7 +147,7 @@ function s2_tpl_edit_content ($template_filename = '')
 		$is_template = true;
 		if (!file_exists(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename))
 		try {
-			$is_template = s2_get_template($template_filename, false);
+			$is_template = s2_get_template($template_filename);
 		}
 		catch (Exception $e) {
 			$is_template = false;

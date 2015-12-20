@@ -29,6 +29,8 @@ abstract class Page_HTML extends \Page_HTML
 
 		$this->viewer = new \Viewer($this);
 
+		parent::__construct($params);
+
 		$this->page['commented'] = 0;
 		$this->page['class'] = 's2_blog';
 		$this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode(Lang::get('RSS link title', 's2_blog')).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';

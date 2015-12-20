@@ -13,6 +13,15 @@ use \Lang;
 
 class Page_Favorite extends Page_HTML implements \Page_Routable
 {
+	public function __construct (array $params = array())
+	{
+		if (empty($params['slash'])) {
+			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/');
+		}
+
+		parent::__construct($params);
+	}
+
 	public function body (array $params = array())
 	{
 		$this->obtainTemplate(__DIR__.'/../../templates/');

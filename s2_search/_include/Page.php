@@ -29,7 +29,7 @@ class Page extends \Page_HTML implements \Page_Routable
 		});
 
 		$this->viewer = new \Viewer($this);
-		parent::__construct();
+		parent::__construct($params);
 
 		$this->build_page($query);
 	}
