@@ -12,7 +12,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 {
 	public function __construct (array $params = array())
 	{
-		parent::__construct();
+		parent::__construct($params);
 		$this->parse_page_url($params['request_uri']);
 	}
 

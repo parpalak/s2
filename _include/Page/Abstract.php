@@ -15,7 +15,7 @@ abstract class Page_Abstract
 	protected $etag = null;
 	protected $viewer = null;
 
-	public function __construct ()
+	public function __construct (array $params = array())
 	{
 		if (empty($this->viewer))
 			$this->viewer = new Viewer();
