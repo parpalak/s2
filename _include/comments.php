@@ -24,7 +24,7 @@ function s2_check_comment_question ($key, $answer)
 //
 function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsubscribe_link)
 {
-	$message = Lang::get('Email subject', 'comments');
+	$message = Lang::get('Email pattern', 'comments');
 	$message = str_replace(array('<name>', '<author>', '<title>', '<url>', '<text>', '<unsubscribe>'),
 		array($name, $auth_name, $title, $url, $text, $unsubscribe_link), $message);
 
