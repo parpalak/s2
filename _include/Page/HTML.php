@@ -112,6 +112,8 @@ abstract class Page_HTML extends Page_Abstract
 			$meta_tags[] = '<meta name="keywords" content="'.s2_htmlencode($page['meta_keywords']).'" />';
 		if (!empty($page['meta_description']))
 			$meta_tags[] = '<meta name="description" content="'.s2_htmlencode($page['meta_description']).'" />';
+		if (!empty($page['canonical_path']) && defined('S2_CANONICAL_URL'))
+			$meta_tags[] = '<link rel="canonical" href="' . S2_CANONICAL_URL . s2_htmlencode($page['canonical_path']) . '" />';
 
 		($hook = s2_hook('proc_tpl_pre_meta_merge')) ? eval($hook) : null;
 		$replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);

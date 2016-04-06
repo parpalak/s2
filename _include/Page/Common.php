@@ -297,6 +297,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 		if (S2_USE_HIERARCHY && $parent_num && $page['children_exist'] != $was_end_slash)
 			s2_permanent_redirect($current_path.(!$was_end_slash ? '/' : ''));
 
+		$page['canonical_path'] = $current_path.($was_end_slash ? '/' : '');
+
 		$id = $page['id'];
 		$bread_crumbs[] = array(
 			'title' => $page['title']
