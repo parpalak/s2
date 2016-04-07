@@ -66,7 +66,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 		$raw_query_user = $s2_db->query_build($sub_query, true);
 
 		$query = array(
-			'SELECT'	=> 'create_time, title, text, id, commented, label, favorite, ('.$raw_query_user.') AS author',
+			'SELECT'	=> 'create_time, title, text, id, commented, label, favorite, ('.$raw_query_user.') AS author, url',
 			'FROM'		=> 's2_blog_posts AS p',
 			'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND url = \''.$s2_db->escape($url).'\' AND published = 1'
 		);
@@ -83,6 +83,8 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
 		$post_id = $row['id'];
 		$label = $row['label'];
+
+		$this->page['canonical_path'] = S2_BLOG_PATH . date('Y/m/d/', $row['create_time']) . $row['url'];
 
 		$is_back_forward = $this->inTemplate('<!-- s2_blog_back_forward -->');
 
@@ -123,10 +125,10 @@ class Page_Post extends Page_HTML implements \Page_Routable
 			$queries[] = $s2_db->query_build($query, true);
 		}
 
-		$result = $s2_db->query('(' . implode(') UNION (', $queries) . ')');
+		$result = !empty($queries) ? $s2_db->query('(' . implode(') UNION (', $queries) . ')') : null;
 
 		$back_forward = array();
-		while ($row1 = $s2_db->fetch_assoc($result))
+		while ($result && $row1 = $s2_db->fetch_assoc($result))
 		{
 			$post_info = array(
 				'title' => $row1['title'],
