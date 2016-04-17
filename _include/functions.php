@@ -706,7 +706,7 @@ function error()
 
 function s2_permanent_redirect ($url, $external = false)
 {
-	$url = $external ? $url : s2_abs_link($url);
+	$url = $external ? $url : s2_link($url);
 	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 	header('Location: '.$url);
 	die;

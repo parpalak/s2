@@ -36,7 +36,7 @@ try
 	//
 	if (substr($request_uri, -3) == '---')
 	{
-		header('Location: ' . S2_BASE_URL . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
+		header('Location: ' . S2_PATH . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
 
 		$s2_db->close();
 		die;

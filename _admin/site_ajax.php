@@ -250,7 +250,7 @@ elseif ($action == 'preview')
 	if ($path === false)
 		echo $lang_admin['Preview not found'];
 	else
-		header('Location: '.s2_abs_link($path));
+		header('Location: '.s2_link($path));
 }
 
 //=======================[Comment management]===================================

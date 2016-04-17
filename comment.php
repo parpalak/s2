@@ -297,9 +297,9 @@ if (!$is_moderate)
 
 	($hook = s2_hook('cmnt_pre_redirect')) ? eval($hook) : null;
 
-	header('Location: '.$link.'#'.$hash);
+	header('Location: '.s2_link($path.'/'.urlencode($row['url'])).'#'.$hash);
 }
 else
-	header('Location: '.S2_BASE_URL.'/comment.php?go='.urlencode($link));
+	header('Location: '.S2_PATH.'/comment.php?go='.urlencode($link));
 
 $s2_db->close();

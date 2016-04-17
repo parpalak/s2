@@ -9,7 +9,7 @@ isset($show_email) || ($show_email = false);
 isset($subscribed) || ($subscribed = false);
 isset($text) || ($text = '');
 
-$action = S2_BASE_URL.'/comment.php';
+$action = S2_PATH.'/comment.php';
 
 $key = md5(time() . 'A very secret string ;-)');
 $a = rand(1, 8);
