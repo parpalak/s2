@@ -474,10 +474,14 @@ else
 		'FROM'		=> 'users'
 	);
 
-	$result = $s2_db->query_build($query);
-	if ($s2_db->fetch_row($result))
-		error(sprintf($lang_install['S2 already installed'], $db_prefix, $db_name));
+	try {
+		$result = $s2_db->query_build($query);
+		if ($s2_db->fetch_row($result))
+			error(sprintf($lang_install['S2 already installed'], $db_prefix, $db_name));
+	}
+	catch (DBLayer_Exception $e) {
 
+	}
 
 	// Check if InnoDB is available
  	if ($db_type == 'mysql_innodb' || $db_type == 'mysqli_innodb')
@@ -1102,7 +1106,7 @@ body {
 			<?php echo implode("\n\t\t\t\t", $alerts)."\n" ?>
 		</ul>
 	</div>
-<?php 
+<?php
 
 	}
 
