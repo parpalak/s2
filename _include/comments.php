@@ -42,6 +42,7 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsub
 		'Content-transfer-encoding: 8bit'."\r\n".
 		'Content-type: text/plain; charset=utf-8'."\r\n".
 		'X-Mailer: S2 Mailer'."\r\n".
+		'List-Unsubscribe: <'.$unsubscribe_link.'>'."\r\n".
 		'Reply-To: '.$from;
 
 	// Change the linebreaks used in the headers according to OS
@@ -126,7 +127,7 @@ function s2_bbcode_to_html ($s)
 //
 // wordwrap() with utf-8 support
 //
-function utf8_wordwrap($string, $width = 75, $break = "\n") 
+function utf8_wordwrap($string, $width = 75, $break = "\n")
 {
 	$a = explode("\n", $string);
 	foreach ($a as $k => $str)
