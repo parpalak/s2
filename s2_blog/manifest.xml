@@ -279,7 +279,7 @@ define('S2_BLOG_TAGS_PATH', S2_BLOG_PATH.urlencode(S2_TAGS_URL).'/');
 		<hook id="idx_new_routes"><![CDATA[
 $router->map('GET', '@^/blog(:?(?P<slash>/)(:?skip/(?P<page>(\d)+))?)?$', '\\s2_extensions\\s2_blog\\Page_Main');
 
-$router->map('GET', S2_BLOG_URL.'/rss.xml', '\\s2_extensions\\s2_blog\\Page_RSS');
+$router->map('GET', '['.S2_BLOG_URL.'/rss.xml:url]', '\\s2_extensions\\s2_blog\\Page_RSS');
 
 $router->map('GET', S2_BLOG_URL.'/'.S2_FAVORITE_URL.'[/:slash]?', '\\s2_extensions\\s2_blog\\Page_Favorite');
 
