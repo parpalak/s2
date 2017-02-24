@@ -99,13 +99,7 @@
 		}
 
 		if (link)
-		{
 			document.location = link;
-			if (window.event)
-				window.event.returnValue = false;
-			if (e.preventDefault)
-				e.preventDefault();
-		}
 	}
 
 	function initNavigate ()
