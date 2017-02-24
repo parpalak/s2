@@ -2,7 +2,7 @@
 /**
  * Comment forms and functions.
  *
- * @copyright (C) 2009-2013 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2017 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -19,9 +19,16 @@ function s2_check_comment_question ($key, $answer)
 	return ((int) ($key[10].$key[12]) + (int) ($key[20]) == (int) trim($answer));
 }
 
-//
-// Sends comments to subscribed users
-//
+/**
+ * @param string $name             Receiver name
+ * @param string $email            Receiver email
+ * @param string $text             Message
+ * @param string $title            Article title
+ * @param string $url              Article URL
+ * @param string $auth_name        Author name
+ * @param string $unsubscribe_link Unsubscribe URL
+ *
+ */
 function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsubscribe_link)
 {
 	$message = Lang::get('Email pattern', 'comments');
@@ -69,11 +76,15 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 	$subject = sprintf(Lang::get('Email subject', 'comments'), $url);
 	$subject = "=?UTF-8?B?".base64_encode($subject)."?=";
 
+	// Our email
 	$sender_email = S2_WEBMASTER_EMAIL ? S2_WEBMASTER_EMAIL : 'example@example.com';
 	$sender = S2_WEBMASTER ? "=?UTF-8?B?".base64_encode(S2_WEBMASTER)."?=".' <'.$sender_email.'>' : $sender_email;
+
+	// Author email
 	$from = trim($auth_name) ? "=?UTF-8?B?".base64_encode($auth_name)."?=".' <'.$auth_email.'>' : $auth_email;
-	$headers = 'From: '.$from."\r\n".
-		'Sender: '.$sender."\r\n".
+	$headers =
+		'From: '.$sender."\r\n". // One cannot use the real author email in "From:" header due to DMARC. Use our one.
+		'Sender: '.$from."\r\n". // Let's use the real author email at least here.
 		'Date: '.gmdate('r')."\r\n".
 		'MIME-Version: 1.0'."\r\n".
 		'Content-transfer-encoding: 8bit'."\r\n".
