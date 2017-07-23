@@ -46,7 +46,8 @@ function s2_date_time ($time)
 function s2_return_bytes ($val)
 {
 	$val = trim($val);
-	$last = strtolower($val[strlen($val) - 1]);
+	$last = strtolower(substr($val, -1));
+	$val = substr($val, 0, -1);
 	switch($last)
 	{
 		case 'g':
