@@ -297,7 +297,7 @@ class Finder extends Worker
 					foreach ($line_num_array as $line_index => $line_num)
 					{
 						$future_found_stems = $found_stems;
-						foreach ($found_stems_lines[$line_num] as $stem => $weight)
+						foreach ($found_stems_lines[$line_num] as $stem => $weight2)
 							$future_found_stems[$stem] = 1;
 
 						if ($max < count($future_found_stems))
@@ -310,17 +310,15 @@ class Finder extends Worker
 					$line_num = $line_num_array[$max_index];
 					unset($line_num_array[$max_index]);
 
-					foreach ($found_stems_lines[$line_num] as $stem => $weight)
+					foreach ($found_stems_lines[$line_num] as $stem => $weight2)
 						$found_stems[$stem] = 1;
 
 					// Highlighting
-					$replace = array();
-					foreach ($found_words[$line_num] as $word)
-						$replace[$word] = '<i>'.$word.'</i>';
-
-					$snippet[$line_num] = strtr($lines[$line_num], $replace);
-					// Cleaning up HTML entites TODO $word may be undefined
-					$snippet[$line_num] = preg_replace('#&[^;]{0,10}(?:<i>'.preg_quote($word, '#').'</i>[^;]{0,15})+;#ue', 'str_replace(array("<i>", "</i>"), "", "\\0")', $snippet[$line_num]);
+					$snippet[$line_num] = preg_replace(
+						'#\b(' . implode('|', $found_words[$line_num]) . ')\b#su',
+						'<i>$1</i>',
+						$lines[$line_num]
+					);
 
 					// If we have found all stems, we do not need any more sentence
 					if ($max == count($stems))
