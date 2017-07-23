@@ -68,7 +68,7 @@ function s2_typo_make ($contents, $soft = 0)
 
 	$replace = array(
 		// Some special chars
-		'...'	=> '…',
+//		'...'	=> '…',
 		'(tm)'	=> '™',
 		'(TM)'	=> '™',
 		'(c)'	=> '©',

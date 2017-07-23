@@ -204,7 +204,7 @@ class Finder extends Worker
 		// Text cleanup
 		$replace_what = array("\r", 'ё', '&nbsp;', '&mdash;', '&ndash;', '&laquo;', '&raquo;');
 		$replace_to = array('', 'е', ' ', '—', '–', '«', '»',);
-		foreach (array('<br>', '<br />', '</h1>', '</h2>', '</h3>', '</h4>', '</p>', '</pre>', '</blockquote>', '</li>') as $tag)
+		foreach (array('<br>', '<br />', '<h1>', '<h2>', '<h3>', '<h4>', '<p>', '<pre>', '<blockquote>', '<li>') as $tag)
 		{
 			$replace_what[] = $tag;
 			$replace_to[] = $tag."\r";
@@ -334,7 +334,7 @@ class Finder extends Worker
 			{
 				// Cleaning up unbalanced quotation makrs
 				$line = preg_replace('#«(.*?)»#Ss', '&laquo;\\1&raquo;', $line);
-				$line = str_replace(array('&quot', '«', '»'), array('"', ''), $line);
+				$line = str_replace(array('&quot;', '«', '»'), array('"', ''), $line);
 				if (substr_count($line, '"') % 2)
 					$line = str_replace('"', '', $line);
 
