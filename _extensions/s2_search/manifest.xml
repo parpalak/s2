@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Search
+ *
+ * Adds full-text search with russian morphology to small sites.
+ *
+ * @copyright (C) 2011-2014 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_search
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_search</id>
+	<title>Search</title>
+	<version>2.0dev</version>
+	<description>Full-text search with Russian morphology. Designed for small sites.</description>
+	<author>Roman Parpalak</author>
+
+	<adminaffected>1</adminaffected>
+
+	<minversion>2.0dev</minversion>
+	<maxtestedon>2.0dev</maxtestedon>
+
+	<note type="install">Do not forget to create search index after extension installation (Admin → Stats page).</note>
+
+	<install><![CDATA[
+$s2_search_config = array(
+	'S2_SEARCH_QUICK'		=> '0',
+);
+
+foreach ($s2_search_config as $conf_name => $conf_value)
+{
+	if (defined($conf_name))
+		continue;
+
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
+	);
+
+	$s2_db->query_build($query);
+}
+	]]></install>
+
+	<uninstall><![CDATA[
+$query = array(
+	'DELETE'	=> 'config',
+	'WHERE'		=> 'name in (\'S2_SEARCH_QUICK\')',
+);
+$s2_db->query_build($query);
+	]]></uninstall>
+
+	<hooks>
+
+		<hook id="idx_get_content"><![CDATA[
+if ($request_uri == '/search' || isset($_GET['search']) && isset($_GET['q']))
+	return new \s2_extensions\s2_search\Page(array());
+		]]></hook>
+
+		<hook id="idx_template_pre_replace"><![CDATA[
+if ($this instanceof \s2_extensions\s2_search\Page)
+{
+	$replace['<!-- s2_search_field -->'] = '';
+}
+else
+{
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
+	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.(S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search').'">'.(S2_URL_PREFIX ? '<input type="hidden" name="search" value="1" />' : '').'<input type="text" name="q" class="inactive" id="s2_search_input" onblur="if(this.value==\'\'){this.value=this.defaultValue; this.className=\'inactive\';}" onfocus="if(this.value==this.defaultValue){this.value=this.className=\'\';}" value="'.Lang::get('Search', 's2_search').'"/></form>';
+}
+		]]></hook>
+
+		<hook id="fn_get_template_pre_includes_merge"><![CDATA[
+$includes['css'][] = $ext_info['url'].'/style.css';
+if (S2_SEARCH_QUICK)
+{
+	$includes['js'][] = $ext_info['url'].'/autosearch.js';
+	$includes['js_inline'][] = '<script>var s2_search_url = "'.$ext_info['url'].'";</script>';
+}
+		]]></hook>
+
+		<hook id="ai_after_js_include"><![CDATA[
+echo '<script type="text/javascript" src="'.$ext_info['url'].'/admin.js"></script>'."\n";
+		]]></hook>
+
+		<hook id="fn_get_counters_end" priority="9"><![CDATA[
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
+$s2_search_reindex = '<a href="#" onclick="return s2_search.reindex();" class="js" title="'.Lang::get('Reindex title', 's2_search').'">'.Lang::get('Reindex', 's2_search').'</a><span id="s2_search_progress"></span>';
+$counters[] = sprintf(Lang::get('Info link', 's2_search'), Lang::friendly_filesize(is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0), $s2_search_reindex);
+		]]></hook>
+
+		<hook id="rq_custom_action"><![CDATA[
+if ($action == 's2_search_makeindex')
+{
+	$is_permission = $s2_user['create_articles'] || $s2_user['edit_site'];
+	$save_action = isset($_GET['save_action']) ? $_GET['save_action'] : '';
+	$id = isset($_GET['id']) ? $_GET['id'] : '';
+	$save_action = ($save_action == 'save') ? '' : $save_action.'_';
+	$chapter = $id ? $save_action.$id : false;
+	($hook = s2_hook('s2_search_action_makeindex')) ? eval($hook) : null;
+	s2_test_user_rights($is_permission);
+
+	$fetcher = new \s2_extensions\s2_search\Fetcher();
+	$finder = new \s2_extensions\s2_search\Indexer(S2_CACHE_DIR, $fetcher);
+	if (!$chapter)
+		echo $finder->index();
+	else
+		$finder->refresh($chapter);
+}
+		]]></hook>
+
+		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
+$fieldset = array(
+	'S2_SEARCH_QUICK' => s2_get_checkbox('S2_SEARCH_QUICK', $options['S2_SEARCH_QUICK'], Lang::get('Quick search', 's2_search'), Lang::get('Quick search label', 's2_search')),
+);
+($hook = s2_hook('s2_search_opt_pre_fs_merge')) ? eval($hook) : null;
+$output .= '<fieldset><legend>'.Lang::get('Search', 's2_search').'</legend>'.implode('', $fieldset).'</fieldset>';
+		]]></hook>
+
+		<hook id="opt_start"><![CDATA[
+$s2_const_types['S2_SEARCH_QUICK'] = 'boolean';
+		]]></hook>
+
+		<hook id="ai_js_end"><![CDATA[
+if ((is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0) == 0)
+{
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
+
+?>
+PopupMessages.show('<?php echo Lang::get('Indexing required', 's2_search'); ?>', [
+	{
+		name: '<?php echo Lang::get('Index now', 's2_search'); ?>',
+		action: s2_search.build_index,
+		once: true
+	}
+]);
+<?php
+}
+		]]></hook>
+
+	</hooks>
+</extension>

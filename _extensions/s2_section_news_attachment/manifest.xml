@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Attachment lists
+ *
+ * Shows in news a thumbnail of the first attached image
+ *
+ * @copyright (C) 2013 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_section_news_attachment
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_section_news_attachment</id>
+	<title>Thumbnails in Section News</title>
+	<version>1.0a1</version>
+	<description>Adds thumbnails to news from the attachment extension.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0b3</minversion>
+	<maxtestedon>1.0b4</maxtestedon>
+	<dependencies>
+		<dependency>s2_attachment</dependency>
+		<dependency>s2_section_news</dependency>
+	</dependencies>
+
+	<hooks>
+		<hook id="s2_section_news_pre_get_news"><![CDATA[
+// Fetching thumbnails
+$s2_section_news_attachment_q = array(
+	'SELECT'	=> 'CONCAT(time, "=", filename)',
+	'FROM'		=> 's2_attachment_files AS f',
+	'WHERE'		=> 'f.article_id = a.id AND is_picture = 1',
+	'LIMIT'		=> '1'
+);
+$s2_section_news_attachment_raw = $s2_db->query_build($s2_section_news_attachment_q, true);
+$s2_section_news_q['SELECT'] .= ', ('.$s2_section_news_attachment_raw.') AS s2_section_news_attachment';
+		]]></hook>
+
+		<hook id="s2_section_news_pre_merge_news"><![CDATA[
+if ($s2_section_news_row['s2_section_news_attachment'])
+{
+	$s2_section_news_attachment_pos = strpos($s2_section_news_row['s2_section_news_attachment'], '=');
+
+	$s2_section_news_row['excerpt'] = '<img align="left" class="s2_section_news_attachment" src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.
+		date('Y', substr($s2_section_news_row['s2_section_news_attachment'], 0, $s2_section_news_attachment_pos)).
+		'/'.$s2_section_news_row['id'].'/micro/'.
+		substr($s2_section_news_row['s2_section_news_attachment'], 1 + $s2_section_news_attachment_pos).
+		'.png" alt="" />' . $s2_section_news_row['excerpt'] . '<br clear="all" />';
+}
+		]]></hook>
+
+		<hook id="fn_s2_parse_page_url_pre_get_children_qr"><![CDATA[
+if ($template_id == 'news.php')
+{
+	// Fetching thumbnails
+	$s2_section_news_attachment_q = array(
+		'SELECT'	=> 'CONCAT(time, "=", filename)',
+		'FROM'		=> 's2_attachment_files AS f',
+		'WHERE'		=> 'f.article_id = a.id AND is_picture = 1',
+		'LIMIT'		=> '1'
+	);
+	$s2_section_news_attachment_raw = $s2_db->query_build($s2_section_news_attachment_q, true);
+	$query['SELECT'] .= ', ('.$s2_section_news_attachment_raw.') AS s2_section_news_attachment';
+}
+		]]></hook>
+
+		<hook id="fn_s2_parse_page_url_add_subarticle"><![CDATA[
+if ($template_id == 'news.php' && $row['s2_section_news_attachment'])
+{
+	$s2_section_news_attachment_pos = strpos($row['s2_section_news_attachment'], '=');
+
+	$subarticles[count($subarticles) - 1]['excerpt'] = '<img align="left" class="s2_section_news_attachment" src="'.S2_PATH.'/'.S2_IMG_DIR.'/'.
+		date('Y', substr($row['s2_section_news_attachment'], 0, $s2_section_news_attachment_pos)).
+		'/'.$row['id'].'/micro/'.
+		substr($row['s2_section_news_attachment'], 1 + $s2_section_news_attachment_pos).
+		'.png" alt="" />' . $row['excerpt'] . '<br clear="all" />';
+}
+		]]></hook>
+
+	</hooks>
+
+</extension>

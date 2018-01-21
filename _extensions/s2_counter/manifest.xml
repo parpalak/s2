@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Counter
+ *
+ * Adds a simple hits/hosts and RSS subscribers counter.
+ *
+ * @copyright (C) 2007-2013 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_counter
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_counter</id>
+	<title>Counter</title>
+	<version>1.0b3</version>
+	<description>A simple hits/hosts and RSS subscribers counter.</description>
+	<author>Roman Parpalak</author>
+
+	<adminaffected>1</adminaffected>
+
+	<minversion>1.0b4</minversion>
+	<maxtestedon>1.0b4</maxtestedon>
+
+	<note type="install">Do not forget to set write permissions (e. g. 777) to folder “_extensions/s2_counter/data/”.</note>
+
+	<hooks>
+
+		<hook id="fn_404_header_start"><![CDATA[
+global $s2_counter_skip;
+$s2_counter_skip = true;
+		]]></hook>
+
+		<hook id="idx_template_pre_replace"><![CDATA[
+if (!isset($s2_counter_skip) || !$s2_counter_skip)
+{
+	if (!defined('S2_COUNTER_FUNCTIONS_LOADED'))
+		include $ext_info['path'].'/functions.php';
+
+	s2_counter_process($ext_info['path']);
+}
+$replace['<!-- s2_counter_img -->'] = '<img class="s2_counter" src="'.$ext_info['url'].'/counter.php" width="88" height="31" />';
+		]]></hook>
+
+		<hook id="pr_render_start"><![CDATA[
+if (!defined('S2_COUNTER_FUNCTIONS_LOADED'))
+	include $ext_info['path'].'/functions.php';
+
+s2_counter_rss_count($ext_info['path']);
+		]]></hook>
+
+		<hook id="ai_after_js_include"><![CDATA[
+echo '<script type="text/javascript" src="'.$ext_info['url'].'/draw_chart.js"></script>'."\n";
+		]]></hook>
+
+		<hook id="fn_stat_info_end"><![CDATA[
+$output .= '<fieldset><legend>Traffic</legend><div id="s2_counter_hits"><strong>You need to upgrade your Flash Player in order to view graphs.</strong></div></fieldset>';
+$output .= '<fieldset><legend>RSS readers</legend><div id="s2_counter_rss"><strong>You need to upgrade your Flash Player in order to view graphs.</strong></div></fieldset>';
+		]]></hook>
+
+		<hook id="ai_js_end"><![CDATA[
+if (!is_writable($ext_info['path'].'/data/'))
+{
+	Lang::load($ext_info['id'], function () use ($ext_info)
+	{
+		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		else
+			return require $ext_info['path'].'/lang/English.php';
+	});
+
+?>
+PopupMessages.show('<?php printf(Lang::get('Data folder not writable', 's2_counter'), $ext_info['path'].'/data/'); ?>');
+<?php
+}
+		]]></hook>
+
+	</hooks>
+</extension>

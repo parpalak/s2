@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * LaTeX
+ *
+ * Integrates site with tex.s2cms.ru service
+ *
+ * @copyright (C) 2011-2014 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_latex
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_latex</id>
+	<title>LaTeX</title>
+	<version>2.0dev</version>
+	<description>Allows to write LaTeX formulae.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>2.0dev</minversion>
+	<maxtestedon>2.0dev</maxtestedon>
+
+	<hooks>
+
+		<hook id="fn_get_template_pre_includes_merge"><![CDATA[
+$includes['css_inline'][] = '<script src="http://tex.s2cms.ru/latex.js"></script>';
+		]]></hook>
+
+		<hook id="v_comment_form_pre_syntax_info"><![CDATA[
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
+echo Lang::get('Comment syntax', 's2_latex');
+		]]></hook>
+
+		<hook id="pr_render_pre_get_content" priority="4"><![CDATA[
+require $ext_info['path'].'/functions.php';
+
+$content['rss_title'] = s2_latex_make($content['rss_title']);
+$content['rss_description'] = s2_latex_make($content['rss_description']);
+		]]></hook>
+
+		<hook id="pr_render_pre_item_render" priority="4"><![CDATA[
+$item['title'] = s2_latex_make($item['title']);
+$item['text'] = s2_latex_make($item['text']);
+		]]></hook>
+	</hooks>
+</extension>

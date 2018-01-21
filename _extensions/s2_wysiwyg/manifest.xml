@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * WYSIWYG
+ *
+ * Adds TinyMCE WYSIWYG editor to the article edit form.
+ *
+ * @copyright (C) 2007-2013 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_wysiwyg
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_wysiwyg</id>
+	<title>WYSIWYG</title>
+	<version>1.0b5</version>
+	<description>Adds TinyMCE WYSIWYG editor to the admin panel.</description>
+	<author>Roman Parpalak</author>
+
+	<adminaffected>1</adminaffected>
+
+	<minversion>1.0b5</minversion>
+	<maxtestedon>1.0b5</maxtestedon>
+
+	<install><![CDATA[
+$s2_wysiwys_config = array(
+	'S2_WYSIWYG_TYPE'		=> '0',
+);
+
+foreach ($s2_wysiwys_config as $conf_name => $conf_value)
+{
+	if (defined($conf_name))
+		continue;
+
+	$query = array(
+		'INSERT'	=> 'name, value',
+		'INTO'		=> 'config',
+		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
+	);
+
+	$s2_db->query_build($query);
+}
+	]]></install>
+
+	<uninstall><![CDATA[
+$query = array(
+	'DELETE'	=> 'config',
+	'WHERE'		=> 'name in (\'S2_WYSIWYG_TYPE\')',
+);
+$s2_db->query_build($query);
+	]]></uninstall>
+
+	<hooks>
+		<hook id="ai_after_js_include"><![CDATA[
+?>
+<script type="text/javascript">
+	var s2_wysiwyg_type = <?php echo S2_WYSIWYG_TYPE; ?>, s2_wysiwyg_cut = <?php echo S2_ADMIN_CUT; ?>, s2_wysiwyg_lang = '<?php echo substr(S2_LANGUAGE, 0, 7) == 'Russian' ? 'ru' : 'en'; ?>';
+</script>
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" src="<?php echo $ext_info['url']; ?>/init.js"></script>
+<?php
+		]]></hook>
+
+		<hook id="ai_after_js_init"><![CDATA[
+?>
+var s2_wysiwyg_pict_url = '<?php echo S2_PATH; ?>/_admin/pictman.php';
+<?php
+		]]></hook>
+
+		<hook id="fn_toolbar_start"><![CDATA[
+return '<hr />';
+		]]></hook>
+
+		<hook id="fn_output_article_form_pre_text,fn_s2_blog_edit_post_form_pre_text"><![CDATA[
+$padding -= 2.583333;
+		]]></hook>
+
+		<hook id="fn_get_options_pre_comment_fs"><![CDATA[
+Lang::load($ext_info['id'], function () use ($ext_info)
+{
+	if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+		return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+	else
+		return require $ext_info['path'].'/lang/English.php';
+});
+$fieldset = array(
+	'S2_WYSIWYG_TYPE' => s2_get_checkbox('S2_WYSIWYG_TYPE', $options['S2_WYSIWYG_TYPE'], Lang::get('WYSIWYG type', 's2_wysiwyg'), Lang::get('WYSIWYG type label', 's2_wysiwyg')),
+);
+($hook = s2_hook('s2_wysiwyg_opt_pre_fs_merge')) ? eval($hook) : null;
+$output .= '<fieldset><legend>'.Lang::get('WYSIWYG', 's2_wysiwyg').'</legend>'.implode('', $fieldset).'</fieldset>';
+		]]></hook>
+
+		<hook id="opt_start"><![CDATA[
+$s2_const_types['S2_WYSIWYG_TYPE'] = 'int';
+		]]></hook>
+
+	</hooks>
+</extension>
