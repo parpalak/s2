@@ -74,7 +74,8 @@ function s2_number_format ($number, $trailing_zero = false, $decimal_count = fal
 function s2_return_bytes ($val)
 {
 	$val = trim($val);
-	$last = strtolower($val[strlen($val) - 1]);
+	$last = strtolower(substr($val, -1));
+	$val = substr($val, 0, -1);
 	switch($last)
 	{
 		case 'g':
@@ -251,17 +252,23 @@ function s2_get_template ($raw_template_id, $default_path = false, $return_error
 	{
 		if (!function_exists('_s2_check_link'))
 		{
-			function _s2_check_link($url, $request_uri, $text)
+			function _s2_check_link($matches)
 			{
-				if ($url == $request_uri)
+				global $request_uri;
+
+				$real_request_uri = s2_link($request_uri);
+
+				list(, $url, $text) = $matches;
+
+				if ($url == $real_request_uri)
 					return '<span>'.$text.'</span>';
-				elseif ($url && strpos($request_uri, $url) === 0)
+				elseif ($url && strpos($real_request_uri, $url) === 0)
 					return '<a class="current" href="'.$url.'">'.$text.'</a>';
 				else
 					return '<a href="'.$url.'">'.$text.'</a>';
 			}
 		}
-		$template = preg_replace('#<a href="([^"]*?)">([^<]*?)</a>#e', '_s2_check_link(\'\\1\', \''.str_replace('\'', '\\\'', s2_link($request_uri)).'\', \'\\2\')', $template);
+		$template = preg_replace_callback('#<a href="([^"]*?)">([^<]*?)</a>#', '_s2_check_link', $template);
 	}
 
 	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;

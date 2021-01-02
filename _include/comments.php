@@ -39,9 +39,9 @@ function s2_comment_form ($id, $name = '', $email = '', $showmail = false, $subs
 {
 	global $lang_common;
 
-	$action = S2_BASE_URL.'/comment.php';
+	$action = S2_PATH.'/comment.php';
 
-	$key = md5(time() + 'A very secret string ;-)');
+	$key = md5(time() . 'A very secret string ;-)');
 	$a = rand(1, 8);
 	$b = rand(0, 9);
 	$c = rand(1, 9);
@@ -182,6 +182,7 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsub
 		'Content-transfer-encoding: 8bit'."\r\n".
 		'Content-type: text/plain; charset=utf-8'."\r\n".
 		'X-Mailer: S2 Mailer'."\r\n".
+		'List-Unsubscribe: <'.$unsubscribe_link.'>'."\r\n".
 		'Reply-To: '.$from;
 
 	// Change the linebreaks used in the headers according to OS
@@ -201,8 +202,8 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 	global $lang_comments;
 
 	$message = $lang_comments['Email moderator pattern'];
-	$message = str_replace(array('<name>', '<author>', '<title>', '<url>', '<text>'),
-		array($name, $auth_name, $title, $url, $text), $message);
+	$message = str_replace(array('<name>', '<author>', '<email>', '<title>', '<url>', '<text>'),
+		array($name, $auth_name, $auth_email, $title, $url, $text), $message);
 
 	// Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
 	$message = str_replace(array("\n", "\0"), array("\r\n", ''), $message);
@@ -210,11 +211,14 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 	$subject = sprintf($lang_comments['Email subject'], $url);
 	$subject = "=?UTF-8?B?".base64_encode($subject)."?=";
 
+	// Our email
 	$sender_email = S2_WEBMASTER_EMAIL ? S2_WEBMASTER_EMAIL : 'example@example.com';
 	$sender = S2_WEBMASTER ? "=?UTF-8?B?".base64_encode(S2_WEBMASTER)."?=".' <'.$sender_email.'>' : $sender_email;
+
+	// Author email
 	$from = trim($auth_name) ? "=?UTF-8?B?".base64_encode($auth_name)."?=".' <'.$auth_email.'>' : $auth_email;
-	$headers = 'From: '.$from."\r\n".
-		'Sender: '.$sender."\r\n".
+	$headers = 'From: '.$sender."\r\n". // One cannot use the real author email in "From:" header due to DMARC. Use our one.
+		'Sender: '.$from."\r\n". // Let's use the real author email at least here.
 		'Date: '.gmdate('r')."\r\n".
 		'MIME-Version: 1.0'."\r\n".
 		'Content-transfer-encoding: 8bit'."\r\n".
@@ -234,6 +238,17 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 //
 // Parses BB-codes in comments
 //
+
+function s2_external_link_callback ($matches)
+{
+	$href = $link = $matches[1];
+
+	if (utf8_strlen($matches[1]) > 55)
+		$link = utf8_substr($matches[1], 0 , 42).' &hellip; '.utf8_substr($matches[1], -10);
+
+	return '<noindex><a href="'.$href.'" rel="nofollow">'.$link.'</a></noindex>';
+}
+
 function s2_bbcode_to_html ($s)
 {
 	global $lang_common;
@@ -250,7 +265,7 @@ function s2_bbcode_to_html ($s)
 	while (preg_match ('/\[Q\].*?\[\/Q\]/isS', $s))
 		$s = preg_replace('/\s*\[Q\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote>\\1</blockquote>', $s);
 
-	$s = preg_replace('#(https?://\S{2,}?)(?=[\s\),\'\><\]]|&lt;|&gt;|[\.;:](?:\s|$)|$)#ue', '\'<noindex><a href="\\1" rel="nofollow">\'.((utf8_strlen(\'\\1\') > 55) ? utf8_substr(\'\\1\', 0 , 42).\' … \'.utf8_substr(\'\\1\', -10) : \'\\1\').\'</a></noindex>\'', $s);
+	$s = preg_replace_callback('#(https?://\S{2,}?)(?=[\s\),\'\><\]]|&lt;|&gt;|[\.;:](?:\s|$)|$)#u', 's2_external_link_callback', $s);
 	$s = str_replace("\n", '<br />', $s);
 	return $s;
 }

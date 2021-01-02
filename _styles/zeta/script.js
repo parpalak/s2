@@ -23,7 +23,7 @@
 			if (!('localStorage' in window) || window['localStorage'] === null)
 				return;
 
-			if (document.cookie.indexOf('comment_form_sent=1') != -1)
+			if (document.cookie.indexOf('comment_form_sent=1') !== -1)
 			{
 				document.cookie = 'comment_form_sent=0; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
 				var eLink = document.getElementById('back_to_commented'),
@@ -99,13 +99,7 @@
 		}
 
 		if (link)
-		{
 			document.location = link;
-			if (window.event)
-				window.event.returnValue = false;
-			if (e.preventDefault)
-				e.preventDefault();
-		}
 	}
 
 	function initNavigate ()

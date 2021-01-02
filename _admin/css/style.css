@@ -666,10 +666,10 @@ textarea,
 		background: #ddd;
 		}
 
-.r-float input[type="text"],
+input[type="text"],
+input[type="password"],
 .input.text input,
-.input.color input,
-.fields input[type="text"] {
+.input.color input {
 	padding: 2px;
 	font: 1em Arial, Helvetica, sans-serif;
 	}

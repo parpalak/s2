@@ -47,7 +47,7 @@ A new comment on
 has been received. You can find it here:
 <url>
 
-<author> is the comment author.
+<author> (<email>) is the comment author.
 
 ----------------------------------------------------------------------
 <text>
