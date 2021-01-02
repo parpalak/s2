@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Adds pagination to the last articles
+ *
+ * @copyright (C) 2011-2014 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_last_articles_paging
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_last_articles_paging</id>
+	<title>Last Articles Paging</title>
+	<version>1.0b</version>
+	<description>Adds pagination to the last articles.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b5</maxtestedon>
+
+	<hooks>
+
+		<hook id="fn_last_articles_array_pre_get_qr"><![CDATA[
+if (S2_MAX_ITEMS && (isset($_GET['p']) || $limit == 5))
+{
+    $s2_last_articles_paging = !empty($_GET['p']) && ((int) $_GET['p'] > 0) ? ((int) $_GET['p'] - 1) : 0;
+    $query['LIMIT'] = (S2_MAX_ITEMS + 1).' OFFSET '.(S2_MAX_ITEMS * $s2_last_articles_paging);
+}
+        ]]></hook>
+
+		<hook id="fn_last_articles_array_loop"><![CDATA[
+global $s2_last_articles_paging_is_next;
+if (S2_MAX_ITEMS && (isset($_GET['p']) || $limit == 5))
+{
+	if ($i == S2_MAX_ITEMS)
+		$s2_last_articles_paging_is_next = true;
+}
+        ]]></hook>
+
+		<hook id="fn_last_articles_array_end"><![CDATA[
+if (isset($s2_last_articles_paging_is_next))
+{
+	unset($last[S2_MAX_ITEMS]);
+}
+        ]]></hook>
+
+		<hook id="fn_last_articles_end"><![CDATA[
+if (S2_MAX_ITEMS)
+{
+    global $lang_common, $s2_last_articles_paging_is_next;
+    $s2_last_articles_paging = isset($_GET['p']) && ((int) $_GET['p'] > 0) ? ((int) $_GET['p'] - 1) : 0;
+    $s2_last_articles_paging_links = '';
+    if ($s2_last_articles_paging)
+    {
+        $s2_last_articles_paging_links .= '<a class="arrow here" href="'.S2_PATH.S2_URL_PREFIX.'/'.(S2_URL_PREFIX ? '&amp;' : '?').'p='.$s2_last_articles_paging.'">'.$lang_common['Here'].'</a>';
+    }
+    if (isset($s2_last_articles_paging_is_next))
+    {
+        $s2_last_articles_paging_links .= ' <a class="arrow there" href="'.S2_PATH.S2_URL_PREFIX.'/'.(S2_URL_PREFIX ? '&amp;' : '?').'p='.($s2_last_articles_paging + 2).'">'.$lang_common['There'].'</a>';
+    }
+
+    if ($s2_last_articles_paging_links)
+        $output .= '<p class="paging">'.$s2_last_articles_paging_links.'</p>';
+}
+        ]]></hook>
+
+	</hooks>
+
+</extension>

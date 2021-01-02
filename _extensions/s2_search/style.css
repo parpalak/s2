@@ -1,0 +1,40 @@
+.search-results form {
+	width: auto;
+	padding: 1em;
+	background: #eee;
+	margin: 1em 0;
+	zoom: 1;
+	}
+
+.search-results .button {
+	float: right;
+	}
+
+.search-results .wrap {
+	overflow: hidden;
+	padding-right: 1em;
+	zoom: 1;
+	}
+	.search-results .wrap input {
+		width: 100%;
+		}
+		* html .search-results .wrap input {
+			position: absolute;
+			}
+
+.search-results a.title {
+	font-size: 1.2em;
+	}
+
+.search-results a.url {
+	color: green;
+	text-decoration: none;
+	}
+
+.search-results small {
+	color: #999;
+	}
+
+.search-results .paging {
+	margin: 2em 0;
+	}

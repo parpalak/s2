@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * Russian typography
+ *
+ * Converts '""' quotation marks to '«»' and '„“' and puts non-breaking space
+ * characters according to Russian typography conventions.
+ *
+ * @copyright (C) 2010-2013 Roman Parpalak, based on code (C) by Dmitry Smirnov
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_typo
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_typo</id>
+	<title>Russian typography</title>
+	<version>1.0b2</version>
+	<description>Converts '""' quotation marks to '«»' and '„“' and puts non-breaking space characters according to Russian typography conventions.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0dev</minversion>
+	<maxtestedon>1.0b5</maxtestedon>
+
+	<hooks>
+
+		<hook id="idx_template_after_replace, cmnt_preview_pre_output"><![CDATA[
+require $ext_info['path'].'/functions.php';
+$template = s2_typo_make($template);
+		]]></hook>
+
+		<hook id="fn_do_rss_pre_output" priority="9"><![CDATA[
+require $ext_info['path'].'/functions.php';
+
+$rss_title = s2_typo_make($rss_title, true);
+$rss_description = s2_typo_make($rss_description, true);
+		]]></hook>
+
+		<hook id="fn_do_rss_loop_pre_output" priority="9"><![CDATA[
+$item['title'] = s2_typo_make($item['title'], true);
+$item['text'] = s2_typo_make($item['text']);
+		]]></hook>
+
+	</hooks>
+
+</extension>

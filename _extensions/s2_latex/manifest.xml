@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+<!--
+/**
+ * LaTeX
+ *
+ * Integrates site with latex.codecogs.com service
+ *
+ * @copyright (C) 2011-2013 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package s2_latex
+ */
+-->
+
+<extension for="S2" engine="1.0">
+	<id>s2_latex</id>
+	<title>LaTeX</title>
+	<version>1.0b5</version>
+	<description>Allows to write LaTeX formulae.</description>
+	<author>Roman Parpalak</author>
+
+	<minversion>1.0b</minversion>
+	<maxtestedon>1.0b5</maxtestedon>
+
+	<hooks>
+
+		<hook id="idx_template_pre_replace, fn_get_service_template_pre_replace"><![CDATA[
+$replace['<!-- s2_styles -->'] .= "\n".'<script src="//tex.s2cms.ru/latex.js"></script>';
+		]]></hook>
+
+		<hook id="ai_pre_get_tpl_styles"><![CDATA[
+echo "\n".'<script src="//tex.s2cms.ru/latex.js"></script>';
+		]]></hook>
+
+		<hook id="fn_comment_form_pre_syntax_info"><![CDATA[
+if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
+	require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+else
+	require $ext_info['path'].'/lang/English.php';
+echo $lang_s2_latex['Comment syntax'];
+		]]></hook>
+
+		<hook id="fn_do_rss_pre_output" priority="4"><![CDATA[
+require $ext_info['path'].'/functions.php';
+
+$rss_title = s2_latex_make($rss_title);
+$rss_description = s2_latex_make($rss_description);
+		]]></hook>
+
+		<hook id="fn_do_rss_loop_pre_output" priority="4"><![CDATA[
+$item['title'] = s2_latex_make($item['title']);
+$item['text'] = s2_latex_make($item['text']);
+		]]></hook>
+	</hooks>
+</extension>
