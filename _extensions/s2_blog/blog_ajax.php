@@ -211,7 +211,7 @@ elseif ($action == 'hide_blog_comment')
 	require $ext_info['path'].'/blog_lib.php';
 	require 'comments.php';
 
-	$post_id = s2_blog_hide_comment((int)$_GET['id']);
+	$post_id = s2_blog_hide_comment((int)$_GET['id'], (bool)($_GET['leave_hidden'] ?? false));
 
 	echo s2_comment_menu_links($_GET['mode']);
 	echo s2_show_comments($_GET['mode'], $post_id);

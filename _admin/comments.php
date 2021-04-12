@@ -32,7 +32,7 @@ function s2_show_comments ($mode, $id = 0)
 
 	// Getting comments
 	$query = array(
-		'SELECT'	=> 'a.title, c.article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.good, c.ip',
+		'SELECT'	=> 'a.title, c.article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.sent, c.good, c.ip',
 		'FROM'		=> 'art_comments AS c',
 		'JOINS'		=> array(
 			array(
@@ -91,7 +91,9 @@ function s2_show_comments ($mode, $id = 0)
 		$buttons['edit'] = '<img class="edit" src="i/1.gif" alt="'.$lang_admin['Edit'].'" onclick="return LoadCommentsTable(\'edit_comment\', '.$row['id'].', \''.$mode.'\');" />';
 		$buttons['hide'] =  $row['shown'] ?
 			'<img class="hide" src="i/1.gif" alt="'.$lang_admin['Hide'].'" onclick="return LoadCommentsTable(\'hide_comment\', '.$row['id'].', \''.$mode.'\');" />' :
-			'<img class="show" src="i/1.gif" alt="'.$lang_admin['Show'].'" onclick="return LoadCommentsTable(\'hide_comment\', '.$row['id'].', \''.$mode.'\')" />' ;
+			'<img class="show" src="i/1.gif" alt="'.$lang_admin['Show'].'" onclick="return LoadCommentsTable(\'hide_comment\', '.$row['id'].', \''.$mode.'\')" />' . (
+                !$row['sent'] ? '<img class="hide" src="i/1.gif" alt="'.$lang_admin['Leave hidden'].'" onclick="return LoadCommentsTable(\'hide_comment\', '.$row['id'].', \''.$mode.'\', \'1\');" />' : ''
+            ) ;
 
 		$buttons['mark'] = $row['good'] ?
 			'<img class="unmark" src="i/1.gif" alt="'.$lang_admin['Unmark comment'].'" onclick="return LoadCommentsTable(\'mark_comment\', '.$row['id'].', \''.$mode.'\');" />' :
@@ -266,7 +268,12 @@ function s2_get_comment ($id)
 	return $comment;
 }
 
-function s2_toggle_hide_comment ($id)
+/**
+ * @param int  $id
+ * @param bool $leaveHidden Set true for spam
+ * @return mixed
+ */
+function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 {
 	global $s2_db;
 
@@ -286,7 +293,7 @@ function s2_toggle_hide_comment ($id)
 		die('Comment not found!');
 
 	$sent = 1;
-	if (!$comment['shown'] && !$comment['sent'])
+	if (!$comment['shown'] && !$comment['sent'] && !$leaveHidden)
 	{
 		// Premoderation is enabled and we have to send the comment to be shown
 		// to subscribed commentators
@@ -332,7 +339,7 @@ function s2_toggle_hide_comment ($id)
 	// Toggle comment visibility
 	$query = array(
 		'UPDATE'	=> 'art_comments',
-		'SET'		=> 'shown = 1 - shown, sent = '.$sent,
+		'SET'		=> !$leaveHidden ? 'shown = 1 - shown, sent = '.$sent : 'shown = 0, sent = 1',
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_hide_comment_pre_upd_qr')) ? eval($hook) : null;

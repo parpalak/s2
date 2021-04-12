@@ -375,7 +375,7 @@ elseif ($action == 'hide_comment')
 
 	require 'comments.php';
 
-	$article_id = s2_toggle_hide_comment((int)$_GET['id']);
+	$article_id = s2_toggle_hide_comment((int)$_GET['id'], (bool)($_GET['leave_hidden'] ?? false));
 
 	echo s2_comment_menu_links($_GET['mode']);
 	echo s2_show_comments($_GET['mode'], $article_id);

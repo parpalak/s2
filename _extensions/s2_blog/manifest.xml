@@ -530,7 +530,7 @@ if ($mode == 'hidden' || $mode == 'new' || $mode == 'last')
 if (strpos($mode, 's2_blog') === 0)
 {
 	$query = array(
-		'SELECT'	=> 'p.title, c.post_id AS article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.good, c.ip',
+		'SELECT'	=> 'p.title, c.post_id AS article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.sent, c.good, c.ip',
 		'FROM'		=> 's2_blog_comments AS c',
 		'JOINS'		=> array(
 			array(

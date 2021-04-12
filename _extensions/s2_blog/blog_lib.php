@@ -277,7 +277,12 @@ function s2_blog_get_comment ($id)
 	return $comment;
 }
 
-function s2_blog_hide_comment ($id)
+/**
+ * @param int  $id
+ * @param bool $leaveHidden Set true for spam
+ * @return mixed
+ */
+function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 {
 	global $s2_db;
 
@@ -297,7 +302,7 @@ function s2_blog_hide_comment ($id)
 		die('Comment not found!');
 
 	$sent = 1;
-	if (!$comment['shown'] && !$comment['sent'])
+	if (!$comment['shown'] && !$comment['sent'] && !$leaveHidden)
 	{
 		// Premoderation is enabled and we have to send the comment to be shown
 		// to the subscribed commentators
@@ -343,7 +348,7 @@ function s2_blog_hide_comment ($id)
 	// Toggle comment visibility
 	$query = array(
 		'UPDATE'	=> 's2_blog_comments',
-		'SET'		=> 'shown = 1 - shown, sent = '.$sent,
+        'SET'		=> !$leaveHidden ? 'shown = 1 - shown, sent = '.$sent : 'shown = 0, sent = 1',
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_hide_comment_pre_upd_qr')) ? eval($hook) : null;

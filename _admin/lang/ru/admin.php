@@ -103,6 +103,7 @@ $lang_admin = array(
 
 // Comments tab
 'Hide'						=> 'Скрыть',
+'Leave hidden'				=> 'Оставить скрытым и не рассылать',
 'Show'						=> 'Отобразить',
 'Mark comment'				=> 'Отметить комментарий',
 'Unmark comment'			=> 'Убрать отметку',

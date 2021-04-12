@@ -3,7 +3,7 @@
  *
  * Drag & drop, event handlers for the admin panel
  *
- * @copyright (C) 2007-2013 Roman Parpalak
+ * @copyright (C) 2007-2021 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -1284,9 +1284,9 @@ function LoadTable (sAction, sID)
 	return false;
 }
 
-function LoadCommentsTable (sAction, iId, sMode)
+function LoadCommentsTable (sAction, iId, sMode, bLeaveHidden)
 {
-	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + iId + '&mode=' + sMode, function (http, data)
+	GETAsyncRequest(sUrl + 'action=' + sAction + '&id=' + iId + '&mode=' + sMode + '&leave_hidden=' + (bLeaveHidden || 0), function (http, data)
 	{
 		$('#comm_div').html(data);
 	});
