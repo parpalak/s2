@@ -26,7 +26,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 		// Tag preview
 
 		$query = array(
-			'SELECT'	=> 'tag_id, description, name',
+			'SELECT'	=> 'tag_id, description, name, url',
 			'FROM'		=> 'tags',
 			'WHERE'		=> 'url = \''.$s2_db->escape($tag_name).'\''
 		);
@@ -34,14 +34,14 @@ class Page_Tag extends Page_HTML implements Page_Routable
 		$result = $s2_db->query_build($query);
 
 		if ($row = $s2_db->fetch_row($result))
-			list($tag_id, $tag_description, $tag_name) = $row;
+			list($tag_id, $tag_description, $tag_name, $tag_url) = $row;
 		else {
 			$this->error_404();
 			die;
 		}
 
 		if (!$is_slash)
-			s2_permanent_redirect('/'.S2_TAGS_URL.'/'.urlencode($tag_name).'/');
+			s2_permanent_redirect('/'.S2_TAGS_URL.'/'.urlencode($tag_url).'/');
 
 		$subquery = array(
 			'SELECT'	=> '1',
