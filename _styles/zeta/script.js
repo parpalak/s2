@@ -81,7 +81,7 @@
 	{
 		e = e || window.event;
 
-		if (!(e.ctrlKey || e.altKey) || inpFocused)
+		if (!(e.ctrlKey || e.metaKey) || inpFocused)
 			return;
 
 		var link = false;
