@@ -174,7 +174,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 		while ($tag = $s2_db->fetch_assoc($result))
 			$tags[] = array(
 				'title' => $tag['name'],
-				'link'  => S2_BLOG_TAGS_PATH.urlencode($tag['url']),
+				'link'  => S2_BLOG_TAGS_PATH.urlencode($tag['url']).'/',
 			);
 
 		$this->page['commented'] = $row['commented'];

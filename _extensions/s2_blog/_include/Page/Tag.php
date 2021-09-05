@@ -19,7 +19,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// A tag
-		$this->posts_by_tag($params['tag']);
+		$this->posts_by_tag($params['tag'], !empty($params['slash']));
 		$this->page['title'] = $this->page['head_title'] = s2_htmlencode($this->page['title']);
 
 		// Bread crumbs
@@ -46,12 +46,12 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 		$this->page['link_navigation']['up'] = S2_BLOG_TAGS_PATH;
 	}
 
-	private function posts_by_tag ($tag)
+	private function posts_by_tag ($tag, $is_slash)
 	{
 		global $s2_db;
 
 		$query = array(
-			'SELECT'	=> 'tag_id, description, name',
+			'SELECT'	=> 'tag_id, description, name, url',
 			'FROM'		=> 'tags',
 			'WHERE'		=> 'url = \''.$s2_db->escape($tag).'\''
 		);
@@ -59,11 +59,14 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 		$result = $s2_db->query_build($query);
 
 		if ($row = $s2_db->fetch_row($result))
-			list($tag_id, $tag_descr, $tag_name) = $row;
+			list($tag_id, $tag_descr, $tag_name, $tag_url) = $row;
 		else {
 			$this->error_404();
 			die;
 		}
+
+		if (!$is_slash)
+			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'.urlencode($tag_url).'/');
 
 		$art_links = self::articles_by_tag($tag_id);
 		if (count($art_links))

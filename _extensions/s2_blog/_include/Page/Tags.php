@@ -92,7 +92,7 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 			if ($num)
 				$tags[] = array(
 					'title' => $tag_name[$id],
-					'link'  => S2_BLOG_TAGS_PATH.urlencode($tag_url[$id]),
+					'link'  => S2_BLOG_TAGS_PATH.urlencode($tag_url[$id]).'/',
 					'num'   => $num,
 				);
 
