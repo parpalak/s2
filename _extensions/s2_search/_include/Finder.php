@@ -143,16 +143,17 @@ class Finder extends Worker
 					$chapter = $this->chapters[$id];
 
 					// Remember chapters and positions
-					if (is_int($entries))
+					if (is_int($entries)) {
 						$curr_positions[$chapter][] = $entries;
-					else
-					{
+						$word_count = self::word_repeat_weight(1);
+					} else {
 						$entries = explode('|', $entries);
 						foreach ($entries as $position)
 							$curr_positions[$chapter][] = base_convert($position, 36, 10);
+
+						$word_count = self::word_repeat_weight(count($entries));
 					}
 
-					$word_count = self::word_repeat_weight(count($entries));
 					if (!isset ($this->keys[$chapter][$word]))
 						$this->keys[$chapter][$word] = $word_count * $word_weight;
 					else
