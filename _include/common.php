@@ -37,23 +37,6 @@ if (defined('S2_DEBUG'))
 else
 	error_reporting(E_ALL ^ E_NOTICE);
 
-// Turn off magic_quotes_runtime
-if (get_magic_quotes_runtime())
-	set_magic_quotes_runtime(0);
-
-// Strip slashes from GET/POST/COOKIE (if magic_quotes_gpc is enabled)
-if (get_magic_quotes_gpc())
-{
-	function stripslashes_array($array)
-	{
-		return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
-	}
-
-	$_GET = stripslashes_array($_GET);
-	$_POST = stripslashes_array($_POST);
-	$_COOKIE = stripslashes_array($_COOKIE);
-}
-
 // Strip out "bad" UTF-8 characters
 s2_remove_bad_characters();
 
