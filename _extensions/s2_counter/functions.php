@@ -177,63 +177,65 @@ function s2_counter_get_aggregator ($ua)
 	return false;
 }
 
-function s2_counter_rss_count ($dir)
+function s2_counter_rss_count($dir)
 {
-	if (s2_counter_is_bot())
-		return;
+    if (s2_counter_is_bot()) {
+        return;
+    }
 
-	$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-	$client_ip = $_SERVER['REMOTE_ADDR'];
-	$filename = '/data/rss_main.txt';
+    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $client_ip  = $_SERVER['REMOTE_ADDR'];
+    $filename   = '/data/rss_main.txt';
 
-	($hook = s2_hook('fn_s2_count_rss_count_start')) ? eval($hook) : null;
+    ($hook = s2_hook('fn_s2_count_rss_count_start')) ? eval($hook) : null;
 
-	if (!is_file($dir.$filename) && !is_writable(dirname($dir.$filename)))
-		return;
+    if (!is_file($dir . $filename) && !is_writable(dirname($dir . $filename))) {
+        return;
+    }
 
-	clearstatcache();
-	if (!is_file($dir.$filename) || date('j', filemtime($dir.$filename)) == date('j'))
-	{
-		s2_counter_append_file($dir.$filename, time().'^'.$client_ip.'^'.$user_agent."\n");
-	}
-	else
-	{
-		$f_day_info = fopen($dir.$filename, 'a+');
-		flock($f_day_info, LOCK_EX);
+    clearstatcache();
+    if (!is_file($dir . $filename) || date('j', filemtime($dir . $filename)) === date('j')) {
+        s2_counter_append_file($dir . $filename, time() . '^' . $client_ip . '^' . $user_agent . "\n");
+    } else {
+        $f_day_info = fopen($dir . $filename, 'a+');
+        flock($f_day_info, LOCK_EX);
 
-		$yesterday_log = @file_get_contents($dir.$filename);
+        $yesterday_log = @file_get_contents($dir . $filename);
 
-		$rss_readers = $online_aggregators = array();
-		foreach (explode("\n", substr($yesterday_log, 0, -1)) as $line)
-		{
-			if ($line == '')
-				continue;
+        $rss_readers = $online_aggregators = [];
+        foreach (explode("\n", substr($yesterday_log, 0, -1)) as $line) {
+            if ($line === '') {
+                continue;
+            }
 
-			list($time, $ip, $ua) = explode('^', $line);
-			list($ip0, $ip1) = explode('.', $ip);
+            [, $ip, $ua] = explode('^', $line);
+            [$ip0, $ip1] = explode('.', $ip . '.'); // TODO IPV6 are placed into $ip0
 
-			$aggregator_info = s2_counter_get_aggregator($ua);
-			if ($aggregator_info !== false)
-				$online_aggregators[$aggregator_info[0]] = $aggregator_info[1];
-			else
-				$rss_readers[$ip0.$ua.$ip1] = 1;
-		}
+            $aggregator_info = s2_counter_get_aggregator($ua);
+            if ($aggregator_info !== false) {
+                $online_aggregators[$aggregator_info[0]] = $aggregator_info[1];
+            }
+            else {
+                $rss_readers[$ip0 . $ua . $ip1] = 1;
+            }
+        }
 
-		$total_readers = count($rss_readers);
+        $total_readers = count($rss_readers);
 
-		foreach($online_aggregators as $name => $reader_num)
-			$total_readers += $reader_num;
+        foreach ($online_aggregators as $name => $reader_num) {
+            $total_readers += $reader_num;
+        }
 
-		s2_counter_append_file($dir.$filename.'.log', date('Y-m-d', time() - 86400) . '^' . $total_readers . "\n");
+        s2_counter_append_file($dir . $filename . '.log', date('Y-m-d', time() - 86400) . '^' . $total_readers . "\n");
 
-		ftruncate($f_day_info, 0);
-		fwrite($f_day_info, time().'^'.$client_ip.'^'.$user_agent."\n");
-		fflush($f_day_info);
-		fflush($f_day_info);
+        ftruncate($f_day_info, 0);
+        fwrite($f_day_info, time() . '^' . $client_ip . '^' . $user_agent . "\n");
+        fflush($f_day_info);
+        fflush($f_day_info);
 
-		flock($f_day_info,LOCK_UN);
-		fclose($f_day_info);
-	}
+        flock($f_day_info, LOCK_UN);
+        fclose($f_day_info);
+    }
 
 }
 
