@@ -1,6 +1,3 @@
 .idea
-!_cache/index.html
-!_cache/.htaccess
-_cache/*
 _vendor/*
 config.php
