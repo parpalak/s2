@@ -8,5 +8,5 @@
 ?>
     <url>
         <loc><?php echo s2_htmlencode($link); ?></loc>
-        <lastmod><?php echo gmdate('D, d M Y H:i:s', $modify_time ?: $time).' GMT'; ?></lastmod>
+        <lastmod><?php echo gmdate('c', $modify_time ?: $time); ?></lastmod>
     </url>
