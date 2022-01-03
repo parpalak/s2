@@ -618,7 +618,7 @@ function s2_blog_year_posts ($year)
 	($hook = s2_hook('fn_s2_blog_year_posts_pre_get_days_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query) or error(__FILE__, __LINE__);
 
-	$day_flags = array_fill(1, 12, '');
+	$day_flags = array_fill(1, 12, array());
 	while ($row = $s2_db->fetch_row($result))
 		$day_flags[(int) date('m', $row[0])][(int) date('j', $row[0])] = 1;
 
