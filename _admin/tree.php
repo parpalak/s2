@@ -254,7 +254,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 		foreach (explode(' ', $search) as $word)
 			if ($word != '')
 			{
-				if ($word{0} != ':' && strlen($word) > 1)
+				if ($word[0] !== ':' && strlen($word) > 1)
 					$condition[] = '(title LIKE \'%'.$s2_db->escape($word).'%\' OR pagetext LIKE \'%'.$s2_db->escape($word).'%\')';
 				else
 				{

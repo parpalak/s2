@@ -52,7 +52,7 @@ function s2_extension_list ()
 	$d = dir(S2_ROOT.'_extensions');
 	while (($entry = $d->read()) !== false)
 	{
-		if ($entry{0} == '.' || !is_dir(S2_ROOT.'_extensions/'.$entry))
+		if ($entry[0] == '.' || !is_dir(S2_ROOT.'_extensions/'.$entry))
 			continue;
 
 		if (preg_match('/[^0-9a-z_]/', $entry))
