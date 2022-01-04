@@ -27,17 +27,9 @@ define('S2_COOKIE_EXPIRE', 14*86400 > S2_EXPIRE_LOGIN_TIMEOUT ? 14*86400 : S2_EX
 //
 function s2_setcookie($name, $value, $expire = 0, $path = null, $secure = null)
 {
-	if ($path === null)
-		$path = S2_PATH.'/_admin/';
-	if ($secure === null)
-		$secure = defined('S2_FORCE_ADMIN_HTTPS');
-
 	$expire = min($expire, PHP_INT_MAX); // Now we do not deal with 2037 year problem :)
 
-	if (version_compare(PHP_VERSION, '5.2.0', '>='))
-		setcookie($name, $value, $expire, $path, null, $secure, true);
-	else
-		setcookie($name, $value, $expire, $path.'; HttpOnly', null, $secure);
+    setcookie($name, $value, $expire, $path ?? S2_PATH . '/_admin/', null, $secure ?? defined('S2_FORCE_ADMIN_HTTPS'), true);
 }
 
 //
