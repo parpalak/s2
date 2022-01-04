@@ -405,8 +405,19 @@ elseif ($action == 'upload')
 			}
 
 			// Processing name collisions
-			while (is_file(S2_IMG_PATH.$path.'/'.$filename))
-				$filename = preg_replace_callback('#(?:|_copy|_copy\((\d+)\))(?=(?:\.[^\.]*)?$)#', create_function('$m', 'if ($m[0] == \'\') return \'_copy\'; elseif ($m[0] == \'_copy\') return \'_copy(2)\'; else return \'_copy(\'.($m[1]+1).\')\';'), $filename, 1);
+			while (is_file(S2_IMG_PATH.$path.'/'.$filename)) {
+                $filename = preg_replace_callback('#(?:|_copy|_copy\((\d+)\))(?=(?:\.[^\.]*)?$)#', static function ($match) {
+                    if ($match[0] === '') {
+                        return '_copy';
+                    }
+
+                    if ($match[0] === '_copy') {
+                        return '_copy(2)';
+                    }
+
+                    return '_copy(' . ($match[1] + 1) . ')';
+                }, $filename, 1);
+            }
 
 			$uploadfile = S2_IMG_PATH.$path.'/'.$filename;
 
