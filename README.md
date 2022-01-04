@@ -10,7 +10,5 @@ Use the following commands to deploy latest development version of S2 and extens
 ```
 git clone https://github.com/parpalak/s2.git
 cd s2
-git submodule init
-git submodule update
 composer install
 ```
