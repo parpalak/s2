@@ -12,12 +12,8 @@
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 
-// Activate HTTP Strict Transport Security
 // IIS sets HTTPS to 'off' for non-SSL requests
-if (defined('S2_FORCE_ADMIN_HTTPS') && isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')
-	header('Strict-Transport-Security: max-age=500');
-elseif (defined('S2_FORCE_ADMIN_HTTPS'))
-{
+if (defined('S2_FORCE_ADMIN_HTTPS') && ($_SERVER['HTTPS'] ?? 'off') === 'off') {
 	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 	die();
 }
