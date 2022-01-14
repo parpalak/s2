@@ -1,3 +1,5 @@
 .idea
 _vendor/*
 config.php
+favicon.ico
+robots.txt

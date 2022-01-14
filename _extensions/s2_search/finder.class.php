@@ -128,28 +128,24 @@ class s2_search_finder extends s2_search_worker
 
 			$curr_positions = array();
 
-			foreach ($words_for_search as $search_word)
-			{
-				if (!isset($this->fulltext_index[$search_word]))
-					continue;
-				foreach ($this->fulltext_index[$search_word] as $id => $entries)
-				{
+			foreach ($words_for_search as $search_word) {
+				foreach ($this->fulltext_index[$search_word] ?? [] as $id => $entries) {
 					$chapter = $this->chapters[$id];
 
 					// Remember chapters and positions
-					if (is_int($entries))
+					if (is_int($entries)) {
 						$curr_positions[$chapter][] = $entries;
-					else
-					{
+						$entry_count = 1;
+					}
+					else {
 						$entries = explode('|', $entries);
-						foreach ($entries as $position)
+						$entry_count = count($entries);
+						foreach ($entries as $position) {
 							$curr_positions[$chapter][] = base_convert($position, 36, 10);
+						}
 					}
 
-					if (!isset ($this->keys[$chapter][$word]))
-						$this->keys[$chapter][$word] = count($entries) * $word_weight;
-					else
-						$this->keys[$chapter][$word] += count($entries) * $word_weight;
+					$this->keys[$chapter][$word] = ($this->keys[$chapter][$word] ?? 0) + $entry_count * $word_weight;
 				}
 			}
 
