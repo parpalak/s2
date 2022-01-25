@@ -1,11 +1,11 @@
 <?php
 /**
  * @var $query string
- * @var $num int
+ * @var $num ?int
  * @var $num_info string
  * @var $output string
  * @var $paging string
- * @var $tags string
+ * @var $tags ?string
  */
 
 ?>
@@ -20,17 +20,20 @@
 	</form>
 <?php
 
-echo $tags;
+echo $tags ?? '';
 
-if ($num)
-{
-	if (!empty($num_info))
-		echo '<p class="s2_search_found_num">'.$num_info.'</p>';
+if (isset($num)) {
+    if ($num > 0) {
+        if (!empty($num_info)) {
+            echo '<p class="s2_search_found_num">' . $num_info . '</p>';
+        }
 
-	echo $output, $paging;
+        echo $output, $paging;
+    }
+    else {
+        echo '<p class="s2_search_not_found">' . Lang::get('Not found', 's2_search') . '</p>';
+    }
 }
-else
-	echo '<p class="s2_search_not_found">'.Lang::get('Not found', 's2_search').'</p>';
 
 ?>
 </div>
