@@ -37,7 +37,6 @@ abstract class Page_HTML extends \Page_HTML
 
 		$this->body($params);
 
-		$this->page['meta_description'] = S2_BLOG_TITLE;
 		$this->page['head_title'] = empty($this->page['head_title']) ? S2_BLOG_TITLE : $this->page['head_title'] . ' - ' . S2_BLOG_TITLE;
 
 		if ($this->inTemplate('<!-- s2_blog_navigation -->'))

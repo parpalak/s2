@@ -2,7 +2,7 @@
 /**
  * Single blog post.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
+ * @copyright (C) 2007-2022 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  */
@@ -13,7 +13,7 @@ use Lang;
 
 class Page_Post extends Page_HTML implements \Page_Routable
 {
-	public function body (array $params = array())
+    public function body (array $params = array())
 	{
 		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']);
@@ -49,7 +49,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 		);
 	}
 
-	private function get_post ($year, $month, $day, $url)
+    private function get_post ($year, $month, $day, $url)
 	{
 		global $s2_db;
 
@@ -185,13 +185,15 @@ class Page_Post extends Page_HTML implements \Page_Routable
 		$row['commented'] = 0; // for template
 		$row['tags'] = $tags;
 
+        $this->page['meta_description'] = self::extractMetaDescriptions($row['text']);
+
 		$this->page['text'] = $this->renderPartial('post', $row);
 
 		$this->page['id'] = $post_id;
 		$this->page['head_title'] = s2_htmlencode($row['title']);
 	}
 
-	private function get_comments ($id)
+    private function get_comments ($id)
 	{
 		global $s2_db;
 
@@ -215,4 +217,31 @@ class Page_Post extends Page_HTML implements \Page_Routable
 		return $comments ? $this->renderPartial('comments', array('comments' => $comments)) : '';
 	}
 
+    private static function extractMetaDescriptions($text)
+    {
+        $replace_what = array("\r", '&nbsp;', '&mdash;', '&ndash;', '&laquo;', '&raquo;');
+        $replace_to = array('', ' ', '—', '–', '«', '»',);
+        foreach (['<br>', '<br />', '<h1>', '<h2>', '<h3>', '<h4>', '<p>', '<pre>', '<blockquote>', '<li>'] as $tag)
+        {
+            $replace_what[] = $tag;
+            $replace_to[] = $tag."\r";
+        }
+        $text = str_replace($replace_what, $replace_to, $text);
+        $text = strip_tags($text);
+        $text = preg_replace('#(?<=[.?!;])[ \n\t]+#S', "\r", $text);
+        $text = trim($text);
+
+        $start = 0;
+        while (($pos = mb_strpos($text, "\r", $start)) !== false) {
+            if ($pos > 160 && $start <= 160) {
+                $text = mb_substr($text, 0, $start);
+                break;
+            }
+            $start = $pos + 1;
+        }
+
+        $text = str_replace("\r", ' ', $text);
+
+        return $text;
+    }
 }

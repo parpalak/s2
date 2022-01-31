@@ -44,10 +44,14 @@ class Page_Main extends Page_HTML implements \Page_Routable
 			);
 		}
 
-		if ($s2_blog_skip)
-			$this->page['link_navigation']['up'] = S2_BLOG_PATH;
-		elseif (S2_BLOG_URL)
-			$this->page['link_navigation']['up'] = s2_link('/');
+		if ($s2_blog_skip) {
+            $this->page['link_navigation']['up'] = S2_BLOG_PATH;
+        } else {
+            $this->page['meta_description'] = S2_BLOG_TITLE;
+            if (S2_BLOG_URL) {
+                   $this->page['link_navigation']['up'] = s2_link('/');
+            }
+        }
 	}
 
 	private function last_posts ($skip = 0)
