@@ -19,10 +19,12 @@ class Page_Sitemap extends Page_Abstract implements Page_Routable
         $items    = '';
 
         // TODO Add tags pages
-        foreach (Placeholder::articles_urls() as $item) {
+        foreach ($this->getItems() as $item) {
             $max_time = max($max_time, $item['modify_time'], $item['time']);
 
-            $item['link'] = s2_abs_link($item['rel_path']);
+            if (!isset($item['link'])) {
+                $item['link'] = s2_abs_link($item['rel_path']);
+            }
 
             $items .= $this->renderPartial('sitemap_item', $item);
         }
@@ -49,5 +51,10 @@ class Page_Sitemap extends Page_Abstract implements Page_Routable
         header('Content-Type: text/xml; charset=utf-8');
 
         ob_end_flush();
+    }
+
+    protected function getItems(): array
+    {
+        return Placeholder::articles_urls();
     }
 }
