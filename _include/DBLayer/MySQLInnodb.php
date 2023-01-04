@@ -68,7 +68,7 @@ class DBLayer_MySQLInnodb extends DBLayer_MySQL
 
 		return array(
 			'name'		=> 'MySQL Standard (InnoDB)',
-			'version'	=> preg_replace('/^([^-]+).*$/', '\\1', $this->result($result))
+			'version'	=> $this->result($result)
 		);
 	}
 }

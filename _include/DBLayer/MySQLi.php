@@ -157,7 +157,7 @@ class DBLayer_MySQli extends DBLayer_Abstract
 
 		return array(
 			'name'		=> 'MySQL Improved',
-			'version'	=> preg_replace('/^([^-]+).*$/', '\\1', $this->result($result))
+			'version'	=> $this->result($result),
 		);
 	}
 

@@ -65,7 +65,7 @@ class DBLayer_MySQLiInnodb extends DBLayer_MySQli
 
 		return array(
 			'name'		=> 'MySQL Improved (InnoDB)',
-			'version'	=> preg_replace('/^([^-]+).*$/', '\\1', $this->result($result))
+            'version'	=> $this->result($result)
 		);
 	}
 }

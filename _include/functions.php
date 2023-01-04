@@ -643,53 +643,51 @@ function error()
 <hr />
 <?php
 
-	if (isset($message) && !($message instanceof Exception))
-		echo '<p>'.$message.'</p>'."\n";
+	if (isset($message) && !($message instanceof Exception)) {
+        echo '<p>' . $message . '</p>' . "\n";
+    }
 
-	if ($num_args > 1 || isset($message) && $message instanceof Exception)
-	{
-		if (defined('S2_DEBUG'))
-		{
-			if (isset($message) && $message instanceof Exception)
-			{
-				if ($message instanceof DBLayer_Exception)
-				{
+	if ($num_args > 1 || isset($message) && $message instanceof Exception) {
+		if (defined('S2_DEBUG')) {
+			if (isset($message) && $message instanceof Exception) {
+				if ($message instanceof DBLayer_Exception) {
 					// Spoecial report for DB
 					echo '<p>Database reported: <b>' . s2_htmlencode($message->getMessage()) . ($message->getCode() ? ' (Errno: ' . $message->getCode() . ')' : '') . '</b>.</p>' . "\n";
 
-					if ($message->getQuery() != '')
-					{
+					if ($message->getQuery() !== '') {
 						echo '<p>Failed query: </p>' . "\n";
 						echo '<pre class="code">' . s2_htmlencode((string)$message->getQuery()) . '</pre>' . "\n";
 					}
 				}
-				else
-					echo '<p>' . s2_htmlencode($message->getMessage()) , '.</p>' . "\n";
+				else {
+                    echo '<p>', s2_htmlencode(get_class($message)), '</p><p>', s2_htmlencode($message->getMessage()), '</p>', "\n";
+                }
 
 				// Output trace
 				echo '<h3>Call trace</h3>';
 				$i = 0;
-				foreach ($message->getTrace() as $trace)
-				{
+				foreach ($message->getTrace() as $trace) {
 					$i++;
-					echo '<p>' . $i . '. File <b>' . $trace['file'] . '</b> on line <b>' . $trace['line'] . "</b></p>";
+					echo '<p>' . $i . '. File <b>' . $trace['file'] . ':' . $trace['line'] . "</b></p>";
 					echo '<pre class="code">';
 					echo (isset($trace['class']) ? $trace['class'] . $trace['type'] : '') . $trace['function'] . '(';
 
 					$args = array();
-					if (!empty($trace['args']))
-						foreach ($trace['args'] as $arg)
-							$args[] = var_export($arg, true);
+                    foreach ($trace['args'] ?? [] as $arg) {
+                        $args[] = var_export($arg, true);
+                    }
 
 					echo implode(', ', $args) . ');' . "\n";
 					echo '</pre>';
 				}
 			}
-			else if (isset($file) && isset($line))
-				echo '<p><em>The error occurred on line '.$line.' in '.$file.'</em></p>'."\n";
+			else if (isset($file, $line)) {
+                echo '<p><em>The error occurred on line ' . $line . ' in ' . $file . '</em></p>' . "\n";
+            }
 		}
-		else
-			echo '<p><strong>Note:</strong> For detailed error information (necessary for troubleshooting), enable "DEBUG mode". To enable "DEBUG mode", open up the file config.php in a text editor, add a line that looks like "define(\'S2_DEBUG\', 1);" (without the quotation marks), and re-upload the file. Once you\'ve solved the problem, it is recommended that "DEBUG mode" be turned off again (just remove the line from the file and re-upload it).</p>'."\n";
+		else {
+            echo '<p><strong>Note:</strong> For detailed error information (necessary for troubleshooting), enable "DEBUG mode". To enable "DEBUG mode", open up the file config.php in a text editor, add a line that looks like "define(\'S2_DEBUG\', 1);" (without the quotation marks), and re-upload the file. Once you\'ve solved the problem, it is recommended that "DEBUG mode" be turned off again (just remove the line from the file and re-upload it).</p>' . "\n";
+        }
 	}
 
 ?>

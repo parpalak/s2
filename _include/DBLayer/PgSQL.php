@@ -305,7 +305,7 @@ class DBLayer_PgSQL extends DBLayer_Abstract
 
 		return array(
 			'name'		=> 'PostgreSQL',
-			'version'	=> preg_replace('/^[^0-9]+([^\s,-]+).*$/', '\\1', $this->result($result))
+            'version'	=> $this->result($result)
 		);
 	}
 

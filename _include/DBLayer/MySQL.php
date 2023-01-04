@@ -142,7 +142,7 @@ class DBLayer_MySQL extends DBLayer_Abstract
 
 		return array(
 			'name'		=> 'MySQL Standard',
-			'version'	=> preg_replace('/^([^-]+).*$/', '\\1', $this->result($result))
+            'version'	=> $this->result($result)
 		);
 	}
 
