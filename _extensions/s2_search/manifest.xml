@@ -75,7 +75,7 @@ else
 		else
 			return require $ext_info['path'].'/lang/English.php';
 	});
-	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.(S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search').'">'.(S2_URL_PREFIX ? '<input type="hidden" name="search" value="1" />' : '').'<input type="text" name="q" class="inactive" id="s2_search_input" onblur="if(this.value==\'\'){this.value=this.defaultValue; this.className=\'inactive\';}" onfocus="if(this.value==this.defaultValue){this.value=this.className=\'\';}" value="'.Lang::get('Search', 's2_search').'"/></form>';
+	$replace['<!-- s2_search_field -->'] = '<form class="s2_search_form" method="get" action="'.(S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search').'">'.(S2_URL_PREFIX ? '<input type="hidden" name="search" value="1" />' : '').'<input type="text" name="q" id="s2_search_input" placeholder="'.Lang::get('Search', 's2_search').'"/></form>';
 }
 		]]></hook>
 
@@ -101,22 +101,32 @@ Lang::load($ext_info['id'], function () use ($ext_info)
 		return require $ext_info['path'].'/lang/English.php';
 });
 $s2_search_reindex = '<a href="#" onclick="return s2_search.reindex();" class="js" title="'.Lang::get('Reindex title', 's2_search').'">'.Lang::get('Reindex', 's2_search').'</a><span id="s2_search_progress"></span>';
-$counters[] = sprintf(Lang::get('Info link', 's2_search'), Lang::friendly_filesize(is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0), $s2_search_reindex);
+try {
+	$stat = \Container::get(\S2\Rose\Storage\Database\PdoStorage::class)->getIndexStat();
+	$size = $stat['bytes'];
+	$rows = $stat['rows'];
+} catch (\Exception $e) {
+	$size = $rows = 0;
+}
+$counters[] = sprintf(Lang::get('Info link', 's2_search'), Lang::friendly_filesize($size), Lang::number_format($rows), $s2_search_reindex);
 		]]></hook>
 
 		<hook id="rq_custom_action"><![CDATA[
 if ($action == 's2_search_makeindex')
 {
 	$is_permission = $s2_user['create_articles'] || $s2_user['edit_site'];
-	$save_action = isset($_GET['save_action']) ? $_GET['save_action'] : '';
-	$id = isset($_GET['id']) ? $_GET['id'] : '';
+	$save_action   = $_GET['save_action'] ?? '';
+	$id            = $_GET['id'] ?? '';
+
 	$save_action = ($save_action == 'save') ? '' : $save_action.'_';
-	$chapter = $id ? $save_action.$id : false;
+	$chapter     = $id ? $save_action.$id : false;
+
 	($hook = s2_hook('s2_search_action_makeindex')) ? eval($hook) : null;
+
 	s2_test_user_rights($is_permission);
 
 	$fetcher = new \s2_extensions\s2_search\Fetcher();
-	$finder = new \s2_extensions\s2_search\Indexer(S2_CACHE_DIR, $fetcher);
+	$finder  = new \s2_extensions\s2_search\IndexManager(S2_CACHE_DIR, $fetcher, Container::get(\S2\Rose\Indexer::class), Container::get(\S2\Rose\Storage\Database\PdoStorage::class));
 	if (!$chapter)
 		echo $finder->index();
 	else
@@ -144,7 +154,13 @@ $s2_const_types['S2_SEARCH_QUICK'] = 'boolean';
 		]]></hook>
 
 		<hook id="ai_js_end"><![CDATA[
-if ((is_file(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) ? filesize(S2_CACHE_DIR.\s2_extensions\s2_search\Worker::index_name) : 0) == 0)
+$size = 0;
+try {
+	\Container::get(\S2\Rose\Storage\Database\PdoStorage::class)->getIndexStat();
+	$size = \Container::get(\S2\Rose\Storage\Database\PdoStorage::class)->getTocSize(null);
+} catch (\Exception $e) {
+}
+if ($size === 0)
 {
 	Lang::load($ext_info['id'], function () use ($ext_info)
 	{

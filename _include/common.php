@@ -28,6 +28,7 @@ if (defined('S2_DEBUG'))
 else
 	error_reporting(E_ALL ^ E_NOTICE);
 
+require S2_ROOT . '_vendor/autoload.php';
 require S2_ROOT.'_include/setup.php';
 
 if (!defined('S2_BASE_URL'))

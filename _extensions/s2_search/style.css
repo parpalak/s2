@@ -11,7 +11,7 @@
 		-webkit-box-sizing: border-box;
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
-		padding: 0.125em 0.25em;
+		padding: 0 0.25em;
 		line-height: 1.0em;
 		}
 		.search-results .search-form .search-button {
@@ -38,6 +38,7 @@
 
 .search-results a.title {
 	font-size: 1.2em;
+	font-weight: bold;
 	}
 
 .search-results a.url {
@@ -52,3 +53,6 @@
 .search-results .paging {
 	margin: 2em 0;
 	}
+.s2_search_highlight {
+	background: #fff8d3;
+    }

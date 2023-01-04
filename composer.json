@@ -1,18 +1,21 @@
 {
-	"config": {
-		"vendor-dir": "_vendor"
-	},
-	"name": "s2cms/s2",
-	"description": "Small and fast CMS",
-	"minimum-stability": "stable",
-	"license": "GPL",
-	"authors": [
-		{
-			"name": "Roman Parpalak",
-			"email": "roman@written.ru"
-		}
-	],
-	"require": {
-		"altorouter/altorouter": "dev-master"
-	}
+  "config": {
+    "vendor-dir": "_vendor"
+  },
+  "name": "s2cms/s2",
+  "description": "Small and fast CMS",
+  "minimum-stability": "stable",
+  "license": "GPL",
+  "authors": [
+    {
+      "name": "Roman Parpalak",
+      "email": "roman@written.ru"
+    }
+  ],
+  "require": {
+    "ext-pdo": "*",
+    "ext-json": "*",
+    "altorouter/altorouter": "dev-master",
+    "s2/rose": "dev-master#23fc6af815667335b2e0c5d4c9c0c98cb9d5b397"
+  }
 }

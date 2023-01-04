@@ -1,200 +1,223 @@
-<?php
+<?php /** @noinspection PhpExpressionResultUnusedInspection */
+
 /**
  * Displays a page with search results
  *
- * @copyright (C) 2010-2014 Roman Parpalak
+ * @copyright (C) 2010-2023 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
 
 namespace s2_extensions\s2_search;
-use \Lang;
 
+use Lang;
+use S2\Rose\Entity\ExternalContent;
+use S2\Rose\Entity\ExternalId;
+use S2\Rose\Entity\Query;
+use S2\Rose\Finder;
+use S2\Rose\Helper\ProfileHelper;
+use S2\Rose\SnippetBuilder;
+use S2\Rose\Stemmer\StemmerInterface;
+use S2\Rose\Storage\Exception\EmptyIndexException;
 
 class Page extends \Page_HTML implements \Page_Routable
 {
-	protected $template_id = 'service.php';
+    protected $template_id = 'service.php';
+    private int $page_num;
 
-	public function __construct (array $params = array())
-	{
-		$query = isset($_GET['q']) ? $_GET['q'] : '';
-		$this->page_num = isset($_GET['p']) ? (int) $_GET['p'] : 1;
+    public function __construct(array $params = array())
+    {
+        $query          = $_GET['q'] ?? '';
+        $this->page_num = isset($_GET['p']) ? (int)$_GET['p'] : 1;
 
-		Lang::load('s2_search', function ()
-		{
-			if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php'))
-				return require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
-			else
-				return require __DIR__ . '/../lang/English.php';
-		});
+        Lang::load('s2_search', static function () {
+            /** @noinspection PhpUndefinedConstantInspection */
+            if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php')) {
+                /** @noinspection PhpUndefinedConstantInspection */
+                return require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
+            }
+            return require __DIR__ . '/../lang/English.php';
+        });
 
-		$this->viewer = new \Viewer($this);
-		parent::__construct($params);
+        $this->viewer = new \Viewer($this);
+        parent::__construct($params);
 
-		$this->build_page($query);
-	}
+        $this->build_page($query);
+    }
 
-	private function build_page ($query)
-	{
-		$content['query'] = $query;
-		
-		if ($query !== '')
-		{
-			$fetcher = new Fetcher();
-			$finder = new Finder(S2_CACHE_DIR);
+    private function build_page($query): void
+    {
+        $content['query'] = $query;
 
-			list($weights, $toc) = $finder->find($query);
+        if ($query !== '') {
+            $fetcher = new Fetcher();
 
-if (defined('DEBUG')) $start_time = microtime(true);
+            /** @var Finder $finder */
+            $finder = \Container::get(Finder::class);
 
-			$content += array(
-				'num' => count($weights),
-				'tags' => $this->findInTags($query),
-			);
+            $items_per_page = S2_MAX_ITEMS ?: 10.0;
+            $queryObj       = new Query($query);
+            $queryObj
+                ->setLimit($items_per_page)
+                ->setOffset(($this->page_num - 1) * $items_per_page) // TODO Может быть за пределами
+            ;
+            try {
+                $resultSet = $finder->find($queryObj, defined('S2_DEBUG_VIEW'));
+                $content   += ['num' => $resultSet->getTotalCount()];
+            } catch (EmptyIndexException $e) {
+                $content += ['num' => 0,];
+            }
 
-			($hook = s2_hook('s2_search_pre_results')) ? eval($hook) : null;
+            $content += ['tags' => $this->findInTags($query)];
 
-			if ($content['num'])
-			{
-				if (substr(S2_LANGUAGE, 0, 7) == 'Russian')
-					// Well... Not pretty much. But it's nice to see phrases in human language.
-					// Feel free to suggest the code for other languages.
-					$content['num_info'] = sprintf(self::rus_plural($content['num'], 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $content['num']);
-				else
-					$content['num_info'] = sprintf(Lang::get('Found', 's2_search'), $content['num']);
+            ($hook = s2_hook('s2_search_pre_results')) ? eval($hook) : null;
 
-				$items_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10.0;
-				$total_pages = ceil(1.0 * $content['num'] / $items_per_page);
-				if ($this->page_num < 1 || $this->page_num > $total_pages)
-					$this->page_num = 1;
+            if ($content['num'] > 0) {
+                // Feel free to suggest the code for other languages.
+                /** @noinspection PhpUndefinedConstantInspection */
+                /** @noinspection SubStrUsedAsStrPosInspection */
+                if (substr(S2_LANGUAGE, 0, 7) === 'Russian') {
+                    $content['num_info'] = sprintf(self::rus_plural($content['num'], 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $content['num']);
+                } else {
+                    $content['num_info'] = sprintf(Lang::get('Found', 's2_search'), $content['num']);
+                }
 
-				$i = 0;
-				$output = array();
-				foreach ($weights as $chapter => $weight)
-				{
-					$i++;
-					if ($i <= ($this->page_num - 1) * $items_per_page)
-						continue;
-					if ($i > $this->page_num * $items_per_page)
-						break;
+                $total_pages = ceil(1.0 * $content['num'] / $items_per_page);
+                if ($this->page_num < 1 || $this->page_num > $total_pages) {
+                    $this->page_num = 1;
+                }
 
-					$output[$chapter] = $toc[$chapter];
-				}
+                /** @var StemmerInterface $stemmer */
+                $stemmer        = \Container::get(StemmerInterface::class);
+                $snippetBuilder = new SnippetBuilder($stemmer);
+                $snippetBuilder->setSnippetLineSeparator(' ⋄ ');
+                $snippetBuilder->attachSnippets($resultSet, static function (array $externalIds) use ($fetcher) {
+                    /** @var ExternalId[] $externalIds */
+                    $idMap = [];
+                    foreach ($externalIds as $externalId) {
+                        $idMap[$externalId->getId()] = $externalId;
+                    }
 
-if (defined('DEBUG')) echo 'Страница: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+                    $result = new ExternalContent();
+                    foreach ($fetcher->texts(array_keys($idMap)) as $id => $text) { // TODO вместо этого вызова получать инфу выше для всех внешних id, повышать релевантность у избранных записей
+                        $result->attach($idMap[$id], $text);
+                    }
+                    return $result;
+                });
 
-				$snippets = $finder->snippets(array_keys($output), $fetcher);
+                $content['profile'] = array_map(static fn($p) => ProfileHelper::formatProfilePoint($p), $resultSet->getProfilePoints());
+                $content['trace']   = $resultSet->getTrace();
 
-if (defined('DEBUG')) echo 'Сниппеты: ', - $start_time + ($start_time = microtime(true)), '  ', memory_get_usage(), '  ', memory_get_peak_usage(), '<br>';
+                $content['output'] = '';
+                foreach ($resultSet->getItems() as $item) {
+                    $content['output'] .= $this->renderPartial('search_result', [
+                        'title' => $item->getHighlightedTitle($stemmer),
+                        'url'   => $item->getUrl(),
+                        'descr' => $item->getSnippet(),
+                        'time'  => $item->getDate() ? $item->getDate()->getTimestamp() : null,
+                        'debug' => ($content['trace'][(new ExternalId($item->getId()))->toString()]),
+                    ]);
+                }
 
-				$content['output'] = '';
-				foreach ($output as $id => &$chapter_info)
-				{
-					if (isset($snippets[$id]))
-					{
-						if (($snippets[$id]['rel'] > 0.6))
-							$chapter_info['descr'] = $snippets[$id]['snippet'];
-						elseif(!$chapter_info['descr'])
-							$chapter_info['descr'] = $snippets[$id]['start_text'];
-					}
+                $link_nav          = array();
+                $content['paging'] = s2_paging($this->page_num, $total_pages, s2_link('/search', array('q=' . str_replace('%', '%%', urlencode($query)), 'p=%d')), $link_nav);
+                foreach ($link_nav as $rel => $href) {
+                    $this->page['link_navigation'][$rel] = $href;
+                }
+            }
+        }
 
-					$content['output'] .= $this->renderPartial('search_result', $chapter_info);
-				}
-				unset($chapter_info);
+        $this->page['text']  = $this->renderPartial('search', $content);
+        $this->page['title'] = Lang::get('Search', 's2_search');
+        $this->page['path']  = array(
+            array(
+                'title' => \Model::main_page_title(),
+                'link'  => s2_link('/'),
+            ),
+            array(
+                'title' => Lang::get('Search', 's2_search'),
+            ),
+        );
+    }
 
+    private static function rus_plural($number, $many, $one, $two)
+    {
+        $number    = abs((int)$number);
+        $num_2_dig = $number % 100;
+        $num_1_dig = $number % 10;
 
-				$link_nav = array();
-				$content['paging'] = s2_paging($this->page_num, $total_pages, s2_link('/search', array('q='.str_replace('%', '%%', urlencode($query)), 'p=%d')), $link_nav);
-				foreach ($link_nav as $rel => $href)
-					$this->page['link_navigation'][$rel] = $href;
-			}
-		}
+        if ($num_2_dig == 1 || ($num_2_dig > 20 && $num_1_dig == 1)) {
+            return $one;
+        }
 
-		$this->page['text'] = $this->renderPartial('search', $content);
-		$this->page['title'] = Lang::get('Search', 's2_search');
-		$this->page['path'] = array(
-			array(
-				'title' => \Model::main_page_title(),
-				'link'  => s2_link('/'),
-			),
-			array(
-				'title' => Lang::get('Search', 's2_search'),
-			),
-		);
-	}
+        if ($num_2_dig == 2 || ($num_2_dig > 20 && $num_1_dig == 2)) {
+            return $two;
+        }
+        if ($num_2_dig == 3 || ($num_2_dig > 20 && $num_1_dig == 3)) {
+            return $two;
+        }
+        if ($num_2_dig == 4 || ($num_2_dig > 20 && $num_1_dig == 4)) {
+            return $two;
+        }
 
-	private static function rus_plural ($number, $many, $one, $two)
-	{
-		$number = abs((int) $number);
-		$num_2_dig = $number % 100;
-		$num_1_dig = $number % 10;
+        return $many;
+    }
 
-		if ($num_2_dig == 1 || $num_2_dig > 20 && $num_1_dig == 1)
-			return $one;
+    // TODO think about html refactoring
+    // TODO rename hooks
+    private function findInTags($query)
+    {
+        global $s2_db;
 
-		if ($num_2_dig == 2 || $num_2_dig > 20 && $num_1_dig == 2)
-			return $two;
-		if ($num_2_dig == 3 || $num_2_dig > 20 && $num_1_dig == 3)
-			return $two;
-		if ($num_2_dig == 4 || $num_2_dig > 20 && $num_1_dig == 4)
-			return $two;
+        $return = '';
 
-		return $many;
-	}
+        ($hook = s2_hook('s2_search_pre_tags')) ? eval($hook) : null;
 
-	// TODO think about html refactoring
-	// TODO rename hooks
-	private function findInTags ($query)
-	{
-		global $s2_db;
+        if (!trim($query))
+            return $return;
 
-		$return = '';
+        $sql = array(
+            'SELECT' => 'count(*)',
+            'FROM'   => 'article_tag AS at',
+            'JOINS'  => array(
+                array(
+                    'INNER JOIN' => 'articles AS a',
+                    'ON'         => 'a.id = at.article_id'
+                )
+            ),
+            'WHERE'  => 'at.tag_id = t.tag_id AND a.published = 1',
+            'LIMIT'  => '1'
+        );
+        ($hook = s2_hook('s2_search_pre_find_tags_sub_qr')) ? eval($hook) : null;
+        $s2_search_sub_sql = $s2_db->query_build($sql, true);
 
-		($hook = s2_hook('s2_search_pre_tags')) ? eval($hook) : null;
+        $sql = array(
+            'SELECT' => 'tag_id, name, url, (' . $s2_search_sub_sql . ') AS used',
+            'FROM'   => 'tags AS t',
+            'WHERE'  => 'name LIKE \'' . $s2_db->escape(trim($query)) . '%\'',
+        );
+        ($hook = s2_hook('s2_search_pre_find_tags_qr')) ? eval($hook) : null;
+        $s2_search_result = $s2_db->query_build($sql);
 
-		if (!trim($query))
-			return $return;
+        $tags = array();
+        while ($s2_search_row = $s2_db->fetch_assoc($s2_search_result)) {
+            ($hook = s2_hook('s2_search_find_tags_get_res')) ? eval($hook) : null;
 
-		$sql = array(
-			'SELECT' => 'count(*)',
-			'FROM'   => 'article_tag AS at',
-			'JOINS'  => array(
-				array(
-					'INNER JOIN' => 'articles AS a',
-					'ON'         => 'a.id = at.article_id'
-				)
-			),
-			'WHERE'  => 'at.tag_id = t.tag_id AND a.published = 1',
-			'LIMIT'  => '1'
-		);
-		($hook = s2_hook('s2_search_pre_find_tags_sub_qr')) ? eval($hook) : null;
-		$s2_search_sub_sql = $s2_db->query_build($sql, true);
+            if ($s2_search_row['used']) {
+                /** @noinspection PhpUndefinedConstantInspection */
+                $tags[] = '<a href="' . s2_link('/' . S2_TAGS_URL . '/' . urlencode($s2_search_row['url']) . '/') . '">' . $s2_search_row['name'] . '</a>';
+            }
+        }
 
-		$sql = array(
-			'SELECT' => 'tag_id, name, url, (' . $s2_search_sub_sql . ') AS used',
-			'FROM'   => 'tags AS t',
-			'WHERE'  => 'name LIKE \'' . $s2_db->escape(trim($query)) . '%\'',
-		);
-		($hook = s2_hook('s2_search_pre_find_tags_qr')) ? eval($hook) : null;
-		$s2_search_result = $s2_db->query_build($sql);
+        ($hook = s2_hook('s2_search_find_tags_pre_mrg')) ? eval($hook) : null;
 
-		$tags = array();
-		while ($s2_search_row = $s2_db->fetch_assoc($s2_search_result))
-		{
-			($hook = s2_hook('s2_search_find_tags_get_res')) ? eval($hook) : null;
+        if (!empty($tags)) {
+            $return .= '<p class="s2_search_found_tags">' . sprintf(Lang::get('Found tags', 's2_search'), implode(', ', $tags)) . '</p>';
+        }
 
-			if ($s2_search_row['used'])
-				$tags[] = '<a href="' . s2_link('/' . S2_TAGS_URL . '/' . urlencode($s2_search_row['url']) . '/') . '">' . $s2_search_row['name'] . '</a>';
-		}
+        ($hook = s2_hook('s2_search_find_tags_end')) ? eval($hook) : null;
 
-		($hook = s2_hook('s2_search_find_tags_pre_mrg')) ? eval($hook) : null;
+        return $return;
+    }
 
-		if (!empty($tags))
-			$return .= '<p class="s2_search_found_tags">' . sprintf(Lang::get('Found tags', 's2_search'), implode(', ', $tags)) . '</p>';
-
-		($hook = s2_hook('s2_search_find_tags_end')) ? eval($hook) : null;
-
-		return $return;
-	}
-
-} 
+}

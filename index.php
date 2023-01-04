@@ -11,9 +11,6 @@ try {
     define('S2_ROOT', './');
     require S2_ROOT . '_include/common.php';
 
-    // Composer
-    require S2_ROOT . '_vendor/autoload.php';
-
     ($hook = s2_hook('idx_start')) ? eval($hook) : null;
 
     header('X-Powered-By: S2/' . S2_VERSION);

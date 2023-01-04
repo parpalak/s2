@@ -2,134 +2,139 @@
 /**
  * Provides data for building the search index
  *
- * @copyright (C) 2010-2014 Roman Parpalak
+ * @copyright (C) 2010-2023 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_search
  */
 
 namespace s2_extensions\s2_search;
 
+use S2\Rose\Entity\Indexable;
 
 class Fetcher implements GenericFetcher
 {
-	/**
-	 * @var Indexer
-	 */
-	private $indexer;
+    private function crawl($parent_id, $url): \Generator
+    {
+        global $s2_db;
 
-	private function crawl ($parent_id, $url)
-	{
-		global $s2_db;
+        $subQuery        = array(
+            'SELECT' => 'count(*)',
+            'FROM'   => 'articles AS a2',
+            'WHERE'  => 'a2.parent_id = a.id',
+            'LIMIT'  => '1'
+        );
+        $child_num_query = $s2_db->query_build($subQuery, true);
 
-		$subquery = array(
-			'SELECT'	=> 'count(*)',
-			'FROM'		=> 'articles AS a2',
-			'WHERE'		=> 'a2.parent_id = a.id',
-			'LIMIT'		=> '1'
-		);
-		$child_num_query = $s2_db->query_build($subquery, true);
+        $query = array(
+            'SELECT' => 'title, id, create_time, url, (' . $child_num_query . ') as is_children, parent_id, meta_keys, meta_desc, pagetext',
+            'FROM'   => 'articles AS a',
+            'WHERE'  => 'parent_id = ' . $parent_id . ' AND published = 1',
+        );
+        ($hook = s2_hook('s2_search_fetcer_crawl_pre_qr')) ? eval($hook) : null;
+        $result = $s2_db->query_build($query);
 
-		$query = array(
-			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
-			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'parent_id = '.$parent_id.' AND published = 1',
-		);
-		($hook = s2_hook('s2_search_fetcer_crawl_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+        while ($article = $s2_db->fetch_assoc($result)) {
+            $indexable = new Indexable($article['id'], $article['title'], $article['pagetext']);
+            $indexable
+                ->setKeywords($article['meta_keys'])
+                ->setDescription($article['meta_desc'])
+                ->setDate($article['create_time'] > 0 ? new \DateTime('@' . $article['create_time']) : null)
+                ->setUrl($url . urlencode($article['url']) . ($article['is_children'] ? '/' : ''))
+            ;
 
-		while ($article = $s2_db->fetch_assoc($result))
-		{
-			$this->indexer->buffer_chapter($article['id'], $article['title'], $article['pagetext'], $article['meta_keys'], $article['meta_desc'], $article['create_time'], $url.urlencode($article['url']).($article['is_children'] ? '/' : ''));
+            yield $indexable;
 
-			$article['pagetext'] = '';
+            $article['pagetext'] = '';
 
-			$this->crawl($article['id'], $url.urlencode($article['url']).'/');
-		}
+            yield from $this->crawl($article['id'], $url . urlencode($article['url']) . '/');
+        }
 
-		($hook = s2_hook('s2_search_fetcher_crawl_end')) ? eval($hook) : null;
-	}
+        ($hook = s2_hook('s2_search_fetcher_crawl_end')) ? eval($hook) : null;
+    }
 
-	public function process (Indexer $indexer)
-	{
-		$this->indexer = $indexer;
-		$this->crawl(0, '');
+    public function process(): \Generator
+    {
+        yield from $this->crawl(0, '');
 
-		($hook = s2_hook('s2_search_fetcher_process_end')) ? eval($hook) : null;
-	}
+        ($hook = s2_hook('s2_search_fetcher_process_end')) ? yield from (eval($hook))() : null;
+    }
 
-	public function chapter ($id)
-	{
-		global $s2_db;
+    public function chapter(string $id): ?Indexable
+    {
+        global $s2_db;
 
-		$data = ($hook = s2_hook('s2_search_fetcher_chapter_start')) ? eval($hook) : null;
-		if (is_array($data))
-			return $data;
+        $data = ($hook = s2_hook('s2_search_fetcher_chapter_start')) ? eval($hook) : null;
+        if ($data instanceof Indexable) {
+            return $data;
+        }
 
-		$subquery = array(
-			'SELECT'	=> 'count(*)',
-			'FROM'		=> 'articles AS a2',
-			'WHERE'		=> 'a2.parent_id = a.id',
-			'LIMIT'		=> '1'
-		);
-		$child_num_query = $s2_db->query_build($subquery, true);
+        $subQuery        = array(
+            'SELECT' => 'count(*)',
+            'FROM'   => 'articles AS a2',
+            'WHERE'  => 'a2.parent_id = a.id',
+            'LIMIT'  => '1'
+        );
+        $child_num_query = $s2_db->query_build($subQuery, true);
 
-		$query = array(
-			'SELECT'	=> 'title, id, create_time, url, ('.$child_num_query.') as is_children, parent_id, meta_keys, meta_desc, pagetext',
-			'FROM'		=> 'articles AS a',
-			'WHERE'		=> 'id = \''.$s2_db->escape($id).'\' AND published = 1',
-		);
-		($hook = s2_hook('s2_search_fetcher_chapter_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+        $query = array(
+            'SELECT' => 'title, id, create_time, url, (' . $child_num_query . ') as is_children, parent_id, meta_keys, meta_desc, pagetext',
+            'FROM'   => 'articles AS a',
+            'WHERE'  => 'id = \'' . $s2_db->escape($id) . '\' AND published = 1',
+        );
+        ($hook = s2_hook('s2_search_fetcher_chapter_pre_qr')) ? eval($hook) : null;
+        $result = $s2_db->query_build($query);
 
-		$article = $s2_db->fetch_assoc($result);
-		if (!$article)
-			return array();
+        $article = $s2_db->fetch_assoc($result);
+        if (!$article) {
+            return null;
+        }
 
-		$parent_path = \Model::path_from_id($article['parent_id'], true);
-		if ($parent_path === false)
-			return array();
+        $parent_path = \Model::path_from_id($article['parent_id'], true);
+        if ($parent_path === false) {
+            return null;
+        }
 
-		return array(
-			$article['title'],
-			$article['pagetext'],
-			$article['meta_keys'],
-			array(
-				'title'		=> $article['title'],
-				'descr'		=> $article['meta_desc'],
-				'time'		=> $article['create_time'],
-				'url'		=> $parent_path.'/'.urlencode($article['url']).($article['url'] && $article['is_children'] ? '/' : ''),
-			)
-		);
-	}
+        $indexable = new Indexable($article['id'], $article['title'], $article['pagetext']);
+        $indexable
+            ->setKeywords($article['meta_keys'])
+            ->setDescription($article['meta_desc'])
+            ->setDate($article['create_time'] > 0 ? new \DateTime('@' . $article['create_time']) : null)
+            ->setUrl($parent_path . '/' . urlencode($article['url']) . ($article['url'] && $article['is_children'] ? '/' : ''))
+        ;
 
-	public function texts ($ids)
-	{
-		global $s2_db;
+        return $indexable;
+    }
 
-		$articles = array();
+    public function texts(array $ids): array
+    {
+        global $s2_db;
 
-		$result = ($hook = s2_hook('s2_search_fetcher_texts_start')) ? eval($hook) : null;
-		if ($result)
-			return $articles;
+        $articles = array();
 
-		foreach ($ids as $k => $v)
-			$ids[$k] = (int) $v;
+        $result = ($hook = s2_hook('s2_search_fetcher_texts_start')) ? eval($hook) : null;
+        if ($result) {
+            return $articles;
+        }
 
-		if (count($ids))
-		{
-			// Obtaining articles text
-			$query = array(
-				'SELECT'	=> 'id, pagetext',
-				'FROM'		=> 'articles AS a',
-				'WHERE'		=> 'id IN ('.implode(', ', $ids).') AND published = 1',
-			);
-			($hook = s2_hook('s2_search_fetcher_texts_pre_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+        foreach ($ids as $k => $v) {
+            $ids[$k] = (int)$v;
+        }
 
-			while ($article = $s2_db->fetch_assoc($result))
-				$articles[$article['id']] = $article['pagetext'];
-		}
+        if (count($ids) > 0) {
+            // Obtaining articles text
+            $query = array(
+                'SELECT' => 'id, pagetext',
+                'FROM'   => 'articles AS a',
+                'WHERE'  => 'id IN (' . implode(', ', $ids) . ') AND published = 1',
+            );
+            ($hook = s2_hook('s2_search_fetcher_texts_pre_qr')) ? eval($hook) : null;
+            $result = $s2_db->query_build($query);
 
-		return $articles;
-	}
+            while ($article = $s2_db->fetch_assoc($result)) {
+                $articles[$article['id']] = $article['pagetext'];
+            }
+        }
+
+        return $articles;
+    }
 }

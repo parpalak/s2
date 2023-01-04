@@ -14,7 +14,7 @@ return array(
 
 	'Reindex'            => 'reindex',
 	'Reindex title'      => 'May be time-consuming. You can run it again in case of connection loss.',
-	'Info link'          => 'Search index: %1$s (%2$s)',
+	'Info link'          => 'Search index: %1$s, %2$s rows (%3$s)',
 
 	'Indexing required'  => 'In order to enable the site search, indexing is required.',
 	'Index now'          => 'Index now',

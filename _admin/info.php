@@ -95,7 +95,7 @@ function s2_stat_info ()
 		$db_version = 'MySQL '.$db_version;
 
 		// Calculate total db size/row count
-		$result = $s2_db->query('SHOW TABLE STATUS FROM `'.$db_name.'` LIKE \''.$db_prefix.'%\'');
+		$result = $s2_db->query('SHOW TABLE STATUS FROM `'.$db_name.'` WHERE NAME LIKE \''.$db_prefix.'%\' AND NAME NOT LIKE \''.$db_prefix.'s2_search_idx_%\'');
 
 		$total_records = $total_size = 0;
 		while ($status = $s2_db->fetch_assoc($result))
