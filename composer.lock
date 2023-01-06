@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3c228d668044d0861dc9f408a579b55",
+    "content-hash": "097ff0b7ab07a558e5ffd6ae30bcd2e9",
     "packages": [
         {
             "name": "altorouter/altorouter",
@@ -72,12 +72,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "23fc6af815667335b2e0c5d4c9c0c98cb9d5b397"
+                "reference": "48207ce190f3f66cfc60ea523c9396f23920abf7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/23fc6af815667335b2e0c5d4c9c0c98cb9d5b397",
-                "reference": "23fc6af815667335b2e0c5d4c9c0c98cb9d5b397",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/48207ce190f3f66cfc60ea523c9396f23920abf7",
+                "reference": "48207ce190f3f66cfc60ea523c9396f23920abf7",
                 "shasum": ""
             },
             "require": {

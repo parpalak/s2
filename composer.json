@@ -16,6 +16,6 @@
     "ext-pdo": "*",
     "ext-json": "*",
     "altorouter/altorouter": "dev-master",
-    "s2/rose": "dev-master#23fc6af815667335b2e0c5d4c9c0c98cb9d5b397"
+    "s2/rose": "dev-master#48207ce190f3f66cfc60ea523c9396f23920abf7"
   }
 }

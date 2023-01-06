@@ -24,6 +24,7 @@ class Page extends \Page_HTML implements \Page_Routable
 {
     protected $template_id = 'service.php';
     private int $page_num;
+    private StemmerInterface $stemmer;
 
     public function __construct(array $params = array())
     {
@@ -39,7 +40,10 @@ class Page extends \Page_HTML implements \Page_Routable
             return require __DIR__ . '/../lang/English.php';
         });
 
-        $this->viewer = new \Viewer($this);
+        $this->viewer  = new \Viewer($this);
+        /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
+        $this->stemmer = \Container::get(StemmerInterface::class);
+
         parent::__construct($params);
 
         $this->build_page($query);
@@ -68,7 +72,7 @@ class Page extends \Page_HTML implements \Page_Routable
                 $content += ['num' => 0,];
             }
 
-            $content += ['tags' => $this->findInTags($query)];
+            $content += ['tags' => $this->findInTags($queryObj)];
 
             ($hook = s2_hook('s2_search_pre_results')) ? eval($hook) : null;
 
@@ -87,9 +91,7 @@ class Page extends \Page_HTML implements \Page_Routable
                     $this->page_num = 1;
                 }
 
-                /** @var StemmerInterface $stemmer */
-                $stemmer        = \Container::get(StemmerInterface::class);
-                $snippetBuilder = new SnippetBuilder($stemmer);
+                $snippetBuilder = new SnippetBuilder($this->stemmer);
                 $snippetBuilder->setSnippetLineSeparator(' ⋄ ');
                 $snippetBuilder->attachSnippets($resultSet, static function (array $externalIds) use ($fetcher) {
                     /** @var ExternalId[] $externalIds */
@@ -111,7 +113,7 @@ class Page extends \Page_HTML implements \Page_Routable
                 $content['output'] = '';
                 foreach ($resultSet->getItems() as $item) {
                     $content['output'] .= $this->renderPartial('search_result', [
-                        'title' => $item->getHighlightedTitle($stemmer),
+                        'title' => $item->getHighlightedTitle($this->stemmer),
                         'url'   => $item->getUrl(),
                         'descr' => $item->getSnippet(),
                         'time'  => $item->getDate() ? $item->getDate()->getTimestamp() : null,
@@ -165,7 +167,7 @@ class Page extends \Page_HTML implements \Page_Routable
 
     // TODO think about html refactoring
     // TODO rename hooks
-    private function findInTags($query)
+    private function findInTags(Query $query)
     {
         global $s2_db;
 
@@ -173,8 +175,13 @@ class Page extends \Page_HTML implements \Page_Routable
 
         ($hook = s2_hook('s2_search_pre_tags')) ? eval($hook) : null;
 
-        if (!trim($query))
+        $words = $query->valueToArray();
+        if (count($words) === 0) {
             return $return;
+        }
+
+        $stemmedWords = array_map(fn($word) => $this->stemmer->stemWord($word), $words);
+        $words        = array_merge($words, $stemmedWords);
 
         $sql = array(
             'SELECT' => 'count(*)',
@@ -191,10 +198,11 @@ class Page extends \Page_HTML implements \Page_Routable
         ($hook = s2_hook('s2_search_pre_find_tags_sub_qr')) ? eval($hook) : null;
         $s2_search_sub_sql = $s2_db->query_build($sql, true);
 
-        $sql = array(
+        $where = array_map(static fn($word) => 'name LIKE \'' . $s2_db->escape($word) . '%\' OR name LIKE \'% ' . $s2_db->escape($word) . '%\'', $words);
+        $sql   = array(
             'SELECT' => 'tag_id, name, url, (' . $s2_search_sub_sql . ') AS used',
             'FROM'   => 'tags AS t',
-            'WHERE'  => 'name LIKE \'' . $s2_db->escape(trim($query)) . '%\'',
+            'WHERE'  => implode(' OR ', $where),
         );
         ($hook = s2_hook('s2_search_pre_find_tags_qr')) ? eval($hook) : null;
         $s2_search_result = $s2_db->query_build($sql);
@@ -203,7 +211,7 @@ class Page extends \Page_HTML implements \Page_Routable
         while ($s2_search_row = $s2_db->fetch_assoc($s2_search_result)) {
             ($hook = s2_hook('s2_search_find_tags_get_res')) ? eval($hook) : null;
 
-            if ($s2_search_row['used']) {
+            if ($s2_search_row['used'] && $this->tagIsSimilarToWords($s2_search_row['name'], $words)) {
                 /** @noinspection PhpUndefinedConstantInspection */
                 $tags[] = '<a href="' . s2_link('/' . S2_TAGS_URL . '/' . urlencode($s2_search_row['url']) . '/') . '">' . $s2_search_row['name'] . '</a>';
             }
@@ -220,4 +228,19 @@ class Page extends \Page_HTML implements \Page_Routable
         return $return;
     }
 
+    private function tagIsSimilarToWords(string $name, array $words): bool
+    {
+        $foundWordsInTags = array_filter(explode(' ', $name), static fn($word) => utf8_strlen($word) > 2);
+        $foundStemsInTags = array_map(fn(string $keyPart) => $this->stemmer->stemWord($keyPart), $foundWordsInTags);
+
+        foreach ($foundStemsInTags as $foundStemInTags) {
+            foreach ($words as $word) {
+                if ($word === $foundStemInTags || (strpos($foundStemInTags, $word) === 0 && utf8_strlen($word) >= 5)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

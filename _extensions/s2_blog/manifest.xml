@@ -870,9 +870,9 @@ $s2_blog_search_sql = array(
 $s2_blog_search_sub_sql = $s2_db->query_build($s2_blog_search_sql, true);
 
 $s2_blog_search_sql = array(
-	'SELECT'	=> 'tag_id, name, url, ('.$s2_blog_search_sub_sql.') AS used',
-	'FROM'		=> 'tags AS t',
-	'WHERE'		=> 'name LIKE \''.$s2_db->escape(trim($query)).'%\'',
+	'SELECT' => 'tag_id, name, url, ('.$s2_blog_search_sub_sql.') AS used',
+	'FROM'	 => 'tags AS t',
+	'WHERE'  => implode(' OR ', $where),
 );
 ($hook = s2_hook('s2_blog_pre_find_tags_qr')) ? eval($hook) : null;
 $s2_blog_result = $s2_db->query_build($s2_blog_search_sql);
@@ -882,8 +882,9 @@ while ($s2_blog_row = $s2_db->fetch_assoc($s2_blog_result))
 {
 	($hook = s2_hook('s2_blog_find_tags_get_res')) ? eval($hook) : null;
 
-	if ($s2_blog_row['used'])
+	if ($s2_blog_row['used'] && $this->tagIsSimilarToWords($s2_blog_row['name'], $words)) {
 		$s2_blog_found_tag[] = '<a href="'.S2_BLOG_TAGS_PATH.urlencode($s2_blog_row['url']).'/">'.$s2_blog_row['name'].'</a>';
+	}
 }
 
 if (!empty($s2_blog_found_tag))
