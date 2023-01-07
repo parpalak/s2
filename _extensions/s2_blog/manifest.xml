@@ -805,20 +805,17 @@ if (substr($id, 0, 8) == 's2_blog_')
 	($hook = s2_hook('s2_blog_pre_get_chapter_qr')) ? eval($hook) : null;
 	$result = $s2_db->query_build($query);
 	$s2_blog_post = $s2_db->fetch_assoc($result);
-	if (!$s2_blog_post)
-		return array();
+	if (!$s2_blog_post) {
+		return null;
+	}
 
-	return array(
-		$s2_blog_post['title'],
-		$s2_blog_post['text'],
-		'',
-		array(
-			'title'		=> $s2_blog_post['title'],
-			'descr'		=> '',
-			'time'		=> $s2_blog_post['create_time'],
-			'url'		=> str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'],
-		)
-	);
+	$indexable = new \S2\Rose\Entity\Indexable('s2_blog_'.$s2_blog_post['id'], $s2_blog_post['title'], $s2_blog_post['text']);
+	$indexable
+		->setDate($s2_blog_post['create_time'] > 0 ? new \DateTime('@' . $s2_blog_post['create_time']) : null)
+		->setUrl(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'])
+	;
+
+	return $indexable;
 }
 		]]></hook>
 
