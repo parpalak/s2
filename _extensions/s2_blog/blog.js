@@ -85,8 +85,6 @@ function ToggleFavBlog (eItem, iId)
 	return false;
 }
 
-Hooks.add('fn_s2_counter_draw_filter_rss', function (data) { return data + ",../_extensions/s2_blog/rss.xml?" + Math.random();});
-
 $(document).on('save_article_end.s2', function (e, sAction)
 {
 	if (sAction != 'save_blog')
