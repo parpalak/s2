@@ -74,8 +74,14 @@ $(function ()
 		// Ctrl + S
 		if (e.ctrlKey && ch == 's')
 		{
-			if (document.activeElement && document.activeElement.form && document.activeElement.form.onsubmit)
-				document.activeElement.form.onsubmit();
+			if (document.activeElement ) {
+				if (document.activeElement.form && document.activeElement.form.onsubmit) {
+					document.activeElement.form.onsubmit();
+				} else {
+					// Для CodeMirror
+					document.activeElement.closest('form') && document.activeElement.closest('form').onsubmit();
+				}
+			}
 
 			return false;
 		}
@@ -818,29 +824,30 @@ var LoadArticle, ReloadArticle;
 					}
 				});
 
-			$(document.forms['artform'].elements['page[text]']).keydown(function (e)
-			{
+			// Используем parentNode, чтобы обработчик был на диве-обертке текстарии и перехватывал события из CodeMirror
+			$(document.forms['artform'].elements['page[text]'].parentNode).keydown(function (e) {
 				var ch = String.fromCharCode(e.which).toLowerCase();
 
-				if (e.ctrlKey)
-				{
-					if (ch == 'i')
+				if (e.ctrlKey) {
+					if (ch === 'i')
 						TagSelection('em');
-					else if (ch == 'b')
+					else if (ch === 'b')
 						TagSelection('strong');
-					else if (ch == 'q')
+					else if (ch === 'q')
 						InsertParagraph('blockquote');
-					else if (ch == 'l')
+					else if (ch === 'l')
 						InsertParagraph('');
-					else if (ch == 'e')
+					else if (ch === 'e')
 						InsertParagraph('center');
-					else if (ch == 'r')
+					else if (ch === 'r')
 						InsertParagraph('right');
-					else if (ch == 'j')
+					else if (ch === 'j')
 						InsertParagraph('justify');
-					else if (ch == 'k')
+					else if (ch === 'k')
 						InsertTag('<a href="">', '</a>');
-					else if (ch == 'p')
+					else if (ch === 'o')
+						TagSelection('nobr');
+					else if (ch === 'p')
 						GetImage();
 					else
 						return;

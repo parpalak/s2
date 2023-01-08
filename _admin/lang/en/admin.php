@@ -62,22 +62,22 @@ $lang_admin = array(
 'URL empty'					=> 'Set the URL part to form the page address.',
 'URL on mainpage'			=> 'You cannot change the URL fragment of the main page.',
 
-'Bold'						=> 'Bold',
-'Italic'					=> 'Italic',
+'Bold'						=> 'Bold (Ctrl + B)',
+'Italic'					=> 'Italic (Ctrl + I)',
 'Strike'					=> 'Strikethrough',
 
-'Link'						=> 'Link',
-'Quote'						=> 'Quotation',
-'Image'						=> 'Pictures',
+'Link'						=> 'Link (Ctrl + K)',
+'Quote'						=> 'Quotation (Ctrl + Q)',
+'Image'						=> 'Pictures (Ctrl + P)',
 
 'Header 2'					=> 'Heading 2',
 'Header 3'					=> 'Heading 3',
 'Header 4'					=> 'Heading 4',
 
-'Left'						=> 'Paragraph',
-'Center'					=> 'Paragraph with the central alignment',
-'Right'						=> 'Paragraph with the right alignment',
-'Justify'					=> 'Expanded paragraph',
+'Left'						=> 'Paragraph (Ctrl + L)',
+'Center'					=> 'Paragraph with the central alignment (Ctrl + E)',
+'Right'						=> 'Paragraph with the right alignment (Ctrl + R)',
+'Justify'					=> 'Expanded paragraph (Ctrl + J)',
 
 'UL'						=> 'List',
 'OL'						=> 'Ordered list',
@@ -92,7 +92,7 @@ $lang_admin = array(
 'BIG'						=> 'Bigger text',
 'SMALL'						=> 'Smaller text',
 
-'NOBR'						=> 'Disable line breaking',
+'NOBR'						=> 'Disable line breaking (Ctrl + O)',
 
 'Cut'						=> 'Insert <cut> tag to show excerpt',
 
