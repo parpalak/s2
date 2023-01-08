@@ -51,7 +51,7 @@ function s2_typo_make ($contents, $soft = 0)
 
 	// Escape sensitive data
 	$contents = preg_replace_callback('#<(script|style|textarea|pre|code|kbd).*?</\\1>#s', 's2_typo_store', $contents);
-	$contents = preg_replace_callback('#<[^>]*>#sS', 's2_typo_replace_q', $contents); 
+	$contents = preg_replace_callback('#<[^>]*>#sS', 's2_typo_replace_q', $contents);
 
 	$contents = "\n".str_replace(array('&quot;', "\xc0"), array('"', '&quot;'), $contents);
 
@@ -74,12 +74,6 @@ function s2_typo_make ($contents, $soft = 0)
 		'(c)'	=> '©',
 		'(C)'	=> '©',
 
-		// XHTML fixes
-		'<br>'	=> '<br />',
-		'<hr>'	=> '<hr />',
-		'<s>'	=> '<span style="text-decoration: line-through;">',
-		'</s>'	=> '</span>',
-
 		// '-' to em-dash
 		"\n- "	=> "\n— ",
 		' - '	=> $nbsp.'— ',
@@ -87,6 +81,10 @@ function s2_typo_make ($contents, $soft = 0)
 		'¬- '	=> '¬— ',
 		'>- '	=> '>— ',
 	);
+
+    $contents = strtr($contents, $replace);
+
+    $replace = array();
 
 	// Particles
 	foreach (array('ли', 'ль', 'же', 'ж', 'бы', 'б') as $particle)
@@ -114,7 +112,7 @@ function s2_typo_make ($contents, $soft = 0)
 	while (preg_match('#¬ (\d*) ¬#S', $contents))
 		$contents = preg_replace_callback ('#(¬) (\d*) ¬#S', 's2_typo_store', $contents);
 
-	$contents = str_replace ('¬', '"', $contents); 
+	$contents = str_replace ('¬', '"', $contents);
 
 	// Move quotation marks outside links
 	$contents = preg_replace(
