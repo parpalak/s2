@@ -110,56 +110,85 @@ var s2_highlight = (function () {
 
                 var sOpenTag = data.openTag, sCloseTag = data.closeTag;
 
-                if (instance.somethingSelected())
-                    instance.replaceSelection(instance.getSelection().replace(/^(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)?([\s\S]*?)(?:<\/(?:p|blockquote|h[2-4])>)?[ ]*$/, sOpenTag + '$1' + sCloseTag));
-                else {
-                    var cursor = instance.getCursor(), line_num = instance.lineCount();
+                if (instance.somethingSelected()) {
+                    instance.replaceSelection(instance.getSelection().replace(
+                        /^(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)?([\s\S]*?)(?:<\/(?:p|blockquote|h[2-4])>)?[ ]*$/,
+                        sOpenTag + '$1' + sCloseTag
+                    ));
+                } else {
+                    var cursor = instance.getCursor(),
+                        totalLineNum = instance.lineCount(),
+                        currentLine = instance.getLine(cursor.line);
 
-                    if (instance.getLine(cursor.line).replace(/^\s+|\s+$/g, '') == '') {
+                    if (currentLine.replace(/^\s+|\s+$/g, '') === '') {
                         // Empty line
-                        if ((line_num <= cursor.line + 1 || instance.getLine(cursor.line + 1).replace(/^\s+|\s+$/g, '') == '') &&
-                            (cursor.line <= 0 || instance.getLine(cursor.line - 1).replace(/^\s+|\s+$/g, '') == '')) {
+                        if ((totalLineNum <= cursor.line + 1 || instance.getLine(cursor.line + 1).replace(/^\s+|\s+$/g, '') === '') &&
+                            (cursor.line <= 0 || instance.getLine(cursor.line - 1).replace(/^\s+|\s+$/g, '') === '')) {
                             // surrounded by empty lines
-                            instance.setLine(cursor.line, sOpenTag + sCloseTag);
+                            instance.replaceRange(
+                                sOpenTag + sCloseTag,
+                                {line: cursor.line, ch: 0},
+                                {line: cursor.line, ch: 0}
+                            );
                             instance.setCursor(cursor.line, sOpenTag.length);
                         }
                     } else {
-                        // Look for empty lines before
-                        for (var i = cursor.line; i--;)
-                            if (instance.getLine(i).replace(/^\s+|\s+$/g, '') == '')
+                        // Cursor is on a non-empty line.
+                        // Find non-empty lines before this line.
+                        for (var i = cursor.line; i--;) {
+                            if (instance.getLine(i).trim() === '') {
                                 break;
-
-                        i++;
-                        var text = instance.getLine(i),
-                            old_length = text.length;
-
-                        text = text.replace(/^(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)/, '');
-                        instance.setLine(i, sOpenTag + text);
-
-                        if (cursor.line == i) {
-                            cursor.ch += text.length - old_length;
-                            if (cursor.ch < 0)
-                                cursor.ch = 0;
-                            cursor.ch += sOpenTag.length;
-                            instance.setCursor(cursor);
+                            }
                         }
+                        i++;
 
-                        // Look for empty lines after
-                        for (i = cursor.line + 1; i < line_num; i++)
-                            if (instance.getLine(i).replace(/^\s+|\s+$/g, '') == '')
+                        var newLinesBuffer = [],
+                            firstLine = instance.getLine(i),
+                            startLineIndex = i,
+                            firstLineOldLength = firstLine.length;
+
+                        // Proces first line and add to buffer
+                        firstLine = sOpenTag + firstLine.replace(/^(?:[ ]*<(?:p|blockquote|h[2-4])[^>]*>)/, '');
+                        newLinesBuffer.push(firstLine);
+
+                        // Find all non-empty lines after.
+                        for (i++; i < totalLineNum; i++) {
+                            var line = instance.getLine(i);
+                            if (line.trim() === '') {
                                 break;
-
+                            }
+                            // Add middle lines to buffer as is
+                            newLinesBuffer.push(line);
+                        }
                         i--;
-                        text = instance.getLine(i);
-                        old_length = text.length;
 
-                        text = text.replace(/(?:<\/(?:p|blockquote|h[2-4])>)?[ ]*$/, '');
-                        instance.setLine(i, text + sCloseTag);
+                        var lastLine = newLinesBuffer[newLinesBuffer.length - 1],
+                            lastLineLength = (i === startLineIndex ? firstLineOldLength : lastLine.length);
 
-                        if (cursor.line == i) {
-                            if (cursor.ch > text.length)
-                                cursor.ch = text.length;
-                            instance.setCursor(cursor);
+                        // Proces last line and replace in stored buffer
+                        lastLine = lastLine.replace(/(?:<\/(?:p|blockquote|h[2-4])>)?[ ]*$/, '') + sCloseTag;
+                        newLinesBuffer[newLinesBuffer.length - 1] = lastLine;
+
+                        // We know the positions of old text and the new text
+                        instance.replaceRange(
+                            newLinesBuffer.join("\n"),
+                            {line: startLineIndex, ch: 0},
+                            {line: i, ch: lastLineLength},
+                            '*replaceparagraph'
+                        );
+
+                        // Restore position of cursor inside shifted text
+                        if (cursor.line == startLineIndex) {
+                            cursor.ch += firstLine.length - firstLineOldLength;
+                            if (cursor.ch < sOpenTag.length) {
+                                cursor.ch = sOpenTag.length;
+                            }
+                            instance.setCursor(cursor, '*replaceparagraph');
+                        } else if (cursor.line == i) {
+                            if (cursor.ch > lastLine.length - sCloseTag.length) {
+                                cursor.ch = lastLine.length - sCloseTag.length;
+                            }
+                            instance.setCursor(cursor, '*replaceparagraph');
                         }
                     }
                 }

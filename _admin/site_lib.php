@@ -319,7 +319,7 @@ function s2_toolbar ()
 	<img class="ol" src="i/1.gif" alt="<?php echo $lang_admin['OL']; ?>" onclick="return TagSelection('ol');" />
 	<img class="li" src="i/1.gif" alt="<?php echo $lang_admin['LI']; ?>" onclick="return TagSelection('li');" />
 	<img class="separator" src="i/1.gif" alt="" />
-	<img class="pre" src="i/1.gif" alt="<?php echo $lang_admin['PRE']; ?>" onclick="return TagSelection('pre');" />
+	<img class="pre" src="i/1.gif" alt="<?php echo $lang_admin['PRE']; ?>" onclick="return InsertParagraph('pre');" />
 	<img class="code" src="i/1.gif" alt="<?php echo $lang_admin['CODE']; ?>" onclick="return TagSelection('code');" />
 	<img class="separator" src="i/1.gif" alt="" />
 	<img class="parag" src="i/1.gif" alt="<?php echo $lang_admin['Paragraphs info']; ?>" onclick="return Paragraph();" />

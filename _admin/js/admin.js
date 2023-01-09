@@ -1135,7 +1135,7 @@ function SmartParagraphs (sText)
 
 function InsertParagraph (sType)
 {
-	if (sType == 'h2' || sType == 'h3' || sType == 'h4' || sType == 'blockquote')
+	if (sType === 'h2' || sType === 'h3' || sType === 'h4' || sType === 'blockquote' || sType === 'pre')
 		var sOpenTag = '<' + sType + '>', sCloseTag = '</' + sType + '>';
 	else
 		var sOpenTag = '<p' + (sType ? ' align="' + sType + '"' : '') + '>', sCloseTag = '</p>';
