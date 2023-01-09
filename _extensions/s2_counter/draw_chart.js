@@ -37,7 +37,14 @@ $(function () {
                     rangeSelector: {
                         selected: 1
                     },
-
+                    chart: {
+                        panning: {
+                            enabled: true,
+                            type: 'x'
+                        },
+                        panKey: 'alt',
+                        zoomType: 'x'
+                    },
                     legend: {
                         enabled: true,
                     },
@@ -70,7 +77,14 @@ $(function () {
                             rangeSelector: {
                                 selected: 1
                             },
-
+                            chart: {
+                                panning: {
+                                    enabled: true,
+                                    type: 'x'
+                                },
+                                panKey: 'alt',
+                                zoomType: 'x'
+                            },
                             legend: {
                                 enabled: true,
                             },

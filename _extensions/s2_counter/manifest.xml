@@ -53,7 +53,6 @@ s2_counter_rss_count($ext_info['path']);
 
 		<hook id="ai_after_js_include"><![CDATA[
 echo '<script type="text/javascript" src="'.$ext_info['url'].'/highcharts/highstock.js"></script>'."\n";
-echo '<script type="text/javascript" src="'.$ext_info['url'].'/highcharts/accessibility.js"></script>'."\n";
 echo '<script type="text/javascript" src="'.$ext_info['url'].'/draw_chart.js"></script>'."\n";
 		]]></hook>
 
