@@ -171,14 +171,17 @@ function s2_extension_list ()
 		$installed_count++;
 	}
 
+    if ($installed_count > 0) {
+        echo '<button class="bitbtn refresh-hooks" style="float:right;" onclick="return RefreshHooks();">' . $lang_admin_ext['Refresh hooks'] . '</button>';
+    }
 	echo '<h2>'.$lang_admin_ext['Installed extensions'].'</h2>';
-	if ($installed_count > 0)
-	{
+	if ($installed_count > 0) {
 		echo '<div class="info-box"><p class="important">'.$lang_admin_ext['Installed extensions warn'].'</p></div>';
 		echo implode('', $ext_item);
 	}
-	else
-		echo '<div class="info-box"><p>'.$lang_admin_ext['No installed extensions'].'</p></div>';
+	else {
+        echo '<div class="info-box"><p>' . $lang_admin_ext['No installed extensions'] . '</p></div>';
+    }
 
 	return ob_get_clean();
 }

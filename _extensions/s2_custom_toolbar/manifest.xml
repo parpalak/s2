@@ -18,7 +18,7 @@
 	<author>Roman Parpalak</author>
 
 	<minversion>1.0b</minversion>
-	<maxtestedon>1.0b4</maxtestedon>
+	<maxtestedon>2.0-dev</maxtestedon>
 
 	<hooks>
 		<hook id="fn_toolbar_end"><![CDATA[

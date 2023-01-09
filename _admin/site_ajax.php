@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpExpressionResultUnusedInspection */
 /**
  * Ajax requests
  *
@@ -753,6 +753,14 @@ elseif ($action == 'flip_extension')
 		header('X-S2-Status: Error');
 		echo $message;
 	}
+}
+
+elseif ($action === 'refresh_hooks') {
+    $is_permission = $s2_user['edit_users'];
+    ($hook = s2_hook('rq_action_refresh_hooks_start')) ? eval($hook) : null;
+    s2_test_user_rights($is_permission);
+
+    S2Cache::generate_hooks();
 }
 
 elseif ($action == 'uninstall_extension')

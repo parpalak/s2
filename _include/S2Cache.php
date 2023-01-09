@@ -1,251 +1,292 @@
 <?php
+
 /**
  * Caching functions.
  *
  * This file contains all of the functions used to generate the cache files used by the site.
  *
- * @copyright (C) 2009-2014 Roman Parpalak, based on code (C) 2008-2009 PunBB
+ * @noinspection PhpExpressionResultUnusedInspection
+ *
+ * @copyright (C) 2009-2023 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
-
-
 class S2Cache
 {
-	// Delete every .php file in the cache directory
-	public static function clear()
-	{
-		$file_list = array('cache_config.php', 'cache_hooks.php');
+    public const CACHE_HOOK_NAMES_FILENAME = S2_CACHE_DIR . 'cache_hook_names.php';
 
-		$return = ($hook = s2_hook('fn_clear_cache_start')) ? eval($hook) : null;
-		if ($return != null)
-			return;
+    /**
+     * Delete every .php file in the cache directory
+     *
+     * @return void
+     */
+    public static function clear(): void
+    {
+        $file_list = ['cache_config.php', 'cache_hook_names.php'];
 
-		foreach ($file_list as $entry)
-			@unlink(S2_CACHE_DIR . $entry);
-	}
+        $return = ($hook = s2_hook('fn_clear_cache_start')) ? eval($hook) : null;
+        if ($return !== null) {
+            return;
+        }
 
-	//
-	// Generate the config cache
-	//
-	public static function generate_config ($load = false)
-	{
-		global $s2_db;
+        foreach ($file_list as $entry) {
+            @unlink(S2_CACHE_DIR . $entry);
+        }
+    }
 
-		$return = ($hook = s2_hook('fn_generate_config_cache_start')) ? eval($hook) : null;
-		if ($return != null)
-			return;
+    /**
+     * Generate the config cache
+     */
+    public static function generate_config(bool $load = false): void
+    {
+        global $s2_db;
 
-		// Get the config from the DB
-		$query = array(
-			'SELECT' => 'c.*',
-			'FROM' => 'config AS c'
-		);
+        $return = ($hook = s2_hook('fn_generate_config_cache_start')) ? eval($hook) : null;
+        if ($return !== null) {
+            return;
+        }
 
-		($hook = s2_hook('fn_generate_config_cache_qr_get_config')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+        // Get the config from the DB
+        $query = array(
+            'SELECT' => 'c.*',
+            'FROM'   => 'config AS c'
+        );
 
-		$output = '';
-		while ($row = $s2_db->fetch_row($result))
-		{
-			$output .= 'define(\'' . $row[0] . '\', \'' . str_replace(array('\\', '\''), array('\\\\', '\\\''), $row[1]) . '\');' . "\n";
-			if ($load)
-				define($row[0], $row[1]);
-		}
+        ($hook = s2_hook('fn_generate_config_cache_qr_get_config')) ? eval($hook) : null;
+        $result = $s2_db->query_build($query);
 
-		if ($load)
-			define('S2_CONFIG_LOADED', 1);
+        $output = '';
+        while ($row = $s2_db->fetch_row($result)) {
+            $output .= 'define(\'' . $row[0] . '\', \'' . str_replace(array('\\', '\''), array('\\\\', '\\\''), $row[1]) . '\');' . "\n";
+            if ($load) {
+                define($row[0], $row[1]);
+            }
+        }
 
-		if (defined('S2_DISABLE_CACHE'))
-			return;
+        if ($load) {
+            define('S2_CONFIG_LOADED', 1);
+        }
 
-		// Output config as PHP code
-		$fh = @fopen(S2_CACHE_DIR . 'cache_config.php', 'a+b');
-		if (!$fh)
-		{
-			// Try to remove the file if it's not writable
-			@unlink(S2_CACHE_DIR . 'cache_config.php');
-			$fh = @fopen(S2_CACHE_DIR . 'cache_config.php', 'a+b');
-		}
+        if (defined('S2_DISABLE_CACHE')) {
+            return;
+        }
 
-		if ($fh)
-		{
-			if (flock($fh, LOCK_EX | LOCK_NB))
-			{
-				ftruncate($fh, 0);
-				fwrite($fh, '<?php' . "\n\n" . 'define(\'S2_CONFIG_LOADED\', 1);' . "\n\n" . $output . "\n");
-				fflush($fh);
-				fflush($fh);
-				flock($fh, LOCK_UN);
-			}
-			fclose($fh);
-		}
-		else
-			error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
-	}
+        // Output config as PHP code
+        $fh = @fopen(S2_CACHE_DIR . 'cache_config.php', 'a+b');
+        if (!$fh) {
+            // Try to remove the file if it's not writable
+            @unlink(S2_CACHE_DIR . 'cache_config.php');
+            $fh = @fopen(S2_CACHE_DIR . 'cache_config.php', 'a+b');
+        }
 
-	//
-	// Generate the hooks cache
-	//
-	public static function generate_hooks()
-	{
-		global $s2_db, $s2_hooks;
+        if ($fh) {
+            if (flock($fh, LOCK_EX | LOCK_NB)) {
+                ftruncate($fh, 0);
+                fwrite($fh, '<?php' . "\n\n" . 'define(\'S2_CONFIG_LOADED\', 1);' . "\n\n" . $output . "\n");
+                fflush($fh);
+                fflush($fh);
+                flock($fh, LOCK_UN);
+            }
+            fclose($fh);
+        } else {
+            error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
+        }
+    }
 
-		$return = ($hook = s2_hook('fn_generate_hooks_cache_start')) ? eval($hook) : null;
-		if ($return != null)
-			return;
+    /**
+     * Generate the hooks cache
+     */
+    public static function generate_hooks(): array
+    {
+        global $s2_db;
 
-		// Get the hooks from the DB
-		$query = array(
-			'SELECT' => 'eh.id, eh.code, eh.extension_id, e.dependencies',
-			'FROM' => 'extension_hooks AS eh',
-			'JOINS' => array(
-				array(
-					'INNER JOIN' => 'extensions AS e',
-					'ON' => 'e.id=eh.extension_id'
-				)
-			),
-			'WHERE' => 'e.disabled=0',
-			'ORDER BY' => 'eh.priority, eh.installed'
-		);
+        // TODO Удалить этот фрагмент после тестирования
+        // Get the hooks from the DB
+        $query = array(
+            'SELECT'   => 'eh.id, eh.code, eh.extension_id, eh.priority, e.dependencies',
+            'FROM'     => 'extension_hooks AS eh',
+            'JOINS'    => array(
+                array(
+                    'INNER JOIN' => 'extensions AS e',
+                    'ON'         => 'e.id=eh.extension_id'
+                )
+            ),
+            'WHERE'    => 'e.disabled=0',
+            'ORDER BY' => 'eh.priority, eh.installed'
+        );
 
-		($hook = s2_hook('fn_generate_hooks_cache_qr_s2_hooks')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+        $result = $s2_db->query_build($query);
 
-		$output = array();
-		while ($cur_hook = $s2_db->fetch_assoc($result))
-		{
-			$load_ext_info = '$GLOBALS[\'ext_info_stack\'][] = array(' . "\n" .
-				'\'id\'				=> \'' . $cur_hook['extension_id'] . '\',' . "\n" .
-				'\'path\'			=> S2_ROOT.\'_extensions/' . $cur_hook['extension_id'] . '\',' . "\n" .
-				'\'url\'			=> S2_PATH.\'/_extensions/' . $cur_hook['extension_id'] . '\',' . "\n" .
-				'\'dependencies\'	=> array (' . "\n";
+        while ($cur_hook = $s2_db->fetch_assoc($result)) {
+            $dir = S2_ROOT . '_extensions/' . $cur_hook['extension_id'] . '/hooks/';
+            if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+            }
 
-			$dependencies = explode('|', substr($cur_hook['dependencies'], 1, -1));
-			foreach ($dependencies as $cur_dependency) {
-				// This happens if there are no dependencies because explode ends up returning an array with one empty element
-				if (empty($cur_dependency))
-					continue;
+            $code = $cur_hook['code'];
+            $code = str_replace('$ext_info[\'url\']', 'S2_PATH.\'/_extensions/' . $cur_hook['extension_id'] . '\'', $code);
+            $code = str_replace('$ext_info[\'path\']', 'S2_ROOT.\'/_extensions/' . $cur_hook['extension_id'] . '\'', $code);
+            $code = str_replace('$ext_info[\'id\']', '\'' . $cur_hook['extension_id'] . '\'', $code);
 
-				$load_ext_info .= '\'' . $cur_dependency . '\'	=> array(' . "\n" .
-					'\'id\'				=> \'' . $cur_dependency . '\',' . "\n" .
-					'\'path\'			=> S2_ROOT.\'_extensions/' . $cur_dependency . '\',' . "\n" .
-					'\'url\'			=> S2_PATH.\'/_extensions/' . $cur_dependency . '\'),' . "\n";
-			}
+            $filename = $dir . $cur_hook['id'] . ($cur_hook['priority'] == 5 ? '' : '_' . $cur_hook['priority']) . '.php';
+            file_put_contents(
+                $filename,
+                <<<EOF
+<?php
+/**
+ * Hook {$cur_hook['id']}
+ *
+ * @copyright (C) 2023 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package {$cur_hook['extension_id']}
+ */
 
-			$load_ext_info .= ')' . "\n" . ');' . "\n" . '$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];';
-			$unload_ext_info = 'array_pop($GLOBALS[\'ext_info_stack\']);' . "\n" . '$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];';
+ if (!defined('S2_ROOT')) {
+     die;
+}
 
-			$output[$cur_hook['id']][] = $load_ext_info . "\n\n" . $cur_hook['code'] . "\n\n" . $unload_ext_info . "\n";
-		}
+$code
 
-		// Replace current hooks
-		$s2_hooks = $output;
+EOF
 
-		if (defined('S2_DISABLE_CACHE'))
-			return;
+            );
+            // $map[$cur_hook['id']][] = '_extensions/' . $cur_hook['extension_id'] . '/hooks/' . $cur_hook['id'] . ($cur_hook['priority'] == 5 ? '' : '_' . $cur_hook['priority']) . '.php';
+        }
+        // TODO удалять до этого места
 
-		// Output hooks as PHP code
-		$fh = @fopen(S2_CACHE_DIR . 'cache_hooks.php', 'a+b');
-		if (!$fh)
-		{
-			// Try to remove the file if it's not writable
-			@unlink(S2_CACHE_DIR . 'cache_hooks.php');
-			$fh = @fopen(S2_CACHE_DIR . 'cache_hooks.php', 'a+b');
-		}
+        // Get extensions from the DB
+        $query = array(
+            'SELECT' => 'e.id',
+            'FROM'   => 'extensions AS e',
+            'WHERE'  => 'e.disabled=0',
+        );
 
-		if ($fh)
-		{
-			if (flock($fh, LOCK_EX | LOCK_NB))
-			{
-				ftruncate($fh, 0);
-				fwrite($fh, '<?php' . "\n\n" . 'if (!defined(\'S2_HOOKS_LOADED\'))' . "\n\t" . 'define(\'S2_HOOKS_LOADED\', 1);' . "\n\n" . '$s2_hooks = ' . var_export($output, true) . ';');
-				fflush($fh);
-				fflush($fh);
-				flock($fh, LOCK_UN);
-			}
-			fclose($fh);
-		}
-		else
-			error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
-	}
+        $result = $s2_db->query_build($query);
 
+        $map = [];
+        while ($extension = $s2_db->fetch_assoc($result)) {
+            $hooks = glob(S2_ROOT . '_extensions/' . $extension['id'] . '/hooks/*.php');
+            foreach ($hooks as $filename) {
+                if (1 !== preg_match($regex = '#/([a-z_\-0-9]+?)(?:_(\d))?\.php$#S', $filename, $matches)) {
+                    throw new RuntimeException(sprintf('Found invalid characters in hook filename "%s". Allowed name must match %s.', $filename, $regex));
+                }
+                $priority = (int)($matches[2] ?? 5);
+                $hookName = $matches[1];
 
-	//
-	// Generate the updates cache PHP script
-	//
-	public static function generate_updates()
-	{
-		global $s2_db;
+                // Structure
+                $map[$hookName][$priority][] = '_extensions/' . $extension['id'] . '/hooks' . $matches[0];
+            }
+        }
 
-		$return = ($hook = s2_hook('fn_generate_updates_cache_start')) ? eval($hook) : null;
-		if ($return != null)
-			return $return;
-		/*
-			// Get a list of installed hotfix extensions
-			$query = array(
-				'SELECT'	=> 'e.id',
-				'FROM'		=> 'extensions AS e',
-				'WHERE'		=> 'e.id LIKE \'hotfix_%\''
-			);
-		
-			($hook = s2_hook('fn_generate_updates_cache_qr_get_hotfixes')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
-		
-			$hotfixes = array();
-			while ($hotfix = $s2_db->fetch_assoc($result))
-				$hotfixes[] = urlencode($hotfix['id']);
-		
-			$result = s2_get_remote_file('http://s2cms.ru/update/?type=xml&version='.urlencode(S2_VERSION).'&hotfixes='.implode(',', $hotfixes), 8);
-		*/
-		// Contact the S2 updates service
-		$result = s2_get_remote_file('http://s2cms.ru/update/index.php?version=' . urlencode(S2_VERSION), 8);
+        array_walk($map, static function (&$mapItem) {
+            // Sort by priority
+            ksort($mapItem);
+            // Remove grouping by priority
+            $mapItem = array_merge(...$mapItem);
+        });
 
-		// Make sure we got everything we need
-		if ($result != null && strpos($result['content'], '</s2_updates>') !== false)
-		{
-			if (!defined('S2_XML_FUNCTIONS_LOADED'))
-				require S2_ROOT . '_include/xml.php';
+        if (defined('S2_DISABLE_CACHE')) {
+            return $map;
+        }
 
-			$update_info = s2_xml_to_array(trim($result['content']));
+        $cacheHookNamesContent = "<?php\n\nreturn " . var_export($map, true) . ';';
 
-			$output['version'] = $update_info['s2_updates']['lastversion'];
-			$output['cached'] = time();
-			$output['fail'] = false;
-		}
-		else
-			$output = array('cached' => time(), 'fail' => true);
+        // Output hooks as PHP code
+        $fh = @fopen(self::CACHE_HOOK_NAMES_FILENAME, 'a+b');
+        if (!$fh) {
+            // Try to remove the file if it's not writable
+            @unlink(self::CACHE_HOOK_NAMES_FILENAME);
+            $fh = @fopen(self::CACHE_HOOK_NAMES_FILENAME, 'a+b');
+        }
 
-		($hook = s2_hook('fn_generate_updates_cache_write')) ? eval($hook) : null;
+        if ($fh) {
+            if (flock($fh, LOCK_EX | LOCK_NB)) {
+                ftruncate($fh, 0);
+                fwrite($fh, $cacheHookNamesContent);
+                fflush($fh);
+                fflush($fh);
+                flock($fh, LOCK_UN);
+            }
+            fclose($fh);
+        } else {
+            error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
+        }
 
-		// Output update status as PHP code
-		if (!defined('S2_DISABLE_CACHE'))
-		{
-			$fh = @fopen(S2_CACHE_DIR . 'cache_updates.php', 'a+b');
+        return $map;
+    }
 
-			if (!$fh)
-			{
-				// Try to remove the file if it's not writable
-				@unlink(S2_CACHE_DIR . 'cache_updates.php');
-				$fh = @fopen(S2_CACHE_DIR . 'cache_updates.php', 'a+b');
-			}
+    /**
+     * Generate the updates cache PHP script
+     * @return array|mixed
+     */
+    public static function generate_updates()
+    {
+        global $s2_db;
 
-			if ($fh)
-			{
-				if (flock($fh, LOCK_EX | LOCK_NB))
-				{
-					ftruncate($fh, 0);
-					fwrite($fh, '<?php' . "\n\n" . 'return ' . var_export($output, true) . ';' . "\n");
-					fflush($fh);
-					fflush($fh);
-					flock($fh, LOCK_UN);
-				}
-				fclose($fh);
-			}
-			else
-				error('Unable to write updates cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
-		}
+        $return = ($hook = s2_hook('fn_generate_updates_cache_start')) ? eval($hook) : null;
+        if ($return !== null) {
+            return $return;
+        }
+        /*
+            // Get a list of installed hotfix extensions
+            $query = array(
+                'SELECT'	=> 'e.id',
+                'FROM'		=> 'extensions AS e',
+                'WHERE'		=> 'e.id LIKE \'hotfix_%\''
+            );
 
-		return $output;
-	}
+            ($hook = s2_hook('fn_generate_updates_cache_qr_get_hotfixes')) ? eval($hook) : null;
+            $result = $s2_db->query_build($query);
+
+            $hotfixes = array();
+            while ($hotfix = $s2_db->fetch_assoc($result))
+                $hotfixes[] = urlencode($hotfix['id']);
+
+            $result = s2_get_remote_file('http://s2cms.ru/update/?type=xml&version='.urlencode(S2_VERSION).'&hotfixes='.implode(',', $hotfixes), 8);
+        */
+        // Contact the S2 updates service
+        $result = s2_get_remote_file('http://s2cms.ru/update/index.php?version=' . urlencode(S2_VERSION), 8);
+
+        // Make sure we got everything we need
+        if ($result !== null && strpos($result['content'], '</s2_updates>') !== false) {
+            if (!defined('S2_XML_FUNCTIONS_LOADED'))
+                require S2_ROOT . '_include/xml.php';
+
+            $update_info = s2_xml_to_array(trim($result['content']));
+
+            $output['version'] = $update_info['s2_updates']['lastversion'];
+            $output['cached']  = time();
+            $output['fail']    = false;
+        } else {
+            $output = array('cached' => time(), 'fail' => true);
+        }
+
+        ($hook = s2_hook('fn_generate_updates_cache_write')) ? eval($hook) : null;
+
+        // Output update status as PHP code
+        if (!defined('S2_DISABLE_CACHE')) {
+            $fh = @fopen(S2_CACHE_DIR . 'cache_updates.php', 'a+b');
+
+            if (!$fh) {
+                // Try to remove the file if it's not writable
+                @unlink(S2_CACHE_DIR . 'cache_updates.php');
+                $fh = @fopen(S2_CACHE_DIR . 'cache_updates.php', 'a+b');
+            }
+
+            if ($fh) {
+                if (flock($fh, LOCK_EX | LOCK_NB)) {
+                    ftruncate($fh, 0);
+                    fwrite($fh, '<?php' . "\n\n" . 'return ' . var_export($output, true) . ';' . "\n");
+                    fflush($fh);
+                    fflush($fh);
+                    flock($fh, LOCK_UN);
+                }
+                fclose($fh);
+            } else {
+                error('Unable to write updates cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
+            }
+        }
+
+        return $output;
+    }
 }

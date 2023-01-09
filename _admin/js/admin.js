@@ -3,7 +3,7 @@
  *
  * Drag & drop, event handlers for the admin panel
  *
- * @copyright (C) 2007-2021 Roman Parpalak
+ * @copyright (C) 2007-2023 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -1498,6 +1498,12 @@ function SaveOptions ()
 	{
 		new_page_pos = document.forms['optform'].elements['opt[S2_ADMIN_NEW_POS]'].checked ? '1' : '0';
 	});
+	return false;
+}
+
+function RefreshHooks ()
+{
+	GETAsyncRequest(sUrl + 'action=refresh_hooks');
 	return false;
 }
 

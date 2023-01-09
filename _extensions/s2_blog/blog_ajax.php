@@ -17,14 +17,14 @@ if ($action == 'load_blog_posts')
 	($hook = s2_hook('blrq_action_load_blog_posts_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	Lang::load($ext_info['id'], function () use ($ext_info)
+	Lang::load('s2_blog', function ()
 	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		if (file_exists(S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php'))
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php';
 		else
-			return require $ext_info['path'].'/lang/English.php';
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/English.php';
 	});
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	s2_blog_output_post_list($_POST['posts']);
 }
@@ -39,14 +39,14 @@ elseif ($action == 'edit_blog_post')
 		die('Error in GET parameters.');
 	$id = (int) $_GET['id'];
 
-	Lang::load($ext_info['id'], function () use ($ext_info)
+	Lang::load('s2_blog', function ()
 	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		if (file_exists(S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php'))
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php';
 		else
-			return require $ext_info['path'].'/lang/English.php';
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/English.php';
 	});
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	($hook = s2_hook('blrq_action_edit_blog_post_pre_output')) ? eval($hook) : null;
 
@@ -64,14 +64,14 @@ elseif ($action == 'save_blog')
 	if (!isset($_POST['page']) || !isset($_POST['flags']))
 		die('Error in POST parameters.');
 
-	Lang::load($ext_info['id'], function () use ($ext_info)
+	Lang::load('s2_blog', function ()
 	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		if (file_exists(S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php'))
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php';
 		else
-			return require $ext_info['path'].'/lang/English.php';
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/English.php';
 	});
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	list($create_time, $result['revision'], $result['status']) = s2_blog_save_post($_POST['page'], $_POST['flags']);
 	if ($result['status'] == 'ok')
@@ -87,7 +87,7 @@ elseif ($action == 'create_blog_post')
 	($hook = s2_hook('blrq_action_create_blog_post_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	$s2_blog_post_id = s2_blog_create_post();
 
@@ -103,7 +103,7 @@ elseif ($action == 'delete_blog_post')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	s2_blog_delete_post((int) $_GET['id']);
 }
@@ -117,7 +117,7 @@ elseif ($action == 'flip_favorite_post')
 	if (!isset($_GET['id']))
 		die('Error in GET parameters.');
 
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	s2_blog_flip_favorite((int)$_GET['id']);
 }
@@ -135,12 +135,12 @@ elseif ($action == 'load_blog_comments')
 	$id = (int)$_GET['id'];
 
 	require 'comments.php';
-	Lang::load($ext_info['id'], function () use ($ext_info)
+	Lang::load('s2_blog', function ()
 	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		if (file_exists(S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php'))
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php';
 		else
-			return require $ext_info['path'].'/lang/English.php';
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/English.php';
 	});
 
 	echo s2_comment_menu_links();
@@ -156,14 +156,14 @@ elseif ($action == 'delete_blog_comment')
 	if (!isset($_GET['id']) || !isset($_GET['mode']))
 		die('Error in GET parameters.');
 
-	Lang::load($ext_info['id'], function () use ($ext_info)
+	Lang::load('s2_blog', function ()
 	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		if (file_exists(S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php'))
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php';
 		else
-			return require $ext_info['path'].'/lang/English.php';
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/English.php';
 	});
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 	require 'comments.php';
 
 	$post_id = s2_blog_delete_comment((int) $_GET['id']);
@@ -181,7 +181,7 @@ elseif ($action == 'edit_blog_comment')
 	if (!isset($_GET['id']) || !isset($_GET['mode']))
 		die('Error in GET parameters.');
 
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	$comment = s2_blog_get_comment((int) $_GET['id']);
 	if (!$comment)
@@ -201,14 +201,14 @@ elseif ($action == 'hide_blog_comment')
 	if (!isset($_GET['id']) || !isset($_GET['mode']))
 		die('Error in GET parameters.');
 
-	Lang::load($ext_info['id'], function () use ($ext_info)
+	Lang::load('s2_blog', function ()
 	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		if (file_exists(S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php'))
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php';
 		else
-			return require $ext_info['path'].'/lang/English.php';
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/English.php';
 	});
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 	require 'comments.php';
 
 	$post_id = s2_blog_hide_comment((int)$_GET['id'], (bool)($_GET['leave_hidden'] ?? false));
@@ -226,16 +226,16 @@ elseif ($action == 'mark_blog_comment')
 	if (!isset($_GET['id']) || !isset($_GET['mode']))
 		die('Error in GET parameters.');
 
-	require $ext_info['path'].'/blog_lib.php';
+	require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 
 	$post_id = s2_blog_mark_comment((int)$_GET['id']);
 
-	Lang::load($ext_info['id'], function () use ($ext_info)
+	Lang::load('s2_blog', function ()
 	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
+		if (file_exists(S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php'))
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/'.S2_LANGUAGE.'.php';
 		else
-			return require $ext_info['path'].'/lang/English.php';
+			return require S2_ROOT.'/_extensions/s2_blog'.'/lang/English.php';
 	});
 	require 'comments.php';
 

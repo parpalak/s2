@@ -16,6 +16,7 @@ $lang_admin_ext = array(
 'Uninstall'						=>	'Uninstall',
 'Enable'						=>	'Enable',
 'Disable'						=>	'Disable',
+'Refresh hooks'  				=>	'Refresh hooks',
 'Extension loading error'		=>	'Loading of extension “%s” failed.',
 'Illegal ID'					=>	'The ID must contain only lowercase alphanumeric characters (a-z and 0-9) and the underscore character (_).',
 'Maxtestedon warning'			=>	'This extension has not been explicitly tested on your S2 version and might therefore not be compatible with your current setup.',

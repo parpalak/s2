@@ -475,36 +475,10 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 	return $result;
 }
 
-// Unset any variables instantiated as a result of register_globals being enabled
-function s2_unregister_globals()
-{
-	$register_globals = @ini_get('register_globals');
-	if ($register_globals === "" || $register_globals === "0" || strtolower($register_globals) === "off")
-		return;
-
-	// Prevent script.php?GLOBALS[foo]=bar
-	if (isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS']))
-		exit('I\'ll have a steak sandwich and... a steak sandwich.');
-
-	// Variables that shouldn't be unset
-	$no_unset = array('GLOBALS', '_GET', '_POST', '_COOKIE', '_REQUEST', '_SERVER', '_ENV', '_FILES');
-
-	// Remove elements in $GLOBALS that are present in any of the superglobals
-	$input = array_merge($_GET, $_POST, $_COOKIE, $_SERVER, $_ENV, $_FILES, isset($_SESSION) && is_array($_SESSION) ? $_SESSION : array());
-	foreach ($input as $k => $v)
-		if (!in_array($k, $no_unset) && isset($GLOBALS[$k]))
-		{
-			unset($GLOBALS[$k]);
-			unset($GLOBALS[$k]);	// Double unset to circumvent the zend_hash_del_key_or_index hole in PHP <4.4.3 and <5.1.4
-		}
-}
-
 // Removes any "bad" characters (characters which mess with the display of a page, are invisible, etc) from user input
 function s2_remove_bad_characters()
 {
 	$bad_utf8_chars = array("\0", "\xc2\xad", "\xcc\xb7", "\xcc\xb8", "\xe1\x85\x9F", "\xe1\x85\xA0", "\xe2\x80\x80", "\xe2\x80\x81", "\xe2\x80\x82", "\xe2\x80\x83", "\xe2\x80\x84", "\xe2\x80\x85", "\xe2\x80\x86", "\xe2\x80\x87", "\xe2\x80\x88", "\xe2\x80\x89", "\xe2\x80\x8a", "\xe2\x80\x8b", "\xe2\x80\x8e", "\xe2\x80\x8f", "\xe2\x80\xaa", "\xe2\x80\xab", "\xe2\x80\xac", "\xe2\x80\xad", "\xe2\x80\xae", "\xe2\x80\xaf", "\xe2\x81\x9f", "\xe3\x80\x80", "\xe3\x85\xa4", "\xef\xbb\xbf", "\xef\xbe\xa0", "\xef\xbf\xb9", "\xef\xbf\xba", "\xef\xbf\xbb", "\xE2\x80\x8D");
-
-	($hook = s2_hook('fn_remove_bad_characters_start')) ? eval($hook) : null;
 
 	function _s2_remove_bad_characters(&$array, &$bad_utf8_chars)
 	{
@@ -549,9 +523,28 @@ function s2_is_valid_email ($email)
 //
 function s2_hook($hook_id)
 {
-	global $s2_hooks;
+    if (defined('S2_DISABLE_HOOKS')) {
+        return false;
+    }
 
-	return !defined('S2_DISABLE_HOOKS') && isset($s2_hooks[$hook_id]) ? implode("\n", $s2_hooks[$hook_id]) : false;
+	static $hookNames = null;
+
+    if ($hookNames === null) {
+        if (!defined('S2_DISABLE_CACHE') && file_exists(S2Cache::CACHE_HOOK_NAMES_FILENAME)) {
+            $hookNames = include S2Cache::CACHE_HOOK_NAMES_FILENAME;
+        }
+        if (!is_array($hookNames)) {
+            $hookNames = S2Cache::generate_hooks();
+        }
+    }
+
+    if (!isset($hookNames[$hook_id])) {
+        return false;
+    }
+
+    $code = implode("\n", array_map(static fn(string $filename) => "\$_include_result = include S2_ROOT.'$filename'; if (\$_include_result !== 1) { return \$_include_result; }", $hookNames[$hook_id]));
+
+    return $code;
 }
 
 //

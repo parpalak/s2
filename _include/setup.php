@@ -20,12 +20,6 @@ if (!defined('S2_CACHE_DIR')) {
     define('S2_CACHE_DIR', S2_ROOT . '_cache/');
 }
 
-// Reverse the effect of register_globals
-s2_unregister_globals();
-
-// Strip out "bad" UTF-8 characters
-s2_remove_bad_characters();
-
 spl_autoload_register(static function ($class) {
     $class = ltrim($class, '\\');
     $dir   = '';
@@ -43,3 +37,6 @@ spl_autoload_register(static function ($class) {
 
     require $file;
 });
+
+// Strip out "bad" UTF-8 characters
+s2_remove_bad_characters();

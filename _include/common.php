@@ -67,10 +67,3 @@ if (!defined('S2_CONFIG_LOADED'))
 define('S2_DB_LAST_REVISION', 14);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION)
 	include S2_ROOT.'_admin/db_update.php';
-
-// Load hooks
-if (file_exists(S2_CACHE_DIR.'cache_hooks.php'))
-	include S2_CACHE_DIR.'cache_hooks.php';
-
-if (!defined('S2_HOOKS_LOADED'))
-	S2Cache::generate_hooks();
