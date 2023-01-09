@@ -3,7 +3,7 @@
 /**
  * Caching functions.
  *
- * This file contains all of the functions used to generate the cache files used by the site.
+ * This file contains all the functions used to generate the cache files used by the site.
  *
  * @noinspection PhpExpressionResultUnusedInspection
  *
@@ -100,59 +100,26 @@ class S2Cache
     {
         global $s2_db;
 
-        // TODO Удалить этот фрагмент после тестирования
-        // Get the hooks from the DB
-        $query = array(
-            'SELECT'   => 'eh.id, eh.code, eh.extension_id, eh.priority, e.dependencies',
-            'FROM'     => 'extension_hooks AS eh',
-            'JOINS'    => array(
-                array(
-                    'INNER JOIN' => 'extensions AS e',
-                    'ON'         => 'e.id=eh.extension_id'
-                )
-            ),
-            'WHERE'    => 'e.disabled=0',
-            'ORDER BY' => 'eh.priority, eh.installed'
-        );
-
-        $result = $s2_db->query_build($query);
-
-        while ($cur_hook = $s2_db->fetch_assoc($result)) {
-            $dir = S2_ROOT . '_extensions/' . $cur_hook['extension_id'] . '/hooks/';
-            if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
-            }
-
-            $code = $cur_hook['code'];
-            $code = str_replace('$ext_info[\'url\']', 'S2_PATH.\'/_extensions/' . $cur_hook['extension_id'] . '\'', $code);
-            $code = str_replace('$ext_info[\'path\']', 'S2_ROOT.\'/_extensions/' . $cur_hook['extension_id'] . '\'', $code);
-            $code = str_replace('$ext_info[\'id\']', '\'' . $cur_hook['extension_id'] . '\'', $code);
-
-            $filename = $dir . $cur_hook['id'] . ($cur_hook['priority'] == 5 ? '' : '_' . $cur_hook['priority']) . '.php';
-            file_put_contents(
-                $filename,
-                <<<EOF
-<?php
-/**
- * Hook {$cur_hook['id']}
- *
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package {$cur_hook['extension_id']}
- */
-
- if (!defined('S2_ROOT')) {
-     die;
-}
-
-$code
-
-EOF
-
-            );
-            // $map[$cur_hook['id']][] = '_extensions/' . $cur_hook['extension_id'] . '/hooks/' . $cur_hook['id'] . ($cur_hook['priority'] == 5 ? '' : '_' . $cur_hook['priority']) . '.php';
-        }
-        // TODO удалять до этого места
+        // Get the hotfix hooks from the DB
+//        $query = array(
+//            'SELECT'   => 'eh.id, eh.code, eh.extension_id, eh.priority, e.dependencies',
+//            'FROM'     => 'extension_hooks AS eh',
+//            'JOINS'    => array(
+//                array(
+//                    'INNER JOIN' => 'extensions AS e',
+//                    'ON'         => 'e.id=eh.extension_id'
+//                )
+//            ),
+//            'WHERE'    => 'e.disabled=0 AND e.name LIKE \'hotfix_%\'',
+//            'ORDER BY' => 'eh.priority, eh.installed'
+//        );
+//
+//        $result = $s2_db->query_build($query);
+//
+//        while ($cur_hook = $s2_db->fetch_assoc($result)) {
+//            $code = $cur_hook['code'];
+//            TODO cache somewhere the hotfix code
+//        }
 
         // Get extensions from the DB
         $query = array(

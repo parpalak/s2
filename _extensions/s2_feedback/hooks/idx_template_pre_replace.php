@@ -13,7 +13,7 @@
 
 if (strpos($template, '<!-- s2_feedback -->') !== false)
 {
-	Lang::load('s2_feedback', function () use ($ext_info)
+	Lang::load('s2_feedback', function ()
 	{
 		if (file_exists(S2_ROOT.'/_extensions/s2_feedback'.'/lang/'.S2_LANGUAGE.'.php'))
 			return require S2_ROOT.'/_extensions/s2_feedback'.'/lang/'.S2_LANGUAGE.'.php';

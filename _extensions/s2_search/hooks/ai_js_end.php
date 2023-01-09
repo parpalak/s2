@@ -19,7 +19,7 @@ try {
 }
 if ($size === 0)
 {
-	Lang::load('s2_search', function () use ($ext_info)
+	Lang::load('s2_search', function ()
 	{
 		if (file_exists(S2_ROOT.'/_extensions/s2_search'.'/lang/'.S2_LANGUAGE.'.php'))
 			return require S2_ROOT.'/_extensions/s2_search'.'/lang/'.S2_LANGUAGE.'.php';

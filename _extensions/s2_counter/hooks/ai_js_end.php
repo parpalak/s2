@@ -13,7 +13,7 @@
 
 if (!is_writable(S2_ROOT.'/_extensions/s2_counter'.'/data/'))
 {
-	Lang::load('s2_counter', function () use ($ext_info)
+	Lang::load('s2_counter', function ()
 	{
 		if (file_exists(S2_ROOT.'/_extensions/s2_counter'.'/lang/'.S2_LANGUAGE.'.php'))
 			return require S2_ROOT.'/_extensions/s2_counter'.'/lang/'.S2_LANGUAGE.'.php';

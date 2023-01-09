@@ -11,7 +11,7 @@
      die;
 }
 
-Lang::load('s2_highlight', function () use ($ext_info)
+Lang::load('s2_highlight', function ()
 {
 	if (file_exists(S2_ROOT.'/_extensions/s2_highlight'.'/lang/'.S2_LANGUAGE.'.php'))
 		return require S2_ROOT.'/_extensions/s2_highlight'.'/lang/'.S2_LANGUAGE.'.php';

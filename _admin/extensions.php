@@ -194,12 +194,12 @@ function s2_install_extension ($id)
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
-	// Load manifest (either locally or from s2cms.com updates service)
+	// Load manifest (either locally or from s2cms.ru updates service)
 //	if (isset($_GET['install']))
 		$manifest = is_readable(S2_ROOT.'_extensions/'.$id.'/manifest.xml') ? file_get_contents(S2_ROOT.'_extensions/'.$id.'/manifest.xml') : false;
 	// else
 	// {
-		// $remote_file = get_remote_file('http://s2cms.com/update/manifest/'.$id.'.xml', 16);
+		// $remote_file = get_remote_file('http://s2cms.ru/update/manifest/'.$id.'.xml', 16);
 		// if (!empty($remote_file['content']))
 			// $manifest = $remote_file['content'];
 	// }

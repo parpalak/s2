@@ -21,7 +21,7 @@ if ($action == 's2_tpl_edit_load')
 		die('Error in GET parameters.');
 	$filename = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $_GET['filename']);
 
-	Lang::load('s2_tpl_edit', function () use ($ext_info)
+	Lang::load('s2_tpl_edit', function ()
 	{
 		if (file_exists(S2_ROOT.'/_extensions/s2_tpl_edit'.'/lang/'.S2_LANGUAGE.'.php'))
 			return require S2_ROOT.'/_extensions/s2_tpl_edit'.'/lang/'.S2_LANGUAGE.'.php';
@@ -44,7 +44,7 @@ elseif ($action == 's2_tpl_edit_save')
 		die('Error in POST parameters.');
 	$s2_tpl_edit_template = $_POST['template'];
 
-	Lang::load('s2_tpl_edit', function () use ($ext_info)
+	Lang::load('s2_tpl_edit', function ()
 	{
 		if (file_exists(S2_ROOT.'/_extensions/s2_tpl_edit'.'/lang/'.S2_LANGUAGE.'.php'))
 			return require S2_ROOT.'/_extensions/s2_tpl_edit'.'/lang/'.S2_LANGUAGE.'.php';

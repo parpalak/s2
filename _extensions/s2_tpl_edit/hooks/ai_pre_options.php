@@ -13,7 +13,7 @@
 
 if ($s2_user['edit_users'])
 {
-	Lang::load('s2_tpl_edit', function () use ($ext_info)
+	Lang::load('s2_tpl_edit', function ()
 	{
 		if (file_exists(S2_ROOT.'/_extensions/s2_tpl_edit'.'/lang/'.S2_LANGUAGE.'.php'))
 			return require S2_ROOT.'/_extensions/s2_tpl_edit'.'/lang/'.S2_LANGUAGE.'.php';
