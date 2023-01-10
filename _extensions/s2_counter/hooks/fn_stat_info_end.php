@@ -11,5 +11,5 @@
      die;
 }
 
-$output .= '<fieldset><legend>Traffic</legend><div id="s2_counter_hits" style="height: 400px;"></div></fieldset>';
-$output .= '<fieldset><legend>RSS readers</legend><div id="s2_counter_rss" style="height: 400px;"></div></fieldset>';
+$output .= '<p id="s2_counter_hits" style="height: 400px;"></p>';
+$output .= '<p id="s2_counter_rss" style="height: 400px;"></p>';

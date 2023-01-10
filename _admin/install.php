@@ -12,8 +12,8 @@
 
 define('S2_VERSION', '2.0dev');
 define('S2_DB_REVISION', 14);
-define('MIN_PHP_VERSION', '5.3.0');
-define('MIN_MYSQL_VERSION', '4.1.2');
+define('MIN_PHP_VERSION', '7.4.0');
+define('MIN_MYSQL_VERSION', '5.6');
 
 define('S2_ROOT', '../');
 define('S2_DEBUG', 1);

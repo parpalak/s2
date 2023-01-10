@@ -90,23 +90,7 @@ function s2_tpl_edit_form ()
 
 ?>
 <form class="full_tab_form" name="s2_tpl_edit_form" action="" onsubmit="return s2_tpl_edit.save('<?php echo Lang::get('Wrong filename', 's2_tpl_edit'); ?>', this);">
-	<div class="r-float" title="<?php echo Lang::get('Help', 's2_tpl_edit'); ?>">
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_submit')) ? eval($hook) : null; ?>
-		<input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
-		<hr />
-<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
-		<div class="height_wrap" style="padding-bottom: 3.2em;">
-			<div class="tags_list" id="s2_tpl_edit_file_list">
-<?php
-
-	echo s2_tpl_edit_file_list('');
-
-?>
-			</div>
-		</div>
-	</div>
-	<div class="l-float">
+	<div class="main-column vert-flex">
 		<table class="fields">
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_fname')) ? eval($hook) : null; ?>
 			<tr>
@@ -115,16 +99,25 @@ function s2_tpl_edit_form ()
 			</tr>
 <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_fname')) ? eval($hook) : null; ?>
 		</table>
-<?php
-
-	$padding = 2.583333;
-	($hook = s2_hook('fn_s2_tpl_edit_form_pre_text')) ? eval($hook) : null;
-
-?>
-		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
+<?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_text')) ? eval($hook) : null; ?>
+		<div class="text_wrapper">
 			<textarea id="s2_tpl_edit_text" class="full_textarea" name="template[text]"></textarea>
 		</div>
 	</div>
+    <div class="aside-column vert-flex" title="<?php echo Lang::get('Help', 's2_tpl_edit'); ?>">
+        <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_submit')) ? eval($hook) : null; ?>
+        <input class="bitbtn" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
+        <?php ($hook = s2_hook('fn_s2_tpl_edit_form_after_submit')) ? eval($hook) : null; ?>
+        <hr />
+        <?php ($hook = s2_hook('fn_s2_tpl_edit_form_pre_tpl')) ? eval($hook) : null; ?>
+        <div class="tags_list" id="s2_tpl_edit_file_list">
+            <?php
+
+            echo s2_tpl_edit_file_list('');
+
+            ?>
+        </div>
+    </div>
 </form>
 <?php
 

@@ -2,15 +2,15 @@
 .tabsheets,
 .tabsheets dd,
 .tabsheets .reducer,
-.r-float,
-.l-float,
+.aside-column,
+.main-column,
 .height_wrap,
 .full_textarea,
 .CodeMirror,
 .fields input,
 .input.text input,
 .input.color input,
-.r-float input[type="text"],
+.aside-column input[type="text"],
 .extension  p.description,
 .error_dialog .error_text {
 	-moz-box-sizing: border-box;
@@ -19,7 +19,7 @@
 	}
 
 .toolbar:after,
-.r-float label:after,
+.aside-column label:after,
 .loginform label:after {
 	content: ".";
 	display: block;
@@ -33,8 +33,6 @@
 
 html,
 .tabsheets,
-.r-float,
-.l-float,
 .tabsheets .reducer.no-scroll {
 	overflow: hidden;
 	}
@@ -43,21 +41,22 @@ html,
 body {
 	height: 100%;
 	min-height: 100%;
-	min-width: 640px;
+	min-width: 720px;
 	}
 
 .tabsheets,
 .height_wrap,
-.full_tab_form,
-.r-float,
-.l-float {
+.full_tab_form {
 	height: 100%;
 	}
 
-.tags_list,
 #tree {
 	overflow: auto;
 	height: 100%;
+	}
+
+.full_tab_form {
+	display: flex;
 	}
 
 /*===========================[General styles]=================================*/
@@ -66,14 +65,13 @@ body {
 	margin: 0;
 	padding: 0;
 	background: #eee;
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 75%;
+	font: 14px/16px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 	color: #000;
 	}
 
 #logout {
 	text-align: center;
-	font: 0.917em/13px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	font: 13px/21px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 	position: absolute;
 	z-index: 1;
 	top: 0;
@@ -82,7 +80,7 @@ body {
 	background: #fff;
 	color: #000;
 	border-left: 1px solid #ccc;
-	height: 28px;
+	height: 22px;
 	}
 
 #loading {
@@ -116,7 +114,7 @@ a > img {
 	margin: 0 0 1em;
 	}
 	.p-js > .js {
-		margin-right: 12px;
+		margin-right: 10px;
 		}
 
 .js,
@@ -132,7 +130,7 @@ a > img {
 	background: linear-gradient(to right, #9bd, #9bd 60%, transparent 60%);
 	background-size: 8px 1px;
 	background-repeat: repeat-x;
-	background-position: 0 100%;
+	background-position: 0 95%;
 	}
 
 a:hover { outline: none; }
@@ -140,14 +138,12 @@ a:hover { outline: none; }
 a.cur_link{
 	font-weight: bold;
 	}
-	.p-js a.js.cur_link {
-		-moz-border-radius: 8px;
-		-webkit-border-radius: 8px;
-		border-radius: 8px;
+	a.js.cur_link {
+		border-radius: 3px;
 		background: #bdf;
 		color: #000;
-		padding: 2px 3px;
-		margin: 0 9px 0 -3px;
+		padding: 0 1px;
+		margin: 0 9px 0 -1px;
 		font-weight: normal;
 		}
 
@@ -231,7 +227,7 @@ hr {
 		text-align: left;
 		background: #ffa;
 		padding: 1px 22px 1px 3px;
-		border: 1px solid #cc4;
+		border: 1px solid #ccb444;
 		border-top: 0;
 		border-bottom-right-radius: 4px;
 		border-bottom-left-radius: 4px;
@@ -283,35 +279,26 @@ hr {
 	}
 
 body > .tabsheets {
-	background: -webkit-gradient(linear, 0 0, 0 bottom, color-stop(0%, rgba(0,0,0,0.01)), color-stop(29px, rgba(0,0,0,0.05))) no-repeat;
-	background: -webkit-linear-gradient(rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
-	background: -moz-linear-gradient(rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
-	background: -ms-linear-gradient(rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
-	background: -o-linear-gradient(rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
-	background: linear-gradient(rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 29px) no-repeat;
-	background-size: 100% 29px;
+	background: linear-gradient(rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.05) 22px) no-repeat;
+	background-size: 100% 22px;
 	}
 
 .tabsheets > dt {
 	float: left;
-	font: 0.917em/13px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
-	height: 12px;
-	padding: 3px 5px 6px 3px;
+	line-height: 20px;
+	height: 22px;
+	padding: 0 5px 0 3px;
 	cursor: default;
 	white-space: nowrap;
 	position: relative;
-	top: 8px;
+	/*top: 8px;*/
 	z-index: 1;
 	border: 1px solid #aaa;
 	border-color: #fff #aaa #aaa #f2f2f2;
 	border-bottom: 0;
 	color: #333;
-	-webkit-border-top-left-radius: 4px;
-	-webkit-border-top-right-radius: 4px;
-	-moz-border-radius-topleft: 4px;
-	-moz-border-radius-topright: 4px;
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
 	background: -webkit-gradient(linear, 0 0, 0 bottom, from(rgba(0,0,0,0)), to(rgba(0,0,0,0.09)));
 	background: -webkit-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.09));
 	background: -moz-linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.09));
@@ -326,30 +313,24 @@ body > .tabsheets {
 		background: url('../i/icons.png');
 		display: block;
 		float: left;
-		margin-top: -1px;
+		margin-top: 2px;
 		width: 16px;
 		height: 16px;
 		margin-right: 4px;
 		}
 
 .tabsheets > dt.active {
-	top: 7px;
-	height: 13px;
+	/*top: 7px;*/
+	height: 22px;
 	z-index: 5;
 	color: #000;
 	text-shadow: 0 1px 0 #fff;
-	background: -webkit-gradient(linear, 0 0, 0 bottom, from(rgba(255,255,255,0.9)), to(rgba(255,255,255,0)));
-	background: -webkit-linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
-	background: -moz-linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
-	background: -ms-linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
-	background: -o-linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
-	background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
 	-moz-box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
 	-webkit-box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
 	box-shadow: 0 -1px 1px rgba(0,0,0,0.1);
 	cursor: default;
-	background-color: #eee;
-	}
+	background: #eee linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+}
 
 .tabsheets > dd {
 	display: block;
@@ -357,7 +338,7 @@ body > .tabsheets {
 	width: 100%;
 	height: 100%;
 	left: 0;
-	padding: 29px 0 0;
+	padding: 22px 0 0;
 	}
 
 .tabsheets .reducer {
@@ -366,7 +347,7 @@ body > .tabsheets {
 	border-top: 1px solid #fdfdfd;
 	overflow: auto;
 	height: 100%;
-	padding: 10px;
+	padding: 10px 10px 0;
 	}
 
 .tabsheets > .inactive {
@@ -570,60 +551,57 @@ body > .tabsheets {
 /*=======================[Tags tab]===========================================*/
 
 .tags_list {
-	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	font-size: 14px;
+	line-height: 20px;
+	flex: 1 1 auto;
+	padding: 0 0 1em;
+	overflow: auto;
 	}
 
 /*===========================[Editor styles]==================================*/
 
-.l-float,
-.r-float {
-	border: 1px solid #eee;
-	border-color: #fff #aaa #aaa #fff;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	border-radius: 4px;
-	padding: 5px;
-	}
+.vert-flex {
+	display: flex;
+	flex-direction: column;
+}
 
-.l-float {
-	position: relative;
+.main-column {
+	flex: 1 1 auto;
 	}
 
 .text_wrapper {
-	position: absolute;
-	bottom: 5px;
-	left: 5px;
-	right: 5px;
+	flex: 1 1 auto;
+	position: relative;
 	}
 
-.r-float {
-	float: right;
-	width: 150px;
+.aside-column {
 	margin-left: 10px;
+	flex: 0.1 0 150px;
 	}
-	.r-float label {
+	.aside-column label {
 		display: block;
-		margin: 0 0 0.5em;
+		margin: 0 0 0.75em;
 		}
-		.r-float label.error {
+		.aside-column label.error {
 			-moz-box-shadow: 0 0 0 2px #f66;
 			-webkit-box-shadow: 0 0 0 2px #f66;
 			box-shadow: 0 0 0 2px #f66;
 			background: #fdd;
 			}
-		.r-float label.ok {
+		.aside-column label.ok {
 			-moz-box-shadow: 0 0 0 2px #bfb;
 			-webkit-box-shadow: 0 0 0 2px #bfb;
 			box-shadow: 0 0 0 2px #bfb;
 			background: #dfd;
 			}
-		.r-float label input[type="checkbox"] {
+		.aside-column label input[type="checkbox"] {
 			float: left;
 			margin: 2px 0.25em;
 			padding: 0;
 			}
-	.r-float select {
-		font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	.aside-column select {
+		font-size: 14px;
+		font-family: "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
 		}
 
 table.fields {
@@ -666,23 +644,26 @@ textarea,
 		background: #ddd;
 		}
 
-.r-float input[type="text"],
+.aside-column input[type="text"],
 .input.text input,
 .input.color input,
-.fields input[type="text"] {
+.fields input[type="text"],
+#search_field {
 	padding: 2px;
 	font: 1em Arial, Helvetica, sans-serif;
 	}
 
-.r-float input[type="text"],
+.aside-column input[type="text"],
 .input.text input,
 .input.color input,
 .fields input[type="text"],
-.r-float select,
 .full_textarea,
+.aside-column select,
 #search_field {
 	width: 100%;
 	margin: 0;
+	border-radius: 2px;
+	border: #bbb 1px solid;
 	}
 
 .fields input.char-2 {
@@ -693,43 +674,37 @@ textarea,
 	}
 
 .full_textarea {
-	font: 1.083em/1.2307 Consolas, Monaco, monospace;
+	font: 15px/21px Consolas, Monaco, monospace;
 	height: 100%;
 	padding: 3px;
 	vertical-align: top;
 	}
 
-.bitbtn {
-	font: 0.917em/13px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
-	padding: 1px 2px 2px 20px;
+.bitbtn, .long-button {
+	padding: 1px 4px 1px 2px;
 	height: 22px;
 	min-width: 120px;
 	margin-bottom: 1px;
-	background: url(../i/button_icons.png) 1px 2px no-repeat #f2f2f2;
 	border: 1px solid #777;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	-moz-box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
-	-webkit-box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
 	box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
+	line-height: 18px;
 	}
-	.bitbtn:hover {
+.bitbtn {
+	padding: 1px 2px 2px 20px;
+	background: url(../i/button_icons.png) 1px 2px no-repeat #f2f2f2;
+	}
+	.bitbtn:hover, .long-button:hover {
 		background-color: #eaedf2;
 		border: 1px solid #778;
-		-moz-box-shadow: inset 0 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
-		-webkit-box-shadow: inset 0 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
 		box-shadow: inset 0 3px 3px -1px rgba(240, 255, 255, 0.9), inset 0 -11px 3px -1px rgba(0, 128, 255, 0.2);
 		}
-	.bitbtn:active {
+	.bitbtn:active, .long-button:active {
 		border-color: #555;
-		-moz-box-shadow: inset 0 -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
-		-webkit-box-shadow: inset 0 -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
 		box-shadow: inset 0 -3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 10px 3px -1px rgba(0, 64, 128, 0.1);
 		}
-	.bitbtn[disabled], .bitbtn[disabled]:hover, .bitbtn[disabled]:active {
-		-moz-box-shadow: none;
-		-webkit-box-shadow: none;
+	.bitbtn[disabled], .bitbtn[disabled]:hover, .bitbtn[disabled]:active,
+	.long-button[disabled], .long-button[disabled]:hover, .long-button[disabled]:active {
 		box-shadow: none;
 		background-color: #f4f4f4;
 		}
@@ -846,6 +821,20 @@ form center {
 	padding: 1em 0;
 	}
 
+.stat-items {
+	line-height: 1.4;
+	display: flex;
+	gap: 2em;
+	flex-wrap: wrap;
+	margin: 0 0 1.5em;
+	}
+	.stat-item {
+		flex: 0 0 auto;
+		max-width: 20em;
+		}
+		.stat-item h3 {
+			margin: 0;
+			}
 .input {
 	margin: 0 0 0.75em;
 	position: relative;
@@ -856,7 +845,7 @@ form center {
 		}
 	.input.select select {
 		margin: 0;
-		font: 1em Arial, Helvetica, sans-serif;
+		font-size: 1em;
 		}
 	.input.checkbox input {
 		vertical-align: middle;
@@ -866,9 +855,9 @@ form center {
 		padding: 0;
 		}
 		.input label > small {
-			font-size: 1em;
+			font-size: 12px;
 			color: #666;
-			margin: 0 0 0 0.273em;
+			margin: 0 0 0 3px;
 			display: block;
 			}
 	.input label > span,
@@ -899,6 +888,7 @@ form center {
 	margin: 1em 0 0.5em;
 	border-bottom: 3px double #ddd;
 	border-color: rgba(0, 0, 0, 0.1);
+	line-height: 22px;
 	}
 
 #comm_div h3 {
@@ -907,32 +897,35 @@ form center {
 	margin: 1em 0 0.5em;
 	}
 
-.extension,
-.info-box {
-	margin: 1em 0;
-	border: 1px solid #ccc;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	border-radius: 4px;
-	padding: 1em 1em 0;
-	overflow: hidden;
+.extensions {
+	line-height: 23px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2em;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 22em);
+	justify-content: space-between;
+	grid-gap: 2em
 	}
-	.extension .info {
-		float: left;
-		width: 19em;
-		}
-	.extension .options,
-	.extension .description {
-		padding-left: 20em;
+	.extension {
+		flex: 1 0 22em;
 		}
 		.extension button {
 			margin: 0 1em 1em 0;
 			}
-	.extension h3 {
-		margin-top: 0;
-		}
-	.extension p,
-	.extension h3,
+			.extension p,
+			.extension h3 {
+				margin: 0;
+				}
+.info-box {
+	line-height: 1.5;
+	margin: 1em 0;
+	border-radius: 4px;
+	padding: 1em 1em 0;
+	overflow: hidden;
+	background: #fafae0;
+	border: 1px solid #dda;
+	}
 	.info-box p {
 		margin: 0 0 1em;
 		font-size: 1em;
@@ -942,14 +935,9 @@ form center {
 		color: red;
 		}
 
-.info-box {
-	background: #fafae0;
-	border: 1px solid #dda;
-	}
-
 .extension.disabled {
-	background: #ccc;
 	color: #666;
+	color: rgba(0,0,0, 0.4);
 	}
 	.extension.disabled h3 {
 		text-decoration: line-through;
@@ -1133,44 +1121,47 @@ form center {
 		padding: 0;
 		background-origin: border-box;
 		}
-	.r-float {
+	.aside-column {
 		width: 130px;
 		}
 	body {
 		font-size: 68.75%;
 		}
-	}
-
-@media screen and (max-width: 775px) {
 	.tabsheets > dt {
-		font-size: 0.909em;
-		padding: 3px 1px 6px 1px;
-		}
-	.tabsheets > dt:before {
-		margin-right: 0;
-		}
-	#admin_tab {
-		margin-left: 0;
+		font-size: 1em;
 		}
 	}
 
-@media screen and (max-width: 710px) {
-	.toolbar img {
-		margin-left: -1px;
-		}
-	}
+/*@media screen and (max-width: 775px) {*/
+/*	.tabsheets > dt {*/
+/*		font-size: 0.909em;*/
+/*		padding: 3px 1px 6px 1px;*/
+/*		}*/
+/*	.tabsheets > dt:before {*/
+/*		margin-right: 0;*/
+/*		}*/
+/*	#admin_tab {*/
+/*		margin-left: 0;*/
+/*		}*/
+/*	}*/
 
-@media screen and (max-width: 680px) {
-	#list_tab, #admin-stat_tab {
-		margin-left: 0;
-		}
-	.tabsheets .reducer {
-		padding: 0;
-		}
-	.toolbar img {
-		margin-left: -3px;
-		}
-	.tabsheets > dt:before {
-		display: none;
-		}
-	}
+/*@media screen and (max-width: 710px) {*/
+/*	.toolbar img {*/
+/*		margin-left: -1px;*/
+/*		}*/
+/*	}*/
+
+/*@media screen and (max-width: 680px) {*/
+/*	#list_tab, #admin-stat_tab {*/
+/*		margin-left: 0;*/
+/*		}*/
+/*	.tabsheets .reducer {*/
+/*		padding: 0;*/
+/*		}*/
+/*	.toolbar img {*/
+/*		margin-left: -3px;*/
+/*		}*/
+/*	.tabsheets > dt:before {*/
+/*		display: none;*/
+/*		}*/
+/*	}*/

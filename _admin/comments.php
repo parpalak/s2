@@ -130,7 +130,7 @@ function s2_show_comments ($mode, $id = 0)
 			require S2_ROOT.'_include/comments.php';
 
 		($hook = s2_hook('fn_show_comments_pre_table_row_merge')) ? eval($hook) : null;
-		$comments_tables[$row['article_id']][] = '<tr'.$class.'><td>'.s2_htmlencode($row['nick']).'</td><td>'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</td><td>'.date("Y/m/d, H:i", $row['time']).'</td><td>'.$ip.'</td><td>'.$email.'</td><td>'.$buttons.'</td></tr>';
+		$comments_tables[$row['article_id']][] = '<tr'.$class.'><td>'.s2_htmlencode($row['nick']).'</td><td>'.s2_bbcode_to_html(s2_htmlencode($row['text'])).'</td><td>'.date("Y-m-d, H:i", $row['time']).'</td><td>'.$ip.'</td><td>'.$email.'</td><td>'.$buttons.'</td></tr>';
 		$article_titles[$row['article_id']] = $row['title'];
 	}
 
@@ -149,7 +149,7 @@ function s2_show_comments ($mode, $id = 0)
 		{
 			$output_header = '<h3><a href="#" title="'.$lang_admin['Go to editor'].'" onclick="return EditArticle('.$article_id.');">&larr; '.s2_htmlencode($title).'</a></h3>';
 			$output_subheader = $mode != 'all' ? '<a href="#" title="'.sprintf($lang_admin['All comments to'], s2_htmlencode($title)).'" onclick="return LoadComments('.$article_id.');">'.$lang_admin['All comments'].'</a>' : '';
-			$output_body = 
+			$output_body =
 				'<table class="sort" width="100%">'.
 					'<thead><tr><td width="8%" class="sortable">'.$lang_admin['Name'].'</td><td class="sortable">'.$lang_admin['Comment'].'</td><td width="8%" class="sortable curcol_down">'.$lang_admin['Date'].'</td><td width="8%" class="sortable">'.$lang_admin['IP'].'</td><td width="10%" class="sortable">'.$lang_admin['Email'].'</td><td width="64px">&nbsp;</td></tr></thead>'.
 					'<tbody>'.implode('', strpos($mode, 'last') !== false ? array_reverse($comments_tables[$article_id]) : $comments_tables[$article_id]).'</tbody>'.
@@ -206,17 +206,7 @@ function s2_output_comment_form ($comment, $mode, $type)
 <div class="height_wrap" style="padding-bottom: 2.167em">
 	<?php echo s2_comment_menu_links(); ?>
 	<form class="full_tab_form" name="commform" action="" onsubmit="SaveComment('<?php echo $type; ?>'); return false;">
-		<div class="r-float">
-			<label for="eml"><input type="checkbox" id="eml" name="comment[show_email]" value="1"<?php if ($comment['show_email']) echo ' checked="checked"'?> />
-			<?php echo $lang_admin['Show email']; ?></label>
-			<label for="sbs"><input type="checkbox" id="sbs" name="comment[subscribed]" value="1"<?php if ($comment['subscribed']) echo ' checked="checked"'?> />
-			<?php echo $lang_admin['Subscribed']; ?></label>
-<?php ($hook = s2_hook('fn_output_comment_form_after_checkboxes')) ? eval($hook) : null; ?>
-			<hr />
-<?php ($hook = s2_hook('fn_output_comment_form_pre_submit')) ? eval($hook) : null; ?>
-			<input class="bitbtn savecomment" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
-		</div>
-		<div class="l-float">
+		<div class="main-column vert-flex">
 			<table class="fields">
 <?php ($hook = s2_hook('fn_output_comment_form_pre_name')) ? eval($hook) : null; ?>
 				<tr>
@@ -232,16 +222,21 @@ function s2_output_comment_form ($comment, $mode, $type)
 			</table>
 			<input type="hidden" name="comment[id]" value="<?php echo $comment['id']; ?>" />
 			<input type="hidden" name="mode" value="<?php echo s2_htmlencode($mode); ?>" />
-<?php
-
-	$padding = 4.5;
-	($hook = s2_hook('fn_output_comment_form_pre_text')) ? eval($hook) : null;
-
-?>
-			<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
+<?php ($hook = s2_hook('fn_output_comment_form_pre_text')) ? eval($hook) : null; ?>
+			<div class="text_wrapper">
 				<textarea id="commtext" class="full_textarea" name="comment[text]"><?php echo s2_htmlencode($comment['text']); ?></textarea>
 			</div>
 		</div>
+        <div class="aside-column">
+            <label for="eml"><input type="checkbox" id="eml" name="comment[show_email]" value="1"<?php if ($comment['show_email']) echo ' checked="checked"'?> />
+                <?php echo $lang_admin['Show email']; ?></label>
+            <label for="sbs"><input type="checkbox" id="sbs" name="comment[subscribed]" value="1"<?php if ($comment['subscribed']) echo ' checked="checked"'?> />
+                <?php echo $lang_admin['Subscribed']; ?></label>
+            <?php ($hook = s2_hook('fn_output_comment_form_after_checkboxes')) ? eval($hook) : null; ?>
+            <hr />
+            <?php ($hook = s2_hook('fn_output_comment_form_pre_submit')) ? eval($hook) : null; ?>
+            <input class="bitbtn savecomment" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
+        </div>
 	</form>
 </div>
 <?php

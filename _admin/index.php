@@ -92,8 +92,6 @@ function s2_jsvarencode ($var)
 <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="css/style.css" />
-<!--[if IE 8]><link rel="stylesheet" type="text/css" href="css/ie8.css" /><![endif]-->
-<!--[if IE 9]><link rel="stylesheet" type="text/css" href="css/ie9.css" /><![endif]-->
 <style>body {background-color: <?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>;}</style>
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>
 </head>
@@ -101,7 +99,7 @@ function s2_jsvarencode ($var)
 <body tabindex="0">
 	<div id="logout">
 		<div id="loading"></div>
-		<?php printf($lang_admin['Welcome'], $login); ?><br />
+		<?php printf($lang_admin['Welcome'], $login); ?>
 		<a href="#" title="<?php echo $lang_admin['Logout info']; ?>" onclick="return Logout();"><?php echo $lang_admin['Logout']; ?></a>
 	</div>
 <?php ($hook = s2_hook('ai_pre_site')) ? eval($hook) : null; ?>
@@ -154,7 +152,7 @@ $padding = 2.5;
 			<div class="reducer" id="comm_div"><?php $premoderation = s2_for_premoderation(); echo $premoderation['content']; ?></div>
 		</dd>
 <?php ($hook = s2_hook('ai_pre_tags')) ? eval($hook) : null; ?>
-		<dt id="tag_tab"><?php echo Lang::get('Tags'); ?></dt>
+		<dt id="tag_tab"><?php echo $lang_admin['Tags']; ?></dt>
 		<dd class="inactive">
 			<div class="reducer" id="tag_div"></div>
 		</dd>
@@ -168,7 +166,7 @@ if ($s2_user['view_hidden'] || $s2_user['edit_users'])
 ?>
 		<dt id="admin_tab"><?php echo $lang_admin['Administrate']; ?></dt>
 		<dd class="inactive">
-			<div class="reducer" id="admin_div" style="padding: 0;">
+			<div class="reducer" id="admin_div" style="padding: 10px 0 0;">
 			<dl class="tabsheets">
 <?php ($hook = s2_hook('ai_pre_stat')) ? eval($hook) : null; ?>
 				<dt id="admin-stat_tab"><?php echo $lang_admin['Stat']; ?></dt>

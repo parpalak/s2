@@ -12,9 +12,11 @@ return array(
 	'Found tags'         => 'Similar tags: %s',
 	'Not found'          => 'No results found for your query.',
 
-	'Reindex'            => 'reindex',
+	'Reindex'            => 'Reindex',
 	'Reindex title'      => 'May be time-consuming. You can run it again in case of connection loss.',
-	'Info link'          => 'Search index: %1$s, %2$s rows (%3$s)',
+    'Search index'       => 'Search index',
+    'Search index rows'  => 'Rows in DB: %1$s',
+    'Search index size'  => 'Data size: %1$s',
 
 	'Indexing required'  => 'In order to enable the site search, indexing is required.',
 	'Index now'          => 'Index now',

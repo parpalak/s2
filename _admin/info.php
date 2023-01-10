@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpExpressionResultUnusedInspection */
 /**
  * Displays information about S2 and environment in the admin panel
  *
@@ -107,48 +107,33 @@ function s2_stat_info ()
 		$total_size = Lang::friendly_filesize($total_size);
 	}
 
-	// Check for the existance of various PHP opcode caches/optimizers
-	if (function_exists('mmcache'))
-		$php_accelerator = '<a href="http://turck-mmcache.sourceforge.net/">Turck MMCache</a>';
-	else if (isset($_PHPA))
-		$php_accelerator = '<a href="http://www.php-accelerator.co.uk/">ionCube PHP Accelerator</a>';
-	else if (ini_get('apc.enabled'))
-		$php_accelerator ='<a href="http://www.php.net/apc/">Alternative PHP Cache (APC)</a>';
-	else if (ini_get('zend_optimizer.optimization_level'))
-		$php_accelerator = '<a href="http://www.zend.com/products/zend_optimizer/">Zend Optimizer</a>';
-	else if (ini_get('eaccelerator.enable'))
-		$php_accelerator = '<a href="http://eaccelerator.net/">eAccelerator</a>';
-	else if (ini_get('xcache.cacher'))
-		$php_accelerator = '<a href="http://trac.lighttpd.net/xcache/">XCache</a>';
-	else
-		$php_accelerator = $lang_admin['N/A'];
-
 	$version = array(
 		'<a href="http://s2cms.ru/" target="_blank">S2 '.S2_VERSION.' &uarr;</a>',
-		'© 2007–2013 Roman Parpalak',
+		'© 2007–2023 Roman Parpalak',
 	);
 
 	$environment = array(
 		sprintf($lang_admin['OS'], PHP_OS),
 		'<a href="site_ajax.php?action=phpinfo" title="'.$lang_admin['PHP info'].'" target="_blank">PHP: '.PHP_VERSION.' &uarr;</a>',
-		sprintf($lang_admin['Accelerator'], $php_accelerator),
+        sprintf($lang_admin['Server load'], $server_load),
 	);
 
 	$database = array(
-		implode(' ', $s2_db->get_version()),
+		implode('<br>', $s2_db->get_version()),
 		!empty($total_records) ? sprintf($lang_admin['Rows'], $total_records) : '',
 		!empty($total_size) ? sprintf($lang_admin['Size'], $total_size) : '',
 	);
 
 	($hook = s2_hook('fn_stat_info_pre_output_merge')) ? eval($hook) : null;
 
-	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Already published'].'</span>'.s2_get_counters().'</div>';
-	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Server load'].'</span>'.$server_load.'</div>';
-	$output .= '<div class="input"><span class="subhead">'.$lang_admin['S2 version'].'</span>'.implode('<br />', $version).'</div>';
-	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Environment'].'</span>'.implode('<br />', $environment).'</div>';
-	$output .= '<div class="input"><span class="subhead">'.$lang_admin['Database'].'</span>'.implode('<br />', $database).'</div>';
+	$output .= '<div class="stat-item"><h3>'.$lang_admin['Already published'].'</h3>'.s2_get_counters().'</div>';
+	$output .= '<div class="stat-item"><h3>'.$lang_admin['Environment'].'</h3>'.implode('<br />', $environment).'</div>';
+	$output .= '<div class="stat-item"><h3>'.$lang_admin['Database'].'</h3>'.implode('<br />', $database).'</div>';
+    $output .= '<div class="stat-item"><h3>'.$lang_admin['S2 version'].'</h3>'.implode('<br />', $version).'</div>';
 
-	$output = '<fieldset><legend>'.$lang_admin['Stat'].'</legend>'.$output.'</fieldset>';
+    ($hook = s2_hook('fn_stat_info_pre_div_merge')) ? eval($hook) : null;
+
+	$output = '<div class="stat-items">'.$output.'</div>';
 
 	($hook = s2_hook('fn_stat_info_end')) ? eval($hook) : null;
 

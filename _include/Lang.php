@@ -1,9 +1,10 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Roman
- * Date: 23.10.2014
- * Time: 23:01
+ * Helper functions for handling translations.
+ *
+ * @copyright (C) 2014 Roman Parpalak
+ * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package S2
  */
 
 class Lang

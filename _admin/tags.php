@@ -106,95 +106,37 @@ function s2_output_tag_form ($tag, $modify_time)
 {
 	global $s2_db, $lang_admin;
 
-	($hook = s2_hook('fn_output_tag_form_start')) ? eval($hook) : null;
+    ($hook = s2_hook('fn_output_tag_form_pre_get_tags')) ? eval($hook) : null;
+
+    $subquery = array(
+        'SELECT'	=> 'count(*)',
+        'FROM'		=> 'article_tag AS at',
+        'WHERE'		=> 't.tag_id = at.tag_id'
+    );
+    $raw_query = $s2_db->query_build($subquery, true);
+
+    $query = array(
+        'SELECT'	=> 'tag_id AS id, name, ('.$raw_query.') AS art_count',
+        'FROM'		=> 'tags AS t',
+        'ORDER BY'	=> 'name'
+    );
+    ($hook = s2_hook('fn_output_tag_form_pre_get_tags_qr')) ? eval($hook) : null;
+    $result = $s2_db->query_build($query);
+
+    $tag_names = array();
+    $rows = [];
+    while ($row = $s2_db->fetch_assoc($result))
+    {
+        $rows[] = $row;
+        $tag_names[$row['id']] = $row['name'];
+    }
+
+
+    ($hook = s2_hook('fn_output_tag_form_start')) ? eval($hook) : null;
 
 ?>
 <form class="full_tab_form" name="tagform" action="" onsubmit="return SaveTag();">
-	<div class="r-float" title="<?php echo $lang_admin['Click tag']; ?>">
-		<?php echo $lang_admin['Tags:']; ?>
-		<hr />
-		<div class="height_wrap" style="padding-bottom: 2.5em;">
-			<div class="tags_list">
-<?php
-
-	($hook = s2_hook('fn_output_tag_form_pre_get_tags')) ? eval($hook) : null;
-
-	$subquery = array(
-		'SELECT'	=> 'count(*)',
-		'FROM'		=> 'article_tag AS at',
-		'WHERE'		=> 't.tag_id = at.tag_id'
-	);
-	$raw_query = $s2_db->query_build($subquery, true);
-
-	$query = array(
-		'SELECT'	=> 'tag_id AS id, name, ('.$raw_query.') AS art_count',
-		'FROM'		=> 'tags AS t',
-		'ORDER BY'	=> 'name'
-	);
-	($hook = s2_hook('fn_output_tag_form_pre_get_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-
-	$tag_names = array();
-	while ($row = $s2_db->fetch_assoc($result))
-	{
-		$tag_names[$row['id']] = $row['name'];
-		$info = $row['art_count'];
-		($hook = s2_hook('fn_output_tag_form_loop_get_tags_qr')) ? eval($hook) : null;
-		echo '<a href="#" class="js'.($row['id'] == $tag['id'] ? ' cur_link' : '').'" onclick="return LoadTag(\''.$row['id'].'\');">'.s2_htmlencode($row['name']).' ('.$info.')</a><br />'."\n";
-	}
-
-?>
-			</div>
-		</div>
-	</div>
-	<div class="r-float">
-<?php ($hook = s2_hook('fn_output_tag_form_pre_url')) ? eval($hook) : null; ?>
-		<?php echo $lang_admin['URL part']; ?>
-		<br />
-		<input type="text" name="tag[url]" size="18" maxlength="255" value="<?php echo $tag['url']; ?>" />
-		<br />
-<?php ($hook = s2_hook('fn_output_tag_form_pre_replace_tag')) ? eval($hook) : null; ?>
-		<?php echo $lang_admin['Replace tag']; ?>
-		<br />
-		<select name="tag[id]">
-			<option value="0"><?php echo $lang_admin['New']; ?></option>
-<?php
-
-	($hook = s2_hook('fn_output_tag_form_pre_loop_replace_tag')) ? eval($hook) : null;
-
-	foreach ($tag_names as $k => $v)
-		echo "\t\t\t".'<option value="'.$k.'"'.($k == $tag['id'] ? 'selected="selected"' : '').'>'.s2_htmlencode($v).'</option>'."\n";
-
-?>
-		</select>
-<?php ($hook = s2_hook('fn_output_tag_form_after_replace_tag')) ? eval($hook) : null; ?>
-		<hr />
-<?php ($hook = s2_hook('fn_output_tag_form_pre_submit')) ? eval($hook) : null; ?>
-		<input class="bitbtn savetag" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
-<?php ($hook = s2_hook('fn_output_tag_form_after_submit')) ? eval($hook) : null; ?>
-		<hr />
-<?php
-
-	($hook = s2_hook('fn_output_tag_form_pre_delete')) ? eval($hook) : null;
-
-	if ($tag['id'])
-	{
-
-?>
-		<input class="bitbtn deltag" type="button" title="<?php printf($lang_admin['Delete tag'], s2_htmlencode($tag['name'])); ?>" value="<?php echo $lang_admin['Delete']; ?>" onclick="return DeleteTag(<?php echo $tag['id'], ', \'', s2_htmlencode(addslashes($tag['name'])), '\''; ?>);" />
-<?php ($hook = s2_hook('fn_output_tag_form_after_delete')) ? eval($hook) : null; ?>
-		<br />
-		<br />
-		<a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag['url'])); ?>"><?php echo $lang_admin['Preview ready']; ?></a>
-<?php
-
-	}
-
-	($hook = s2_hook('fn_output_tag_form_after_preview')) ? eval($hook) : null;
-
-?>
-	</div>
-	<div class="l-float">
+	<div class="main-column vert-flex">
 		<table class="fields">
 <?php ($hook = s2_hook('fn_output_tag_form_pre_name')) ? eval($hook) : null; ?>
 			<tr>
@@ -211,16 +153,73 @@ function s2_output_tag_form ($tag, $modify_time)
 			</tr>
 <?php ($hook = s2_hook('fn_output_tag_form_after_time')) ? eval($hook) : null; ?>
 		</table>
-<?php
-
-	$padding = 4.5;
-	($hook = s2_hook('fn_output_tag_form_pre_text')) ? eval($hook) : null;
-
-?>
-		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
+<?php ($hook = s2_hook('fn_output_tag_form_pre_text')) ? eval($hook) : null; ?>
+		<div class="text_wrapper">
 			<textarea id="tagtext" class="full_textarea" name="tag[description]"><?php echo s2_htmlencode($tag['description'])?></textarea>
 		</div>
 	</div>
+    <div class="aside-column">
+        <?php ($hook = s2_hook('fn_output_tag_form_pre_url')) ? eval($hook) : null; ?>
+        <?php echo $lang_admin['URL part']; ?>
+        <br />
+        <input type="text" name="tag[url]" size="18" maxlength="255" value="<?php echo $tag['url']; ?>" />
+        <br />
+        <?php ($hook = s2_hook('fn_output_tag_form_pre_replace_tag')) ? eval($hook) : null; ?>
+        <?php echo $lang_admin['Replace tag']; ?>
+        <br />
+        <select name="tag[id]">
+            <option value="0"><?php echo $lang_admin['New']; ?></option>
+            <?php
+
+            ($hook = s2_hook('fn_output_tag_form_pre_loop_replace_tag')) ? eval($hook) : null;
+
+            foreach ($tag_names as $k => $v)
+                echo "\t\t\t".'<option value="'.$k.'"'.($k == $tag['id'] ? 'selected="selected"' : '').'>'.s2_htmlencode($v).'</option>'."\n";
+
+            ?>
+        </select>
+        <?php ($hook = s2_hook('fn_output_tag_form_after_replace_tag')) ? eval($hook) : null; ?>
+        <hr />
+        <?php ($hook = s2_hook('fn_output_tag_form_pre_submit')) ? eval($hook) : null; ?>
+        <input class="bitbtn savetag" name="button" type="submit" title="<?php echo $lang_admin['Save info']; ?>" value="<?php echo $lang_admin['Save']; ?>" />
+        <?php ($hook = s2_hook('fn_output_tag_form_after_submit')) ? eval($hook) : null; ?>
+        <hr />
+        <?php
+
+        ($hook = s2_hook('fn_output_tag_form_pre_delete')) ? eval($hook) : null;
+
+        if ($tag['id'])
+        {
+
+            ?>
+            <input class="bitbtn deltag" type="button" title="<?php printf($lang_admin['Delete tag'], s2_htmlencode($tag['name'])); ?>" value="<?php echo $lang_admin['Delete']; ?>" onclick="return DeleteTag(<?php echo $tag['id'], ', \'', s2_htmlencode(addslashes($tag['name'])), '\''; ?>);" />
+            <?php ($hook = s2_hook('fn_output_tag_form_after_delete')) ? eval($hook) : null; ?>
+            <br />
+            <br />
+            <a title="<?php echo $lang_admin['Preview published']; ?>" target="_blank" href="<?php echo s2_link('/'.S2_TAGS_URL.'/'.urlencode($tag['url'])); ?>"><?php echo $lang_admin['Preview ready']; ?></a>
+            <?php
+
+        }
+
+        ($hook = s2_hook('fn_output_tag_form_after_preview')) ? eval($hook) : null;
+
+        ?>
+    </div>
+    <div class="aside-column vert-flex" title="<?php echo $lang_admin['Click tag']; ?>">
+        <?php echo $lang_admin['Tags:']; ?>
+        <hr />
+        <div class="tags_list">
+            <?php
+
+            foreach ($rows as $row) {
+                $info = $row['art_count'];
+                ($hook = s2_hook('fn_output_tag_form_loop_get_tags_qr')) ? eval($hook) : null;
+                echo '<a href="#" class="js'.($row['id'] == $tag['id'] ? ' cur_link' : '').'" onclick="return LoadTag(\''.$row['id'].'\');">'.s2_htmlencode($row['name']).' ('.$info.')</a><br />'."\n";
+            }
+
+            ?>
+        </div>
+    </div>
 </form>
 <?php
 

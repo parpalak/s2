@@ -46,19 +46,20 @@ $(function () {
                         zoomType: 'x'
                     },
                     legend: {
-                        enabled: true,
+                        enabled: true
                     },
                     series: [
                         {
-                            name: 'Hits',
+                            name: 'Hits by day',
                             data: dataHits,
                             tooltip: {
                                 valueDecimals: 0
                             }
                         },
                         {
-                            name: 'Hosts',
+                            name: 'Unique hosts by day',
                             data: dataHosts,
+                            color: '#00751c',
                             tooltip: {
                                 valueDecimals: 0
                             }
@@ -90,15 +91,17 @@ $(function () {
                             },
                             series: [
                                 {
-                                    name: 'RSS main',
+                                    name: 'RSS readers of the main site',
                                     data: collectedData['main'],
+                                    color: '#fd8205',
                                     tooltip: {
                                         valueDecimals: 0
                                     }
                                 },
                                 {
-                                    name: 'RSS blog',
+                                    name: 'RSS readers of blog',
                                     data: collectedData['blog'],
+                                    color: '#c700f5',
                                     tooltip: {
                                         valueDecimals: 0
                                     }

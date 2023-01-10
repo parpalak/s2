@@ -2,8 +2,8 @@
 
 .CodeMirror {
 	/* Set height, width, borders, and global font properties here */
-	font: 1.083em/1.2307 Consolas, Monaco, monospace;
-	height: 100%;
+	font: 15px/21px Consolas, Monaco, monospace;
+	border-radius: 2px;
 	color: black;
 	direction: ltr;
 }
@@ -150,7 +150,14 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #a22;}
    the editor. You probably shouldn't touch them. */
 
 .CodeMirror {
-	position: relative;
+	/*position: relative;*/
+	/* For compatibility with flex. Alternatively one can use a wrapper div with position: absolute */
+	position: absolute;
+	top:0;
+	left:0;
+	bottom: 0;
+	right: 0;
+
 	overflow: hidden;
 	background: white;
 }

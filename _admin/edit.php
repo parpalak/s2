@@ -268,8 +268,79 @@ function s2_output_article_form ($id)
 	($hook = s2_hook('fn_output_article_form_output_start')) ? eval($hook) : null;
 ?>
 <form class="full_tab_form" name="artform" action="" onsubmit="SaveArticle('save'); return false;">
+    <?php ($hook = s2_hook('fn_output_article_form_pre_art_col')) ? eval($hook) : null; ?>
+    <div class="main-column vert-flex">
+        <table class="fields">
+            <?php ($hook = s2_hook('fn_output_article_form_pre_title')) ? eval($hook) : null; ?>
+            <tr>
+                <td class="label"><?php echo $lang_admin['Title']; ?></td>
+                <td><input type="text" name="page[title]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['title']); ?>" /></td>
+            </tr>
+            <?php ($hook = s2_hook('fn_output_article_form_pre_mkeys')) ? eval($hook) : null; ?>
+            <tr>
+                <td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta keywords']; ?></td>
+                <td><input type="text" name="page[meta_keys]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_keys']); ?>" /></td>
+            </tr>
+            <?php ($hook = s2_hook('fn_output_article_form_pre_mdesc')) ? eval($hook) : null; ?>
+            <tr>
+                <td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta description']; ?></td>
+                <td><input type="text" name="page[meta_desc]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_desc']); ?>" /></td>
+            </tr>
+            <?php
+
+            ($hook = s2_hook('fn_output_article_form_pre_cite')) ? eval($hook) : null;
+
+            if (!S2_ADMIN_CUT)
+            {
+
+                ?>
+                <tr>
+                    <td class="label" title="<?php echo $lang_admin['Excerpt help']; ?>"><?php echo $lang_admin['Excerpt']; ?></td>
+                    <td><input type="text" name="page[excerpt]" size="100" value="<?php echo s2_htmlencode($page['excerpt']); ?>" /></td>
+                </tr>
+                <?php
+
+            }
+
+            ($hook = s2_hook('fn_output_article_form_after_cite')) ? eval($hook) : null;
+
+            ?>
+            <tr>
+                <td class="label" title="<?php echo $lang_admin['Tags help']; ?>"><?php echo $lang_admin['Tags']; ?></td>
+                <td><input type="text" name="page[tags]" size="100" value="<?php echo !empty($tags) ? s2_htmlencode(implode(', ', $tags).', ') : ''; ?>" /></td>
+            </tr>
+            <?php ($hook = s2_hook('fn_output_article_form_after_tags')) ? eval($hook) : null; ?>
+        </table>
+        <?php ($hook = s2_hook('fn_output_article_form_after_fields1')) ? eval($hook) : null; ?>
+        <table class="fields">
+            <tr>
+                <td class="label"><?php echo $lang_admin['Create time']; ?></td>
+                <td><nobr>
+                        <?php echo s2_get_time_input('page[create_time]', $create_time); ?>
+                        <a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[create_time]');"><?php echo $lang_admin['Now']; ?></a>
+                    </nobr></td>
+                <td class="label" title="<?php echo $lang_admin['Modify time help']; ?>"><?php echo $lang_admin['Modify time']; ?></td>
+                <td><nobr>
+                        <?php echo s2_get_time_input('page[modify_time]', $modify_time); ?>
+                        <a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[modify_time]');"><?php echo $lang_admin['Now']; ?></a>
+                    </nobr></td>
+            </tr>
+        </table>
+        <?php
+
+        ($hook = s2_hook('fn_output_article_form_after_fields2')) ? eval($hook) : null;
+
+        s2_toolbar();
+
+        ($hook = s2_hook('fn_output_article_form_pre_text')) ? eval($hook) : null;
+
+        ?>
+        <div class="text_wrapper">
+            <textarea tabindex="1" id="arttext" class="full_textarea" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
+        </div>
+    </div>
 <?php ($hook = s2_hook('fn_output_article_form_pre_btn_col')) ? eval($hook) : null; ?>
-	<div class="r-float">
+	<div class="aside-column">
 		<input type="hidden" name="page[id]" value="<?php echo $page['id']; ?>" />
 		<input type="hidden" name="page[revision]" value="<?php echo $page['revision']; ?>" />
 <?php
@@ -284,8 +355,9 @@ function s2_output_article_form ($id)
 		<select name="page[user_id]">
 <?php
 
-		foreach ($users as $id => $login)
-			echo "\t\t\t".'<option value="'.$id.'"'.($id == $page['user_id'] ? ' selected="selected"' : '').'>'.s2_htmlencode($login).'</option>'."\n";
+		foreach ($users as $userId => $login) {
+            echo "\t\t\t" . '<option value="' . $userId . '"' . ($userId == $page['user_id'] ? ' selected="selected"' : '') . '>' . s2_htmlencode($login) . '</option>' . "\n";
+        }
 
 ?>
 		</select></label>
@@ -341,76 +413,6 @@ function s2_output_article_form ($id)
 <?php ($hook = s2_hook('fn_output_article_form_after_btn_col')) ? eval($hook) : null; ?>
 	</div>
 <?php ($hook = s2_hook('fn_output_article_form_after_cols')) ? eval($hook) : null; ?>
-	<div class="l-float">
-		<table class="fields">
-<?php ($hook = s2_hook('fn_output_article_form_pre_title')) ? eval($hook) : null; ?>
-			<tr>
-				<td class="label"><?php echo $lang_admin['Title']; ?></td>
-				<td><input type="text" name="page[title]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['title']); ?>" /></td>
-			</tr>
-<?php ($hook = s2_hook('fn_output_article_form_pre_mkeys')) ? eval($hook) : null; ?>
-			<tr>
-				<td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta keywords']; ?></td>
-				<td><input type="text" name="page[meta_keys]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_keys']); ?>" /></td>
-			</tr>
-<?php ($hook = s2_hook('fn_output_article_form_pre_mdesc')) ? eval($hook) : null; ?>
-			<tr>
-				<td class="label" title="<?php echo $lang_admin['Meta help']; ?>"><?php echo $lang_admin['Meta description']; ?></td>
-				<td><input type="text" name="page[meta_desc]" size="100" maxlength="255" value="<?php echo s2_htmlencode($page['meta_desc']); ?>" /></td>
-			</tr>
-<?php
-
-	($hook = s2_hook('fn_output_article_form_pre_cite')) ? eval($hook) : null;
-
-	if (!S2_ADMIN_CUT)
-	{
-
-?>
-			<tr>
-				<td class="label" title="<?php echo $lang_admin['Excerpt help']; ?>"><?php echo $lang_admin['Excerpt']; ?></td>
-				<td><input type="text" name="page[excerpt]" size="100" value="<?php echo s2_htmlencode($page['excerpt']); ?>" /></td>
-			</tr>
-<?php
-
-	}
-
-	($hook = s2_hook('fn_output_article_form_after_cite')) ? eval($hook) : null;
-
-?>
-			<tr>
-				<td class="label" title="<?php echo $lang_admin['Tags help']; ?>"><?php echo $lang_admin['Tags']; ?></td>
-				<td><input type="text" name="page[tags]" size="100" value="<?php echo !empty($tags) ? s2_htmlencode(implode(', ', $tags).', ') : ''; ?>" /></td>
-			</tr>
-<?php ($hook = s2_hook('fn_output_article_form_after_tags')) ? eval($hook) : null; ?>
-		</table>
-<?php ($hook = s2_hook('fn_output_article_form_after_fields1')) ? eval($hook) : null; ?>
-		<table class="fields">
-			<tr>
-				<td class="label"><?php echo $lang_admin['Create time']; ?></td>
-				<td><nobr>
-					<?php echo s2_get_time_input('page[create_time]', $create_time); ?>
-					<a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[create_time]');"><?php echo $lang_admin['Now']; ?></a>
-				</nobr></td>
-				<td class="label" title="<?php echo $lang_admin['Modify time help']; ?>"><?php echo $lang_admin['Modify time']; ?></td>
-				<td><nobr>
-					<?php echo s2_get_time_input('page[modify_time]', $modify_time); ?>
-					<a href="#" class="js" onclick="return SetTime(document.forms['artform'], 'page[modify_time]');"><?php echo $lang_admin['Now']; ?></a>
-				</nobr></td>
-			</tr>
-		</table>
-<?php
-
-	($hook = s2_hook('fn_output_article_form_after_fields2')) ? eval($hook) : null;
-
-	s2_toolbar();
-	$padding = S2_ADMIN_CUT ? 13.583333 : 15.5;
-	($hook = s2_hook('fn_output_article_form_pre_text')) ? eval($hook) : null;
-
-?>
-		<div class="text_wrapper" style="top: <?php echo $padding; ?>em;">
-			<textarea tabindex="1" id="arttext" class="full_textarea" name="page[text]"><?php echo s2_htmlencode($page['text']); ?></textarea>
-		</div>
-	</div>
 </form>
 <?php
 

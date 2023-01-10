@@ -133,7 +133,7 @@ function s2_extension_list ()
 	echo '<h2>'.$lang_admin_ext['Extensions available'].'</h2>';
 
 	if ($num_exts)
-		echo implode('', $ext_item);
+        echo '<div class="extensions">' . implode('', $ext_item) . '</div>';
 	else
 		echo '<div class="info-box"><p>'.$lang_admin_ext['No available extensions'].'</p></div>';
 
@@ -141,7 +141,7 @@ function s2_extension_list ()
 	if ($num_failed)
 	{
 		echo '<div class="info-box"><p class="important">'.$lang_admin_ext['Invalid extensions'].'</p></div>';
-		echo implode('', $ext_error);
+        echo '<div class="extensions">' . implode('', $ext_error) . '</div>';
 	}
 
 	($hook = s2_hook('fn_extension_list_pre_display_installed')) ? eval($hook) : null;
@@ -177,7 +177,7 @@ function s2_extension_list ()
 	echo '<h2>'.$lang_admin_ext['Installed extensions'].'</h2>';
 	if ($installed_count > 0) {
 		echo '<div class="info-box"><p class="important">'.$lang_admin_ext['Installed extensions warn'].'</p></div>';
-		echo implode('', $ext_item);
+		echo '<div class="extensions">' . implode('', $ext_item) . '</div>';
 	}
 	else {
         echo '<div class="info-box"><p>' . $lang_admin_ext['No installed extensions'] . '</p></div>';

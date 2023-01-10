@@ -43,7 +43,7 @@ require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 							<td class="label"><?php echo Lang::get('Author', 's2_blog'); ?></td>
 							<td><input style="width: 10em;" type="text" name="posts[author]" size="20" value="" /></td>
 							<td style="padding-left: 0.5em;"><label><input type="checkbox" name="posts[hidden]" value="1" checked="checked" /><?php echo Lang::get('Only hidden', 's2_blog'); ?></label></td>
-							<td><input name="button" type="submit" value="<?php echo Lang::get('Show posts', 's2_blog'); ?>" onclick="return LoadPosts();" /></td>
+                            <td><button class="find_posts long-button" name="button" type="submit" onclick="return LoadPosts();"><?php echo Lang::get('Show posts', 's2_blog'); ?></button></td>
 							<td></td>
 						</tr>
 					</table>
