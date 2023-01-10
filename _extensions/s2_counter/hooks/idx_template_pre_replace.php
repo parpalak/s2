@@ -14,8 +14,8 @@
 if (!isset($s2_counter_skip) || !$s2_counter_skip)
 {
 	if (!defined('S2_COUNTER_FUNCTIONS_LOADED'))
-		include S2_ROOT.'/_extensions/s2_counter'.'/functions.php';
+		include S2_ROOT.'/_extensions/s2_counter/functions.php';
 
 	s2_counter_process(S2_ROOT.'/_extensions/s2_counter');
 }
-$replace['<!-- s2_counter_img -->'] = '<img class="s2_counter" src="'.S2_PATH.'/_extensions/s2_counter'.'/counter.php" width="88" height="31" />';
+$replace['<!-- s2_counter_img -->'] = '<img class="s2_counter" src="'.S2_PATH.'/_extensions/s2_counter/counter.php" width="88" height="31" />';

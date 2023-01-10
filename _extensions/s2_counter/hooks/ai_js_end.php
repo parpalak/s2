@@ -22,6 +22,6 @@ if (!is_writable(S2_ROOT.'/_extensions/s2_counter'.'/data/'))
 	});
 
 ?>
-PopupMessages.show('<?php printf(Lang::get('Data folder not writable', 's2_counter'), S2_ROOT.'/_extensions/s2_counter'.'/data/'); ?>');
+PopupMessages.show('<?php printf(Lang::get('Data folder not writable', 's2_counter'), S2_ROOT.'/_extensions/s2_counter/data/'); ?>');
 <?php
 }

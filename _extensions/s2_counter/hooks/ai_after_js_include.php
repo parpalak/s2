@@ -11,5 +11,5 @@
      die;
 }
 
-echo '<script type="text/javascript" src="'.S2_PATH.'/_extensions/s2_counter'.'/highcharts/highstock.js"></script>'."\n";
-echo '<script type="text/javascript" src="'.S2_PATH.'/_extensions/s2_counter'.'/draw_chart.js"></script>'."\n";
+echo '<script type="text/javascript" src="'.S2_PATH.'/_extensions/s2_counter/highcharts/highstock.js"></script>'."\n";
+echo '<script type="text/javascript" src="'.S2_PATH.'/_extensions/s2_counter/draw_chart.js"></script>'."\n";

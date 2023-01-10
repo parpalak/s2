@@ -12,6 +12,6 @@
 }
 
 if (!defined('S2_COUNTER_FUNCTIONS_LOADED'))
-	include S2_ROOT.'/_extensions/s2_counter'.'/functions.php';
+	include S2_ROOT.'/_extensions/s2_counter/functions.php';
 
 s2_counter_rss_count(S2_ROOT.'/_extensions/s2_counter');
