@@ -67,26 +67,22 @@ var selectTabN = function () {};
 
 $(function ()
 {
-	$(document).keydown(function (e)
-	{
+	$(document).keydown(function (e) {
 		var ch = String.fromCharCode(e.which).toLowerCase();
 
 		// Ctrl + S
-		if (e.ctrlKey && ch == 's')
-		{
-			if (document.activeElement ) {
+		if (e.ctrlKey && !e.shiftKey && ch === 's') {
+			if (document.activeElement) {
 				if (document.activeElement.form && document.activeElement.form.onsubmit) {
 					document.activeElement.form.onsubmit();
 				} else {
-					// Для CodeMirror
+					// If activeElement is not an input (e.g. content-editable in CodeMirror)
 					document.activeElement.closest('form') && document.activeElement.closest('form').onsubmit();
 				}
 			}
 
 			return false;
-		}
-		else if (e.ctrlKey && tab_ids[ch])
-		{
+		} else if (e.ctrlKey && !e.shiftKey && tab_ids[ch]) {
 			selectTabN(ch);
 			return false;
 		}
@@ -900,7 +896,7 @@ var LoadArticle, ReloadArticle;
 			$(document.forms['artform'].elements['page[text]'].parentNode).keydown(function (e) {
 				var ch = String.fromCharCode(e.which).toLowerCase();
 
-				if (e.ctrlKey) {
+				if (e.ctrlKey && !e.shiftKey) {
 					if (ch === 'i')
 						TagSelection('em');
 					else if (ch === 'b')
