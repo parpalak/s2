@@ -377,6 +377,7 @@ $(function ()
 				{
 					var a = d.rslt.obj.attr('data-dim').split('*');
 
+					str += "<br />" + s2_lang.color + d.rslt.obj.attr('data-bits');
 					str += "<br />" + s2_lang.size + a[0] + "&times;" + a[1];
 					str += '<span id="s2_retina_size" style="display: ' + (s2Retina.get() ? 'inline' : 'none') + ';">' + s2_lang.reduction + Math.round(a[0]/2) + "&times;" + Math.round(a[1]/2) + '</span>';
 

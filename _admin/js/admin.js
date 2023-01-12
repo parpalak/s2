@@ -156,17 +156,23 @@ function uploadBlobToPictureDir(blob, extension, successCallback) {
 function optimizeAndUploadFile(file) {
 	var blobs = {};
 
+	SetWait(true);
+
 	/**
 	 * Experiments show that now in Chrome file.type === 'image/png' now matter how the image is pasted.
 	 * However, I prefer to write a general algorithm.
 	 */
 	if (file.type === 'image/png') {
-		blobs.png = file;
+		runOptipng(file, function (optimizedBlob) {
+			blobs.png = optimizedBlob;
+			compareBlobs();
+		});
 	} else {
 		imageConversion.compress(file,{
 			quality: 0.9,
 			type: 'image/png'
 		}).then(function(pngBlob) {
+			// TODO OptiPNG is also required here. But as I pointed above, for now it's a dead brunch. Let's do it later.
 			blobs.png = pngBlob;
 			compareBlobs();
 		});
@@ -188,6 +194,7 @@ function optimizeAndUploadFile(file) {
 		if (blobs.png && blobs.jpeg) {
 			var successCallback = function (res, w, h) {
 				ReturnImage(res.file_path, w || 'auto', h || 'auto');
+				SetWait(false);
 			};
 			if (blobs.png.size > blobs.jpeg.size) {
 				// JPEG is smaller, nevertheless we keep the PNG as a losless copy but suggest to use JPEG

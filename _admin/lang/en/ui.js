@@ -53,6 +53,7 @@ var s2_lang = {
 	folder				: 'Folder',
 	value				: 'Size: ',
 	size				: 'Dimension: ',
+	color				: 'Color depth: ',
 	insert				: '← Insert',
 	retina_help			: 'High resolution',
 	reduction			: ' &rarr; ',

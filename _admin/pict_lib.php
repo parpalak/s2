@@ -130,6 +130,7 @@ function s2_get_files ($dir)
 			'attr'		=> array(
 				'data-fname'	=> $item,
 				'data-dim'		=> $dim,
+				'data-bits'		=> $image_info['bits'] * ($image_info['channels'] ?? 1),
 				'data-fsize'	=> Lang::friendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item))
 			)
 		);
@@ -190,7 +191,7 @@ function s2_make_thumbnail ($filename, $max_size = 100)
 		if ($sy > $max_size)
 		{
 			$dy = $max_size;
-			$dx = round($dy * $sx / $sy); 
+			$dx = round($dy * $sx / $sy);
 		}
 		else
 		{
@@ -203,7 +204,7 @@ function s2_make_thumbnail ($filename, $max_size = 100)
 		if ($sx > $max_size)
 		{
 			$dx = $max_size;
-			$dy = round($dx * $sy / $sx); 
+			$dy = round($dx * $sy / $sx);
 		}
 		else
 		{

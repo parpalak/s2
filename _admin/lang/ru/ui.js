@@ -53,6 +53,7 @@ var s2_lang = {
 	folder				: 'папку ',
 	value				: 'Объем: ',
 	size				: 'Размер: ',
+	color				: 'Глубина цвета: ',
 	insert				: '← Вставить',
 	retina_help			: 'Высокое разрешение',
 	reduction			: ' &rarr; ',
