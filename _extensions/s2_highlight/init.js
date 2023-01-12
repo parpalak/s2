@@ -29,6 +29,23 @@ var s2_highlight = (function () {
                     selectionPointer: true
                 });
 
+                instance.on('paste', function (inst, event) {
+                    var items = (event.clipboardData || event.originalEvent.clipboardData).items,
+                        hasImage = false;
+
+                    for (var i = 0; i < items.length; i++) {
+                        var item = items[i];
+                        if (item.type.indexOf("image") != -1) {
+                            optimizeAndUploadFile(item.getAsFile());
+                            hasImage = true;
+                        }
+                    }
+
+                    if (hasImage) {
+                        event.preventDefault();
+                    }
+                    return !hasImage;
+                });
                 s2_highlight.restore_scroll();
             },
 

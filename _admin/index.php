@@ -250,6 +250,7 @@ SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 <!--><![endif]-->
 <script type="text/javascript" src="js/jquery-tools.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>
+<script type="text/javascript" src="js/conversion.js"></script>
 <script type="text/javascript" src="js/admin.js"></script>
 <?php ($hook = s2_hook('ai_after_js_include')) ? eval($hook) : null; ?>
 <script type="text/javascript">

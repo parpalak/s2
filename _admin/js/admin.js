@@ -107,25 +107,17 @@ $(function ()
 	});
 
 	// Tooltips
-	$(document).mouseover(function (e)
-	{
+	$(document).mouseover(function (e) {
 		var eItem = e.target,
 			title = eItem.title;
 
-		if (!title && eItem.nodeName == 'IMG')
-			title = eItem.title = eItem.alt;
-
-		if (title)
-			window.status = title;
-	})
-	.mouseout(function ()
-	{
-		window.status = window.defaultStatus;
+		if (!title && eItem.nodeName == 'IMG') {
+			eItem.title = eItem.alt;
+		}
 	});
 
 	// Prevent from loosing unsaved data
-	window.onbeforeunload = function ()
-	{
+	window.onbeforeunload = function () {
 		if (Changes.present())
 			return s2_lang.unsaved_exit;
 	};
@@ -135,6 +127,79 @@ $(function ()
 	SetWait(false);
 });
 
+function uploadBlobToPictureDir(blob, extension, successCallback) {
+	var formData = new FormData();
+
+	var d = new Date();
+	var name = d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + "-" +('0' + d.getDate()).slice(-2)
+		+ "_" + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + '.' + extension ;
+
+	formData.append('pictures[]', blob, name);
+	formData.append('dir', '/' + d.getFullYear() + '/' + ('0'+(d.getMonth()+1)).slice(-2));
+	formData.append('ajax', '1');
+	formData.append('create_dir', '1');
+	formData.append('return_image_info', '1');
+
+	$.ajax('pict_ajax.php?action=upload', {
+		type: 'POST',
+		contentType: false,
+		processData: false,
+		data: formData,
+		success: function (res) {
+			if (res.status === 'ok' && typeof successCallback !== "undefined") {
+				successCallback(res, res.image_info[0], res.image_info[1]);
+			}
+		}
+	});
+}
+
+function optimizeAndUploadFile(file) {
+	var blobs = {};
+
+	/**
+	 * Experiments show that now in Chrome file.type === 'image/png' now matter how the image is pasted.
+	 * However, I prefer to write a general algorithm.
+	 */
+	if (file.type === 'image/png') {
+		blobs.png = file;
+	} else {
+		imageConversion.compress(file,{
+			quality: 0.9,
+			type: 'image/png'
+		}).then(function(pngBlob) {
+			blobs.png = pngBlob;
+			compareBlobs();
+		});
+	}
+
+	if (file.type === 'image/jpg' || file.type === 'image/jpg') {
+		blobs.jpeg = file;
+	} else {
+		imageConversion.compress(file,{
+			quality: 0.9,
+			type: 'image/jpeg'
+		}).then(function(jpegBlob) {
+			blobs.jpeg = jpegBlob;
+			compareBlobs();
+		});
+	}
+
+	function compareBlobs() {
+		if (blobs.png && blobs.jpeg) {
+			var successCallback = function (res, w, h) {
+				ReturnImage(res.file_path, w || 'auto', h || 'auto');
+			};
+			if (blobs.png.size > blobs.jpeg.size) {
+				// JPEG is smaller, nevertheless we keep the PNG as a losless copy but suggest to use JPEG
+				uploadBlobToPictureDir(blobs.png, 'png');
+				uploadBlobToPictureDir(blobs.jpeg, 'jpg', successCallback);
+			} else {
+				// JPEG is larger, just forget about it
+				uploadBlobToPictureDir(blobs.png, 'png', successCallback);
+			}
+		}
+	}
+}
 function Logout ()
 {
 	function DoLogout ()
@@ -852,6 +917,17 @@ var LoadArticle, ReloadArticle;
 					else
 						return;
 					return false;
+				}
+			});
+
+			document.forms['artform'].elements['page[text]'].addEventListener('paste', function (event) {
+				var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+				for (var i = 0; i < items.length; i++) {
+					var item = items[i];
+					if (item.type.indexOf('image') !== -1) {
+						optimizeAndUploadFile(item.getAsFile());
+					}
 				}
 			});
 

@@ -597,28 +597,29 @@ var FileCounter = (function (inc, new_value)
 	}
 }());
 
-function DroppedFileUploaded ()
-{
-	if (this.readyState == 4)
-	{
+function DroppedFileUploaded() {
+	if (this.readyState == 4) {
 		var s2_status = this.getResponseHeader('X-S2-Status');
 
-		if (s2_status && s2_status != 'Success')
-		{
-			if (0 == FileCounter(-1))
-			{
+		if (s2_status && s2_status !== 'Success') {
+			if (0 == FileCounter(-1)) {
 				SetWait(false);
-				if (this.responseText)
-					PopupMessages.show(this.responseText);
+				if (this.responseText) {
+					var data = JSON.parse(this.responseText);
+					PopupMessages.show(data.errors.join("\n"));
+				}
 			}
 			return;
 		}
 
-		if (this.responseText)
-			PopupMessages.show(this.responseText);
+		if (this.responseText) {
+			var data = JSON.parse(this.responseText);
+			if (data.errors) {
+				PopupMessages.show(data.errors.join("\n"));
+			}
+		}
 
-		if (0 == FileCounter(-1))
-		{
+		if (0 == FileCounter(-1)) {
 			SetWait(false);
 			refreshFiles();
 		}
