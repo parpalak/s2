@@ -172,7 +172,7 @@ function s2_extension_list ()
 	}
 
     if ($installed_count > 0) {
-        echo '<button class="bitbtn refresh-hooks" style="float:right;" onclick="return RefreshHooks();">' . $lang_admin_ext['Refresh hooks'] . '</button>';
+        echo '<button class="bitbtn refresh-hooks" style="position: relative; float:right; top:1em;" onclick="return RefreshHooks();">' . $lang_admin_ext['Refresh hooks'] . '</button>';
     }
 	echo '<h2>'.$lang_admin_ext['Installed extensions'].'</h2>';
 	if ($installed_count > 0) {

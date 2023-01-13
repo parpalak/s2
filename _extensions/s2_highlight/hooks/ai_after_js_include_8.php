@@ -20,5 +20,8 @@
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/htmlmixed.min.js"></script>
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/clike.min.js"></script>
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/php.min.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/foldcode.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/foldgutter.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/xml-fold.js"></script>
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/init.js"></script>
 <?php

@@ -65,13 +65,14 @@ body {
 	margin: 0;
 	padding: 0;
 	background: #eee;
-	font: 14px/16px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	font: 14px/16px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 	color: #000;
 	}
 
 #logout {
 	text-align: center;
-	font: 13px/21px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	font-size: 13px;
+	line-height: 21px;
 	position: absolute;
 	z-index: 1;
 	top: 0;
@@ -235,7 +236,7 @@ hr {
 		-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 		overflow: hidden;
-		font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+		font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 		}
 	#popup_message .message {
 		padding: 2px 0;
@@ -481,7 +482,7 @@ body > .tabsheets {
 			background: linear-gradient(#ebebeb, #ccc);
 			cursor: default;
 			color: #840;
-			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 			vertical-align: middle;
 			}
 			.sort .sortable {
@@ -601,7 +602,7 @@ body > .tabsheets {
 			}
 	.aside-column select {
 		font-size: 14px;
-		font-family: "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+		font-family: "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 		}
 
 table.fields {
@@ -876,7 +877,7 @@ form center {
 			position: absolute;
 			right: 1em;
 			top: 1.167em;
-			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 			}
 
 /*=======================[Extensions tab]=====================================*/
@@ -884,7 +885,6 @@ form center {
 #ext_div h2,
 #comm_div h2 {
 	font-size: 1.4em;
-	font-family: Arial, Helvetica, sans-serif;
 	margin: 1em 0 0.5em;
 	border-bottom: 3px double #ddd;
 	border-color: rgba(0, 0, 0, 0.1);
@@ -1050,7 +1050,7 @@ form center {
 .jstree-leaf > a > .jstree-icon { background: url(../i/icons.png) -33px -64px; }
 
 #vakata-dragged {
-	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, sans-serif;
+	font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 	background: rgba(245, 252, 255, 0.8);
 	border: 1px solid #eee;
 	-moz-border-radius: 2px;

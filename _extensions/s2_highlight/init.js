@@ -26,6 +26,8 @@ var s2_highlight = (function () {
                     lineWrapping: true,
                     spellcheck: true,
                     inputStyle: "contenteditable",
+                    foldGutter: true,
+                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
                     selectionPointer: true
                 });
 
