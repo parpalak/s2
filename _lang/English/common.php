@@ -45,7 +45,7 @@ return array(
 	'Show email label title' => '',
 	'Subscribe label'        => 'Subscribe to the other visitors’ comments',
 	'Subscribe label title'  => 'The comments of other visitors will be sent to your e-mail. You can unsubscribe later if it bother you.',
-	'Comment syntax info'    => 'Use the following code to format your message: [i]<i>italics</i>[/i], [b]<b>bold</b>[/b].<br />Insert quotations: [q = author’s name]a quotation[/q] or [q]another quotation[/q].<br />Start links from http://. There are no other commands or HTML-tags.',
+	'Comment syntax info'    => 'Use the following code to format your message: [i]<i>italics</i>[/i], [b]<b>bold</b>[/b].<br />Insert quotations: [q = author’s name]a quotation[/q] or [q]another quotation[/q].<br />There are no other commands or HTML-tags.',
 	'Comment question'       => 'How much is %s?',
 
 	'Submit'                 => 'Submit',

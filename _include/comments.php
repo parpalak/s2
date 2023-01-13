@@ -101,6 +101,11 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 	mail($email, $subject, $message, $headers);
 }
 
+function s2_link_count(string $text)
+{
+    return preg_match_all('#(https?://\S{2,}?)(?=[\s),\'><\]]|&lt;|&gt;|[.;:](?:\s|$)|$)#u', $text);
+}
+
 //
 // Parses BB-codes in comments
 //
@@ -119,7 +124,7 @@ function s2_bbcode_to_html ($s)
 		$s = preg_replace('/\s*\[Q\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote>\\1</blockquote>', $s);
 
 	$s = preg_replace_callback(
-		'#(https?://\S{2,}?)(?=[\s\),\'\><\]]|&lt;|&gt;|[\.;:](?:\s|$)|$)#u',
+		'#(https?://\S{2,}?)(?=[\s),\'><\]]|&lt;|&gt;|[.;:](?:\s|$)|$)#u',
 		function ($matches)
 		{
 			$href = $link = $matches[1];

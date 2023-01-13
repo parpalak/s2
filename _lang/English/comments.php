@@ -21,7 +21,7 @@ return array(
 	'Email pattern'            =>
 		'Hello, <name>.
 
-You have received this e-mail, because you have subscribed for the article 
+You have received this e-mail, because you have subscribed for the article
 “<title>”,
 located at the address:
 <url>
@@ -59,6 +59,7 @@ of the comment will receive your answer.',
 	'missing_text'             => 'You have forgotten to enter the comment text.',
 	'missing_nick'             => 'You have forgotten to enter your name.',
 	'long_text'                => 'The message cannot be larger than%s bytes.',
+    'links_in_text'            => 'Remove http:// or https:// from links. Author will add links to the article if they are valuable.',
 	'long_nick'                => 'Is your name length more than 50 symbols? It is something strange...',
 	'question'                 => 'You gave the wrong answer to the question. Try again.',
 	'email'                    => 'Invalid e-mail. Please enter the correct e-mail, and the author of the site will contact you if it is needed. If you clear the &laquo;Show to other visitors&raquo; checkbox, your e-mail will not be shown.',

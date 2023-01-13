@@ -3,8 +3,8 @@
 body {
 	background: #fff;
 	color: #000;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 14px;
+	font-family: sans-serif;
+	font-size: 16px;
 	line-height: 1.5;
 	margin: 0;
 	}
@@ -13,30 +13,31 @@ body.e404 {
 	background: #eee;
 	}
 	.e404 h1 {
-		color: red;
+		color: #a00;
 		}
 	.e404 #crumbs {
 		height: 1em;
 		}
 
-
-*+html body {
-	font-size: 87.5%;
+/* Comment form and message */
+.icon-success, .icon-error{
+	font-size: 6em;
+	float: right;
 	}
-
-* html body {
-	font-size: 87.5%;
-	}
+	.icon-success {
+		color: #00af00;
+		}
+	.icon-error {
+		color: #af2000;
+		}
 
 #header, h1, h2, h3, h4, .header, blockquote {
-	font-family: Cambria, Georgia, "Times New Roman", times, serif;
-	font-weight: normal;
-	position: relative;
+	font-family: Georgia, "Times New Roman", times, serif;
 	}
 
 input, button {
 	font-size: 1em;
-}
+	}
 code, kbd, pre, textarea {
 	font-family: Consolas, monospace;
 	font-size: 1em;
@@ -48,8 +49,12 @@ code, kbd, pre, textarea {
 
 p, ol, ul, #content table, pre {
 	font-size: 1em;
-	margin: 0 0 1.5em;
+	margin: 0 0 1em;
 	}
+
+pre {
+	background: #f2f2f2;
+}
 
 hr {
 	margin: -0.071em 0 1.5em;
@@ -63,26 +68,23 @@ hr {
 #header {
 	font-size: 2.5em;
 	line-height: 1.2;
-	text-align: center;
-	padding: 0.6286em 10% 0.5714em;
+	padding: 0.7em 10% 0.5em;
 	}
 
 h1 {
 	font-size: 2em;
-	line-height: 1;
-	margin: -0.25em 0 0.75em;
+	line-height: 1.125;
+	margin: -0.125em 0 0.75em;
 	}
 h2 {
-	font-size: 1.5714em;
-	line-height: 0.955;
-	margin: 1.909em 0 0.955em;
-	top: -0.136em;
+	font-size: 1.5em;
+	line-height: 1.25;
+	margin: 1.5em 0 0.25em;
 	}
 h3 {
-	font-size: 1.286em;
-	line-height: 1.167;
-	margin: 1.167em 0;
-	top: 0.222em;
+	font-size: 1.25em;
+	line-height: 1.25;
+	margin: 0.75em 0 0.25em;
 	}
 h4 {
 	font-size: 1.214em;
@@ -113,18 +115,18 @@ h2.preview small, .preview .preview_section {
 	}
 
 small, .date, .time, #crumbs, #footer, .author {
-	font-size: 0.8571em;
+	font-size: 0.875em;
 	}
 p small, .author {
 	line-height: 1.75;
 	}
 .date, .time {
 	color: #666;
-	line-height: 1.75;
-	margin: -1.75em 0 1.75em;
+	line-height: 1.25;
+	margin: -1.25em 0 1.25em;
 	}
 .preview.time {
-	margin: 0;
+	margin: 0 0 0.25em;
 	}
 .preview.cite {
 	margin: 0 0 1.75em;
@@ -135,11 +137,7 @@ h3.article, h3.subsection {
 	top: -0.167em;
 	}
 p.article, p.subsection {
-	margin: -1.5em 0 1.5em;
-	}
-
-h2.preview {
-	margin: 1.909em 0 0;
+	margin: -1em 0 1.5em;
 	}
 
 blockquote, .reply {
@@ -170,7 +168,6 @@ a:link {color: #06c;}
 a:visited {color: #939;} 
 a:active {color: #f30;}
 a:hover {color: #063;}
-
 
 /* Forms */
 
@@ -308,54 +305,34 @@ body {
 
 /* Other styles */
 
-#content ul {
-	padding: 0 0 0 1.5em;
+#content ol li, #content ul li {
+	margin-bottom: 0.5em;
 	}
-	#content table ul {
-		margin: 0;
-		}
-	#content ul li {
-		margin: 0;
-		padding: 0 0 0 1.5em;
-		list-style-type: none;
-		text-indent: -1.214em;
-		}
 
 #menu .header {
-	margin: 2.333em 0 0;
-	font-size: 1.2857em;
-	line-height: 1.1667;
+	margin: 3em 0 0;
 	padding: 0;
+	font-weight: bold;
 	}
 	#menu .header a {
 		white-space: nowrap;
 		}
 
-#menu ul {
+#menu > ul {
 	margin: 0;
 	padding: 0;
 	}
 	#menu ul li {
-		margin: 0.643em 0;
-		padding: 0 0 0 1.5em;
-		line-height: 1.2;
-		list-style-type: none;
-		text-indent: -1.214em;
-		}
-	#menu > ul li {
-		text-indent: 0;
-		padding: 0;
+		line-height: 1.25;
+		margin: 0 0 0.5em;
 		}
 
-#content ul li,
-#menu ul ul li {
-	behavior: expression( !this.before ? this.before = this.innerHTML = '&mdash;&nbsp;' + this.innerHTML : '' );
-	}
-#content ul li:before,
-#menu ul ul li:before {
+#content ul li::marker,
+#menu ul ul li::marker {
 	content: '\2014\a0';
 	}
 
+#menu ul li::marker,
 #content ul.back_forward li:before {
 	content: '';
 	}

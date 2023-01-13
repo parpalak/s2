@@ -18,11 +18,11 @@ header('X-Powered-By: S2/'.S2_VERSION);
 if (isset($_GET['go']))
 {
 	// Outputs "comment saved" message (used if the premoderation mode is enabled)
-	$controller = new Page_Service(array(
-		'head_title' => Lang::get('Comment sent', 'comments'),
-		'title'      => '<h1>'.Lang::get('Comment sent', 'comments').'</h1>',
-		'text'       => sprintf(Lang::get('Comment sent info', 'comments'), s2_htmlencode($_GET['go']), s2_link('/')),
-	));
+    $controller = new Page_Service([
+        'head_title' => '✅' . Lang::get('Comment sent', 'comments'),
+        'title'      => '<span class="icon-success">✔</span>' . Lang::get('Comment sent', 'comments'),
+        'text'       => sprintf(Lang::get('Comment sent info', 'comments'), s2_htmlencode($_GET['go']), s2_link('/')),
+    ]);
 
 	$controller->render();
 
@@ -99,8 +99,9 @@ $_POST['subscribed'] = $subscribed = (int) isset($_POST['subscribed']);
 
 $errors = array();
 
-if (!S2_ENABLED_COMMENTS)
-	$errors[] = Lang::get('disabled', 'comments');
+if (!S2_ENABLED_COMMENTS) {
+    $errors[] = Lang::get('disabled', 'comments');
+}
 
 function s2_ext_var($field)
 {
@@ -108,10 +109,14 @@ function s2_ext_var($field)
 }
 
 $text = s2_ext_var('text');
-if ($text === '')
-	$errors[] = Lang::get('missing_text', 'comments');
-if (strlen($text) > S2_MAX_COMMENT_BYTES)
-	$errors[] = sprintf(Lang::get('long_text', 'comments'), S2_MAX_COMMENT_BYTES);
+if ($text === '') {
+    $errors[] = Lang::get('missing_text', 'comments');
+}
+if (strlen($text) > S2_MAX_COMMENT_BYTES) {
+    $errors[] = sprintf(Lang::get('long_text', 'comments'), S2_MAX_COMMENT_BYTES);
+} elseif (s2_link_count($text) > 0) {
+    $errors[] = Lang::get('links_in_text', 'comments');
+}
 
 $email = s2_ext_var('email');
 if (!s2_is_valid_email($email))
@@ -192,8 +197,8 @@ if (!empty($errors))
 	$error_text .=  '</ul>';
 
 	$controller = new Page_Service(array(
-		'head_title'   => Lang::get('Error'),
-		'title'        => Lang::get('Error'),
+		'head_title'   => '❌' . Lang::get('Error'),
+		'title'        => '<span class="icon-error">✖</span>' . Lang::get('Error'),
 		'text'         => $error_text . '<p>' . Lang::get('Fix error', 'comments') . '</p>',
 		'id'           => $id,
 		'class'        => $class,
