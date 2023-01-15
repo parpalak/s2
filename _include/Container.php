@@ -8,6 +8,10 @@
  */
 
 
+use Katzgrau\KLogger\Logger;
+use Psr\Log\LoggerInterface;
+use S2\Rose\Extractor\ExtractorInterface;
+use S2\Rose\Extractor\HtmlDom\DomExtractor;
 use S2\Rose\Finder;
 use S2\Rose\Indexer;
 use S2\Rose\Stemmer\PorterStemmerEnglish;
@@ -47,8 +51,19 @@ class Container
                     ->setHighlightTemplate('<i class="s2_search_highlight">%s</i>')
                 ;
 
+            case LoggerInterface::class:
+                return new Logger(S2_CACHE_DIR);
+
+            case ExtractorInterface::class:
+                return new DomExtractor(self::get(LoggerInterface::class));
+
             case Indexer::class:
-                return new Indexer(self::get(PdoStorage::class), self::get(StemmerInterface::class));
+                return new Indexer(
+                    self::get(PdoStorage::class),
+                    self::get(StemmerInterface::class),
+                    self::get(ExtractorInterface::class),
+                    self::get(LoggerInterface::class),
+                );
         }
 
         throw new InvalidArgumentException(sprintf('Unknown service "%s" requested.', $className));

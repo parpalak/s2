@@ -8,7 +8,7 @@
  */
 
 
-class DBLayer_MySQLiInnodb extends DBLayer_MySQli
+class DBLayer_MySQLiInnodb extends DBLayer_MySQLi
 {
 	const ENGINE = 'InnoDB';
 

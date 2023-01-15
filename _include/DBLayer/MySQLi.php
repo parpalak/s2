@@ -8,7 +8,7 @@
  */
 
 
-class DBLayer_MySQli extends DBLayer_Abstract
+class DBLayer_MySQLi extends DBLayer_Abstract
 {
 	const ENGINE = 'MyISAM';
 

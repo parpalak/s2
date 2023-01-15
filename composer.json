@@ -16,6 +16,9 @@
     "ext-pdo": "*",
     "ext-json": "*",
     "altorouter/altorouter": "dev-master",
-    "s2/rose": "dev-master#ee846ff57bd25626a6504468545eb899fe010b52"
+    "psr/log": "^1.1",
+    "katzgrau/klogger": "^1.2",
+    "s2/rose": "dev-extractors",
+    "symfony/error-handler": "^5.4"
   }
 }

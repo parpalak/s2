@@ -616,7 +616,7 @@ function error()
 	<style>
 		body {
 			margin: 40px;
-			font: 16px/1.3 Helvetica, Arial, sans-serif;
+			font: 16px/1.5 Helvetica, Arial, sans-serif;
 			color: #333;
 		}
 		pre {
@@ -632,7 +632,7 @@ function error()
 	</style>
 </head>
 <body>
-<h1><?php echo Lang::get('Error encountered') ? Lang::get('Error encountered') : 'An error was encountered'; ?></h1>
+<h1><?php echo Lang::get('Error encountered') ?: 'An error was encountered'; ?></h1>
 <hr />
 <?php
 

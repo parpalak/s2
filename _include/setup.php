@@ -8,6 +8,11 @@
  */
 
 
+use Psr\Log\LoggerInterface;
+use Symfony\Component\ErrorHandler\Debug;
+use Symfony\Component\ErrorHandler\ErrorHandler;
+use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
+
 if (!defined('S2_ROOT')) {
     die;
 }
@@ -37,6 +42,15 @@ spl_autoload_register(static function ($class) {
 
     require $file;
 });
+
+if (defined('S2_DEBUG')) {
+    $errorHandler = Debug::enable();
+} else {
+    $errorHandler = ErrorHandler::register();
+}
+/** @noinspection PhpParamsInspection */
+$errorHandler->setDefaultLogger(Container::get(LoggerInterface::class));
+HtmlErrorRenderer::setTemplate(S2_ROOT.'_include/views/error.php');
 
 // Strip out "bad" UTF-8 characters
 s2_remove_bad_characters();
