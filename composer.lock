@@ -176,12 +176,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "6250a644a8f6b7cfd9e1d29128bcae6bfe2475e7"
+                "reference": "40074e0d32339d306ea101317675efa28132d5c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/6250a644a8f6b7cfd9e1d29128bcae6bfe2475e7",
-                "reference": "6250a644a8f6b7cfd9e1d29128bcae6bfe2475e7",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/40074e0d32339d306ea101317675efa28132d5c6",
+                "reference": "40074e0d32339d306ea101317675efa28132d5c6",
                 "shasum": ""
             },
             "require": {
@@ -216,7 +216,7 @@
                 "issues": "https://github.com/parpalak/rose/issues",
                 "source": "https://github.com/parpalak/rose/tree/master"
             },
-            "time": "2023-01-20T17:16:29+00:00"
+            "time": "2023-01-20T20:56:24+00:00"
         },
         {
             "name": "symfony/error-handler",

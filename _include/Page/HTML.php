@@ -222,7 +222,7 @@ abstract class Page_HTML extends Page_Abstract
 		($hook = s2_hook('idx_template_after_replace')) ? eval($hook) : null;
 
 		// Execution time
-		if (defined('S2_DEBUG'))
+		if (defined('S2_DEBUG') || defined('S2_SHOW_TIME'))
 		{
 			$time_placeholder = 't = '.Lang::number_format(microtime(true) - $s2_start, true, 3).'; q = '.$s2_db->get_num_queries();
 			$template = str_replace('<!-- s2_querytime -->', $time_placeholder, $template);
