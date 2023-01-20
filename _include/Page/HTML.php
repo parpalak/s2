@@ -188,7 +188,12 @@ abstract class Page_HTML extends Page_Abstract
 		($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
 
 		// Queries
-		$replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', array('saved_queries' => $s2_db->get_saved_queries())) : '';
+        /** @var \S2\Core\Pdo\PDO $pdo */
+        $pdo                          = \Container::get(\PDO::class);
+        $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', [
+            'saved_queries' => $s2_db->get_saved_queries(),
+            'saved_queries2' => $pdo->cleanLogs(),
+        ]) : '';
 
 		$etag = md5($template);
 		// Add here placeholders to be excluded from the ETag calculation

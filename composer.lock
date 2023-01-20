@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5b3655c4bf270201d8931fd32cce485d",
+    "content-hash": "0716b95217b572d99e3f74eed7bfe533",
     "packages": [
         {
             "name": "altorouter/altorouter",
@@ -172,16 +172,16 @@
         },
         {
             "name": "s2/rose",
-            "version": "dev-extractors",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "bd945ca7026b31f6e0734c68fdcfb6b936aaf214"
+                "reference": "6250a644a8f6b7cfd9e1d29128bcae6bfe2475e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/bd945ca7026b31f6e0734c68fdcfb6b936aaf214",
-                "reference": "bd945ca7026b31f6e0734c68fdcfb6b936aaf214",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/6250a644a8f6b7cfd9e1d29128bcae6bfe2475e7",
+                "reference": "6250a644a8f6b7cfd9e1d29128bcae6bfe2475e7",
                 "shasum": ""
             },
             "require": {
@@ -194,6 +194,7 @@
                 "codeception/codeception": "^2.0|^3.0|^4.0",
                 "codeception/module-asserts": "^1.3"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -213,9 +214,9 @@
             "description": "Search engine for PHP sites",
             "support": {
                 "issues": "https://github.com/parpalak/rose/issues",
-                "source": "https://github.com/parpalak/rose/tree/extractors"
+                "source": "https://github.com/parpalak/rose/tree/master"
             },
-            "time": "2023-01-14T13:29:26+00:00"
+            "time": "2023-01-20T17:16:29+00:00"
         },
         {
             "name": "symfony/error-handler",

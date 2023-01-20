@@ -24,12 +24,4 @@ interface GenericFetcher
      * Returns info about a page ID
      */
     public function chapter(string $id): ?Indexable;
-
-    /**
-     * Returns page text for a given array of IDs
-     *
-     * @param array|string[] $ids
-     * @return array
-     */
-    public function texts(array $ids): array;
 }

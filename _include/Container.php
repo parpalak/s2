@@ -35,7 +35,7 @@ class Container
 
         switch ($className) {
             case \PDO::class:
-                $pdo = new \PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
+                $pdo = new \S2\Core\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
                 return $pdo;
@@ -49,6 +49,7 @@ class Container
             case Finder::class:
                 return (new Finder(self::get(PdoStorage::class), self::get(StemmerInterface::class)))
                     ->setHighlightTemplate('<i class="s2_search_highlight">%s</i>')
+                    ->setSnippetLineSeparator(' ⋄ ')
                 ;
 
             case LoggerInterface::class:

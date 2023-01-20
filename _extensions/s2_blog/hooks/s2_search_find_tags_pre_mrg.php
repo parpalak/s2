@@ -20,7 +20,7 @@ Lang::load('s2_blog', function ()
 });
 
 $s2_blog_search_sql = array(
-	'SELECT'	=> 'count(*)',
+	'SELECT'	=> '1',
 	'FROM'		=> 's2_blog_post_tag AS pt',
 	'JOINS'		=> array(
 		array(

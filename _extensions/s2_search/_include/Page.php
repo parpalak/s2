@@ -11,12 +11,10 @@
 namespace s2_extensions\s2_search;
 
 use Lang;
-use S2\Rose\Entity\ExternalContent;
 use S2\Rose\Entity\ExternalId;
 use S2\Rose\Entity\Query;
 use S2\Rose\Finder;
 use S2\Rose\Helper\ProfileHelper;
-use S2\Rose\SnippetBuilder;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Exception\EmptyIndexException;
 
@@ -40,7 +38,7 @@ class Page extends \Page_HTML implements \Page_Routable
             return require __DIR__ . '/../lang/English.php';
         });
 
-        $this->viewer  = new \Viewer($this);
+        $this->viewer = new \Viewer($this);
         /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
         $this->stemmer = \Container::get(StemmerInterface::class);
 
@@ -54,8 +52,6 @@ class Page extends \Page_HTML implements \Page_Routable
         $content['query'] = $query;
 
         if ($query !== '') {
-            $fetcher = new Fetcher();
-
             /** @var Finder $finder */
             $finder = \Container::get(Finder::class);
 
@@ -90,22 +86,6 @@ class Page extends \Page_HTML implements \Page_Routable
                 if ($this->page_num < 1 || $this->page_num > $total_pages) {
                     $this->page_num = 1;
                 }
-
-                $snippetBuilder = new SnippetBuilder($this->stemmer);
-                $snippetBuilder->setSnippetLineSeparator(' ⋄ ');
-                $snippetBuilder->attachSnippets($resultSet, static function (array $externalIds) use ($fetcher) {
-                    /** @var ExternalId[] $externalIds */
-                    $idMap = [];
-                    foreach ($externalIds as $externalId) {
-                        $idMap[$externalId->getId()] = $externalId;
-                    }
-
-                    $result = new ExternalContent();
-                    foreach ($fetcher->texts(array_keys($idMap)) as $id => $text) { // TODO вместо этого вызова получать инфу выше для всех внешних id, повышать релевантность у избранных записей
-                        $result->attach($idMap[$id], $text);
-                    }
-                    return $result;
-                });
 
                 $content['profile'] = array_map(static fn($p) => ProfileHelper::formatProfilePoint($p), $resultSet->getProfilePoints());
                 $content['trace']   = $resultSet->getTrace();
@@ -181,10 +161,10 @@ class Page extends \Page_HTML implements \Page_Routable
         }
 
         $stemmedWords = array_map(fn($word) => $this->stemmer->stemWord($word), $words);
-        $words        = array_merge($words, $stemmedWords);
+        $words        = array_unique(array_merge($words, $stemmedWords));
 
         $sql = array(
-            'SELECT' => 'count(*)',
+            'SELECT' => '1',
             'FROM'   => 'article_tag AS at',
             'JOINS'  => array(
                 array(

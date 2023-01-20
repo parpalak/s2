@@ -104,37 +104,4 @@ class Fetcher implements GenericFetcher
 
         return $indexable;
     }
-
-    public function texts(array $ids): array
-    {
-        global $s2_db;
-
-        $articles = array();
-
-        $result = ($hook = s2_hook('s2_search_fetcher_texts_start')) ? eval($hook) : null;
-        if ($result) {
-            return $articles;
-        }
-
-        foreach ($ids as $k => $v) {
-            $ids[$k] = (int)$v;
-        }
-
-        if (count($ids) > 0) {
-            // Obtaining articles text
-            $query = array(
-                'SELECT' => 'id, pagetext',
-                'FROM'   => 'articles AS a',
-                'WHERE'  => 'id IN (' . implode(', ', $ids) . ') AND published = 1',
-            );
-            ($hook = s2_hook('s2_search_fetcher_texts_pre_qr')) ? eval($hook) : null;
-            $result = $s2_db->query_build($query);
-
-            while ($article = $s2_db->fetch_assoc($result)) {
-                $articles[$article['id']] = $article['pagetext'];
-            }
-        }
-
-        return $articles;
-    }
 }
