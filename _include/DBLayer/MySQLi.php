@@ -141,8 +141,9 @@ class DBLayer_MySQLi extends DBLayer_Abstract
 	{
 		if ($this->link_id)
 		{
-			if ($this->query_result)
-				@mysqli_free_result($this->query_result);
+			if (!is_bool($this->query_result) && $this->query_result) {
+                @mysqli_free_result($this->query_result);
+            }
 
 			return @mysqli_close($this->link_id);
 		}

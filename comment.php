@@ -125,7 +125,7 @@ if (!s2_is_valid_email($email))
 $name = s2_ext_var('name');
 if (empty($name))
 	$errors[] = Lang::get('missing_nick', 'comments');
-if (utf8_strlen($name) > 50)
+if (mb_strlen($name) > 50)
 	$errors[] = Lang::get('long_nick', 'comments');
 
 if (!s2_check_comment_question($_POST['key'], $_POST['question']))

@@ -413,7 +413,7 @@ else
 		$base_url = $_POST['req_base_url'];
 
 	// Validate form
-	if (utf8_strlen($db_name) == 0)
+	if (mb_strlen($db_name) == 0)
 		error($lang_install['Missing database name']);
 
 	// Validate prefix
@@ -424,20 +424,20 @@ else
 		error(sprintf($lang_install['Invalid table prefix'], $db_prefix));
 
 	// Validate username
-	if (utf8_strlen($username) < 2)
+	if (mb_strlen($username) < 2)
 		error($lang_install['Username too short']);
-	if (utf8_strlen($username) > 40)
+	if (mb_strlen($username) > 40)
 		error($lang_install['Username too long']);
 
 	// Validate password
-	if (utf8_strlen($password) > 100)
+	if (mb_strlen($password) > 100)
 		error($lang_install['Password too long']);
 
 	// Validate email
 	if ($email && !s2_is_valid_email($email))
 		error($lang_install['Invalid email']);
 
-	if (utf8_strlen($base_url) == 0)
+	if (mb_strlen($base_url) == 0)
 		error($lang_install['Missing base url']);
 
 	if (!file_exists(S2_ROOT.'_lang/'.$default_lang.'/common.php'))

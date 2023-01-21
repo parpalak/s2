@@ -18,7 +18,7 @@ if (!defined('S2_ROOT')) {
 }
 
 require S2_ROOT . '_include/functions.php';
-require S2_ROOT . '_include/utf8/utf8.php';
+mb_internal_encoding('UTF-8');
 
 // If the cache directory is not specified, we use the default setting
 if (!defined('S2_CACHE_DIR')) {

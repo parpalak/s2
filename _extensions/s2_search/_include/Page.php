@@ -210,12 +210,12 @@ class Page extends \Page_HTML implements \Page_Routable
 
     private function tagIsSimilarToWords(string $name, array $words): bool
     {
-        $foundWordsInTags = array_filter(explode(' ', $name), static fn($word) => utf8_strlen($word) > 2);
+        $foundWordsInTags = array_filter(explode(' ', $name), static fn($word) => mb_strlen($word) > 2);
         $foundStemsInTags = array_map(fn(string $keyPart) => $this->stemmer->stemWord($keyPart), $foundWordsInTags);
 
         foreach ($foundStemsInTags as $foundStemInTags) {
             foreach ($words as $word) {
-                if ($word === $foundStemInTags || (strpos($foundStemInTags, $word) === 0 && utf8_strlen($word) >= 5)) {
+                if ($word === $foundStemInTags || (strpos($foundStemInTags, $word) === 0 && mb_strlen($word) >= 5)) {
                     return true;
                 }
             }

@@ -338,7 +338,7 @@ if ($action == 'load_tree') {
                 continue;
             }
 
-            $filename = utf8_strtolower(s2_basename($filename));
+            $filename = mb_strtolower(s2_basename($filename));
             $filename = str_replace("\0", '', $filename);
             while (strpos($filename, '..') !== false)
                 $filename = str_replace('..', '', $filename);

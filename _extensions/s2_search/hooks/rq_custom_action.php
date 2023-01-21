@@ -7,7 +7,9 @@
  * @package s2_search
  */
 
- if (!defined('S2_ROOT')) {
+use s2_extensions\s2_search\IndexManager;
+
+if (!defined('S2_ROOT')) {
      die;
 }
 
@@ -24,10 +26,12 @@ if ($action == 's2_search_makeindex')
 
 	s2_test_user_rights($is_permission);
 
-	$fetcher = new \s2_extensions\s2_search\Fetcher();
-	$finder  = new \s2_extensions\s2_search\IndexManager(S2_CACHE_DIR, $fetcher, Container::get(\S2\Rose\Indexer::class), Container::get(\S2\Rose\Storage\Database\PdoStorage::class));
-	if (!$chapter)
-		echo $finder->index();
-	else
-		$finder->refresh($chapter);
+    /** @var IndexManager $finder */
+	$finder = Container::get(IndexManager::class);
+	if (!$chapter) {
+        echo $finder->index();
+    }
+	else {
+        $finder->refresh($chapter);
+    }
 }

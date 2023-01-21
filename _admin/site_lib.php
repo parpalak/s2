@@ -360,7 +360,7 @@ function s2_get_tag_ids ($tag_str)
 	{
 		$tag = trim($tag);
 		$dirty_tags[$k] = $tag;
-		$fake_tags[] = utf8_strtolower($tag);
+		$fake_tags[] = mb_strtolower($tag);
 	}
 
 	// Case-independent
@@ -391,7 +391,7 @@ function s2_get_tag_ids ($tag_str)
 	$ids = $real_tags = array();
 	while ($real_tag = $s2_db->fetch_assoc($result))
 	{
-		$lowered_real_tag = utf8_strtolower($real_tag['name']);
+		$lowered_real_tag = mb_strtolower($real_tag['name']);
 
 		foreach ($lowered_tags as $k => $lowered_tag)
 			if ($lowered_real_tag == $lowered_tag)

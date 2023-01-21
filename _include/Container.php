@@ -65,6 +65,15 @@ class Container
                     self::get(ExtractorInterface::class),
                     self::get(LoggerInterface::class),
                 );
+
+            case \s2_extensions\s2_search\IndexManager::class:
+                return new \s2_extensions\s2_search\IndexManager(
+                    S2_CACHE_DIR,
+                    new \s2_extensions\s2_search\Fetcher(),
+                    self::get(Indexer::class),
+                    self::get(PdoStorage::class),
+                    self::get(LoggerInterface::class)
+                );
         }
 
         throw new InvalidArgumentException(sprintf('Unknown service "%s" requested.', $className));

@@ -15,6 +15,7 @@
   "require": {
     "ext-pdo": "*",
     "ext-json": "*",
+    "ext-dom": "*",
     "altorouter/altorouter": "dev-master",
     "psr/log": "^1.1",
     "katzgrau/klogger": "^1.2",

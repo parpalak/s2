@@ -9,6 +9,7 @@
 
 namespace s2_extensions\s2_search;
 
+use Psr\Log\LoggerInterface;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Exception\RuntimeException;
 use S2\Rose\Indexer;
@@ -16,7 +17,7 @@ use S2\Rose\Storage\Database\PdoStorage;
 
 class IndexManager
 {
-    private const FILE_PROCESS_STATE = 's2_search_state.txt';
+    private const FILE_PROCESS_STATE  = 's2_search_state.txt';
     private const FILE_BUFFER_CONTENT = 's2_search_buffer.txt';
     private const FILE_BUFFER_POINTER = 's2_search_pointer.txt';
 
@@ -24,13 +25,15 @@ class IndexManager
     private GenericFetcher $fetcher;
     private Indexer $indexer;
     private PdoStorage $pdoStorage;
+    private LoggerInterface $logger;
 
-    public function __construct(string $dir, GenericFetcher $fetcher, Indexer $indexer, PdoStorage $pdoStorage)
+    public function __construct(string $dir, GenericFetcher $fetcher, Indexer $indexer, PdoStorage $pdoStorage, LoggerInterface $logger)
     {
         $this->dir        = $dir;
         $this->fetcher    = $fetcher;
         $this->indexer    = $indexer;
         $this->pdoStorage = $pdoStorage;
+        $this->logger     = $logger;
     }
 
     public function index(): string
@@ -90,6 +93,7 @@ class IndexManager
                         $this->indexer->index($indexable);
                     } catch (RuntimeException $e) {
                         file_put_contents($this->dir . self::FILE_PROCESS_STATE, '');
+                        $this->logger->error($e->getMessage(), ['exception' => $e]);
                     }
                 }
             } while ($start + 4.0 > microtime(1));

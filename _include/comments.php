@@ -129,8 +129,8 @@ function s2_bbcode_to_html ($s)
 		{
 			$href = $link = $matches[1];
 
-			if (utf8_strlen($matches[1]) > 55)
-				$link = utf8_substr($matches[1], 0 , 42).' &hellip; '.utf8_substr($matches[1], -10);
+			if (mb_strlen($matches[1]) > 55)
+				$link = mb_substr($matches[1], 0 , 42).' &hellip; '.mb_substr($matches[1], -10);
 
 			return '<noindex><a href="'.$href.'" rel="nofollow">'.$link.'</a></noindex>';
 		},
@@ -154,7 +154,7 @@ function utf8_wordwrap($string, $width = 75, $break = "\n")
 		foreach ($str as $val)
 		{
 			$val .= ' ';
-			$tmp = utf8_strlen($val);
+			$tmp = mb_strlen($val);
 			$len += $tmp;
 			if ($len >= $width)
 			{
