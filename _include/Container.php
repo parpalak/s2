@@ -53,7 +53,7 @@ class Container
                 ;
 
             case LoggerInterface::class:
-                return new Logger(S2_CACHE_DIR);
+                return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR);
 
             case ExtractorInterface::class:
                 return new DomExtractor(self::get(LoggerInterface::class));
