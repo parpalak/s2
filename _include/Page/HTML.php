@@ -188,7 +188,7 @@ abstract class Page_HTML extends Page_Abstract
 		($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
 
 		// Queries
-        /** @var \S2\Core\Pdo\PDO $pdo */
+        /** @var \S2\Cms\Pdo\PDO $pdo */
         $pdo                          = \Container::get(\PDO::class);
         $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', [
             'saved_queries' => $s2_db->get_saved_queries(),

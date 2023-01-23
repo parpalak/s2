@@ -10,8 +10,8 @@
 
 use Katzgrau\KLogger\Logger;
 use Psr\Log\LoggerInterface;
+use S2\Cms\Image\ThumbnailGenerator;
 use S2\Rose\Extractor\ExtractorInterface;
-use S2\Rose\Extractor\HtmlDom\DomExtractor;
 use S2\Rose\Finder;
 use S2\Rose\Indexer;
 use S2\Rose\Stemmer\PorterStemmerEnglish;
@@ -35,7 +35,7 @@ class Container
 
         switch ($className) {
             case \PDO::class:
-                $pdo = new \S2\Core\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
+                $pdo = new \S2\Cms\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
                 return $pdo;
@@ -49,14 +49,17 @@ class Container
             case Finder::class:
                 return (new Finder(self::get(PdoStorage::class), self::get(StemmerInterface::class)))
                     ->setHighlightTemplate('<i class="s2_search_highlight">%s</i>')
-                    ->setSnippetLineSeparator(' ⋄ ')
+                    ->setSnippetLineSeparator(' ⋄&nbsp;')
                 ;
+
+            case ThumbnailGenerator::class:
+                return new ThumbnailGenerator();
 
             case LoggerInterface::class:
                 return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR);
 
             case ExtractorInterface::class:
-                return new DomExtractor(self::get(LoggerInterface::class));
+                return new \S2\Cms\Rose\CustomExtractor(self::get(LoggerInterface::class));
 
             case Indexer::class:
                 return new Indexer(

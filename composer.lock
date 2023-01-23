@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0716b95217b572d99e3f74eed7bfe533",
+    "content-hash": "37dd0be6c7d3f7c2feefdff0b7e3cbed",
     "packages": [
         {
             "name": "altorouter/altorouter",
@@ -176,16 +176,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "40074e0d32339d306ea101317675efa28132d5c6"
+                "reference": "5d10bb0d464bf3e8bc4aee0c20cce1eb88d24d7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/40074e0d32339d306ea101317675efa28132d5c6",
-                "reference": "40074e0d32339d306ea101317675efa28132d5c6",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/5d10bb0d464bf3e8bc4aee0c20cce1eb88d24d7d",
+                "reference": "5d10bb0d464bf3e8bc4aee0c20cce1eb88d24d7d",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
+                "ext-json": "*",
                 "php": ">=7.4",
                 "psr/log": "^1.1",
                 "symfony/polyfill-mbstring": "^1.2"
@@ -216,7 +217,7 @@
                 "issues": "https://github.com/parpalak/rose/issues",
                 "source": "https://github.com/parpalak/rose/tree/master"
             },
-            "time": "2023-01-20T20:56:24+00:00"
+            "time": "2023-01-23T13:16:02+00:00"
         },
         {
             "name": "symfony/error-handler",
@@ -556,7 +557,9 @@
     "prefer-lowest": false,
     "platform": {
         "ext-pdo": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-dom": "*",
+        "ext-gd": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"

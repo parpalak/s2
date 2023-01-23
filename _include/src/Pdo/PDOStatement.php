@@ -8,7 +8,7 @@
  * @see https://github.com/filisko/pdo-plus for original code
  */
 
-namespace S2\Core\Pdo;
+namespace S2\Cms\Pdo;
 
 use PDO as NativePdo;
 use PDOStatement as NativePdoStatement;

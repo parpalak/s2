@@ -93,11 +93,12 @@ class Page extends \Page_HTML implements \Page_Routable
                 $content['output'] = '';
                 foreach ($resultSet->getItems() as $item) {
                     $content['output'] .= $this->renderPartial('search_result', [
-                        'title' => $item->getHighlightedTitle($this->stemmer),
-                        'url'   => $item->getUrl(),
-                        'descr' => $item->getSnippet(),
-                        'time'  => $item->getDate() ? $item->getDate()->getTimestamp() : null,
-                        'debug' => ($content['trace'][(new ExternalId($item->getId()))->toString()]),
+                        'title'  => $item->getHighlightedTitle($this->stemmer),
+                        'url'    => $item->getUrl(),
+                        'descr'  => $item->getSnippet(),
+                        'time'   => $item->getDate() ? $item->getDate()->getTimestamp() : null,
+                        'images' => $item->getImageCollection(),
+                        'debug'  => ($content['trace'][(new ExternalId($item->getId()))->toString()]),
                     ]);
                 }
 
