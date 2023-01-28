@@ -17,8 +17,6 @@ abstract class DBLayer_Abstract
 	private static function getClassName ($db_type)
 	{
 		$classes = array(
-			'mysql' => 'MySQL',
-			'mysql_innodb' => 'MySQLInnoDB',
 			'mysqli' => 'MySQLi',
 			'mysqli_innodb' => 'MySQLiInnoDB',
 			'pgsql' => 'PgSQL',

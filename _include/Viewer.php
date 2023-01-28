@@ -78,7 +78,7 @@ class Viewer
             return $s;
         }
 
-        $str = s2_htmlencode(json_encode($vars, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | (is_array($vars) && count($vars) > 1 ? JSON_PRETTY_PRINT : 0)));
+        $str = s2_htmlencode(json_encode($vars, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | (is_array($vars) && count($vars) > 1 ? JSON_PRETTY_PRINT : 0)));
         $str = str_replace(["\r", "\n"], ['', "\n" . str_pad(' ', $level * 4)], $str);
 
         return $str;

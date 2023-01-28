@@ -52,7 +52,7 @@ if (isset($s2_blog_placehoders['s2_blog_last_post']))
 	unset($s2_blog_post);
 	$replace['<!-- s2_blog_last_post -->'] = implode('', $s2_blog_data);
 }
-$replace['<!-- s2_blog_tags -->'] = isset($page['s2_blog_tags']) ? $page['s2_blog_tags'] : '';
-$replace['<!-- s2_blog_calendar -->'] = isset($page['s2_blog_calendar']) ? $page['s2_blog_calendar'] : '';
-$replace['<!-- s2_blog_navigation -->'] = isset($page['s2_blog_navigation']) ? $page['s2_blog_navigation'] : '';
-$replace['<!-- s2_blog_back_forward -->'] = isset($page['s2_blog_back_forward']) ? $page['s2_blog_back_forward'] : '';
+$replace['<!-- s2_blog_tags -->'] = $page['s2_blog_tags'] ?? '';
+$replace['<!-- s2_blog_calendar -->'] = $page['s2_blog_calendar'] ?? '';
+$replace['<!-- s2_blog_navigation -->'] = $page['s2_blog_navigation'] ?? '';
+$replace['<!-- s2_blog_back_forward -->'] = $page['s2_blog_back_forward'] ?? '';

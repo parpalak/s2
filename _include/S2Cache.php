@@ -100,6 +100,9 @@ class S2Cache
     {
         global $s2_db;
 
+        if (!isset($s2_db)) {
+            return []; // Install
+        }
         // Get the hotfix hooks from the DB
 //        $query = array(
 //            'SELECT'   => 'eh.id, eh.code, eh.extension_id, eh.priority, e.dependencies',

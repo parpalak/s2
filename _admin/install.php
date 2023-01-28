@@ -13,7 +13,6 @@
 define('S2_VERSION', '2.0dev');
 define('S2_DB_REVISION', 14);
 define('MIN_PHP_VERSION', '7.4.0');
-define('MIN_MYSQL_VERSION', '5.6');
 
 define('S2_ROOT', '../');
 define('S2_DEBUG', 1);
@@ -454,15 +453,6 @@ else
 		error($e);
 	}
 
-
-	// If MySQL, make sure it's at least 4.1.2
-	if ($db_type == 'mysql' || $db_type == 'mysqli')
-	{
-		$mysql_info = $s2_db->get_version();
-		if (version_compare($mysql_info['version'], MIN_MYSQL_VERSION, '<'))
-			error(sprintf($lang_install['Invalid MySQL version'], $mysql_info['version'], MIN_MYSQL_VERSION));
-	}
-
 	// Check SQLite prefix collision
 	if ($db_type == 'pdo_sqlite' && strtolower($db_prefix) == 'sqlite_')
 		error($lang_install['SQLite prefix collision']);
@@ -483,14 +473,6 @@ else
 
 	}
 
-	// Check if InnoDB is available
- 	if ($db_type == 'mysql_innodb' || $db_type == 'mysqli_innodb')
- 	{
-		$result = $s2_db->query('SHOW VARIABLES LIKE \'have_innodb\'');
-		list (, $result) = $s2_db->fetch_row($result);
-		if ((strtoupper($result) != 'YES'))
-			error('InnoDB does not seem to be enabled. Please choose a database layer that does not have InnoDB support, or enable InnoDB on your MySQL server.');
-	}
 
 	// Start a transaction
 	$s2_db->start_transaction();

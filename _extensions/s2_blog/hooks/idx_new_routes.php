@@ -7,8 +7,8 @@
  * @package s2_blog
  */
 
- if (!defined('S2_ROOT')) {
-     die;
+if (!defined('S2_ROOT')) {
+    die;
 }
 
 $router->map('GET', '@^/blog(:?(?P<slash>/)(:?skip/(?P<page>(\d)+))?)?$', '\\s2_extensions\\s2_blog\\Page_Main');

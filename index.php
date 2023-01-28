@@ -67,14 +67,17 @@ $match = $router->match($request_uri);
 
 if (!empty($match)) {
     $target = $match['target'];
-    if (is_callable($target))
+    if (is_callable($target)) {
         $target();
-    else
+    }
+    else {
         $controller = new $target($match['params']);
+    }
 } else {
     $controller = ($hook = s2_hook('idx_get_content')) ? eval($hook) : null;
-    if (!$controller)
+    if (!$controller) {
         $controller = new Page_Common(array('request_uri' => $request_uri));
+    }
 }
 
 if ($controller instanceof Page_Routable) {

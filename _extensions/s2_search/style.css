@@ -61,9 +61,11 @@ p.search-result {
 	.search-result-img-preview .preview-link {
 		text-decoration: none;
 		border: none;
+		background: linear-gradient(0deg, #ccc 0%, #888 100%);
+		display: inline-block;
+		margin: 0 5px 5px 0;
 		}
 		.search-result-img-preview img {
-			margin: 0 5px 5px 0;
 			vertical-align: bottom;
 			max-width: 300px;
 			max-height: 75px;
@@ -75,13 +77,13 @@ p.search-result {
 	}
 	.video-thumbnail:after {
 		content: '';
-		background: center / 32px #fff url(data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDAwMDAwIiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyLDFBMTEsMTEsMCwxLDAsMjMsMTIsMTEuMDEzLDExLjAxMywwLDAsMCwxMiwxWm0wLDIwYTksOSwwLDEsMSw5LTlBOS4wMTEsOS4wMTEsMCwwLDEsMTIsMjFaTTEwLDhsNiw0LTYsNFoiLz48L3N2Zz4=);
+		background: #fff url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIyMiI+PHBhdGggZD0iTTE2IDExIDggMTdWNXoiLz48L3N2Zz4=");
 		position: absolute;
 		left: 50%;
 		top: 50%;
 		width: 22px;
 		height: 22px;
-		margin: -13px;
+		margin: -11px;
 		border-radius: 11px;
 		opacity: 0.5;
 		}
