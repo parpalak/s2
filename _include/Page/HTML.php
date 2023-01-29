@@ -74,20 +74,21 @@ abstract class Page_HTML extends Page_Abstract
 		}
 	}
 
-	protected function simple_placeholders ()
-	{
-		return array(
-			'section_link',
-			'excerpt',
-			'text',
-			'tags',
-			'comments',
-			'menu_siblings',
-			'menu_children',
-			'menu_subsections',
-			'article_tags'
-		);
-	}
+    protected function simple_placeholders(): array
+    {
+        return [
+            'section_link',
+            'excerpt',
+            'text',
+            'tags',
+            'recommendations',
+            'comments',
+            'menu_siblings',
+            'menu_children',
+            'menu_subsections',
+            'article_tags'
+        ];
+    }
 
 	/**
 	 * Prepares the content and inserts into the template
@@ -142,7 +143,7 @@ abstract class Page_HTML extends Page_Abstract
 
 		foreach ($this->simple_placeholders() as $page_index)
 		{
-			$replace['<!-- s2_' . $page_index . ' -->'] = isset($page[$page_index]) ? $page[$page_index] : '';
+			$replace['<!-- s2_' . $page_index . ' -->'] = $page[$page_index] ?? '';
 		}
 
 

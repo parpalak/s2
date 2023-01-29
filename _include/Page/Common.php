@@ -1,4 +1,8 @@
 <?php
+
+use S2\Cms\Recommendation\RecommendationProvider;
+use S2\Rose\Entity\ExternalId;
+
 /**
  * Displays a page stored in DB.
  *
@@ -534,6 +538,20 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 		if ($this->inTemplate('<!-- s2_tags -->'))
 			$page['tags'] = $this->get_tags($id);
+
+        // Recommendations
+        if ($this->inTemplate('<!-- s2_recommendations -->')) {
+            /** @var RecommendationProvider $recommendationProvider */
+            $recommendationProvider = \Container::get(RecommendationProvider::class);
+            global $request_uri;
+
+            [$recommendations, $log, $rawRecommendations] = $recommendationProvider->getRecommendations($request_uri, new ExternalId($id));
+            $this->page['recommendations'] = $this->renderPartial('recommendations', [
+                'raw'     => $rawRecommendations,
+                'content' => $recommendations,
+                'log'     => $log,
+            ]);
+        }
 
 		// Comments
 		if ($page['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->'))

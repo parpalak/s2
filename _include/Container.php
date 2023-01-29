@@ -10,7 +10,10 @@
 
 use Katzgrau\KLogger\Logger;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use S2\Cms\Image\ThumbnailGenerator;
+use S2\Cms\Layout\LayoutMatcherFactory;
+use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
 use S2\Rose\Indexer;
@@ -57,6 +60,12 @@ class Container
 
             case LoggerInterface::class:
                 return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR);
+
+            case 'recommendations_logger':
+                return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::DEBUG, ['prefix' => 'recommendations_']);
+
+            case RecommendationProvider::class:
+                return new RecommendationProvider(self::get(PdoStorage::class), LayoutMatcherFactory::getFourColumns(self::get('recommendations_logger')));
 
             case ExtractorInterface::class:
                 return new \S2\Cms\Rose\CustomExtractor(self::get(LoggerInterface::class));

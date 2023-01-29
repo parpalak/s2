@@ -45,4 +45,19 @@ class ThumbnailGenerator
 
         return [(int)($width * $ratio), (int)($height * $ratio)];
     }
+
+    public function getImgThumbnail(ImgDto $img): ImgDto
+    {
+        $src = $img->getSrc();
+        if (strpos($src, CustomExtractor::YOUTUBE_PROTOCOL) === 0) {
+            return (new ImgDto(
+                'https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/hq720.jpg',
+                640,
+                360,
+                $img->getClass()
+            ))/*->addSrc('https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/hq720.jpg')*/;
+        }
+
+        return $img;
+    }
 }

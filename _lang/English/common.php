@@ -19,6 +19,7 @@ return array(
 	'Subsections'            => 'Subsections',
 	'Tags'                   => 'Tags',
 	'With this tag'          => 'On the subject “%s”',
+    'Read next'              => 'Read next',
 	'Comments'               => 'Comments',
 	'Copyright 1'            => '© %2$s %1$s.',
 	'Copyright 2'            => '© %2$s–%3$s %1$s.',
