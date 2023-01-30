@@ -131,8 +131,8 @@ class DBLayer_MySQLi extends DBLayer_Abstract
 	}
 
 
-	function escape($str)
-	{
+	function escape($str): string
+    {
 		return is_array($str) ? '' : mysqli_real_escape_string($this->link_id, $str);
 	}
 

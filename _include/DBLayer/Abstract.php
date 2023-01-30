@@ -158,7 +158,7 @@ abstract class DBLayer_Abstract
 	 * @param string $str
 	 * @return string
 	 */
-	abstract function escape($str);
+	abstract function escape($str): string;
 	abstract function result($query_id = 0, $row = 0, $col = 0);
 	abstract function fetch_row($query_id);
 	abstract function fetch_assoc($query_id);

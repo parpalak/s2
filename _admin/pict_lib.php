@@ -112,28 +112,28 @@ function s2_get_files ($dir)
 		if ($item == '.' || $item == '..' || is_dir(S2_IMG_PATH.$dir.'/'.$item))
 			continue;
 
-		$dim = '';
+        $bits = $dim = '';
 
-		if (strpos($item, '.') !== false && in_array(pathinfo($item, PATHINFO_EXTENSION), $allowed_extensions))
-		{
-			$image_info = getImageSize(S2_IMG_PATH.$dir.'/'.$item);
-			$dim = $image_info[0].'*'.$image_info[1];
-		}
+        if (strpos($item, '.') !== false && \in_array(pathinfo($item, PATHINFO_EXTENSION), $allowed_extensions, true)) {
+            $image_info = getImageSize(S2_IMG_PATH . $dir . '/' . $item);
+            $dim        = $image_info[0] . '*' . $image_info[1];
+            $bits       = $image_info['bits'] * ($image_info['channels'] ?? 1);
+        }
 
 		($hook = s2_hook('fn_get_files_pre_output_item_merge')) ? eval($hook) : null;
 
-		$output[] = array(
-			'data'		=> array(
-				'title'		=> $item,
-				'icon'		=> $display_preview && $dim ? S2_PATH.'/_admin/pict_ajax.php?action=preview&file='.rawurlencode($dir.'/'.$item).'&nocache='.filemtime(S2_IMG_PATH.$dir.'/'.$item) : 'no-preview'
-			),
-			'attr'		=> array(
-				'data-fname'	=> $item,
-				'data-dim'		=> $dim,
-				'data-bits'		=> $image_info['bits'] * ($image_info['channels'] ?? 1),
-				'data-fsize'	=> Lang::friendly_filesize(filesize(S2_IMG_PATH.$dir.'/'.$item))
-			)
-		);
+        $output[] = array(
+            'data' => array(
+                'title' => $item,
+                'icon'  => $display_preview && $dim ? S2_PATH . '/_admin/pict_ajax.php?action=preview&file=' . rawurlencode($dir . '/' . $item) . '&nocache=' . filemtime(S2_IMG_PATH . $dir . '/' . $item) : 'no-preview'
+            ),
+            'attr' => array(
+                'data-fname' => $item,
+                'data-dim'   => $dim,
+                'data-bits'  => $bits,
+                'data-fsize' => Lang::friendly_filesize(filesize(S2_IMG_PATH . $dir . '/' . $item))
+            )
+        );
 	}
 
 	closedir($dir_handle);
