@@ -10,10 +10,13 @@
 namespace s2_extensions\s2_search;
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Exception\RuntimeException;
 use S2\Rose\Indexer;
 use S2\Rose\Storage\Database\PdoStorage;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class IndexManager
 {
@@ -25,14 +28,22 @@ class IndexManager
     private GenericFetcher $fetcher;
     private Indexer $indexer;
     private PdoStorage $pdoStorage;
+    private CacheInterface $cache;
     private LoggerInterface $logger;
 
-    public function __construct(string $dir, GenericFetcher $fetcher, Indexer $indexer, PdoStorage $pdoStorage, LoggerInterface $logger)
+    public function __construct(
+        string                 $dir,
+        GenericFetcher         $fetcher,
+        Indexer                $indexer,
+        PdoStorage             $pdoStorage,
+        TagAwareCacheInterface $cache,
+        LoggerInterface        $logger)
     {
         $this->dir        = $dir;
         $this->fetcher    = $fetcher;
         $this->indexer    = $indexer;
         $this->pdoStorage = $pdoStorage;
+        $this->cache      = $cache;
         $this->logger     = $logger;
     }
 
@@ -60,6 +71,8 @@ class IndexManager
             file_put_contents($this->dir . self::FILE_PROCESS_STATE, 'step');
 
             clearstatcache();
+
+            $this->cache->invalidateTags([RecommendationProvider::TAG_RECOMMENDATIONS]);
 
             return 'go_20';
         }
@@ -101,6 +114,8 @@ class IndexManager
             fclose($bufferFile);
             file_put_contents($this->dir . self::FILE_BUFFER_POINTER, $bufferFilePointer);
 
+            $this->cache->invalidateTags([RecommendationProvider::TAG_RECOMMENDATIONS]);
+
             return 'go_' . (20 + (int)(80.0 * $bufferFilePointer / filesize($this->dir . self::FILE_BUFFER_CONTENT)));
         }
 
@@ -113,8 +128,10 @@ class IndexManager
     {
         $indexable = $this->fetcher->chapter($chapter);
         if ($indexable !== null) {
-            $this->indexer->removeById($chapter, null);
             $this->indexer->index($indexable);
+        } else {
+            $this->indexer->removeById($chapter, null);
         }
+        $this->cache->invalidateTags([RecommendationProvider::TAG_RECOMMENDATIONS]);
     }
 }

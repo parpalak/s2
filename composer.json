@@ -21,7 +21,8 @@
     "psr/log": "^1.1",
     "katzgrau/klogger": "^1.2",
     "s2/rose": "dev-master",
-    "symfony/error-handler": "^5.4"
+    "symfony/error-handler": "^5.4",
+    "symfony/cache": "^5.4"
   },
   "autoload": {
     "psr-4": {

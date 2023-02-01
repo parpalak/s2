@@ -42,9 +42,12 @@ var s2_search = {
 		setTimeout(s2_search.reindex, 50);
 	},
 
-	refresh_index: function (e, sAction, sId)
+	refresh_index: function (e, sAction, sId, oldPublished, newPublished, oldRevision, newRevision)
 	{
-		GETAsyncRequest(sUrl + 'action=s2_search_makeindex&save_action=' + encodeURIComponent(sAction) + '&id=' + encodeURIComponent(sId));
+		// noinspection EqualityComparisonWithCoercionJS
+		if (newPublished && (!oldPublished || oldRevision != newRevision) || !newPublished && oldPublished) {
+			GETAsyncRequest(sUrl + 'action=s2_search_makeindex&save_action=' + encodeURIComponent(sAction) + '&id=' + encodeURIComponent(sId));
+		}
 	}
 };
 

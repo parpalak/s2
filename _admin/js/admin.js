@@ -1026,13 +1026,16 @@ function SaveArticle(sAction)
 				return;
 			}
 
-			$(document).trigger('save_article_done.s2', [sAction, sId]);
+			var ePublishedCheckbox = $('#publiched_checkbox')[0],
+				newPublished = ePublishedCheckbox.checked,
+				oldPublished = ePublishedCheckbox.parentNode.className === 'ok',
+				frm = document.forms['artform'];
 
-			var frm = document.forms['artform'];
+			$(document).trigger('save_article_done.s2', [sAction, sId, oldPublished, newPublished, frm.elements['page[revision]'].value, data.revision]);
 
 			// If the form was reloaded, we do not have to update it.
 			// (for example, if user had modified the page
-			// then opened another page and chose "Save and open") 
+			// then opened another page and chose "Save and open")
 			if (!frm.getAttribute('data-save-process'))
 				return;
 
@@ -1046,9 +1049,8 @@ function SaveArticle(sAction)
 
 			frm.elements['page[revision]'].value = data.revision;
 
-			eItem = $('#publiched_checkbox')[0];
-			eItem.parentNode.className = eItem.checked ? 'ok' : '';
-			$('#preview_link').css('display', eItem.checked ? 'inline' : 'none');
+			ePublishedCheckbox.parentNode.className = ePublishedCheckbox.checked ? 'ok' : '';
+			$('#preview_link').css('display', ePublishedCheckbox.checked ? 'inline' : 'none');
 
 			$(document).trigger('save_article_end.s2', sAction);
 		}

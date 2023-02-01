@@ -21,6 +21,8 @@ use S2\Rose\Stemmer\PorterStemmerEnglish;
 use S2\Rose\Stemmer\PorterStemmerRussian;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
+use Symfony\Component\Cache\Adapter\FilesystemTagAwareAdapter;
+use Symfony\Contracts\Cache\CacheInterface;
 
 class Container
 {
@@ -64,8 +66,15 @@ class Container
             case 'recommendations_logger':
                 return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::DEBUG, ['prefix' => 'recommendations_']);
 
+            case CacheInterface::class:
+                return new FilesystemTagAwareAdapter('common', 0, S2_CACHE_DIR);
+
             case RecommendationProvider::class:
-                return new RecommendationProvider(self::get(PdoStorage::class), LayoutMatcherFactory::getFourColumns(self::get('recommendations_logger')));
+                return new RecommendationProvider(
+                    self::get(PdoStorage::class),
+                    LayoutMatcherFactory::getFourColumns(self::get('recommendations_logger')),
+                    self::get(CacheInterface::class)
+                );
 
             case ExtractorInterface::class:
                 return new \S2\Cms\Rose\CustomExtractor(self::get(LoggerInterface::class));
@@ -84,6 +93,7 @@ class Container
                     new \s2_extensions\s2_search\Fetcher(),
                     self::get(Indexer::class),
                     self::get(PdoStorage::class),
+                    self::get(CacheInterface::class),
                     self::get(LoggerInterface::class)
                 );
         }

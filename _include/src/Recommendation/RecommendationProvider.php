@@ -7,26 +7,39 @@
 
 namespace S2\Cms\Recommendation;
 
+use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Layout\ContentItem;
 use S2\Cms\Layout\LayoutMatcher;
 use S2\Rose\Entity\ExternalId;
 use S2\Rose\Entity\TocEntryWithMetadata;
 use S2\Rose\Storage\Database\PdoStorage;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class RecommendationProvider
 {
+    public const TAG_RECOMMENDATIONS = 'recommendations';
     private PdoStorage $pdoStorage;
     private LayoutMatcher $layoutMatcher;
+    private CacheInterface $cache;
 
-    public function __construct(PdoStorage $pdoStorage, LayoutMatcher $layoutMatcher)
+    public function __construct(PdoStorage $pdoStorage, LayoutMatcher $layoutMatcher, CacheInterface $cache)
     {
         $this->pdoStorage    = $pdoStorage;
         $this->layoutMatcher = $layoutMatcher;
+        $this->cache         = $cache;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function getRecommendations(string $page, ExternalId $externalId): array
     {
-        $recommendations = $this->pdoStorage->getSimilar($externalId);
+        $recommendations = $this->cache->get('recommendations_' . $externalId->toString(), function (ItemInterface $item) use ($externalId) {
+            $item->tag(self::TAG_RECOMMENDATIONS);
+
+            return $this->pdoStorage->getSimilar($externalId);
+        });
 
         return array_merge($this->processRecommendations($page, $recommendations), [$recommendations]);
     }
