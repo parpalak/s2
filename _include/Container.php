@@ -22,7 +22,6 @@ use S2\Rose\Stemmer\PorterStemmerRussian;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
 use Symfony\Component\Cache\Adapter\FilesystemTagAwareAdapter;
-use Symfony\Contracts\Cache\CacheInterface;
 
 class Container
 {
@@ -31,6 +30,11 @@ class Container
     public static function get(string $className): object
     {
         return self::$instances[$className] ?? (self::$instances[$className] = self::instantiate($className));
+    }
+
+    public static function getIfInstantiated(string $className): ?object
+    {
+        return self::$instances[$className] ?? null;
     }
 
     /** @noinspection PhpParamsInspection */
@@ -66,14 +70,14 @@ class Container
             case 'recommendations_logger':
                 return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::DEBUG, ['prefix' => 'recommendations_']);
 
-            case CacheInterface::class:
-                return new FilesystemTagAwareAdapter('common', 0, S2_CACHE_DIR);
+            case 'recommendations_cache':
+                return new FilesystemTagAwareAdapter('recommendations', 0, S2_CACHE_DIR);
 
             case RecommendationProvider::class:
                 return new RecommendationProvider(
                     self::get(PdoStorage::class),
                     LayoutMatcherFactory::getFourColumns(self::get('recommendations_logger')),
-                    self::get(CacheInterface::class)
+                    self::get('recommendations_cache')
                 );
 
             case ExtractorInterface::class:
@@ -93,7 +97,7 @@ class Container
                     new \s2_extensions\s2_search\Fetcher(),
                     self::get(Indexer::class),
                     self::get(PdoStorage::class),
-                    self::get(CacheInterface::class),
+                    self::get('recommendations_cache'),
                     self::get(LoggerInterface::class)
                 );
         }

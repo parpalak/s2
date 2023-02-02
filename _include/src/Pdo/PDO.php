@@ -68,6 +68,11 @@ if (PHP_VERSION_ID < 80000) {
 
             return $result;
         }
+
+        public function getQueryCount(): int
+        {
+            return \count($this->log);
+        }
     }
 } else {
     class PDO extends NativePdo
@@ -130,6 +135,11 @@ if (PHP_VERSION_ID < 80000) {
             $this->log = [];
 
             return $result;
+        }
+
+        public function getQueryCount(): int
+        {
+            return \count($this->log);
         }
     }
 }

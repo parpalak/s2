@@ -188,13 +188,16 @@ abstract class Page_HTML extends Page_Abstract
 
 		($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
 
-		// Queries
-        /** @var \S2\Cms\Pdo\PDO $pdo */
-        $pdo                          = \Container::get(\PDO::class);
-        $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', [
-            'saved_queries' => $s2_db->get_saved_queries(),
-            'saved_queries2' => $pdo->cleanLogs(),
-        ]) : '';
+        // Queries
+        /** @var ?\S2\Cms\Pdo\PDO $pdo */
+        $pdo = \Container::getIfInstantiated(\PDO::class);
+        if (defined('S2_SHOW_QUERIES')) {
+            $pdoLogs                      = $pdo ? $pdo->cleanLogs() : [];
+            $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', [
+                'saved_queries'  => $s2_db->get_saved_queries(),
+                'saved_queries2' => $pdoLogs,
+            ]) : '';
+        }
 
 		$etag = md5($template);
 		// Add here placeholders to be excluded from the ETag calculation
@@ -225,7 +228,7 @@ abstract class Page_HTML extends Page_Abstract
 		// Execution time
 		if (defined('S2_DEBUG') || defined('S2_SHOW_TIME'))
 		{
-			$time_placeholder = 't = '.Lang::number_format(microtime(true) - $s2_start, true, 3).'; q = '.$s2_db->get_num_queries();
+			$time_placeholder = 't = '.Lang::number_format(microtime(true) - $s2_start, true, 3).'; q = '.($s2_db->get_num_queries() + ($pdo ? (isset($pdoLogs) ? count($pdoLogs) : $pdo->getQueryCount()) : 0));
 			$template = str_replace('<!-- s2_querytime -->', $time_placeholder, $template);
 			$etag .= md5($time_placeholder);
 		}
