@@ -7,6 +7,8 @@
  * @package S2
  */
 
+use Psr\Log\LoggerInterface;
+
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
 require S2_ROOT.'_include/comments.php';
@@ -207,6 +209,13 @@ if (!empty($errors))
 	));
 
 	$controller->render();
+
+    /** @var LoggerInterface $logger */
+    $logger = Container::get(LoggerInterface::class);
+    $logger->notice('Comment was not saved due to errors.', [
+        'errors' => $errors,
+        'id'     => s2_ext_var('id'),
+    ]);
 
 	die();
 }
