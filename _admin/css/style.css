@@ -796,7 +796,7 @@ textarea,
 .toolbar .collapse { background-position: -70px -16px; }
 
 #search_field {
-	float: right;
+	margin-left: 1em;
 	width: 300px;
 	}
 	#search_field.inactive {
