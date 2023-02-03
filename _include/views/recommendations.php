@@ -22,20 +22,20 @@ function getImgMarkup(ImgDto $imgDto, int $columnNum): string
     if ($class === 'right') {
         $height = $percent * 0.35;
 
-        return "<div class='recommendation-img-right-wrapper' style=\"width: 35%; padding-top: {$height}%\"><img src=\"$src\" class='recommendation-img' {$fallbackHandler}></div>";
+        return "<div class='recommendation-img-right-wrapper' style=\"width: 35%; padding-top: {$height}%\"><img loading='lazy' src=\"$src\" class='recommendation-img' {$fallbackHandler}></div>";
     }
 
     if ($class === 'right2') {
         $height = $percent * 0.18;
 
-        return "<div class='recommendation-img-right-wrapper' style=\"width: 18%; padding-top: {$height}%\"><img src=\"$src\" class='recommendation-img' {$fallbackHandler}></div>";
+        return "<div class='recommendation-img-right-wrapper' style=\"width: 18%; padding-top: {$height}%\"><img loading='lazy' src=\"$src\" class='recommendation-img' {$fallbackHandler}></div>";
     }
 
     if ($class === 'thumb') {
         $h = 120.0 * $imgDto->getRatio();
         $w = 120;
 
-        return "<div class='recommendation-img-thumb-wrapper' style='height: {$h}px; width: {$w}px;'><img class='recommendation-img' src='$src' {$fallbackHandler}></div><br clear='left'>";
+        return "<div class='recommendation-img-thumb-wrapper' style='height: {$h}px; width: {$w}px;'><img loading='lazy' class='recommendation-img' src='$src' {$fallbackHandler}></div><br clear='left'>";
     }
 
     $class = '';
@@ -49,7 +49,7 @@ function getImgMarkup(ImgDto $imgDto, int $columnNum): string
         $class = 'recommendation-video-wrapper';
     }
 
-    return "<div class='recommendation-img-wrapper {$class}' style='padding-top: $percent%'><img class='recommendation-img' src='$src' {$fallbackHandler}></div>";
+    return "<div class='recommendation-img-wrapper {$class}' style='padding-top: $percent%'><img loading='lazy' class='recommendation-img' src='$src' {$fallbackHandler}></div>";
 }
 
 function getColumnsNumFromGridArea(string $area): int
