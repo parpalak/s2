@@ -1,0 +1,18 @@
+suites:
+    unit:
+        path: .
+        actor: UnitTester
+        modules:
+            enabled:
+                # add more modules here
+                - Asserts
+        step_decorators: ~ 
+settings:
+    shuffle: true
+    lint: true
+paths:
+    tests: _tests
+    output: _tests/_output
+    support: _tests/_support
+    data: _tests
+     
