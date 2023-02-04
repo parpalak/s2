@@ -1,32 +1,36 @@
 {
-  "config": {
-    "vendor-dir": "_vendor"
-  },
-  "name": "s2cms/s2",
-  "description": "Small and fast CMS",
-  "minimum-stability": "stable",
-  "license": "GPL",
-  "authors": [
-    {
-      "name": "Roman Parpalak",
-      "email": "roman@written.ru"
+    "config": {
+        "vendor-dir": "_vendor"
+    },
+    "name": "s2cms/s2",
+    "description": "Small and fast CMS",
+    "minimum-stability": "stable",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Roman Parpalak",
+            "email": "roman@written.ru"
+        }
+    ],
+    "require": {
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "ext-dom": "*",
+        "ext-gd": "*",
+        "altorouter/altorouter": "dev-master",
+        "psr/log": "^1.1",
+        "katzgrau/klogger": "^1.2",
+        "s2/rose": "dev-master",
+        "symfony/error-handler": "^5.4",
+        "symfony/cache": "^5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "S2\\Cms\\": "_include/src"
+        }
+    },
+    "require-dev": {
+        "codeception/codeception": "^4.2",
+        "codeception/module-asserts": "^1.0.0"
     }
-  ],
-  "require": {
-    "ext-pdo": "*",
-    "ext-json": "*",
-    "ext-dom": "*",
-    "ext-gd": "*",
-    "altorouter/altorouter": "dev-master",
-    "psr/log": "^1.1",
-    "katzgrau/klogger": "^1.2",
-    "s2/rose": "dev-master",
-    "symfony/error-handler": "^5.4",
-    "symfony/cache": "^5.4"
-  },
-  "autoload": {
-    "psr-4": {
-      "S2\\Cms\\": "_include/src"
-    }
-  }
 }

@@ -9,172 +9,185 @@
 
 
 if (!defined('S2_ROOT'))
-	die;
+    die;
 
 if (!defined('S2_COUNTER_TOTAL_HITS_FNAME'))
-	define('S2_COUNTER_TOTAL_HITS_FNAME', '/data/total_hits.txt');
+    define('S2_COUNTER_TOTAL_HITS_FNAME', '/data/total_hits.txt');
 
 if (!defined('S2_COUNTER_TODAY_INFO_FNAME'))
-	define('S2_COUNTER_TODAY_INFO_FNAME', '/data/today_info.txt');
+    define('S2_COUNTER_TODAY_INFO_FNAME', '/data/today_info.txt');
 
 if (!defined('S2_COUNTER_ARCH_INFO_FNAME'))
-	define('S2_COUNTER_ARCH_INFO_FNAME', '/data/arch_info.txt');
+    define('S2_COUNTER_ARCH_INFO_FNAME', '/data/arch_info.txt');
 
 if (!defined('S2_COUNTER_TODAY_DATA_FNAME'))
-	define('S2_COUNTER_TODAY_DATA_FNAME', '/data/today_data.txt');
+    define('S2_COUNTER_TODAY_DATA_FNAME', '/data/today_data.txt');
 
-function s2_counter_is_bot ()
+function s2_counter_is_bot()
 {
-	$sebot = array(
-		'bot',
-		'Yahoo!',
-		'Mediapartners-Google',
-		'Spider',
-		'Yandex',
-		'StackRambler',
-		'ia_archiver',
-		'appie',
-		'ZyBorg',
-		'WebAlta',
-		'ichiro',
-		'TurtleScanner',
-		'LinkWalker',
-		'Snoopy',
-		'libwww',
-		'Aport',
-		'Crawler',
-		'Spyder',
-		'findlinks',
-		'Parser',
-		'Mail.Ru',
-		'rulinki.ru',
-	);
+    $sebot = array(
+        'bot',
+        'Yahoo!',
+        'Mediapartners-Google',
+        'Spider',
+        'Yandex',
+        'StackRambler',
+        'ia_archiver',
+        'appie',
+        'ZyBorg',
+        'WebAlta',
+        'ichiro',
+        'TurtleScanner',
+        'LinkWalker',
+        'Snoopy',
+        'libwww',
+        'Aport',
+        'Crawler',
+        'Spyder',
+        'findlinks',
+        'Parser',
+        'Mail.Ru',
+        'rulinki.ru',
+    );
 
-	if (!isset($_SERVER['HTTP_USER_AGENT']))
-		return false;
+    if (!isset($_SERVER['HTTP_USER_AGENT']))
+        return false;
 
-	foreach ($sebot as $se1)
-		if (stristr($_SERVER['HTTP_USER_AGENT'], $se1))
-			return true;
+    foreach ($sebot as $se1)
+        if (stristr($_SERVER['HTTP_USER_AGENT'], $se1))
+            return true;
 
-	return false;
+    return false;
 }
 
-function s2_counter_append_file ($filename, $str)
+function s2_counter_append_file($filename, $str)
 {
-	$f = fopen($filename, 'a+');
-	flock($f, LOCK_EX);
+    $f = fopen($filename, 'a+');
+    flock($f, LOCK_EX);
 
-	fwrite($f, $str);
-	fflush($f);
-	fflush($f);
+    fwrite($f, $str);
+    fflush($f);
+    fflush($f);
 
-	flock($f, LOCK_UN);
-	fclose($f);
+    flock($f, LOCK_UN);
+    fclose($f);
 }
 
-function s2_counter_refresh_file ($filename, $str)
+function s2_counter_refresh_file($filename, $str)
 {
-	$f = fopen($filename, 'a+');
-	flock($f, LOCK_EX);
+    $f = fopen($filename, 'a+');
+    flock($f, LOCK_EX);
 
-	ftruncate($f, 0);
-	fwrite($f, $str);
-	fflush($f);
-	fflush($f);
+    ftruncate($f, 0);
+    fwrite($f, $str);
+    fflush($f);
+    fflush($f);
 
-	flock($f, LOCK_UN);
-	fclose($f);
+    flock($f, LOCK_UN);
+    fclose($f);
 }
 
-function s2_counter_get_total_hits ($dir)
+function s2_counter_get_total_hits($dir)
 {
-	$f = fopen($dir.S2_COUNTER_TOTAL_HITS_FNAME, 'a+');
-	flock($f, LOCK_EX);
+    $f = fopen($dir . S2_COUNTER_TOTAL_HITS_FNAME, 'a+');
+    flock($f, LOCK_EX);
 
-	$hits = intval(fread($f, 100)) + 1;
+    $hits = intval(fread($f, 100)) + 1;
 
-	ftruncate($f, 0);
-	fwrite($f, $hits);
-	fflush($f);
+    ftruncate($f, 0);
+    fwrite($f, $hits);
+    fflush($f);
 
-	flock($f, LOCK_UN);
-	fclose($f);
+    flock($f, LOCK_UN);
+    fclose($f);
 
-	return $hits;
+    return $hits;
 }
 
-function s2_counter_process ($dir)
+function s2_counter_process($dir)
 {
-	if (s2_counter_is_bot())
-		return;
+    if (s2_counter_is_bot())
+        return;
 
-	if (!is_file($dir.S2_COUNTER_TODAY_DATA_FNAME) && !is_writable(dirname($dir.S2_COUNTER_TODAY_DATA_FNAME)))
-		return;
+    if (!is_file($dir . S2_COUNTER_TODAY_DATA_FNAME) && !is_writable(dirname($dir . S2_COUNTER_TODAY_DATA_FNAME)))
+        return;
 
-	$f_day_info = fopen($dir.S2_COUNTER_TODAY_DATA_FNAME, 'a+');
-	flock($f_day_info, LOCK_EX);
+    $f_day_info = fopen($dir . S2_COUNTER_TODAY_DATA_FNAME, 'a+');
+    flock($f_day_info, LOCK_EX);
 
-	$ips = unserialize(file_get_contents($dir.S2_COUNTER_TODAY_DATA_FNAME));
+    $ips = unserialize(file_get_contents($dir . S2_COUNTER_TODAY_DATA_FNAME));
 
-	clearstatcache();
-	if (!is_file($dir.S2_COUNTER_TODAY_DATA_FNAME) || date('j', filemtime($dir.S2_COUNTER_TODAY_DATA_FNAME)) == date('j'))
-	{
-		// We have already some hits today
+    clearstatcache();
+    if (!is_file($dir . S2_COUNTER_TODAY_DATA_FNAME) || date('j', filemtime($dir . S2_COUNTER_TODAY_DATA_FNAME)) == date('j')) {
+        // We have already some hits today
 
-		// Let's correct the data saved before
-		if (isset($ips[$_SERVER['REMOTE_ADDR']]))
-			$ips[$_SERVER['REMOTE_ADDR']]++;
-		else
-			$ips[$_SERVER['REMOTE_ADDR']] = 1;
+        // Let's correct the data saved before
+        if (isset($ips[$_SERVER['REMOTE_ADDR']]))
+            $ips[$_SERVER['REMOTE_ADDR']]++;
+        else
+            $ips[$_SERVER['REMOTE_ADDR']] = 1;
 
-		$today_hosts = count($ips);
-		$today_hits = array_sum($ips);
-	}
-	else
-	{
-		// It's a new day!
+        $today_hosts = count($ips);
+        $today_hits  = array_sum($ips);
+    } else {
+        // It's a new day!
 
-		// Logging yesterday info
-		s2_counter_append_file($dir.S2_COUNTER_ARCH_INFO_FNAME, date('Y-m-d', time() - 86400).'^'.(is_array($ips) && count($ips) ? array_sum($ips) : 0).'^'.count($ips)."\n");
+        // Logging yesterday info
+        s2_counter_append_file($dir . S2_COUNTER_ARCH_INFO_FNAME, date('Y-m-d', time() - 86400) . '^' . (is_array($ips) && count($ips) ? array_sum($ips) : 0) . '^' . count($ips) . "\n");
 
-		// Erase yesterday info
-		unset($ips);
-		$ips[$_SERVER['REMOTE_ADDR']] = 1;
+        // Erase yesterday info
+        unset($ips);
+        $ips[$_SERVER['REMOTE_ADDR']] = 1;
 
-		$today_hits = $today_hosts = 1;
-	}
+        $today_hits = $today_hosts = 1;
+    }
 
-	ftruncate($f_day_info, 0);
-	fwrite($f_day_info, serialize($ips));
-	fflush($f_day_info);
-	fflush($f_day_info);
+    ftruncate($f_day_info, 0);
+    fwrite($f_day_info, serialize($ips));
+    fflush($f_day_info);
+    fflush($f_day_info);
 
-	flock($f_day_info, LOCK_UN);
-	fclose($f_day_info);
+    flock($f_day_info, LOCK_UN);
+    fclose($f_day_info);
 
-	$total_hits = s2_counter_get_total_hits($dir);
-	s2_counter_refresh_file($dir.S2_COUNTER_TODAY_INFO_FNAME, $total_hits."\n".$today_hits."\n".$today_hosts);
+    $total_hits = s2_counter_get_total_hits($dir);
+    s2_counter_refresh_file($dir . S2_COUNTER_TODAY_INFO_FNAME, $total_hits . "\n" . $today_hits . "\n" . $today_hosts);
 }
 
-function s2_counter_get_aggregator ($ua)
+function s2_counter_get_aggregator(string $userAgent): ?array
 {
-	$rss_aggregators_pattern = array(
-		'Feedfetcher-Google'	=> '#(Feedfetcher-Google).*?(\d+) (subscribers; feed-id=\d+)#',
-		'YandexBlog'			=> '#(YandexBlog).*?(\d+) (readers)#',
-		'AideRSS'				=> '#(AideRSS).*?(\d+) (subscribers)#',
-		'NewsGatorOnline'		=> '#(NewsGatorOnline).*?(\d+) (subscribers)#',
-		'PostRank'				=> '#(PostRank).*?(\d+) (subscribers)#',
-	);
+    foreach ([
+                 'feeder.co'                              => 1,
+                 'NetNewsWire'                            => 1,
+                 'Feedspot'                               => 1,
+                 'http://www.google.com/feedfetcher.html' => 0,
+             ] as $noStatsAggregator => $readersNum) {
+        if (strpos($userAgent, $noStatsAggregator) !== false) {
+            return [$noStatsAggregator, $readersNum];
+        }
+    }
 
-	foreach ($rss_aggregators_pattern as $aggregator => $pattern)
-		if (false !== strpos($ua, $aggregator))
-		{
-			preg_match($pattern, $ua, $matches);
-			return array($matches[1].$matches[3], $matches[2]);
-		}
+    $knownAggregators = array(
+        'YandexBlog'      => '#(YandexBlog).*?(\d+) (readers)#',
+        'AideRSS'         => '#(AideRSS).*?(\d+) (subscribers)#',
+        'NewsGatorOnline' => '#(NewsGatorOnline).*?(\d+) (subscribers)#',
+        'PostRank'        => '#(PostRank).*?(\d+) (subscribers)#',
+        'Feedbin'         => '#(Feedbin feed-id:\d+) - (\d+) (subscribers)#',
+        'theoldreader'    => '#(theoldreader).* (\d+) (subscribers; feed-id=[^\)]*)#',
+        'universal'       => '#(Feedly|Bloglovin|BazQux|inoreader|NewsBlur).* (\d+) (subscribers)#',
+    );
 
-	return false;
+    foreach ($knownAggregators as $aggregator => $pattern) {
+        if (false !== strpos($userAgent, $aggregator)) {
+            break;
+        }
+    }
+
+    if (preg_match($pattern, $userAgent, $matches)) {
+        return array($matches[1] . $matches[3], $matches[2]);
+    }
+
+    return null;
 }
 
 function s2_counter_rss_count($dir)
@@ -202,29 +215,7 @@ function s2_counter_rss_count($dir)
 
         $yesterday_log = @file_get_contents($dir . $filename);
 
-        $rss_readers = $online_aggregators = [];
-        foreach (explode("\n", substr($yesterday_log, 0, -1)) as $line) {
-            if ($line === '') {
-                continue;
-            }
-
-            [, $ip, $ua] = explode('^', $line);
-            [$ip0, $ip1] = explode('.', $ip . '.'); // TODO IPV6 are placed into $ip0
-
-            $aggregator_info = s2_counter_get_aggregator($ua);
-            if ($aggregator_info !== false) {
-                $online_aggregators[$aggregator_info[0]] = $aggregator_info[1];
-            }
-            else {
-                $rss_readers[$ip0 . $ua . $ip1] = 1;
-            }
-        }
-
-        $total_readers = count($rss_readers);
-
-        foreach ($online_aggregators as $name => $reader_num) {
-            $total_readers += $reader_num;
-        }
+        $total_readers = s2_counter_get_total_readers($yesterday_log);
 
         s2_counter_append_file($dir . $filename . '.log', date('Y-m-d', time() - 86400) . '^' . $total_readers . "\n");
 
@@ -237,6 +228,28 @@ function s2_counter_rss_count($dir)
         fclose($f_day_info);
     }
 
+}
+
+function s2_counter_get_total_readers(string $logContents): int
+{
+    $rss_readers = $online_aggregators = [];
+    foreach (explode("\n", substr($logContents, 0, -1)) as $line) {
+        if ($line === '') {
+            continue;
+        }
+
+        [, $ip, $ua] = explode('^', $line);
+
+        $aggregator_info = s2_counter_get_aggregator($ua);
+        if ($aggregator_info !== null) {
+            $online_aggregators[$aggregator_info[0]] = $aggregator_info[1];
+        } else {
+            [$ip0, $ip1] = preg_split('#[.:]#', $ip );
+            $rss_readers[$ip0 . $ua . $ip1] = 1;
+        }
+    }
+
+    return \count($rss_readers) + array_sum($online_aggregators);
 }
 
 define('S2_COUNTER_FUNCTIONS_LOADED', 1);
