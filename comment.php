@@ -173,22 +173,24 @@ if (isset($_POST['preview']))
 // What are we going to comment?
 $path = false;
 
-$query = array(
-	'SELECT'	=> 'title, parent_id, url',
-	'FROM'		=> 'articles',
-	'WHERE'		=> 'id = '.$id.' AND published = 1 AND commented = 1'
-);
-($hook = s2_hook('cmnt_pre_get_page_info_qr')) ? eval($hook) : null;
-$result = $s2_db->query_build($query);
+if (empty($errors)) {
+    $query = array(
+        'SELECT' => 'title, parent_id, url',
+        'FROM'   => 'articles',
+        'WHERE'  => 'id = ' . $id . ' AND published = 1 AND commented = 1'
+    );
+    ($hook = s2_hook('cmnt_pre_get_page_info_qr')) ? eval($hook) : null;
+    $result = $s2_db->query_build($query);
 
-if (!$row = $s2_db->fetch_assoc($result))
-	$errors[] = Lang::get('no_item', 'comments');
-else
-{
-	$path = Model::path_from_id($row['parent_id'], true);
-	($hook = s2_hook('cmnt_pre_path_check')) ? eval($hook) : null;
-	if ($path === false)
-		$errors[] = Lang::get('no_item', 'comments');
+    if (!$row = $s2_db->fetch_assoc($result)) {
+        $errors[] = Lang::get('no_item', 'comments');
+    } else {
+        $path = Model::path_from_id($row['parent_id'], true);
+        ($hook = s2_hook('cmnt_pre_path_check')) ? eval($hook) : null;
+        if ($path === false) {
+            $errors[] = Lang::get('no_item', 'comments');
+        }
+    }
 }
 
 if (!empty($errors))
