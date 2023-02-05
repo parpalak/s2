@@ -18,8 +18,6 @@ $lang_install = array(
 'Database username'			=>	'Database username',
 'Database password'			=>	'Database password',
 'Table prefix'				=>	'Table prefix',
-'Mysql type info'			=>	'S2 supports two different ways of communicating with MySQL called “<em>standard</em>” and “<em>improved</em>”. If you are uncertain which one to use, start by trying improved and if that fails, try standard.',
-'MySQL InnoDB info'			=>	'S2 has detected that your MySQL server might support <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-overview.html">InnoDB</a>. If you are uncertain, it is recommended to not use InnoDB.',
 'Part1 legend'				=>	'Database information',
 'Database type help'		=>	'Select database type.<br />S2 supports MySQL, PostgreSQL and SQLite. If your database of choice is missing from the drop-down menu, it means this PHP environment does not have support for that particular database.',
 'Database server help'		=>	'The address of the database server.<br />Examples: <em>localhost</em>, <em>mysql1.example.com</em> or <em>208.77.188.166</em>. You can specify a custom port number if your database does not run on the default port (example: <em>localhost:3580</em>). For SQLite support, just enter anything or leave it at “localhost”.',

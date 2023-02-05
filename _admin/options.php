@@ -38,7 +38,8 @@ $s2_const_types = array(
 //
 function s2_read_options ()
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> '*',
@@ -131,7 +132,9 @@ function s2_get_textarea ($name, $value, $info, $label)
 //
 function s2_get_options ()
 {
-	global $s2_db, $s2_user, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
+	global $s2_user, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$options = s2_read_options();
 
@@ -191,7 +194,9 @@ function s2_get_options ()
 //
 function s2_save_options ($opt)
 {
-	global $s2_const_types, $s2_db, $lang_admin_opt;
+	global $s2_const_types, $lang_admin_opt;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$return = array();
 	($hook = s2_hook('fn_save_options_start')) ? eval($hook) : null;

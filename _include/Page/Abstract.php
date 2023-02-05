@@ -53,14 +53,18 @@ abstract class Page_Abstract
 	 */
 	public function render ()
 	{
-		global $s2_db;
+        /** @var ?DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
 
 		$this->obtainTemplate();
 
-		if ($this instanceof Page_HTML)
-			$this->process_template();
+		if ($this instanceof Page_HTML) {
+            $this->process_template();
+        }
 
-		$s2_db->close();
+        if ($s2_db !== null) {
+            $s2_db->close();
+        }
 
 		if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $this->etag)
 		{

@@ -43,7 +43,8 @@ class Page_Year extends Page_HTML implements \Page_Routable
 
 	private function year_posts ($year)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$start_time = mktime(0, 0, 0, 1, 1, $year);
 		$end_time = mktime(0, 0, 0, 1, 1, $year + 1);

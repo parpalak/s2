@@ -39,7 +39,8 @@ class S2Cache
      */
     public static function generate_config(bool $load = false): void
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         $return = ($hook = s2_hook('fn_generate_config_cache_start')) ? eval($hook) : null;
         if ($return !== null) {
@@ -98,7 +99,8 @@ class S2Cache
      */
     public static function generate_hooks(): array
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         if (!isset($s2_db)) {
             return []; // Install
@@ -191,7 +193,8 @@ class S2Cache
      */
     public static function generate_updates()
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         $return = ($hook = s2_hook('fn_generate_updates_cache_start')) ? eval($hook) : null;
         if ($return !== null) {

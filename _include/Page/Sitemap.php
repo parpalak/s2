@@ -29,8 +29,11 @@ class Page_Sitemap extends Page_Abstract implements Page_Routable
             $items .= $this->renderPartial('sitemap_item', $item);
         }
 
-        global $s2_db;
-        $s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
         $output = $this->renderPartial('sitemap', compact('items'));
 

@@ -31,7 +31,11 @@ else {
 if (substr($request_uri, -3) == '---') {
     header('Location: ' . S2_PATH . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
 
-    $s2_db->close();
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::getIfInstantiated('db');
+    if ($s2_db !== null) {
+        $s2_db->close();
+    }
     die;
 }
 
@@ -69,8 +73,7 @@ if (!empty($match)) {
     $target = $match['target'];
     if (is_callable($target)) {
         $target();
-    }
-    else {
+    } else {
         $controller = new $target($match['params']);
     }
 } else {

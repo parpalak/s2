@@ -14,12 +14,15 @@ class Placeholder
 {
 	public static function recent_comments ()
 	{
-		global $s2_db, $request_uri;
+		global $request_uri;
 
-		if (!S2_SHOW_COMMENTS)
-			return '';
+        if (!S2_SHOW_COMMENTS)
+            return '';
 
-		$subquery1 = array(
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
+
+        $subquery1 = array(
 			'SELECT'	=> 'count(*) + 1',
 			'FROM'		=> 's2_blog_comments AS c1',
 			'WHERE'		=> 'shown = 1 AND c1.post_id = c.post_id AND c1.time < c.time'
@@ -59,12 +62,15 @@ class Placeholder
 
 	public static function recent_discussions ()
 	{
-		global $s2_db, $request_uri;
+		global $request_uri;
 
-		if (!S2_SHOW_COMMENTS)
-			return '';
+        if (!S2_SHOW_COMMENTS)
+            return '';
 
-		$subquery1 = array(
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
+
+        $subquery1 = array(
 			'SELECT'	=> 'c.post_id AS post_id, count(c.post_id) AS comment_num,  max(c.id) AS max_id',
 			'FROM'		=> 's2_blog_comments AS c',
 			'WHERE'		=> 'c.shown = 1 AND c.time > '.strtotime('-1 month midnight'),
@@ -105,7 +111,8 @@ class Placeholder
 
 	public static function blog_tags ($id)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$subquery = array(
 			'SELECT'	=> 'p.id',

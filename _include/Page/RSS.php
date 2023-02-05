@@ -58,8 +58,11 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 			$items .= $this->renderPartial('rss_item', $item);
 		}
 
-		global $s2_db;
-		$s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
 		if (!$items && $last_date)
 		{
@@ -122,4 +125,3 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 		return sprintf(Lang::get('RSS description'), S2_SITE_NAME);
 	}
 }
- 

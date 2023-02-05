@@ -41,7 +41,11 @@ if ($action == 'preview') {
 
     s2_make_thumbnail(S2_IMG_PATH . $file, 80);
 
-    $s2_db->close();
+    /** @var ?\DBLayer_Abstract $s2_db */
+    $s2_db = \Container::getIfInstantiated('db');
+    if ($s2_db) {
+        $s2_db->close();
+    }
     die;
 }
 
@@ -104,7 +108,11 @@ if ($action == 'load_tree') {
         header('Content-Type: application/json; charset=utf-8');
         echo s2_json_encode(array('status' => 1, 'name' => $name, 'path' => $path . '/' . $name));
     } else {
-        $s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
         header('X-S2-Status: Error');
         printf($lang_pictures['Error creating folder'], S2_IMG_PATH . $path . '/' . $name);
@@ -166,7 +174,11 @@ if ($action == 'load_tree') {
     $parent_path = s2_dirname($path);
 
     if (file_exists(S2_IMG_PATH . $parent_path . '/' . $folder_name)) {
-        $s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
         header('X-S2-Status: Error');
         printf($lang_pictures['File exists'], $folder_name);
@@ -180,7 +192,11 @@ if ($action == 'load_tree') {
         header('Content-Type: application/json; charset=utf-8');
         echo s2_json_encode(array('status' => 1, 'new_path' => $parent_path . '/' . $folder_name));
     } else {
-        $s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
         header('X-S2-Status: Error');
         die($lang_pictures['Rename error']);
@@ -208,7 +224,11 @@ if ($action == 'load_tree') {
         $extension = substr($filename, $ext_pos + 1);
 
     if (!$s2_user['edit_users'] && $extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' ' . S2_ALLOWED_EXTENSIONS . ' ', ' ' . $extension . ' ')) {
-        $s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
         header('X-S2-Status: Error');
         printf($lang_pictures['Forbidden extension'], $extension);
@@ -218,7 +238,11 @@ if ($action == 'load_tree') {
     $parent_path = s2_dirname($path);
 
     if (file_exists(S2_IMG_PATH . $parent_path . '/' . $filename)) {
-        $s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
         header('X-S2-Status: Error');
         printf($lang_pictures['File exists'], $filename);
@@ -229,7 +253,11 @@ if ($action == 'load_tree') {
         header('Content-Type: application/json; charset=utf-8');
         echo s2_json_encode(array('status' => 1, 'new_name' => $filename));
     } else {
-        $s2_db->close();
+        /** @var ?\DBLayer_Abstract $s2_db */
+        $s2_db = \Container::getIfInstantiated('db');
+        if ($s2_db) {
+            $s2_db->close();
+        }
 
         header('X-S2-Status: Error');
         die($lang_pictures['Rename error']);
@@ -413,7 +441,11 @@ if ($action == 'load_tree') {
 
 ($hook = s2_hook('prq_custom_action')) ? eval($hook) : null;
 
-$s2_db->close();
+/** @var ?\DBLayer_Abstract $s2_db */
+$s2_db = \Container::getIfInstantiated('db');
+if ($s2_db) {
+    $s2_db->close();
+}
 
 if (S2_COMPRESS)
     ob_end_flush();

@@ -13,7 +13,8 @@ if (!defined('S2_ROOT'))
 
 function s2_count_articles ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$n = 0;
 
@@ -33,7 +34,9 @@ function s2_count_articles ($id)
 
 function s2_get_counters ()
 {
-	global $s2_db, $lang_admin;
+	global $lang_admin;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$articles_num = s2_count_articles(1);
 
@@ -63,7 +66,9 @@ function s2_get_counters ()
 
 function s2_stat_info ()
 {
-	global $s2_db, $db_name, $db_type, $db_version, $db_prefix, $lang_admin;
+	global $db_name, $db_type, $db_version, $db_prefix, $lang_admin;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$output = '';
 

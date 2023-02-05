@@ -15,7 +15,8 @@ class Placeholder
 	//
 	public static function last_articles_array ($limit = '5')
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$subquery = array(
 			'SELECT'	=> '1',
@@ -87,7 +88,8 @@ class Placeholder
     //
     public static function articles_urls ()
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         $subquery = array(
             'SELECT'	=> '1',
@@ -161,7 +163,8 @@ class Placeholder
 	// Makes tags list for the tags page and the placeholder
 	public static function tags_list ()
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		static $tags = array();
 		static $ready = false;
@@ -227,7 +230,8 @@ class Placeholder
 		if (!S2_SHOW_COMMENTS)
 			return '';
 
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$subquery1 = array(
 			'SELECT'	=> 'count(*) + 1',
@@ -282,7 +286,8 @@ class Placeholder
 		if (!S2_SHOW_COMMENTS)
 			return '';
 
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$subquery1 = array(
 			'SELECT'	=> 'c.article_id AS article_id, count(c.article_id) AS comment_num, max(c.id) AS max_id',

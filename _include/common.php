@@ -23,10 +23,7 @@ define('S2_VERSION', '2.0dev');
 if (file_exists(S2_ROOT.'config.php'))
 	include S2_ROOT.'config.php';
 
-if (defined('S2_DEBUG'))
-	error_reporting(E_ALL);
-else
-	error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(defined('S2_DEBUG') ? E_ALL : E_ALL ^ E_NOTICE);
 
 require S2_ROOT . '_vendor/autoload.php';
 require S2_ROOT.'_include/setup.php';
@@ -43,19 +40,6 @@ define('S2_IMG_PATH', S2_ROOT.S2_IMG_DIR);
 
 if (!defined('S2_ALLOWED_EXTENSIONS'))
 	define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav avi flv mpg mpeg mkv zip 7z doc pdf');
-
-if (defined('S2_NO_DB'))
-	return;
-
-// Create the database adapter object (and open/connect to/select db)
-try
-{
-	$s2_db = DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect);
-}
-catch (Exception $e)
-{
-	error($e->getMessage(), $e->getFile(), $e->getLine());
-}
 
 // Load cached config
 if (file_exists(S2_CACHE_DIR.'cache_config.php'))

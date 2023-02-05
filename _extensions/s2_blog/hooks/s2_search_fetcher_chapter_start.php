@@ -5,6 +5,8 @@
  * @copyright (C) 2023 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
+ *
+ * @var \s2_extensions\s2_search\Fetcher $this
  */
 
  if (!defined('S2_ROOT')) {
@@ -19,8 +21,8 @@ if (substr($id, 0, 8) == 's2_blog_')
 		'WHERE'		=> 'published = 1 AND id = '.intval(substr($id, 8)),
 	);
 	($hook = s2_hook('s2_blog_pre_get_chapter_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	$s2_blog_post = $s2_db->fetch_assoc($result);
+	$result = $this->db->query_build($query);
+	$s2_blog_post = $this->db->fetch_assoc($result);
 	if (!$s2_blog_post) {
 		return null;
 	}

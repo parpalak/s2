@@ -37,6 +37,9 @@ if (isset($_GET['unsubscribe']))
 
 	if (isset($_GET['id']) && isset($_GET['mail']))
 	{
+        /** @var DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
+
 		list($id, $class) = explode('.', $_GET['id']);
 		$id = (int) $id;
 		$class = (string) $class;
@@ -174,6 +177,9 @@ if (isset($_POST['preview']))
 $path = false;
 
 if (empty($errors)) {
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
     $query = array(
         'SELECT' => 'title, parent_id, url',
         'FROM'   => 'articles',
@@ -227,6 +233,9 @@ $link = s2_abs_link($path.'/'.urlencode($row['url']));
 //
 // Everything is ok, save and send the comment
 //
+
+/** @var DBLayer_Abstract $s2_db */
+$s2_db = \Container::get('db');
 
 // Detect if there is a user logged in
 $is_logged_in = false;

@@ -30,7 +30,9 @@ function s2_tpl_edit_save ($template)
 
 function s2_tpl_edit_file_list ($template_filename)
 {
-	global $lang_templates, $s2_db;
+	global $lang_templates;
+    /** @var \DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$templates = $lang_templates;
 	unset($templates['+']);

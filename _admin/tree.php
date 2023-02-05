@@ -17,7 +17,9 @@ if (!defined('S2_ROOT'))
 
 function s2_create_article ($id, $title)
 {
-	global $s2_db, $s2_user;
+	global $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> '1',
@@ -69,7 +71,9 @@ function s2_create_article ($id, $title)
 
 function s2_rename_article ($id, $title)
 {
-	global $s2_db, $s2_user;
+	global $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'user_id',
@@ -98,7 +102,9 @@ function s2_rename_article ($id, $title)
 
 function s2_move_branch ($source_id, $dest_id, $position)
 {
-	global $s2_db, $s2_user;
+	global $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'priority, parent_id, user_id, id',
@@ -153,7 +159,8 @@ function s2_move_branch ($source_id, $dest_id, $position)
 
 function s2_delete_item_and_children ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$return = ($hook = s2_hook('fn_delete_item_and_children_start')) ? eval($hook) : null;
 	if ($return != null)
@@ -194,7 +201,9 @@ function s2_delete_item_and_children ($id)
 
 function s2_delete_branch ($id)
 {
-	global $s2_db, $s2_user;
+	global $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'priority, parent_id, user_id',
@@ -232,7 +241,8 @@ function s2_delete_branch ($id)
 
 function s2_get_child_branches ($id, $root = true, $search = false)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',

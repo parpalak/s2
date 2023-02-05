@@ -17,7 +17,8 @@ class Page_Sitemap extends \Page_Sitemap
      */
     protected function getItems(): array
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         // Obtaining posts
         $query  = [

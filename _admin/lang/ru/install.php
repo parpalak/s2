@@ -18,8 +18,6 @@ $lang_install = array(
 'Database username'			=>	'Имя пользователя',
 'Database password'			=>	'Пароль',
 'Table prefix'				=>	'Префикс таблиц',
-'Mysql type info'			=>	'В S2 поддерживается два способа работы с базой данных MySQL, «<em>standard</em>» и «<em>improved</em>». Если вы не знаете, какой использовать, попробуйте сначала improved. Если он не заработает, выберите standard.',
-'MySQL InnoDB info'			=>	'Возможно, сервер MySQL поддерживает таблицы <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-overview.html">InnoDB</a>. Если вы не знаете, что такое InnoDB, лучше эти таблицы не использовать.',
 'Part1 legend'				=>	'Информация о базе данных',
 'Database type help'		=>	'Выберите тип базы данных.<br />S2 работает с базами данных MySQL, PostgreSQL и SQLite. В выпадающем списке перечислены те из них, которые доступны PHP на этом сервере.',
 'Database server help'		=>	'Адрес сервера баз данных. Для SQLite значение не требуется и не используется.<br />Примеры: <em>localhost</em>, <em>mysql1.example.com</em> или <em>208.77.188.166</em>. Вы можете указать и порт, если сервер базы данных работает на нестандартном порту (например, <em>localhost:3580</em>).',

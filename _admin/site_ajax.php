@@ -33,6 +33,10 @@ ob_start();
 if (S2_COMPRESS)
 	ob_start('ob_gzhandler');
 
+/**
+ * @var $s2_cookie_name
+ * @var $lang_admin
+ */
 $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
@@ -414,7 +418,10 @@ elseif ($action == 'add_user')
 	if (!isset($_GET['name']))
 		die('Error in GET parameters.');
 
-	$login = $s2_db->escape($_GET['name']);
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
+    $login = $s2_db->escape($_GET['name']);
 
 	// Verify if login entered already exists
 	$query = array(
@@ -455,6 +462,9 @@ elseif ($action == 'delete_user')
 	if (!isset($_GET['name']))
 		die('Error in GET parameters.');
 
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
 	$login = $_GET['name'];
 
 	$query = array(
@@ -493,7 +503,10 @@ elseif ($action == 'user_set_password')
 	// We allow usual users to change only their passwords
 	if ($s2_user['login'] == $_GET['name'] || $s2_user['edit_users'])
 	{
-		$query = array(
+        /** @var DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
+
+        $query = array(
 			'SELECT'	=> 'password',
 			'FROM'		=> 'users',
 			'WHERE'		=> 'login = \''.$s2_db->escape($_GET['name']).'\'',
@@ -541,7 +554,10 @@ elseif ($action == 'user_set_email')
 		die($lang_admin['No permission']);
 	}
 
-	$query = array(
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
+    $query = array(
 		'UPDATE'	=> 'users',
 		'SET'		=> 'email = \''.$s2_db->escape($_GET['email']).'\'',
 		'WHERE'		=> 'login = \''.$s2_db->escape($_GET['login']).'\'',
@@ -568,7 +584,10 @@ elseif ($action == 'user_set_name')
 		die($lang_admin['No permission']);
 	}
 
-	$query = array(
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
+    $query = array(
 		'UPDATE'	=> 'users',
 		'SET'		=> 'name = \''.$s2_db->escape($_GET['name']).'\'',
 		'WHERE'		=> 'login = \''.$s2_db->escape($_GET['login']).'\'',
@@ -591,7 +610,10 @@ elseif ($action == 'user_set_permission')
 	$login = $_GET['name'];
 	$permission = $_GET['permission'];
 
-	$allow = true;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
+    $allow = true;
 
 	if ($permission == 'edit_users')
 	{
@@ -824,13 +846,18 @@ elseif ($action == 'phpinfo')
 	($hook = s2_hook('rq_action_phpinfo_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	phpinfo();
+    /** @noinspection ForgottenDebugOutputInspection */
+    phpinfo();
 }
 
 
 ($hook = s2_hook('rq_custom_action')) ? eval($hook) : null;
 
-$s2_db->close();
+/** @var ?\DBLayer_Abstract $s2_db */
+$s2_db = \Container::getIfInstantiated('db');
+if ($s2_db) {
+    $s2_db->close();
+}
 
 if (S2_COMPRESS)
 	ob_end_flush();

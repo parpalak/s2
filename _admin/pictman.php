@@ -33,7 +33,11 @@ $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
 if ($session_id == '')
 {
 	echo $lang_admin['Lost session'];
-	$s2_db->close();
+    /** @var ?\DBLayer_Abstract $s2_db */
+    $s2_db = \Container::getIfInstantiated('db');
+    if ($s2_db) {
+        $s2_db->close();
+    }
 	die();
 }
 
@@ -43,7 +47,11 @@ $login = s2_get_login($session_id);
 if ($login === false)
 {
 	echo $lang_admin['Lost session'];
-	$s2_db->close();
+    /** @var ?\DBLayer_Abstract $s2_db */
+    $s2_db = \Container::getIfInstantiated('db');
+    if ($s2_db) {
+        $s2_db->close();
+    }
 	die();
 }
 
@@ -108,4 +116,8 @@ if ($s2_user['create_articles'])
 </html>
 <?php
 
-$s2_db->close();
+/** @var ?\DBLayer_Abstract $s2_db */
+$s2_db = \Container::getIfInstantiated('db');
+if ($s2_db) {
+    $s2_db->close();
+}

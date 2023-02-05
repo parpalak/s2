@@ -22,7 +22,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 	private function tagged_articles ($id)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$query = array(
 			'SELECT'	=> 't.tag_id as tag_id, name, t.url as url',
@@ -129,7 +130,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 	private function get_tags ($id)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$query = array(
 			'SELECT'	=> 'name, url',
@@ -165,7 +167,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 	// Processes site pages
 	private function parse_page_url ($request_uri)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$page = &$this->page;
 

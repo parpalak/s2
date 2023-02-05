@@ -150,7 +150,8 @@ class Page extends \Page_HTML implements \Page_Routable
     // TODO rename hooks
     private function findInTags(Query $query)
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         $return = '';
 

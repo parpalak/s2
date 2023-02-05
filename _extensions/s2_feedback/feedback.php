@@ -83,6 +83,9 @@ if (!empty($errors))
 
 $message = sprintf(Lang::get('Mail template', 's2_feedback'), $name, $contact, $subject, $text);
 
+/** @var \DBLayer_Abstract $s2_db */
+$s2_db = \Container::get('db');
+
 // Sending the comment to administrators
 $query = array(
 	'SELECT'	=> 'login, email',

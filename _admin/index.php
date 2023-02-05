@@ -42,7 +42,11 @@ if ($session_id == '')
 	// A simple login page loading
 	echo s2_get_login_form();
 
-	$s2_db->close();
+    /** @var ?\DBLayer_Abstract $s2_db */
+    $s2_db = \Container::getIfInstantiated('db');
+    if ($s2_db) {
+        $s2_db->close();
+    }
 
 	die();
 }
@@ -60,7 +64,11 @@ if ($login === false)
 	// We tell him nothing
 	echo s2_get_login_form();
 
-	$s2_db->close();
+    /** @var ?\DBLayer_Abstract $s2_db */
+    $s2_db = \Container::getIfInstantiated('db');
+    if ($s2_db) {
+        $s2_db->close();
+    }
 
 	die();
 }
@@ -296,4 +304,8 @@ GETAsyncRequest(sUrl + 'action=check_updates', function (http, data)
 </html>
 <?php
 
-$s2_db->close();
+/** @var ?\DBLayer_Abstract $s2_db */
+$s2_db = \Container::getIfInstantiated('db');
+if ($s2_db) {
+    $s2_db->close();
+}

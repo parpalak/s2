@@ -13,17 +13,22 @@ use S2\Rose\Entity\Indexable;
 
 class Fetcher implements GenericFetcher
 {
+    private \DBLayer_Abstract $db;
+
+    public function __construct(\DBLayer_Abstract $db)
+    {
+        $this->db = $db;
+    }
+
     private function crawl($parent_id, $url): \Generator
     {
-        global $s2_db;
-
         $subQuery        = array(
             'SELECT' => 'count(*)',
             'FROM'   => 'articles AS a2',
             'WHERE'  => 'a2.parent_id = a.id',
             'LIMIT'  => '1'
         );
-        $child_num_query = $s2_db->query_build($subQuery, true);
+        $child_num_query = $this->db->query_build($subQuery, true);
 
         $query = array(
             'SELECT' => 'title, id, create_time, url, (' . $child_num_query . ') as is_children, parent_id, meta_keys, meta_desc, pagetext',
@@ -31,9 +36,9 @@ class Fetcher implements GenericFetcher
             'WHERE'  => 'parent_id = ' . $parent_id . ' AND published = 1',
         );
         ($hook = s2_hook('s2_search_fetcer_crawl_pre_qr')) ? eval($hook) : null;
-        $result = $s2_db->query_build($query);
+        $result = $this->db->query_build($query);
 
-        while ($article = $s2_db->fetch_assoc($result)) {
+        while ($article = $this->db->fetch_assoc($result)) {
             $indexable = new Indexable($article['id'], $article['title'], $article['pagetext']);
             $indexable
                 ->setKeywords($article['meta_keys'])
@@ -61,8 +66,6 @@ class Fetcher implements GenericFetcher
 
     public function chapter(string $id): ?Indexable
     {
-        global $s2_db;
-
         $data = ($hook = s2_hook('s2_search_fetcher_chapter_start')) ? eval($hook) : null;
         if ($data instanceof Indexable) {
             return $data;
@@ -74,17 +77,17 @@ class Fetcher implements GenericFetcher
             'WHERE'  => 'a2.parent_id = a.id',
             'LIMIT'  => '1'
         );
-        $child_num_query = $s2_db->query_build($subQuery, true);
+        $child_num_query = $this->db->query_build($subQuery, true);
 
         $query = array(
             'SELECT' => 'title, id, create_time, url, (' . $child_num_query . ') as is_children, parent_id, meta_keys, meta_desc, pagetext',
             'FROM'   => 'articles AS a',
-            'WHERE'  => 'id = \'' . $s2_db->escape($id) . '\' AND published = 1',
+            'WHERE'  => 'id = \'' . $this->db->escape($id) . '\' AND published = 1',
         );
         ($hook = s2_hook('s2_search_fetcher_chapter_pre_qr')) ? eval($hook) : null;
-        $result = $s2_db->query_build($query);
+        $result = $this->db->query_build($query);
 
-        $article = $s2_db->fetch_assoc($result);
+        $article = $this->db->fetch_assoc($result);
         if (!$article) {
             return null;
         }

@@ -149,36 +149,20 @@ header('Content-Type: text/html; charset=utf-8');
 if (!isset($_POST['form_sent']))
 {
 	// Determine available database extensions
-	$dual_mysql = $mysql_innodb = false;
-	$db_extensions = array();
-	if (function_exists('mysqli_connect'))
-	{
-		$db_extensions[] = array('mysqli', 'MySQL Improved');
-	}
-	if (function_exists('mysql_connect'))
-	{
-		$db_extensions[] = array('mysql', 'MySQL Standard');
+    $db_extensions = [];
+    if (function_exists('mysqli_connect')) {
+        $db_extensions[] = ['mysqli', 'MySQL Improved'];
+    }
+    if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers())) {
+        $db_extensions[] = ['pdo_sqlite', 'PDO SQLite'];
+    }
+    if (function_exists('pg_connect')) {
+        $db_extensions[] = ['pgsql', 'PostgreSQL'];
+    }
 
-		if (count($db_extensions) > 1)
-			$dual_mysql = true;
-	}
-	if (function_exists('mysqli_connect'))
-	{
-		$db_extensions[] = array('mysqli_innodb', 'MySQL Improved (InnoDB)');
-		$mysql_innodb = true;
-	}
-	if (function_exists('mysql_connect'))
-	{
-		$db_extensions[] = array('mysql_innodb', 'MySQL Standard (InnoDB)');
-		$mysql_innodb = true;
-	}
-	if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers()))
-		$db_extensions[] = array('pdo_sqlite', 'PDO SQLite');
-	if (function_exists('pg_connect'))
-		$db_extensions[] = array('pgsql', 'PostgreSQL');
-
-	if (empty($db_extensions))
-		error($lang_install['No database support']);
+    if (empty($db_extensions)) {
+        error($lang_install['No database support']);
+    }
 
 	// Make an educated guess regarding base_url
 	$base_url_guess = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https://' : 'http://').preg_replace('/:80$/', '', $_SERVER['HTTP_HOST']).substr(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), 0, -6);
@@ -263,7 +247,7 @@ body {
 ?>
 						</select>
 						<br />
-						<small><?php echo $lang_install['Database type help']; if ($dual_mysql) echo '<br />'.$lang_install['Mysql type info']; if ($mysql_innodb) echo '<br />'.$lang_install['MySQL InnoDB info'] ?></small>
+						<small><?php echo $lang_install['Database type help']; ?></small>
 					</label>
 				</div>
 				<div class="input text required">
@@ -386,24 +370,16 @@ body {
 }
 else
 {
-	//
-	// Strip slashes only if magic_quotes_gpc is on.
-	//
-	function unescape($str)
-	{
-		return (get_magic_quotes_gpc() == 1) ? stripslashes($str) : $str;
-	}
-
-	$db_type = $_POST['req_db_type'];
+    $db_type = $_POST['req_db_type'];
 	$db_host = trim($_POST['req_db_host']);
 	$db_name = trim($_POST['req_db_name']);
-	$db_username = unescape(trim($_POST['db_username']));
-	$db_password = unescape(trim($_POST['db_password']));
+	$db_username = trim($_POST['db_username']);
+	$db_password = trim($_POST['db_password']);
 	$db_prefix = trim($_POST['db_prefix']);
-	$username = unescape(trim($_POST['req_username']));
-	$password = unescape(trim($_POST['req_password']));
-	$email = unescape(strtolower(trim($_POST['adm_email'])));
-	$default_lang = preg_replace('#[\.\\\/]#', '', unescape(trim($_POST['req_language'])));
+	$username = trim($_POST['req_username']);
+	$password = trim($_POST['req_password']);
+	$email = strtolower(trim($_POST['adm_email']));
+	$default_lang = preg_replace('#[\.\\\/]#', '', trim($_POST['req_language']));
 
 	// Make sure base_url doesn't end with a slash
 	if (substr($_POST['req_base_url'], -1) == '/')
@@ -444,14 +420,9 @@ else
 
 
 	// Create the database object (and connect/select db)
-	try
-	{
-		$s2_db = DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, false);
-	}
-	catch (Exception $e)
-	{
-		error($e);
-	}
+    $p_connect = false;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Check SQLite prefix collision
 	if ($db_type == 'pdo_sqlite' && strtolower($db_prefix) == 'sqlite_')
@@ -466,8 +437,9 @@ else
 
 	try {
 		$result = $s2_db->query_build($query);
-		if ($s2_db->fetch_row($result))
-			error(sprintf($lang_install['S2 already installed'], $db_prefix, $db_name));
+		if ($s2_db->fetch_row($result)) {
+            error(sprintf($lang_install['S2 already installed'], $db_prefix, $db_name));
+        }
 	}
 	catch (DBLayer_Exception $e) {
 

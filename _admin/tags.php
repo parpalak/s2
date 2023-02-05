@@ -13,7 +13,8 @@ if (!defined('S2_ROOT'))
 
 function s2_load_tag ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'tag_id as id, name, description, url, modify_time',
@@ -30,7 +31,8 @@ function s2_load_tag ($id)
 
 function s2_save_tag ($tag)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$id = isset($tag['id']) ? (int) $tag['id'] : 0;
 	$tag_name = isset($tag['name']) ? $s2_db->escape($tag['name']) : '';
@@ -82,7 +84,8 @@ function s2_save_tag ($tag)
 
 function s2_delete_tag ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'DELETE'	=> 'tags',
@@ -104,7 +107,8 @@ function s2_delete_tag ($id)
 
 function s2_output_tag_form ($tag, $modify_time)
 {
-	global $s2_db, $lang_admin;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
     ($hook = s2_hook('fn_output_tag_form_pre_get_tags')) ? eval($hook) : null;
 

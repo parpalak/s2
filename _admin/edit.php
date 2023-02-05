@@ -13,7 +13,8 @@ if (!defined('S2_ROOT'))
 
 function s2_check_url_status ($parent_id, $url)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$url_status = 'ok';
 
@@ -43,9 +44,12 @@ function s2_check_url_status ($parent_id, $url)
 
 function s2_save_article ($page, $flags)
 {
-	global $s2_db, $lang_admin, $s2_user;
+	global $lang_admin, $s2_user;
 
-	$id = (int) $page['id'];
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
+    $id = (int) $page['id'];
 	$favorite = (int) isset($flags['favorite']);
 	$published = (int) isset($flags['published']);
 	$commented = (int) isset($flags['commented']);
@@ -157,9 +161,12 @@ function s2_save_article ($page, $flags)
 
 function s2_output_article_form ($id)
 {
-	global $s2_db, $lang_templates, $lang_admin, $s2_user;
+	global $lang_templates, $lang_admin, $s2_user;
 
-	($hook = s2_hook('fn_output_article_form_start')) ? eval($hook) : null;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
+    ($hook = s2_hook('fn_output_article_form_start')) ? eval($hook) : null;
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',

@@ -29,9 +29,12 @@ if (!function_exists('xml_parser_create'))
 
 function s2_extension_list ()
 {
-	global $s2_db, $lang_admin_ext;
+	global $lang_admin_ext;
 
-	$inst_exts = array();
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
+
+    $inst_exts = array();
 	$query = array(
 		'SELECT'	=> 'e.*',
 		'FROM'		=> 'extensions AS e',
@@ -188,7 +191,9 @@ function s2_extension_list ()
 
 function s2_install_extension ($id)
 {
-	global $s2_db, $lang_admin_ext;
+	global $lang_admin_ext;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	($hook = s2_hook('fn_install_extension_start')) ? eval($hook) : null;
 
@@ -362,7 +367,9 @@ function s2_install_extension ($id)
 
 function s2_flip_extension ($id)
 {
-	global $s2_db, $lang_admin_ext;
+	global $lang_admin_ext;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
@@ -460,7 +467,9 @@ function s2_flip_extension ($id)
 
 function s2_uninstall_extension ($id)
 {
-	global $s2_db, $lang_admin_ext;
+	global $lang_admin_ext;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$messages = array();
 

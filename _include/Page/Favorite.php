@@ -21,7 +21,8 @@ class Page_Favorite extends Page_HTML implements Page_Routable
 	//
 	private function make_favorite_page ()
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$subquery = array(
 			'SELECT'	=> '1',

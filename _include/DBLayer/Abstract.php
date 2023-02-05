@@ -9,25 +9,26 @@
 
 abstract class DBLayer_Abstract
 {
-	protected $saved_queries = array();
+    protected $saved_queries = array();
 	protected $num_queries = 0;
 
 	protected $prefix = '';
 
-	private static function getClassName ($db_type)
-	{
-		$classes = array(
-			'mysqli' => 'MySQLi',
-			'mysqli_innodb' => 'MySQLiInnoDB',
-			'pgsql' => 'PgSQL',
-			'pdo_sqlite' => 'PDOSQLite',
-		);
+    private static function getClassName($db_type)
+    {
+        $classes = array(
+            'mysqli'        => 'MySQLi',
+            'mysqli_innodb' => 'MySQLi', // TODO Now only InnoDB is supported. Remove mysqli_innodb key in favour of mysqli
+            'pgsql'         => 'PgSQL',
+            'pdo_sqlite'    => 'PDOSQLite',
+        );
 
-		if (!isset($classes[$db_type]))
-			throw new Exception('\''.$db_type.'\' is not a valid database type. Please check settings in config.php.');
+        if (!isset($classes[$db_type])) {
+            throw new Exception('\'' . $db_type . '\' is not a valid database type. Please check settings in config.php.');
+        }
 
-		return 'DBLayer_' . $classes[$db_type];
-	}
+        return 'DBLayer_' . $classes[$db_type];
+    }
 
 	/**
 	 * @param $db_type
@@ -70,14 +71,14 @@ abstract class DBLayer_Abstract
 		return $this->saved_queries;
 	}
 
-	/**
+    /**
 	 * @param string $sql
 	 * @param bool $unbuffered
 	 * @return resource
 	 */
 	abstract function query($sql, $unbuffered = false);
 
-	protected function set_names($names)
+    protected function set_names($names)
 	{
 		return $this->query('SET NAMES \''.$this->escape($names).'\'');
 	}

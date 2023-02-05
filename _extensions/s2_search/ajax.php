@@ -13,7 +13,6 @@ use S2\Rose\Storage\Database\PdoStorage;
 header('Content-Type: text/html; charset=utf-8');
 
 define('S2_ROOT', '../../');
-define('S2_NO_DB', 1);
 require S2_ROOT . '_include/common.php';
 
 header('X-Powered-By: S2/' . S2_VERSION);

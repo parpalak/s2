@@ -52,7 +52,8 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 
 	private function all_tags ()
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$query = array(
 			'SELECT'	=> 'tag_id, name, url',

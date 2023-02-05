@@ -52,7 +52,8 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
     private function get_post($year, $month, $day, $url)
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         $start_time = mktime(0, 0, 0, $month, $day, $year);
         $end_time   = mktime(0, 0, 0, $month, $day + 1, $year);
@@ -202,7 +203,8 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
     private function get_comments($id)
     {
-        global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
         $comments = '';
 

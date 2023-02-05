@@ -39,7 +39,8 @@ function s2_setcookie($name, $value, $expire = 0, $path = null, $secure = null)
 // Creates hew challenge and puts it into DB
 function s2_get_new_challenge ()
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$time = time();
 
@@ -60,7 +61,8 @@ function s2_get_new_challenge ()
 
 function s2_update_challenge ($challenge)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'UPDATE'	=> 'users_online',
@@ -73,7 +75,8 @@ function s2_update_challenge ($challenge)
 
 function s2_delete_challenge ($challenge)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'DELETE'	=> 'users_online',
@@ -85,7 +88,9 @@ function s2_delete_challenge ($challenge)
 
 function s2_close_other_sessions ($challenge)
 {
-	global $s2_db, $s2_user;
+	global $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array (
 		'DELETE'	=> 'users_online',
@@ -98,7 +103,8 @@ function s2_close_other_sessions ($challenge)
 // Removes outdated challenges and sessions from DB
 function s2_cleanup_expired_sessions ()
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$time = time() - S2_EXPIRE_CHALLENGE_TIMEOUT;
 
@@ -125,7 +131,8 @@ function s2_cleanup_expired_sessions ()
 
 function s2_get_login ($challenge)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'login, time',
@@ -151,7 +158,8 @@ function s2_get_login ($challenge)
 
 function s2_get_user_info ($login)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Fetching user info
 	$query = array(
@@ -167,7 +175,9 @@ function s2_get_user_info ($login)
 
 function s2_authenticate_user ($challenge)
 {
-	global $s2_db, $lang_admin, $s2_cookie_name;
+	global $lang_admin, $s2_cookie_name;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// If the challenge exists and isn't expired
 	$query = array(
@@ -229,7 +239,8 @@ function s2_test_user_rights ($is_permissions)
 
 function s2_get_salt ($s)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'salt',
@@ -244,7 +255,8 @@ function s2_get_salt ($s)
 
 function s2_get_password_hash ($login)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'password',
@@ -259,7 +271,9 @@ function s2_get_password_hash ($login)
 
 function s2_login_success ($login, $challenge)
 {
-	global $s2_db, $s2_cookie_name;
+	global $s2_cookie_name;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$time = time();
 	$comment_cookie = md5(uniqid('comment_cookie').$time);
@@ -325,7 +339,9 @@ function s2_logout ($challenge)
 
 function s2_get_sessions ($login)
 {
-	global $s2_db, $lang_admin;
+	global $lang_admin;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'SELECT'	=> 'ip, ua, time, challenge',

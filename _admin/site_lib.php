@@ -145,7 +145,9 @@ function s2_grb ($b, $login, $permission, $allow_modify)
 
 function s2_get_user_list ()
 {
-	global $s2_db, $lang_user_permissions, $lang_user_permissions_help, $lang_admin, $s2_user;
+	global $lang_user_permissions, $lang_user_permissions_help, $lang_admin, $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$s2_user_permissions = array(
 		'view',
@@ -227,7 +229,8 @@ function s2_get_user_list ()
 // if the article is specified in GET parameters
 function s2_preload_editor ()
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$return = ($hook = s2_hook('fn_preload_editor_start')) ? eval($hook) : null;
 	if ($return)
@@ -351,7 +354,8 @@ function s2_context_buttons ()
 
 function s2_get_tag_ids ($tag_str)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// String cleanup, lower-case copy
 	$dirty_tags = explode(',', $tag_str);

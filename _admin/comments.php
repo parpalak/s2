@@ -28,9 +28,11 @@ function s2_comment_menu_links ($mode = false)
 // Displays the comments tables
 function s2_show_comments ($mode, $id = 0)
 {
-	global $s2_db, $session_id, $lang_admin, $s2_user;
+	global $session_id, $lang_admin, $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
-	// Getting comments
+    // Getting comments
 	$query = array(
 		'SELECT'	=> 'a.title, c.article_id, c.id, c.time, c.nick, c.email, c.show_email, c.subscribed, c.text, c.shown, c.sent, c.good, c.ip',
 		'FROM'		=> 'art_comments AS c',
@@ -168,7 +170,9 @@ function s2_show_comments ($mode, $id = 0)
 // if premoderation is enabled.
 function s2_for_premoderation ()
 {
-	global $s2_db, $s2_user, $lang_admin;
+	global $s2_user, $lang_admin;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	if (!S2_PREMODERATION || !$s2_user['hide_comments'])
 		return array('content' => s2_comment_menu_links());
@@ -247,7 +251,8 @@ function s2_output_comment_form ($comment, $mode, $type)
 
 function s2_get_comment ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Get comment
 	$query = array(
@@ -270,7 +275,8 @@ function s2_get_comment ($id)
  */
 function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Does the comment exist?
 	// We need article_id for displaying comments.
@@ -345,7 +351,8 @@ function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 
 function s2_toggle_mark_comment ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Does the comment exist?
 	// We need article_id for displaying comments
@@ -376,8 +383,8 @@ function s2_toggle_mark_comment ($id)
 
 function s2_save_comment ($comment)
 {
-	global $s2_db;
-
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$nick = $s2_db->escape($comment['nick']);
 	$email = $s2_db->escape($comment['email']);
@@ -423,7 +430,8 @@ function s2_save_comment ($comment)
 
 function s2_delete_comment ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Does the comment exist?
 	// We need article_id for displaying the other comments

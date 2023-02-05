@@ -40,7 +40,9 @@ function s2_blog_parse_date ($time, $day_shift = 0)
 
 function s2_blog_save_post ($page, $flags)
 {
-	global $s2_db, $lang_admin, $s2_user;
+	global $lang_admin, $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$favorite = (int) isset($flags['favorite']);
 	$published = (int) isset($flags['published']);
@@ -148,7 +150,8 @@ function s2_blog_save_post ($page, $flags)
 // Check nor unique and empty post urls
 function s2_blog_check_url_status ($create_time, $url)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$url_status = 'ok';
 
@@ -180,7 +183,9 @@ function s2_blog_check_url_status ($create_time, $url)
 
 function s2_blog_create_post ()
 {
-	global $s2_db, $lang_admin, $s2_user;
+	global $lang_admin, $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$now = time();
 
@@ -197,7 +202,8 @@ function s2_blog_create_post ()
 
 function s2_blog_flip_favorite ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$query = array(
 		'UPDATE'	=> 's2_blog_posts',
@@ -210,7 +216,9 @@ function s2_blog_flip_favorite ($id)
 
 function s2_blog_delete_post ($id)
 {
-	global $s2_db, $s2_user;
+	global $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	if (!$s2_user['edit_site'])
 	{
@@ -261,7 +269,8 @@ function s2_blog_delete_post ($id)
 
 function s2_blog_get_comment ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Get comment
 	$query = array(
@@ -284,7 +293,8 @@ function s2_blog_get_comment ($id)
  */
 function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Does the comment exist?
 	// We need post id for displaying comments.
@@ -359,7 +369,8 @@ function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 
 function s2_blog_mark_comment ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Does the comment exist?
 	// We need post id for displaying comments
@@ -390,7 +401,8 @@ function s2_blog_mark_comment ($id)
 
 function s2_blog_delete_comment ($id)
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	// Does the comment exist?
 	// We need post id for displaying the other comments
@@ -423,7 +435,9 @@ function s2_blog_delete_comment ($id)
 
 function s2_blog_output_post_list ($criteria)
 {
-	global $s2_db, $lang_admin, $s2_user;
+	global $lang_admin, $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$conditions = array();
 	$messages = array();
@@ -578,7 +592,8 @@ function s2_blog_output_post_list ($criteria)
 
 function s2_blog_tag_list ()
 {
-	global $s2_db;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',
@@ -607,7 +622,9 @@ function s2_blog_tag_list ()
 
 function s2_blog_edit_post_form ($id)
 {
-	global $s2_db, $lang_admin, $s2_user;
+	global $lang_admin, $s2_user;
+    /** @var DBLayer_Abstract $s2_db */
+    $s2_db = \Container::get('db');
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',

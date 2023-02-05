@@ -48,7 +48,8 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 
 	private function posts_by_tag ($tag, $is_slash)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$query = array(
 			'SELECT'	=> 'tag_id, description, name, url',
@@ -100,7 +101,8 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 	 */
 	private static function articles_by_tag ($tag_id)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$subquery = array(
 			'SELECT'	=> '1',

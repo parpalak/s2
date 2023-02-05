@@ -11,6 +11,9 @@
 if (!defined('S2_DB_LAST_REVISION'))
 	die;
 
+/** @var DBLayer_Abstract $s2_db */
+$s2_db = \Container::get('db');
+
 if (S2_DB_REVISION < 2)
 {
 	$query = array(

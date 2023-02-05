@@ -20,7 +20,8 @@ class Model
 	//
 	public static function get_group_url ($parent_ids, $urls)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		if (!S2_USE_HIERARCHY)
 		{
@@ -76,7 +77,8 @@ class Model
 	//
 	public static function path_from_id ($id, $visible_for_all = false)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		if ($id < 0)
 			return false;
@@ -117,7 +119,8 @@ class Model
 	//
 	public static function main_page_title ()
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$query = array(
 			'SELECT'	=> 'title',

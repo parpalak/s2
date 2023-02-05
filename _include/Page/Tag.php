@@ -21,7 +21,8 @@ class Page_Tag extends Page_HTML implements Page_Routable
 	//
 	private function make_tags_pages ($tag_name, $is_slash)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		// Tag preview
 

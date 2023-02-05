@@ -40,10 +40,19 @@ class Container
     /** @noinspection PhpParamsInspection */
     private static function instantiate(string $className): object
     {
-        global $db_host, $db_name, $db_username, $db_password, $db_prefix;
+        global $db_type, $db_host, $db_name, $db_username, $db_password, $db_prefix, $p_connect;
 
         switch ($className) {
+            case 'db':
+                try {
+                    $s2_db = DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect);
+                } catch (Exception $e) {
+                    error($e->getMessage(), $e->getFile(), $e->getLine());
+                }
+                return $s2_db;
+
             case \PDO::class:
+                // TODO use $db_type
                 $pdo = new \S2\Cms\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -94,7 +103,7 @@ class Container
             case \s2_extensions\s2_search\IndexManager::class:
                 return new \s2_extensions\s2_search\IndexManager(
                     S2_CACHE_DIR,
-                    new \s2_extensions\s2_search\Fetcher(),
+                    new \s2_extensions\s2_search\Fetcher(self::get('db')),
                     self::get(Indexer::class),
                     self::get(PdoStorage::class),
                     self::get('recommendations_cache'),

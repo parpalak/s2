@@ -21,7 +21,8 @@ class Lib
 
 	public static function calendar ($year, $month, $day, $url = '', $day_flags = false)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		if ($month === '')
 			$month = 1;
@@ -121,7 +122,8 @@ class Lib
 	// Returns an array containing info about 10 last posts
 	public static function last_posts_array ($num_posts = 10, $skip = 0, $fake_last_post = false)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		if ($fake_last_post)
 			$num_posts++;
@@ -203,7 +205,8 @@ class Lib
 	//
 	public static function posts_links ($ids, $labels, &$see_also, &$tags)
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$ids = implode(', ', $ids);
 

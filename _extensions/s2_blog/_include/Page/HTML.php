@@ -45,7 +45,8 @@ abstract class Page_HTML extends \Page_HTML
 
 	public function get_posts ($query_add, $sort_asc = true, $sort_field = 'create_time')
 	{
-		global $s2_db;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		// Obtaining posts
 
@@ -123,7 +124,9 @@ abstract class Page_HTML extends \Page_HTML
 
 	public function blog_navigation ()
 	{
-		global $s2_db, $request_uri;
+		global $request_uri;
+        /** @var \DBLayer_Abstract $s2_db */
+        $s2_db = \Container::get('db');
 
 		$cur_url = str_replace('%2F', '/', urlencode($request_uri));
 
