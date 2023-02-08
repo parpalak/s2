@@ -4,9 +4,14 @@ suites:
         actor: UnitTester
         modules:
             enabled:
-                # add more modules here
                 - Asserts
-        step_decorators: ~ 
+        step_decorators: ~
+    acceptance:
+        actor: AcceptanceTester
+        modules:
+            enabled:
+                - PhpBrowser:
+                      url: http://localhost:8881/
 settings:
     shuffle: true
     lint: true
@@ -15,4 +20,3 @@ paths:
     output: _tests/_output
     support: _tests/_support
     data: _tests
-     

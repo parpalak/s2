@@ -349,6 +349,9 @@ function s2_get_remote_file ($url, $timeout = 10, $head_only = false, $max_redir
 		// Grab the page
 		$content = @curl_exec($ch);
 		$response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if (curl_errno($ch)) {
+            $error_msg = curl_error($ch);
+        }
 		curl_close($ch);
 
 		// Process 301/302 redirect

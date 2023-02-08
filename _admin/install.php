@@ -17,6 +17,7 @@ define('MIN_PHP_VERSION', '7.4.0');
 define('S2_ROOT', '../');
 define('S2_DEBUG', 1);
 define('S2_SHOW_QUERIES', 1);
+define('S2_DISABLE_HOOKS', 1);
 
 if (file_exists(S2_ROOT.'config.php'))
 	exit('The file \'config.php\' already exists which would mean that S2 is already installed. You should go <a href="'.S2_ROOT.'">here</a> instead.');
@@ -33,6 +34,7 @@ error_reporting(E_ALL);
 @set_time_limit(0);
 
 // We need some stuff
+require S2_ROOT . '_vendor/autoload.php';
 require S2_ROOT.'_include/setup.php';
 require 'options.php';
 
@@ -43,12 +45,12 @@ function generate_config_file ()
 {
 	global $db_type, $db_host, $db_name, $db_username, $db_password, $db_prefix, $base_url, $s2_cookie_name;
 
-	foreach (array('', '/?', '/index.php', '/index.php?') as $prefix)
-	{
+	foreach (array('', '/?', '/index.php', '/index.php?') as $prefix) {
 		$url_prefix = $prefix;
-		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 5, false, 10, true);
-		if (false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
-			break;
+		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
+		if ($content !== null && false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />')) {
+            break;
+        }
 	}
 
 	$path = preg_replace('#^[^:/]+://[^/]*#', '', $base_url);
@@ -58,8 +60,8 @@ function generate_config_file ()
 		$use_https = true;
 	else
 	{
-		$content = s2_get_remote_file('https://'.substr($base_url, 7).$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 5, false, 10, true);
-		if (false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
+		$content = s2_get_remote_file('https://'.substr($base_url, 7).$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
+		if ($content !== null && false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
 			$use_https = true;
 	}
 
