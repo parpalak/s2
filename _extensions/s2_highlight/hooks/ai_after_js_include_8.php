@@ -23,5 +23,11 @@
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/foldcode.js"></script>
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/foldgutter.js"></script>
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/xml-fold.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/annotatescrollbar.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/dialog.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/jump-to-line.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/matchesonscrollbar.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/search.js"></script>
+<script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/codemirror/searchcursor.js"></script>
 <script type="text/javascript" src="<?php echo S2_PATH.'/_extensions/s2_highlight'; ?>/init.js"></script>
 <?php

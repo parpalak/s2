@@ -12,6 +12,37 @@ var s2_highlight = (function () {
     var instance, scrolltop = null,
         enabled = is_local_storage && localStorage.getItem('s2_highlight_on') === '1';
 
+
+    /** Duplicate a current line in CodeMirror doc */
+    function cmDuplicateLine(cm) {
+        // get a position of a current cursor in a current cell
+        var currentCursor = cm.doc.getCursor();
+
+        // read a content from a line where is the current cursor
+        var lineContent = cm.doc.getLine(currentCursor.line);
+
+        // go to the end the current line
+        CodeMirror.commands.goLineEnd(cm);
+
+        // make a break for a new line
+        CodeMirror.commands.newlineAndIndent(cm);
+
+        // move caret to the left position
+        CodeMirror.commands.goLineStart(cm);
+
+        // filled a content of the new line content from line above it
+        cm.doc.replaceSelection(lineContent);
+
+        // restore position cursor on the new line
+        cm.doc.setCursor(currentCursor.line + 1, currentCursor.ch);
+    }
+
+    // from https://gist.github.com/Boorj/eb020e14487329431bdabc9141ee7ca1
+    CodeMirror.keyMap.pcDefault["Ctrl-D"] = cmDuplicateLine;
+    CodeMirror.keyMap.pcDefault["Ctrl-Y"] = CodeMirror.commands.deleteLine;
+
+//    CodeMirror.keyMap.pcDefault["Ctrl-Y"] = CodeMirror.commands.findPersistent;
+
     return (
         {
             get_instance: function () {
@@ -19,6 +50,12 @@ var s2_highlight = (function () {
                 scrolltop = eText.scrollTop;
 
                 instance = CodeMirror.fromTextArea(eText, {
+                    extraKeys: {
+                        "Ctrl-F": "findPersistent",
+                        "F3": "findNext",
+                        "Shift-F3": "findPrev",
+                        "Ctrl-H": "replace"
+                    },
                     mode: "text/html",
                     smartIndent: false,
                     indentUnit: 4,
