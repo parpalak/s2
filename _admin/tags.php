@@ -107,6 +107,7 @@ function s2_delete_tag ($id)
 
 function s2_output_tag_form ($tag, $modify_time)
 {
+    global $lang_admin;
     /** @var DBLayer_Abstract $s2_db */
     $s2_db = \Container::get('db');
 

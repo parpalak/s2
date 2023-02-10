@@ -18,6 +18,7 @@ class InstallCest
 
         $this->testComment($I);
         $this->testAdminLogin($I);
+        $this->testAdminCommentList($I);
     }
 
     private function testComment(AcceptanceTester $I): void
@@ -45,5 +46,12 @@ class InstallCest
 
         $I->amOnPage('/---');
         $I->see('👤 admin');
+    }
+
+    private function testAdminCommentList(AcceptanceTester $I): void
+    {
+        $I->amOnPage('/_admin/site_ajax.php?action=load_tags');
+        $I->see('Tag');
+        $I->see('Modified');
     }
 }
