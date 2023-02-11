@@ -22,7 +22,7 @@ require S2_ROOT.'/_extensions/s2_blog'.'/blog_lib.php';
 ?>
 		<dt id="blog_tab"><?php echo Lang::get('Blog', 's2_blog'); ?></dt>
 		<dd class="inactive">
-			<div class="reducer">
+			<div class="reducer" id="blog_wrapper">
 				<form name="blogform">
 					<table width="100%" class="fields">
 						<tr>

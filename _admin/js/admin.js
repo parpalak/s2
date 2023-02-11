@@ -1538,6 +1538,7 @@ function LoadTag (iId)
 {
 	GETAsyncRequest(sUrl + 'action=load_tag&id=' + iId, function (http, data)
 	{
+		selectTab('#tag_tab');
 		$('#tag_div').html(data);
 	});
 	return false;

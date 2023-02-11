@@ -89,7 +89,7 @@ class DBLayer_MySQLi extends DBLayer_Abstract
             if ($cur_row === false)
                 return false;
 
-            return $cur_row[$col];
+            return $cur_row[$col] ?? false;
         } else
             return false;
     }

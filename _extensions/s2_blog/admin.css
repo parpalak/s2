@@ -34,3 +34,17 @@
 .bitbtn.add_post {
 	background-position: 1px -51px;
 	}
+
+#blog_wrapper {
+	display: flex;
+	flex-direction: column;
+	}
+	#blog_div {
+		overflow: auto;
+		}
+
+.s2_blog_date,
+.s2_blog_tags,
+.s2_blog_label {
+	white-space: nowrap;
+	}
