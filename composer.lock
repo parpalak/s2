@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1ec0d8d6108e6dde413beb8d6b759c26",
+    "content-hash": "8b84efe37cddb374aa259f81ac411cc4",
     "packages": [
         {
             "name": "altorouter/altorouter",
@@ -67,34 +67,40 @@
             "time": "2022-12-08T10:12:36+00:00"
         },
         {
-            "name": "katzgrau/klogger",
-            "version": "1.2.2",
+            "name": "johnykvsky/jklogger",
+            "version": "0.1.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/katzgrau/KLogger.git",
-                "reference": "36481c69db9305169a2ceadead25c2acaabd567c"
+                "url": "https://github.com/johnykvsky/JKLogger.git",
+                "reference": "999b6533e64252037352732eb30ca82a3d6aa05c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/katzgrau/KLogger/zipball/36481c69db9305169a2ceadead25c2acaabd567c",
-                "reference": "36481c69db9305169a2ceadead25c2acaabd567c",
+                "url": "https://api.github.com/repos/johnykvsky/JKLogger/zipball/999b6533e64252037352732eb30ca82a3d6aa05c",
+                "reference": "999b6533e64252037352732eb30ca82a3d6aa05c",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3",
+                "php": "^7.4 || ^8.0",
                 "psr/log": "^1.0.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^6.0.0"
+                "johnykvsky/faker": "~1.14",
+                "phpstan/extension-installer": "~1.1.0",
+                "phpstan/phpstan": "~0.12.92",
+                "phpunit/phpunit": "~8.5.2",
+                "thecodingmachine/phpstan-strict-rules": "~0.12.1"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
-                    "Katzgrau\\KLogger\\": "src/"
-                },
-                "classmap": [
-                    "src/"
-                ]
+                    "johnykvsky\\Utils\\": "src"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -108,17 +114,25 @@
                 {
                     "name": "Dan Horrigan",
                     "email": "dan@dhorrigan.com"
+                },
+                {
+                    "name": "johnykvsky",
+                    "email": "johnykvsky@protonmail.com",
+                    "homepage": "https://github.com/johnykvsky",
+                    "role": "Developer"
                 }
             ],
             "description": "A Simple Logging Class",
+            "homepage": "https://github.com/johnykvsky/JKLogger",
             "keywords": [
-                "logging"
+                "JKlogger",
+                "johnykvsky"
             ],
             "support": {
-                "issues": "https://github.com/katzgrau/KLogger/issues",
-                "source": "https://github.com/katzgrau/KLogger/tree/1.2.2"
+                "issues": "https://github.com/johnykvsky/JKLogger/issues",
+                "source": "https://github.com/johnykvsky/JKLogger/tree/0.1.2"
             },
-            "time": "2022-07-29T20:41:14+00:00"
+            "time": "2021-07-13T18:48:12+00:00"
         },
         {
             "name": "psr/cache",

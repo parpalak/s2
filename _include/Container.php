@@ -8,7 +8,7 @@
  */
 
 
-use Katzgrau\KLogger\Logger;
+use johnykvsky\Utils\JKLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Image\ThumbnailGenerator;
@@ -74,10 +74,10 @@ class Container
                 return new ThumbnailGenerator();
 
             case LoggerInterface::class:
-                return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR);
+                return new JKLogger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::INFO, ['prefix' => 'log_', 'extension' => 'log']);
 
             case 'recommendations_logger':
-                return new Logger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::DEBUG, ['prefix' => 'recommendations_']);
+                return new JKLogger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::DEBUG, ['prefix' => 'recommendations_', 'extension' => 'log']);
 
             case 'recommendations_cache':
                 return new FilesystemTagAwareAdapter('recommendations', 0, S2_CACHE_DIR);
