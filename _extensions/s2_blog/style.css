@@ -20,12 +20,12 @@ table.cal {
 	.cal td, .cal th,
 	#content .cal td,
 	#content .cal th {
-		padding: 0;
 		width: 27px;
-		text-align: center;
 		line-height: 1.5;
 		}
 	.cal td {
+		padding: 0;
+		text-align: right;
 		color: #000;
 		}
  		.cal td.sun {
@@ -35,7 +35,15 @@ table.cal {
 			display: block;
 			background: #eed;
 			}
+		.cal td:before { /* hack for text-ident from right */
+			content: "\0000a0";
+			float:right;
+			width: 6px;
+			}
+
 	.cal th {
+		text-align: left;
+		padding: 0 0 0 7px;
 		font-weight: normal;
 		font-size: 0.786em;
 		line-height: 1.909;

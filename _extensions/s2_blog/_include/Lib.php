@@ -62,7 +62,7 @@ class Lib
 			// One of 12 year tables
 			if ($start_time < time())
 				$month_name = '<a href="'.S2_BLOG_PATH.date('Y/m', $start_time).'/">'.$month_name.'</a>';
-			$header = '<tr class="nav"><th colspan="7" align="center">'.$month_name.'</th></tr>';
+			$header = '<tr class="nav"><th colspan="7">'.$month_name.'</th></tr>';
 		}
 		else
 		{

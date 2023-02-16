@@ -27,7 +27,7 @@ $s = $a*10 + $b;
 $s += $bbb ? $add1 : -$add1;
 
 ?>
-<h2 class="comment form"><?php echo Lang::get('Post a comment'); ?></h2>
+<h2 class="comment form" id="comment"><?php echo Lang::get('Post a comment'); ?></h2>
 <form method="post" name="post_comment" action="<?php echo $action?>">
 	<p class="input name">
 		<?php echo Lang::get('Your name'); ?><br />

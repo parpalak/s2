@@ -11,4 +11,4 @@
      die;
 }
 
-$includes['css'][] = S2_PATH.'/_extensions/s2_blog'.'/style.css';
+$includes['css'][] = S2_PATH.'/_extensions/s2_blog/style.css?3';

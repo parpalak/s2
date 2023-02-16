@@ -6,7 +6,7 @@
  */
 
 ?>
-<h2 id="comment" class="comment"><?php echo Lang::get('Comments'); ?></h2>
+<h2 class="comment"><?php echo Lang::get('Comments'); ?></h2>
 <?php
 
 echo $comments;
