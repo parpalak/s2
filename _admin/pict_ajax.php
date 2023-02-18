@@ -39,7 +39,7 @@ if ($action == 'preview') {
     while (strpos($file, '..') !== false)
         $file = str_replace('..', '', $file);
 
-    s2_make_thumbnail(S2_IMG_PATH . $file, 80);
+    s2_make_thumbnail(S2_IMG_PATH . $file, 200);
 
     /** @var ?\DBLayer_Abstract $s2_db */
     $s2_db = \Container::getIfInstantiated('db');
