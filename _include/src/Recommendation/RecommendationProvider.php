@@ -35,7 +35,11 @@ class RecommendationProvider
      */
     public function getRecommendations(string $page, ExternalId $externalId): array
     {
-        $recommendations = $this->cache->get('recommendations_' . $externalId->toString(), fn(ItemInterface $item) => $this->pdoStorage->getSimilar($externalId));
+        $recommendations = $this->cache->get(
+            'recommendations2_' . $externalId->toString(),
+            fn(ItemInterface $item) => $this->pdoStorage->getSimilar($externalId, null, 4, 9)
+                ?: $this->pdoStorage->getSimilar($externalId, null, 2, 9)
+        );
 
         return array_merge($this->processRecommendations($page, $recommendations), [$recommendations]);
     }
