@@ -606,9 +606,9 @@ class LayoutMatcherFactory
             new BlockGroup(['1/3'],/*     */ (new Block())->text(150, 300)),
             new BlockGroup(['', '', '', ''], (new Block())->text(0, 80)),
         ]);
+        // /blog/2013/02/24/language
         $r->addGroup('i i', ...[
-            new BlockGroup(['1/1/3/3'], (new Block())->img(0, 0.8, $minImgWidth2)->bigTitle()),
-            new BlockGroup(['1/3/3/5'], (new Block())->img(0, 0.8, $minImgWidth2)->bigTitle()),
+            new BlockGroup(['1/1/3/3', '1/3/3/5'], (new Block())->img(0, 0.8, $minImgWidth2)->bigTitle()),
         ]);
         $r->addGroup('i i 2 2', ...[
             // http://localhost:8081/?/blog/2011/02/22/Perpetuum_mobile
