@@ -43,7 +43,7 @@ class Fetcher implements GenericFetcher
             $indexable
                 ->setKeywords($article['meta_keys'])
                 ->setDescription($article['meta_desc'])
-                ->setDate($article['create_time'] > 0 ? new \DateTime('@' . $article['create_time']) : null)
+                ->setDate($article['create_time'] > 0 ? (new \DateTime('@' . $article['create_time']))->setTimezone((new \DateTime())->getTimezone()) : null)
                 ->setUrl($url . urlencode($article['url']) . ($article['is_children'] ? '/' : ''))
             ;
 
@@ -101,7 +101,7 @@ class Fetcher implements GenericFetcher
         $indexable
             ->setKeywords($article['meta_keys'])
             ->setDescription($article['meta_desc'])
-            ->setDate($article['create_time'] > 0 ? new \DateTime('@' . $article['create_time']) : null)
+            ->setDate($article['create_time'] > 0 ? (new \DateTime('@' . $article['create_time']))->setTimezone((new \DateTime())->getTimezone()) : null)
             ->setUrl($parent_path . '/' . urlencode($article['url']) . ($article['url'] && $article['is_children'] ? '/' : ''))
         ;
 

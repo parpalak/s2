@@ -29,7 +29,7 @@ if (substr($id, 0, 8) == 's2_blog_')
 
 	$indexable = new \S2\Rose\Entity\Indexable('s2_blog_'.$s2_blog_post['id'], $s2_blog_post['title'], $s2_blog_post['text']);
 	$indexable
-		->setDate($s2_blog_post['create_time'] > 0 ? new \DateTime('@' . $s2_blog_post['create_time']) : null)
+		->setDate($s2_blog_post['create_time'] > 0 ? (new \DateTime('@' . $s2_blog_post['create_time']))->setTimezone((new \DateTime())->getTimezone()) : null)
 		->setUrl(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d', $s2_blog_post['create_time']).'/'.$s2_blog_post['url'])
 	;
 
