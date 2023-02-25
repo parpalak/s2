@@ -219,7 +219,7 @@ function s2_get_template ($raw_template_id, $default_path = false)
 		if (s2_is_local_resource($js_path))
 			$js_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $js_path;
 
-		$js[] = '<script src="' . $js_path . '"></script>';
+		$js[] = '<script src="' . $js_path . '" defer></script>'; // TODO add more control for deferred attr
 	}
 
 	$link = array_merge($link, $includes['css_inline']);
