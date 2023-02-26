@@ -155,7 +155,7 @@ function optimizeAndUploadFile(file) {
 	SetWait(true);
 
 	/**
-	 * Experiments show that now in Chrome file.type === 'image/png' now matter how the image is pasted.
+	 * Experiments show that now in Chrome file.type is 'image/png' no matter how the image is pasted.
 	 * However, I prefer to write a general algorithm.
 	 */
 	if (file.type === 'image/png') {
@@ -174,7 +174,7 @@ function optimizeAndUploadFile(file) {
 		});
 	}
 
-	if (file.type === 'image/jpg' || file.type === 'image/jpg') {
+	if (file.type === 'image/jpg' || file.type === 'image/jpeg') {
 		blobs.jpeg = file;
 	} else {
 		imageConversion.compress(file,{
