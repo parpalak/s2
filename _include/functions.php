@@ -168,115 +168,79 @@ function s2_process_multipart_mixed (&$src, &$dest, $dir = false)
 	$src = '';
 }
 
-//
-// Searches for a template file (in the style or 'template' directory)
-//
-function s2_get_template ($raw_template_id, $default_path = false)
-{
-	global $request_uri;
-
-	if ($default_path === false)
-		$default_path = S2_ROOT.'_include/templates/';
-
-	$path = false;
-	$template_id = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $raw_template_id);
-
-	$return = ($hook = s2_hook('fn_get_template_start')) ? eval($hook) : null;
-	if ($return)
-		return $return;
-
-	if (!$path)
-	{
-		if (file_exists(S2_ROOT.'_styles/'.S2_STYLE.'/templates/'.$template_id))
-			$path = S2_ROOT.'_styles/'.S2_STYLE.'/templates/'.$template_id;
-		elseif (file_exists($default_path.$template_id))
-			$path = $default_path.$template_id;
-		else
-			throw new Exception(sprintf(Lang::get('Template not found'), $default_path.$template_id));
-	}
-
-	ob_start();
-	include $path;
-	$template = ob_get_clean();
-
-	$style_filename =  '_styles/' . S2_STYLE . '/' . S2_STYLE . '.php';
-	$includes = require S2_ROOT . $style_filename;
-
-	if (empty($includes) || !is_array($includes))
-		throw new Exception(sprintf('File "%s" must return a PHP array with the following keys: css, js, css_inline, js_inline, favicon.', $style_filename));
-
-	($hook = s2_hook('fn_get_template_pre_includes_merge')) ? eval($hook) : null;
-
-	$link = $js = array();
-	foreach ($includes['css'] as $css_path) {
-		if (s2_is_local_resource($css_path))
-			$css_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $css_path;
-
-		$link[] = '<link rel="stylesheet" href="' . $css_path . '" />';
-	}
-
-	foreach ($includes['js'] as $js_path) {
-		if (s2_is_local_resource($js_path))
-			$js_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $js_path;
-
-		$js[] = '<script src="' . $js_path . '" defer></script>'; // TODO add more control for deferred attr
-	}
-
-	$link = array_merge($link, $includes['css_inline']);
-	$js = array_merge($js, $includes['js_inline']);
-
-	if (isset($includes['favicon'])) {
-		$favicon_path = $includes['favicon'];
-		if (s2_is_local_resource($favicon_path)) {
-			$favicon_path = S2_PATH . '/_styles/' . S2_STYLE . '/' . $favicon_path;
-		}
-		$link[] = '<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="' . $favicon_path . '">';
-	}
-
-	($hook = s2_hook('fn_get_template_pre_includes_replace')) ? eval($hook) : null;
-
-	$template = str_replace('<!-- s2_styles -->', implode("\n", $link), $template);
-	$template = str_replace('<!-- s2_scripts -->', implode("\n", $js), $template);
-
-	if ((strpos($template, '</a>') !== false) && isset($request_uri))
-	{
-		$template = preg_replace_callback('#<a href="([^"]*)">([^<]*)</a>#',
-			function ($matches) use ($request_uri)
-			{
-				$real_request_uri = s2_link($request_uri);
-
-				list(, $url, $text) = $matches;
-
-				if ($url == $real_request_uri)
-					return '<span>'.$text.'</span>';
-				elseif ($url && strpos($real_request_uri, $url) === 0)
-					return '<a class="current" href="'.$url.'">'.$text.'</a>';
-				else
-					return '<a href="'.$url.'">'.$text.'</a>';
-			},
-			$template);
-	}
-
-	($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
-	return $template;
-}
-
 /**
- * @param $path
- * @return bool
+ * Searches for a template file (in the style or 'template' directory)
+ *
+ * @throws Exception
  */
-function s2_is_local_resource ($path)
+function s2_get_template($rawTemplateId, $defaultPath = false)
 {
-	if (substr($path, 0, 1) === '/')
-		return false;
+    global $request_uri;
 
-	if (substr($path, 0, 7) === 'http://')
-		return false;
+    if ($defaultPath === false) {
+        $defaultPath = S2_ROOT . '_include/templates/';
+    }
 
-	if (substr($path, 0, 8) === 'https://')
-		return false;
+    $path       = false;
+    $templateId = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $rawTemplateId);
 
-	return true;
+    $return = ($hook = s2_hook('fn_get_template_start')) ? eval($hook) : null;
+    if ($return) {
+        return $return;
+    }
+
+    if (!$path) {
+        if (file_exists(S2_ROOT . '_styles/' . S2_STYLE . '/templates/' . $templateId)) {
+            $path = S2_ROOT . '_styles/' . S2_STYLE . '/templates/' . $templateId;
+        } elseif (file_exists($defaultPath . $templateId)) {
+            $path = $defaultPath . $templateId;
+        } else {
+            throw new Exception(sprintf(Lang::get('Template not found'), $defaultPath . $templateId));
+        }
+    }
+
+    ob_start();
+    include $path;
+    $template = ob_get_clean();
+
+    $style_filename = '_styles/' . S2_STYLE . '/' . S2_STYLE . '.php';
+    $assetPack      = require S2_ROOT . $style_filename;
+
+    if (!($assetPack instanceof \S2\Cms\Asset\AssetPack)) {
+        throw new Exception(sprintf('File "%s" must return an AssetPack object.', $style_filename));
+    }
+
+    ($hook = s2_hook('fn_get_template_pre_includes_merge')) ? eval($hook) : null;
+
+    $template = str_replace(
+        ['<!-- s2_styles -->', '<!-- s2_scripts -->'],
+        [$assetPack->getStyles(S2_PATH . '/_styles/' . S2_STYLE . '/'), $assetPack->getScripts(S2_PATH . '/_styles/' . S2_STYLE . '/')],
+        $template
+    );
+
+    if ((strpos($template, '</a>') !== false) && isset($request_uri)) {
+        $template = preg_replace_callback('#<a href="([^"]*)">([^<]*)</a>#',
+            static function ($matches) use ($request_uri) {
+                $real_request_uri = s2_link($request_uri);
+
+                [, $url, $text] = $matches;
+
+                if ($url == $real_request_uri) {
+                    return '<span>' . $text . '</span>';
+                }
+
+                if ($url && strpos($real_request_uri, $url) === 0) {
+                    return '<a class="current" href="' . $url . '">' . $text . '</a>';
+                }
+
+                return '<a href="' . $url . '">' . $text . '</a>';
+            },
+            $template
+        );
+    }
+
+    ($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;
+    return $template;
 }
 
 function s2_build_copyright ()

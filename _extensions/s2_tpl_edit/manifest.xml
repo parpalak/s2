@@ -6,7 +6,7 @@
  *
  * Allows to edit templates in the admin panel
  *
- * @copyright (C) 2012-2013 Roman Parpalak
+ * @copyright (C) 2012-2023 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_tpl_edit
  */
@@ -15,102 +15,12 @@
 <extension for="S2" engine="1.0">
 	<id>s2_tpl_edit</id>
 	<title>Template editor</title>
-	<version>1.0b</version>
+	<version>2.0dev</version>
 	<description>Allows to edit templates in the admin panel.</description>
 	<author>Roman Parpalak</author>
 
 	<adminaffected>1</adminaffected>
 
-	<minversion>1.0b4</minversion>
-	<maxtestedon>1.0b4</maxtestedon>
-
-	<hooks>
-		<hook id="fn_get_template_start"><![CDATA[
-$s2_tpl_edit_cached = false;
-if (file_exists(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_id))
-{
-	$path = S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_id;
-	$s2_tpl_edit_cached = true;
-}
-		]]></hook>
-
-		<hook id="fn_get_template_end"><![CDATA[
-if (!$s2_tpl_edit_cached)
-	copy($path, S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_id);
-		]]></hook>
-
-		<hook id="ai_after_js_include"><![CDATA[
-echo '<script type="text/javascript" src="'.$ext_info['url'].'/admin.js"></script>'."\n";
-		]]></hook>
-
-		<hook id="ai_pre_options"><![CDATA[
-if ($s2_user['edit_users'])
-{
-	Lang::load($ext_info['id'], function () use ($ext_info)
-	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-		else
-			return require $ext_info['path'].'/lang/English.php';
-	});
-	require $ext_info['path'].'/functions.php';
-?>
-<style>#admin-tpl_tab:before { background-position: -32px -64px; }</style>
-				<dt id="admin-tpl_tab"><?php echo Lang::get('Templates', 's2_tpl_edit'); ?></dt>
-				<dd class="inactive">
-					<div class="reducer" id="s2_tpl_edit_div"><?php echo s2_tpl_edit_form(); ?></div>
-				</dd>
-<?php
-}
-		]]></hook>
-
-		<hook id="rq_custom_action"><![CDATA[
-if ($action == 's2_tpl_edit_load')
-{
-	$is_permission = $s2_user['edit_users'];
-	($hook = s2_hook('rq_action_s2_tpl_edit_load_start')) ? eval($hook) : null;
-	s2_test_user_rights($is_permission);
-
-	if (!isset($_GET['filename']))
-		die('Error in GET parameters.');
-	$filename = preg_replace('#[^0-9a-zA-Z\._\-]#', '', $_GET['filename']);
-
-	Lang::load($ext_info['id'], function () use ($ext_info)
-	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-		else
-			return require $ext_info['path'].'/lang/English.php';
-	});
-	require $ext_info['path'].'/functions.php';
-
-	header('Content-Type: application/json; charset=utf-8');
-	echo s2_json_encode(s2_tpl_edit_content($filename));
-}
-
-elseif ($action == 's2_tpl_edit_save')
-{
-	$is_permission = $s2_user['edit_users'];
-	($hook = s2_hook('rq_action_s2_tpl_edit_load_start')) ? eval($hook) : null;
-	s2_test_user_rights($is_permission);
-
-	if (!isset($_POST['template']))
-		die('Error in POST parameters.');
-	$s2_tpl_edit_template = $_POST['template'];
-
-	Lang::load($ext_info['id'], function () use ($ext_info)
-	{
-		if (file_exists($ext_info['path'].'/lang/'.S2_LANGUAGE.'.php'))
-			return require $ext_info['path'].'/lang/'.S2_LANGUAGE.'.php';
-		else
-			return require $ext_info['path'].'/lang/English.php';
-	});
-	require $ext_info['path'].'/functions.php';
-
-	$s2_tpl_edit_template_id = s2_tpl_edit_save($s2_tpl_edit_template);
-	echo s2_tpl_edit_file_list($s2_tpl_edit_template_id);
-}
-		]]></hook>
-
-	</hooks>
+	<minversion>2.0dev</minversion>
+	<maxtestedon>2.0dev</maxtestedon>
 </extension>
