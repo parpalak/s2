@@ -6,13 +6,13 @@
  * @var string $favorite
  */
 
-$prefix = '';
+$postfix = '';
 $class = array();
 if (!empty($favorite))
 {
-	$prefix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">*</a>';
+    $postfix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">★</a>';
 	$class[] = 'favorite-item';
 }
 
 ?>
-<h1<?php if (!empty($class)) echo ' class="'.implode(' ', $class).'"'; ?>><?php echo $prefix; ?><?php echo $title; ?></h1>
+<h1<?php if (!empty($class)) echo ' class="'.implode(' ', $class).'"'; ?>><?php echo $title; ?><?php echo $postfix; ?></h1>

@@ -13,11 +13,11 @@ if (!defined('S2_ROOT')) {
     die;
 }
 
-$assetPack->addCss(S2_PATH . '/_extensions/s2_search/style.css', [\S2\Cms\Asset\AssetPack::OPTION_MERGE]);
+$assetPack->addCss('../../_extensions/s2_search/style.css', [\S2\Cms\Asset\AssetPack::OPTION_MERGE]);
 
 if (S2_SEARCH_QUICK) {
     $assetPack
-        ->addJs(S2_PATH . '/_extensions/s2_search/autosearch.js', [\S2\Cms\Asset\AssetPack::OPTION_MERGE])
+        ->addJs('../../_extensions/s2_search/autosearch.js', [\S2\Cms\Asset\AssetPack::OPTION_MERGE])
         ->addInlineJs('<script>var s2_search_url = "' . S2_PATH . '/_extensions/s2_search";</script>')
     ;
 }

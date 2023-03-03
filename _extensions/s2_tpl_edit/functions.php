@@ -76,7 +76,7 @@ function s2_tpl_edit_file_list ($template_filename)
 		elseif (substr($filename, -4) == '.css')
 			$link = '<link rel="stylesheet" type="text/css" href="<?php echo S2_PATH; ?>/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'" />';
 		else
-			$link = '<?php include S2_ROOT.\'/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'\'; ?>';
+			$link = '<?php include S2_ROOT.\'/_cache/s2_tpl_edit_'.S2_STYLE.'_'.$filename.'\'; ?>'; // TODO move _cache to a constant
 
 		$return .= '<a href="#" class="js'.($filename == $template_filename ? ' cur_link' : '').'" draggable="true" data-copy="'.s2_htmlencode($link).'" onclick="return s2_tpl_edit.load(\''.$filename.'\');">'.s2_htmlencode($name).'</a><br />'."\n";
 	}
@@ -125,32 +125,35 @@ function s2_tpl_edit_form ()
 
 }
 
-function s2_tpl_edit_content ($template_filename = '')
+function s2_tpl_edit_content($templateFilename = ''): array
 {
-	$template_text = '';
-	$return = array (
-		'filename'	=> $template_filename,
-		'menu'		=> s2_tpl_edit_file_list($template_filename),
-	);
+    $templateText = '';
+    $return       = array(
+        'filename' => $templateFilename,
+        'menu'     => s2_tpl_edit_file_list($templateFilename),
+    );
 
-	($hook = s2_hook('fn_s2_tpl_edit_content_start')) ? eval($hook) : null;
+    ($hook = s2_hook('fn_s2_tpl_edit_content_start')) ? eval($hook) : null;
 
-	if (!$template_text && $template_filename)
-	{
-		// Ensure the template is cached
-		clearstatcache();
-		$is_template = true;
-		if (!file_exists(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename))
-		try {
-			$is_template = s2_get_template($template_filename);
-		}
-		catch (Exception $e) {
-			$is_template = false;
-		}
-		if ($is_template)
-			$template_text = file_get_contents(S2_CACHE_DIR.'s2_tpl_edit_'.S2_STYLE.'_'.$template_filename);
-	}
-	$return['text'] = $template_text;
+    if ($templateText === '' && $templateFilename !== '') {
+        // Ensure the template is cached
+        clearstatcache();
+        $cachedTemplateFilename = S2_CACHE_DIR . 's2_tpl_edit_' . S2_STYLE . '_' . $templateFilename;
+        if (file_exists($cachedTemplateFilename)) {
+            $templateExists = true;
+        } else {
+            // Get template to trigger its caching
+            try {
+                $templateExists = (s2_get_template($templateFilename) !== '');
+            } catch (Exception $e) {
+                $templateExists = false;
+            }
+        }
+        if ($templateExists) {
+            $templateText = file_get_contents($cachedTemplateFilename);
+        }
+    }
+    $return['text'] = $templateText;
 
-	return $return;
+    return $return;
 }

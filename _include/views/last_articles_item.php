@@ -10,21 +10,22 @@
  * @var string $text
  */
 
-$prefix = '';
+$postfix = '';
 $class = array('preview');
 if (!empty($favorite))
 {
-	$prefix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">*</a>';
+    $postfix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">★</a>';
 	$class[] = 'favorite-item';
 }
 
 ?>
-<h2 class="<?php echo implode(' ', $class)?>"><?php echo $prefix; ?>
+<h2 class="<?php echo implode(' ', $class)?>">
 	<small>
 		<a class="preview_section" href="<?php echo s2_htmlencode($parent_link); ?>"><?php echo s2_htmlencode($parent_title); ?></a>
 		&rarr;
 	</small>
 	<a href="<?php echo s2_htmlencode($link); ?>"><?php echo s2_htmlencode($title); ?></a>
+    <?php echo $postfix; ?>
 </h2>
 <div class="preview time"><?php echo $date; ?></div>
 <div class="preview cite"><?php echo $text; ?></div>

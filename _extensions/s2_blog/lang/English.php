@@ -74,6 +74,4 @@ return array(
 
 	'Found tags'           => 'Similar blog tags: %s',
 	'Found tags short'     => '; blog tags: %s',
-	'Days'                 => array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'),
-
 );

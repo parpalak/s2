@@ -20,7 +20,7 @@ table.cal {
 	.cal td, .cal th,
 	#content .cal td,
 	#content .cal th {
-		width: 27px;
+		width: 28px;
 		line-height: 1.5;
 		}
 	.cal td {
@@ -42,12 +42,13 @@ table.cal {
 			}
 
 	.cal th {
-		text-align: left;
-		padding: 0 0 0 7px;
 		font-weight: normal;
 		font-size: 0.786em;
 		line-height: 1.909;
 		}
+		#content .cal th {
+			text-align: left;
+			}
 		.cal .nav th {
 			font-size: 100%;
 			font-weight: bold;

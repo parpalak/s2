@@ -13,4 +13,4 @@ if (!defined('S2_ROOT')) {
     die;
 }
 
-$assetPack->addCss(S2_PATH . '/_extensions/s2_blog/style.css', [\S2\Cms\Asset\AssetPack::OPTION_MERGE]);
+$assetPack->addCss('../../_extensions/s2_blog/style.css', [\S2\Cms\Asset\AssetPack::OPTION_MERGE]);

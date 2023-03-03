@@ -1,21 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 
-// Feel free to add your own styles and scripts
-// Paths here are relative to the template (this file).
-return array(
-	// Used to generate content for <!-- s2_styles --> placeholder
-	'css' => array(
-		'site.css',
-	),
-	'css_inline' => array(
-		'<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="'.S2_PATH.'/_styles/'.S2_STYLE.'/favicon.ico" />',
-	),
+use S2\Cms\Asset\AssetPack;
 
-	// Used to generate content for <!-- s2_scripts --> placeholder
-	'js' => array(
-		'script.js',
-	),
-	'js_inline' => array(
-//		'<script>alert(\'test\');</script>',
-	),
-);
+return (new AssetPack(__DIR__))
+    ->addCss('site.css', [AssetPack::OPTION_MERGE])
+// Here is an example how to add Google Analytics code:
+//    ->addHeadJs('https://www.googletagmanager.com/gtag/js?id=...', [AssetPack::OPTION_ASYNC])
+//    ->addHeadInlineJs("<script>  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n  gtag('config', '...');</script>")
+    ->addJs('script.js', [AssetPack::OPTION_MERGE, AssetPack::OPTION_DEFER])
+    ->setFavIcon('favicon.ico')
+;

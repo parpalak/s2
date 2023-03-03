@@ -10,24 +10,24 @@
  * @var string $excerpt
  */
 
-$prefix = '';
+$postfix = '';
 $class = array('subsection');
 if (!empty($favorite))
 {
 	if ($favorite != 2)
-		$prefix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">*</a>';
+        $postfix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">★</a>';
 	else
-		$prefix = '<span class="favorite-star" title="'.Lang::get('Favorite').'">*</span>';
+        $postfix = '<span class="favorite-star" title="'.Lang::get('Favorite').'">★</span>';
 	$class[] = 'favorite-item';
 }
 
 ?>
 				<h3 class="<?php echo implode(' ', $class)?>">
-<?php if ($prefix) { ?>
-					<?php echo $prefix; ?>
+                    <a href="<?php echo s2_htmlencode($link); ?>"><?php echo s2_htmlencode($title); ?></a>
+<?php if ($postfix) { ?>
+					<?php echo $postfix; ?>
 
 <?php } ?>
-					<a href="<?php echo s2_htmlencode($link); ?>"><?php echo s2_htmlencode($title); ?></a>
 				</h3>
 				<div class="subsection time"><?php echo $date; ?></div>
 				<p class="subsection"><?php echo $excerpt; ?></p>

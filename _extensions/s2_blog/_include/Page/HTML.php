@@ -200,20 +200,15 @@ abstract class Page_HTML extends \Page_HTML
 			if (isset($s2_blog_navigation_time) && $s2_blog_navigation_time < $now - 86400)
 				@unlink(S2_CACHE_DIR.'s2_blog_navigation.php');
 
-			// Output navigation array as PHP code
-			$fh = @fopen(S2_CACHE_DIR.'s2_blog_navigation.php', 'ab+');
-			if ($fh)
-			{
-				if (flock($fh, LOCK_EX | LOCK_NB))
-				{
-					ftruncate($fh, 0);
-					fwrite($fh, '<?php'."\n\n".'$s2_blog_navigation_time = '.$now.';'."\n\n".'$s2_blog_navigation = '.var_export($s2_blog_navigation, true).';');
-					fflush($fh);
-					fflush($fh);
-					flock($fh, LOCK_UN);
-				}
-				fclose($fh);
-			}
+            // Output navigation array as PHP code
+            try {
+                s2_overwrite_file_skip_locked(
+                    S2_CACHE_DIR.'s2_blog_navigation.php',
+                    '<?php'."\n\n".'$s2_blog_navigation_time = '.$now.';'."\n\n".'$s2_blog_navigation = '.var_export($s2_blog_navigation, true).';'
+                );
+            } catch (\RuntimeException $e) {
+                // noop
+            }
 		}
 
 		foreach ($s2_blog_navigation as &$item)

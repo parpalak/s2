@@ -14,7 +14,6 @@ class AssetPack
     public const OPTION_ASYNC   = 'async';
     public const OPTION_MERGE   = 'merge';
 
-    private int $version = 0;
     private array $meta = [];
     private array $css = [];
     private array $headJs = [];
@@ -23,6 +22,12 @@ class AssetPack
     private array $inlineJs = [];
     private array $preload = [];
     private ?string $favIcon = null;
+    private string $localDir;
+
+    public function __construct(string $localDir)
+    {
+        $this->localDir = rtrim($localDir, '/');
+    }
 
     public function addCss(string $filename, array $options = []): self
     {
@@ -79,12 +84,6 @@ class AssetPack
         return $this;
     }
 
-    public function setVersion(int $version): self
-    {
-        $this->version = $version;
-        return $this;
-    }
-
     public function addHeadJs(string $filename, array $options = []): self
     {
         $o = array_flip($options);
@@ -126,40 +125,47 @@ class AssetPack
         return $this;
     }
 
-    public function getStyles(string $localPrefix): string
+    /**
+     * Return styles (as long as meta tags and scripts) to be included in the head section.
+     *
+     * @param string              $pathPrefix Path prefix to be prepended to local file names
+     * @param AssetMergeInterface $assetMerge
+     *
+     * @return string
+     */
+    public function getStyles(string $pathPrefix, AssetMergeInterface $assetMerge): string
     {
-        $result = [];
-        foreach ($this->meta as $item) {
-            $result[] = $item;
-        }
+        $result = array_values($this->meta);
 
         foreach ($this->preload as $preloadItem) {
-            $preloadPath = $preloadItem['src'];
-            if (self::requireDirPrefix($preloadPath)) {
-                $preloadPath = $localPrefix . $preloadPath;
-            }
-            $result[] = "<link rel=\"preload\" href=\"$preloadPath\" as=\"{$preloadItem['as']}\">";
+            $preloadPath = self::getPrefixedPath($preloadItem['src'], $pathPrefix);
+            $result[]    = sprintf('<link rel="preload" href="%s" as="%s">', $preloadPath, $preloadItem['as']);
         }
 
         foreach ($this->css as $cssItem) {
-            $cssPath = $cssItem['src'];
-            if (self::requireDirPrefix($cssPath)) {
-                $cssPath = $localPrefix . $cssPath;
+            if ($cssItem['merge'] ?? false) {
+                $assetMerge->concat((self::requireDirPrefix($cssItem['src']) ? $this->localDir . '/' : '') . $cssItem['src']);
+            } else {
+                $cssPath  = self::getPrefixedPath($cssItem['src'], $pathPrefix);
+                $result[] = sprintf('<link rel="stylesheet" href="%s">', $cssPath);
             }
-            $result[] = "<link rel=\"stylesheet\" href=\"{$cssPath}\" />";
+        }
+
+        if (($mergedPath = $assetMerge->getMergedPath()) !== null) {
+            $result[] = sprintf('<link rel="stylesheet" href="%s" />', $mergedPath);
         }
 
         foreach ($this->headJs as $jsItem) {
             $result[] = sprintf(
                 '<script src="%s"%s%s></script>',
-                self::getPrefixedPath($jsItem['src'], $localPrefix) . '?v=' . $this->version,
+                self::getPrefixedPath($jsItem['src'], $pathPrefix),
                 ($jsItem['is_defer'] ?? false) ? ' defer' : '',
                 ($jsItem['is_async'] ?? false) ? ' async' : ''
             );
         }
 
         if ($this->favIcon !== null) {
-            $result[] = '<link rel="shortcut icon" type="' . self::getFaviconMimeType($this->favIcon) . '" href="' . self::getPrefixedPath($this->favIcon, $localPrefix) . '">';
+            $result[] = '<link rel="shortcut icon" type="' . self::getFaviconMimeType($this->favIcon) . '" href="' . self::getPrefixedPath($this->favIcon, $pathPrefix) . '">';
         }
 
         $result = array_merge($result, $this->headInlineJs);
@@ -167,13 +173,20 @@ class AssetPack
         return implode("\n", $result);
     }
 
-    public function getScripts(string $localPrefix): string
+    /**
+     * Return scripts to be included in the body section.
+     *
+     * @param string $pathPrefix Path prefix to be prepended to local file names
+     *
+     * @return string
+     */
+    public function getScripts(string $pathPrefix): string
     {
         $result = [];
         foreach ($this->js as $jsItem) {
             $result[] = sprintf(
                 '<script src="%s"%s%s></script>',
-                self::getPrefixedPath($jsItem['src'], $localPrefix) . '?v=' . $this->version,
+                self::getPrefixedPath($jsItem['src'], $pathPrefix),
                 ($jsItem['is_defer'] ?? false) ? ' defer' : '',
                 ($jsItem['is_async'] ?? false) ? ' async' : ''
             );
@@ -222,12 +235,12 @@ class AssetPack
         return true;
     }
 
-    private static function getPrefixedPath($jsPath, string $localPrefix)
+    private static function getPrefixedPath($path, string $dirPrefix)
     {
-        if (self::requireDirPrefix($jsPath)) {
-            $jsPath = $localPrefix . $jsPath;
+        if (self::requireDirPrefix($path)) {
+            $path = $dirPrefix . $path;
         }
 
-        return $jsPath;
+        return $path;
     }
 }

@@ -73,23 +73,9 @@ class S2Cache
         }
 
         // Output config as PHP code
-        $fh = @fopen(S2_CACHE_DIR . 'cache_config.php', 'a+b');
-        if (!$fh) {
-            // Try to remove the file if it's not writable
-            @unlink(S2_CACHE_DIR . 'cache_config.php');
-            $fh = @fopen(S2_CACHE_DIR . 'cache_config.php', 'a+b');
-        }
-
-        if ($fh) {
-            if (flock($fh, LOCK_EX | LOCK_NB)) {
-                ftruncate($fh, 0);
-                fwrite($fh, '<?php' . "\n\n" . 'define(\'S2_CONFIG_LOADED\', 1);' . "\n\n" . $output . "\n");
-                fflush($fh);
-                fflush($fh);
-                flock($fh, LOCK_UN);
-            }
-            fclose($fh);
-        } else {
+        try {
+            s2_overwrite_file_skip_locked(S2_CACHE_DIR . 'cache_config.php', '<?php' . "\n\n" . 'define(\'S2_CONFIG_LOADED\', 1);' . "\n\n" . $output . "\n");
+        } catch (\RuntimeException $e) {
             error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
         }
     }
@@ -164,23 +150,9 @@ class S2Cache
         $cacheHookNamesContent = "<?php\n\nreturn " . var_export($map, true) . ';';
 
         // Output hooks as PHP code
-        $fh = @fopen(self::CACHE_HOOK_NAMES_FILENAME, 'a+b');
-        if (!$fh) {
-            // Try to remove the file if it's not writable
-            @unlink(self::CACHE_HOOK_NAMES_FILENAME);
-            $fh = @fopen(self::CACHE_HOOK_NAMES_FILENAME, 'a+b');
-        }
-
-        if ($fh) {
-            if (flock($fh, LOCK_EX | LOCK_NB)) {
-                ftruncate($fh, 0);
-                fwrite($fh, $cacheHookNamesContent);
-                fflush($fh);
-                fflush($fh);
-                flock($fh, LOCK_UN);
-            }
-            fclose($fh);
-        } else {
+        try {
+            s2_overwrite_file_skip_locked(self::CACHE_HOOK_NAMES_FILENAME, $cacheHookNamesContent);
+        } catch (\RuntimeException $e) {
             error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
         }
 
@@ -236,26 +208,11 @@ class S2Cache
 
         ($hook = s2_hook('fn_generate_updates_cache_write')) ? eval($hook) : null;
 
-        // Output update status as PHP code
         if (!defined('S2_DISABLE_CACHE')) {
-            $fh = @fopen(S2_CACHE_DIR . 'cache_updates.php', 'a+b');
-
-            if (!$fh) {
-                // Try to remove the file if it's not writable
-                @unlink(S2_CACHE_DIR . 'cache_updates.php');
-                $fh = @fopen(S2_CACHE_DIR . 'cache_updates.php', 'a+b');
-            }
-
-            if ($fh) {
-                if (flock($fh, LOCK_EX | LOCK_NB)) {
-                    ftruncate($fh, 0);
-                    fwrite($fh, '<?php' . "\n\n" . 'return ' . var_export($output, true) . ';' . "\n");
-                    fflush($fh);
-                    fflush($fh);
-                    flock($fh, LOCK_UN);
-                }
-                fclose($fh);
-            } else {
+            // Output update status as PHP code
+            try {
+                s2_overwrite_file_skip_locked(S2_CACHE_DIR . 'cache_updates.php', '<?php' . "\n\n" . 'return ' . var_export($output, true) . ';' . "\n");
+            } catch (\RuntimeException $e) {
                 error('Unable to write updates cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
             }
         }

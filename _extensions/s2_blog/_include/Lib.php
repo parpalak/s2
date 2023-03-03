@@ -80,11 +80,7 @@ class Lib
 		}
 
 		// Titles
-		$lang_days = Lang::get('Days', 's2_blog');
 		$output = '<table class="cal">'.$header.'<tr>';
-		for ($i = 0; $i < 7; $i++)
-			$output .= '<th'.($i % 7 == 5 || $i % 7 == 6 ? ' class="sun"' : '').'>'. $lang_days[$i] .'</th>';
-		$output .= '</tr><tr>';
 
 		// Empty cells before
 		for ($i = 0; $i < $n; $i++)
