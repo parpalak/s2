@@ -211,7 +211,10 @@ function s2_get_template($rawTemplateId, $defaultPath = false)
         S2_PATH . '/_styles/' . S2_STYLE . '/',
         new \S2\Cms\Asset\AssetMerge(S2_CACHE_DIR, '/_cache/', S2_STYLE . '_styles.css', \S2\Cms\Asset\AssetMerge::FILTER_CSS, defined('S2_DEBUG'))
     );
-    $scripts = $assetPack->getScripts(S2_PATH . '/_styles/' . S2_STYLE . '/');
+    $scripts = $assetPack->getScripts(
+        S2_PATH . '/_styles/' . S2_STYLE . '/',
+        new \S2\Cms\Asset\AssetMerge(S2_CACHE_DIR, '/_cache/', S2_STYLE . '_scripts.js', \S2\Cms\Asset\AssetMerge::FILTER_JS, defined('S2_DEBUG'))
+    );
 
     $template = str_replace(['<!-- s2_styles -->', '<!-- s2_scripts -->'], [$styles, $scripts], $template);
 

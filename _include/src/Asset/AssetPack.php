@@ -180,16 +180,24 @@ class AssetPack
      *
      * @return string
      */
-    public function getScripts(string $pathPrefix): string
+    public function getScripts(string $pathPrefix, AssetMergeInterface $assetMerge): string
     {
         $result = [];
         foreach ($this->js as $jsItem) {
-            $result[] = sprintf(
-                '<script src="%s"%s%s></script>',
-                self::getPrefixedPath($jsItem['src'], $pathPrefix),
-                ($jsItem['is_defer'] ?? false) ? ' defer' : '',
-                ($jsItem['is_async'] ?? false) ? ' async' : ''
-            );
+            if ($jsItem['merge'] ?? false) {
+                $assetMerge->concat((self::requireDirPrefix($jsItem['src']) ? $this->localDir . '/' : '') . $jsItem['src']);
+            } else {
+                $result[] = sprintf(
+                    '<script src="%s"%s%s></script>',
+                    self::getPrefixedPath($jsItem['src'], $pathPrefix),
+                    ($jsItem['is_defer'] ?? false) ? ' defer' : '',
+                    ($jsItem['is_async'] ?? false) ? ' async' : ''
+                );
+            }
+        }
+
+        if (($mergedPath = $assetMerge->getMergedPath()) !== null) {
+            $result[] = sprintf('<script src="%s" defer></script>', $mergedPath);
         }
 
         $result = array_merge($result, $this->inlineJs);

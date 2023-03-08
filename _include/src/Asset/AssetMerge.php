@@ -13,6 +13,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class AssetMerge implements AssetMergeInterface
 {
     public const FILTER_CSS = 'css';
+    public const FILTER_JS  = 'js';
 
     private string $publicCacheDir;
     private string $publicCachePath;
@@ -62,6 +63,12 @@ class AssetMerge implements AssetMergeInterface
         if ($this->filter === self::FILTER_CSS) {
             $minifier = new Minify\CSS();
             $minifier->setMaxImportSize(4);
+            foreach ($this->filesToMerge as $fileToMerge) {
+                $minifier->add($fileToMerge);
+            }
+            $content = $minifier->minify($this->getDumpFilename());
+        } elseif ($this->filter === self::FILTER_JS) {
+            $minifier = new Minify\JS();
             foreach ($this->filesToMerge as $fileToMerge) {
                 $minifier->add($fileToMerge);
             }
