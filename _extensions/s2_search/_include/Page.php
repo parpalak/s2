@@ -77,7 +77,7 @@ class Page extends \Page_HTML implements \Page_Routable
                 /** @noinspection PhpUndefinedConstantInspection */
                 /** @noinspection SubStrUsedAsStrPosInspection */
                 if (substr(S2_LANGUAGE, 0, 7) === 'Russian') {
-                    $content['num_info'] = sprintf(self::rus_plural($content['num'], 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $content['num']);
+                    $content['num_info'] = sprintf(s2_russian_plural((int)$content['num'], 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $content['num']);
                 } else {
                     $content['num_info'] = sprintf(Lang::get('Found', 's2_search'), $content['num']);
                 }
@@ -121,29 +121,6 @@ class Page extends \Page_HTML implements \Page_Routable
                 'title' => Lang::get('Search', 's2_search'),
             ),
         );
-    }
-
-    private static function rus_plural($number, $many, $one, $two)
-    {
-        $number    = abs((int)$number);
-        $num_2_dig = $number % 100;
-        $num_1_dig = $number % 10;
-
-        if ($num_2_dig == 1 || ($num_2_dig > 20 && $num_1_dig == 1)) {
-            return $one;
-        }
-
-        if ($num_2_dig == 2 || ($num_2_dig > 20 && $num_1_dig == 2)) {
-            return $two;
-        }
-        if ($num_2_dig == 3 || ($num_2_dig > 20 && $num_1_dig == 3)) {
-            return $two;
-        }
-        if ($num_2_dig == 4 || ($num_2_dig > 20 && $num_1_dig == 4)) {
-            return $two;
-        }
-
-        return $many;
     }
 
     // TODO think about html refactoring

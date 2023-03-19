@@ -676,3 +676,26 @@ function s2_overwrite_file_skip_locked(string $filename, string $content): void
     }
     fclose($fh);
 }
+
+function s2_russian_plural(int $number, string $many, string $one, string $two): string
+{
+    $number        = abs($number);
+    $lastTwoDigits = $number % 100;
+    $lastDigit     = $number % 10;
+
+    if ($lastTwoDigits === 1 || ($lastTwoDigits > 20 && $lastDigit === 1)) {
+        return $one;
+    }
+
+    if ($lastTwoDigits === 2 || ($lastTwoDigits > 20 && $lastDigit === 2)) {
+        return $two;
+    }
+    if ($lastTwoDigits === 3 || ($lastTwoDigits > 20 && $lastDigit === 3)) {
+        return $two;
+    }
+    if ($lastTwoDigits === 4 || ($lastTwoDigits > 20 && $lastDigit === 4)) {
+        return $two;
+    }
+
+    return $many;
+}
