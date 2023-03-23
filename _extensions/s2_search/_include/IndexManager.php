@@ -10,7 +10,9 @@
 namespace s2_extensions\s2_search;
 
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Exception\RuntimeException;
 use S2\Rose\Indexer;
@@ -45,6 +47,9 @@ class IndexManager
         $this->logger     = $logger;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function index(): string
     {
         if (!is_file($this->dir . self::FILE_PROCESS_STATE) || !($state = file_get_contents($this->dir . self::FILE_PROCESS_STATE))) {
@@ -70,7 +75,7 @@ class IndexManager
 
             clearstatcache();
 
-            $this->cache->clear();
+            $this->invalidateRecommendationsCache();
 
             return 'go_20';
         }
@@ -112,7 +117,7 @@ class IndexManager
             fclose($bufferFile);
             file_put_contents($this->dir . self::FILE_BUFFER_POINTER, $bufferFilePointer);
 
-            $this->cache->clear();
+            $this->invalidateRecommendationsCache();
 
             return 'go_' . (20 + (int)(80.0 * $bufferFilePointer / filesize($this->dir . self::FILE_BUFFER_CONTENT)));
         }
@@ -122,6 +127,9 @@ class IndexManager
         return 'unknown state';
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function refresh($chapter): void
     {
         $indexable = $this->fetcher->chapter($chapter);
@@ -130,6 +138,14 @@ class IndexManager
         } else {
             $this->indexer->removeById($chapter, null);
         }
-        $this->cache->clear();
+        $this->invalidateRecommendationsCache();
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function invalidateRecommendationsCache(): void
+    {
+        $this->cache->deleteItem(RecommendationProvider::INVALIDATED_AT);
     }
 }

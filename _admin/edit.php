@@ -58,7 +58,7 @@ function s2_save_article ($page, $flags)
 	$modify_time = !empty($page['modify_time']) ? s2_time_from_array($page['modify_time']) : time();
 
 	$query = array(
-		'SELECT'	=> 'user_id, parent_id, revision, pagetext',
+		'SELECT'	=> 'user_id, parent_id, revision, pagetext, title, url',
 		'FROM'		=> 'articles',
 		'WHERE'		=> 'id = '.$id
 	);
@@ -66,14 +66,14 @@ function s2_save_article ($page, $flags)
 	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
-		list($user_id, $parent_id, $revision, $pagetext) = $row;
+		list($user_id, $parent_id, $revision, $pagetext, $title, $url) = $row;
 	else
 		die('Item not found!');
 
 	if (!$s2_user['edit_site'])
 		s2_test_user_rights($user_id == $s2_user['id']);
 
-	if ($page['text'] != $pagetext)
+	if ($page['text'] != $pagetext || $page['title'] != $title || $page['url'] != $url)
 	{
 		// If the page text has been modified, we check if this modification is done by current user
 		if ($revision != $page['revision'])

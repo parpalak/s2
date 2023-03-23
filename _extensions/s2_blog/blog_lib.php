@@ -56,7 +56,7 @@ function s2_blog_save_post ($page, $flags)
 	$label = isset($page['label']) ? $s2_db->escape($page['label']) : '';
 
 	$query = array(
-		'SELECT'	=> 'user_id, revision, text',
+		'SELECT'	=> 'user_id, revision, text, title, url',
 		'FROM'		=> 's2_blog_posts',
 		'WHERE'		=> 'id = '.$id
 	);
@@ -64,14 +64,14 @@ function s2_blog_save_post ($page, $flags)
 	$result = $s2_db->query_build($query);
 
 	if ($row = $s2_db->fetch_row($result))
-		list($user_id, $revision, $text) = $row;
+		list($user_id, $revision, $text, $title, $url) = $row;
 	else
 		die('Item not found!');
 
 	if (!$s2_user['edit_site'])
 		s2_test_user_rights($user_id == $s2_user['id']);
 
-	if ($page['text'] != $text)
+    if ($page['text'] != $text || $page['title'] != $title || $page['url'] != $url)
 	{
 		// If the page text has been modified, we check if this modification is done by current user
 		if ($revision != $page['revision'])

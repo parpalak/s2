@@ -1,6 +1,6 @@
 <?php
 /**
- * Forked to fix a bug with PDO::query()
+ * Forked to fix a bug with PDO::query() and to make connections lazy.
  * @see https://github.com/filisko/pdo-plus for original code
  */
 
@@ -12,32 +12,58 @@ if (PHP_VERSION_ID < 80000) {
     class PDO extends NativePdo
     {
         protected array $log = [];
+        private array $connectionParams;
+        private bool $isConnected = false;
 
         /**
          * {@inheritdoc}
          */
         public function __construct($dsn, $username = null, $passwd = null, $options = null)
         {
-            parent::__construct($dsn, $username, $passwd, $options);
-            $this->setAttribute(self::ATTR_STATEMENT_CLASS, [PDOStatement::class, [$this]]);
+            $this->connectionParams = [$dsn, $username, $passwd, $options];
         }
 
         /**
          * {@inheritdoc}
          */
+        public function getAttribute($attribute)
+        {
+            $this->connectIfRequired();
+
+            return parent::getAttribute($attribute);
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function prepare($query, $options = [])
+        {
+            $this->connectIfRequired();
+
+            return parent::prepare($query, $options);
+        }
+
+        /**
+         * {@inheritdoc}
+         * @return int|false
+         */
         public function exec($statement)
         {
+            $this->connectIfRequired();
             $start  = microtime(true);
             $result = parent::exec($statement);
             $this->addLog($statement, microtime(true) - $start);
+
             return $result;
         }
 
         /**
          * {@inheritdoc}
+         * @return \PDOStatement|false
          */
         public function query($statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = [])
         {
+            $this->connectIfRequired();
             $start = microtime(true);
 
             // Here is a fix in this line.
@@ -73,19 +99,54 @@ if (PHP_VERSION_ID < 80000) {
         {
             return \count($this->log);
         }
+
+        private function connectIfRequired(): void
+        {
+            if (!$this->isConnected) {
+                $start = microtime(true);
+
+                parent::__construct(...$this->connectionParams);
+                $this->setAttribute(self::ATTR_STATEMENT_CLASS, [PDOStatement::class, [$this]]);
+                $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $this->isConnected = true;
+
+                $this->addLog('PDO connect', microtime(true) - $start);
+            }
+        }
     }
 } else {
     class PDO extends NativePdo
     {
         protected array $log = [];
+        private array $connectionParams;
+        private bool $isConnected = false;
 
         /**
          * {@inheritdoc}
          */
         public function __construct($dsn, $username = null, $passwd = null, $options = null)
         {
-            parent::__construct($dsn, $username, $passwd, $options);
-            $this->setAttribute(self::ATTR_STATEMENT_CLASS, [PDOStatement::class, [$this]]);
+            $this->connectionParams = [$dsn, $username, $passwd, $options];
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function getAttribute($attribute)
+        {
+            $this->connectIfRequired();
+
+            return parent::getAttribute($attribute);
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function prepare($query, array $options = [])
+        {
+            $this->connectIfRequired();
+
+            return parent::prepare($query, $options);
         }
 
         /**
@@ -94,6 +155,8 @@ if (PHP_VERSION_ID < 80000) {
         #[\ReturnTypeWillChange]
         public function exec($statement)
         {
+            $this->connectIfRequired();
+
             $start  = microtime(true);
             $result = parent::exec($statement);
             $this->addLog($statement, microtime(true) - $start);
@@ -106,6 +169,8 @@ if (PHP_VERSION_ID < 80000) {
         #[\ReturnTypeWillChange]
         public function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs)
         {
+            $this->connectIfRequired();
+
             $start = microtime(true);
 
             // Here is a fix in this line.
@@ -140,6 +205,20 @@ if (PHP_VERSION_ID < 80000) {
         public function getQueryCount(): int
         {
             return \count($this->log);
+        }
+
+        private function connectIfRequired(): void
+        {
+            if (!$this->isConnected) {
+                $start = microtime(true);
+
+                parent::__construct(...$this->connectionParams);
+                $this->setAttribute(self::ATTR_STATEMENT_CLASS, [PDOStatement::class, [$this]]);
+                $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $this->isConnected = true;
+
+                $this->addLog('PDO connect', microtime(true) - $start);
+            }
         }
     }
 }

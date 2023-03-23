@@ -142,6 +142,26 @@ if (S2_DB_REVISION < 14)
 	define('S2_USE_HIERARCHY', '1');
 }
 
+if (S2_DB_REVISION < 15) {
+    $s2_db->create_table('queue', array(
+        'FIELDS'      => array(
+            'id'      => array(
+                'datatype'   => 'VARCHAR(80)',
+                'allow_null' => false,
+            ),
+            'code'    => array(
+                'datatype'   => 'VARCHAR(80)',
+                'allow_null' => false
+            ),
+            'payload' => array(
+                'datatype'   => 'TEXT',
+                'allow_null' => false
+            ),
+        ),
+        'PRIMARY KEY' => array('id', 'code')
+    ));
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',

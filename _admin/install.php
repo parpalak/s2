@@ -11,7 +11,7 @@
 
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 14);
+define('S2_DB_REVISION', 15);
 define('MIN_PHP_VERSION', '7.4.0');
 
 define('S2_ROOT', '../');
@@ -909,6 +909,23 @@ else
 
 	$s2_db->create_table('users', $schema);
 
+    $s2_db->create_table('queue', array(
+        'FIELDS'      => array(
+            'id'      => array(
+                'datatype'   => 'VARCHAR(80)',
+                'allow_null' => false,
+            ),
+            'code'    => array(
+                'datatype'   => 'VARCHAR(80)',
+                'allow_null' => false
+            ),
+            'payload' => array(
+                'datatype'   => 'TEXT',
+                'allow_null' => false
+            ),
+        ),
+        'PRIMARY KEY' => array('id', 'code')
+    ));
 
 	$now = time();
 

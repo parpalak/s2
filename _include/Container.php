@@ -13,6 +13,8 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
+use S2\Cms\Queue\QueueConsumer;
+use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
@@ -53,10 +55,7 @@ class Container
 
             case \PDO::class:
                 // TODO use $db_type
-                $pdo = new \S2\Cms\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
-                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-                return $pdo;
+                return new \S2\Cms\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
 
             case PdoStorage::class:
                 return new PdoStorage(self::get(\PDO::class), $db_prefix . 's2_search_idx_');
@@ -82,11 +81,22 @@ class Container
             case 'recommendations_cache':
                 return new FilesystemTagAwareAdapter('recommendations', 0, S2_CACHE_DIR);
 
+            case QueuePublisher::class:
+                return new QueuePublisher(self::get(\PDO::class));
+
+            case QueueConsumer::class:
+                return new QueueConsumer(
+                    self::get(\PDO::class),
+                    self::get(LoggerInterface::class),
+                    self::get(RecommendationProvider::class)
+                );
+
             case RecommendationProvider::class:
                 return new RecommendationProvider(
                     self::get(PdoStorage::class),
                     LayoutMatcherFactory::getFourColumns(self::get('recommendations_logger')),
-                    self::get('recommendations_cache')
+                    self::get('recommendations_cache'),
+                    self::get(QueuePublisher::class)
                 );
 
             case ExtractorInterface::class:

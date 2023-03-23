@@ -29,6 +29,7 @@ class PDOStatement extends NativePdoStatement
 
     /**
      * {@inheritdoc}
+     * @return bool
      */
     #[\ReturnTypeWillChange]
     public function bindParam(
@@ -44,6 +45,7 @@ class PDOStatement extends NativePdoStatement
 
     /**
      * {@inheritdoc}
+     * @return bool
      */
     #[\ReturnTypeWillChange]
     public function bindValue($parameter, $variable, $data_type = NativePdo::PARAM_STR)
@@ -54,6 +56,7 @@ class PDOStatement extends NativePdoStatement
 
     /**
      * {@inheritdoc}
+     * @return bool
      */
     #[\ReturnTypeWillChange]
     public function execute($input_parameters = null)

@@ -87,3 +87,11 @@ if ($controller instanceof Page_Routable) {
     s2_no_cache();
     $controller->render();
 }
+
+if (function_exists('fastcgi_finish_request')) {
+    fastcgi_finish_request();
+    /** @var \S2\Cms\Queue\QueueConsumer $consumer */
+    $consumer = Container::get(\S2\Cms\Queue\QueueConsumer::class);
+    $startedAt = microtime(true);
+    while ($consumer->runQueue() && microtime(true) - $startedAt < 10);
+}
