@@ -1,6 +1,6 @@
 suites:
     unit:
-        path: .
+        path: unit
         actor: UnitTester
         modules:
             enabled:

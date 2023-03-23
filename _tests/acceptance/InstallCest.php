@@ -9,6 +9,9 @@ class InstallCest
     // tests
     public function tryToTest(AcceptanceTester $I): void
     {
+        if (file_exists('config.php')) {
+            throw new Exception('config.php must not exist for test run');
+        }
         $I->install('admin', 'passwd');
 
         $I->amOnPage('/');
