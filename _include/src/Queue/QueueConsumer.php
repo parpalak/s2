@@ -33,7 +33,9 @@ class QueueConsumer
     {
         $this->pdo->exec('START TRANSACTION');
 
-        $statement = $this->pdo->query('SELECT * FROM queue LIMIT 1 FOR UPDATE SKIP LOCKED');
+        // TODO figure out how to detect support for SKIP LOCKED to make a fallback
+        // $statement = $this->pdo->query('SELECT * FROM queue LIMIT 1 FOR UPDATE SKIP LOCKED');
+        $statement = $this->pdo->query('SELECT * FROM queue LIMIT 1 FOR UPDATE');
         $job       = $statement->fetch(\PDO::FETCH_ASSOC);
         if (!$job) {
             return false;
