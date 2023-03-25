@@ -85,6 +85,38 @@ var s2_highlight = (function () {
                     }
                     return !hasImage;
                 });
+
+                instance.on('drop', function(cm, e) {
+                    var dt = e.dataTransfer;
+                    if (!dt || !dt.files) {
+                        return;
+                    }
+
+                    var files = dt.files, processed = false;
+                    for (var i = files.length; i-- ;) {
+                        if (
+                            files[i].type === 'image/jpeg'
+                            || files[i].type === 'image/png'
+                        ) {
+                            processed = true;
+                            uploadBlobToPictureDir(files[i], files[i].name, null, function (res, w, h) {
+                                ReturnImage(res.file_path, w || 'auto', h || 'auto');
+                                SetWait(false);
+                            });
+                        }
+                    }
+
+                    if (processed) {
+                        SetWait(true);
+                        // Move cursor to a new position where a file was drpopped
+                        cm.setSelection(cm.coordsChar({
+                            left: e.x,
+                            top: e.y
+                        }));
+                        e.preventDefault();
+                    }
+                });
+
                 s2_highlight.restore_scroll();
             },
 

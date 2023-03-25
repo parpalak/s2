@@ -123,12 +123,15 @@ $(function ()
 	SetWait(false);
 });
 
-function uploadBlobToPictureDir(blob, extension, successCallback) {
+function uploadBlobToPictureDir(blob, name, extension, successCallback) {
 	var formData = new FormData();
 
 	var d = new Date();
-	var name = d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + "-" +('0' + d.getDate()).slice(-2)
-		+ "_" + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + '.' + extension ;
+
+	if (typeof name !== 'string') {
+		name = d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + "-" +('0' + d.getDate()).slice(-2)
+			+ "_" + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + '.' + extension ;
+	}
 
 	formData.append('pictures[]', blob, name);
 	formData.append('dir', '/' + d.getFullYear() + '/' + ('0'+(d.getMonth()+1)).slice(-2));
@@ -194,11 +197,11 @@ function optimizeAndUploadFile(file) {
 			};
 			if (blobs.png.size > blobs.jpeg.size) {
 				// JPEG is smaller, nevertheless we keep the PNG as a losless copy but suggest to use JPEG
-				uploadBlobToPictureDir(blobs.png, 'png');
-				uploadBlobToPictureDir(blobs.jpeg, 'jpg', successCallback);
+				uploadBlobToPictureDir(blobs.png, null, 'png');
+				uploadBlobToPictureDir(blobs.jpeg, null, 'jpg', successCallback);
 			} else {
 				// JPEG is larger, just forget about it
-				uploadBlobToPictureDir(blobs.png, 'png', successCallback);
+				uploadBlobToPictureDir(blobs.png, null, 'png', successCallback);
 			}
 		}
 	}
