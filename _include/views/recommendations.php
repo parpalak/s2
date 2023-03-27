@@ -87,7 +87,7 @@ foreach ($content as $recommendation) {
                 if ($recommendation['image'] !== null) {
                     $columnNum = getColumnsNumFromGridArea($recommendation['position']);
 
-                    $imgDto = $th->getImgThumbnail($recommendation['image']);
+                    $imgDto = $th->getReducedImg($recommendation['image']);
 
                     echo $img = getImgMarkup($imgDto, $columnNum);
                 }

@@ -70,7 +70,11 @@ class Container
                 ;
 
             case ThumbnailGenerator::class:
-                return new ThumbnailGenerator();
+                return new ThumbnailGenerator(
+                    self::get(QueuePublisher::class),
+                    S2_PATH . '/' . S2_IMG_DIR,
+                    S2_IMG_PATH
+                );
 
             case LoggerInterface::class:
                 return new JKLogger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::INFO, ['prefix' => 'log_', 'extension' => 'log']);
@@ -88,7 +92,8 @@ class Container
                 return new QueueConsumer(
                     self::get(\PDO::class),
                     self::get(LoggerInterface::class),
-                    self::get(RecommendationProvider::class)
+                    self::get(RecommendationProvider::class),
+                    self::get(ThumbnailGenerator::class)
                 );
 
             case RecommendationProvider::class:

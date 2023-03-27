@@ -24,7 +24,7 @@ $link = s2_link($url);
 /** @var ThumbnailGenerator $th */
 $th = Container::get(ThumbnailGenerator::class);
 foreach ($images as $image) {
-    $img = $th->getImgHtml($image, 300, 75);
+    $img = $th->getThumbnailHtml($image->getSrc(), $image->getWidth(), $image->getHeight(), 300, 75);
     echo '<a class="preview-link" href="', $link , '">', $img, '</a>';
 }
 ?>
