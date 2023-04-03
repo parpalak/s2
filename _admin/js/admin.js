@@ -64,11 +64,18 @@ catch (e)
 }
 
 var selectTabN = function () {};
+var isAltPressed = function () {};
 
 $(function ()
 {
+	var altPressed = false;
+	$(document).keyup(function (e) {
+		altPressed = e.altKey;
+	});
 	$(document).keydown(function (e) {
 		var ch = String.fromCharCode(e.which).toLowerCase();
+
+		altPressed = e.altKey;
 
 		// Ctrl + S
 		if (e.ctrlKey && !e.shiftKey && ch === 's') {
@@ -87,6 +94,10 @@ $(function ()
 			return false;
 		}
 	});
+
+	isAltPressed = function () {
+		return altPressed;
+	}
 
 	var tab_ids = [];
 	$('body > dl.tabsheets > dt').each(function (i) { tab_ids[(i + 1).toString()] = this.id; });
@@ -1409,6 +1420,15 @@ function ReturnImage (s, w, h)
 	if (!frm || !frm.elements['page[text]'])
 		return;
 
+	if (isAltPressed()) {
+		// For retina
+		if (!isNaN(parseInt(w))) {
+			w = parseInt(w) / 2;
+		}
+		if (!isNaN(parseInt(h))) {
+			h = parseInt(h) / 2;
+		}
+	}
 	s = encodeURI(s).
 		replace(/&/g, '&amp;').
 		replace(/</g, '&lt;').
@@ -1417,7 +1437,7 @@ function ReturnImage (s, w, h)
 		replace(/"/g, '&quot;');
  
 	selectTab('#edit_tab');
-	var sOpenTag = '<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'alt="', sCloseTag = '" />';
+	var sOpenTag = '<img src="' + s + '" width="' + w + '" height="' + h +'" ' + 'loading="lazy" alt="', sCloseTag = '" />';
 	InsertTag(sOpenTag, sCloseTag, slEditorSelection);
 }
 
