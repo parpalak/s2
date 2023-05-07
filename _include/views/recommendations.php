@@ -92,9 +92,7 @@ foreach ($content as $recommendation) {
                     echo $img = getImgMarkup($imgDto, $columnNum);
                 }
                 ?>
-                <span class="recommendation-header recommendation-header-<?= $recommendation['headingSize'] ?>">
-                <?php echo s2_htmlencode($recommendation['title']); ?>
-            </span>
+                <span class="recommendation-header recommendation-header-<?= $recommendation['headingSize'] ?>"><?php echo s2_htmlencode($recommendation['title']); ?></span>
             </a>
             <div class="recommendation-snippet"><?= $recommendation['snippet'] ?></div>
             <div class="recommendation-date"
