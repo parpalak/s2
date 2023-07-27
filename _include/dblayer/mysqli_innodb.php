@@ -42,6 +42,7 @@ class DBLayer
 		// Persistent connection in MySQLi are only available in PHP 5.3 and later releases
 		$p_connect = $p_connect && version_compare(PHP_VERSION, '5.3.0', '>=') ? 'p:' : '';
 
+        mysqli_report(MYSQLI_REPORT_OFF);
 		if (isset($db_port))
 			$this->link_id = @mysqli_connect($p_connect.$db_host, $db_username, $db_password, $db_name, $db_port);
 		else
@@ -264,7 +265,7 @@ class DBLayer
 	{
 		if ($this->link_id)
 		{
-			if ($this->query_result)
+            if (!is_bool($this->query_result))
 				@mysqli_free_result($this->query_result);
 
 			return @mysqli_close($this->link_id);

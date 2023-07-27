@@ -56,7 +56,7 @@ function generate_config_file ()
 	{
 		$url_prefix = $prefix;
 		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 5, false, 10, true);
-		if (false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
+		if ($content !== null && false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
 			break;
 	}
 
@@ -68,7 +68,7 @@ function generate_config_file ()
 	else
 	{
 		$content = s2_get_remote_file('https://'.substr($base_url, 7).$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 5, false, 10, true);
-		if (false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
+		if ($content !== null && false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
 			$use_https = true;
 	}
 
@@ -410,7 +410,7 @@ else
 	//
 	function unescape($str)
 	{
-		return (get_magic_quotes_gpc() == 1) ? stripslashes($str) : $str;
+		return (PHP_VERSION_ID < 70400 && get_magic_quotes_gpc() == 1) ? stripslashes($str) : $str;
 	}
 
 	$db_type = $_POST['req_db_type'];
