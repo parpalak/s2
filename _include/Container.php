@@ -46,12 +46,7 @@ class Container
 
         switch ($className) {
             case 'db':
-                try {
-                    $s2_db = DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect);
-                } catch (Exception $e) {
-                    error($e->getMessage(), $e->getFile(), $e->getLine());
-                }
-                return $s2_db;
+                return DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect);
 
             case \PDO::class:
                 // TODO use $db_type

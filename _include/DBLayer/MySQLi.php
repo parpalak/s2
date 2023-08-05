@@ -35,6 +35,7 @@ class DBLayer_MySQLi extends DBLayer_Abstract
 
         $p_connect = $p_connect ? 'p:' : '';
 
+        mysqli_report(MYSQLI_REPORT_OFF); // TODO get rid of this class, use PDO instead.
         if (isset($db_port)) {
             $this->link_id = @mysqli_connect($p_connect . $db_host, $db_username, $db_password, $db_name, $db_port);
         } else {
@@ -86,7 +87,7 @@ class DBLayer_MySQLi extends DBLayer_Abstract
                 return false;
 
             $cur_row = @mysqli_fetch_row($query_id);
-            if ($cur_row === false)
+            if ($cur_row === false || $cur_row === null)
                 return false;
 
             return $cur_row[$col] ?? false;

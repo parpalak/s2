@@ -19,7 +19,7 @@ class Lib
 		return strlen($n) == 1 ? '0'.$n : $n;
 	}
 
-	public static function calendar ($year, $month, $day, $url = '', $day_flags = false)
+	public static function calendar ($year, $month, $day, $url = '', $day_flags = null)
 	{
         /** @var \DBLayer_Abstract $s2_db */
         $s2_db = \Container::get('db');
@@ -42,8 +42,9 @@ class Lib
 		$day_count = (int) date('j', mktime(0, 0, 0, $month + 1, 0, $year)); // day = 0
 
 		// Flags for the days when posts have been written
-		if ($day_flags === false)
+		if ($day_flags === null)
 		{
+            $day_flags = [];
 			$query = array(
 				'SELECT'	=> 'create_time',
 				'FROM'		=> 's2_blog_posts',

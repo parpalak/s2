@@ -132,7 +132,7 @@ if (PHP_VERSION_ID < 80000) {
         /**
          * {@inheritdoc}
          */
-        public function getAttribute($attribute)
+        public function getAttribute(int $attribute): mixed
         {
             $this->connectIfRequired();
 
@@ -142,7 +142,7 @@ if (PHP_VERSION_ID < 80000) {
         /**
          * {@inheritdoc}
          */
-        public function prepare($query, array $options = [])
+        public function prepare(string $query, array $options = []): PDOStatement|false
         {
             $this->connectIfRequired();
 
@@ -152,8 +152,7 @@ if (PHP_VERSION_ID < 80000) {
         /**
          * {@inheritdoc}
          */
-        #[\ReturnTypeWillChange]
-        public function exec($statement)
+        public function exec($statement): int|false
         {
             $this->connectIfRequired();
 
@@ -166,8 +165,7 @@ if (PHP_VERSION_ID < 80000) {
         /**
          * {@inheritdoc}
          */
-        #[\ReturnTypeWillChange]
-        public function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs)
+        public function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs): PDOStatement|false
         {
             $this->connectIfRequired();
 
