@@ -491,7 +491,7 @@ function s2_blog_get_favorite_posts ()
 	return $output;
 }
 
-function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
+function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = null)
 {
 	global $s2_db, $lang_s2_blog, $lang_s2_blog_days;
 
@@ -513,8 +513,9 @@ function s2_blog_calendar ($year, $month, $day, $url = '', $day_flags = false)
 	$day_count = (int) date('j', mktime(0, 0, 0, $month + 1, 0, $year)); // day = 0
 
 	// Flags for the days when posts have been written
-	if ($day_flags === false)
+	if ($day_flags === null)
 	{
+        $day_flags = [];
 		$query = array(
 			'SELECT'	=> 'create_time',
 			'FROM'		=> 's2_blog_posts',

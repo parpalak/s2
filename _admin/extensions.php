@@ -155,7 +155,7 @@ function s2_extension_list ()
 
 		$buttons = array(
 			'flip'		=> '<button class="bitbtn flip_ext" onclick="return changeExtension(\'flip_extension\', \''.s2_htmlencode(addslashes($id)).'\', \'\', '.$ext['admin_affected'].');">'.($ext['disabled'] != '1' ? $lang_admin_ext['Disable'] : $lang_admin_ext['Enable']).'</button>',
-			'uninstall'	=> '<button class="bitbtn uninst_ext" onclick="return changeExtension(\'uninstall_extension\', \''.s2_htmlencode(addslashes($id)).'\', \''.s2_htmlencode(addslashes($ext['uninstall_note'])).'\', '.$ext['admin_affected'].');">'.$lang_admin_ext['Uninstall'].'</button>'
+			'uninstall'	=> '<button class="bitbtn uninst_ext" onclick="return changeExtension(\'uninstall_extension\', \''.s2_htmlencode(addslashes($id)).'\', \''.s2_htmlencode(addslashes($ext['uninstall_note'] ?? '')).'\', '.$ext['admin_affected'].');">'.$lang_admin_ext['Uninstall'].'</button>'
 		);
 
 		$extra_info = '';
