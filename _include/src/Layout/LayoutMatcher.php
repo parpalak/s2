@@ -46,8 +46,9 @@ class LayoutMatcher
         }
 
         foreach ($this->templatesList as $templateName => $templateGroups) {
-            $log[]      = self::formatTime($start) . " >>>>> '$templateName': start";
-            $blockCount = array_sum(array_map(static fn(BlockGroup $bg) => $bg->count(), $templateGroups));
+            $templateName = (string)$templateName; // Integers in array keys are converted to int
+            $log[]        = self::formatTime($start) . " >>>>> '$templateName': start";
+            $blockCount   = array_sum(array_map(static fn(BlockGroup $bg) => $bg->count(), $templateGroups));
 
             if ($blockCount > $contentItemsNum) {
                 $log[] = self::formatTime($start) . " '$templateName': no match due to count condition ($blockCount > $contentItemsNum)";
