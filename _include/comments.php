@@ -14,9 +14,13 @@ if (!defined('S2_ROOT'))
 ($hook = s2_hook('cmts_start')) ? eval($hook) : null;
 
 
-function s2_check_comment_question ($key, $answer)
+function s2_check_comment_question (string $key, string $answer): bool
 {
-	return ((int) ($key[10].$key[12]) + (int) ($key[20]) == (int) trim($answer));
+    if (strlen($key) < 21) {
+        return false;
+    }
+
+	return ((int) ($key[10].$key[12]) + (int) ($key[20]) === (int) trim($answer));
 }
 
 /**

@@ -50,7 +50,7 @@ if (defined('S2_DEBUG')) {
 }
 /** @noinspection PhpParamsInspection */
 $errorHandler->setDefaultLogger(Container::get(LoggerInterface::class));
-HtmlErrorRenderer::setTemplate(S2_ROOT.'_include/views/error.php');
+HtmlErrorRenderer::setTemplate(realpath(S2_ROOT.'_include/views/error.php'));
 
 // Strip out "bad" UTF-8 characters
 s2_remove_bad_characters();

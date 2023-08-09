@@ -133,12 +133,17 @@ if (empty($name))
 if (mb_strlen($name) > 50)
 	$errors[] = Lang::get('long_nick', 'comments');
 
-if (!s2_check_comment_question($_POST['key'], $_POST['question']))
+if (count($errors) === 0 && !s2_check_comment_question($_POST['key'] ?? '', $_POST['question'] ?? ''))
 	$errors[] = Lang::get('question', 'comments');
 
-list($id, $class) = explode('.', s2_ext_var('id'));
-$id = (int) $id;
-$class = (string) $class;
+$idArray = explode('.', s2_ext_var('id'));
+if (count($idArray) !== 2) {
+    $errors[] = Lang::get('no_item', 'comments');
+    $id = $class = null;
+} else {
+    [$id, $class] = $idArray;
+    $id = (int) $id;
+}
 
 ($hook = s2_hook('cmnt_after_post_check')) ? eval($hook) : null;
 
@@ -209,10 +214,10 @@ if (!empty($errors))
 	$controller = new Page_Service(array(
 		'head_title'   => '❌' . Lang::get('Error'),
 		'title'        => '<span class="icon-error">✖</span>' . Lang::get('Error'),
-		'text'         => $error_text . '<p>' . Lang::get('Fix error', 'comments') . '</p>',
+		'text'         => $error_text . ($id !== null ? '<p>' . Lang::get('Fix error', 'comments') . '</p>' : ''),
 		'id'           => $id,
 		'class'        => $class,
-		'commented'    => true,
+		'commented'    => $id !== null,
 		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
 	));
 
