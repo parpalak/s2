@@ -416,12 +416,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "04dcace2f0d681be94646d2402a9b4c553ecd061"
+                "reference": "cb8bdda223b8f2ee9f9bd7456551a5affedea98d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/04dcace2f0d681be94646d2402a9b4c553ecd061",
-                "reference": "04dcace2f0d681be94646d2402a9b4c553ecd061",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/cb8bdda223b8f2ee9f9bd7456551a5affedea98d",
+                "reference": "cb8bdda223b8f2ee9f9bd7456551a5affedea98d",
                 "shasum": ""
             },
             "require": {
@@ -459,7 +459,7 @@
                 "issues": "https://github.com/parpalak/rose/issues",
                 "source": "https://github.com/parpalak/rose/tree/master"
             },
-            "time": "2023-08-05T21:02:07+00:00"
+            "time": "2023-08-12T21:21:22+00:00"
         },
         {
             "name": "symfony/cache",
