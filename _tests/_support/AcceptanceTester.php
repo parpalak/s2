@@ -17,7 +17,7 @@ use Codeception\Actor;
  * @method void pause()
  *
  * @SuppressWarnings(PHPMD)
-*/
+ */
 class AcceptanceTester extends Actor
 {
     use _generated\AcceptanceTesterActions;
@@ -44,6 +44,22 @@ class AcceptanceTester extends Actor
         $I->see('S2 is completely installed!');
     }
 
+    public function canWriteComment(): void
+    {
+        $I = $this;
+        $I->fillField('name', 'Roman');
+        $I->fillField('email', 'roman@example.com');
+        $I->fillField('text', 'This is my first comment!');
+        $text = $I->grabTextFrom('p#qsp');
+        preg_match('#(\d\d)\+(\d)#', $text, $matches);
+        $I->fillField('question', (int)$matches[1] + (int)$matches[2]);
+        $I->click('submit');
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Roman wrote:');
+        $I->see('This is my first comment!');
+    }
+
     public function login(string $username = 'admin', string $userpass = ''): void
     {
         $I = $this;
@@ -58,5 +74,19 @@ class AcceptanceTester extends Actor
             'key'       => md5(md5($userpass . 'Life is not so easy :-)') . ';-)' . $I->grabAttributeFrom('.loginform', 'data-salt')),
         ]);
         $I->seeResponseCodeIs(200);
+    }
+
+    public function installExtension(string $extensionId): void
+    {
+        $I = $this;
+        $I->amOnPage('/_admin/site_ajax.php?action=load_extensions');
+        $I->seeResponseCodeIsSuccessful();
+        $I->seeElement('.extension.available [title=' . $extensionId . ']');
+        $I->dontSeeElement('.extension.enabled [title=' . $extensionId . ']');
+
+        $I->amOnPage('/_admin/site_ajax.php?action=install_extension&id=' . $extensionId);
+        $I->seeResponseCodeIsSuccessful();
+        $I->dontSeeElement('.extension.available [title=' . $extensionId . ']');
+        $I->seeElement('.extension.enabled [title=' . $extensionId . ']');
     }
 }

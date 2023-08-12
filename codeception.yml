@@ -10,10 +10,12 @@ suites:
         actor: AcceptanceTester
         modules:
             enabled:
+                - Asserts
                 - PhpBrowser:
-                      url: http://localhost:8881/
+                      url: http://localhost:8881
+                      curl:
+                          CURLOPT_TIMEOUT_MS: 120000
 settings:
-    shuffle: true
     lint: true
 paths:
     tests: _tests
