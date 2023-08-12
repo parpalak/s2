@@ -8,6 +8,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
@@ -29,8 +31,8 @@ function s2_comment_menu_links ($mode = false)
 function s2_show_comments ($mode, $id = 0)
 {
 	global $session_id, $lang_admin, $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     // Getting comments
 	$query = array(
@@ -69,10 +71,10 @@ function s2_show_comments ($mode, $id = 0)
 	}
 
 	($hook = s2_hook('fn_show_comments_pre_get_comm_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$article_titles = $comments_tables = array();
-	while ($row = $s2_db->fetch_assoc($result))
+	while ($row = $s2_db->fetchAssoc($result))
 	{
 		// Do not show anyone hidden comments
 		if (!$row['shown'] && !$s2_user['view_hidden'])
@@ -171,8 +173,8 @@ function s2_show_comments ($mode, $id = 0)
 function s2_for_premoderation ()
 {
 	global $s2_user, $lang_admin;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	if (!S2_PREMODERATION || !$s2_user['hide_comments'])
 		return array('content' => s2_comment_menu_links());
@@ -184,7 +186,7 @@ function s2_for_premoderation ()
 		'WHERE'		=> 'shown = 0 AND sent = 0'
 	);
 	($hook = s2_hook('fn_for_premoderation_pre_comm_check_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 	$new_comment_count = $s2_db->result($result);
 
 	($hook = s2_hook('fn_for_premoderation_pre_comm_check')) ? eval($hook) : null;
@@ -251,8 +253,8 @@ function s2_output_comment_form ($comment, $mode, $type)
 
 function s2_get_comment ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Get comment
 	$query = array(
@@ -261,9 +263,9 @@ function s2_get_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_get_comment_pre_get_cmnt_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	$comment = $s2_db->fetch_assoc($result);
+	$comment = $s2_db->fetchAssoc($result);
 
 	return $comment;
 }
@@ -275,8 +277,8 @@ function s2_get_comment ($id)
  */
 function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Does the comment exist?
 	// We need article_id for displaying comments.
@@ -287,9 +289,9 @@ function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_hide_comment_pre_get_comment_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	$comment = $s2_db->fetch_assoc($result);
+	$comment = $s2_db->fetchAssoc($result);
 	if (!$comment)
 		die('Comment not found!');
 
@@ -308,9 +310,9 @@ function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 			'WHERE'		=> 'id = '.$comment['article_id'].' AND published = 1 AND commented = 1'
 		);
 		($hook = s2_hook('fn_toggle_hide_comment_pre_get_page_info_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		if (($article = $s2_db->fetch_assoc($result)) && ($path = Model::path_from_id($article['parent_id'], true)) !== false)
+		if (($article = $s2_db->fetchAssoc($result)) && ($path = Model::path_from_id($article['parent_id'], true)) !== false)
 		{
 			$link = s2_abs_link($path.'/'.urlencode($article['url']));
 
@@ -321,10 +323,10 @@ function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 				'WHERE'		=> 'article_id = '.$comment['article_id'].' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($comment['email']).'\''
 			);
 			($hook = s2_hook('fn_toggle_hide_comment_pre_get_receivers_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			$receivers = array();
-			while ($receiver = $s2_db->fetch_assoc($result))
+			while ($receiver = $s2_db->fetchAssoc($result))
 				$receivers[$receiver['email']] = $receiver;
 
 			foreach ($receivers as $receiver)
@@ -344,15 +346,15 @@ function s2_toggle_hide_comment ($id, bool $leaveHidden = false)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_hide_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	return $comment['article_id'];
 }
 
 function s2_toggle_mark_comment ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Does the comment exist?
 	// We need article_id for displaying comments
@@ -362,9 +364,9 @@ function s2_toggle_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_mark_comment_pre_get_aid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		$article_id = $row[0];
 	else
 		die('Comment not found!');
@@ -376,15 +378,15 @@ function s2_toggle_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_toggle_mark_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	return $article_id;
 }
 
 function s2_save_comment ($comment)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$nick = $s2_db->escape($comment['nick']);
 	$email = $s2_db->escape($comment['email']);
@@ -406,9 +408,9 @@ function s2_save_comment ($comment)
 			'WHERE'		=> 'id = '.$id
 		);
 		($hook = s2_hook('fn_save_comment_pre_get_aid_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		if ($row = $s2_db->fetch_row($result))
+		if ($row = $s2_db->fetchRow($result))
 			$article_id = $row[0];
 		else
 			die('Comment not found!');
@@ -420,7 +422,7 @@ function s2_save_comment ($comment)
 			'WHERE'		=> 'id = '.$id
 		);
 		($hook = s2_hook('fn_save_comment_pre_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 
 	($hook = s2_hook('fn_save_comment_end')) ? eval($hook) : null;
@@ -430,8 +432,8 @@ function s2_save_comment ($comment)
 
 function s2_delete_comment ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Does the comment exist?
 	// We need article_id for displaying the other comments
@@ -441,9 +443,9 @@ function s2_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_delete_comment_pre_get_aid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		$article_id = $row[0];
 	else
 		die('Comment not found!');
@@ -453,7 +455,7 @@ function s2_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_delete_comment_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	return $article_id;
 }

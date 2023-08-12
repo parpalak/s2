@@ -1,4 +1,7 @@
 <?php
+
+use S2\Cms\Pdo\DbLayer;
+
 /**
  * Displays the list of favorite pages and excerpts.
  *
@@ -21,8 +24,8 @@ class Page_Favorite extends Page_HTML implements Page_Routable
 	//
 	private function make_favorite_page ()
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$subquery = array(
 			'SELECT'	=> '1',
@@ -30,7 +33,7 @@ class Page_Favorite extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query1 = $s2_db->query_build($subquery, true);
+		$raw_query1 = $s2_db->build($subquery);
 
 		$sort_order = SORT_DESC; // SORT_ASC also possible
 		$query = array(
@@ -39,10 +42,10 @@ class Page_Favorite extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'a.favorite = 1 AND a.published = 1'
 		);
 		($hook = s2_hook('fn_s2_make_favorite_page_pre_get_arts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$urls = $parent_ids = $rows = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$rows[] = $row;
 			$urls[] = urlencode($row['url']);

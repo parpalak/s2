@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  *
- * @var DBLayer_Abstract $s2_db
+ * @var \S2\Cms\Pdo\DbLayer $s2_db
  */
 
  if (!defined('S2_ROOT')) {
@@ -34,7 +34,7 @@ $s2_blog_search_sql = array(
 	'LIMIT'		=> '1'
 );
 ($hook = s2_hook('s2_blog_pre_find_tags_sub_qr')) ? eval($hook) : null;
-$s2_blog_search_sub_sql = $s2_db->query_build($s2_blog_search_sql, true);
+$s2_blog_search_sub_sql = $s2_db->build($s2_blog_search_sql);
 
 $s2_blog_search_sql = array(
 	'SELECT' => 'tag_id, name, url, ('.$s2_blog_search_sub_sql.') AS used',
@@ -42,10 +42,10 @@ $s2_blog_search_sql = array(
 	'WHERE'  => implode(' OR ', $where),
 );
 ($hook = s2_hook('s2_blog_pre_find_tags_qr')) ? eval($hook) : null;
-$s2_blog_result = $s2_db->query_build($s2_blog_search_sql);
+$s2_blog_result = $s2_db->buildAndQuery($s2_blog_search_sql);
 
 $s2_blog_found_tag = array();
-while ($s2_blog_row = $s2_db->fetch_assoc($s2_blog_result))
+while ($s2_blog_row = $s2_db->fetchAssoc($s2_blog_result))
 {
 	($hook = s2_hook('s2_blog_find_tags_get_res')) ? eval($hook) : null;
 

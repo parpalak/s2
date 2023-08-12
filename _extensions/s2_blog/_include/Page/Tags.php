@@ -9,6 +9,7 @@
 
 namespace s2_extensions\s2_blog;
 use \Lang;
+use S2\Cms\Pdo\DbLayer;
 
 
 class Page_Tags extends Page_HTML implements \Page_Routable
@@ -52,17 +53,17 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 
 	private function all_tags ()
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$query = array(
 			'SELECT'	=> 'tag_id, name, url',
 			'FROM'		=> 'tags'
 		);
 		($hook = s2_hook('fn_s2_blog_all_tags_pre_get_tags_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$tag_name[$row['tag_id']] = $row['name'];
 			$tag_url[$row['tag_id']] = $row['url'];
@@ -81,9 +82,9 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'p.published = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_all_tags_pre_get_posts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		while ($row = $s2_db->fetch_row($result))
+		while ($row = $s2_db->fetchRow($result))
 			$tag_count[$row[0]] = isset($tag_count[$row[0]]) ? $tag_count[$row[0]] + 1 : 1;
 
 		arsort($tag_count);

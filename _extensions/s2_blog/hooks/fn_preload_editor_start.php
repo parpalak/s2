@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  *
- * @var DBLayer_Abstract $s2_db
+ * @var \S2\Cms\Pdo\DbLayer $s2_db
  */
 
  if (!defined('S2_ROOT')) {
@@ -34,9 +34,9 @@ elseif (!empty($_GET['path']) && substr($_GET['path'], 0, strlen(S2_BLOG_URL)) =
 		'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND url=\''.$s2_db->escape($path[4]).'\''
 	);
 	($hook = s2_hook('blfn_preload_editor_loop_pre_get_post_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_assoc($result))
+	if ($row = $s2_db->fetchAssoc($result))
 		echo 'document.location.hash = "#edit";'."\n".'setTimeout(function () { EditRecord('.$row['id'].'); }, 0);'."\n";
 
 	($hook = s2_hook('blfn_preload_editor_end')) ? eval($hook) : null;

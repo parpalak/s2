@@ -8,6 +8,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayerException;
+
 if (!defined('S2_ROOT'))
     die;
 
@@ -583,13 +585,13 @@ function error()
     if ($num_args > 1 || isset($message) && $message instanceof Exception) {
         if (defined('S2_DEBUG')) {
             if (isset($message) && $message instanceof Exception) {
-                if ($message instanceof DBLayer_Exception) {
-                    // Spoecial report for DB
+                if ($message instanceof DbLayerException) {
+                    // Special report for DB
                     echo '<p>Database reported: <b>' . s2_htmlencode($message->getMessage()) . ($message->getCode() ? ' (Errno: ' . $message->getCode() . ')' : '') . '</b>.</p>' . "\n";
 
                     if ($message->getQuery() !== '') {
                         echo '<p>Failed query: </p>' . "\n";
-                        echo '<pre class="code">' . s2_htmlencode((string)$message->getQuery()) . '</pre>' . "\n";
+                        echo '<pre class="code">' . s2_htmlencode($message->getQuery()) . '</pre>' . "\n";
                     }
                 } else {
                     echo '<p>', s2_htmlencode(get_class($message)), '</p><p>', s2_htmlencode($message->getMessage()), '</p>', "\n";

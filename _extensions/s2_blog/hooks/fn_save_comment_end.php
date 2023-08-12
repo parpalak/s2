@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  *
- * @var DBLayer_Abstract $s2_db
+ * @var \S2\Cms\Pdo\DbLayer $s2_db
  */
 
  if (!defined('S2_ROOT')) {
@@ -23,9 +23,9 @@ if ($type == 'blog')
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('blfn_save_comment_pre_get_pid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		$post_id = $row[0];
 	else
 		die('Comment not found!');
@@ -37,7 +37,7 @@ if ($type == 'blog')
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('blfn_save_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	Lang::load('s2_blog', function ()
 	{

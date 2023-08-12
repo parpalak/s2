@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  *
- * @var DBLayer_Abstract $s2_db
+ * @var \S2\Cms\Pdo\DbLayer $s2_db
  */
 
  if (!defined('S2_ROOT')) {
@@ -18,5 +18,5 @@ $subquery = array(
 	'FROM'		=> 's2_blog_post_tag AS pt',
 	'WHERE'		=> 't.tag_id = pt.tag_id'
 );
-$raw_query = $s2_db->query_build($subquery, true);
+$raw_query = $s2_db->build($subquery);
 $query['SELECT'] .= ', ('.$raw_query.') AS post_count';

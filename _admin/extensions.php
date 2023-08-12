@@ -10,6 +10,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
@@ -31,8 +33,8 @@ function s2_extension_list ()
 {
 	global $lang_admin_ext;
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     $inst_exts = array();
 	$query = array(
@@ -42,8 +44,8 @@ function s2_extension_list ()
 	);
 
 	($hook = s2_hook('fn_extension_list_qr_get_all_extensions')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	while ($cur_ext = $s2_db->fetch_assoc($result))
+	$result = $s2_db->buildAndQuery($query);
+	while ($cur_ext = $s2_db->fetchAssoc($result))
 		$inst_exts[$cur_ext['id']] = $cur_ext;
 
 	$num_exts = 0;
@@ -192,8 +194,8 @@ function s2_extension_list ()
 function s2_install_extension ($id)
 {
 	global $lang_admin_ext;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	($hook = s2_hook('fn_install_extension_start')) ? eval($hook) : null;
 
@@ -231,10 +233,10 @@ function s2_install_extension ($id)
 	);
 
 	($hook = s2_hook('fn_install_extension_check_dependencies')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$installed_ext = array();
-	while ($row = $s2_db->fetch_assoc($result))
+	while ($row = $s2_db->fetchAssoc($result))
 		$installed_ext[] = $row['id'];
 
 	$broken_dependencies = array();
@@ -283,7 +285,7 @@ function s2_install_extension ($id)
 	);
 
 	($hook = s2_hook('aex_install_comply_qr_get_current_ext_version')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 	if ($curr_version = $s2_db->result($result))
 	{
 		// EXT_CUR_VERSION will be available to the extension install routine (to facilitate extension upgrades)
@@ -305,7 +307,7 @@ function s2_install_extension ($id)
 		);
 
 		($hook = s2_hook('fn_install_extension_comply_qr_update_ext')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 
 		// Delete the old hooks
 		$query = array(
@@ -314,7 +316,7 @@ function s2_install_extension ($id)
 		);
 
 		($hook = s2_hook('fn_install_extension_qr_update_ext_delete_hooks')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 	else
 	{
@@ -334,7 +336,7 @@ function s2_install_extension ($id)
 		);
 
 		($hook = s2_hook('fn_install_extension_comply_qr_add_ext')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 
 	// Now insert the hooks
@@ -352,7 +354,7 @@ function s2_install_extension ($id)
 				);
 
 				($hook = s2_hook('fn_install_extension_comply_qr_add_hook')) ? eval($hook) : null;
-				$s2_db->query_build($query);
+				$s2_db->buildAndQuery($query);
 			}
 		}
 	}
@@ -368,8 +370,8 @@ function s2_install_extension ($id)
 function s2_flip_extension ($id)
 {
 	global $lang_admin_ext;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$id = preg_replace('/[^0-9a-z_]/', '', $id);
 
@@ -383,9 +385,9 @@ function s2_flip_extension ($id)
 	);
 
 	($hook = s2_hook('fn_flip_extension_qr_get_disabled_status')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_assoc($result))
+	if ($row = $s2_db->fetchAssoc($result))
 	// Are we disabling or enabling?
 		$disable = $row['disabled'] == '0';
 	else
@@ -401,10 +403,10 @@ function s2_flip_extension ($id)
 		);
 
 		($hook = s2_hook('fn_flip_extension_qr_get_disable_dependencies')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$dependency_ids = array();
-		while ($dependency = $s2_db->fetch_assoc($result))
+		while ($dependency = $s2_db->fetchAssoc($result))
 			$dependency_ids[] = $dependency['id'];
 
 		if (!empty($dependency_ids))
@@ -419,9 +421,9 @@ function s2_flip_extension ($id)
 		);
 
 		($hook = s2_hook('fn_flip_extension_qr_get_enable_dependencies')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		$dependencies = $s2_db->fetch_assoc($result);
+		$dependencies = $s2_db->fetchAssoc($result);
 		$dependencies = explode('|', substr($dependencies['dependencies'], 1, -1));
 
 		$query = array(
@@ -431,10 +433,10 @@ function s2_flip_extension ($id)
 		);
 
 		($hook = s2_hook('fn_flip_extension_qr_check_dependencies')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$installed_ext = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 			$installed_ext[] = $row['id'];
 
 		$broken_dependencies = array();
@@ -453,7 +455,7 @@ function s2_flip_extension ($id)
 	);
 
 	($hook = s2_hook('fn_flip_extension_qr_update_disabled_status')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 
 	// Regenerate the hooks cache
@@ -468,8 +470,8 @@ function s2_flip_extension ($id)
 function s2_uninstall_extension ($id)
 {
 	global $lang_admin_ext;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$messages = array();
 
@@ -485,9 +487,9 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_get_ext')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	$ext_data = $s2_db->fetch_assoc($result);
+	$ext_data = $s2_db->fetchAssoc($result);
 	if (!$ext_data)
 		return array(sprintf($lang_admin_ext['Extension loading error'], $id)) + $messages;
 
@@ -499,10 +501,10 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_chk_dep')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$dependencies = array();
-	while ($row = $s2_db->fetch_assoc($result))
+	while ($row = $s2_db->fetchAssoc($result))
 		$dependencies[] = $row['id'];
 
 	if (!empty($dependencies))
@@ -526,7 +528,7 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_del_hooks')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	$query = array(
 		'DELETE'	=> 'extensions',
@@ -534,7 +536,7 @@ function s2_uninstall_extension ($id)
 	);
 
 	($hook = s2_hook('fn_uninstall_extension_qr_del_ext')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 
 	// Regenerate the hooks cache

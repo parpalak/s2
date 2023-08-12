@@ -8,6 +8,7 @@
  */
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Pdo\DbLayer;
 
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
@@ -37,8 +38,8 @@ if (isset($_GET['unsubscribe']))
 
 	if (isset($_GET['id']) && isset($_GET['mail']))
 	{
-        /** @var DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		list($id, $class) = explode('.', $_GET['id']);
 		$id = (int) $id;
@@ -50,10 +51,10 @@ if (isset($_GET['unsubscribe']))
 			'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
 		);
 		($hook = s2_hook('cmnt_unsubscribe_pre_get_receivers_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$found = false;
-		while ($receiver = $s2_db->fetch_assoc($result))
+		while ($receiver = $s2_db->fetchAssoc($result))
 			if ($_GET['unsubscribe'] === base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36))
 				$found = true;
 
@@ -65,7 +66,7 @@ if (isset($_GET['unsubscribe']))
 				'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
 			);
 			($hook = s2_hook('cmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query);
+			$s2_db->buildAndQuery($query);
 
 			$controller = new Page_Service(array(
 				'head_title' => Lang::get('Unsubscribed OK', 'comments'),
@@ -182,8 +183,8 @@ if (isset($_POST['preview']))
 $path = false;
 
 if (empty($errors)) {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     $query = array(
         'SELECT' => 'title, parent_id, url',
@@ -191,9 +192,9 @@ if (empty($errors)) {
         'WHERE'  => 'id = ' . $id . ' AND published = 1 AND commented = 1'
     );
     ($hook = s2_hook('cmnt_pre_get_page_info_qr')) ? eval($hook) : null;
-    $result = $s2_db->query_build($query);
+    $result = $s2_db->buildAndQuery($query);
 
-    if (!$row = $s2_db->fetch_assoc($result)) {
+    if (!$row = $s2_db->fetchAssoc($result)) {
         $errors[] = Lang::get('no_item', 'comments');
     } else {
         $path = Model::path_from_id($row['parent_id'], true);
@@ -239,8 +240,8 @@ $link = s2_abs_link($path.'/'.urlencode($row['url']));
 // Everything is ok, save and send the comment
 //
 
-/** @var DBLayer_Abstract $s2_db */
-$s2_db = \Container::get('db');
+/** @var DbLayer $s2_db */
+$s2_db = \Container::get(DbLayer::class);
 
 // Detect if there is a user logged in
 $is_logged_in = false;
@@ -258,7 +259,7 @@ if (isset($_COOKIE[$s2_cookie_name.'_c']))
 		'WHERE'		=> 'u.email = \''.$s2_db->escape($email).'\' AND o.comment_cookie = \''.$s2_db->escape($_COOKIE[$s2_cookie_name.'_c']).'\''
 	);
 	($hook = s2_hook('cmnt_pre_get_logged_in_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$is_logged_in = $s2_db->result($result);
 }
@@ -271,7 +272,7 @@ $query = array(
 	'VALUES'	=> $id.', '.time().', \''.$s2_db->escape($_SERVER['REMOTE_ADDR']).'\', \''.$s2_db->escape($name).'\', \''.$s2_db->escape($email).'\', '.$show_email.', '.$subscribed.', '.(1 - $is_moderate).', '.(1 - $is_moderate).', 0, \''.$s2_db->escape($text).'\''
 );
 ($hook = s2_hook('cmnt_pre_save_comment_qr')) ? eval($hook) : null;
-$s2_db->query_build($query);
+$s2_db->buildAndQuery($query);
 
 $message = s2_bbcode_to_mail($text);
 
@@ -284,10 +285,10 @@ if (!$is_moderate)
 		'WHERE'		=> 'article_id = '.$id.' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($email).'\''
 	);
 	($hook = s2_hook('cmnt_pre_get_subscribers_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$receivers = array();
-	while ($receiver = $s2_db->fetch_assoc($result))
+	while ($receiver = $s2_db->fetchAssoc($result))
 		$receivers[$receiver['email']] = $receiver;
 
 	foreach ($receivers as $receiver)
@@ -307,8 +308,8 @@ $query = array(
 if ($is_logged_in)
 	$query['WHERE'] .= ' AND email <> \''.$s2_db->escape($email).'\'';
 ($hook = s2_hook('cmnt_pre_get_moderators_qr')) ? eval($hook) : null;
-$result = $s2_db->query_build($query);
-while ($mrow = $s2_db->fetch_assoc($result))
+$result = $s2_db->buildAndQuery($query);
+while ($mrow = $s2_db->fetchAssoc($result))
 	s2_mail_moderator($mrow['login'], $mrow['email'], $message, $row['title'], $link, $name, $email);
 
 setcookie('comment_form_sent', $id.'.'.$class);
@@ -322,7 +323,7 @@ if (!$is_moderate)
 		'WHERE'		=> 'article_id = '.$id.' AND shown = 1'
 	);
 	($hook = s2_hook('cmnt_pre_get_comment_count_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 	$hash = $s2_db->result($result);
 
 	($hook = s2_hook('cmnt_pre_redirect')) ? eval($hook) : null;

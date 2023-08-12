@@ -1,4 +1,7 @@
 <?php
+
+use S2\Cms\Pdo\DbLayer;
+
 /**
  * Abstract page controller class. Renders content for the browser
  *
@@ -53,8 +56,8 @@ abstract class Page_Abstract
 	 */
 	public function render ()
 	{
-        /** @var ?DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
 
 		$this->obtainTemplate();
 

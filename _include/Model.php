@@ -1,4 +1,7 @@
 <?php
+
+use S2\Cms\Pdo\DbLayer;
+
 /**
  * Helper functions for handling pages stored in DB.
  *
@@ -20,8 +23,8 @@ class Model
 	//
 	public static function get_group_url ($parent_ids, $urls)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		if (!S2_USE_HIERARCHY)
 		{
@@ -44,9 +47,9 @@ class Model
 				'WHERE'		=> 'id IN ('.implode(', ', array_unique($parent_ids)).') AND published = 1'
 			);
 			($hook = s2_hook('fn_get_cascade_urls_loop_pre_query')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
-			while ($row = $s2_db->fetch_assoc($result))
+			while ($row = $s2_db->fetchAssoc($result))
 				// So, the loop may seem not pretty much.
 				// But $parent_ids values don't have to be unique.
 				foreach ($parent_ids as $k => $v)
@@ -77,8 +80,8 @@ class Model
 	//
 	public static function path_from_id ($id, $visible_for_all = false)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		if ($id < 0)
 			return false;
@@ -92,9 +95,9 @@ class Model
 			'WHERE'		=> 'id = '.$id.($visible_for_all ? ' AND published = 1' : '')
 		);
 		($hook = s2_hook('fn_path_from_id_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		$row = $s2_db->fetch_row($result);
+		$row = $s2_db->fetchRow($result);
 		if (!$row)
 			return false;
 
@@ -119,8 +122,8 @@ class Model
 	//
 	public static function main_page_title ()
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$query = array(
 			'SELECT'	=> 'title',
@@ -130,7 +133,7 @@ class Model
 
 		($hook = s2_hook('fn_s2_main_page_title_qr')) ? eval($hook) : null;
 
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 		return $s2_db->result($result);
 	}
 }

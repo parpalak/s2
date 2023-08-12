@@ -8,6 +8,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
@@ -41,8 +43,8 @@ function s2_blog_parse_date ($time, $day_shift = 0)
 function s2_blog_save_post ($page, $flags)
 {
 	global $lang_admin, $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$favorite = (int) isset($flags['favorite']);
 	$published = (int) isset($flags['published']);
@@ -61,9 +63,9 @@ function s2_blog_save_post ($page, $flags)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_save_post_pre_get_post_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		list($user_id, $revision, $text, $title, $url) = $row;
 	else
 		die('Item not found!');
@@ -92,8 +94,8 @@ function s2_blog_save_post ($page, $flags)
 		$query['SET'] .= ', user_id = '.intval($page['user_id']);
 
 	($hook = s2_hook('fn_s2_blog_save_post_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	if ($s2_db->affected_rows() == -1)
+	$result = $s2_db->buildAndQuery($query);
+	if ($s2_db->affectedRows($result) <= 0)
 		$error = true;
 
 	// Dealing with tags
@@ -107,10 +109,10 @@ function s2_blog_save_post ($page, $flags)
 		'ORDER BY'	=> 'id'
 	);
 	($hook = s2_hook('fn_s2_blog_save_post_pre_get_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$old_tags = array();
-	while ($row = $s2_db->fetch_row($result))
+	while ($row = $s2_db->fetchRow($result))
 		$old_tags[] = $row[0];
 
 	// Compare old and new tags
@@ -122,9 +124,7 @@ function s2_blog_save_post ($page, $flags)
 			'WHERE'		=> 'post_id = '.$id
 		);
 		($hook = s2_hook('fn_s2_blog_save_post_pre_del_tags_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
-		if ($s2_db->affected_rows() == -1)
-			$error = true;
+        $s2_db->buildAndQuery($query);
 
 		// Inserting new links
 		foreach ($new_tags as $tag_id)
@@ -135,8 +135,8 @@ function s2_blog_save_post ($page, $flags)
 				'VALUES'	=> $id.', '.$tag_id
 			);
 			($hook = s2_hook('fn_s2_blog_save_post_pre_ins_tags_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query);
-			if ($s2_db->affected_rows() == -1)
+            $result = $s2_db->buildAndQuery($query);
+			if ($s2_db->affectedRows($result) <= 0)
 				$error = true;
 		}
 	}
@@ -150,8 +150,8 @@ function s2_blog_save_post ($page, $flags)
 // Check nor unique and empty post urls
 function s2_blog_check_url_status ($create_time, $url)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$url_status = 'ok';
 
@@ -168,7 +168,7 @@ function s2_blog_check_url_status ($create_time, $url)
 			'WHERE'		=> 'url = \''.$url.'\' AND create_time < '.$end_time.' AND create_time >= '.$start_time
 		);
 		($hook = s2_hook('fn_s2_blog_check_url_status_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		if ($s2_db->result($result) != 1)
 			$url_status = 'not_unique';
@@ -184,8 +184,8 @@ function s2_blog_check_url_status ($create_time, $url)
 function s2_blog_create_post ()
 {
 	global $lang_admin, $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$now = time();
 
@@ -195,15 +195,15 @@ function s2_blog_create_post ()
 		'VALUES'	=> $now.', '.$now.', \''.$lang_admin['New page'].'\', \'\', 0, '.$s2_user['id']
 	);
 	($hook = s2_hook('fn_s2_blog_create_post_pre_ins_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
-	return $s2_db->insert_id();
+	return $s2_db->insertId();
 }
 
 function s2_blog_flip_favorite ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'UPDATE'	=> 's2_blog_posts',
@@ -211,14 +211,14 @@ function s2_blog_flip_favorite ($id)
 		'WHERE'		=> 'id = '.$id,
 	);
 	($hook = s2_hook('fn_s2_blog_flip_favorite_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 }
 
 function s2_blog_delete_post ($id)
 {
 	global $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	if (!$s2_user['edit_site'])
 	{
@@ -228,9 +228,9 @@ function s2_blog_delete_post ($id)
 			'WHERE'		=> 'id = '.$id
 		);
 		($hook = s2_hook('fn_s2_blog_delete_post_pre_get_uid_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		if ($row = $s2_db->fetch_row($result))
+		if ($row = $s2_db->fetchRow($result))
 			list($user_id) = $row;
 		else
 			die('Item not found!');
@@ -244,21 +244,21 @@ function s2_blog_delete_post ($id)
 		'LIMIT'		=> '1'
 	);
 	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_post_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	$query = array(
 		'DELETE'	=> 's2_blog_post_tag',
 		'WHERE'		=> 'post_id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_tags_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	$query = array(
 		'DELETE'	=> 's2_blog_comments',
 		'WHERE'		=> 'post_id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_post_pre_del_cmnts_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	($hook = s2_hook('fn_s2_blog_delete_post_end')) ? eval($hook) : null;
 }
@@ -269,8 +269,8 @@ function s2_blog_delete_post ($id)
 
 function s2_blog_get_comment ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Get comment
 	$query = array(
@@ -279,9 +279,9 @@ function s2_blog_get_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_get_comment_pre_get_cmnnt_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	$comment = $s2_db->fetch_assoc($result);
+	$comment = $s2_db->fetchAssoc($result);
 
 	return $comment;
 }
@@ -293,8 +293,8 @@ function s2_blog_get_comment ($id)
  */
 function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Does the comment exist?
 	// We need post id for displaying comments.
@@ -305,9 +305,9 @@ function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_hide_comment_pre_get_cmnt_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	$comment = $s2_db->fetch_assoc($result);
+	$comment = $s2_db->fetchAssoc($result);
 	if (!$comment)
 		die('Comment not found!');
 
@@ -326,9 +326,9 @@ function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 			'WHERE'		=> 'id = '.$comment['post_id'].' AND published = 1 AND commented = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_hide_comment_pre_get_post_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		if ($post = $s2_db->fetch_assoc($result))
+		if ($post = $s2_db->fetchAssoc($result))
 		{
 			$link = s2_abs_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).date('/Y/m/d/', $post['create_time']).urlencode($post['url']));
 
@@ -339,10 +339,10 @@ function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 				'WHERE'		=> 'post_id = '.$comment['post_id'].' AND subscribed = 1 AND shown = 1 AND email <> \''.$s2_db->escape($comment['email']).'\''
 			);
 			($hook = s2_hook('fn_s2_blog_toggle_hide_comment_pre_get_rcvs_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			$receivers = array();
-			while ($receiver = $s2_db->fetch_assoc($result))
+			while ($receiver = $s2_db->fetchAssoc($result))
 				$receivers[$receiver['email']] = $receiver;
 
 			foreach ($receivers as $receiver)
@@ -362,15 +362,15 @@ function s2_blog_hide_comment ($id, bool $leaveHidden = false)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_hide_comment_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	return $comment['post_id'];
 }
 
 function s2_blog_mark_comment ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Does the comment exist?
 	// We need post id for displaying comments
@@ -380,9 +380,9 @@ function s2_blog_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_mark_comment_pre_get_pid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		$post_id = $row[0];
 	else
 		die('Comment not found!');
@@ -394,15 +394,15 @@ function s2_blog_mark_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_mark_comment_pre_get_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	return $post_id;
 }
 
 function s2_blog_delete_comment ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Does the comment exist?
 	// We need post id for displaying the other comments
@@ -412,9 +412,9 @@ function s2_blog_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_comment_pre_get_pid_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		$post_id = $row[0];
 	else
 		die('Comment not found!');
@@ -424,7 +424,7 @@ function s2_blog_delete_comment ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_delete_comment_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	return $post_id;
 }
@@ -436,8 +436,8 @@ function s2_blog_delete_comment ($id)
 function s2_blog_output_post_list ($criteria)
 {
 	global $lang_admin, $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$conditions = array();
 	$messages = array();
@@ -487,7 +487,7 @@ function s2_blog_output_post_list ($criteria)
 			'FROM'      => 'users AS u',
 			'WHERE'     => 'u.login LIKE \'%'.$s2_db->escape(trim($criteria['author'])).'%\'',
 		);
-		$raw_sub_query = $s2_db->query_build($sub_query, true);
+		$raw_sub_query = $s2_db->build($sub_query);
 		$conditions[] = 'p.user_id in ('.$raw_sub_query.')';
 	}
 
@@ -509,7 +509,7 @@ function s2_blog_output_post_list ($criteria)
 				'FROM'      => 's2_blog_post_tag AS pt',
 				'WHERE'     => 'pt.tag_id IN ('.implode(', ', $tag_ids).')',
 			);
-			$raw_sub_query = $s2_db->query_build($sub_query, true);
+			$raw_sub_query = $s2_db->build($sub_query);
 			$conditions[] = 'p.id in ('.$raw_sub_query.')';
 		}
 		else
@@ -526,7 +526,7 @@ function s2_blog_output_post_list ($criteria)
 		'FROM'      => 's2_blog_comments AS c',
 		'WHERE'     => 'c.post_id = p.id',
 	);
-	$raw_sub_query = $s2_db->query_build($sub_query, true);
+	$raw_sub_query = $s2_db->build($sub_query);
 
 	$query = array(
 		'SELECT'	=> 'id, title, published, commented, ('.$raw_sub_query.') as comment_count, create_time, label, favorite, user_id',
@@ -535,10 +535,10 @@ function s2_blog_output_post_list ($criteria)
 		'ORDER BY'	=> 'create_time DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_output_post_list_pre_fetch_posts_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$rows = array();
-	while ($row = $s2_db->fetch_assoc($result))
+	while ($row = $s2_db->fetchAssoc($result))
 	{
 		$row['tags'] = array();
 		($hook = s2_hook('fn_s2_blog_output_post_list_pre_form_row_ar')) ? eval($hook) : null;
@@ -555,8 +555,8 @@ function s2_blog_output_post_list ($criteria)
 			'ORDER BY'	=> 'id'
 		);
 		($hook = s2_hook('fn_s2_blog_output_post_list_pre_get_tags_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
-		while ($row = $s2_db->fetch_assoc($result))
+		$result = $s2_db->buildAndQuery($query);
+		while ($row = $s2_db->fetchAssoc($result))
 			if (isset($rows[$row['post_id']]))
 				$rows[$row['post_id']]['tags'][] = '<a href="#" onclick="return LoadTag(' . $row['tag_id'] . ');">' . $tag_names[$row['tag_id']] . '</a>';
 
@@ -592,15 +592,15 @@ function s2_blog_output_post_list ($criteria)
 
 function s2_blog_tag_list ()
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',
 		'FROM'		=> 's2_blog_post_tag AS pt',
 		'WHERE'		=> 't.tag_id = pt.tag_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true);
+	$raw_query = $s2_db->build($subquery);
 
 	$query = array(
 		'SELECT'	=> 'tag_id AS id, name, url, ('.$raw_query.') AS post_count',
@@ -608,10 +608,10 @@ function s2_blog_tag_list ()
 		'ORDER BY'	=> 'post_count DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_tag_list_pre_page_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$names = $urls = $counts = array();
-	while ($row = $s2_db->fetch_assoc($result))
+	while ($row = $s2_db->fetchAssoc($result))
 	{
 		$names[$row['id']] = $row['name'];
 		$counts[$row['id']] = $row['post_count'];
@@ -623,15 +623,15 @@ function s2_blog_tag_list ()
 function s2_blog_edit_post_form ($id)
 {
 	global $lang_admin, $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$subquery = array(
 		'SELECT'	=> 'count(*)',
 		'FROM'		=> 's2_blog_comments AS c',
 		'WHERE'		=> 'p.id = c.post_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true);
+	$raw_query = $s2_db->build($subquery);
 
 	$query = array(
 		'SELECT'	=> 'title, text, create_time, modify_time, published, favorite, commented, url, label, ('.$raw_query.') AS comment_num, user_id, revision',
@@ -639,8 +639,8 @@ function s2_blog_edit_post_form ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_page_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	$page = $s2_db->fetch_assoc($result);
+	$result = $s2_db->buildAndQuery($query);
+	$page = $s2_db->fetchAssoc($result);
 
 	if (!$page['published'])
 		s2_test_user_rights($s2_user['view_hidden'] || $s2_user['id'] == $page['user_id']);
@@ -663,14 +663,14 @@ function s2_blog_edit_post_form ($id)
 		'FROM'		=> 's2_blog_post_tag AS pt',
 		'WHERE'		=> 't.tag_id = pt.tag_id'
 	);
-	$used_raw_query = $s2_db->query_build($subquery, true);
+	$used_raw_query = $s2_db->build($subquery);
 
 	$subquery = array(
 		'SELECT'	=> 'id',
 		'FROM'		=> 's2_blog_post_tag AS pt',
 		'WHERE'		=> 't.tag_id = pt.tag_id AND pt.post_id = '.$id
 	);
-	$current_raw_query = $s2_db->query_build($subquery, true);
+	$current_raw_query = $s2_db->build($subquery);
 
 	$query = array(
 		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as link_id',
@@ -678,10 +678,10 @@ function s2_blog_edit_post_form ($id)
 		'ORDER BY'	=> 'used DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_chk_url_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$all_tags = $tags = array();
-	while ($tag = $s2_db->fetch_assoc($result))
+	while ($tag = $s2_db->fetchAssoc($result))
 	{
 		$all_tags[] = $tag['name'];
 		if (!empty($tag['link_id']))
@@ -697,10 +697,10 @@ function s2_blog_edit_post_form ($id)
 		'ORDER BY'	=> 'count(label) DESC'
 	);
 	($hook = s2_hook('fn_s2_blog_edit_post_form_pre_labels_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$labels = array();
-	while ($row = $s2_db->fetch_row($result))
+	while ($row = $s2_db->fetchRow($result))
 		$labels[] = $row[0];
 
 	// Options for author select
@@ -712,10 +712,10 @@ function s2_blog_edit_post_form ($id)
 			'WHERE'		=> 'create_articles = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_edit_post_form_pre_users_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$users = array(0 => '');
-		while ($user = $s2_db->fetch_assoc($result))
+		while ($user = $s2_db->fetchAssoc($result))
 			$users[$user['id']] = $user['login'];
 	}
 

@@ -9,6 +9,7 @@
 
 namespace s2_extensions\s2_blog;
 use \Lang;
+use S2\Cms\Pdo\DbLayer;
 
 
 class Page_Year extends Page_HTML implements \Page_Routable
@@ -43,8 +44,8 @@ class Page_Year extends Page_HTML implements \Page_Routable
 
 	private function year_posts ($year)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$start_time = mktime(0, 0, 0, 1, 1, $year);
 		$end_time = mktime(0, 0, 0, 1, 1, $year + 1);
@@ -69,10 +70,10 @@ class Page_Year extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND published = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_year_posts_pre_get_days_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$day_flags = array_fill(1, 12, array());
-		while ($row = $s2_db->fetch_row($result))
+		while ($row = $s2_db->fetchRow($result))
 			$day_flags[(int) date('m', $row[0])][(int) date('j', $row[0])] = 1;
 
 		$content = array();

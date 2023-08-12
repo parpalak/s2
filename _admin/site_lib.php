@@ -8,6 +8,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
@@ -146,8 +148,8 @@ function s2_grb ($b, $login, $permission, $allow_modify)
 function s2_get_user_list ()
 {
 	global $lang_user_permissions, $lang_user_permissions_help, $lang_admin, $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$s2_user_permissions = array(
 		'view',
@@ -166,10 +168,10 @@ function s2_get_user_list ()
 	);
 
 	($hook = s2_hook('fn_get_user_list_pre_select_query')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$body = array();
-	while ($row = $s2_db->fetch_assoc($result))
+	while ($row = $s2_db->fetchAssoc($result))
 	{
 		$login = $row['login'];
 		$name = $row['name'] ? s2_htmlencode($row['name']) : '&nbsp;—&nbsp;';
@@ -229,8 +231,8 @@ function s2_get_user_list ()
 // if the article is specified in GET parameters
 function s2_preload_editor ()
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$return = ($hook = s2_hook('fn_preload_editor_start')) ? eval($hook) : null;
 	if ($return)
@@ -260,7 +262,7 @@ function s2_preload_editor ()
 			'WHERE'		=> 'url = \''.$s2_db->escape($request_array[$i]).'\''.(S2_USE_HIERARCHY ? ' AND parent_id = '.$id : '')
 		);
 		($hook = s2_hook('fn_preload_editor_loop_pre_get_parents_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$id = $s2_db->result($result);
 		if (!$id)
@@ -354,8 +356,8 @@ function s2_context_buttons ()
 
 function s2_get_tag_ids ($tag_str)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// String cleanup, lower-case copy
 	$dirty_tags = explode(',', $tag_str);
@@ -390,10 +392,10 @@ function s2_get_tag_ids ($tag_str)
 		'WHERE'		=> 't.name in (\''.implode('\', \'', $escaped_tags).'\')'
 	);
 	($hook = s2_hook('fn_get_tag_ids_pre_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$ids = $real_tags = array();
-	while ($real_tag = $s2_db->fetch_assoc($result))
+	while ($real_tag = $s2_db->fetchAssoc($result))
 	{
 		$lowered_real_tag = mb_strtolower($real_tag['name']);
 
@@ -415,9 +417,9 @@ function s2_get_tag_ids ($tag_str)
 				'VALUES'	=> '\''.$new_tag.'\', \'\', \'0\', \''.$new_tag.'\''
 			);
 			($hook = s2_hook('fn_get_tag_ids_pre_ins_tag_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query);
+			$s2_db->buildAndQuery($query);
 
-			$ids[$k] = $s2_db->insert_id();
+			$ids[$k] = $s2_db->insertId();
 			$real_tags[$k] = $new_tag;
 		}
 

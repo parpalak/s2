@@ -10,6 +10,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
@@ -39,8 +41,8 @@ function s2_setcookie($name, $value, $expire = 0, $path = null, $secure = null)
 // Creates hew challenge and puts it into DB
 function s2_get_new_challenge ()
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$time = time();
 
@@ -54,15 +56,15 @@ function s2_get_new_challenge ()
 		'VALUES'	=> '\''.$challenge.'\', \''.$salt.'\', '.$time
 	);
 	($hook = s2_hook('fn_get_challenge_pre_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	return array($challenge, $salt);
 }
 
 function s2_update_challenge ($challenge)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'UPDATE'	=> 'users_online',
@@ -70,41 +72,41 @@ function s2_update_challenge ($challenge)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_update_challenge_pre_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 }
 
 function s2_delete_challenge ($challenge)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'DELETE'	=> 'users_online',
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_delete_challenge_pre_del_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 }
 
 function s2_close_other_sessions ($challenge)
 {
 	global $s2_user;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array (
 		'DELETE'	=> 'users_online',
 		'WHERE'		=> 'login = \''.$s2_db->escape($s2_user['login']).'\' AND NOT challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_close_other_sessions_pre_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 }
 
 // Removes outdated challenges and sessions from DB
 function s2_cleanup_expired_sessions ()
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$time = time() - S2_EXPIRE_CHALLENGE_TIMEOUT;
 
@@ -113,7 +115,7 @@ function s2_cleanup_expired_sessions ()
 		'WHERE'		=> 'time < '.$time.' AND login IS NULL'
 	);
 	($hook = s2_hook('fn_cleanup_expired_pre_remove_challenge_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	$time = time() - S2_COOKIE_EXPIRE;
 
@@ -122,7 +124,7 @@ function s2_cleanup_expired_sessions ()
 		'WHERE'		=> 'time < '.$time.' AND login IS NOT NULL'
 	);
 	($hook = s2_hook('fn_cleanup_expired_pre_remove_session_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 }
 
 //
@@ -131,8 +133,8 @@ function s2_cleanup_expired_sessions ()
 
 function s2_get_login ($challenge)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'SELECT'	=> 'login, time',
@@ -140,9 +142,9 @@ function s2_get_login ($challenge)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\' AND ip = \''.$s2_db->escape($_SERVER['REMOTE_ADDR']).'\' AND login IS NOT NULL'
 	);
 	($hook = s2_hook('fn_get_login_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		list($login, $time) = $row;
 	else
 		return false;
@@ -158,8 +160,8 @@ function s2_get_login ($challenge)
 
 function s2_get_user_info ($login)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Fetching user info
 	$query = array(
@@ -168,16 +170,16 @@ function s2_get_user_info ($login)
 		'WHERE'		=> 'login = \''.$s2_db->escape($login).'\''
 	);
 	($hook = s2_hook('fn_get_user_info_pre_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	return $s2_db->fetch_assoc($result);
+	return $s2_db->fetchAssoc($result);
 }
 
 function s2_authenticate_user ($challenge)
 {
 	global $lang_admin, $s2_cookie_name;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// If the challenge exists and isn't expired
 	$query = array(
@@ -186,10 +188,10 @@ function s2_authenticate_user ($challenge)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($challenge).'\''
 	);
 	($hook = s2_hook('fn_authenticate_user_pre_get_time_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$status = '';
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		list($login, $time, $ip) = $row;
 	else
 		$status = 'Lost';
@@ -239,8 +241,8 @@ function s2_test_user_rights ($is_permissions)
 
 function s2_get_salt ($s)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'SELECT'	=> 'salt',
@@ -248,15 +250,15 @@ function s2_get_salt ($s)
 		'WHERE'		=> 'challenge = \''.$s2_db->escape($s).'\''
 	);
 	($hook = s2_hook('fn_verify_challenge_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	return ($return = $s2_db->result($result)) ? $return : false;
 }
 
 function s2_get_password_hash ($login)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'SELECT'	=> 'password',
@@ -264,7 +266,7 @@ function s2_get_password_hash ($login)
 		'WHERE'		=> 'login = \''.$s2_db->escape($login).'\''
 	);
 	($hook = s2_hook('fn_get_password_hash_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	return ($return = $s2_db->result($result)) ? $return : false;
 }
@@ -272,8 +274,8 @@ function s2_get_password_hash ($login)
 function s2_login_success ($login, $challenge)
 {
 	global $s2_cookie_name;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$time = time();
 	$comment_cookie = md5(uniqid('comment_cookie').$time);
@@ -286,7 +288,7 @@ function s2_login_success ($login, $challenge)
 	);
 
 	($hook = s2_hook('fn_login_success_pre_update_challenge_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	s2_setcookie($s2_cookie_name, $challenge, ($time + S2_COOKIE_EXPIRE));
 	s2_setcookie($s2_cookie_name.'_c', $comment_cookie, ($time + S2_COOKIE_EXPIRE), S2_PATH.'/comment.php', false);
@@ -340,8 +342,8 @@ function s2_logout ($challenge)
 function s2_get_sessions ($login)
 {
 	global $lang_admin;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'SELECT'	=> 'ip, ua, time, challenge',
@@ -350,13 +352,13 @@ function s2_get_sessions ($login)
 		'ORDER BY'	=> 'time ASC'
 	);
 	($hook = s2_hook('fn_get_other_sessions_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$known_browsers = array('Opera', 'Firefox', 'Chrome', 'Safari', 'MSIE', 'Mozilla');
 	$browser_aliases = array('MSIE' => 'Internet Explorer');
 
 	$sessions = array();
-	while ($session = $s2_db->fetch_assoc($result))
+	while ($session = $s2_db->fetchAssoc($result))
 	{
 		$detected_ua = '';
 		foreach ($known_browsers as $browser)

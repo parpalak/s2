@@ -1,4 +1,7 @@
 <?php
+
+use S2\Cms\Pdo\DbLayer;
+
 /**
  * Creates RSS feeds.
  *
@@ -58,8 +61,8 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 			$items .= $this->renderPartial('rss_item', $item);
 		}
 
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
         if ($s2_db) {
             $s2_db->close();
         }

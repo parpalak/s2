@@ -1,4 +1,7 @@
 <?php
+
+use S2\Cms\Pdo\DbLayer;
+
 /**
  * Builds placeholders content for templates.
  *
@@ -15,8 +18,8 @@ class Placeholder
 	//
 	public static function last_articles_array ($limit = '5')
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$subquery = array(
 			'SELECT'	=> '1',
@@ -24,14 +27,14 @@ class Placeholder
 			'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query_child_num = $s2_db->query_build($subquery, true);
+		$raw_query_child_num = $s2_db->build($subquery);
 
 		$subquery = array(
 			'SELECT'	=> 'u.name',
 			'FROM'		=> 'users AS u',
 			'WHERE'		=> 'u.id = a.user_id'
 		);
-		$raw_query_user = $s2_db->query_build($subquery, true);
+		$raw_query_user = $s2_db->build($subquery);
 
 		$query = array(
 			'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS parent_title, a1.url AS p_url, ('.$raw_query_user.') AS author',
@@ -50,10 +53,10 @@ class Placeholder
 			$query['LIMIT'] = $limit;
 
 		($hook = s2_hook('fn_last_articles_array_pre_get_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$last = $urls = $parent_ids = array();
-		for ($i = 0; $row = $s2_db->fetch_assoc($result); $i++)
+		for ($i = 0; $row = $s2_db->fetchAssoc($result); $i++)
 		{
 			($hook = s2_hook('fn_last_articles_array_loop')) ? eval($hook) : null;
 
@@ -88,8 +91,8 @@ class Placeholder
     //
     public static function articles_urls ()
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $subquery = array(
             'SELECT'	=> '1',
@@ -97,7 +100,7 @@ class Placeholder
             'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
             'LIMIT'		=> '1'
         );
-        $raw_query_child_num = $s2_db->query_build($subquery, true);
+        $raw_query_child_num = $s2_db->build($subquery);
 
         $query = [
             'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.url, a.parent_id, ('.$raw_query_child_num.') IS NOT NULL AS children_exist',
@@ -105,10 +108,10 @@ class Placeholder
             'WHERE'		=> '(a.create_time <> 0 OR a.modify_time <> 0) AND a.published = 1',
         ];
 
-        $result = $s2_db->query_build($query);
+        $result = $s2_db->buildAndQuery($query);
 
         $articles = $urls = $parent_ids = [];
-        for ($i = 0; $row = $s2_db->fetch_assoc($result); $i++)
+        for ($i = 0; $row = $s2_db->fetchAssoc($result); $i++)
         {
             $urls[$i] = urlencode($row['url']).(S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
 
@@ -163,8 +166,8 @@ class Placeholder
 	// Makes tags list for the tags page and the placeholder
 	public static function tags_list ()
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		static $tags = array();
 		static $ready = false;
@@ -176,10 +179,10 @@ class Placeholder
 				'FROM'		=> 'tags'
 			);
 			($hook = s2_hook('fn_s2_tags_list_pre_get_tags_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			$tag_count = $tag_name = $tag_url = array();
-			while ($row = $s2_db->fetch_assoc($result))
+			while ($row = $s2_db->fetchAssoc($result))
 			{
 				$tag_name[$row['tag_id']] = $row['name'];
 				$tag_url[$row['tag_id']] = $row['url'];
@@ -199,9 +202,9 @@ class Placeholder
 				'WHERE'		=> 'a.published = 1'
 			);
 			($hook = s2_hook('fn_s2_tags_list_pre_get_posts_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
-			while ($row = $s2_db->fetch_row($result))
+			while ($row = $s2_db->fetchRow($result))
 				$tag_count[$row[0]]++;
 
 			arsort($tag_count);
@@ -230,15 +233,15 @@ class Placeholder
 		if (!S2_SHOW_COMMENTS)
 			return '';
 
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$subquery1 = array(
 			'SELECT'	=> 'count(*) + 1',
 			'FROM'		=> 'art_comments AS c1',
 			'WHERE'		=> 'shown = 1 AND c1.article_id = c.article_id AND c1.time < c.time'
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true);
+		$raw_query1 = $s2_db->build($subquery1);
 
 		$query = array(
 			'SELECT'	=> 'c.time, a.url, a.title, c.nick, a.parent_id, ('.$raw_query1.') AS count',
@@ -254,10 +257,10 @@ class Placeholder
 			'LIMIT'		=> '5'
 		);
 		($hook = s2_hook('fn_last_article_comments_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$nicks = $titles = $parent_ids = $urls = $counts = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$nicks[] = $row['nick'];
 			$titles[] = $row['title'];
@@ -286,8 +289,8 @@ class Placeholder
 		if (!S2_SHOW_COMMENTS)
 			return '';
 
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$subquery1 = array(
 			'SELECT'	=> 'c.article_id AS article_id, count(c.article_id) AS comment_num, max(c.id) AS max_id',
@@ -296,7 +299,7 @@ class Placeholder
 			'GROUP BY'	=> 'c.article_id',
 			'ORDER BY'	=> 'comment_num DESC',
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true);
+		$raw_query1 = $s2_db->build($subquery1);
 
 		$query = array(
 			'SELECT'	=> 'a.url, a.title, a.parent_id, c2.nick, c2.time',
@@ -311,10 +314,10 @@ class Placeholder
 			'LIMIT'		=> '10',
 		);
 		($hook = s2_hook('fn_last_discussions_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$titles = $parent_ids = $urls = $nicks = $time = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$titles[] = $row['title'];
 			$parent_ids[] = $row['parent_id'];

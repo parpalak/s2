@@ -10,6 +10,8 @@
 namespace s2_extensions\s2_blog;
 
 
+use S2\Cms\Pdo\DbLayer;
+
 class Page_Sitemap extends \Page_Sitemap
 {
     /**
@@ -17,8 +19,8 @@ class Page_Sitemap extends \Page_Sitemap
      */
     protected function getItems(): array
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         // Obtaining posts
         $query  = [
@@ -26,10 +28,10 @@ class Page_Sitemap extends \Page_Sitemap
             'FROM'   => 's2_blog_posts AS p',
             'WHERE'  => 'p.published = 1',
         ];
-        $result = $s2_db->query_build($query);
+        $result = $s2_db->buildAndQuery($query);
 
         $posts = [];
-        while ($row = $s2_db->fetch_assoc($result)) {
+        while ($row = $s2_db->fetchAssoc($result)) {
             $row['rel_path'] = S2_BLOG_PATH . date('Y/m/d/', $row['time']) . urlencode($row['url']);
             $posts[]         = $row;
         }

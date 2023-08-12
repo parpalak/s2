@@ -10,6 +10,7 @@
 namespace s2_extensions\s2_blog;
 
 use Lang;
+use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\ExternalId;
 
@@ -52,8 +53,8 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
     private function get_post($year, $month, $day, $url)
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $start_time = mktime(0, 0, 0, $month, $day, $year);
         $end_time   = mktime(0, 0, 0, $month, $day + 1, $year);
@@ -65,7 +66,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
             'FROM'   => 'users AS u',
             'WHERE'  => 'u.id = p.user_id',
         ];
-        $raw_query_user = $s2_db->query_build($sub_query, true);
+        $raw_query_user = $s2_db->build($sub_query);
 
         $query = [
             'SELECT' => 'create_time, title, text, id, commented, label, favorite, (' . $raw_query_user . ') AS author, url',
@@ -73,9 +74,9 @@ class Page_Post extends Page_HTML implements \Page_Routable
             'WHERE'  => 'create_time < ' . $end_time . ' AND create_time >= ' . $start_time . ' AND url = \'' . $s2_db->escape($url) . '\' AND published = 1',
         ];
         ($hook = s2_hook('fn_s2_blog_get_post_pre_get_post_qr')) ? eval($hook) : null;
-        $result = $s2_db->query_build($query);
+        $result = $s2_db->buildAndQuery($query);
 
-        if (!$row = $s2_db->fetch_assoc($result)) {
+        if (!$row = $s2_db->fetchAssoc($result)) {
             $this->s2_404_header();
             $this->page['head_title'] = Lang::get('Not found', 's2_blog');
             $this->page['text']       = '<p>' . Lang::get('Not found', 's2_blog') . '</p>';
@@ -100,7 +101,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
                 'ORDER BY' => 'create_time DESC',
             ];
             ($hook = s2_hook('fn_s2_blog_get_post_pre_get_labelled_posts_qr')) ? eval($hook) : null;
-            $queries[] = $s2_db->query_build($query, true);
+            $queries[] = $s2_db->build($query);
         }
 
         if ($is_back_forward) {
@@ -112,7 +113,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
                 'LIMIT'    => '1',
             ];
             ($hook = s2_hook('fn_s2_blog_get_post_pre_get_next_posts_qr')) ? eval($hook) : null;
-            $queries[] = $s2_db->query_build($query, true);
+            $queries[] = $s2_db->build($query);
 
             $query = [
                 'SELECT'   => 'title, create_time, url, "prev" AS type',
@@ -122,13 +123,13 @@ class Page_Post extends Page_HTML implements \Page_Routable
                 'LIMIT'    => '1',
             ];
             ($hook = s2_hook('fn_s2_blog_get_post_pre_get_prev_posts_qr')) ? eval($hook) : null;
-            $queries[] = $s2_db->query_build($query, true);
+            $queries[] = $s2_db->build($query);
         }
 
         $result = !empty($queries) ? $s2_db->query('(' . implode(') UNION (', $queries) . ')') : null;
 
         $back_forward = [];
-        while ($result && $row1 = $s2_db->fetch_assoc($result)) {
+        while ($result && $row1 = $s2_db->fetchAssoc($result)) {
             $post_info = [
                 'title' => $row1['title'],
                 'link'  => S2_BLOG_PATH . date('Y/m/d/', $row1['create_time']) . urlencode($row1['url']),
@@ -163,10 +164,10 @@ class Page_Post extends Page_HTML implements \Page_Routable
             'ORDER BY' => 'pt.id',
         ];
         ($hook = s2_hook('fn_s2_blog_get_post_pre_get_labelled_posts_qr')) ? eval($hook) : null;
-        $result = $s2_db->query_build($query);
+        $result = $s2_db->buildAndQuery($query);
 
         $tags = [];
-        while ($tag = $s2_db->fetch_assoc($result))
+        while ($tag = $s2_db->fetchAssoc($result))
             $tags[] = [
                 'title' => $tag['name'],
                 'link'  => S2_BLOG_TAGS_PATH . urlencode($tag['url']) . '/',
@@ -203,8 +204,8 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
     private function get_comments($id)
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $comments = '';
 
@@ -215,9 +216,9 @@ class Page_Post extends Page_HTML implements \Page_Routable
             'ORDER BY' => 'time',
         ];
         ($hook = s2_hook('fn_s2_blog_get_comments_pre_qr')) ? eval($hook) : null;
-        $result = $s2_db->query_build($query);
+        $result = $s2_db->buildAndQuery($query);
 
-        for ($i = 1; $row = $s2_db->fetch_assoc($result); $i++) {
+        for ($i = 1; $row = $s2_db->fetchAssoc($result); $i++) {
             $row['i'] = $i;
             $comments .= $this->renderPartial('comment', $row);
         }

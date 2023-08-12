@@ -10,6 +10,9 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
+
 define('S2_VERSION', '2.0dev');
 define('S2_DB_REVISION', 15);
 define('MIN_PHP_VERSION', '7.4.0');
@@ -423,8 +426,8 @@ else
 
 	// Create the database object (and connect/select db)
     $p_connect = false;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	// Check SQLite prefix collision
 	if ($db_type == 'pdo_sqlite' && strtolower($db_prefix) == 'sqlite_')
@@ -438,18 +441,18 @@ else
 	);
 
 	try {
-		$result = $s2_db->query_build($query);
-		if ($s2_db->fetch_row($result)) {
+		$result = $s2_db->buildAndQuery($query);
+		if ($s2_db->fetchRow($result)) {
             error(sprintf($lang_install['S2 already installed'], $db_prefix, $db_name));
         }
 	}
-	catch (DBLayer_Exception $e) {
+	catch (DbLayerException | PDOException $e) {
 
 	}
 
 
 	// Start a transaction
-	$s2_db->start_transaction();
+	$s2_db->startTransaction();
 
 
 	// Create all tables
@@ -468,7 +471,7 @@ else
 		'PRIMARY KEY'	=> array('name')
 	);
 
-	$s2_db->create_table('config', $schema);
+	$s2_db->createTable('config', $schema);
 
 
 	$schema = array(
@@ -524,7 +527,7 @@ else
 		'PRIMARY KEY'	=> array('id')
 	);
 
-	$s2_db->create_table('extensions', $schema);
+	$s2_db->createTable('extensions', $schema);
 
 
 	$schema = array(
@@ -557,7 +560,7 @@ else
 		'PRIMARY KEY'	=> array('id', 'extension_id')
 	);
 
-	$s2_db->create_table('extension_hooks', $schema);
+	$s2_db->createTable('extension_hooks', $schema);
 
 
 	$schema = array(
@@ -655,7 +658,7 @@ else
 		)
 	);
 
-	$s2_db->create_table('articles', $schema);
+	$s2_db->createTable('articles', $schema);
 
 
 	$schema = array(
@@ -727,7 +730,7 @@ else
 		)
 	);
 
-	$s2_db->create_table('art_comments', $schema);
+	$s2_db->createTable('art_comments', $schema);
 
 
 	$schema = array(
@@ -763,7 +766,7 @@ else
 		)
 	);
 
-	$s2_db->create_table('tags', $schema);
+	$s2_db->createTable('tags', $schema);
 
 
 	$schema = array(
@@ -790,7 +793,7 @@ else
 		),
 	);
 
-	$s2_db->create_table('article_tag', $schema);
+	$s2_db->createTable('article_tag', $schema);
 
 
 	$schema = array(
@@ -836,7 +839,7 @@ else
 		),
 	);
 
-	$s2_db->create_table('users_online', $schema);
+	$s2_db->createTable('users_online', $schema);
 
 
 	$schema = array(
@@ -907,9 +910,9 @@ else
 		)
 	);
 
-	$s2_db->create_table('users', $schema);
+	$s2_db->createTable('users', $schema);
 
-    $s2_db->create_table('queue', array(
+    $s2_db->createTable('queue', array(
         'FIELDS'      => array(
             'id'      => array(
                 'datatype'   => 'VARCHAR(80)',
@@ -936,8 +939,8 @@ else
 		'VALUES'	=> '\''.$s2_db->escape($username).'\', \''.md5($password.'Life is not so easy :-)').'\', \''.$s2_db->escape($email).'\', 1, 1, 1, 1, 1, 1, 1'
 	);
 
-	$s2_db->query_build($query);
-	$admin_uid = $s2_db->insert_id();
+	$s2_db->buildAndQuery($query);
+	$admin_uid = $s2_db->insertId();
 
 	// Enable/disable automatic check for updates depending on PHP environment (require cURL, fsockopen or allow_url_fopen)
 	$check_for_updates = (function_exists('curl_init') || function_exists('fsockopen') || in_array(strtolower(@ini_get('allow_url_fopen')), array('on', 'true', '1'))) ? 1 : 0;
@@ -974,7 +977,7 @@ else
 			'VALUES'	=> '\''.$conf_name.'\', '.$conf_value.''
 		);
 
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 
 	// Insert some other default data
@@ -984,7 +987,7 @@ else
 		'VALUES'	=> '0, \''.$lang_install['Main Page'].'\', 0, '.$now.', 1, \'mainpage.php\''
 	);
 
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	$query = array(
 		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url',
@@ -992,7 +995,7 @@ else
 		'VALUES'	=> '1, \''.$lang_install['Section example'].'\', '.$now.', '.$now.', 1, \'site.php\', \'section1\''
 	);
 
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	$query = array(
 		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url, pagetext, excerpt, user_id',
@@ -1000,9 +1003,9 @@ else
 		'VALUES'	=> '2, \''.$lang_install['Page example'].'\', '.$now.', '.$now.', 1, \'\', \'page1\', \''.$s2_db->escape($lang_install['Page text']).'\', \''.$s2_db->escape($lang_install['Page text']).'\', '.$admin_uid
 	);
 
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
-	$s2_db->end_transaction();
+	$s2_db->endTransaction();
 
 	$s2_db->close();
 

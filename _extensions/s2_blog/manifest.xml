@@ -28,7 +28,7 @@
 
 	<install><![CDATA[
 // Setup posts table
-if (!$s2_db->table_exists('s2_blog_posts'))
+if (!$s2_db->tableExists('s2_blog_posts'))
 {
 	$schema = array(
 		'FIELDS'			=> array(
@@ -102,21 +102,21 @@ if (!$s2_db->table_exists('s2_blog_posts'))
 		)
 	);
 
-	$s2_db->create_table('s2_blog_posts', $schema);
+	$s2_db->createTable('s2_blog_posts', $schema);
 }
 else
 {
-	$s2_db->add_field('s2_blog_posts', 'revision', 'INT(10) UNSIGNED', false, '1', 'modify_time');
-	$s2_db->add_field('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', false, '0', 'url');
+	$s2_db->addField('s2_blog_posts', 'revision', 'INT(10) UNSIGNED', false, '1', 'modify_time');
+	$s2_db->addField('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', false, '0', 'url');
 }
 
 // For old installations
-$s2_db->add_index('s2_blog_posts', 'create_time_published_idx', array('create_time', 'published'));
-$s2_db->add_index('s2_blog_posts', 'id_published_idx', array('id', 'published'));
-$s2_db->add_index('s2_blog_posts', 'favorite_idx', array('favorite'));
+$s2_db->addIndex('s2_blog_posts', 'create_time_published_idx', array('create_time', 'published'));
+$s2_db->addIndex('s2_blog_posts', 'id_published_idx', array('id', 'published'));
+$s2_db->addIndex('s2_blog_posts', 'favorite_idx', array('favorite'));
 
 // Setup blog comments table
-if (!$s2_db->table_exists('s2_blog_comments'))
+if (!$s2_db->tableExists('s2_blog_comments'))
 {
 	$schema = array(
 		'FIELDS'		=> array(
@@ -187,14 +187,14 @@ if (!$s2_db->table_exists('s2_blog_comments'))
 		)
 	);
 
-	$s2_db->create_table('s2_blog_comments', $schema);
+	$s2_db->createTable('s2_blog_comments', $schema);
 }
 
 // For old installations
-$s2_db->add_index('s2_blog_comments', 'sort_idx', array('post_id', 'time', 'shown'));
+$s2_db->addIndex('s2_blog_comments', 'sort_idx', array('post_id', 'time', 'shown'));
 
 // Setup table to link posts and tags
-if (!$s2_db->table_exists('s2_blog_post_tag'))
+if (!$s2_db->tableExists('s2_blog_post_tag'))
 {
 	$schema = array(
 		'FIELDS'		=> array(
@@ -220,7 +220,7 @@ if (!$s2_db->table_exists('s2_blog_post_tag'))
 		),
 	);
 
-	$s2_db->create_table('s2_blog_post_tag', $schema);
+	$s2_db->createTable('s2_blog_post_tag', $schema);
 }
 
 // Add extension options to the config table
@@ -240,18 +240,18 @@ foreach ($s2_blog_config as $conf_name => $conf_value)
 		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
 	);
 
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 }
 
 // User permissions
-if ($s2_db->field_exists('users', 'edit_s2_blog'))
-	$s2_db->drop_field('users', 'edit_s2_blog');
+if ($s2_db->fieldExists('users', 'edit_s2_blog'))
+	$s2_db->dropField('users', 'edit_s2_blog');
 
 // A field in tags table for important tags displaying
-if (!$s2_db->field_exists('tags', 's2_blog_important'))
-	$s2_db->add_field('tags', 's2_blog_important', 'INT(1)', false, '0');
+if (!$s2_db->fieldExists('tags', 's2_blog_important'))
+	$s2_db->addField('tags', 's2_blog_important', 'INT(1)', false, '0');
 
-$s2_db->add_index('tags', 's2_blog_important_idx', array('s2_blog_important'));
+$s2_db->addIndex('tags', 's2_blog_important_idx', array('s2_blog_important'));
 
 	]]></install>
 
@@ -260,13 +260,13 @@ $query = array(
 	'DELETE'	=> 'config',
 	'WHERE'		=> 'name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\')',
 );
-$s2_db->query_build($query);
+$s2_db->buildAndQuery($query);
 
-$s2_db->drop_table('s2_blog_posts');
-$s2_db->drop_table('s2_blog_post_tag');
-$s2_db->drop_table('s2_blog_comments');
+$s2_db->dropTable('s2_blog_posts');
+$s2_db->dropTable('s2_blog_post_tag');
+$s2_db->dropTable('s2_blog_comments');
 
-$s2_db->drop_field('tags', 's2_blog_important');
+$s2_db->dropField('tags', 's2_blog_important');
 	]]></uninstall>
 
 </extension>

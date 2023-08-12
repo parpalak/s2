@@ -7,6 +7,8 @@
  * @package       S2
  */
 
+use S2\Cms\Pdo\DbLayer;
+
 define('S2_ROOT', './');
 require S2_ROOT . '_include/common.php';
 
@@ -31,8 +33,8 @@ else {
 if (substr($request_uri, -3) == '---') {
     header('Location: ' . S2_PATH . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::getIfInstantiated('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::getIfInstantiated(DbLayer::class);
     if ($s2_db !== null) {
         $s2_db->close();
     }

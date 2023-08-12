@@ -9,6 +9,8 @@
  * @package S2
  */
 
+use S2\Cms\Pdo\DbLayer;
+
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 
@@ -33,8 +35,8 @@ $session_id = isset($_COOKIE[$s2_cookie_name]) ? $_COOKIE[$s2_cookie_name] : '';
 if ($session_id == '')
 {
 	echo $lang_admin['Lost session'];
-    /** @var ?\DBLayer_Abstract $s2_db */
-    $s2_db = \Container::getIfInstantiated('db');
+    /** @var ?DbLayer $s2_db */
+    $s2_db = \Container::getIfInstantiated(DbLayer::class);
     if ($s2_db) {
         $s2_db->close();
     }
@@ -47,8 +49,8 @@ $login = s2_get_login($session_id);
 if ($login === false)
 {
 	echo $lang_admin['Lost session'];
-    /** @var ?\DBLayer_Abstract $s2_db */
-    $s2_db = \Container::getIfInstantiated('db');
+    /** @var ?DbLayer $s2_db */
+    $s2_db = \Container::getIfInstantiated(DbLayer::class);
     if ($s2_db) {
         $s2_db->close();
     }
@@ -116,8 +118,8 @@ if ($s2_user['create_articles'])
 </html>
 <?php
 
-/** @var ?\DBLayer_Abstract $s2_db */
-$s2_db = \Container::getIfInstantiated('db');
+/** @var ?DbLayer $s2_db */
+$s2_db = \Container::getIfInstantiated(DbLayer::class);
 if ($s2_db) {
     $s2_db->close();
 }

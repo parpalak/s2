@@ -1,5 +1,7 @@
 <?php
 
+use S2\Cms\Pdo\DbLayer;
+
 /**
  * Caching functions.
  *
@@ -39,8 +41,8 @@ class S2Cache
      */
     public static function generate_config(bool $load = false): void
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $return = ($hook = s2_hook('fn_generate_config_cache_start')) ? eval($hook) : null;
         if ($return !== null) {
@@ -54,10 +56,10 @@ class S2Cache
         );
 
         ($hook = s2_hook('fn_generate_config_cache_qr_get_config')) ? eval($hook) : null;
-        $result = $s2_db->query_build($query);
+        $result = $s2_db->buildAndQuery($query);
 
         $output = '';
-        while ($row = $s2_db->fetch_row($result)) {
+        while ($row = $s2_db->fetchRow($result)) {
             $output .= 'define(\'' . $row[0] . '\', \'' . str_replace(array('\\', '\''), array('\\\\', '\\\''), $row[1]) . '\');' . "\n";
             if ($load) {
                 define($row[0], $row[1]);
@@ -85,8 +87,8 @@ class S2Cache
      */
     public static function generate_hooks(): array
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         if (!isset($s2_db)) {
             return []; // Install
@@ -107,7 +109,7 @@ class S2Cache
 //
 //        $result = $s2_db->query_build($query);
 //
-//        while ($cur_hook = $s2_db->fetch_assoc($result)) {
+//        while ($cur_hook = $s2_db->fetchAssoc($result)) {
 //            $code = $cur_hook['code'];
 //            TODO cache somewhere the hotfix code
 //        }
@@ -119,10 +121,10 @@ class S2Cache
             'WHERE'  => 'e.disabled=0',
         );
 
-        $result = $s2_db->query_build($query);
+        $result = $s2_db->buildAndQuery($query);
 
         $map = [];
-        while ($extension = $s2_db->fetch_assoc($result)) {
+        while ($extension = $s2_db->fetchAssoc($result)) {
             $hooks = glob(S2_ROOT . '_extensions/' . $extension['id'] . '/hooks/*.php');
             foreach ($hooks as $filename) {
                 if (1 !== preg_match($regex = '#/([a-z_\-0-9]+?)(?:_(\d))?\.php$#S', $filename, $matches)) {
@@ -165,8 +167,8 @@ class S2Cache
      */
     public static function generate_updates()
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $return = ($hook = s2_hook('fn_generate_updates_cache_start')) ? eval($hook) : null;
         if ($return !== null) {
@@ -184,7 +186,7 @@ class S2Cache
             $result = $s2_db->query_build($query);
 
             $hotfixes = array();
-            while ($hotfix = $s2_db->fetch_assoc($result))
+            while ($hotfix = $s2_db->fetchAssoc($result))
                 $hotfixes[] = urlencode($hotfix['id']);
 
             $result = s2_get_remote_file('http://s2cms.ru/update/?type=xml&version='.urlencode(S2_VERSION).'&hotfixes='.implode(',', $hotfixes), 8);

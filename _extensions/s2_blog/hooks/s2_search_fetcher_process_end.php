@@ -19,10 +19,10 @@ $query = array (
 	'WHERE'		=> 'published = 1'
 );
 ($hook = s2_hook('s2_blog_pre_index_fetch')) ? eval($hook) : null;
-$result = $this->db->query_build($query);
+$result = $this->db->buildAndQuery($query);
 
 return function () use ($result) {
-	while ($s2_blog_post = $this->db->fetch_assoc($result))
+	while ($s2_blog_post = $this->db->fetchAssoc($result))
 	{
 		$indexable = new \S2\Rose\Entity\Indexable('s2_blog_'.$s2_blog_post['id'], $s2_blog_post['title'], $s2_blog_post['text']);
 		$indexable

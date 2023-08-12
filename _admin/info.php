@@ -8,13 +8,15 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
 function s2_count_articles ($id)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$n = 0;
 
@@ -24,8 +26,8 @@ function s2_count_articles ($id)
 		'WHERE'		=> 'published = 1 AND parent_id = '.$id
 	);
 	($hook = s2_hook('fn_count_articles_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	while ($row = $s2_db->fetch_row($result))
+	$result = $s2_db->buildAndQuery($query);
+	while ($row = $s2_db->fetchRow($result))
 		$n += s2_count_articles($row[0]);
 
 	($hook = s2_hook('fn_count_articles_end')) ? eval($hook) : null;
@@ -35,8 +37,8 @@ function s2_count_articles ($id)
 function s2_get_counters ()
 {
 	global $lang_admin;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$articles_num = s2_count_articles(1);
 
@@ -52,7 +54,7 @@ function s2_get_counters ()
 		'WHERE'		=> 'c.shown = 1 AND a.published = 1'
 	);
 	($hook = s2_hook('fn_get_counters_pre_get_comm_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 	$comments_num = $s2_db->result($result);
 
 	$counters = array(
@@ -67,8 +69,8 @@ function s2_get_counters ()
 function s2_stat_info ()
 {
 	global $db_name, $db_type, $db_version, $db_prefix, $lang_admin;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$output = '';
 
@@ -103,7 +105,7 @@ function s2_stat_info ()
 		$result = $s2_db->query('SHOW TABLE STATUS FROM `'.$db_name.'` WHERE NAME LIKE \''.$db_prefix.'%\' AND NAME NOT LIKE \''.$db_prefix.'s2_search_idx_%\'');
 
 		$total_records = $total_size = 0;
-		while ($status = $s2_db->fetch_assoc($result))
+		while ($status = $s2_db->fetchAssoc($result))
 		{
 			$total_records += $status['Rows'];
 			$total_size += $status['Data_length'] + $status['Index_length'];
@@ -124,7 +126,7 @@ function s2_stat_info ()
 	);
 
 	$database = array(
-		implode('<br>', $s2_db->get_version()),
+		implode('<br>', $s2_db->getVersion()),
 		!empty($total_records) ? sprintf($lang_admin['Rows'], $total_records) : '',
 		!empty($total_size) ? sprintf($lang_admin['Size'], $total_size) : '',
 	);

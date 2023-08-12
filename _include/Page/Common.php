@@ -1,5 +1,6 @@
 <?php
 
+use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\ExternalId;
 
@@ -22,8 +23,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 	private function tagged_articles ($id)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$query = array(
 			'SELECT'	=> 't.tag_id as tag_id, name, t.url as url',
@@ -37,10 +38,10 @@ class Page_Common extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'atg.article_id = '.$id
 		);
 		($hook = s2_hook('fn_tagged_articles_pre_get_tags_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$tag_names = $tag_urls = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			($hook = s2_hook('fn_tagged_articles_loop_get_tags')) ? eval($hook) : null;
 
@@ -57,7 +58,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'a1.parent_id = atg.article_id AND a1.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query1 = $s2_db->query_build($subquery, true);
+		$raw_query1 = $s2_db->build($subquery);
 
 		$query = array(
 			'SELECT'	=> 'title, tag_id, parent_id, url, a.id AS id, ('.$raw_query1.') IS NOT NULL AS children_exist',
@@ -72,14 +73,14 @@ class Page_Common extends Page_HTML implements Page_Routable
 //		'ORDER BY'	=> 'create_time'  // no temp table is created but order by ID is almost the same
 		);
 		($hook = s2_hook('fn_tagged_articles_pre_get_articles_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		// Build article lists that have the same tags as our article
 
 		$create_tag_list = false;
 
 		$titles = $parent_ids = $urls = $tag_ids = $original_ids = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			($hook = s2_hook('fn_tagged_articles_get_articles_loop')) ? eval($hook) : null;
 
@@ -130,8 +131,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 	private function get_tags ($id)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$query = array(
 			'SELECT'	=> 'name, url',
@@ -145,10 +146,10 @@ class Page_Common extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'at.article_id = '.$id
 		);
 		($hook = s2_hook('fn_tags_list_pre_get_tags_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$tags = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 			$tags[] = array(
 				'title' => $row['name'],
 				'link'  => s2_link('/'.S2_TAGS_URL.'/'.urlencode($row['url']).'/'),
@@ -167,8 +168,8 @@ class Page_Common extends Page_HTML implements Page_Routable
 	// Processes site pages
 	private function parse_page_url ($request_uri)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$page = &$this->page;
 
@@ -201,9 +202,9 @@ class Page_Common extends Page_HTML implements Page_Routable
 				'WHERE'		=> 'url IN (\''.implode('\', \'', $urls).'\') AND published=1'
 			);
 			($hook = s2_hook('fn_s2_parse_page_url_loop_pre_get_parents_query')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
-			$nodes = $s2_db->fetch_assoc_all($result);
+			$nodes = $s2_db->fetchAssocAll($result);
 
 			// Walking through the page parents
 			// 1. We ensure all of them are published
@@ -255,14 +256,14 @@ class Page_Common extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query_children = $s2_db->query_build($subquery, true);
+		$raw_query_children = $s2_db->build($subquery);
 
 		$subquery = array(
 			'SELECT'	=> 'u.name',
 			'FROM'		=> 'users AS u',
 			'WHERE'		=> 'u.id = a.user_id'
 		);
-		$raw_query_author = $s2_db->query_build($subquery, true);
+		$raw_query_author = $s2_db->build($subquery);
 
 		$query = array(
 			'SELECT'	=> 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.excerpt as excerpt, a.pagetext as text, a.create_time as date, favorite, commented, template, ('.$raw_query_children.') IS NOT NULL AS children_exist, ('.$raw_query_author.') AS author',
@@ -270,14 +271,14 @@ class Page_Common extends Page_HTML implements Page_Routable
 			'WHERE'		=> 'url=\''.$s2_db->escape($request_array[$i]).'\''.(S2_USE_HIERARCHY ? ' AND parent_id='.$parent_id : '').' AND published=1'
 		);
 		($hook = s2_hook('fn_s2_parse_page_url_pre_get_page')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		$page = $s2_db->fetch_assoc($result);
+		$page = $s2_db->fetchAssoc($result);
 
 		// Error handling
 		if (!$page)
 			$this->error_404();
-		if ($s2_db->fetch_assoc($result))
+		if ($s2_db->fetchAssoc($result))
 			error(Lang::get('DB repeat items') . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
 
 		if ($page['template'])
@@ -341,7 +342,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 				'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 				'LIMIT'		=> '1'
 			);
-			$raw_query1 = $s2_db->query_build($subquery, true);
+			$raw_query1 = $s2_db->build($subquery);
 
 			$sort_order = SORT_DESC;
 			$query = array(
@@ -351,10 +352,10 @@ class Page_Common extends Page_HTML implements Page_Routable
 				'ORDER BY'	=> 'priority'
 			);
 			($hook = s2_hook('fn_s2_parse_page_url_pre_get_children_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			$subarticles = $subsections = $sort_array = array();
-			while ($row = $s2_db->fetch_assoc($result))
+			while ($row = $s2_db->fetchAssoc($result))
 			{
 				if ($row['children_exist'])
 				{
@@ -469,7 +470,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 				'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
 				'LIMIT'		=> '1'
 			);
-			$raw_query_child_num = $s2_db->query_build($subquery, true);
+			$raw_query_child_num = $s2_db->build($subquery);
 
 			$query = array(
 				'SELECT'	=> 'title, url, id, excerpt, create_time, parent_id',
@@ -478,12 +479,12 @@ class Page_Common extends Page_HTML implements Page_Routable
 				'ORDER BY'	=> 'priority'
 			);
 			($hook = s2_hook('fn_s2_parse_page_url_pre_get_neighbours_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			$neighbour_urls = $menu_articles = array();
 			$i = 0;
 			$curr_item = -1;
-			while ($row = $s2_db->fetch_assoc($result))
+			while ($row = $s2_db->fetchAssoc($result))
 			{
 				// A neighbour
 				$url = s2_link($parent_path.urlencode($row['url']));
@@ -566,11 +567,11 @@ class Page_Common extends Page_HTML implements Page_Routable
 				'ORDER BY'	=> 'time'
 			);
 			($hook = s2_hook('fn_s2_parse_page_url_pre_get_comm_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			$comments = '';
 
-			for ($i = 1; $row = $s2_db->fetch_assoc($result); $i++)
+			for ($i = 1; $row = $s2_db->fetchAssoc($result); $i++)
 			{
 				$row['i'] = $i;
 				$comments .= $this->renderPartial('comment', $row);

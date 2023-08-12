@@ -8,6 +8,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
@@ -38,18 +40,18 @@ $s2_const_types = array(
 //
 function s2_read_options ()
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$query = array(
 		'SELECT'	=> '*',
 		'FROM'		=> 'config'
 	);
 	($hook = s2_hook('fn_read_options_pre_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$output = array();
-	while ($row = $s2_db->fetch_assoc($result))
+	while ($row = $s2_db->fetchAssoc($result))
 		$output[$row['name']] = $row['value'];
 
 	($hook = s2_hook('fn_read_options_end')) ? eval($hook) : null;
@@ -133,8 +135,8 @@ function s2_get_textarea ($name, $value, $info, $label)
 function s2_get_options ()
 {
 	global $s2_user, $lang_admin, $lang_admin_opt, $lang_const_names, $lang_const_explain;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$options = s2_read_options();
 
@@ -195,8 +197,8 @@ function s2_get_options ()
 function s2_save_options ($opt)
 {
 	global $s2_const_types, $lang_admin_opt;
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$return = array();
 	($hook = s2_hook('fn_save_options_start')) ? eval($hook) : null;
@@ -231,7 +233,7 @@ function s2_save_options ($opt)
 				'WHERE'		=> 'name = \''.$s2_db->escape($name).'\''
 			);
 			($hook = s2_hook('fn_save_options_loop_pre_update_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query);
+			$s2_db->buildAndQuery($query);
 		}
 	}
 
@@ -246,7 +248,7 @@ function s2_save_options ($opt)
 			'WHERE'		=> 'name = \'S2_STYLE\''
 		);
 		($hook = s2_hook('fn_save_options_pre_style_update_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 
 	$lang = preg_replace('#[\.\\\/]#', '', $opt['lang']);
@@ -260,7 +262,7 @@ function s2_save_options ($opt)
 			'WHERE'		=> 'name = \'S2_LANGUAGE\''
 		);
 		($hook = s2_hook('fn_save_options_pre_lang_update_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 
 	S2Cache::generate_config();

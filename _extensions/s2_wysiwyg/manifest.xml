@@ -40,7 +40,7 @@ foreach ($s2_wysiwys_config as $conf_name => $conf_value)
 		'VALUES'	=> '\''.$conf_name.'\', \''.$conf_value.'\''
 	);
 
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 }
 	]]></install>
 
@@ -49,7 +49,7 @@ $query = array(
 	'DELETE'	=> 'config',
 	'WHERE'		=> 'name in (\'S2_WYSIWYG_TYPE\')',
 );
-$s2_db->query_build($query);
+$s2_db->buildAndQuery($query);
 	]]></uninstall>
 
 	<hooks>

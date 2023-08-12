@@ -8,6 +8,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
@@ -31,8 +33,8 @@ function s2_tpl_edit_save ($template)
 function s2_tpl_edit_file_list ($template_filename)
 {
 	global $lang_templates;
-    /** @var \DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$templates = $lang_templates;
 	unset($templates['+']);
@@ -44,9 +46,9 @@ function s2_tpl_edit_file_list ($template_filename)
 		'FROM'		=> 'articles'
 	);
 	($hook = s2_hook('fn_s2_tpl_edit_file_list_pre_get_tpl_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	while ($row = $s2_db->fetch_row($result))
+	while ($row = $s2_db->fetchRow($result))
 		if (!isset($templates[$row[0]]))
 			$templates[$row[0]] = $row[0];
 

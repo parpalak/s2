@@ -9,15 +9,13 @@
 
 namespace s2_extensions\s2_search;
 
+use S2\Cms\Pdo\DbLayer;
 use S2\Rose\Entity\Indexable;
 
 class Fetcher implements GenericFetcher
 {
-    private \DBLayer_Abstract $db;
-
-    public function __construct(\DBLayer_Abstract $db)
+    public function __construct(private DbLayer $db)
     {
-        $this->db = $db;
     }
 
     private function crawl($parent_id, $url): \Generator
@@ -28,7 +26,7 @@ class Fetcher implements GenericFetcher
             'WHERE'  => 'a2.parent_id = a.id',
             'LIMIT'  => '1'
         );
-        $child_num_query = $this->db->query_build($subQuery, true);
+        $child_num_query = $this->db->build($subQuery);
 
         $query = array(
             'SELECT' => 'title, id, create_time, url, (' . $child_num_query . ') as is_children, parent_id, meta_keys, meta_desc, pagetext',
@@ -36,10 +34,10 @@ class Fetcher implements GenericFetcher
             'WHERE'  => 'parent_id = ' . $parent_id . ' AND published = 1',
         );
         ($hook = s2_hook('s2_search_fetcer_crawl_pre_qr')) ? eval($hook) : null;
-        $result = $this->db->query_build($query);
+        $result = $this->db->buildAndQuery($query);
 
-        while ($article = $this->db->fetch_assoc($result)) {
-            $indexable = new Indexable($article['id'], $article['title'], $article['pagetext']);
+        while ($article = $this->db->fetchAssoc($result)) {
+            $indexable = new Indexable($article['id'], $article['title'], $article['pagetext'] ?? '');
             $indexable
                 ->setKeywords($article['meta_keys'])
                 ->setDescription($article['meta_desc'])
@@ -77,7 +75,7 @@ class Fetcher implements GenericFetcher
             'WHERE'  => 'a2.parent_id = a.id',
             'LIMIT'  => '1'
         );
-        $child_num_query = $this->db->query_build($subQuery, true);
+        $child_num_query = $this->db->build($subQuery);
 
         $query = array(
             'SELECT' => 'title, id, create_time, url, (' . $child_num_query . ') as is_children, parent_id, meta_keys, meta_desc, pagetext',
@@ -85,9 +83,9 @@ class Fetcher implements GenericFetcher
             'WHERE'  => 'id = \'' . $this->db->escape($id) . '\' AND published = 1',
         );
         ($hook = s2_hook('s2_search_fetcher_chapter_pre_qr')) ? eval($hook) : null;
-        $result = $this->db->query_build($query);
+        $result = $this->db->buildAndQuery($query);
 
-        $article = $this->db->fetch_assoc($result);
+        $article = $this->db->fetchAssoc($result);
         if (!$article) {
             return null;
         }

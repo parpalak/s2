@@ -10,6 +10,8 @@
 namespace s2_extensions\s2_blog;
 
 
+use S2\Cms\Pdo\DbLayer;
+
 class Placeholder
 {
 	public static function recent_comments ()
@@ -19,15 +21,15 @@ class Placeholder
         if (!S2_SHOW_COMMENTS)
             return '';
 
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $subquery1 = array(
 			'SELECT'	=> 'count(*) + 1',
 			'FROM'		=> 's2_blog_comments AS c1',
 			'WHERE'		=> 'shown = 1 AND c1.post_id = c.post_id AND c1.time < c.time'
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true);
+		$raw_query1 = $s2_db->build($subquery1);
 
 		$query = array(
 			'SELECT'	=> 'time, url, title, nick, create_time, ('.$raw_query1.') AS count',
@@ -43,10 +45,10 @@ class Placeholder
 			'LIMIT'		=> '5'
 		);
 		($hook = s2_hook('fn_s2_blog_recent_comments_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$output = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$cur_url = S2_BLOG_PATH . date('Y/m/d/', $row['create_time']) . urlencode($row['url']);
 			$output[] = array(
@@ -67,8 +69,8 @@ class Placeholder
         if (!S2_SHOW_COMMENTS)
             return '';
 
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $subquery1 = array(
 			'SELECT'	=> 'c.post_id AS post_id, count(c.post_id) AS comment_num,  max(c.id) AS max_id',
@@ -77,7 +79,7 @@ class Placeholder
 			'GROUP BY'	=> 'c.post_id',
 			'ORDER BY'	=> 'comment_num DESC',
 		);
-		$raw_query1 = $s2_db->query_build($subquery1, true);
+		$raw_query1 = $s2_db->build($subquery1);
 
 		$query = array(
 			'SELECT'	=> 'p.create_time, p.url, p.title, c1.comment_num AS comment_num, c2.nick, c2.time',
@@ -92,10 +94,10 @@ class Placeholder
 			'LIMIT'		=> '10',
 		);
 		($hook = s2_hook('fn_s2_blog_recent_discussions_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$output = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$cur_url = S2_BLOG_PATH.date('Y/m/d/', $row['create_time']).urlencode($row['url']);
 			$output[] = array(
@@ -111,8 +113,8 @@ class Placeholder
 
 	public static function blog_tags ($id)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$subquery = array(
 			'SELECT'	=> 'p.id',
@@ -126,7 +128,7 @@ class Placeholder
 			'WHERE'		=> 'pt.tag_id = atg.tag_id',
 			'LIMIT'		=> '1'
 		);
-		$raw_query = $s2_db->query_build($subquery, true);
+		$raw_query = $s2_db->build($subquery);
 
 		$query = array(
 			'SELECT'	=> 't.name, t.url as url',
@@ -140,10 +142,10 @@ class Placeholder
 			'WHERE'		=> 'atg.article_id = ' . (int) $id . ' AND ('.$raw_query.') IS NOT NULL',
 		);
 
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$s2_blog_links = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$s2_blog_links[] = array(
 				'title' => $row['name'],

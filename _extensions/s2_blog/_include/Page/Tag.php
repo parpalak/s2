@@ -9,6 +9,7 @@
 
 namespace s2_extensions\s2_blog;
 use Lang;
+use S2\Cms\Pdo\DbLayer;
 
 
 class Page_Tag extends Page_HTML implements \Page_Routable
@@ -48,8 +49,8 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 
 	private function posts_by_tag ($tag, $is_slash)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$query = array(
 			'SELECT'	=> 'tag_id, description, name, url',
@@ -57,9 +58,9 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'url = \''.$s2_db->escape($tag).'\''
 		);
 		($hook = s2_hook('fn_s2_blog_posts_by_tag_pre_get_tag_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
-		if ($row = $s2_db->fetch_row($result))
+		if ($row = $s2_db->fetchRow($result))
 			list($tag_id, $tag_descr, $tag_name, $tag_url) = $row;
 		else {
 			$this->error_404();
@@ -101,8 +102,8 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 	 */
 	private static function articles_by_tag ($tag_id)
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$subquery = array(
 			'SELECT'	=> '1',
@@ -110,7 +111,7 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
 			'LIMIT'		=> '1'
 		);
-		$raw_query1 = $s2_db->query_build($subquery, true);
+		$raw_query1 = $s2_db->build($subquery);
 
 		$query = array(
 			'SELECT'	=> 'a.id, a.url, a.title, a.parent_id, ('.$raw_query1.') IS NOT NULL AS children_exist',
@@ -124,11 +125,11 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'atg.tag_id = '.$tag_id.' AND a.published = 1',
 		);
 		($hook = s2_hook('fn_articles_by_tag_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$title = $urls = $parent_ids = array();
 
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$urls[] = urlencode($row['url']).(S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
 			$parent_ids[] = $row['parent_id'];

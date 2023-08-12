@@ -7,6 +7,8 @@
  * @package s2_feedback
  */
 
+use S2\Cms\Pdo\DbLayer;
+
 define('S2_ROOT', '../../');
 require 'functions.php';
 require S2_ROOT.'_include/common.php';
@@ -83,8 +85,8 @@ if (!empty($errors))
 
 $message = sprintf(Lang::get('Mail template', 's2_feedback'), $name, $contact, $subject, $text);
 
-/** @var \DBLayer_Abstract $s2_db */
-$s2_db = \Container::get('db');
+/** @var DbLayer $s2_db */
+$s2_db = \Container::get(DbLayer::class);
 
 // Sending the comment to administrators
 $query = array(
@@ -92,8 +94,8 @@ $query = array(
 	'FROM'		=> 'users',
 	'WHERE'		=> 'edit_users = 1 and email <> \'\''
 );
-$result = $s2_db->query_build($query);
-while ($mrow = $s2_db->fetch_assoc($result))
+$result = $s2_db->buildAndQuery($query);
+while ($mrow = $s2_db->fetchAssoc($result))
 	s2_feedback_send($mrow['email'], Lang::get('Mail subject', 's2_feedback'), $message);
 
 header('Location: ?go=1');

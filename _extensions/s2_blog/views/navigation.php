@@ -18,6 +18,7 @@
 		<?php echo $last['title']; ?>
 <?php } ?>
 	</li>
+<?php if(isset($favorite)): ?>
 	<li>
 <?php if (empty($favorite['is_current'])) {?>
 		<a href="<?php echo s2_htmlencode($favorite['link']); ?>"><?php echo $favorite['title']; ?></a>
@@ -25,6 +26,7 @@
 		<?php echo $favorite['title']; ?>
 <?php } ?>
 	</li>
+<?php endif ?>
 	<li>
 <?php if (empty($tags_header['is_current'])) {?>
 			<?php printf($tags_header['title'], '<a href="'.$tags_header['link'].'">', '</a>'); ?>

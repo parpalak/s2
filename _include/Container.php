@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
+use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Queue\QueueConsumer;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
@@ -45,8 +46,8 @@ class Container
         global $db_type, $db_host, $db_name, $db_username, $db_password, $db_prefix, $p_connect;
 
         switch ($className) {
-            case 'db':
-                return DBLayer_Abstract::getInstance($db_type, $db_host, $db_username, $db_password, $db_name, $db_prefix, $p_connect);
+            case DbLayer::class:
+                return new DbLayer(self::get(\PDO::class), $db_prefix);
 
             case \PDO::class:
                 // TODO use $db_type
@@ -113,7 +114,7 @@ class Container
             case \s2_extensions\s2_search\IndexManager::class:
                 return new \s2_extensions\s2_search\IndexManager(
                     S2_CACHE_DIR,
-                    new \s2_extensions\s2_search\Fetcher(self::get('db')),
+                    new \s2_extensions\s2_search\Fetcher(self::get(DbLayer::class)),
                     self::get(Indexer::class),
                     self::get(PdoStorage::class),
                     self::get('recommendations_cache'),

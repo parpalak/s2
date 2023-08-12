@@ -10,6 +10,8 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 define('S2_ROOT', '../');
 
 define('S2_NO_POST_BAD_CHARS', 1);
@@ -41,8 +43,8 @@ if ($action == 'preview') {
 
     s2_make_thumbnail(S2_IMG_PATH . $file, 200);
 
-    /** @var ?\DBLayer_Abstract $s2_db */
-    $s2_db = \Container::getIfInstantiated('db');
+    /** @var ?DbLayer $s2_db */
+    $s2_db = \Container::getIfInstantiated(DbLayer::class);
     if ($s2_db) {
         $s2_db->close();
     }
@@ -108,8 +110,8 @@ if ($action == 'load_tree') {
         header('Content-Type: application/json; charset=utf-8');
         echo s2_json_encode(array('status' => 1, 'name' => $name, 'path' => $path . '/' . $name));
     } else {
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
         if ($s2_db) {
             $s2_db->close();
         }
@@ -174,8 +176,8 @@ if ($action == 'load_tree') {
     $parent_path = s2_dirname($path);
 
     if (file_exists(S2_IMG_PATH . $parent_path . '/' . $folder_name)) {
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
         if ($s2_db) {
             $s2_db->close();
         }
@@ -192,8 +194,8 @@ if ($action == 'load_tree') {
         header('Content-Type: application/json; charset=utf-8');
         echo s2_json_encode(array('status' => 1, 'new_path' => $parent_path . '/' . $folder_name));
     } else {
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
         if ($s2_db) {
             $s2_db->close();
         }
@@ -224,8 +226,8 @@ if ($action == 'load_tree') {
         $extension = substr($filename, $ext_pos + 1);
 
     if (!$s2_user['edit_users'] && $extension != '' && S2_ALLOWED_EXTENSIONS != '' && false === strpos(' ' . S2_ALLOWED_EXTENSIONS . ' ', ' ' . $extension . ' ')) {
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
         if ($s2_db) {
             $s2_db->close();
         }
@@ -238,8 +240,8 @@ if ($action == 'load_tree') {
     $parent_path = s2_dirname($path);
 
     if (file_exists(S2_IMG_PATH . $parent_path . '/' . $filename)) {
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
         if ($s2_db) {
             $s2_db->close();
         }
@@ -253,8 +255,8 @@ if ($action == 'load_tree') {
         header('Content-Type: application/json; charset=utf-8');
         echo s2_json_encode(array('status' => 1, 'new_name' => $filename));
     } else {
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
+        /** @var ?DbLayer $s2_db */
+        $s2_db = \Container::getIfInstantiated(DbLayer::class);
         if ($s2_db) {
             $s2_db->close();
         }
@@ -441,8 +443,8 @@ if ($action == 'load_tree') {
 
 ($hook = s2_hook('prq_custom_action')) ? eval($hook) : null;
 
-/** @var ?\DBLayer_Abstract $s2_db */
-$s2_db = \Container::getIfInstantiated('db');
+/** @var ?DbLayer $s2_db */
+$s2_db = \Container::getIfInstantiated(DbLayer::class);
 if ($s2_db) {
     $s2_db->close();
 }

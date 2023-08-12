@@ -9,6 +9,8 @@
  * @package S2
  */
 
+use S2\Cms\Pdo\DbLayer;
+
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 
@@ -418,8 +420,8 @@ elseif ($action == 'add_user')
 	if (!isset($_GET['name']))
 		die('Error in GET parameters.');
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     $login = $s2_db->escape($_GET['name']);
 
@@ -431,8 +433,8 @@ elseif ($action == 'add_user')
 	);
 
 	($hook = s2_hook('rq_action_add_user_pre_login_verify_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	if ($s2_db->fetch_row($result))
+	$result = $s2_db->buildAndQuery($query);
+	if ($s2_db->fetchRow($result))
 	{
 		// Exists
 		header('X-S2-Status: Error');
@@ -447,7 +449,7 @@ elseif ($action == 'add_user')
 			'VALUES'	=> '\''.$login.'\', \''.md5('Life is not so easy :-)').'\''
 		);
 		($hook = s2_hook('rq_action_add_user_pre_ins_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 
 	echo s2_get_user_list();
@@ -462,8 +464,8 @@ elseif ($action == 'delete_user')
 	if (!isset($_GET['name']))
 		die('Error in GET parameters.');
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$login = $_GET['name'];
 
@@ -473,7 +475,7 @@ elseif ($action == 'delete_user')
 		'WHERE'		=> 'edit_users = 1 AND NOT login = \''.$s2_db->escape($login).'\'',
 	);
 	($hook = s2_hook('rq_action_delete_user_pre_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 	$allow = $s2_db->result($result) > 0;
 
 	if ($allow)
@@ -483,7 +485,7 @@ elseif ($action == 'delete_user')
 			'WHERE'		=> 'login = \''.$s2_db->escape($login).'\''
 		);
 		($hook = s2_hook('rq_action_delete_user_pre_del_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 	else
 		echo '<div class="info-box"><p>'.$lang_admin['No other admin delete'].'</p></div>';
@@ -503,8 +505,8 @@ elseif ($action == 'user_set_password')
 	// We allow usual users to change only their passwords
 	if ($s2_user['login'] == $_GET['name'] || $s2_user['edit_users'])
 	{
-        /** @var DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $query = array(
 			'SELECT'	=> 'password',
@@ -512,7 +514,7 @@ elseif ($action == 'user_set_password')
 			'WHERE'		=> 'login = \''.$s2_db->escape($_GET['name']).'\'',
 		);
 		($hook = s2_hook('rq_action_user_set_password_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		if ($s2_db->result($result) != $_POST['pass'])
 		{
@@ -522,8 +524,8 @@ elseif ($action == 'user_set_password')
 				'WHERE'		=> 'login = \''.$s2_db->escape($_GET['name']).'\'',
 			);
 			($hook = s2_hook('rq_action_user_set_password_pre_upd_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query);
-			if ($s2_db->affected_rows() != 1)
+            $result = $s2_db->buildAndQuery($query);
+            if ($s2_db->affectedRows($result) <= 0)
 				echo 'Error while changing password';
 			else
 				echo $lang_admin['Password changed'];
@@ -554,8 +556,8 @@ elseif ($action == 'user_set_email')
 		die($lang_admin['No permission']);
 	}
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     $query = array(
 		'UPDATE'	=> 'users',
@@ -563,7 +565,7 @@ elseif ($action == 'user_set_email')
 		'WHERE'		=> 'login = \''.$s2_db->escape($_GET['login']).'\'',
 	);
 	($hook = s2_hook('rq_action_user_set_email_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	echo s2_get_user_list();
 }
@@ -584,8 +586,8 @@ elseif ($action == 'user_set_name')
 		die($lang_admin['No permission']);
 	}
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     $query = array(
 		'UPDATE'	=> 'users',
@@ -593,7 +595,7 @@ elseif ($action == 'user_set_name')
 		'WHERE'		=> 'login = \''.$s2_db->escape($_GET['login']).'\'',
 	);
 	($hook = s2_hook('rq_action_user_set_name_pre_upd_qr')) ? eval($hook) : null;
-	$s2_db->query_build($query);
+	$s2_db->buildAndQuery($query);
 
 	echo s2_get_user_list();
 }
@@ -610,8 +612,8 @@ elseif ($action == 'user_set_permission')
 	$login = $_GET['name'];
 	$permission = $_GET['permission'];
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     $allow = true;
 
@@ -623,7 +625,7 @@ elseif ($action == 'user_set_permission')
 			'WHERE'		=> 'edit_users = 1 AND NOT login = \''.$s2_db->escape($login).'\'',
 		);
 		($hook = s2_hook('rq_action_user_set_permission_pre_get_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 		$allow = $s2_db->result($result) > 0;
 	}
 
@@ -635,7 +637,7 @@ elseif ($action == 'user_set_permission')
 			'WHERE'		=> 'login = \''.$s2_db->escape($login).'\'',
 		);
 		($hook = s2_hook('rq_action_user_set_permission_pre_upd_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
+		$s2_db->buildAndQuery($query);
 	}
 	else
 		echo '<div class="info-box"><p>'.$lang_admin['No other admin'].'</p></div>';
@@ -853,8 +855,8 @@ elseif ($action == 'phpinfo')
 
 ($hook = s2_hook('rq_custom_action')) ? eval($hook) : null;
 
-/** @var ?\DBLayer_Abstract $s2_db */
-$s2_db = \Container::getIfInstantiated('db');
+/** @var ?DbLayer $s2_db */
+$s2_db = \Container::getIfInstantiated(DbLayer::class);
 if ($s2_db) {
     $s2_db->close();
 }

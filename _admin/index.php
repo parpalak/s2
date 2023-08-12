@@ -9,6 +9,8 @@
  * @package S2
  */
 
+use S2\Cms\Pdo\DbLayer;
+
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 
@@ -42,8 +44,8 @@ if ($session_id == '')
 	// A simple login page loading
 	echo s2_get_login_form();
 
-    /** @var ?\DBLayer_Abstract $s2_db */
-    $s2_db = \Container::getIfInstantiated('db');
+    /** @var ?DbLayer $s2_db */
+    $s2_db = \Container::getIfInstantiated(DbLayer::class);
     if ($s2_db) {
         $s2_db->close();
     }
@@ -64,8 +66,8 @@ if ($login === false)
 	// We tell him nothing
 	echo s2_get_login_form();
 
-    /** @var ?\DBLayer_Abstract $s2_db */
-    $s2_db = \Container::getIfInstantiated('db');
+    /** @var ?DbLayer $s2_db */
+    $s2_db = \Container::getIfInstantiated(DbLayer::class);
     if ($s2_db) {
         $s2_db->close();
     }
@@ -304,8 +306,8 @@ GETAsyncRequest(sUrl + 'action=check_updates', function (http, data)
 </html>
 <?php
 
-/** @var ?\DBLayer_Abstract $s2_db */
-$s2_db = \Container::getIfInstantiated('db');
+/** @var ?DbLayer $s2_db */
+$s2_db = \Container::getIfInstantiated(DbLayer::class);
 if ($s2_db) {
     $s2_db->close();
 }

@@ -8,6 +8,8 @@
  * @see https://github.com/filisko/pdo-plus for original code
  */
 
+declare(strict_types=1);
+
 namespace S2\Cms\Pdo;
 
 use PDO as NativePdo;
@@ -84,8 +86,13 @@ class PDOStatement extends NativePdoStatement
         $indexed = ($bindings == array_values($bindings));
 
         foreach ($bindings as $param => $value) {
-            $value = (is_numeric($value) or $value === null) ? $value : $this->pdo->quote($value);
-            $value = \is_null($value) ? 'null' : $value;
+            $value = match (true) {
+                $value === null => 'null',
+                \is_int($value), \is_float($value) => (string)$value,
+                is_numeric($value) => $value,
+                default => $this->pdo->quote($value),
+            };
+
             if ($indexed) {
                 $query = preg_replace('/\?/', $value, $query, 1);
             } else {

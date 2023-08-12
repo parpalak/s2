@@ -21,8 +21,8 @@ if (substr($id, 0, 8) == 's2_blog_')
 		'WHERE'		=> 'published = 1 AND id = '.intval(substr($id, 8)),
 	);
 	($hook = s2_hook('s2_blog_pre_get_chapter_qr')) ? eval($hook) : null;
-	$result = $this->db->query_build($query);
-	$s2_blog_post = $this->db->fetch_assoc($result);
+	$result = $this->db->buildAndQuery($query);
+	$s2_blog_post = $this->db->fetchAssoc($result);
 	if (!$s2_blog_post) {
 		return null;
 	}

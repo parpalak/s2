@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  *
- * @var DBLayer_Abstract $s2_db
+ * @var \S2\Cms\Pdo\DbLayer $s2_db
  */
 
  if (!defined('S2_ROOT')) {
@@ -20,5 +20,5 @@ $query = array(
 	'WHERE'		=> 'shown = 0 AND sent = 0'
 );
 ($hook = s2_hook('blfn_for_premoderation_pre_comm_check_qr')) ? eval($hook) : null;
-$result = $s2_db->query_build($query);
+$result = $s2_db->buildAndQuery($query);
 $new_comment_count += $s2_db->result($result);

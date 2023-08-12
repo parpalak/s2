@@ -8,13 +8,15 @@
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+
 if (!defined('S2_ROOT'))
 	die;
 
 function s2_check_url_status ($parent_id, $url)
 {
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
 	$url_status = 'ok';
 
@@ -32,7 +34,7 @@ function s2_check_url_status ($parent_id, $url)
 				'WHERE'		=> 'a.url = \''.$url.'\''.(S2_USE_HIERARCHY ? ' AND a.parent_id = '.$parent_id : '')
 			);
 			($hook = s2_hook('fn_check_url_status_pre_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			if ($s2_db->result($result) != 1)
 				$url_status = 'not_unique';
@@ -46,8 +48,8 @@ function s2_save_article ($page, $flags)
 {
 	global $lang_admin, $s2_user;
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     $id = (int) $page['id'];
 	$favorite = (int) isset($flags['favorite']);
@@ -63,9 +65,9 @@ function s2_save_article ($page, $flags)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_save_article_pre_get_art_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetch_row($result))
+	if ($row = $s2_db->fetchRow($result))
 		list($user_id, $parent_id, $revision, $pagetext, $title, $url) = $row;
 	else
 		die('Item not found!');
@@ -73,11 +75,11 @@ function s2_save_article ($page, $flags)
 	if (!$s2_user['edit_site'])
 		s2_test_user_rights($user_id == $s2_user['id']);
 
-	if ($page['text'] != $pagetext || $page['title'] != $title || $page['url'] != $url)
-	{
+	if ($page['text'] != $pagetext || $page['title'] != $title || $page['url'] != $url) {
 		// If the page text has been modified, we check if this modification is done by current user
-		if ($revision != $page['revision'])
-			return array($parent_id, $revision, 'conflict'); // No, it's somebody else
+		if ($revision !== (int)$page['revision']) {
+            return array($parent_id, $revision, 'conflict'); // No, it's somebody else
+        }
 
 		$revision++;
 	}
@@ -96,7 +98,7 @@ function s2_save_article ($page, $flags)
 
 	$query = array(
 		'UPDATE'	=> 'articles',
-		'SET'		=> "title = '".$s2_db->escape($page['title'])."', meta_keys = '".$s2_db->escape($page['meta_keys'])."', meta_desc = '".$s2_db->escape($page['meta_desc'])."', excerpt = '".$s2_db->escape($excerpt)."', pagetext = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, template = '".$s2_db->escape($page['template'])."', revision = '".$s2_db->escape($revision)."'",
+		'SET'		=> "title = '".$s2_db->escape($page['title'])."', meta_keys = '".$s2_db->escape($page['meta_keys'])."', meta_desc = '".$s2_db->escape($page['meta_desc'])."', excerpt = '".$s2_db->escape($excerpt)."', pagetext = '".$s2_db->escape($page['text'])."', url = '".$s2_db->escape($page['url'])."', published = $published, favorite = $favorite, commented = $commented, create_time = $create_time, modify_time = $modify_time, template = '".$s2_db->escape($page['template'])."', revision = " . $revision,
 		'WHERE'		=> 'id = '.$id
 	);
 
@@ -104,8 +106,8 @@ function s2_save_article ($page, $flags)
 		$query['SET'] .= ', user_id = '.intval($page['user_id']);
 
 	($hook = s2_hook('fn_save_article_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	if ($s2_db->affected_rows() == -1)
+	$result = $s2_db->buildAndQuery($query);
+	if ($s2_db->affectedRows($result) === 0)
 		$error = true;
 
 	// Dealing with tags
@@ -119,10 +121,10 @@ function s2_save_article ($page, $flags)
 		'ORDER BY'	=> 'id'
 	);
 	($hook = s2_hook('fn_save_article_pre_get_tags_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$old_tags = array();
-	while ($row = $s2_db->fetch_row($result))
+	while ($row = $s2_db->fetchRow($result))
 		$old_tags[] = $row[0];
 
 	// Compare old and new tags
@@ -134,9 +136,7 @@ function s2_save_article ($page, $flags)
 			'WHERE'		=> 'article_id = '.$id
 		);
 		($hook = s2_hook('fn_save_article_pre_del_tags_qr')) ? eval($hook) : null;
-		$s2_db->query_build($query);
-		if ($s2_db->affected_rows() == -1)
-			$error = true;
+        $s2_db->buildAndQuery($query);
 
 		// Inserting new links
 		foreach ($new_tags as $tag_id)
@@ -147,8 +147,8 @@ function s2_save_article ($page, $flags)
 				'VALUES'	=> $id.', '.$tag_id
 			);
 			($hook = s2_hook('fn_save_article_pre_ins_tags_qr')) ? eval($hook) : null;
-			$s2_db->query_build($query);
-			if ($s2_db->affected_rows() == -1)
+            $result = $s2_db->buildAndQuery($query);
+            if ($s2_db->affectedRows($result) === 0)
 				$error = true;
 		}
 	}
@@ -163,8 +163,8 @@ function s2_output_article_form ($id)
 {
 	global $lang_templates, $lang_admin, $s2_user;
 
-    /** @var DBLayer_Abstract $s2_db */
-    $s2_db = \Container::get('db');
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
 
     ($hook = s2_hook('fn_output_article_form_start')) ? eval($hook) : null;
 
@@ -173,7 +173,7 @@ function s2_output_article_form ($id)
 		'FROM'		=> 'art_comments AS c',
 		'WHERE'		=> 'a.id = c.article_id'
 	);
-	$raw_query = $s2_db->query_build($subquery, true);
+	$raw_query = $s2_db->build($subquery);
 
 	$query = array(
 		'SELECT'	=> 'title, meta_keys, meta_desc, excerpt, pagetext as text, create_time, modify_time, published, favorite, commented, url, template, parent_id, user_id, revision, ('.$raw_query.') as comment_count',
@@ -181,8 +181,8 @@ function s2_output_article_form ($id)
 		'WHERE'		=> 'id = '.$id
 	);
 	($hook = s2_hook('fn_output_article_form_pre_page_get_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
-	$page = $s2_db->fetch_assoc($result);
+	$result = $s2_db->buildAndQuery($query);
+	$page = $s2_db->fetchAssoc($result);
 
 	$page['id'] = $id;
 
@@ -198,14 +198,14 @@ function s2_output_article_form ($id)
 		'FROM'		=> 'article_tag AS at',
 		'WHERE'		=> 't.tag_id = at.tag_id'
 	);
-	$used_raw_query = $s2_db->query_build($subquery, true);
+	$used_raw_query = $s2_db->build($subquery);
 
 	$subquery = array(
 		'SELECT'	=> 'id',
 		'FROM'		=> 'article_tag AS at',
 		'WHERE'		=> 't.tag_id = at.tag_id AND at.article_id = '.$id
 	);
-	$current_raw_query = $s2_db->query_build($subquery, true);
+	$current_raw_query = $s2_db->build($subquery);
 
 	$query = array(
 		'SELECT'	=> 't.name, ('.$used_raw_query.') as used, ('.$current_raw_query.') as link_id',
@@ -213,10 +213,10 @@ function s2_output_article_form ($id)
 		'ORDER BY'	=> 'used DESC'
 	);
 	($hook = s2_hook('fn_output_article_form_pre_chk_url_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$all_tags = $tags = array();
-	while ($tag = $s2_db->fetch_assoc($result))
+	while ($tag = $s2_db->fetchAssoc($result))
 	{
 		$all_tags[] = $tag['name'];
 		if (!empty($tag['link_id']))
@@ -238,12 +238,12 @@ function s2_output_article_form ($id)
 		'FROM'		=> 'articles AS a'
 	);
 	($hook = s2_hook('fn_output_article_form_pre_get_tpl_qr')) ? eval($hook) : null;
-	$result = $s2_db->query_build($query);
+	$result = $s2_db->buildAndQuery($query);
 
 	$templates = $lang_templates;
 	$add_option = $templates['+'];
 	unset($templates['+']);
-	while ($row = $s2_db->fetch_row($result))
+	while ($row = $s2_db->fetchRow($result))
 		if (!isset($templates[$row[0]]))
 			$templates[$row[0]] = $row[0];
 
@@ -261,10 +261,10 @@ function s2_output_article_form ($id)
 			'WHERE'		=> 'create_articles = 1'
 		);
 		($hook = s2_hook('fn_output_article_form_pre_get_usr_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$users = array(0 => '');
-		while ($user = $s2_db->fetch_assoc($result))
+		while ($user = $s2_db->fetchAssoc($result))
 			 $users[$user['id']] = $user['login'];
 	}
 

@@ -191,13 +191,10 @@ abstract class Page_HTML extends Page_Abstract
         // Queries
         /** @var ?\S2\Cms\Pdo\PDO $pdo */
         $pdo = \Container::getIfInstantiated(\PDO::class);
-        /** @var ?\DBLayer_Abstract $s2_db */
-        $s2_db = \Container::getIfInstantiated('db');
         if (defined('S2_SHOW_QUERIES')) {
             $pdoLogs                      = $pdo ? $pdo->cleanLogs() : [];
             $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', [
-                'saved_queries'  => $s2_db !== null ? $s2_db->get_saved_queries() : [],
-                'saved_queries2' => $pdoLogs,
+                'saved_queries' => $pdoLogs,
             ]) : '';
         }
 
@@ -230,7 +227,7 @@ abstract class Page_HTML extends Page_Abstract
 		// Execution time
 		if (defined('S2_DEBUG') || defined('S2_SHOW_TIME'))
 		{
-			$time_placeholder = 't = '.Lang::number_format(microtime(true) - $s2_start, true, 3).'; q = '.(($s2_db !== null ? $s2_db->get_num_queries() : 0) + ($pdo ? (isset($pdoLogs) ? count($pdoLogs) : $pdo->getQueryCount()) : 0));
+			$time_placeholder = 't = '.Lang::number_format(microtime(true) - $s2_start, true, 3).'; q = '.($pdo ? (isset($pdoLogs) ? count($pdoLogs) : $pdo->getQueryCount()) : 0);
 			$template = str_replace('<!-- s2_querytime -->', $time_placeholder, $template);
 			$etag .= md5($time_placeholder);
 		}

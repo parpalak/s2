@@ -11,6 +11,7 @@
 namespace s2_extensions\s2_search;
 
 use Lang;
+use S2\Cms\Pdo\DbLayer;
 use S2\Rose\Entity\ExternalId;
 use S2\Rose\Entity\Query;
 use S2\Rose\Finder;
@@ -127,8 +128,8 @@ class Page extends \Page_HTML implements \Page_Routable
     // TODO rename hooks
     private function findInTags(Query $query)
     {
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
         $return = '';
 
@@ -155,7 +156,7 @@ class Page extends \Page_HTML implements \Page_Routable
             'LIMIT'  => '1'
         );
         ($hook = s2_hook('s2_search_pre_find_tags_sub_qr')) ? eval($hook) : null;
-        $s2_search_sub_sql = $s2_db->query_build($sql, true);
+        $s2_search_sub_sql = $s2_db->build($sql);
 
         $where = array_map(static fn($word) => 'name LIKE \'' . $s2_db->escape($word) . '%\' OR name LIKE \'% ' . $s2_db->escape($word) . '%\'', $words);
         $sql   = array(
@@ -164,10 +165,10 @@ class Page extends \Page_HTML implements \Page_Routable
             'WHERE'  => implode(' OR ', $where),
         );
         ($hook = s2_hook('s2_search_pre_find_tags_qr')) ? eval($hook) : null;
-        $s2_search_result = $s2_db->query_build($sql);
+        $s2_search_result = $s2_db->buildAndQuery($sql);
 
         $tags = array();
-        while ($s2_search_row = $s2_db->fetch_assoc($s2_search_result)) {
+        while ($s2_search_row = $s2_db->fetchAssoc($s2_search_result)) {
             ($hook = s2_hook('s2_search_find_tags_get_res')) ? eval($hook) : null;
 
             if ($s2_search_row['used'] && $this->tagIsSimilarToWords($s2_search_row['name'], $words)) {

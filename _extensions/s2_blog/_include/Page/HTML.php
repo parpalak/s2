@@ -9,6 +9,7 @@
 
 namespace s2_extensions\s2_blog;
 use \Lang;
+use S2\Cms\Pdo\DbLayer;
 
 
 abstract class Page_HTML extends \Page_HTML
@@ -45,8 +46,8 @@ abstract class Page_HTML extends \Page_HTML
 
 	public function get_posts ($query_add, $sort_asc = true, $sort_field = 'create_time')
 	{
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		// Obtaining posts
 
@@ -55,14 +56,14 @@ abstract class Page_HTML extends \Page_HTML
 			'FROM'   => 's2_blog_comments AS c',
 			'WHERE'  => 'c.post_id = p.id AND shown = 1',
 		);
-		$raw_query_comment = $s2_db->query_build($sub_query, true);
+		$raw_query_comment = $s2_db->build($sub_query);
 
 		$sub_query = array(
 			'SELECT' => 'u.name',
 			'FROM'   => 'users AS u',
 			'WHERE'  => 'u.id = p.user_id',
 		);
-		$raw_query_user = $s2_db->query_build($sub_query, true);
+		$raw_query_user = $s2_db->build($sub_query);
 
 		$query = array(
 			'SELECT' => 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, (' . $raw_query_comment . ') AS comment_num, (' . $raw_query_user . ') AS author, p.label',
@@ -76,10 +77,10 @@ abstract class Page_HTML extends \Page_HTML
 			$query['SELECT'] .= ', '.$query_add['SELECT'];
 
 		($hook = s2_hook('fn_s2_blog_get_posts_pre_get_posts_qr')) ? eval($hook) : null;
-		$result = $s2_db->query_build($query);
+		$result = $s2_db->buildAndQuery($query);
 
 		$posts = $merge_labels = $labels = $ids = $sort_array = array();
-		while ($row = $s2_db->fetch_assoc($result))
+		while ($row = $s2_db->fetchAssoc($result))
 		{
 			$posts[$row['id']] = $row;
 			$ids[] = $row['id'];
@@ -125,8 +126,8 @@ abstract class Page_HTML extends \Page_HTML
 	public function blog_navigation ()
 	{
 		global $request_uri;
-        /** @var \DBLayer_Abstract $s2_db */
-        $s2_db = \Container::get('db');
+        /** @var DbLayer $s2_db */
+        $s2_db = \Container::get(DbLayer::class);
 
 		$cur_url = str_replace('%2F', '/', urlencode($request_uri));
 
@@ -153,9 +154,9 @@ abstract class Page_HTML extends \Page_HTML
 				'LIMIT'		=> '1'
 			);
 			($hook = s2_hook('fn_s2_blog_navigation_pre_is_favorite_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
-			if ($s2_db->fetch_row($result))
+			if ($s2_db->fetchRow($result))
 				$s2_blog_navigation['favorite'] = array(
 					'title'      => Lang::get('Nav favorite', 's2_blog'),
 					'link'       => S2_BLOG_PATH . urlencode(S2_FAVORITE_URL) . '/',
@@ -185,10 +186,10 @@ abstract class Page_HTML extends \Page_HTML
 				'ORDER BY'	=> '3 DESC',
 			);
 			($hook = s2_hook('fn_s2_blog_navigation_pre_get_tags_qr')) ? eval($hook) : null;
-			$result = $s2_db->query_build($query);
+			$result = $s2_db->buildAndQuery($query);
 
 			$tags = array();
-			while ($tag = $s2_db->fetch_assoc($result))
+			while ($tag = $s2_db->fetchAssoc($result))
 				$tags[] = array(
 					'title'      => $tag['name'],
 					'link'       => S2_BLOG_TAGS_PATH . urlencode($tag['url']) . '/',
@@ -211,16 +212,20 @@ abstract class Page_HTML extends \Page_HTML
             }
 		}
 
-		foreach ($s2_blog_navigation as &$item)
-			if (is_array($item))
-			{
-				if (isset($item['link']))
-					$item['is_current'] = $item['link'] == $cur_url;
-				else
-					foreach ($item as &$sub_item)
-						if (is_array($sub_item) && isset($sub_item['link']))
-							$sub_item['is_current'] = $sub_item['link'] == $cur_url;
-			}
+		foreach ($s2_blog_navigation as &$item) {
+            if (\is_array($item)) {
+                if (isset($item['link'])) {
+                    $item['is_current'] = $item['link'] == S2_URL_PREFIX . $cur_url;
+                }
+                else {
+                    foreach ($item as &$sub_item) {
+                        if (\is_array($sub_item) && isset($sub_item['link'])) {
+                            $sub_item['is_current'] = $sub_item['link'] == S2_URL_PREFIX . $cur_url;
+                        }
+                    }
+                }
+            }
+        }
 
 		return $this->renderPartial('navigation', $s2_blog_navigation);
 	}
