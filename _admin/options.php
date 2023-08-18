@@ -191,9 +191,11 @@ function s2_get_options ()
 	return '<form name="optform" method="post" action="" onsubmit="return SaveOptions();">'.$output.'<center><input name="button" class="bitbtn saveopt" type="submit" value="'.$lang_admin_opt['Save options'].'" '.(!$s2_user['edit_users'] ? 'disabled="disabled" ' : '').'/></center></form>';
 }
 
-//
-// Writes options to the DB
-//
+/**
+ * Writes options to the DB
+ *
+ * @throws \S2\Cms\Pdo\DbLayerException
+ */
 function s2_save_options ($opt)
 {
 	global $s2_const_types, $lang_admin_opt;
@@ -203,30 +205,22 @@ function s2_save_options ($opt)
 	$return = array();
 	($hook = s2_hook('fn_save_options_start')) ? eval($hook) : null;
 
-	foreach ($s2_const_types as $name => $type)
-	{
-		switch ($type)
-		{
-			case 'boolean':
-			$value = isset($opt[$name]) ? 1 : 0;
-			break;
-			case 'int':
-			$value = isset($opt[$name]) ? (int) $opt[$name] : 0;
-			break;
-			case 'string':
-			$value = $opt[$name];
-		}
+	foreach ($s2_const_types as $name => $type) {
+        $value = match ($type) {
+            'boolean' => isset($opt[$name]) ? '1' : '0',
+            'int' => isset($opt[$name]) ? (string)(int)$opt[$name] : '0',
+            'string' => $opt[$name],
+            default => throw new LogicException('Unknown option type'),
+        };
 
-		if ($name == 'S2_WEBMASTER_EMAIL' && $value != '' && !s2_is_valid_email($value))
-		{
+		if ($name === 'S2_WEBMASTER_EMAIL' && $value !== '' && !s2_is_valid_email($value)) {
 			$return[] = $lang_admin_opt['Invalid webmaster email'];
 			continue;
 		}
 
 		($hook = s2_hook('fn_save_options_loop')) ? eval($hook) : null;
 
-		if (constant($name) != $value)
-		{
+		if (constant($name) !== $value) {
 			$query = array(
 				'UPDATE'	=> 'config',
 				'SET'		=> 'value = \''.$s2_db->escape($value).'\'',
@@ -238,9 +232,10 @@ function s2_save_options ($opt)
 	}
 
 	$style = preg_replace('#[\.\\\/]#', '', $opt['style']);
-	if (!file_exists(S2_ROOT.'_styles/'.$style.'/'.$style.'.php'))
-		$return[] = $lang_admin_opt['Invalid style'];
-	else if ($style != S2_STYLE)
+	if (!file_exists(S2_ROOT.'_styles/'.$style.'/'.$style.'.php')) {
+        $return[] = $lang_admin_opt['Invalid style'];
+    }
+	else if ($style !== S2_STYLE)
 	{
 		$query = array(
 			'UPDATE'	=> 'config',
@@ -252,9 +247,10 @@ function s2_save_options ($opt)
 	}
 
 	$lang = preg_replace('#[\.\\\/]#', '', $opt['lang']);
-	if (!file_exists(S2_ROOT.'_lang/'.$lang.'/common.php'))
-		$return[] = sprintf($lang_admin_opt['Invalid lang pack'], s2_htmlencode($lang));
-	else if ($lang != S2_LANGUAGE)
+	if (!file_exists(S2_ROOT.'_lang/'.$lang.'/common.php')) {
+        $return[] = sprintf($lang_admin_opt['Invalid lang pack'], s2_htmlencode($lang));
+    }
+	else if ($lang !== S2_LANGUAGE)
 	{
 		$query = array(
 			'UPDATE'	=> 'config',

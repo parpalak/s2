@@ -44,7 +44,6 @@ class InstallCest
         $I->canWriteComment();
 
         $this->testAdminLogin($I);
-        $this->testAdminCommentList($I);
         $this->testAdminEditAndTagsAdded($I);
         $this->testBlogExtension($I);
         if ($example['db_type'] === 'mysql') {
@@ -52,6 +51,7 @@ class InstallCest
             $this->testSearchExtension($I);
         }
         $this->testAdminTagListAndEdit($I);
+        $this->testAdminCommentManagement($I);
     }
 
     private function testAdminLogin(AcceptanceTester $I): void
@@ -64,10 +64,6 @@ class InstallCest
 
         $I->amOnPage('/---');
         $I->see('👤 admin');
-    }
-
-    private function testAdminCommentList(AcceptanceTester $I): void
-    {
     }
 
     /**
@@ -317,5 +313,40 @@ class InstallCest
         $I->amOnPage('/tags/new_tag_url1');
         $I->seeResponseCodeIsSuccessful();
         $I->see('New tag description text');
+    }
+
+    private function testAdminCommentManagement(AcceptanceTester $I): void
+    {
+        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=load_last_comments');
+        $I->see('This is my first comment!');
+
+        $data = [
+            'opt' => [
+                'S2_SITE_NAME'        => 'Site Title',
+                'S2_WEBMASTER'        => 'Author Name',
+                'S2_WEBMASTER_EMAIL'  => 'author@example.com',
+                'S2_START_YEAR'       => '2023',
+                'S2_COMPRESS'         => '1',
+                'S2_FAVORITE_URL'     => 'favorite',
+                'S2_TAGS_URL'         => 'keywords',
+                'S2_USE_HIERARCHY'    => '1',
+                'S2_MAX_ITEMS'        => '0',
+                'style'               => 'zeta',
+                'lang'                => 'English',
+                'S2_BLOG_TITLE'       => 'Blog Title',
+                'S2_BLOG_URL'         => '/blog',
+                'S2_SHOW_COMMENTS'    => '1',
+                'S2_ENABLED_COMMENTS' => '1',
+                'S2_ADMIN_COLOR'      => '#e7e4f4',
+                'S2_LOGIN_TIMEOUT'    => '120000',
+                'S2_ADMIN_UPDATES'    => '0',
+            ]
+        ];
+
+        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_options', $data);
+        $I->seeResponseCodeIsSuccessful();
+
+        // TODO check premoderation
+        // TODO check deleting comments
     }
 }
