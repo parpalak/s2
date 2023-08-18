@@ -1,5 +1,6 @@
 chmod a+w _tests/_output/
 rm -f _cache/*.log
+rm -f s2_test
 mysql -uroot --execute="DROP DATABASE IF EXISTS s2_test; CREATE DATABASE s2_test;"
 if [ -f config.php ]; then
   mv config.php config.php.old

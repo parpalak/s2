@@ -36,39 +36,39 @@ class DBLayer_PDOSQLite extends DBLayer_Abstract
 		// Prepend $db_name with the path to the site root directory
 		$db_name = S2_ROOT.$db_name;
 
-		parent::__construct($db_prefix);
+        parent::__construct($db_prefix);
 
-		if (!file_exists($db_name))
-		{
-			@touch($db_name);
-			@chmod($db_name, 0666);
-			if (!file_exists($db_name))
-				throw new DBLayer_Exception('Unable to create new database file \''.$db_name.'\'. Permission denied. Please allow write permissions for the \''.dirname($db_name).'\' directory.');
-		}
+        if (!file_exists($db_name))
+        {
+            @touch($db_name);
+            @chmod($db_name, 0666);
+            if (!file_exists($db_name))
+                throw new DBLayer_Exception('Unable to create new database file \''.$db_name.'\'. Permission denied. Please allow write permissions for the \''.dirname($db_name).'\' directory.');
+        }
 
-		if (!is_readable($db_name))
-			throw new DBLayer_Exception('Unable to open database \''.$db_name.'\' for reading. Permission denied');
+        if (!is_readable($db_name))
+            throw new DBLayer_Exception('Unable to open database \''.$db_name.'\' for reading. Permission denied');
 
-		if (!is_writable($db_name))
-			throw new DBLayer_Exception('Unable to open database \''.$db_name.'\' for writing. Permission denied');
+        if (!is_writable($db_name))
+            throw new DBLayer_Exception('Unable to open database \''.$db_name.'\' for writing. Permission denied');
 
-		if (!is_writable(dirname($db_name)))
-			throw new DBLayer_Exception('Unable to write files in the \''.dirname($db_name).'\' directory. Permission denied');
+        if (!is_writable(dirname($db_name)))
+            throw new DBLayer_Exception('Unable to write files in the \''.dirname($db_name).'\' directory. Permission denied');
 
-		try
-		{
-			if ($p_connect)
-				$this->link_id = new PDO('sqlite:'.$db_name, "", "", array(PDO::ATTR_PERSISTENT => true));
-			else
-				$this->link_id = new PDO('sqlite:'.$db_name);
+        try
+        {
+            if ($p_connect)
+                $this->link_id = new PDO('sqlite:'.$db_name, "", "", array(PDO::ATTR_PERSISTENT => true));
+            else
+                $this->link_id = new PDO('sqlite:'.$db_name);
 
-			$this->link_id->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->link_id->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-		}
-		catch (PDOException $e)
-		{
-			throw new DBLayer_Exception('Unable to open database \''.$db_name.'\'. PDO_SQLite reported: '.$e->getMessage());
-		}
+        }
+        catch (PDOException $e)
+        {
+            throw new DBLayer_Exception('Unable to open database \''.$db_name.'\'. PDO_SQLite reported: '.$e->getMessage());
+        }
 	}
 
 

@@ -155,13 +155,14 @@ if (!isset($_POST['form_sent']))
 {
 	// Determine available database extensions
     $db_extensions = [];
-    if (function_exists('mysqli_connect')) {
-        $db_extensions[] = ['mysqli', 'MySQL Improved'];
+    if (class_exists('PDO') && in_array('mysql', PDO::getAvailableDrivers(), true)) {
+        $db_extensions[] = ['mysql', 'MySQL Improved'];
     }
-    if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers())) {
-        $db_extensions[] = ['pdo_sqlite', 'PDO SQLite'];
+    if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+        $db_extensions[] = ['sqlite', 'PDO SQLite'];
     }
-    if (function_exists('pg_connect')) {
+    if (false && function_exists('pg_connect')) {
+        // TODO Implement PDO Postgres database layer
         $db_extensions[] = ['pgsql', 'PostgreSQL'];
     }
 
@@ -430,8 +431,9 @@ else
     $s2_db = \Container::get(DbLayer::class);
 
 	// Check SQLite prefix collision
-	if ($db_type == 'pdo_sqlite' && strtolower($db_prefix) == 'sqlite_')
-		error($lang_install['SQLite prefix collision']);
+	if ($db_type == 'sqlite' && strtolower($db_prefix) == 'sqlite_') {
+        error($lang_install['SQLite prefix collision']);
+    }
 
 
 	// Make sure S2 isn't already installed

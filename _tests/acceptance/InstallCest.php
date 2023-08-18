@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Codeception\Example;
+
 class InstallCest
 {
     /**
@@ -9,18 +11,31 @@ class InstallCest
      */
     public function _before(AcceptanceTester $I)
     {
+        $file = __DIR__ . '/../../config.php';
+        if (file_exists($file)) {
+            unlink($file);
+        }
+    }
+
+    protected function configProvider(): array
+    {
+        return [
+            ['db_type' => 'mysql'],
+            ['db_type' => 'sqlite'],
+        ];
     }
 
     /**
      * @throws JsonException
+     * @dataProvider configProvider
      */
-    public function tryToTest(AcceptanceTester $I): void
+    public function tryToTest(AcceptanceTester $I, Example $example): void
     {
         if (file_exists('config.php')) {
             throw new Exception('config.php must not exist for test run');
         }
 
-        $I->install('admin', 'passwd');
+        $I->install('admin', 'passwd', $example['db_type']);
 
         $I->amOnPage('/');
         $I->see('Site powered by S2');
@@ -32,7 +47,10 @@ class InstallCest
         $this->testAdminCommentList($I);
         $this->testAdminEditAndTagsAdded($I);
         $this->testBlogExtension($I);
-        $this->testSearchExtension($I);
+        if ($example['db_type'] === 'mysql') {
+            // TODO implement PdoStorage for other databases
+            $this->testSearchExtension($I);
+        }
         $this->testAdminTagListAndEdit($I);
     }
 
@@ -269,8 +287,8 @@ class InstallCest
         $I->amOnPage('/_admin/site_ajax.php?action=load_tag&id=' . $tagId);
         $dataProvider = static function (string $id) {
             return [
-                'tag'  => [
-                    'name'       => 'New Tag Name',
+                'tag'   => [
+                    'name'        => 'New Tag Name',
                     'modify_time' => [
                         'hour' => '12',
                         'min'  => '15',
@@ -278,9 +296,9 @@ class InstallCest
                         'mon'  => '08',
                         'year' => '2023',
                     ],
-                    'description'        => 'New tag description text',
+                    'description' => 'New tag description text',
                     'url'         => 'new_tag_url1',
-                    'id'         => $id,
+                    'id'          => $id,
                 ],
                 'flags' => [
                     'commented' => '1',

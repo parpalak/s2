@@ -414,7 +414,7 @@ class DbLayer
     /**
      * @throws DbLayerException
      */
-    function dropIndex(string $table_name, string $index_name, bool $no_prefix = false): void
+    public function dropIndex(string $table_name, string $index_name, bool $no_prefix = false): void
     {
         if (!$this->indexExists($table_name, $index_name, $no_prefix)) {
             return;

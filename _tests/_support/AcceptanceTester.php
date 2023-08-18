@@ -26,7 +26,7 @@ class AcceptanceTester extends Actor
      * Define custom actions here
      */
 
-    public function install(string $username = 'admin', string $userpass = ''): void
+    public function install(string $username = 'admin', string $userpass = '', string $dbType): void
     {
         $I = $this;
         $I->amOnPage('/');
@@ -35,6 +35,7 @@ class AcceptanceTester extends Actor
         $I->seeResponseCodeIs(200);
         $I->see('S2 2.0dev', 'h1');
 
+        $I->selectOption('req_db_type', $dbType);
         $I->fillField('req_db_name', 's2_test');
         $I->fillField('db_username', 'root');
         $I->fillField('req_username', $username);
