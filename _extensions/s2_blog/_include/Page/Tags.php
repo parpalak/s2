@@ -19,6 +19,9 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 		if (empty($params['slash']))
 			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/');
 
+        // Disable this block at tags page since it does not make any sense.
+        $this->page['s2_blog_navigation'] = '';
+
 		parent::__construct($params);
 	}
 

@@ -44,7 +44,11 @@ if (substr($request_uri, -3) == '---') {
 if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
     require S2_ROOT . '_include/comments.php';
 
-$router = new AltoRouter([
+$router = new AltoRouter();
+
+($hook = s2_hook('idx_new_routes')) ? eval($hook) : null;
+
+$router->addRoutes([
     ['GET', '[/rss.xml:url]', 'Page_RSS'],
     ['GET', '[/sitemap.xml]', 'Page_Sitemap'],
 
@@ -65,8 +69,6 @@ $router = new AltoRouter([
     ['GET', '/' . S2_TAGS_URL . '/', 'Page_Tags'],
     ['GET', '/' . S2_TAGS_URL . '/[:name][/:slash]?', 'Page_Tag'],
 ]);
-
-($hook = s2_hook('idx_new_routes')) ? eval($hook) : null;
 
 // match current request
 $match = $router->match($request_uri);
