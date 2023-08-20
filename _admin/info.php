@@ -97,16 +97,14 @@ function s2_stat_info ()
 		$server_load = $lang_admin['N/A'];
 
 	// Collect some additional info about MySQL
-	if ($db_type == 'mysql' || $db_type == 'mysqli' || $db_type == 'mysql_innodb' || $db_type == 'mysqli_innodb')
-	{
+	if ($db_type === 'mysql') {
 		$db_version = 'MySQL '.$db_version;
 
 		// Calculate total db size/row count
 		$result = $s2_db->query('SHOW TABLE STATUS FROM `'.$db_name.'` WHERE NAME LIKE \''.$db_prefix.'%\' AND NAME NOT LIKE \''.$db_prefix.'s2_search_idx_%\'');
 
 		$total_records = $total_size = 0;
-		while ($status = $s2_db->fetchAssoc($result))
-		{
+		while ($status = $s2_db->fetchAssoc($result)) {
 			$total_records += $status['Rows'];
 			$total_size += $status['Data_length'] + $status['Index_length'];
 		}

@@ -48,6 +48,7 @@ if (file_exists(S2_CACHE_DIR.'cache_config.php'))
 if (!defined('S2_CONFIG_LOADED'))
 	S2Cache::generate_config(true);
 
-define('S2_DB_LAST_REVISION', 15);
-if (S2_DB_REVISION < S2_DB_LAST_REVISION)
-	include S2_ROOT.'_admin/db_update.php';
+define('S2_DB_LAST_REVISION', 16);
+if (S2_DB_REVISION < S2_DB_LAST_REVISION) {
+    include S2_ROOT . '_admin/db_update.php';
+}

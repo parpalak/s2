@@ -7,7 +7,6 @@
  * @package S2
  */
 
-
 use johnykvsky\Utils\JKLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -49,7 +48,7 @@ class Container
         switch ($className) {
             case DbLayer::class:
                 return match ($db_type) {
-                    'mysql', 'mysqli' => new DbLayer(self::get(\PDO::class), $db_prefix),
+                    'mysql' => new DbLayer(self::get(\PDO::class), $db_prefix),
                     'sqlite' => new DbLayerSqlite(self::get(\PDO::class), $db_prefix),
                     default => throw new RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
                 };
@@ -59,48 +58,19 @@ class Container
                     throw new RuntimeException('This PHP environment does not have PDO support built in. PDO support is required. Consult the PHP documentation for further assistance.');
                 }
 
-                switch ($db_type) {
-                    case 'mysql':
-                    case 'mysqli':
-                        return new \S2\Cms\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_username, $db_password);
-                    case 'sqlite':
-                        if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
-                            throw new RuntimeException('This PHP environment does not have PDO_SQLite support built in. PDO_SQLite support is required if you want to use a PDO_SQLite database to run this site. Consult the PHP documentation for further assistance.');
-                        }
-
-                        if (!defined('S2_ROOT')) {
-                            throw new LogicException('S2_ROOT constant must be defined.');
-                        }
-
-                        $db_filename = S2_ROOT . $db_name;
-
-                        if (!file_exists($db_filename)) {
-                            @touch($db_filename);
-                            @chmod($db_filename, 0666);
-                            if (!file_exists($db_filename)) {
-                                throw new RuntimeException('Unable to create new database file \'' . $db_filename . '\'. Permission denied. Please allow write permissions for the \'' . dirname($db_filename) . '\' directory.');
-                            }
-                        }
-
-                        if (!is_readable($db_filename)) {
-                            throw new RuntimeException('Unable to open database \'' . $db_filename . '\' for reading. Permission denied');
-                        }
-
-                        if (!is_writable($db_filename)) {
-                            throw new RuntimeException('Unable to open database \'' . $db_filename . '\' for writing. Permission denied');
-                        }
-
-                        if (!is_writable(dirname($db_filename))) {
-                            throw new RuntimeException('Unable to write files in the \'' . dirname($db_filename) . '\' directory. Permission denied');
-                        }
-
-                        if ($p_connect) {
-                            return new \S2\Cms\Pdo\PDO('sqlite:' . $db_filename, "", "", array(PDO::ATTR_PERSISTENT => true));
-                        }
-                        return new \S2\Cms\Pdo\PDO('sqlite:' . $db_filename);
-                    default:
-                        throw new RuntimeException(sprintf('Unsupported db_type="%s"', $db_type));
+                if (!is_string($db_type)) {
+                    throw new RuntimeException('$db_type must be a string.');
                 }
+
+                if (!in_array($db_type, PDO::getAvailableDrivers(), true)) {
+                    throw new RuntimeException('This PHP environment does not have PDO "%s" support built in. It is required if you want to use this type of database. Consult the PHP documentation for further assistance.');
+                }
+
+                return match ($db_type) {
+                    'mysql' => new \S2\Cms\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_username, $db_password),
+                    'sqlite' => self::createPdoForSqlite($db_name, $p_connect),
+                    default => throw new RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
+                };
 
             case PdoStorage::class:
                 return new PdoStorage(self::get(\PDO::class), $db_prefix . 's2_search_idx_');
@@ -172,5 +142,39 @@ class Container
         }
 
         throw new InvalidArgumentException(sprintf('Unknown service "%s" requested.', $className));
+    }
+
+    private static function createPdoForSqlite(string $dbName, bool $persistentConnection): \S2\Cms\Pdo\PDO
+    {
+        if (!defined('S2_ROOT')) {
+            throw new LogicException('S2_ROOT constant must be defined.');
+        }
+
+        $dbFilename = S2_ROOT . $dbName;
+
+        if (!file_exists($dbFilename)) {
+            @touch($dbFilename);
+            @chmod($dbFilename, 0666);
+            if (!file_exists($dbFilename)) {
+                throw new RuntimeException('Unable to create new database file \'' . $dbFilename . '\'. Permission denied. Please allow write permissions for the \'' . dirname($dbFilename) . '\' directory.');
+            }
+        }
+
+        if (!is_readable($dbFilename)) {
+            throw new RuntimeException('Unable to open database \'' . $dbFilename . '\' for reading. Permission denied');
+        }
+
+        if (!is_writable($dbFilename)) {
+            throw new RuntimeException('Unable to open database \'' . $dbFilename . '\' for writing. Permission denied');
+        }
+
+        if (!is_writable(dirname($dbFilename))) {
+            throw new RuntimeException('Unable to write files in the \'' . dirname($dbFilename) . '\' directory. Permission denied');
+        }
+
+        if ($persistentConnection) {
+            return new \S2\Cms\Pdo\PDO('sqlite:' . $dbFilename, "", "", [PDO::ATTR_PERSISTENT => true]);
+        }
+        return new \S2\Cms\Pdo\PDO('sqlite:' . $dbFilename);
     }
 }

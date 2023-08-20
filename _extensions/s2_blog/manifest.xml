@@ -248,8 +248,7 @@ if ($s2_db->fieldExists('users', 'edit_s2_blog'))
 	$s2_db->dropField('users', 'edit_s2_blog');
 
 // A field in tags table for important tags displaying
-if (!$s2_db->fieldExists('tags', 's2_blog_important'))
-	$s2_db->addField('tags', 's2_blog_important', 'INT(1)', false, '0');
+$s2_db->addField('tags', 's2_blog_important', 'INT(1)', false, '0');
 
 $s2_db->addIndex('tags', 's2_blog_important_idx', array('s2_blog_important'));
 

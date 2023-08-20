@@ -48,16 +48,18 @@ class AcceptanceTester extends Actor
     public function canWriteComment(): void
     {
         $I = $this;
-        $I->fillField('name', 'Roman');
+
+        $name = 'Roman 🌞';
+        $I->fillField('name', $name);
         $I->fillField('email', 'roman@example.com');
-        $I->fillField('text', 'This is my first comment!');
+        $I->fillField('text', 'This is my first comment! 👪🐶');
         $text = $I->grabTextFrom('p#qsp');
         preg_match('#(\d\d)\+(\d)#', $text, $matches);
         $I->fillField('question', (int)$matches[1] + (int)$matches[2]);
         $I->click('submit');
 
         $I->seeResponseCodeIs(200);
-        $I->see('Roman wrote:');
+        $I->see($name . ' wrote:');
         $I->see('This is my first comment!');
     }
 

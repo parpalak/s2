@@ -1,6 +1,7 @@
 <?php
 /**
  * A database abstract layer class.
+ * Contains default implementation for MySQL database.
  *
  * @copyright (C) 2009-2023 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
@@ -22,6 +23,11 @@ class DbLayer
         protected \PDO   $pdo,
         protected string $prefix = ''
     ) {
+    }
+
+    public function getPrefix(): string
+    {
+        return $this->prefix;
     }
 
     public function startTransaction(): void
@@ -293,10 +299,6 @@ class DbLayer
 
             $query .= $field_name . ' ' . $field_data['datatype'];
 
-            if (isset($field_data['collation'])) {
-                $query .= 'CHARACTER SET utf8 COLLATE utf8_' . $field_data['collation'];
-            }
-
             if (!$field_data['allow_null']) {
                 $query .= ' NOT NULL';
             }
@@ -328,7 +330,7 @@ class DbLayer
         }
 
         // We remove the last two characters (a newline and a comma) and add on the ending
-        $query = substr($query, 0, -2) . "\n" . ') ENGINE = ' . ($schema['ENGINE'] ?? 'InnoDB') . ' CHARACTER SET utf8';
+        $query = substr($query, 0, -2) . "\n" . ') ENGINE = InnoDB CHARACTER SET utf8mb4';
 
         $this->query($query);
     }

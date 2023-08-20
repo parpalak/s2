@@ -164,6 +164,34 @@ if (S2_DB_REVISION < 15) {
     ));
 }
 
+if (S2_DB_REVISION < 16 && $db_type === 'mysql') {
+    foreach ([
+                 'art_comments',
+                 'article_tag',
+                 'articles',
+                 'config',
+                 'extension_hooks',
+                 'extensions',
+                 'queue',
+                 'tags',
+                 'users',
+                 'users_online',
+             ] as $table) {
+        $s2_db->query(sprintf('ALTER TABLE `%s` ENGINE=InnoDB;', $s2_db->getPrefix() . $table));
+        $s2_db->query(sprintf('ALTER TABLE `%s` CONVERT TO CHARACTER SET utf8mb4;', $s2_db->getPrefix() . $table));
+    }
+    foreach ([
+                 's2_blog_comments',
+                 's2_blog_post_tag',
+                 's2_blog_posts',
+             ] as $table) {
+        if ($s2_db->tableExists($table)) {
+            $s2_db->query(sprintf('ALTER TABLE `%s` ENGINE=InnoDB;', $s2_db->getPrefix() . $table));
+            $s2_db->query(sprintf('ALTER TABLE `%s` CONVERT TO CHARACTER SET utf8mb4;', $s2_db->getPrefix() . $table));
+        }
+    }
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',
