@@ -14,8 +14,8 @@ use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 15);
-define('MIN_PHP_VERSION', '7.4.0');
+define('S2_DB_REVISION', 16);
+define('MIN_PHP_VERSION', '8.2.0');
 
 define('S2_ROOT', '../');
 define('S2_DEBUG', 1);
