@@ -26,7 +26,7 @@ class AcceptanceTester extends Actor
      * Define custom actions here
      */
 
-    public function install(string $username = 'admin', string $userpass = '', string $dbType): void
+    public function install(string $userName, string $userPass, string $dbType, string $dbUser, string $dbPassword): void
     {
         $I = $this;
         $I->amOnPage('/');
@@ -37,9 +37,10 @@ class AcceptanceTester extends Actor
 
         $I->selectOption('req_db_type', $dbType);
         $I->fillField('req_db_name', 's2_test');
-        $I->fillField('db_username', 'root');
-        $I->fillField('req_username', $username);
-        $I->fillField('req_password', $userpass);
+        $I->fillField('db_username', $dbUser);
+        $I->fillField('db_password', $dbPassword);
+        $I->fillField('req_username', $userName);
+        $I->fillField('req_password', $userPass);
         $I->click('start');
         $I->canSeeResponseCodeIs(200);
         $I->see('S2 is completely installed!');

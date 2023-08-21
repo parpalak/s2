@@ -155,14 +155,13 @@ if (!isset($_POST['form_sent']))
 {
 	// Determine available database extensions
     $db_extensions = [];
-    if (class_exists('PDO') && in_array('mysql', PDO::getAvailableDrivers(), true)) {
-        $db_extensions[] = ['mysql', 'MySQL Improved'];
+    if (class_exists(PDO::class) && in_array('mysql', PDO::getAvailableDrivers(), true)) {
+        $db_extensions[] = ['mysql', 'MySQL'];
     }
-    if (class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers(), true)) {
-        $db_extensions[] = ['sqlite', 'PDO SQLite'];
+    if (class_exists(PDO::class) && in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+        $db_extensions[] = ['sqlite', 'SQLite'];
     }
-    if (false && function_exists('pg_connect')) {
-        // TODO Implement PDO Postgres database layer
+    if (class_exists(PDO::class) && in_array('sqlite', PDO::getAvailableDrivers(), true)) {
         $db_extensions[] = ['pgsql', 'PostgreSQL'];
     }
 

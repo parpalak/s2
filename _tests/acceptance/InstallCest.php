@@ -20,8 +20,9 @@ class InstallCest
     protected function configProvider(): array
     {
         return [
-            ['db_type' => 'mysql'],
-            ['db_type' => 'sqlite'],
+            ['db_type' => 'mysql', 'db_user' => 'root', 'db_password' => ''],
+            ['db_type' => 'sqlite', 'db_user' => '', 'db_password' => ''],
+            ['db_type' => 'pgsql', 'db_user' => 'postgres', 'db_password' => '12345'],
         ];
     }
 
@@ -35,7 +36,7 @@ class InstallCest
             throw new Exception('config.php must not exist for test run');
         }
 
-        $I->install('admin', 'passwd', $example['db_type']);
+        $I->install('admin', 'passwd', $example['db_type'], $example['db_user'], $example['db_password']);
 
         $I->amOnPage('/');
         $I->see('Site powered by S2');

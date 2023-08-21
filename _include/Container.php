@@ -13,6 +13,7 @@ use Psr\Log\LogLevel;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerPostgres;
 use S2\Cms\Pdo\DbLayerSqlite;
 use S2\Cms\Queue\QueueConsumer;
 use S2\Cms\Queue\QueuePublisher;
@@ -50,6 +51,7 @@ class Container
                 return match ($db_type) {
                     'mysql' => new DbLayer(self::get(\PDO::class), $db_prefix),
                     'sqlite' => new DbLayerSqlite(self::get(\PDO::class), $db_prefix),
+                    'pgsql' => new DbLayerPostgres(self::get(\PDO::class), $db_prefix),
                     default => throw new RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
                 };
 
@@ -69,6 +71,7 @@ class Container
                 return match ($db_type) {
                     'mysql' => new \S2\Cms\Pdo\PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_username, $db_password),
                     'sqlite' => self::createPdoForSqlite($db_name, $p_connect),
+                    'pgsql' => new \S2\Cms\Pdo\PDO("pgsql:host=$db_host;dbname=$db_name", $db_username, $db_password),
                     default => throw new RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
                 };
 

@@ -518,7 +518,7 @@ function s2_blog_output_post_list ($criteria)
 
 	($hook = s2_hook('fn_s2_blog_output_post_list_pre_crit_mrg')) ? eval($hook) : null;
 
-	$condition = count($conditions) ? implode(' AND ', $conditions) : '1';
+	$condition = count($conditions) > 0 ? implode(' AND ', $conditions) : '1=1';
 	$message = empty($messages) ? '' : '<div class="info-box"><p>'.implode('</p><p>', $messages).'</p></div>';
 
 	$sub_query = array(

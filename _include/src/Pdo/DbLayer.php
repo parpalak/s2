@@ -403,25 +403,25 @@ class DbLayer
     /**
      * @throws DbLayerException
      */
-    public function addIndex(string $table_name, string $index_name, $index_fields, bool $unique = false, bool $no_prefix = false): void
+    public function addIndex(string $tableName, string $indexName, array $indexFields, bool $unique = false, bool $noPrefix = false): void
     {
-        if ($this->indexExists($table_name, $index_name, $no_prefix)) {
+        if ($this->indexExists($tableName, $indexName, $noPrefix)) {
             return;
         }
 
-        $this->query('ALTER TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' ADD ' . ($unique ? 'UNIQUE ' : '') . 'INDEX ' . ($no_prefix ? '' : $this->prefix) . $table_name . '_' . $index_name . ' (' . implode(',', $index_fields) . ')');
+        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ADD ' . ($unique ? 'UNIQUE ' : '') . 'INDEX ' . ($noPrefix ? '' : $this->prefix) . $tableName . '_' . $indexName . ' (' . implode(',', $indexFields) . ')');
     }
 
 
     /**
      * @throws DbLayerException
      */
-    public function dropIndex(string $table_name, string $index_name, bool $no_prefix = false): void
+    public function dropIndex(string $tableName, string $indexName, bool $noPrefix = false): void
     {
-        if (!$this->indexExists($table_name, $index_name, $no_prefix)) {
+        if (!$this->indexExists($tableName, $indexName, $noPrefix)) {
             return;
         }
 
-        $this->query('ALTER TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' DROP INDEX ' . ($no_prefix ? '' : $this->prefix) . $table_name . '_' . $index_name);
+        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' DROP INDEX ' . ($noPrefix ? '' : $this->prefix) . $tableName . '_' . $indexName);
     }
 }

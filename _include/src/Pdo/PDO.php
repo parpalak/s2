@@ -33,6 +33,16 @@ class PDO extends NativePdo
     /**
      * {@inheritdoc}
      */
+    public function beginTransaction(): bool
+    {
+        $this->connectIfRequired();
+
+        return parent::beginTransaction();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getAttribute(int $attribute): mixed
     {
         $this->connectIfRequired();
