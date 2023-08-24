@@ -392,23 +392,19 @@ function s2_get_remote_file($url, $timeout = 10, $head_only = false, $max_redire
         }
     } // Last case scenario, we use file_get_contents provided allow_url_fopen is enabled (any non 200 response results in a failure)
     else if (in_array($allow_url_fopen, array('on', 'true', '1'))) {
-        // PHP5's version of file_get_contents() supports stream options
-        if (version_compare(PHP_VERSION, '5.0.0', '>=')) {
-            // Setup a stream context
-            $stream_context = stream_context_create(
-                array(
-                    'http' => array(
-                        'method'        => $head_only ? 'HEAD' : 'GET',
-                        'user_agent'    => 'S2',
-                        'max_redirects' => $max_redirects + 1,    // PHP >=5.1.0 only
-                        'timeout'       => $timeout    // PHP >=5.2.1 only
-                    )
+        // Setup a stream context
+        $stream_context = stream_context_create(
+            array(
+                'http' => array(
+                    'method'        => $head_only ? 'HEAD' : 'GET',
+                    'user_agent'    => 'S2',
+                    'max_redirects' => $max_redirects + 1,
+                    'timeout'       => $timeout
                 )
-            );
+            )
+        );
 
-            $content = @file_get_contents($url, false, $stream_context);
-        } else
-            $content = @file_get_contents($url);
+        $content = @file_get_contents($url, false, $stream_context);
 
         // Did we get anything?
         if ($content !== false) {
@@ -700,4 +696,19 @@ function s2_russian_plural(int $number, string $many, string $one, string $two):
     }
 
     return $many;
+}
+
+/**
+ * Check APP_NAME env variable for test purposes.
+ *
+ * @see https://gist.github.com/samdark/01279afbce4871bd02b556bbb7ca4790 for details of getenv() / $_ENV
+ */
+function s2_get_config_filename(): string
+{
+    $appEnv = getenv('APP_ENV');
+    if (is_string($appEnv) && $appEnv !== '') {
+        return sprintf('config.%s.php', $appEnv);
+    }
+
+    return 'config.php';
 }

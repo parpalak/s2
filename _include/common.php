@@ -19,19 +19,28 @@ define('S2_VERSION', '2.0dev');
 //define('S2_DEBUG', 1);
 //define('S2_SHOW_QUERIES', 1);
 
+require S2_ROOT . '_vendor/autoload.php';
+require S2_ROOT . '_include/functions.php';
+
 // Attempt to load the configuration file config.php
-if (file_exists(S2_ROOT.'config.php'))
-	include S2_ROOT.'config.php';
+if (file_exists(S2_ROOT . s2_get_config_filename())) {
+    include S2_ROOT . s2_get_config_filename();
+}
 
 error_reporting(defined('S2_DEBUG') ? E_ALL : E_ALL ^ E_NOTICE);
 
-require S2_ROOT . '_vendor/autoload.php';
-require S2_ROOT.'_include/setup.php';
+require S2_ROOT . '_include/setup.php';
 
-if (!defined('S2_BASE_URL'))
-	error('The file \'config.php\' doesn\'t exist or is corrupt.<br />Do you want to <a href="'.preg_replace('#'.(S2_ROOT == '../' ? '/[a-z_\.]*' : '').'/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME']).'_admin/install.php">install S2</a>?');
-if (!defined('S2_URL_PREFIX'))
-	define('S2_URL_PREFIX', '');
+if (!defined('S2_BASE_URL')) {
+    error(sprintf(
+        'The file \'%s\' doesn\'t exist or is corrupt.<br />Do you want to <a href="%s_admin/install.php">install S2</a>?',
+        s2_get_config_filename(),
+        preg_replace('#' . (S2_ROOT == '../' ? '/[a-z_\.]*' : '') . '/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME'])
+    ));
+}
+if (!defined('S2_URL_PREFIX')) {
+    define('S2_URL_PREFIX', '');
+}
 
 // If the image directory is not specified, we use the default setting
 if (!defined('S2_IMG_DIR'))

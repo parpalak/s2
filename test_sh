@@ -3,10 +3,7 @@ rm -f _cache/*.log
 rm -f s2_test
 mysql -uroot --execute="DROP DATABASE IF EXISTS s2_test; CREATE DATABASE s2_test;"
 echo 'DROP DATABASE IF EXISTS s2_test; CREATE DATABASE s2_test;' | psql postgresql://postgres:12345@localhost > /dev/null
-if [ -f config.php ]; then
-  mv config.php config.php.old
-fi
-PHP_CLI_SERVER_WORKERS=2 nohup php -d "max_execution_time=-1" -d "opcache.revalidate_freq=0" -S localhost:8881 >/dev/null 2>&1 &
+APP_ENV=test PHP_CLI_SERVER_WORKERS=2 nohup php -d "max_execution_time=-1" -d "opcache.revalidate_freq=0" -S localhost:8881 >/dev/null 2>&1 &
 serverPID=$!
 XDEBUG_MODE=off php _vendor/bin/codecept run acceptance
 
@@ -15,8 +12,4 @@ XDEBUG_MODE=off php _vendor/bin/codecept run acceptance
 pkill -P $serverPID # for children PHP_CLI_SERVER_WORKERS
 kill $serverPID
 
-rm config.php
-if [ -f config.php.old ]; then
-  mv config.php.old config.php
-fi
 rm -f _cache/*.php

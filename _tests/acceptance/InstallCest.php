@@ -11,7 +11,7 @@ class InstallCest
      */
     public function _before(AcceptanceTester $I)
     {
-        $file = __DIR__ . '/../../config.php';
+        $file = __DIR__ . '/../../config.test.php';
         if (file_exists($file)) {
             unlink($file);
         }
@@ -32,8 +32,8 @@ class InstallCest
      */
     public function tryToTest(AcceptanceTester $I, Example $example): void
     {
-        if (file_exists('config.php')) {
-            throw new Exception('config.php must not exist for test run');
+        if (file_exists('config.test.php')) {
+            throw new Exception('config.test.php must not exist for test run');
         }
 
         $I->install('admin', 'passwd', $example['db_type'], $example['db_user'], $example['db_password']);

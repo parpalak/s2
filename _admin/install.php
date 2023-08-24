@@ -22,9 +22,17 @@ define('S2_DEBUG', 1);
 define('S2_SHOW_QUERIES', 1);
 define('S2_DISABLE_HOOKS', 1);
 
-if (file_exists(S2_ROOT.'config.php'))
-	exit('The file \'config.php\' already exists which would mean that S2 is already installed. You should go <a href="'.S2_ROOT.'">here</a> instead.');
+// We need some stuff
+require S2_ROOT . '_vendor/autoload.php';
+require S2_ROOT . '_include/functions.php';
 
+if (file_exists(S2_ROOT . s2_get_config_filename())) {
+    exit(sprintf(
+        'The file \'%s\' already exists which would mean that S2 is already installed. You should go <a href="%s">here</a> instead.',
+        s2_get_config_filename(),
+        S2_ROOT
+    ));
+}
 
 // Make sure we are running at least MIN_PHP_VERSION
 if (!function_exists('version_compare') || version_compare(PHP_VERSION, MIN_PHP_VERSION, '<'))
@@ -36,9 +44,7 @@ error_reporting(E_ALL);
 // Turn off PHP time limit
 @set_time_limit(0);
 
-// We need some stuff
-require S2_ROOT . '_vendor/autoload.php';
-require S2_ROOT.'_include/setup.php';
+require S2_ROOT . '_include/setup.php';
 require 'options.php';
 
 //
@@ -132,8 +138,8 @@ require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/install.php';
 
 if (isset($_POST['generate_config']))
 {
-	header('Content-Type: text/x-delimtext; name="config.php"');
-	header('Content-disposition: attachment; filename=config.php');
+	header(sprintf('Content-Type: text/x-delimtext; name="%s"', s2_get_config_filename()));
+	header(sprintf("Content-disposition: attachment; filename=%s", s2_get_config_filename()));
 
 	$db_type = $_POST['db_type'];
 	$db_host = $_POST['db_host'];
@@ -1036,7 +1042,7 @@ else
 	$written = false;
 	if (is_writable(S2_ROOT))
 	{
-		$fh = @fopen(S2_ROOT.'config.php', 'wb');
+		$fh = @fopen(S2_ROOT.s2_get_config_filename(), 'wb');
 		if ($fh)
 		{
 			fwrite($fh, $config);

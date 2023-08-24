@@ -2,4 +2,5 @@
 _cache/*
 _vendor/*
 config.php
+config.test.php
 pictures
