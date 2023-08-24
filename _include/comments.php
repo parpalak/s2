@@ -186,11 +186,15 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsub
 		'Reply-To: '.$from;
 
 	// Change the linebreaks used in the headers according to OS
-	if (strtoupper(substr(PHP_OS, 0, 3)) == 'MAC')
-		$headers = str_replace("\r\n", "\r", $headers);
-	else if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN')
-		$headers = str_replace("\r\n", "\n", $headers);
-
+    if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 80000) {
+        // Change the linebreaks used in the headers according to OS
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'MAC') {
+            $headers = str_replace("\r\n", "\r", $headers);
+        }
+        else if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+            $headers = str_replace("\r\n", "\n", $headers);
+        }
+    }
 	mail($email, $subject, $message, $headers);
 }
 
@@ -226,12 +230,15 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 		'X-Mailer: S2 Mailer'."\r\n".
 		'Reply-To: '.$from;
 
-	// Change the linebreaks used in the headers according to OS
-	if (strtoupper(substr(PHP_OS, 0, 3)) == 'MAC')
-		$headers = str_replace("\r\n", "\r", $headers);
-	else if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN')
-		$headers = str_replace("\r\n", "\n", $headers);
-
+    if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 80000) {
+        // Change the linebreaks used in the headers according to OS
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'MAC') {
+            $headers = str_replace("\r\n", "\r", $headers);
+        }
+        else if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+            $headers = str_replace("\r\n", "\n", $headers);
+        }
+    }
 	mail($email, $subject, $message, $headers);
 }
 
