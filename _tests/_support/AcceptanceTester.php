@@ -46,7 +46,7 @@ class AcceptanceTester extends Actor
         $I->see('S2 is completely installed!');
     }
 
-    public function canWriteComment(): void
+    public function canWriteComment(bool $premoderation = false): void
     {
         $I = $this;
 
@@ -60,8 +60,12 @@ class AcceptanceTester extends Actor
         $I->click('submit');
 
         $I->seeResponseCodeIs(200);
-        $I->see($name . ' wrote:');
-        $I->see('This is my first comment!');
+        if ($premoderation) {
+            $I->see('Your comment has been successfully sent. It will be published after the verification.');
+        } else {
+            $I->see($name . ' wrote:');
+            $I->see('This is my first comment!');
+        }
     }
 
     public function login(string $username = 'admin', string $userpass = ''): void
@@ -92,5 +96,29 @@ class AcceptanceTester extends Actor
         $I->seeResponseCodeIsSuccessful();
         $I->dontSeeElement('.extension.available [title=' . $extensionId . ']');
         $I->seeElement('.extension.enabled [title=' . $extensionId . ']');
+    }
+
+    public function clearEmail(): void
+    {
+        $fi = new FilesystemIterator($this->getEmailDir(), FilesystemIterator::SKIP_DOTS);
+        foreach ($fi as $f) {
+            unlink($f);
+        }
+    }
+
+    public function getEmails(): array
+    {
+        $result = [];
+        $fi = new FilesystemIterator($this->getEmailDir(), FilesystemIterator::SKIP_DOTS);
+        foreach ($fi as $f) {
+            $result[] = file_get_contents($f);
+        }
+
+        return $result;
+    }
+
+    private function getEmailDir(): string
+    {
+        return '_tests/_output/email';
     }
 }

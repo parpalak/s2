@@ -116,6 +116,7 @@ class InstallCest
                 'flags' => [
                     'favorite'  => '1',
                     'published' => '1',
+                    'commented' => '1',
                 ],
             ];
         };
@@ -324,8 +325,8 @@ class InstallCest
         $data = [
             'opt' => [
                 'S2_SITE_NAME'        => 'Site Title',
-                'S2_WEBMASTER'        => 'Author Name',
-                'S2_WEBMASTER_EMAIL'  => 'author@example.com',
+                'S2_WEBMASTER'        => 'Webmaster Name',
+                'S2_WEBMASTER_EMAIL'  => 'webmaster@example.com',
                 'S2_START_YEAR'       => '2023',
                 'S2_COMPRESS'         => '1',
                 'S2_FAVORITE_URL'     => 'favorite',
@@ -338,6 +339,7 @@ class InstallCest
                 'S2_BLOG_URL'         => '/blog',
                 'S2_SHOW_COMMENTS'    => '1',
                 'S2_ENABLED_COMMENTS' => '1',
+                'S2_PREMODERATION'    => '1',
                 'S2_ADMIN_COLOR'      => '#e7e4f4',
                 'S2_LOGIN_TIMEOUT'    => '120000',
                 'S2_ADMIN_UPDATES'    => '0',
@@ -347,7 +349,52 @@ class InstallCest
         $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_options', $data);
         $I->seeResponseCodeIsSuccessful();
 
-        // TODO check premoderation
+        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=user_set_email&login=admin&email=admin@example.com');
+        $I->seeResponseCodeIsSuccessful();
+        $I->see('admin@example.com');
+
+        $I->clearEmail();
+
+        $I->amOnPage('/section1/new_page1');
+        $I->see('Some new page text');
+        $I->canWriteComment(true);
+
+        $emails = $I->getEmails();
+        $I->assertCount(1, $emails);
+
+        // Two asserts to skip variable "Date" header
+        $I->assertStringContainsString('To: admin@example.com' . "\r\n" .
+            'Subject: =?UTF-8?B?Q29tbWVudCB0byBodHRwOi8vbG9jYWxob3N0Ojg4ODEvaW5kZXgucGhwPy9zZWN0aW9uMS9uZXdfcGFnZTE=?=' . "\r\n" .
+            'From: =?UTF-8?B?V2VibWFzdGVyIE5hbWU=?= <webmaster@example.com>' . "\r\n" .
+            'Sender: =?UTF-8?B?Um9tYW4g8J+Mng==?= <roman@example.com>' . "\r\n" .
+            'Date: ', $emails[0]);
+
+        $I->assertStringContainsString(' +0000' . "\r\n" .
+            'MIME-Version: 1.0' . "\r\n" .
+            'Content-transfer-encoding: 8bit' . "\r\n" .
+            'Content-type: text/plain; charset=utf-8' . "\r\n" .
+            'X-Mailer: S2 Mailer' . "\r\n" .
+            'Reply-To: =?UTF-8?B?Um9tYW4g8J+Mng==?= <roman@example.com>' . "\r\n" .
+            '' . "\r\n" .
+            'Hello, admin.' . "\r\n" .
+            '' . "\r\n" .
+            'You have received this e-mail, because you are the moderator.' . "\r\n" .
+            'A new comment on' . "\r\n" .
+            '“New Page Title”,' . "\r\n" .
+            'has been received. You can find it here:' . "\r\n" .
+            'http://localhost:8881/index.php?/section1/new_page1' . "\r\n" .
+            '' . "\r\n" .
+            'Roman 🌞 is the comment author.' . "\r\n" .
+            '' . "\r\n" .
+            '----------------------------------------------------------------------' . "\r\n" .
+            'This is my first comment! 👪🐶' . "\r\n" .
+            '----------------------------------------------------------------------' . "\r\n" .
+            '' . "\r\n" .
+            'This e-mail has been sent automatically. If you reply, the author' . "\r\n" .
+            'of the comment will receive your answer.' . "\r\n" .
+            '', $emails[0]);
+
+        // TODO check showing and hiding comments
         // TODO check deleting comments
     }
 }

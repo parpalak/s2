@@ -1,10 +1,23 @@
 chmod a+w _tests/_output/
 rm -f _cache/*.log
+
+# clear test databases
 rm -f s2_test
 mysql -uroot --execute="DROP DATABASE IF EXISTS s2_test; CREATE DATABASE s2_test;"
 echo 'DROP DATABASE IF EXISTS s2_test; CREATE DATABASE s2_test;' | psql postgresql://postgres:12345@localhost > /dev/null
-APP_ENV=test PHP_CLI_SERVER_WORKERS=2 nohup php -d "max_execution_time=-1" -d "opcache.revalidate_freq=0" -S localhost:8881 >/dev/null 2>&1 &
+
+# run web-server in background
+APP_ENV=test \
+ PHP_CLI_SERVER_WORKERS=2 \
+ nohup php \
+  -d "max_execution_time=-1" \
+  -d "opcache.revalidate_freq=0" \
+  -d "sendmail_path=_tests/_resources/sendmail.php --dir\\=_tests/_output/email/" \
+  -S localhost:8881 >/dev/null 2>&1 &
+
 serverPID=$!
+
+# run tests
 XDEBUG_MODE=off php _vendor/bin/codecept run acceptance
 
 #read -p "Press any key to resume ..."
