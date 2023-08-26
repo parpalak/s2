@@ -1,4 +1,6 @@
 chmod a+w _tests/_output/
+[ ! -d "_tests/_output/email/" ] && mkdir _tests/_output/email/
+chmod a+w _tests/_output/email/
 rm -f _cache/*.log
 
 # clear test databases
@@ -20,9 +22,13 @@ serverPID=$!
 # run tests
 XDEBUG_MODE=off php _vendor/bin/codecept run acceptance
 
+status=$?
+
 #read -p "Press any key to resume ..."
 
 pkill -P $serverPID # for children PHP_CLI_SERVER_WORKERS
 kill $serverPID
 
 rm -f _cache/*.php
+
+exit $status

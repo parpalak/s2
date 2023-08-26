@@ -6,17 +6,6 @@ use Codeception\Example;
 
 class InstallCest
 {
-    /**
-     * @throws Exception
-     */
-    public function _before(AcceptanceTester $I)
-    {
-        $file = __DIR__ . '/../../config.test.php';
-        if (file_exists($file)) {
-            unlink($file);
-        }
-    }
-
     protected function configProvider(): array
     {
         return [
@@ -28,9 +17,26 @@ class InstallCest
 
     /**
      * @throws JsonException
-     * @dataProvider configProvider
      */
-    public function tryToTest(AcceptanceTester $I, Example $example): void
+    public function runTest(AcceptanceTester $I): void
+    {
+        $dbType = getenv('APP_DB_TYPE');
+        foreach ($this->configProvider() as $config) {
+            if (!is_string($dbType) || $dbType === $config['db_type']) {
+                $file = __DIR__ . '/../../config.test.php';
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+
+                $this->tryToTest($I, new Example($config));
+            }
+        }
+    }
+
+    /**
+     * @throws JsonException
+     */
+    protected function tryToTest(AcceptanceTester $I, Example $example): void
     {
         if (file_exists('config.test.php')) {
             throw new Exception('config.test.php must not exist for test run');

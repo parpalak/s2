@@ -1,0 +1,46 @@
+name: Test on PostgreSQL
+
+on: [ push ]
+
+env:
+  APP_DB_TYPE: pgsql
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        operating_system: ['ubuntu-22.04']
+        php_versions:
+          - '8.2'
+#        postgres_versions:
+#          - '12'
+#          - '13'
+#          - '14'
+
+    runs-on: '${{ matrix.operating_system }}'
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ikalnytskyi/action-setup-postgres@v4
+        with:
+          username: postgres
+          password: 12345
+          database: test
+          port: 5432
+#          postgres-version: ${{ matrix.postgres_versions }}
+
+      - name: 'Setup PHP'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php_versions }}
+
+      - name: Install dependencies
+        run: COMPOSER_MEMORY_LIMIT=-1 composer install --prefer-dist --no-interaction
+
+      - name: Run test cases
+        run: sh ./test_sh
+
+      - name: Output logs
+        if: failure()
+        run: cat _cache/*.log && cat _tests/_output/email/*.txt

@@ -134,7 +134,7 @@ class DbLayer
 
             throw new DbLayerException(
                 sprintf("%s. Failed query: %s. Error code: %s.", $e->getMessage(), $sql, $e->getCode()),
-                $e->errorInfo[1],
+                $e->errorInfo[1] ?? 0,
                 $sql,
                 $e
             );

@@ -36,6 +36,7 @@ class AcceptanceTester extends Actor
         $I->see('S2 2.0dev', 'h1');
 
         $I->selectOption('req_db_type', $dbType);
+        $I->fillField('req_db_host', '127.0.0.1'); // not localhost for Github Actions
         $I->fillField('req_db_name', 's2_test');
         $I->fillField('db_username', $dbUser);
         $I->fillField('db_password', $dbPassword);
