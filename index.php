@@ -30,7 +30,7 @@ else {
 //
 // Redirect to the admin page
 //
-if (substr($request_uri, -3) == '---') {
+if (str_ends_with($request_uri, '---')) {
     header('Location: ' . S2_PATH . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
 
     /** @var DbLayer $s2_db */
@@ -77,6 +77,7 @@ if (!empty($match)) {
     $target = $match['target'];
     if (is_callable($target)) {
         $target();
+        $controller = null;
     } else {
         $controller = new $target($match['params']);
     }
@@ -94,6 +95,14 @@ if ($controller instanceof Page_Routable) {
 
 if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
+    if (\extension_loaded('newrelic')) {
+        if (is_object($controller)) {
+            newrelic_name_transaction(get_class($controller));
+        }
+        newrelic_end_transaction();
+        newrelic_start_transaction(ini_get('newrelic.appname'));
+        newrelic_name_transaction('index_background');
+    }
     /** @var \S2\Cms\Queue\QueueConsumer $consumer */
     $consumer = Container::get(\S2\Cms\Queue\QueueConsumer::class);
     $startedAt = microtime(true);
