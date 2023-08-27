@@ -633,6 +633,16 @@ function error()
 
 function s2_permanent_redirect($url, $external = false)
 {
+    global $controller;
+
+    if (\extension_loaded('newrelic')) {
+        if (isset($controller) && is_object($controller)) {
+            newrelic_name_transaction(get_class($controller) . '_redirect');
+        } else {
+            newrelic_name_transaction('redirect');
+        }
+    }
+
     $url = $external ? $url : s2_link($url);
     header($_SERVER['SERVER_PROTOCOL'] . ' 301 Moved Permanently');
     header('Location: ' . $url);
