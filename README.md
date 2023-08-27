@@ -3,8 +3,7 @@ S2
 
 Small and fast CMS
 
-Installation
-==
+## Installation
 
 Use the following commands to deploy latest development version of S2 and extensions.
 ```
