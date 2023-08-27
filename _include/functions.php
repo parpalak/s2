@@ -10,9 +10,6 @@
 
 use S2\Cms\Pdo\DbLayerException;
 
-if (!defined('S2_ROOT'))
-    die;
-
 //
 // Dealing with date and time
 //
