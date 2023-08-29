@@ -7,6 +7,8 @@
 
 namespace S2\Cms\Queue;
 
+use S2\Rose\Storage\Exception\InvalidEnvironmentException;
+
 class QueuePublisher
 {
     private \PDO $pdo;
@@ -25,15 +27,55 @@ class QueuePublisher
             throw new \DomainException('Id length must not exceed 80 characters');
         }
 
-        $statement = $this->pdo->prepare('INSERT IGNORE INTO queue (id, code, payload) VALUES (:id, :code, :payload)');
+        try {
+            $data = json_encode($payload, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new \InvalidArgumentException($e->getMessage(), 0, $e);
+        }
+
+        $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        switch ($driverName) {
+            case 'mysql':
+                // Unfortunately, there is no INSERT ... NOWAIT operator. Let's make it by hands.
+                $this->pdo->exec('SET innodb_lock_wait_timeout = 0;');
+                $statement = $this->pdo->prepare('INSERT IGNORE INTO queue (id, code, payload) VALUES (:id, :code, :payload)');
+                break;
+
+            case 'sqlite':
+                $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 0);
+            case 'pgsql':
+                $statement = $this->pdo->prepare('INSERT INTO queue (id, code, payload) VALUES (:id, :code, :payload) ON CONFLICT DO NOTHING');
+                break;
+
+            default:
+                throw new InvalidEnvironmentException(sprintf('Driver "%s" is not supported.', $driverName));
+        }
+
         try {
             $statement->execute([
                 'id'      => $id,
                 'code'    => $code,
-                'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
+                'payload' => $data,
             ]);
-        } catch (\JsonException $e) {
-            throw new \InvalidArgumentException($e->getMessage(), 0, $e);
+        } catch (\PDOException $e) {
+            if (
+                (1205 === (int)($e->errorInfo[1] ?? 0) && $driverName === 'mysql')
+                || (5 === (int)($e->errorInfo[1] ?? 0) && $driverName === 'sqlite') // SQLSTATE[HY000]: General error: 5 database is locked
+            ) {
+                // Cannot insert a new item while the existing one is locked;
+                return;
+            }
+            throw $e;
+        } finally {
+            switch ($driverName) {
+                case 'mysql':
+                    $this->pdo->exec('SET innodb_lock_wait_timeout = 5;');
+                    break;
+
+                case 'sqlite':
+                    $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 5);
+                    break;
+            }
         }
     }
 }

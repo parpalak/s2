@@ -26,20 +26,23 @@ class QueueConsumer
         $this->logger   = $logger;
     }
 
-    /**
-     * @throws \JsonException
-     */
     public function runQueue(): bool
     {
-        $this->pdo->exec('START TRANSACTION');
+        $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        $sql        = match ($driverName) {
+            'mysql' => 'SELECT * FROM queue LIMIT 1 FOR UPDATE', // TODO figure out how to detect support for SKIP LOCKED to make a fallback
+            'pgsql' => 'SELECT * FROM queue LIMIT 1 FOR UPDATE SKIP LOCKED',
+            'sqlite' => 'SELECT * FROM queue LIMIT 1',
+            default => throw new \RuntimeException(sprintf('Driver "%s" is not supported.', $driverName)),
+        };
+
+        $this->pdo->beginTransaction();
 
         try {
-            // TODO figure out how to detect support for SKIP LOCKED to make a fallback
-            // $statement = $this->pdo->query('SELECT * FROM queue LIMIT 1 FOR UPDATE SKIP LOCKED');
-            $statement = $this->pdo->query('SELECT * FROM queue LIMIT 1 FOR UPDATE');
+            $statement = $this->pdo->query($sql);
             $job       = $statement->fetch(\PDO::FETCH_ASSOC);
             if (!$job) {
-                $this->pdo->exec('ROLLBACK');
+                $this->pdo->rollBack();
                 return false;
             }
 
@@ -62,9 +65,9 @@ class QueueConsumer
                 'code' => $job['code'],
             ]);
 
-            $this->pdo->exec('COMMIT');
+            $this->pdo->commit();
         } catch (\Throwable $e) {
-            $this->pdo->exec('ROLLBACK');
+            $this->pdo->rollBack();
         }
 
         return true;
