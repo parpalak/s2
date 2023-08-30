@@ -36,7 +36,9 @@ class QueuePublisher
         $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
         switch ($driverName) {
             case 'mysql':
-                // Unfortunately, there is no INSERT ... NOWAIT operator. Let's make it by hands.
+                // There is a wierd behaviour of INSERT IGNORE in MySQL. Unlike Postgres, INSERT IGNORE waits
+                // for releasing a lock even if the row was just locked with SELECT ... FOR UPDATE and not modified yet.
+                // Moreover, there is no INSERT ... NOWAIT operator. Let's make it by hands.
                 $this->pdo->exec('SET innodb_lock_wait_timeout = 0;');
                 $statement = $this->pdo->prepare('INSERT IGNORE INTO queue (id, code, payload) VALUES (:id, :code, :payload)');
                 break;
