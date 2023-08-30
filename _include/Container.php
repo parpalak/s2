@@ -25,7 +25,7 @@ use S2\Rose\Stemmer\PorterStemmerEnglish;
 use S2\Rose\Stemmer\PorterStemmerRussian;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
-use Symfony\Component\Cache\Adapter\FilesystemTagAwareAdapter;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class Container
 {
@@ -101,7 +101,7 @@ class Container
                 return new JKLogger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::DEBUG, ['prefix' => 'recommendations_', 'extension' => 'log']);
 
             case 'recommendations_cache':
-                return new FilesystemTagAwareAdapter('recommendations', 0, S2_CACHE_DIR);
+                return new FilesystemAdapter('recommendations', 0, S2_CACHE_DIR);
 
             case QueuePublisher::class:
                 return new QueuePublisher(self::get(\PDO::class));
