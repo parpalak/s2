@@ -53,10 +53,7 @@ class InstallCest
         $this->testAdminLogin($I);
         $this->testAdminEditAndTagsAdded($I);
         $this->testBlogExtension($I);
-        if ($example['db_type'] === 'mysql') {
-            // TODO implement PdoStorage for other databases
-            $this->testSearchExtension($I);
-        }
+        $this->testSearchExtension($I);
         $this->testAdminTagListAndEdit($I);
         $this->testAdminCommentManagement($I);
     }
