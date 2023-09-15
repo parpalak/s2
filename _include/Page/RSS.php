@@ -71,6 +71,10 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 		{
 			($hook = s2_hook('pr_render_pre_not_modified')) ? eval($hook) : null;
 
+            if (\extension_loaded('newrelic')) {
+                newrelic_name_transaction(get_class($this) . '_not_modified');
+            }
+
 			header($_SERVER['SERVER_PROTOCOL'].' 304 Not Modified');
 			exit;
 		}
