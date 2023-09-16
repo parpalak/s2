@@ -56,6 +56,11 @@ abstract class Page_HTML extends Page_Abstract
 		);
 
 		$this->render();
+
+        if (\extension_loaded('newrelic')) {
+            newrelic_name_transaction(get_class($this) . '_not_found');
+        }
+
 		die();
 	}
 
