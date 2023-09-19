@@ -96,7 +96,7 @@ class Page extends \Page_HTML implements \Page_Routable
                     $content['output'] .= $this->renderPartial('search_result', [
                         'title'  => $item->getHighlightedTitle($this->stemmer),
                         'url'    => $item->getUrl(),
-                        'descr'  => $item->getSnippet(),
+                        'descr'  => $item->getFormattedSnippet(),
                         'time'   => $item->getDate() ? $item->getDate()->getTimestamp() : null,
                         'images' => $item->getImageCollection(),
                         'debug'  => ($content['trace'][(new ExternalId($item->getId()))->toString()]),
