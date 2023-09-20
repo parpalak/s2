@@ -83,7 +83,7 @@ class Container
 
             case Finder::class:
                 return (new Finder(self::get(PdoStorage::class), self::get(StemmerInterface::class)))
-                    ->setHighlightTemplate('<i class="s2_search_highlight">%s</i>')
+                    ->setHighlightTemplate('<span class="s2_search_highlight">%s</span>')
                     ->setSnippetLineSeparator(' ⋄&nbsp;')
                 ;
 
