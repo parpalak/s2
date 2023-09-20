@@ -179,9 +179,7 @@ class ThumbnailGenerator implements QueueHandlerInterface
         $inputHeight = imagesy($image);
         $thumbnail   = imagecreatetruecolor($width, $height);
 
-        imagealphablending($thumbnail, false);
-        imagesavealpha($thumbnail, true);
-        $white = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
+        $white = imagecolorallocate($thumbnail, 255, 255, 255);
         imagefilledrectangle($thumbnail, 0, 0, $width, $height, $white);
         imagecolortransparent($thumbnail, $white);
 
