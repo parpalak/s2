@@ -120,8 +120,8 @@ class RecommendationProvider implements QueueHandlerInterface
     private function getValueForCache(ExternalId $externalId): array
     {
         return [
-            $this->pdoStorage->getSimilar($externalId, null, 4, 9)
-                ?: $this->pdoStorage->getSimilar($externalId, null, 2, 9),
+            $this->pdoStorage->getSimilar($externalId, true, null, 4, 9)
+                ?: $this->pdoStorage->getSimilar($externalId, true, null, 2, 9),
             time()
         ];
     }

@@ -146,7 +146,7 @@ class ContentItem
                 $text          = '';
                 $totalLength   = 0;
                 foreach ($this->snippets as $snippet) {
-                    $length      = mb_strlen($snippet);
+                    $length      = mb_strlen(strip_tags($snippet));
                     $deltaLength = ($text !== '' ? 1 : 0) + $length;
                     if ($totalLength > $textMaxLength || $totalLength + $deltaLength > $textMaxLength) {
                         break;
