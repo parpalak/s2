@@ -55,8 +55,8 @@ class QueueConsumer
                         $this->logger->notice('Queue item has been processed', $job);
                     }
                 }
-            } catch (\Exception $e) {
-                $this->logger->warning('Exception occurred while processing queue: ' . $e->getMessage(), ['exception' => $e]);
+            } catch (\Throwable $e) {
+                $this->logger->warning('Throwable occurred while processing queue: ' . $e->getMessage(), ['exception' => $e]);
             }
 
             $statement = $this->pdo->prepare('DELETE FROM queue WHERE id = :id AND code = :code');
@@ -67,6 +67,7 @@ class QueueConsumer
 
             $this->pdo->commit();
         } catch (\Throwable $e) {
+            $this->logger->warning('Unknown throwable occurred, do rollback: ' . $e->getMessage(), ['exception' => $e]);
             $this->pdo->rollBack();
         }
 
