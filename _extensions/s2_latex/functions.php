@@ -20,7 +20,7 @@ function s2_encodeURIComponent(string $str): string
 
 function s2_latex_make($text): string
 {
-    return preg_replace_callback('#\\$\\$([^<$]*)\\$\\$#S', static function ($matches) {
+    return preg_replace_callback('#\\$\\$([^<]*?)\\$\\$#S', static function ($matches) {
         $formula = str_replace(['&nbsp;', '&lt;', '&gt;', '&amp;'], [' ', '<', '>', '&'], $matches[1]);
         return '<img border="0" style="vertical-align: middle;" src="//i.upmath.me/svg/' . s2_htmlencode(s2_encodeURIComponent($formula)) . '" alt="' . s2_htmlencode($formula) . '" />';
     }, $text);
