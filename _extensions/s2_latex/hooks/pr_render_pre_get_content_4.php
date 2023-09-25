@@ -7,11 +7,11 @@
  * @package s2_latex
  */
 
- if (!defined('S2_ROOT')) {
-     die;
+if (!defined('S2_ROOT')) {
+    die;
 }
 
-require S2_ROOT.'/_extensions/s2_latex'.'/functions.php';
+require S2_ROOT . '/_extensions/s2_latex/functions.php';
 
-$content['rss_title'] = s2_latex_make($content['rss_title']);
+$content['rss_title']       = s2_latex_make($content['rss_title']);
 $content['rss_description'] = s2_latex_make($content['rss_description']);

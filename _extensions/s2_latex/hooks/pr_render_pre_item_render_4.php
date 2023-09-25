@@ -7,9 +7,9 @@
  * @package s2_latex
  */
 
- if (!defined('S2_ROOT')) {
-     die;
+if (!defined('S2_ROOT')) {
+    die;
 }
 
 $item['title'] = s2_latex_make($item['title']);
-$item['text'] = s2_latex_make($item['text']);
+$item['text']  = s2_latex_make($item['text']);

@@ -6,11 +6,13 @@
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_latex
  *
- * @var \S2\Cms\Asset\AssetPack $assetPack
+ * @var AssetPack $assetPack
  */
+
+use S2\Cms\Asset\AssetPack;
 
 if (!defined('S2_ROOT')) {
     die;
 }
 
-$assetPack->addHeadJs('//i.upmath.me/latex.js');
+$assetPack->addJs('//i.upmath.me/latex.js', [AssetPack::OPTION_PRELOAD, AssetPack::OPTION_DEFER]);

@@ -4,9 +4,9 @@
 /**
  * LaTeX
  *
- * Integrates site with tex.s2cms.ru service
+ * Integrates site with i.upmath.me service
  *
- * @copyright (C) 2011-2014 Roman Parpalak
+ * @copyright (C) 2011-2023 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_latex
  */
@@ -16,7 +16,7 @@
 	<id>s2_latex</id>
 	<title>LaTeX</title>
 	<version>2.0dev</version>
-	<description>Allows to write LaTeX formulae.</description>
+	<description>Allows to write LaTeX formulas.</description>
 	<author>Roman Parpalak</author>
 
 	<minversion>2.0dev</minversion>

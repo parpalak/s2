@@ -12,16 +12,16 @@ if (!defined('S2_ROOT')) {
     die;
 }
 
-function s2_encodeURIComponent($str)
+function s2_encodeURIComponent(string $str): string
 {
     $revert = array('%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')');
     return strtr(rawurlencode($str), $revert);
 }
 
-function s2_latex_make($text)
+function s2_latex_make($text): string
 {
-    return preg_replace_callback('#\\$\\$([^<>\\$]*)\\$\\$#Ss', function ($matches) {
-        $formula = str_replace(array('&nbsp;', '&lt;', '&gt;', '&amp;'), array(' ', '<', '>', '&'), $matches[1]);
-        return '<img border="0" style="vertical-align: middle;" src="//i.upmath.me/png/' . s2_htmlencode(s2_encodeURIComponent($formula)) . '" alt="' . s2_htmlencode($formula) . '" />';
+    return preg_replace_callback('#\\$\\$([^<$]*)\\$\\$#S', static function ($matches) {
+        $formula = str_replace(['&nbsp;', '&lt;', '&gt;', '&amp;'], [' ', '<', '>', '&'], $matches[1]);
+        return '<img border="0" style="vertical-align: middle;" src="//i.upmath.me/svg/' . s2_htmlencode(s2_encodeURIComponent($formula)) . '" alt="' . s2_htmlencode($formula) . '" />';
     }, $text);
 }
