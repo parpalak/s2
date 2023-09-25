@@ -10,7 +10,7 @@
  */
 
 echo '<?xml version="1.0" encoding="utf-8"?>'."\n".
-	'<?xml-stylesheet href="http://www.w3.org/2000/08/w3c-synd/style.css" type="text/css"?>'."\n";
+    '<?xml-stylesheet href="'. S2_PATH .'/_styles/rss.xslt' .'" type="text/xsl"?>'."\n";
 
 ?>
 	<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
