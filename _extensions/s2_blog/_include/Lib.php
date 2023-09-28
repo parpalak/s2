@@ -17,10 +17,10 @@ class Lib
 	// '1' -> '01'
 	public static function extend_number ($n)
 	{
-		return strlen($n) == 1 ? '0'.$n : $n;
+		return \strlen($n) === 1 ? '0'.$n : $n;
 	}
 
-	public static function calendar ($year, $month, $day, $url = '', $day_flags = null)
+    public static function calendar($year, $month, $day, $url = '', $dayUrls = null)
 	{
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);
@@ -32,29 +32,30 @@ class Lib
 		$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
 
 		// Dealing with week days
-		$n = date('w', $start_time);
-		if (Lang::get('Sunday starts week', 's2_blog') != '1')
-		{
-			$n -= 1;
-			if ($n == -1) $n = 6;
-		}
+        $n = (int)date('w', $start_time);
+        if (Lang::get('Sunday starts week', 's2_blog') !== '1') {
+            --$n;
+            if ($n === -1) {
+                $n = 6;
+            }
+        }
 
 		// How many days have the month?
 		$day_count = (int) date('j', mktime(0, 0, 0, $month + 1, 0, $year)); // day = 0
 
 		// Flags for the days when posts have been written
-		if ($day_flags === null)
-		{
-            $day_flags = [];
-			$query = array(
-				'SELECT'	=> 'create_time',
+		if ($dayUrls === null) {
+            $dayUrls = [];
+			$query   = array(
+				'SELECT'	=> 'create_time, url',
 				'FROM'		=> 's2_blog_posts',
 				'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND published = 1'
 			);
 			($hook = s2_hook('fn_s2_blog_calendar_pre_get_days_qr')) ? eval($hook) : null;
 			$result = $s2_db->buildAndQuery($query);
-			while ($row = $s2_db->fetchRow($result))
-				$day_flags[1 + intval(($row[0] - $start_time) / 86400)] = 1;
+			while ($row = $s2_db->fetchRow($result)) {
+                $dayUrls[1 + (int)(($row[0] - $start_time) / 86400)][] = $row[1];
+            }
 		}
 
 		// Header
@@ -62,8 +63,9 @@ class Lib
 		if ($day == '-1')
 		{
 			// One of 12 year tables
-			if ($start_time < time())
-				$month_name = '<a href="'.S2_BLOG_PATH.date('Y/m', $start_time).'/">'.$month_name.'</a>';
+			if ($start_time < time()) {
+                $month_name = '<a href="' . S2_BLOG_PATH . date('Y/m', $start_time) . '/">' . $month_name . '</a>';
+            }
 			$header = '<tr class="nav"><th colspan="7">'.$month_name.'</th></tr>';
 		}
 		else
@@ -92,8 +94,16 @@ class Lib
 		for ($i = 1; $i <= $day_count; $i++)
 		{
 			$n++;
-			// Are there posts?
-			$b = isset($day_flags[$i]) ? '<a href="'.S2_BLOG_PATH.$year.'/'.self::extend_number($month).'/'.self::extend_number($i).'/">'.$i.'</a>' : $i;
+            if (!isset($dayUrls[$i])) {
+                // No posts
+                $b = $i;
+            } elseif (\count($dayUrls[$i]) !== 1) {
+                // Several posts, link to the day page
+                $b = '<a href="' . S2_BLOG_PATH . $year . '/' . self::extend_number($month) . '/' . self::extend_number($i) . '/">' . $i . '</a>';
+            } else {
+                // One post, link to it
+                $b = '<a href="' . S2_BLOG_PATH . $year . '/' . self::extend_number($month) . '/' . self::extend_number($i) . '/' . urlencode($dayUrls[$i][0]) . '">' . $i . '</a>';
+            }
 			$classes = array();
 			if ($i == $day)
 				// Current day

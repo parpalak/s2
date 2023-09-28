@@ -65,20 +65,22 @@ class Page_Year extends Page_HTML implements \Page_Routable
 		}
 
 		$query = array(
-			'SELECT'	=> 'create_time',
+			'SELECT'	=> 'create_time, url',
 			'FROM'		=> 's2_blog_posts',
 			'WHERE'		=> 'create_time < '.$end_time.' AND create_time >= '.$start_time.' AND published = 1'
 		);
 		($hook = s2_hook('fn_s2_blog_year_posts_pre_get_days_qr')) ? eval($hook) : null;
 		$result = $s2_db->buildAndQuery($query);
 
-		$day_flags = array_fill(1, 12, array());
-		while ($row = $s2_db->fetchRow($result))
-			$day_flags[(int) date('m', $row[0])][(int) date('j', $row[0])] = 1;
+		$dayUrlsArray = array_fill(1, 12, []);
+		while ($row = $s2_db->fetchRow($result)) {
+            $dayUrlsArray[(int)date('m', $row[0])][(int)date('j', $row[0])][] = $row[1];
+        }
 
-		$content = array();
-		for ($i = 1; $i <= 12; $i++)
-			$content[] = Lib::calendar($year, Lib::extend_number($i), '-1', '', $day_flags[$i]);
+		$content = [];
+		for ($i = 1; $i <= 12; $i++) {
+            $content[] = Lib::calendar($year, Lib::extend_number($i), '-1', '', $dayUrlsArray[$i]);
+        }
 
 		$page['text'] = $this->renderPartial('year', array(
 			'content' => $content
