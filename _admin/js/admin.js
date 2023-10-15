@@ -1022,7 +1022,7 @@ function SaveArticle(sAction)
 
 	POSTAsyncRequest(sUrl + 'action=' + sAction, sRequest, function (http, data)
 	{
-		if (typeof data.status != undefined)
+		if (typeof data.status !== 'undefined')
 		{
 			if (data.status == 'conflict')
 			{

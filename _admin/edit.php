@@ -106,9 +106,7 @@ function s2_save_article ($page, $flags)
 		$query['SET'] .= ', user_id = '.intval($page['user_id']);
 
 	($hook = s2_hook('fn_save_article_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->buildAndQuery($query);
-	if ($s2_db->affectedRows($result) === 0)
-		$error = true;
+	$s2_db->buildAndQuery($query);
 
 	// Dealing with tags
 	$new_tags_str = isset($page['tags']) ? $page['tags'] : '';

@@ -8,6 +8,7 @@
  */
 
 
+use Psr\Log\LoggerInterface;
 use S2\Cms\Pdo\DbLayer;
 
 if (!defined('S2_ROOT'))
@@ -45,6 +46,8 @@ function s2_blog_save_post ($page, $flags)
 	global $lang_admin, $s2_user;
     /** @var DbLayer $s2_db */
     $s2_db = \Container::get(DbLayer::class);
+    /** @var LoggerInterface $logger */
+    $logger = \Container::get(LoggerInterface::class);
 
 	$favorite = (int) isset($flags['favorite']);
 	$published = (int) isset($flags['published']);
@@ -65,19 +68,24 @@ function s2_blog_save_post ($page, $flags)
 	($hook = s2_hook('fn_s2_blog_save_post_pre_get_post_qr')) ? eval($hook) : null;
 	$result = $s2_db->buildAndQuery($query);
 
-	if ($row = $s2_db->fetchRow($result))
-		list($user_id, $revision, $text, $title, $url) = $row;
-	else
-		die('Item not found!');
+	if ($row = $s2_db->fetchRow($result)) {
+        [$user_id, $revision, $text, $title, $url] = $row;
+    } else {
+        $logger->warning('Trying to edit a non-existent blog post.', [
+            'id' => $id,
+        ]);
+        die('Item not found!');
+    }
 
-	if (!$s2_user['edit_site'])
-		s2_test_user_rights($user_id == $s2_user['id']);
+	if (!$s2_user['edit_site']) {
+        s2_test_user_rights($user_id == $s2_user['id']);
+    }
 
-    if ($page['text'] != $text || $page['title'] != $title || $page['url'] != $url)
-	{
+    if ($page['text'] != $text || $page['title'] != $title || $page['url'] != $url) {
 		// If the page text has been modified, we check if this modification is done by current user
-		if ($revision != $page['revision'])
-			return array(null, $revision, 'conflict'); // No, it's somebody else
+		if ($revision != $page['revision']) {
+            return array(null, $revision, 'conflict'); // No, it's somebody else
+        }
 
 		$revision++;
 	}
@@ -94,12 +102,10 @@ function s2_blog_save_post ($page, $flags)
 		$query['SET'] .= ', user_id = '.intval($page['user_id']);
 
 	($hook = s2_hook('fn_s2_blog_save_post_pre_upd_qr')) ? eval($hook) : null;
-	$result = $s2_db->buildAndQuery($query);
-	if ($s2_db->affectedRows($result) <= 0)
-		$error = true;
+	$s2_db->buildAndQuery($query);
 
 	// Dealing with tags
-	$new_tags_str = isset($page['tags']) ? $page['tags'] : '';
+	$new_tags_str = $page['tags'] ?? '';
 	$new_tags = s2_get_tag_ids($new_tags_str);
 
 	$query = array(
@@ -112,8 +118,9 @@ function s2_blog_save_post ($page, $flags)
 	$result = $s2_db->buildAndQuery($query);
 
 	$old_tags = array();
-	while ($row = $s2_db->fetchRow($result))
-		$old_tags[] = $row[0];
+	while ($row = $s2_db->fetchRow($result)) {
+        $old_tags[] = $row[0];
+    }
 
 	// Compare old and new tags
 	if (implode(',', $old_tags) != implode(',', $new_tags))
@@ -136,13 +143,18 @@ function s2_blog_save_post ($page, $flags)
 			);
 			($hook = s2_hook('fn_s2_blog_save_post_pre_ins_tags_qr')) ? eval($hook) : null;
             $result = $s2_db->buildAndQuery($query);
-			if ($s2_db->affectedRows($result) <= 0)
-				$error = true;
+			if ($s2_db->affectedRows($result) <= 0) {
+                $logger->warning('No database entries have been created when inserting new tags.', [
+                    'id' => $id,
+                ]);
+                $error = true;
+            }
 		}
 	}
 
-	if ($error)
-		die($lang_admin['Not saved correct']);
+	if ($error) {
+        die($lang_admin['Not saved correct']);
+    }
 
 	return array($create_time, $revision, 'ok');
 }

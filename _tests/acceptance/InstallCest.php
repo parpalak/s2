@@ -126,10 +126,13 @@ class InstallCest
         $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save', $dataProvider('333'));
         $I->see('Item not found!');
 
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save', $dataProvider('3'));
-        $I->seeResponseCodeIsSuccessful();
-        $I->dontSee('Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.');
-        $I->see('{"revision":2,"status":"ok","url_status":"ok"}');
+        for ($i = 0; $i < 2; $i++) {
+            // 2-nd iteration checks that consequent saving of the same entity works fine
+            $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save', $dataProvider('3'));
+            $I->seeResponseCodeIsSuccessful();
+            $I->dontSee('Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.');
+            $I->see('{"revision":2,"status":"ok","url_status":"ok"}');
+        }
 
         $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=load_tree');
         $I->see('Error in GET parameters.');
