@@ -44,8 +44,13 @@
 		$footer['tags'] = Lang::get('Tags') . ': ' . implode(', ', $tags);
 	}
 
-	if ($commented && S2_SHOW_COMMENTS)
-		$footer['comments'] = '<a href="'.$link.'#comment">'.($comment_num ? sprintf(Lang::get('Comments', 's2_blog'), $comment_num) : (S2_ENABLED_COMMENTS ? Lang::get('Post comment', 's2_blog') : '')).'</a>';
+	if ($commented && S2_SHOW_COMMENTS) {
+        if ($comment_num) {
+            $footer['comments'] = '<a href="'.$link.'#comment">'. sprintf(Lang::get('Comments', 's2_blog'), $comment_num) .'</a>';
+        } else {
+            $footer['comments'] = '<a href="' . $link . '#add-comment">' . (S2_ENABLED_COMMENTS ? Lang::get('Post comment', 's2_blog') : '') . '</a>';
+        }
+    }
 
 	echo implode(' | ', $footer);
 ?>
