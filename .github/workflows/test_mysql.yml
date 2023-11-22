@@ -27,11 +27,19 @@ jobs:
           - 'mariadb-10.11'
           - 'mariadb-11.0'
           - 'mariadb-11.1'
+          - 'mariadb-11.2'
+          - 'mariadb-11.3'
           - '5.7'
           - '8.0'
           - '8.1'
+          - '8.2'
         php_versions:
           - '8.2'
+        include:
+          -
+            operating_system: 'ubuntu-22.04'
+            php_versions: 8.3
+            mysql_versions: 'mariadb-11.3'
 
     runs-on: '${{ matrix.operating_system }}'
 
