@@ -147,8 +147,7 @@ class LayoutMatcherFactory
         $r->addGroup('2i i t+1', ...[
             // http://localhost:8081/?/blog/2012/05/30/Do_you_understand_something_in_physics
             new BlockGroup(['1/2/3/4'], (new Block())->img(0.6, 0.8, $minImgWidth2)->bigTitle()),
-            new BlockGroup(['1/1'], Block::img1columnTall()),
-            new BlockGroup(['2/1'], (new Block())->img(0.0, 1.5, 300)),
+            new BlockGroup(['1/1', '2/1'], (new Block())->img(0.0, 0.8, 300)),
             new BlockGroup(['auto'], Block::thumbnail()->text(0, 150)),
             new BlockGroup(['auto'], (new Block())->text(0, 200)),
         ]);
