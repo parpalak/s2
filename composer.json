@@ -21,9 +21,9 @@
         "psr/log": "^1.1",
         "johnykvsky/jklogger": "^0.1.2",
         "s2/rose": "dev-master",
-        "symfony/error-handler": "^5.4",
-        "symfony/cache": "^5.4",
-        "symfony/filesystem": "^5.4",
+        "symfony/error-handler": "^7.0",
+        "symfony/cache": "^7.0",
+        "symfony/filesystem": "^7.0",
         "matthiasmullie/minify": "^1.3"
     },
     "autoload": {
@@ -32,8 +32,8 @@
         }
     },
     "require-dev": {
-        "codeception/codeception": "^4.2",
-        "codeception/module-asserts": "^2.0.0",
-        "codeception/module-phpbrowser": "^2.0"
+        "codeception/codeception": "^5.0",
+        "codeception/module-asserts": "^3.0.0",
+        "codeception/module-phpbrowser": "^3.0"
     }
 }
