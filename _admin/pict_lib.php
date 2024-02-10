@@ -112,8 +112,10 @@ function s2_get_files($dir)
 
         if (strpos($item, '.') !== false && \in_array(pathinfo($item, PATHINFO_EXTENSION), $allowed_extensions, true)) {
             $image_info = getImageSize(S2_IMG_PATH . $dir . '/' . $item);
-            $dim        = $image_info[0] . '*' . $image_info[1];
-            $bits       = ($image_info['bits'] ?? 0) * ($image_info['channels'] ?? 1);
+            if ($image_info !== false) {
+                $dim        = $image_info[0] . '*' . $image_info[1];
+                $bits       = ($image_info['bits'] ?? 0) * ($image_info['channels'] ?? 1);
+            }
         }
 
         ($hook = s2_hook('fn_get_files_pre_output_item_merge')) ? eval($hook) : null;
