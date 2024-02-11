@@ -2,16 +2,16 @@
 /**
  * Simple DI container to be used in legacy code.
  *
- * @copyright (C) 2023 Roman Parpalak
+ * @copyright (C) 2023-2024 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
 
-use johnykvsky\Utils\JKLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
+use S2\Cms\Logger\Logger;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerPostgres;
 use S2\Cms\Pdo\DbLayerSqlite;
@@ -95,10 +95,10 @@ class Container
                 );
 
             case LoggerInterface::class:
-                return new JKLogger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::INFO, ['prefix' => 'log_', 'extension' => 'log']);
+                return new Logger((defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR) . 'app.log', 'app',  LogLevel::INFO);
 
             case 'recommendations_logger':
-                return new JKLogger(defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR, LogLevel::DEBUG, ['prefix' => 'recommendations_', 'extension' => 'log']);
+                return new Logger((defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR) . 'recommendations.log', 'recommendations',  LogLevel::INFO);
 
             case 'recommendations_cache':
                 return new FilesystemAdapter('recommendations', 0, S2_CACHE_DIR);
