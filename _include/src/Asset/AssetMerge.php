@@ -91,6 +91,7 @@ class AssetMerge implements AssetMergeInterface
         }
 
         if ($this->devEnv) {
+            // TODO add images embedding in CSS
             $dumpModifiedAt = filemtime($this->getDumpFilename());
             foreach ($this->filesToMerge as $fileToMerge) {
                 if (filemtime($fileToMerge) > $dumpModifiedAt) {

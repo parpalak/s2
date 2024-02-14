@@ -167,7 +167,7 @@ function s2_process_multipart_mixed(&$src, &$dest, $dir = false)
  *
  * @throws Exception
  */
-function s2_get_template($rawTemplateId, $defaultPath = false)
+function s2_get_template($rawTemplateId, $defaultPath = false): string
 {
     global $request_uri;
 
@@ -621,8 +621,9 @@ function error()
     <?php
 
     // If a database connection was established (before this error) we close it
-    if (isset($GLOBALS['s2_db']))
-        $GLOBALS['s2_db']->close();
+    /** @var ?\S2\Cms\Pdo\DbLayer $s2_db */
+    $s2_db = Container::getIfInstantiated(\S2\Cms\Pdo\DbLayer::class);
+    $s2_db?->close();
 
     exit;
 }

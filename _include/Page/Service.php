@@ -10,7 +10,7 @@
 
 class Page_Service extends Page_HTML
 {
-	protected $template_id = 'service.php';
+	protected string $template_id = 'service.php';
 
 	public function __construct (array $params = array())
 	{

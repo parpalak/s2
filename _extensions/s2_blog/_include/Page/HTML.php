@@ -14,7 +14,7 @@ use S2\Cms\Pdo\DbLayer;
 
 abstract class Page_HTML extends \Page_HTML
 {
-	public $template_id = 'blog.php';
+	protected string $template_id = 'blog.php';
 
 	abstract public function body (array $params);
 

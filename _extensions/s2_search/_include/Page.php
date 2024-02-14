@@ -21,7 +21,7 @@ use S2\Rose\Storage\Exception\EmptyIndexException;
 
 class Page extends \Page_HTML implements \Page_Routable
 {
-    protected $template_id = 'service.php';
+    protected string $template_id = 'service.php';
     private int $page_num;
     private StemmerInterface $stemmer;
 

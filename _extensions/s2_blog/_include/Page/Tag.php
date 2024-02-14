@@ -1,8 +1,8 @@
 <?php
 /**
- * Blog posts for a tag.
+ * Blog posts for a specified tag.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
+ * @copyright (C) 2007-2024 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package s2_blog
  */
@@ -16,20 +16,20 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 {
 	public function body (array $params = array())
 	{
-		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
-			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
+		if ($this->inTemplate('<!-- s2_blog_calendar -->')) {
+            $this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
+        }
 
 		// A tag
 		$this->posts_by_tag($params['tag'], !empty($params['slash']));
-		$this->page['title'] = $this->page['head_title'] = s2_htmlencode($this->page['title']);
 
 		// Bread crumbs
 		$this->page['path'][] = array(
 			'title' => \Model::main_page_title(),
 			'link'  => s2_link('/'),
 		);
-		if (S2_BLOG_URL)
-		{
+
+		if (S2_BLOG_URL) {
 			$this->page['path'][] = array(
 				'title' => Lang::get('Blog', 's2_blog'),
 				'link' => S2_BLOG_PATH,
@@ -43,6 +43,10 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 		$this->page['path'][] = array(
 			'title' => $this->page['title'],
 		);
+
+
+        $this->page['head_title'] = s2_htmlencode($this->page['title']);
+        $this->page['title'] = $this->renderPartial('tag_title', ['title' => $this->page['title']]);
 
 		$this->page['link_navigation']['up'] = S2_BLOG_TAGS_PATH;
 	}

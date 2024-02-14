@@ -2,15 +2,15 @@
 /**
  * Renders views.
  *
- * @copyright (C) 2014 Roman Parpalak
+ * @copyright (C) 2014-2024 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
 
 class Viewer
 {
-    private $dirs = array();
-    private $debug = false;
+    private array $dirs = [];
+    private bool $debug = false;
 
     public function __construct($that = null)
     {
@@ -84,20 +84,15 @@ class Viewer
         return $str;
     }
 
-    /**
-     * @param       $name
-     * @param array $vars
-     * @returns string
-     */
-    public function render($name, array $vars)
+    public function render(string $name, array $vars): string
     {
         $name     = preg_replace('#[^0-9a-zA-Z._\-]#', '', $name);
         $filename = $name . '.php';
 
-        $found_file = '';
+        $foundFile = null;
         foreach ($this->dirs as $dir) {
             if (file_exists($dir . $filename)) {
-                $found_file = $dir . $filename;
+                $foundFile = $dir . $filename;
                 break;
             }
         }
@@ -112,8 +107,8 @@ class Viewer
             echo '</pre>';
         }
 
-        if ($found_file) {
-            $this->include_file($found_file, $vars);
+        if ($foundFile !== null) {
+            $this->includeFile($foundFile, $vars);
         } elseif ($this->debug) {
             echo 'View file not found in ', s2_htmlencode(var_export($this->dirs, true));
         }
@@ -125,7 +120,7 @@ class Viewer
         return ob_get_clean();
     }
 
-    private function include_file($_found_file, $_vars): void
+    private function includeFile(string $_found_file, array $_vars): void
     {
         extract($_vars, EXTR_OVERWRITE);
         include $_found_file;

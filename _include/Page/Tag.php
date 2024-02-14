@@ -5,7 +5,7 @@ use S2\Cms\Pdo\DbLayer;
 /**
  * Displays the list of pages and excerpts for a specified tag.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
+ * @copyright (C) 2007-2024 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -154,7 +154,7 @@ class Page_Tag extends Page_HTML implements Page_Routable
 					'title' => $tag_name,
 				),
 			),
-			'title' => s2_htmlencode($tag_name),
+			'title' => $this->renderPartial('tag_title', ['title' => $tag_name]),
 			'date'  => '',
 			'text'  => $this->renderPartial('list_text', array(
 				'description' => $tag_description,
