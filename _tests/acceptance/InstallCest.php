@@ -52,7 +52,9 @@ class InstallCest
 
         $this->testAdminLogin($I);
         $this->testAdminEditAndTagsAdded($I);
+        $this->testRssAndSitemap($I);
         $this->testBlogExtension($I);
+        $this->testBlogRssAndSitemap($I);
         $this->testSearchExtension($I);
         $this->testAdminTagListAndEdit($I);
         $this->testAdminCommentManagement($I);
@@ -157,6 +159,22 @@ class InstallCest
         $I->see('another tag');
     }
 
+    private function testRssAndSitemap(AcceptanceTester $I): void
+    {
+        $I->amOnPage('/index.php?/rss.xml'); // Other URL scheme because the built-in PHP server looks for a file rss.xml
+        $I->seeResponseCodeIsSuccessful();
+        $I->canSee('Site powered by S2');
+        $I->canSee('New Page Title');
+        $I->canSee('/section1/new_page1');
+        $I->canSee('Thu, 10 Aug 2023 11:32:00 GMT');
+        $I->see('New Excerpt');
+
+        $I->amOnPage('/index.php?/sitemap.xml'); // Same as above
+        $I->seeResponseCodeIsSuccessful();
+        $I->see('/section1/new_page1');
+        $I->see('2023-08-11T12:15:00+00:00');
+    }
+
     /**
      * @throws JsonException
      */
@@ -249,6 +267,22 @@ class InstallCest
 
         $I->amOnPage('/tags/blog tag');
         $I->seeResponseCodeIsSuccessful();
+    }
+
+    private function testBlogRssAndSitemap(AcceptanceTester $I): void
+    {
+        $I->amOnPage('/index.php?/blog/rss.xml'); // Other URL scheme because the built-in PHP server looks for a file rss.xml
+        $I->seeResponseCodeIsSuccessful();
+        $I->canSee('My blog');
+        $I->canSee('New Blog Post Title');
+        $I->canSee('/blog/2023/08/12/new_post1');
+        $I->canSee('Sat, 12 Aug 2023 11:32:00 GMT');
+        $I->see('New blog post');
+
+        $I->amOnPage('/index.php?/blog/sitemap.xml'); // Same as above
+        $I->seeResponseCodeIsSuccessful();
+        $I->see('/blog/2023/08/12/new_post1');
+        $I->see('2023-08-12T12:15:00+00:00');
     }
 
     private function testSearchExtension(AcceptanceTester $I): void

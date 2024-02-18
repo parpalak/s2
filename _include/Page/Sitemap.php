@@ -16,7 +16,7 @@ class Page_Sitemap extends Page_Abstract implements Page_Routable
     /**
      * {@inheritdoc}
      */
-    public function render()
+    public function render(): void
     {
         $max_time = 0;
         $items    = '';

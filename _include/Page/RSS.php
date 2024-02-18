@@ -20,7 +20,7 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 		parent::__construct();
 	}
 
-	public function render ()
+	public function render(): void
 	{
 		$return = ($hook = s2_hook('pr_render_start')) ? eval($hook) : null;
 		if ($return)
