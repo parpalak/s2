@@ -1,7 +1,4 @@
 <?php
-
-use S2\Cms\Pdo\DbLayer;
-
 /**
  * Creates Sitemap.
  *
@@ -11,12 +8,15 @@ use S2\Cms\Pdo\DbLayer;
  */
 
 
+use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
+
 class Page_Sitemap extends Page_Abstract implements Page_Routable
 {
     /**
      * {@inheritdoc}
      */
-    public function render(): void
+    public function render(Request $request): void
     {
         $max_time = 0;
         $items    = '';

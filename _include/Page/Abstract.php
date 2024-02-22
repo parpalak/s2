@@ -1,6 +1,7 @@
 <?php
 
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Abstract page controller class. Renders content for the browser
@@ -59,7 +60,7 @@ abstract class Page_Abstract
     /**
      * Outputs content to browser
      */
-    public function render(): void
+    public function render(Request $request): void
     {
         $this->ensureTemplateIsLoaded();
 

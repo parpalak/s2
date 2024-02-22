@@ -1,6 +1,8 @@
 <?php
 
+use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Displays the list of pages and excerpts for a specified tag.
@@ -13,13 +15,14 @@ use S2\Cms\Pdo\DbLayer;
 
 class Page_Tag extends Page_HTML implements Page_Routable
 {
-	public function __construct (array $params = array())
-	{
-		parent::__construct();
-		$this->make_tags_pages($params['name'], !empty($params['slash']));
-	}
+    public function render(Request $request): void
+    {
+        $this->make_tags_pages($request->attributes->get('name'), !empty($request->attributes->get('slash')));
+        parent::render($request);
+    }
 
-	//
+
+    //
 	// Builds tags pages
 	//
 	private function make_tags_pages ($tag_name, $is_slash)
@@ -37,14 +40,13 @@ class Page_Tag extends Page_HTML implements Page_Routable
 		($hook = s2_hook('pt_make_tags_pages_pre_get_tag_qr')) ? eval($hook) : null;
 		$result = $s2_db->buildAndQuery($query);
 
-		if ($row = $s2_db->fetchRow($result))
-			list($tag_id, $tag_description, $tag_name, $tag_url) = $row;
-		else {
-			$this->error_404();
-			die;
-		}
+		if (!($row = $s2_db->fetchRow($result))) {
+            throw new NotFoundException();
+        }
 
-		if (!$is_slash)
+        [$tag_id, $tag_description, $tag_name, $tag_url] = $row;
+
+        if (!$is_slash)
 			s2_permanent_redirect('/'.S2_TAGS_URL.'/'.urlencode($tag_url).'/');
 
 		$subquery = array(

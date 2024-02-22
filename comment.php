@@ -2,13 +2,14 @@
 /**
  * Receives POST data and saves user comments.
  *
- * @copyright (C) 2009-2013 Roman Parpalak
+ * @copyright (C) 2009-2024 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
 
 use Psr\Log\LoggerInterface;
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
 
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
@@ -27,7 +28,7 @@ if (isset($_GET['go']))
         'text'       => sprintf(Lang::get('Comment sent info', 'comments'), s2_htmlencode($_GET['go']), s2_link('/')),
     ]);
 
-	$controller->render();
+	$controller->render(Request::createFromGlobals());
 
 	die();
 }
@@ -74,7 +75,7 @@ if (isset($_GET['unsubscribe']))
 				'text'       => Lang::get('Unsubscribed OK info', 'comments'),
 			));
 
-			$controller->render();
+			$controller->render(Request::createFromGlobals());
 
 			die();
 		}
@@ -86,7 +87,7 @@ if (isset($_GET['unsubscribe']))
 		'text'       => Lang::get('Unsubscribed failed info', 'comments'),
 	));
 
-	$controller->render();
+	$controller->render(Request::createFromGlobals());
 
 	die();
 }
@@ -174,7 +175,7 @@ if (isset($_POST['preview']))
 		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
 	));
 
-	$controller->render();
+	$controller->render(Request::createFromGlobals());
 
 	die();
 }
@@ -222,7 +223,7 @@ if (!empty($errors))
 		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
 	));
 
-	$controller->render();
+	$controller->render(Request::createFromGlobals());
 
     /** @var LoggerInterface $logger */
     $logger = Container::get(LoggerInterface::class);

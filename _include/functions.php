@@ -163,6 +163,8 @@ function s2_process_multipart_mixed(&$src, &$dest, $dir = false)
 }
 
 /**
+ * @deprecated Move code to the HtmlTemplateProvided
+ *
  * Searches for a template file (in the style or 'template' directory)
  *
  * @throws Exception
@@ -629,6 +631,12 @@ function error()
 }
 
 
+/**
+ * @deprecated TODO use Response instead
+ * @param $url
+ * @param $external
+ * @return void
+ */
 function s2_permanent_redirect($url, $external = false)
 {
     global $controller;

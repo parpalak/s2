@@ -1,26 +1,18 @@
 <?php
-
-use S2\Cms\Pdo\DbLayer;
-
 /**
  * Creates RSS feeds.
  *
- * @copyright (C) 2009-2014 Roman Parpalak, based on code (C) 2008-2009 PunBB
+ * @copyright (C) 2009-2024 Roman Parpalak, based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
 
+use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
 
 class Page_RSS extends Page_Abstract implements Page_Routable
 {
-	private $url = '';
-	public function __construct (array $params = array())
-	{
-		$this->url = $params['url'];
-		parent::__construct();
-	}
-
-	public function render(): void
+	public function render(Request $request): void
 	{
 		$return = ($hook = s2_hook('pr_render_start')) ? eval($hook) : null;
 		if ($return)
@@ -29,7 +21,7 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 		$content = array(
 			'rss_title'       => $this->title(),
 			'rss_link'        => s2_abs_link($this->link()),
-			'self_link'       => $this->url,
+			'self_link'       => $request->getPathInfo(),
 			'rss_description' => $this->description(),
 		);
 

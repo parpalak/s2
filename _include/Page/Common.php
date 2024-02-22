@@ -1,13 +1,15 @@
 <?php
 
+use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\ExternalId;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Displays a page stored in DB.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
+ * @copyright (C) 2007-2024 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -15,10 +17,10 @@ use S2\Rose\Entity\ExternalId;
 
 class Page_Common extends Page_HTML implements Page_Routable
 {
-	public function __construct (array $params = array())
+    public function render(Request $request): void
 	{
-		parent::__construct($params);
-		$this->parse_page_url($params['request_uri']);
+        $this->parse_page_url($request->getPathInfo());
+        parent::render($request);
 	}
 
 	private function tagged_articles ($id)
@@ -225,8 +227,9 @@ class Page_Common extends Page_HTML implements Page_Routable
 					}
 				}
 
-				if ($found_node_num == 0)
-					$this->error_404();
+				if ($found_node_num === 0) {
+                    throw new NotFoundException();
+                }
 				if ($found_node_num > 1)
 					error(Lang::get('DB repeat items') . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.s2_htmlencode($request_array[$i]).'")' : ''));
 
@@ -276,8 +279,10 @@ class Page_Common extends Page_HTML implements Page_Routable
 		$page = $s2_db->fetchAssoc($result);
 
 		// Error handling
-		if (!$page)
-			$this->error_404();
+		if (!$page) {
+            throw new NotFoundException();
+        }
+
 		if ($s2_db->fetchAssoc($result))
 			error(Lang::get('DB repeat items') . (defined('S2_DEBUG') ? ' (parent_id='.$parent_id.', url="'.$request_array[$i].'")' : ''));
 

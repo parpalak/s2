@@ -9,6 +9,7 @@
 
 namespace s2_extensions\s2_blog;
 use Lang;
+use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
 
 
@@ -64,14 +65,13 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 		($hook = s2_hook('fn_s2_blog_posts_by_tag_pre_get_tag_qr')) ? eval($hook) : null;
 		$result = $s2_db->buildAndQuery($query);
 
-		if ($row = $s2_db->fetchRow($result))
-			list($tag_id, $tag_descr, $tag_name, $tag_url) = $row;
-		else {
-			$this->error_404();
-			die;
-		}
+		if (!($row = $s2_db->fetchRow($result))) {
+            throw new NotFoundException();
+        }
 
-		if (!$is_slash)
+        [$tag_id, $tag_descr, $tag_name, $tag_url] = $row;
+
+        if (!$is_slash)
 			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'.urlencode($tag_url).'/');
 
 		$art_links = self::articles_by_tag($tag_id);
@@ -91,8 +91,9 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 			'WHERE'		=> 'pt.tag_id = '.$tag_id
 		);
 		$output = $this->get_posts($query_add, false);
-		if ($output == '')
-			$this->error_404();
+		if ($output == '') {
+            throw new NotFoundException();
+        }
 
 		$this->page['title'] = $tag_name;
 		$this->page['text'] = $tag_descr.$output;

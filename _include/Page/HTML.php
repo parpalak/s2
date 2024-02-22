@@ -28,41 +28,6 @@ abstract class Page_HTML extends Page_Abstract
 		s2_no_cache();
 	}
 
-	/**
-	 * Call this if there is nothing to display
-	 * and you want to show standard 404 page.
-	 */
-	protected function error_404 ()
-	{
-		$this->checkRedirect();
-
-		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		try {
-			$this->template = s2_get_template($this->error_template_id);
-		}
-		catch (Exception $e) {
-			error($e->getMessage());
-		}
-
-		$this->page = array(
-			'head_title' => Lang::get('Error 404'),
-			'title'      => '<h1 class="error404-header">' . Lang::get('Error 404') . '</h1>',
-			'text'       => sprintf(Lang::get('Error 404 text'), s2_link('/')),
-		);
-
-		$this->page['path'][] = array(
-			'title' => \Model::main_page_title(),
-			'link'  => s2_link('/'),
-		);
-
-		$this->render();
-
-        if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction(get_class($this) . '_not_found');
-        }
-
-		die();
-	}
 
 	protected function checkRedirect ()
 	{
