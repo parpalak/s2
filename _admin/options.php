@@ -261,7 +261,7 @@ function s2_save_options ($opt)
 		$s2_db->buildAndQuery($query);
 	}
 
-	S2Cache::generate_config();
+    \Container::get(\S2\Cms\Config\DynamicConfigProvider::class)->regenerate();
 
 	return implode("\n", $return);
 }

@@ -2,16 +2,11 @@
 /**
  * Autoloader and proper environment setup.
  *
- * @copyright (C) 2009-2014 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2009-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
 
-
-use Psr\Log\LoggerInterface;
-use Symfony\Component\ErrorHandler\Debug;
-use Symfony\Component\ErrorHandler\ErrorHandler;
-use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 if (!defined('S2_ROOT')) {
     die;
@@ -21,7 +16,14 @@ mb_internal_encoding('UTF-8');
 
 // If the cache directory is not specified, we use the default setting
 if (!defined('S2_CACHE_DIR')) {
-    define('S2_CACHE_DIR', S2_ROOT . '_cache/');
+    define('S2_CACHE_DIR', (static function () {
+        $appEnv = getenv('APP_ENV');
+        if (is_string($appEnv) && $appEnv !== '') {
+            return S2_ROOT . '_cache/' . $appEnv .'/';
+        }
+
+        return S2_ROOT . '_cache/';
+    })());
 }
 
 spl_autoload_register(static function ($class) {
@@ -41,15 +43,6 @@ spl_autoload_register(static function ($class) {
 
     require $file;
 });
-
-if (defined('S2_DEBUG')) {
-    $errorHandler = Debug::enable();
-} else {
-    $errorHandler = ErrorHandler::register();
-}
-/** @noinspection PhpParamsInspection */
-$errorHandler->setDefaultLogger(Container::get(LoggerInterface::class));
-HtmlErrorRenderer::setTemplate(realpath(S2_ROOT.'_include/views/error.php'));
 
 // Strip out "bad" UTF-8 characters
 s2_remove_bad_characters();

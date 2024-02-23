@@ -1,7 +1,11 @@
 chmod a+w _tests/_output/
 [ ! -d "_tests/_output/email/" ] && mkdir _tests/_output/email/
 chmod a+w _tests/_output/email/
+
+[ ! -d "_cache/test/" ] && mkdir _cache/test/
+chmod a+w _cache/test/
 rm -f _cache/*.log
+rm -f _cache/test/*.log
 
 # clear test databases
 rm -f s2_test
@@ -20,7 +24,11 @@ APP_ENV=test \
 serverPID=$!
 
 # run tests
-XDEBUG_MODE=off php _vendor/bin/codecept run acceptance
+if [ -z "$1" ]; then
+    XDEBUG_MODE=off php _vendor/bin/codecept run acceptance
+else
+    XDEBUG_MODE=off php _vendor/bin/codecept run acceptance "$1"
+fi
 
 status=$?
 
@@ -29,6 +37,6 @@ status=$?
 pkill -P $serverPID # for children PHP_CLI_SERVER_WORKERS
 kill $serverPID
 
-rm -f _cache/*.php
+rm -f _cache/test/*.php
 
 exit $status

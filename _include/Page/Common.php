@@ -552,7 +552,7 @@ class Page_Common extends Page_HTML implements Page_Routable
         if ($this->inTemplate('<!-- s2_recommendations -->')) {
             /** @var RecommendationProvider $recommendationProvider */
             $recommendationProvider = \Container::get(RecommendationProvider::class);
-            global $request_uri;
+            global $request_uri; // ???
 
             [$recommendations, $log, $rawRecommendations] = $recommendationProvider->getRecommendations($request_uri, new ExternalId($id));
             $this->page['recommendations'] = $this->renderPartial('recommendations', [

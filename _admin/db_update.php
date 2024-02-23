@@ -1,17 +1,18 @@
 <?php
 /**
- * Database update script.
+ * Database migrations script.
  *
- * @copyright (C) 2011-2013 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2011-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
 
 
 use S2\Cms\Pdo\DbLayer;
 
-if (!defined('S2_DB_LAST_REVISION'))
-	die;
+if (!defined('S2_DB_LAST_REVISION')) {
+    die;
+}
 
 /** @var DbLayer $s2_db */
 $s2_db = \Container::get(DbLayer::class);
@@ -200,4 +201,4 @@ $query = array(
 
 $s2_db->buildAndQuery($query);
 
-S2Cache::generate_config();
+\Container::get(\S2\Cms\Config\DynamicConfigProvider::class)->regenerate();

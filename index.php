@@ -7,12 +7,11 @@
  * @package       S2
  */
 
+use S2\Cms\Controller\NotFoundController;
+use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
 
 define('S2_ROOT', './');
 require S2_ROOT . '_include/common.php';
@@ -50,37 +49,12 @@ if (str_ends_with($request_uri, '---')) {
     die;
 }
 
-if (!defined('S2_COMMENTS_FUNCTIONS_LOADED'))
+if (!defined('S2_COMMENTS_FUNCTIONS_LOADED')) {
     require S2_ROOT . '_include/comments.php';
-
-$routes = new RouteCollection();
-
-($hook = s2_hook('idx_new_routes')) ? eval($hook) : null;
-
-$routes->add('rss', new Route('/rss.xml',  ['_controller' => Page_RSS::class]));
-$routes->add('sitemap', new Route('/sitemap.xml',  ['_controller' => Page_Sitemap::class]));
-
-$routes->add('favorite_', new Route('/'.S2_FAVORITE_URL,  ['_controller' => static function () {
-    s2_permanent_redirect('/' . S2_FAVORITE_URL . '/');
-}]));
-$routes->add('favorite', new Route('/'.S2_FAVORITE_URL.'/',  ['_controller' => Page_Favorite::class]));
-
-$routes->add('tags_', new Route('/'.S2_TAGS_URL,  ['_controller' => static function () {
-    s2_permanent_redirect('/' . S2_TAGS_URL . '/');
-}]));
-$routes->add('tags', new Route('/'.S2_TAGS_URL.'/',  ['_controller' => Page_Tags::class]));
-$routes->add('tag', new Route('/'.S2_TAGS_URL.'/{name}{slash</?>}',  ['_controller' => Page_Tag::class]));
-$routes->add('common', new Route('/{path<.*>}', ['_controller' => Page_Common::class, 'request_uri' => $request_uri]));
-
+}
 
 $request = Request::createFromGlobals();
-$context = new RequestContext();
-$context->fromRequest($request);
-
-$matcher = new UrlMatcher($routes, $context);
-
-$attributes = $matcher->matchRequest($request);
-$request->attributes->add($attributes);
+$attributes = $app->matchRequest($request);
 
 $target = $attributes['_controller'];
 if (is_callable($target)) {
@@ -95,9 +69,9 @@ if ($controller instanceof Page_Routable) {
 
     try {
         $controller->render($request);
-    } catch (\S2\Cms\Framework\Exception\NotFoundException $e) {
+    } catch (NotFoundException $e) {
         // TODO checkRedirect
-        $controller = new \S2\Cms\Controller\NotFoundController(new \S2\Cms\Template\HtmlTemplateProvider());
+        $controller = new NotFoundController(new HtmlTemplateProvider());
         $response = $controller->handle($request);
         $response->prepare($request);
         $response->send(false);

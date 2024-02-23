@@ -37,52 +37,6 @@ class S2Cache
     }
 
     /**
-     * Generate the config cache
-     */
-    public static function generate_config(bool $load = false): void
-    {
-        /** @var DbLayer $s2_db */
-        $s2_db = \Container::get(DbLayer::class);
-
-        $return = ($hook = s2_hook('fn_generate_config_cache_start')) ? eval($hook) : null;
-        if ($return !== null) {
-            return;
-        }
-
-        // Get the config from the DB
-        $query = array(
-            'SELECT' => 'c.*',
-            'FROM'   => 'config AS c'
-        );
-
-        ($hook = s2_hook('fn_generate_config_cache_qr_get_config')) ? eval($hook) : null;
-        $result = $s2_db->buildAndQuery($query);
-
-        $output = '';
-        while ($row = $s2_db->fetchRow($result)) {
-            $output .= 'define(\'' . $row[0] . '\', \'' . str_replace(array('\\', '\''), array('\\\\', '\\\''), $row[1]) . '\');' . "\n";
-            if ($load) {
-                define($row[0], $row[1]);
-            }
-        }
-
-        if ($load) {
-            define('S2_CONFIG_LOADED', 1);
-        }
-
-        if (defined('S2_DISABLE_CACHE')) {
-            return;
-        }
-
-        // Output config as PHP code
-        try {
-            s2_overwrite_file_skip_locked(S2_CACHE_DIR . 'cache_config.php', '<?php' . "\n\n" . 'define(\'S2_CONFIG_LOADED\', 1);' . "\n\n" . $output . "\n");
-        } catch (\RuntimeException $e) {
-            error('Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
-        }
-    }
-
-    /**
      * Generate the hooks cache
      */
     public static function generate_hooks(): array
@@ -93,26 +47,6 @@ class S2Cache
         if (!isset($s2_db)) {
             return []; // Install
         }
-        // Get the hotfix hooks from the DB
-//        $query = array(
-//            'SELECT'   => 'eh.id, eh.code, eh.extension_id, eh.priority, e.dependencies',
-//            'FROM'     => 'extension_hooks AS eh',
-//            'JOINS'    => array(
-//                array(
-//                    'INNER JOIN' => 'extensions AS e',
-//                    'ON'         => 'e.id=eh.extension_id'
-//                )
-//            ),
-//            'WHERE'    => 'e.disabled=0 AND e.name LIKE \'hotfix_%\'',
-//            'ORDER BY' => 'eh.priority, eh.installed'
-//        );
-//
-//        $result = $s2_db->query_build($query);
-//
-//        while ($cur_hook = $s2_db->fetchAssoc($result)) {
-//            $code = $cur_hook['code'];
-//            TODO cache somewhere the hotfix code
-//        }
 
         // Get extensions from the DB
         $query = array(

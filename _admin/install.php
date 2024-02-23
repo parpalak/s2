@@ -10,8 +10,12 @@
  */
 
 
+use Psr\Log\LogLevel;
+use S2\Cms\Logger\Logger;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use Symfony\Component\ErrorHandler\Debug;
+use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
 define('S2_DB_REVISION', 16);
@@ -35,8 +39,9 @@ if (file_exists(S2_ROOT . s2_get_config_filename())) {
 }
 
 // Make sure we are running at least MIN_PHP_VERSION
-if (!function_exists('version_compare') || version_compare(PHP_VERSION, MIN_PHP_VERSION, '<'))
-	exit('You are running PHP version '.PHP_VERSION.'. S2 requires at least PHP '.MIN_PHP_VERSION.' to run properly. You must upgrade your PHP installation before you can continue.');
+if (!function_exists('version_compare') || version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
+    exit('You are running PHP version ' . PHP_VERSION . '. S2 requires at least PHP ' . MIN_PHP_VERSION . ' to run properly. You must upgrade your PHP installation before you can continue.');
+}
 
 // Disable error reporting for uninitialized variables
 error_reporting(E_ALL);
@@ -45,6 +50,11 @@ error_reporting(E_ALL);
 @set_time_limit(0);
 
 require S2_ROOT . '_include/setup.php';
+
+$errorHandler = Debug::enable();
+HtmlErrorRenderer::setTemplate(realpath(S2_ROOT.'_include/views/error.php'));
+$errorHandler->setDefaultLogger(new Logger(S2_ROOT . '_cache/install.log', 'install', LogLevel::DEBUG));
+
 require 'options.php';
 
 //
@@ -432,8 +442,9 @@ else
 
 	// Create the database object (and connect/select db)
     $p_connect = false;
-    /** @var DbLayer $s2_db */
-    $s2_db = \Container::get(DbLayer::class);
+    $app = new \S2\Cms\Application();
+    $app->boot();
+    $s2_db = $app->container->get(DbLayer::class);
 
 	// Check SQLite prefix collision
 	if ($db_type == 'sqlite' && strtolower($db_prefix) == 'sqlite_') {
