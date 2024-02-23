@@ -69,6 +69,9 @@ if ($controller instanceof Page_Routable) {
 
     try {
         $controller->render($request);
+        if (\extension_loaded('newrelic')) {
+            newrelic_name_transaction(get_class($controller));
+        }
     } catch (NotFoundException $e) {
         // TODO checkRedirect
         $controller = new NotFoundController(new HtmlTemplateProvider());
@@ -77,7 +80,7 @@ if ($controller instanceof Page_Routable) {
         $response->send(false);
 
         if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction(get_class($this) . '_not_found');
+            newrelic_name_transaction(get_class($controller) . '_not_found');
         }
     }
 }
@@ -85,9 +88,6 @@ if ($controller instanceof Page_Routable) {
 if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
     if (\extension_loaded('newrelic')) {
-        if (is_object($controller)) {
-            newrelic_name_transaction(get_class($controller));
-        }
         newrelic_end_transaction();
         newrelic_start_transaction(ini_get('newrelic.appname'));
         newrelic_name_transaction('index_background');
