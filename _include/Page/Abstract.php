@@ -1,8 +1,4 @@
 <?php
-
-use S2\Cms\Pdo\DbLayer;
-use Symfony\Component\HttpFoundation\Request;
-
 /**
  * Abstract page controller class. Renders content for the browser
  *
@@ -10,6 +6,11 @@ use Symfony\Component\HttpFoundation\Request;
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
+
+use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 abstract class Page_Abstract
 {
     protected string $template_id = 'site.php';
@@ -60,7 +61,7 @@ abstract class Page_Abstract
     /**
      * Outputs content to browser
      */
-    public function render(Request $request): void
+    public function render(Request $request): ?Response
     {
         $this->ensureTemplateIsLoaded();
 
@@ -95,5 +96,7 @@ abstract class Page_Abstract
         header('Content-Type: text/html; charset=utf-8');
 
         ob_end_flush();
+
+        return null;
     }
 }

@@ -1,8 +1,4 @@
 <?php
-
-use S2\Cms\Pdo\DbLayer;
-use Symfony\Component\HttpFoundation\Request;
-
 /**
  * Displays the list of favorite pages and excerpts.
  *
@@ -11,16 +7,21 @@ use Symfony\Component\HttpFoundation\Request;
  * @package S2
  */
 
+use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class Page_Favorite extends Page_HTML implements Page_Routable
 {
-    public function render(Request $request): void
+    public function render(Request $request): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
-            s2_permanent_redirect($request->getPathInfo() . '/');
+            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
         $this->page = $this->make_favorite_page() + $this->page;
-        parent::render($request);
+        return parent::render($request);
     }
 
     //

@@ -38,5 +38,6 @@ pkill -P $serverPID # for children PHP_CLI_SERVER_WORKERS
 kill $serverPID
 
 rm -f _cache/test/*.php
+rm -f _cache/test/*.txt
 
 exit $status

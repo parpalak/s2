@@ -9,14 +9,16 @@
 
 use S2\Cms\Pdo\DbLayer;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Page_RSS extends Page_Abstract implements Page_Routable
 {
-	public function render(Request $request): void
-	{
+	public function render(Request $request): ?Response
+    {
 		$return = ($hook = s2_hook('pr_render_start')) ? eval($hook) : null;
-		if ($return)
-			return;
+		if ($return) {
+            return $return;
+        }
 
 		$content = array(
 			'rss_title'       => $this->title(),
@@ -90,6 +92,8 @@ class Page_RSS extends Page_Abstract implements Page_Routable
 		header('Content-Type: text/xml; charset=utf-8');
 
 		ob_end_flush();
+
+        return null;
 	}
 
 	/**

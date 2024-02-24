@@ -2,21 +2,22 @@
 /**
  * Creates Sitemap.
  *
- * @copyright (C) 2021 Roman Parpalak
- * @license       http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package       S2
+ * @copyright 2021-2024 Roman Parpalak
+ * @license MIT
+ * @package S2
  */
 
 
 use S2\Cms\Pdo\DbLayer;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Page_Sitemap extends Page_Abstract implements Page_Routable
 {
     /**
      * {@inheritdoc}
      */
-    public function render(Request $request): void
+    public function render(Request $request): ?Response
     {
         $max_time = 0;
         $items    = '';
@@ -57,6 +58,8 @@ class Page_Sitemap extends Page_Abstract implements Page_Routable
         header('Content-Type: text/xml; charset=utf-8');
 
         ob_end_flush();
+
+        return null;
     }
 
     protected function getItems(): array

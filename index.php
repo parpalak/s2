@@ -62,7 +62,7 @@ if ($controller instanceof Page_Routable) {
     s2_no_cache(); // TODO пожоже, это внутри if для исключения отправки заголовков в RSS. Надо понять, нужно ли это вообще. Типа, чтобы браузеры не кешировали странички без комментов?
 
     try {
-        $controller->render($request);
+        $response = $controller->render($request);
         if (\extension_loaded('newrelic')) {
             newrelic_name_transaction($controllerClass);
         }
@@ -70,12 +70,15 @@ if ($controller instanceof Page_Routable) {
         /** @var NotFoundController $errorController */
         $errorController = $app->container->get(NotFoundController::class);
         $response = $errorController->handle($request);
-        $response->prepare($request);
-        $response->send(false);
 
         if (\extension_loaded('newrelic')) {
             newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
         }
+    }
+
+    if ($response !== null) {
+        $response->prepare($request);
+        $response->send(false);
     }
 }
 

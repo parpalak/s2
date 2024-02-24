@@ -7,14 +7,16 @@
  * @package S2
  */
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Page_Tags extends Page_HTML implements Page_Routable
 {
-    public function render(Request $request): void
+    public function render(Request $request): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
-            s2_permanent_redirect($request->getPathInfo() . '/');
+            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $this->page = [
@@ -32,6 +34,6 @@ class Page_Tags extends Page_HTML implements Page_Routable
             'text'  => $this->renderPartial('tags_list', ['tags' => Placeholder::tags_list()]),
         ];
 
-        parent::render($request);
+        return parent::render($request);
     }
 }

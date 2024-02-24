@@ -50,6 +50,7 @@ class InstallCest
         $I->see('If you see this text, the install of S2 has been successfully completed.');
         $I->canWriteComment();
 
+        $this->testHierarchyRedirects($I);
         $this->testAdminLogin($I);
         $this->testAdminEditAndTagsAdded($I);
         $this->testTagsPage($I);
@@ -60,6 +61,20 @@ class InstallCest
         $this->testSearchExtension($I);
         $this->testAdminTagListAndEdit($I);
         $this->testAdminCommentManagement($I);
+    }
+
+    private function testHierarchyRedirects(AcceptanceTester $I): void
+    {
+        $I->stopFollowingRedirects();
+        $I->amOnPage('/section1');
+        $I->seeResponseCodeIs(301);
+        $I->followRedirect();
+        $I->seeCurrentUrlEquals('/index.php?/section1/');
+        $I->amOnPage('/section1/page1/');
+        $I->seeResponseCodeIs(301);
+        $I->followRedirect();
+        $I->seeCurrentUrlEquals('/index.php?/section1/page1');
+        $I->startFollowingRedirects();
     }
 
     private function testAdminLogin(AcceptanceTester $I): void

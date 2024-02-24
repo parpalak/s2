@@ -1,11 +1,4 @@
 <?php
-
-use S2\Cms\Framework\Exception\NotFoundException;
-use S2\Cms\Pdo\DbLayer;
-use S2\Cms\Recommendation\RecommendationProvider;
-use S2\Rose\Entity\ExternalId;
-use Symfony\Component\HttpFoundation\Request;
-
 /**
  * Displays a page stored in DB.
  *
@@ -14,13 +7,21 @@ use Symfony\Component\HttpFoundation\Request;
  * @package S2
  */
 
+use S2\Cms\Framework\Exception\NotFoundException;
+use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Recommendation\RecommendationProvider;
+use S2\Rose\Entity\ExternalId;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class Page_Common extends Page_HTML implements Page_Routable
 {
-    public function render(Request $request): void
-	{
-        $this->parse_page_url($request->getPathInfo());
-        parent::render($request);
+    public function render(Request $request): ?Response
+    {
+        $result = $this->parse_page_url($request->getPathInfo());
+        return $result ?? parent::render($request);
 	}
 
 	private function tagged_articles ($id)
@@ -168,7 +169,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 
 
 	// Processes site pages
-	private function parse_page_url ($request_uri)
+	private function parse_page_url ($request_uri): ?Response
 	{
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);
@@ -178,10 +179,11 @@ class Page_Common extends Page_HTML implements Page_Routable
 		$request_array = explode('/', $request_uri);   //   []/[dir1]/[dir2]/[dir3]/[file1]
 
 		// Correcting trailing slash and the rest of URL
-		if (!S2_USE_HIERARCHY && count($request_array) > 2)
-			s2_permanent_redirect('/'.$request_array[1]);
+		if (!S2_USE_HIERARCHY && count($request_array) > 2) {
+            return new RedirectResponse(s2_link('/'.$request_array[1]), Response::HTTP_MOVED_PERMANENTLY);
+        }
 
-		$was_end_slash = '/' == substr($request_uri, -1);
+		$was_end_slash = str_ends_with($request_uri, '/');
 
 		$bread_crumbs = array();
 
@@ -307,8 +309,9 @@ class Page_Common extends Page_HTML implements Page_Routable
 				error(Lang::get('Error no template flat'));
 		}
 
-		if (S2_USE_HIERARCHY && $parent_num && $page['children_exist'] != $was_end_slash)
-			s2_permanent_redirect($current_path.(!$was_end_slash ? '/' : ''));
+        if (S2_USE_HIERARCHY && $parent_num && $page['children_exist'] != $was_end_slash) {
+            return new RedirectResponse(s2_link($current_path . (!$was_end_slash ? '/' : '')), Response::HTTP_MOVED_PERMANENTLY);
+        }
 
 		$page['canonical_path'] = $current_path.($was_end_slash ? '/' : '');
 
@@ -587,5 +590,7 @@ class Page_Common extends Page_HTML implements Page_Routable
 		}
 
 		($hook = s2_hook('fn_s2_parse_page_url_end')) ? eval($hook) : null;
+
+        return null;
 	}
 }
