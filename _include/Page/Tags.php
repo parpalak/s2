@@ -2,33 +2,36 @@
 /**
  * Displays tags list page.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
 
+use Symfony\Component\HttpFoundation\Request;
 
 class Page_Tags extends Page_HTML implements Page_Routable
 {
-	public function __construct (array $params = array())
-	{
-		parent::__construct();
+    public function render(Request $request): void
+    {
+        if ($request->attributes->get('slash') !== '/') {
+            s2_permanent_redirect($request->getPathInfo() . '/');
+        }
 
-		($hook = s2_hook('pts_construct_end')) ? eval($hook) : null;
+        $this->page = [
+            'path'  => [
+                [
+                    'title' => Model::main_page_title(),
+                    'link'  => s2_link('/'),
+                ],
+                [
+                    'title' => Lang::get('Tags'),
+                ],
+            ],
+            'title' => Lang::get('Tags'),
+            'date'  => '',
+            'text'  => $this->renderPartial('tags_list', ['tags' => Placeholder::tags_list()]),
+        ];
 
-		$this->page = array(
-			'path'			=> array(
-				array(
-					'title' => Model::main_page_title(),
-					'link'  => s2_link('/'),
-				),
-				array(
-					'title' => Lang::get('Tags'),
-				),
-			),
-			'title'			=> Lang::get('Tags'),
-			'date'			=> '',
-			'text'			=> $this->renderPartial('tags_list', array('tags' => Placeholder::tags_list())),
-		);
-	}
+        parent::render($request);
+    }
 }

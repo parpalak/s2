@@ -199,16 +199,8 @@ class Application
 
         $routes->add('rss', new Route('/rss.xml', ['_controller' => \Page_RSS::class]));
         $routes->add('sitemap', new Route('/sitemap.xml', ['_controller' => \Page_Sitemap::class]));
-
-        $routes->add('favorite_', new Route('/' . $favoriteUrl, ['_controller' => static function () use ($favoriteUrl) {
-            s2_permanent_redirect('/' . $favoriteUrl . '/');
-        }]));
-        $routes->add('favorite', new Route('/' . $favoriteUrl . '/', ['_controller' => \Page_Favorite::class]));
-
-        $routes->add('tags_', new Route('/' . $tagsUrl, ['_controller' => static function () use ($tagsUrl) {
-            s2_permanent_redirect('/' . $tagsUrl . '/');
-        }]));
-        $routes->add('tags', new Route('/' . $tagsUrl . '/', ['_controller' => \Page_Tags::class]));
+        $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => \Page_Favorite::class]));
+        $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => \Page_Tags::class]));
         $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => \Page_Tag::class]));
         $routes->add('common', new Route('/{path<.*>}', ['_controller' => \Page_Common::class]));
 

@@ -1,25 +1,29 @@
 <?php
 
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Displays the list of favorite pages and excerpts.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
 
 
 class Page_Favorite extends Page_HTML implements Page_Routable
 {
-	public function __construct (array $params = array())
-	{
-		parent::__construct();
-		$this->page = $this->make_favorite_page() + $this->page;
-	}
+    public function render(Request $request): void
+    {
+        if ($request->attributes->get('slash') !== '/') {
+            s2_permanent_redirect($request->getPathInfo() . '/');
+        }
+        $this->page = $this->make_favorite_page() + $this->page;
+        parent::render($request);
+    }
 
-	//
+    //
 	// Builds favorite page
 	//
 	private function make_favorite_page ()

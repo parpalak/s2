@@ -2,9 +2,9 @@
 /**
  * Processing all public pages of the site.
  *
- * @copyright (C) 2009-2024 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
- * @license       http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package       S2
+ * @copyright 2009-2024 Roman Parpalak
+ * @license MIT
+ * @package S2
  */
 
 use S2\Cms\Controller\NotFoundController;
@@ -55,13 +55,8 @@ if (!defined('S2_COMMENTS_FUNCTIONS_LOADED')) {
 $request = Request::createFromGlobals();
 $attributes = $app->matchRequest($request);
 
-$target = $attributes['_controller'];
-if (is_callable($target)) {
-    $target();
-    $controller = null;
-} else {
-    $controller = new $target($attributes);
-}
+$controllerClass = $attributes['_controller'];
+$controller      = new $controllerClass($attributes);
 
 if ($controller instanceof Page_Routable) {
     s2_no_cache(); // TODO пожоже, это внутри if для исключения отправки заголовков в RSS. Надо понять, нужно ли это вообще. Типа, чтобы браузеры не кешировали странички без комментов?
@@ -69,7 +64,7 @@ if ($controller instanceof Page_Routable) {
     try {
         $controller->render($request);
         if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction(get_class($controller));
+            newrelic_name_transaction($controllerClass);
         }
     } catch (NotFoundException $e) {
         /** @var NotFoundController $errorController */
@@ -79,7 +74,7 @@ if ($controller instanceof Page_Routable) {
         $response->send(false);
 
         if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction(get_class($controller) . $response->getStatusCode());
+            newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
         }
     }
 }

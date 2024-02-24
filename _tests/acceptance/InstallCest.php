@@ -52,6 +52,8 @@ class InstallCest
 
         $this->testAdminLogin($I);
         $this->testAdminEditAndTagsAdded($I);
+        $this->testTagsPage($I);
+        $this->testFavoritePage($I);
         $this->testRssAndSitemap($I);
         $this->testBlogExtension($I);
         $this->testBlogRssAndSitemap($I);
@@ -157,6 +159,27 @@ class InstallCest
         $I->seeResponseCodeIsSuccessful();
         $I->amOnPage('/_admin/site_ajax.php?action=load_tags');
         $I->see('another tag');
+    }
+
+    private function testTagsPage(AcceptanceTester $I): void
+    {
+        $I->stopFollowingRedirects();
+        $I->amOnPage('/tags');
+        $I->seeResponseCodeIs(301);
+        $I->startFollowingRedirects();
+        $I->amOnPage('/tags/');
+        $I->see('tag1');
+        $I->see('another tag');
+    }
+
+    private function testFavoritePage(AcceptanceTester $I): void
+    {
+        $I->stopFollowingRedirects();
+        $I->amOnPage('/favorite');
+        $I->seeResponseCodeIs(301);
+        $I->startFollowingRedirects();
+        $I->amOnPage('/favorite/');
+        $I->see('New Excerpt');
     }
 
     private function testRssAndSitemap(AcceptanceTester $I): void
