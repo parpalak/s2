@@ -344,14 +344,6 @@ if ($action == 'load_tree') {
 
     clearstatcache();
 
-    $check_uploaded = true;
-
-    // A workaround for multipart/mixed data
-    if (!isset($_FILES['pictures']) && isset($_POST['pictures'][0])) {
-        s2_process_multipart_mixed($_POST['pictures'][0], $_FILES['pictures'], S2_IMG_PATH);
-        $check_uploaded = false;
-    }
-
     if (!isset($_FILES['pictures']))
         $errors[] = $lang_pictures['Empty files'];
     else {
@@ -362,7 +354,7 @@ if ($action == 'load_tree') {
                 continue;
             }
 
-            if ($check_uploaded && !is_uploaded_file($_FILES['pictures']['tmp_name'][$i])) {
+            if (!is_uploaded_file($_FILES['pictures']['tmp_name'][$i])) {
                 $error_message = $lang_pictures['Is upload file error'];
                 $errors[]      = $filename ? sprintf($lang_pictures['Upload file error'], $filename, $error_message) : $error_message;
                 continue;
@@ -406,9 +398,7 @@ if ($action == 'load_tree') {
             }
             $uploadfile = S2_IMG_PATH . $path . '/' . $filename;
 
-            $result = $check_uploaded ?
-                move_uploaded_file($_FILES['pictures']['tmp_name'][$i], $uploadfile) :
-                rename($_FILES['pictures']['tmp_name'][$i], $uploadfile);
+            $result = move_uploaded_file($_FILES['pictures']['tmp_name'][$i], $uploadfile);
 
             if ($result)
                 chmod($uploadfile, 0644);

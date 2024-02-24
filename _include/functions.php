@@ -114,54 +114,6 @@ function s2_paging($page, $total_pages, $url, &$link_nav)
     return '<p class="paging">' . $prev_link . $links . $next_link . '</p>';
 }
 
-//
-// Workaround for processing multipart/mixed data
-// Opera sends multiple files in this format, and PHP doesn't understand it
-//
-function s2_process_multipart_mixed(&$src, &$dest, $dir = false)
-{
-    if (!$dir)
-        $dir = sys_get_temp_dir();
-
-    $separator_len = strpos($src, "\r\n");
-    $separator     = substr($src, 0, $separator_len);
-    $start         = $separator_len + 2;
-
-    $i = 0;
-    while (false !== ($next = strpos($src, "\r\n" . $separator, $start))) {
-        $file_start = 4 + strpos($src, "\r\n\r\n", $start);
-
-        $headers  = substr($src, $start, $file_start - $start);
-        $filename = 'unknown';
-        if (preg_match('#filename="([^"]*)"#', $headers, $matches))
-            $filename = $matches[1];
-        $content_type = '';
-        if (preg_match('#Content-Type:\s*(\S*)#i', $headers, $matches))
-            $content_type = $matches[1];
-
-        $tmp_filename = tempnam($dir, 'php');
-        $f            = fopen($tmp_filename, 'wb');
-        while ($length = min(20480, $next - $file_start)) {
-            $data = substr($src, $file_start, $length);
-            fwrite($f, $data);
-            $file_start += $length;
-        }
-        fclose($f);
-
-        $dest['name'][$i]     = $filename;
-        $dest['type'][$i]     = $content_type;
-        $dest['tmp_name'][$i] = $tmp_filename;
-        $dest['error'][$i]    = 0;
-        $dest['size'][$i]     = filesize($tmp_filename);
-
-        $i++;
-
-        $start = $next + $separator_len + 2;
-    }
-
-    $src = '';
-}
-
 /**
  * @deprecated Move code to the HtmlTemplateProvided
  *
