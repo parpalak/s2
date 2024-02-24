@@ -8,25 +8,31 @@
  */
 
 namespace s2_extensions\s2_blog;
+
 use \Lang;
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class Page_Tags extends Page_HTML implements \Page_Routable
 {
-	public function __construct (array $params = array())
-	{
-		if (empty($params['slash']))
-			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/');
-
+    public function render(Request $request): ?Response
+    {
         // Disable this block at tags page since it does not make any sense.
         $this->page['s2_blog_navigation'] = '';
 
-		parent::__construct($params);
-	}
+        return parent::render($request);
+    }
 
-	public function body (array $params = array())
-	{
+
+    public function body (Request $request): ?Response
+    {
+        if ($request->attributes->get('slash') !== '/') {
+            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+        }
+
 		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
@@ -52,6 +58,8 @@ class Page_Tags extends Page_HTML implements \Page_Routable
 
 		$this->page['head_title'] = $this->page['title'] = Lang::get('Tags');
 		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
+
+        return null;
 	}
 
 	private function all_tags ()

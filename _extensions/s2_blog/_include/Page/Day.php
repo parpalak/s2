@@ -2,21 +2,26 @@
 /**
  * Blog posts for a day.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package s2_blog
  */
 
 namespace s2_extensions\s2_blog;
 use \Lang;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class Page_Day extends Page_HTML implements \Page_Routable
 {
-	public function body (array $params = array())
-	{
-		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
-			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day']);
+	public function body (Request $request): ?Response
+    {
+        $params = $request->attributes->all();
+
+		if ($this->inTemplate('<!-- s2_blog_calendar -->')) {
+            $this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day']);
+        }
 
 		$this->page['title'] = '';
 
@@ -48,6 +53,8 @@ class Page_Day extends Page_HTML implements \Page_Routable
 		$this->page['path'][] = array(
 			'title' => $params['day'],
 		);
+
+        return null;
 	}
 
 	public function posts_by_day ($year, $month, $day)

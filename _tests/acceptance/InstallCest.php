@@ -224,7 +224,7 @@ class InstallCest
         $postId = $I->grabPageSource();
         $I->assertEquals(1, $postId, 'If postId is empty probably hooks are not applied due to lack of opcache invalidation.');
 
-        $I->amOnPage('/tags/blog tag');
+        $I->amOnPage('/blog/tags/blog tag');
         $I->seeResponseCodeIsClientError();
 
         $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=edit_blog_post&id=' . $postId);
@@ -290,7 +290,7 @@ class InstallCest
         $I->canSee('2023-08-12');
         $I->see('New Blog Post Title');
 
-        foreach (['/blog/2023/08/12/', '/blog/2023/08/', '/blog/'] as $url) {
+        foreach (['/blog/2023/08/12/', '/blog/2023/08/'] as $url) {
             $I->amOnPage($url);
             $I->see('New Blog Post Title');
             $I->see('New blog post');
@@ -303,8 +303,24 @@ class InstallCest
         $I->see('August 12, 2023');
         $I->canWriteComment();
 
-        $I->amOnPage('/tags/blog tag');
+        $I->stopFollowingRedirects();
+
+        $I->amOnPage('/blog/tags/blog tag');
+        $I->seeResponseCodeIs(301);
+        $I->followRedirect();
+        $I->seeCurrentUrlEquals('/index.php?/blog/tags/blog+tag/');
         $I->seeResponseCodeIsSuccessful();
+
+        $I->amOnPage('/blog');
+        $I->seeResponseCodeIs(301);
+        $I->followRedirect();
+        $I->seeCurrentUrlEquals('/index.php?/blog/');
+        $I->seeResponseCodeIsSuccessful();
+        $I->see('New Blog Post Title');
+        $I->see('New blog post');
+        $I->see('August 12, 2023');
+
+        $I->startFollowingRedirects();
     }
 
     private function testBlogRssAndSitemap(AcceptanceTester $I): void

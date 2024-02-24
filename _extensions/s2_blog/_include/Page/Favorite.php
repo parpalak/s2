@@ -2,28 +2,27 @@
 /**
  * Favorite blog posts.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package s2_blog
  */
 
 namespace s2_extensions\s2_blog;
+
 use \Lang;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class Page_Favorite extends Page_HTML implements \Page_Routable
 {
-	public function __construct (array $params = array())
-	{
-		if (empty($params['slash'])) {
-			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_FAVORITE_URL.'/');
-		}
+    public function body (Request $request): ?Response
+    {
+        if ($request->attributes->get('slash') !== '/') {
+            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+        }
 
-		parent::__construct($params);
-	}
-
-	public function body (array $params = array())
-	{
 		$this->ensureTemplateIsLoaded();
 
 		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
@@ -49,6 +48,8 @@ class Page_Favorite extends Page_HTML implements \Page_Routable
 
 		$this->page['head_title'] = $this->page['title'] = Lang::get('Favorite');
 		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
+
+        return null;
 	}
 
 	public function favorite_posts ()

@@ -1,27 +1,29 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Roman
- * Date: 07.09.14
- * Time: 18:38
+ * Main blog page with last posts.
+ *
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
+ * @package s2_blog
  */
 
 namespace s2_extensions\s2_blog;
+
 use \Lang;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class Page_Main extends Page_HTML implements \Page_Routable
 {
-	public function __construct (array $params = array())
-	{
-		if (empty($params['slash']))
-			s2_permanent_redirect(S2_BLOG_URL.'/');
+    public function body (Request $request): ?Response
+    {
+        if ($request->attributes->get('slash') !== '/') {
+            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+        }
 
-		parent::__construct($params);
-	}
-
-	public function body (array $params = array())
-	{
+        $params = $request->attributes->all();
 		$s2_blog_skip = !empty($params['page']) ? (int) $params['page'] : 0;
 
 		$this->template_id = $s2_blog_skip ? 'blog.php' : 'blog_main.php';
@@ -52,6 +54,8 @@ class Page_Main extends Page_HTML implements \Page_Routable
                    $this->page['link_navigation']['up'] = s2_link('/');
             }
         }
+
+        return null;
 	}
 
 	private function last_posts ($skip = 0)

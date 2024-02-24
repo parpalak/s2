@@ -2,8 +2,8 @@
 /**
  * Single blog post.
  *
- * @copyright (C) 2007-2022 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package s2_blog
  */
 
@@ -13,11 +13,15 @@ use Lang;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\ExternalId;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Page_Post extends Page_HTML implements \Page_Routable
 {
-    public function body(array $params = [])
+    public function body (Request $request): ?Response
     {
+        $params = $request->attributes->all();
+
         if ($this->inTemplate('<!-- s2_blog_calendar -->'))
             $this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']);
 
@@ -49,6 +53,8 @@ class Page_Post extends Page_HTML implements \Page_Routable
             'title' => $params['day'],
             'link'  => S2_BLOG_PATH . $params['year'] . '/' . $params['month'] . '/' . $params['day'] . '/',
         ];
+
+        return null;
     }
 
     private function get_post($year, $month, $day, $url)

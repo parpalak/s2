@@ -10,12 +10,16 @@
 namespace s2_extensions\s2_blog;
 use \Lang;
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class Page_Year extends Page_HTML implements \Page_Routable
 {
-	public function body (array $params = array())
-	{
+    public function body (Request $request): ?Response
+    {
+        $params = $request->attributes->all();
+
 		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], '', 0);
 
@@ -40,6 +44,8 @@ class Page_Year extends Page_HTML implements \Page_Routable
 		$this->page['path'][] = array(
 			'title' => $params['year']
 		);
+
+        return null;
 	}
 
 	private function year_posts ($year)

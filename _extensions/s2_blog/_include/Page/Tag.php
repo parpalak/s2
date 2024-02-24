@@ -2,27 +2,36 @@
 /**
  * Blog posts for a specified tag.
  *
- * @copyright (C) 2007-2024 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package s2_blog
  */
 
 namespace s2_extensions\s2_blog;
+
 use Lang;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class Page_Tag extends Page_HTML implements \Page_Routable
 {
-	public function body (array $params = array())
-	{
+    public function body (Request $request): ?Response
+    {
+        $params = $request->attributes->all();
+
 		if ($this->inTemplate('<!-- s2_blog_calendar -->')) {
             $this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
         }
 
 		// A tag
-		$this->posts_by_tag($params['tag'], !empty($params['slash']));
+		$result = $this->posts_by_tag($params['tag'], !empty($params['slash']));
+        if ($result !== null) {
+            return $result;
+        }
 
 		// Bread crumbs
 		$this->page['path'][] = array(
@@ -50,9 +59,11 @@ class Page_Tag extends Page_HTML implements \Page_Routable
         $this->page['title'] = $this->renderPartial('tag_title', ['title' => $this->page['title']]);
 
 		$this->page['link_navigation']['up'] = S2_BLOG_TAGS_PATH;
-	}
 
-	private function posts_by_tag ($tag, $is_slash)
+        return null;
+    }
+
+	private function posts_by_tag ($tag, $is_slash): ?Response
 	{
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);
@@ -71,8 +82,9 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 
         [$tag_id, $tag_descr, $tag_name, $tag_url] = $row;
 
-        if (!$is_slash)
-			s2_permanent_redirect(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'.urlencode($tag_url).'/');
+        if (!$is_slash) {
+            return new RedirectResponse(s2_link(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'.urlencode($tag_url).'/'), Response::HTTP_MOVED_PERMANENTLY);
+        }
 
 		$art_links = self::articles_by_tag($tag_id);
 		if (count($art_links))
@@ -97,6 +109,8 @@ class Page_Tag extends Page_HTML implements \Page_Routable
 
 		$this->page['title'] = $tag_name;
 		$this->page['text'] = $tag_descr.$output;
+
+        return null;
 	}
 
 	/**

@@ -2,21 +2,24 @@
 /**
  * General blog page.
  *
- * @copyright (C) 2007-2014 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package s2_blog
  */
 
 namespace s2_extensions\s2_blog;
+
 use \Lang;
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 
 abstract class Page_HTML extends \Page_HTML
 {
 	protected string $template_id = 'blog.php';
 
-	abstract public function body (array $params);
+	abstract public function body (Request $request): ?Response;
 
 	public function __construct (array $params = array())
 	{
@@ -31,21 +34,29 @@ abstract class Page_HTML extends \Page_HTML
 		$this->viewer = new \Viewer($this);
 
 		parent::__construct($params);
-
-		$this->page['commented'] = 0;
-		$this->page['class'] = 's2_blog';
-		$this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode(Lang::get('RSS link title', 's2_blog')).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
-
-		$this->body($params);
-
-		$this->page['head_title'] = empty($this->page['head_title']) ? S2_BLOG_TITLE : $this->page['head_title'] . ' - ' . S2_BLOG_TITLE;
-
-		if (!isset($this->page['s2_blog_navigation']) && $this->inTemplate('<!-- s2_blog_navigation -->')) {
-            $this->page['s2_blog_navigation'] = $this->blog_navigation();
-        }
 	}
 
-	public function get_posts ($query_add, $sort_asc = true, $sort_field = 'create_time')
+    public function render(Request $request): ?Response
+    {
+        $this->page['commented'] = 0;
+        $this->page['class'] = 's2_blog';
+        $this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="'.s2_htmlencode(Lang::get('RSS link title', 's2_blog')).'" href="'.s2_link(str_replace(urlencode('/'), '/', urlencode(S2_BLOG_URL)).'/rss.xml').'" />';
+
+        $result = $this->body($request);
+        if ($result !== null) {
+            return $result;
+        }
+
+        $this->page['head_title'] = empty($this->page['head_title']) ? S2_BLOG_TITLE : $this->page['head_title'] . ' - ' . S2_BLOG_TITLE;
+
+        if (!isset($this->page['s2_blog_navigation']) && $this->inTemplate('<!-- s2_blog_navigation -->')) {
+            $this->page['s2_blog_navigation'] = $this->blog_navigation();
+        }
+
+        return parent::render($request);
+    }
+
+    public function get_posts ($query_add, $sort_asc = true, $sort_field = 'create_time')
 	{
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);
