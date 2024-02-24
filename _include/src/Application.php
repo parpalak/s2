@@ -12,6 +12,7 @@ namespace S2\Cms;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Controller\NotFoundController;
 use S2\Cms\Framework\Container;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
@@ -25,6 +26,7 @@ use S2\Cms\Queue\QueueConsumer;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Rose\CustomExtractor;
+use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
 use S2\Rose\Indexer;
@@ -175,6 +177,14 @@ class Application
                 $container->get(QueuePublisher::class)
             );
         });
+
+        $this->container->set(HtmlTemplateProvider::class, function (Container $container) {
+            return new HtmlTemplateProvider();
+        });
+
+        $this->container->set(NotFoundController::class, function (Container $container) {
+            return new NotFoundController($container->get(HtmlTemplateProvider::class), $container->getParameter('redirect_map'));
+        });
     }
 
     private function addRoutes(): void
@@ -225,9 +235,10 @@ class Application
     private function loadParameters(): array
     {
         $result = [
-            'cache_dir' => S2_CACHE_DIR,
-            'log_dir'   => (defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR),
-            'base_url'  => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+            'cache_dir'    => S2_CACHE_DIR,
+            'log_dir'      => (defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR),
+            'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+            'redirect_map' => $GLOBALS['s2_redirect'] ?? [],
         ];
 
         foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {

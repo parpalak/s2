@@ -10,7 +10,6 @@
 use S2\Cms\Controller\NotFoundController;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
-use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Component\HttpFoundation\Request;
 
 define('S2_ROOT', './');
@@ -73,14 +72,14 @@ if ($controller instanceof Page_Routable) {
             newrelic_name_transaction(get_class($controller));
         }
     } catch (NotFoundException $e) {
-        // TODO checkRedirect
-        $controller = new NotFoundController(new HtmlTemplateProvider());
-        $response = $controller->handle($request);
+        /** @var NotFoundController $errorController */
+        $errorController = $app->container->get(NotFoundController::class);
+        $response = $errorController->handle($request);
         $response->prepare($request);
         $response->send(false);
 
         if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction(get_class($controller) . '_not_found');
+            newrelic_name_transaction(get_class($controller) . $response->getStatusCode());
         }
     }
 }
@@ -93,7 +92,7 @@ if (function_exists('fastcgi_finish_request')) {
         newrelic_name_transaction('index_background');
     }
     /** @var \S2\Cms\Queue\QueueConsumer $consumer */
-    $consumer = Container::get(\S2\Cms\Queue\QueueConsumer::class);
+    $consumer = $app->container->get(\S2\Cms\Queue\QueueConsumer::class);
     $startedAt = microtime(true);
     while ($consumer->runQueue() && microtime(true) - $startedAt < 10);
 }

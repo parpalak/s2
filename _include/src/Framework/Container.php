@@ -57,7 +57,7 @@ class Container implements ContainerInterface
     public function getParameter(string $name): mixed
     {
         if (!\array_key_exists($name, $this->parameters)) {
-            throw new ParameterNotFoundException(sprintf('Unknown parameter "%s" has been requested from container.', $name));
+            throw new ParameterNotFoundException(sprintf('Unknown parameter "%s" has been requested from container. Either define one or fix its name.', $name));
         }
 
         if (!isset($this->parameters[$name])) {
