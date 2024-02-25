@@ -36,7 +36,7 @@ abstract class Page_HTML extends \Page_HTML
 		parent::__construct($params);
 	}
 
-    public function render(Request $request): ?Response
+    public function handle(Request $request): ?Response
     {
         $this->page['commented'] = 0;
         $this->page['class'] = 's2_blog';
@@ -53,7 +53,7 @@ abstract class Page_HTML extends \Page_HTML
             $this->page['s2_blog_navigation'] = $this->blog_navigation();
         }
 
-        return parent::render($request);
+        return parent::handle($request);
     }
 
     public function get_posts ($query_add, $sort_asc = true, $sort_field = 'create_time')

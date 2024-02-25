@@ -56,13 +56,13 @@ $request = Request::createFromGlobals();
 $attributes = $app->matchRequest($request);
 
 $controllerClass = $attributes['_controller'];
-$controller      = new $controllerClass($attributes);
+$controller      = $app->container->has($controllerClass) ? $app->container->get($controllerClass) : new $controllerClass($attributes);
 
-if ($controller instanceof Page_Routable) {
+if ($controller instanceof Page_Routable || $controller instanceof \S2\Cms\Controller\ControllerInterface) {
     s2_no_cache(); // TODO пожоже, это внутри if для исключения отправки заголовков в RSS. Надо понять, нужно ли это вообще. Типа, чтобы браузеры не кешировали странички без комментов?
 
     try {
-        $response = $controller->render($request);
+        $response = $controller->handle($request);
         if (\extension_loaded('newrelic')) {
             newrelic_name_transaction($controllerClass);
         }

@@ -12,5 +12,5 @@ use Symfony\Component\HttpFoundation\Request;
 interface Page_Routable
 {
 	public function __construct (array $params = array());
-	public function render(Request $request);
+	public function handle(Request $request);
 }

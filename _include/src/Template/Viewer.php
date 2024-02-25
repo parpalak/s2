@@ -2,54 +2,33 @@
 /**
  * Renders views.
  *
- * @copyright (C) 2014-2024 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2014-2024 Roman Parpalak
+ * @license MIT
  * @package S2
- * @deprecated
  */
+
+namespace S2\Cms\Template;
+
 
 class Viewer
 {
-    private array $dirs = [];
-    private bool $debug = false;
+    private string $styleViewDir;
+    private string $systemViewDir;
 
-    public function __construct($that = null)
+    public function __construct(string $rootDir, string $style, private readonly bool $debug)
     {
-        /** @noinspection PhpUndefinedConstantInspection */
-        $this->dirs[] = S2_ROOT . '_styles/' . S2_STYLE . '/views/';
-
-        $ext_dir = s2_ext_dir_from_ns(get_class($this));
-        if ($ext_dir) {
-            $this->dirs[] = $ext_dir . '/views/';
-        }
-
-        if ($that instanceof Page_Abstract) {
-            $ext_dir = s2_ext_dir_from_ns(get_class($that));
-            if ($ext_dir) {
-                $this->dirs[] = $ext_dir . '/views/';
-            }
-        } elseif (is_string($that) && $that) {
-            $ext_dir = s2_ext_dir_from_ns($that);
-            if ($ext_dir) {
-                $this->dirs[] = $ext_dir . '/views/';
-            }
-        }
-
-        $this->dirs[] = S2_ROOT . '_include/views/';
-
-        if (defined('S2_DEBUG_VIEW') && ($that === null || $that instanceof Page_HTML)) {
-            $this->debug = true;
-        }
+        $this->styleViewDir = $rootDir . '_styles/' . $style . '/views/';
+        $this->systemViewDir = S2_ROOT . '_include/views/';
     }
 
     /**
-     * @throws JsonException
+     * @throws \JsonException
      */
     private static function jsonFormat($vars, int $level = 0): string
     {
-        if (is_array($vars) && count(array_filter(array_keys($vars), 'is_int')) < count($vars)) {
+        if (\is_array($vars) && \count(array_filter(array_keys($vars), '\is_int')) < \count($vars)) {
             $s = "<span style='color:grey'>{</span>\n";
-            $i = count($vars);
+            $i = \count($vars);
             foreach ($vars as $k => $v) {
                 $i--;
                 $s .= sprintf("%s<span style='color:grey'>\"</span>%s<span style='color:grey'>\":</span> %s<span style='color:grey'>%s</span>\n",
@@ -63,9 +42,9 @@ class Viewer
 
             return $s;
         }
-        if (is_array($vars)) {
+        if (\is_array($vars)) {
             $s = "<span style='color:grey'>[</span>\n";
-            $i = count($vars);
+            $i = \count($vars);
             foreach ($vars as $k => $v) {
                 $i--;
                 $s .= sprintf("%s%s<span style='color:grey'>%s</span>\n",
@@ -79,19 +58,20 @@ class Viewer
             return $s;
         }
 
-        $str = s2_htmlencode(json_encode($vars, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | (is_array($vars) && count($vars) > 1 ? JSON_PRETTY_PRINT : 0)));
+        $str = s2_htmlencode(json_encode($vars, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | (\is_array($vars) && \count($vars) > 1 ? JSON_PRETTY_PRINT : 0)));
         $str = str_replace(["\r", "\n"], ['', "\n" . str_pad(' ', $level * 4)], $str);
 
         return $str;
     }
 
-    public function render(string $name, array $vars): string
+    public function render(string $name, array $vars, string ...$extraDirs): string
     {
         $name     = preg_replace('#[^0-9a-zA-Z._\-]#', '', $name);
         $filename = $name . '.php';
 
         $foundFile = null;
-        foreach ($this->dirs as $dir) {
+        $dirs      = [$this->styleViewDir, ...$extraDirs, $this->systemViewDir];
+        foreach ($dirs as $dir) {
             if (file_exists($dir . $filename)) {
                 $foundFile = $dir . $filename;
                 break;
@@ -111,7 +91,7 @@ class Viewer
         if ($foundFile !== null) {
             $this->includeFile($foundFile, $vars);
         } elseif ($this->debug) {
-            echo 'View file not found in ', s2_htmlencode(var_export($this->dirs, true));
+            echo 'View file not found in ', s2_htmlencode(var_export($dirs, true));
         }
 
         if ($this->debug) {

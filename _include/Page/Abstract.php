@@ -61,7 +61,7 @@ abstract class Page_Abstract
     /**
      * Outputs content to browser
      */
-    public function render(Request $request): ?Response
+    public function handle(Request $request): ?Response
     {
         $this->ensureTemplateIsLoaded();
 

@@ -11,8 +11,12 @@ namespace S2\Cms\Template;
 
 class HtmlTemplateProvider
 {
+    public function __construct(private readonly Viewer $viewer)
+    {
+    }
+
     public function getTemplate(string $templateId): HtmlTemplate
     {
-        return new HtmlTemplate(s2_get_template($templateId), new \Viewer());
+        return new HtmlTemplate(s2_get_template($templateId), $this->viewer);
     }
 }

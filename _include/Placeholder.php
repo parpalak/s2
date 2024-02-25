@@ -138,7 +138,7 @@ class Placeholder
     //
 	// Formatting last articles (for template placeholders)
 	//
-	public static function last_articles (Viewer $viewer, $limit)
+	public static function last_articles (Viewer|\S2\Cms\Template\Viewer $viewer, $limit)
 	{
 		$return = ($hook = s2_hook('fn_last_articles_start')) ? eval($hook) : null;
 		if ($return)

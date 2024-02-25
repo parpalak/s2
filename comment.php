@@ -28,7 +28,7 @@ if (isset($_GET['go']))
         'text'       => sprintf(Lang::get('Comment sent info', 'comments'), s2_htmlencode($_GET['go']), s2_link('/')),
     ]);
 
-	$controller->render(Request::createFromGlobals());
+	$controller->handle(Request::createFromGlobals());
 
 	die();
 }
@@ -75,7 +75,7 @@ if (isset($_GET['unsubscribe']))
 				'text'       => Lang::get('Unsubscribed OK info', 'comments'),
 			));
 
-			$controller->render(Request::createFromGlobals());
+			$controller->handle(Request::createFromGlobals());
 
 			die();
 		}
@@ -87,7 +87,7 @@ if (isset($_GET['unsubscribe']))
 		'text'       => Lang::get('Unsubscribed failed info', 'comments'),
 	));
 
-	$controller->render(Request::createFromGlobals());
+	$controller->handle(Request::createFromGlobals());
 
 	die();
 }
@@ -175,7 +175,7 @@ if (isset($_POST['preview']))
 		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
 	));
 
-	$controller->render(Request::createFromGlobals());
+	$controller->handle(Request::createFromGlobals());
 
 	die();
 }
@@ -223,7 +223,7 @@ if (!empty($errors))
 		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
 	));
 
-	$controller->render(Request::createFromGlobals());
+	$controller->handle(Request::createFromGlobals());
 
     /** @var LoggerInterface $logger */
     $logger = Container::get(LoggerInterface::class);

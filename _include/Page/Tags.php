@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Page_Tags extends Page_HTML implements Page_Routable
 {
-    public function render(Request $request): ?Response
+    public function handle(Request $request): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
             return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
@@ -34,6 +34,6 @@ class Page_Tags extends Page_HTML implements Page_Routable
             'text'  => $this->renderPartial('tags_list', ['tags' => Placeholder::tags_list()]),
         ];
 
-        return parent::render($request);
+        return parent::handle($request);
     }
 }

@@ -16,8 +16,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 readonly class NotFoundController implements ControllerInterface
 {
-    public function __construct(private HtmlTemplateProvider $htmlTemplateProvider, private array $redirectMap)
-    {
+    public function __construct(
+        private HtmlTemplateProvider $htmlTemplateProvider,
+        private array                $redirectMap
+    ) {
     }
 
     protected function checkRedirect(Request $request): ?RedirectResponse

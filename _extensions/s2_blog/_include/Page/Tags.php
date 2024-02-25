@@ -18,12 +18,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Page_Tags extends Page_HTML implements \Page_Routable
 {
-    public function render(Request $request): ?Response
+    public function handle(Request $request): ?Response
     {
         // Disable this block at tags page since it does not make any sense.
         $this->page['s2_blog_navigation'] = '';
 
-        return parent::render($request);
+        return parent::handle($request);
     }
 
 

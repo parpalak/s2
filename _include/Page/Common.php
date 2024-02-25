@@ -18,10 +18,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Page_Common extends Page_HTML implements Page_Routable
 {
-    public function render(Request $request): ?Response
+    public function handle(Request $request): ?Response
     {
         $result = $this->parse_page_url($request->getPathInfo());
-        return $result ?? parent::render($request);
+        return $result ?? parent::handle($request);
 	}
 
 	private function tagged_articles ($id)

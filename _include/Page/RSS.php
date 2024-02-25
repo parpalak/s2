@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Page_RSS extends Page_Abstract implements Page_Routable
 {
-	public function render(Request $request): ?Response
+	public function handle(Request $request): ?Response
     {
 		$return = ($hook = s2_hook('pr_render_start')) ? eval($hook) : null;
 		if ($return) {

@@ -17,7 +17,7 @@ class Page_Sitemap extends Page_Abstract implements Page_Routable
     /**
      * {@inheritdoc}
      */
-    public function render(Request $request): ?Response
+    public function handle(Request $request): ?Response
     {
         $max_time = 0;
         $items    = '';

@@ -18,7 +18,7 @@ class HtmlTemplate
 
     public function __construct(
         protected string $template,
-        protected \Viewer $viewer
+        protected Viewer $viewer
     ) {
     }
 

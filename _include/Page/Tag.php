@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Page_Tag extends Page_HTML implements Page_Routable
 {
-    public function render(Request $request): ?Response
+    public function handle(Request $request): ?Response
     {
         $tag_name = $request->attributes->get('name');
         $is_slash = (!empty($request->attributes->get('slash')));
@@ -165,6 +165,6 @@ class Page_Tag extends Page_HTML implements Page_Routable
 
         $this->page = $page;
 
-        return parent::render($request);
+        return parent::handle($request);
     }
 }

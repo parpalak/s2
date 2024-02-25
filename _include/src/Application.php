@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\NotFoundController;
+use S2\Cms\Controller\PageFavorite;
 use S2\Cms\Framework\Container;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
@@ -27,6 +28,7 @@ use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Rose\CustomExtractor;
 use S2\Cms\Template\HtmlTemplateProvider;
+use S2\Cms\Template\Viewer;
 use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
 use S2\Rose\Indexer;
@@ -179,11 +181,28 @@ class Application
         });
 
         $this->container->set(HtmlTemplateProvider::class, function (Container $container) {
-            return new HtmlTemplateProvider();
+            return new HtmlTemplateProvider($container->get(Viewer::class));
+        });
+
+        $this->container->set(Viewer::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new Viewer($container->getParameter('root_dir'), $provider->get('S2_STYLE'), $container->getParameter('debug_view'));
         });
 
         $this->container->set(NotFoundController::class, function (Container $container) {
-            return new NotFoundController($container->get(HtmlTemplateProvider::class), $container->getParameter('redirect_map'));
+            return new NotFoundController(
+                $container->get(HtmlTemplateProvider::class),
+                $container->getParameter('redirect_map')
+            );
+        });
+
+        $this->container->set(PageFavorite::class, function (Container $container) {
+            return new PageFavorite(
+                $container->get(DbLayer::class),
+                $container->get(HtmlTemplateProvider::class),
+                $container->get(Viewer::class),
+            );
         });
     }
 
@@ -199,7 +218,7 @@ class Application
 
         $routes->add('rss', new Route('/rss.xml', ['_controller' => \Page_RSS::class]));
         $routes->add('sitemap', new Route('/sitemap.xml', ['_controller' => \Page_Sitemap::class]));
-        $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => \Page_Favorite::class]));
+        $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => PageFavorite::class]));
         $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => \Page_Tags::class]));
         $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => \Page_Tag::class]));
         $routes->add('common', new Route('/{path<.*>}', ['_controller' => \Page_Common::class]));
@@ -227,9 +246,11 @@ class Application
     private function loadParameters(): array
     {
         $result = [
+            'root_dir'     => S2_ROOT,
             'cache_dir'    => S2_CACHE_DIR,
             'log_dir'      => (defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR),
             'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+            'debug_view'   => defined('S2_DEBUG_VIEW'),
             'redirect_map' => $GLOBALS['s2_redirect'] ?? [],
         ];
 
