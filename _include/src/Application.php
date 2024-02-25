@@ -14,6 +14,8 @@ use Psr\Log\LogLevel;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\NotFoundController;
 use S2\Cms\Controller\PageFavorite;
+use S2\Cms\Controller\PageTag;
+use S2\Cms\Controller\PageTags;
 use S2\Cms\Framework\Container;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
@@ -187,7 +189,11 @@ class Application
         $this->container->set(Viewer::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
-            return new Viewer($container->getParameter('root_dir'), $provider->get('S2_STYLE'), $container->getParameter('debug_view'));
+            return new Viewer(
+                $container->getParameter('root_dir'),
+                $provider->get('S2_STYLE'),
+                $container->getParameter('debug_view')
+            );
         });
 
         $this->container->set(NotFoundController::class, function (Container $container) {
@@ -202,6 +208,25 @@ class Application
                 $container->get(DbLayer::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
+            );
+        });
+
+        $this->container->set(PageTags::class, function (Container $container) {
+            return new PageTags(
+                $container->get(DbLayer::class),
+                $container->get(HtmlTemplateProvider::class),
+                $container->get(Viewer::class),
+            );
+        });
+
+        $this->container->set(PageTag::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new PageTag(
+                $container->get(DbLayer::class),
+                $container->get(HtmlTemplateProvider::class),
+                $container->get(Viewer::class),
+                $provider->get('S2_TAGS_URL'),
             );
         });
     }
@@ -219,8 +244,8 @@ class Application
         $routes->add('rss', new Route('/rss.xml', ['_controller' => \Page_RSS::class]));
         $routes->add('sitemap', new Route('/sitemap.xml', ['_controller' => \Page_Sitemap::class]));
         $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => PageFavorite::class]));
-        $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => \Page_Tags::class]));
-        $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => \Page_Tag::class]));
+        $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => PageTags::class]));
+        $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => PageTag::class]));
         $routes->add('common', new Route('/{path<.*>}', ['_controller' => \Page_Common::class]));
 
         $this->routes = $routes;

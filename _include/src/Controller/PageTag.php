@@ -1,8 +1,8 @@
 <?php
 /**
- * Displays the list of favorite pages and excerpts.
+ * Displays the list of pages and excerpts for a specified tag.
  *
- * @copyright 2024 Roman Parpalak
+ * @copyright 2007-2024 Roman Parpalak
  * @license MIT
  * @package S2
  */
@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
@@ -18,19 +19,37 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-readonly class PageFavorite implements ControllerInterface
+readonly class PageTag implements ControllerInterface
 {
     public function __construct(
         private DbLayer              $dbLayer,
         private HtmlTemplateProvider $htmlTemplateProvider,
-        private Viewer               $viewer
+        private Viewer               $viewer,
+        private string               $tagsUrlFragment,
     ) {
     }
 
     public function handle(Request $request): Response
     {
-        if ($request->attributes->get('slash') !== '/') {
-            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+        $name     = $request->attributes->get('name');
+        $hasSlash = (!empty($request->attributes->get('slash')));
+
+        // Tag preview
+        $query  = [
+            'SELECT' => 'tag_id, description, name, url',
+            'FROM'   => 'tags',
+            'WHERE'  => 'url = \'' . $this->dbLayer->escape($name) . '\''
+        ];
+        $result = $this->dbLayer->buildAndQuery($query);
+
+        if (!($row = $this->dbLayer->fetchRow($result))) {
+            throw new NotFoundException();
+        }
+
+        [$tagId, $tagDescription, $tagName, $tagUrl] = $row;
+
+        if (!$hasSlash) {
+            return new RedirectResponse(s2_link('/' . $this->tagsUrlFragment . '/' . urlencode($tagUrl) . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $subquery   = [
@@ -43,9 +62,15 @@ readonly class PageFavorite implements ControllerInterface
 
         $sort_order = SORT_DESC; // SORT_ASC is also possible
         $query      = [
-            'SELECT' => 'a.title, a.url, (' . $raw_query1 . ') IS NOT NULL AS children_exist, a.id, a.excerpt, a.create_time, a.parent_id',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => 'a.favorite = 1 AND a.published = 1'
+            'SELECT' => 'a.title, a.url, (' . $raw_query1 . ') IS NOT NULL AS children_exist, a.id, a.excerpt, a.favorite, a.create_time, a.parent_id',
+            'FROM'   => 'article_tag AS at',
+            'JOINS'  => [
+                [
+                    'INNER JOIN' => 'articles AS a',
+                    'ON'         => 'a.id = at.article_id'
+                ],
+            ],
+            'WHERE'  => 'at.tag_id = ' . $tagId . ' AND a.published = 1'
         ];
         $result     = $this->dbLayer->buildAndQuery($query);
 
@@ -68,7 +93,7 @@ readonly class PageFavorite implements ControllerInterface
                     'link'     => s2_link($url . (S2_USE_HIERARCHY ? '/' : '')),
                     'date'     => s2_date($row['create_time']),
                     'excerpt'  => $row['excerpt'],
-                    'favorite' => 2,
+                    'favorite' => $row['favorite'],
                 ];
                 $sort_field = $row['create_time'];
 
@@ -81,7 +106,7 @@ readonly class PageFavorite implements ControllerInterface
                     'link'     => s2_link($url),
                     'date'     => s2_date($row['create_time']),
                     'excerpt'  => $row['excerpt'],
-                    'favorite' => 2,
+                    'favorite' => $row['favorite'],
                 ];
                 $sort_field = $row['create_time'];
 
@@ -90,7 +115,6 @@ readonly class PageFavorite implements ControllerInterface
             }
         }
 
-        // There are favorite sections
         $section_text = '';
         if (\count($sections) > 0) {
             // There are sections having the tag
@@ -113,12 +137,14 @@ readonly class PageFavorite implements ControllerInterface
 
         $template
             ->addBreadCrumb(\Model::main_page_title(), s2_link('/'))
-            ->addBreadCrumb(\Lang::get('Favorite'))
-            ->putInPlaceholder('title', \Lang::get('Favorite'))
+            ->addBreadCrumb(\Lang::get('Tags'), s2_link('/' . $this->tagsUrlFragment . '/'))
+            ->addBreadCrumb($tagName)
+            ->putInPlaceholder('title', $this->viewer->render('tag_title', ['title' => $tagName]))
             ->putInPlaceholder('date', '')
             ->putInPlaceholder('text', $this->viewer->render('list_text', [
-                'articles' => $article_text,
-                'sections' => $section_text,
+                'description' => $tagDescription,
+                'articles'    => $article_text,
+                'sections'    => $section_text,
             ]))
         ;
 
