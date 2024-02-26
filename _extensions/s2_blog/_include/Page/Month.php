@@ -20,7 +20,7 @@ class Page_Month extends Page_HTML implements \Page_Routable
     {
         $params = $request->attributes->all();
 
-		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
+		if ($this->hasPlaceholder('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], 0);
 
 		$this->page['title'] = '';

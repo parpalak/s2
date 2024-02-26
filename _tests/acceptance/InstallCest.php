@@ -59,6 +59,7 @@ class InstallCest
         $this->testBlogExtension($I);
         $this->testBlogRssAndSitemap($I);
         $this->testSearchExtension($I);
+        $this->testAdminAddArticles($I);
         $this->testAdminTagListAndEdit($I);
         $this->testAdminCommentManagement($I);
     }
@@ -174,6 +175,85 @@ class InstallCest
         $I->seeResponseCodeIsSuccessful();
         $I->amOnPage('/_admin/site_ajax.php?action=load_tags');
         $I->see('another tag');
+    }
+
+    private function testAdminAddArticles(AcceptanceTester $I): void
+    {
+        foreach ([4, 5] as $newId) {
+            $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=create&id=2&title=New+page+' . $newId);
+            $data = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
+            $I->assertArrayHasKey('status', $data);
+            $I->assertEquals(1, $data['status']);
+            $I->assertArrayHasKey('id', $data);
+            $I->assertEquals($newId, $data['id']);
+
+            $dataProvider = static function (string $id) {
+                return [
+                    'page'  => [
+                        'title'       => 'New Page ' . $id,
+                        'meta_keys'   => 'New Meta Keywords',
+                        'meta_desc'   => 'New Meta Description',
+                        'excerpt'     => 'New Excerpt',
+                        'tags'        => 'tag1, another tag',
+                        'create_time' => [
+                            'hour' => '11',
+                            'min'  => '32',
+                            'day'  => '10',
+                            'mon'  => '08',
+                            'year' => '2023',
+                        ],
+                        'modify_time' => [
+                            'hour' => '12',
+                            'min'  => '15',
+                            'day'  => '11',
+                            'mon'  => '08',
+                            'year' => '2023',
+                        ],
+                        'text'        => '<p>Some new page text</p>',
+                        'id'          => $id,
+                        'revision'    => '1',
+                        'user_id'     => '0',
+                        'template'    => 'site.php',
+                        'url'         => 'new_page' . $id,
+                    ],
+                    'flags' => [
+                        'favorite'  => '1',
+                        'published' => '1',
+                        'commented' => '1',
+                    ],
+                ];
+            };
+
+            $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save', $dataProvider((string)$newId));
+            $I->seeResponseCodeIsSuccessful();
+            $I->dontSee('Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.');
+            $I->see('{"revision":2,"status":"ok","url_status":"ok"}');
+        }
+
+        // Links to related pages in section and by tags
+        $I->amOnPage('/section1/new_page4');
+        $I->see('New Page 4', 'h1');
+        $I->see('Some new page text', '#content');
+
+        $I->see('More in the section “Section 1”', '.header.menu_siblings');
+        $I->see('New Page Title', '.menu_siblings a');
+        $I->see('New Page 4', '.menu_siblings span');
+
+        $I->see('On the subject “tag1”', '.header.article_tags');
+        $I->see('New Page Title', '.article_tags a');
+        $I->see('New Page 4', '.article_tags span');
+
+        $I->see('See in blog', '.header.s2_blog_tags');
+        $I->see('tag1', '.s2_blog_tags a');
+
+        // Links to sub-pages
+        $I->amOnPage('/section1/');
+        $I->see('In this section', '.header.menu_children');
+        $I->see('New Page Title', '.menu_children a');
+        $I->see('New Page 4', '.menu_children a');
+
+        $I->see('New Page Title', 'h3.subsection');
+        $I->see('New Excerpt', 'p.subsection');
     }
 
     private function testTagsPage(AcceptanceTester $I): void

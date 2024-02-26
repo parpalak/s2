@@ -51,7 +51,7 @@ abstract class Page_Abstract
         }
     }
 
-    public function inTemplate($placeholder): bool
+    public function hasPlaceholder($placeholder): bool
     {
         $this->ensureTemplateIsLoaded();
 

@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\NotFoundController;
+use S2\Cms\Controller\PageCommon;
 use S2\Cms\Controller\PageFavorite;
 use S2\Cms\Controller\PageTag;
 use S2\Cms\Controller\PageTags;
@@ -229,6 +230,22 @@ class Application
                 $provider->get('S2_TAGS_URL'),
             );
         });
+
+        $this->container->set(PageCommon::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new PageCommon(
+                $container->get(DbLayer::class),
+                $container->get(HtmlTemplateProvider::class),
+                $container->get(RecommendationProvider::class),
+                $container->get(Viewer::class),
+                $provider->get('S2_USE_HIERARCHY') === '1',
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_TAGS_URL'),
+                (int)$provider->get('S2_MAX_ITEMS'),
+                $container->getParameter('debug'),
+            );
+        });
     }
 
     private function addRoutes(): void
@@ -246,7 +263,7 @@ class Application
         $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => PageFavorite::class]));
         $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => PageTags::class]));
         $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => PageTag::class]));
-        $routes->add('common', new Route('/{path<.*>}', ['_controller' => \Page_Common::class]));
+        $routes->add('common', new Route('/{path<.*>}', ['_controller' => PageCommon::class]));
 
         $this->routes = $routes;
     }
@@ -275,6 +292,7 @@ class Application
             'cache_dir'    => S2_CACHE_DIR,
             'log_dir'      => (defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR),
             'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+            'debug'        => defined('S2_DEBUG'),
             'debug_view'   => defined('S2_DEBUG_VIEW'),
             'redirect_map' => $GLOBALS['s2_redirect'] ?? [],
         ];

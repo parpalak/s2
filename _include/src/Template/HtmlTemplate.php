@@ -15,6 +15,7 @@ class HtmlTemplate
 {
     protected array $page = [];
     protected array $breadCrumbs = [];
+    private array $navLinks = [];
 
     public function __construct(
         protected string $template,
@@ -71,15 +72,13 @@ class HtmlTemplate
 
         // Content
         $replace['<!-- s2_site_title -->']      = S2_SITE_NAME;
-        $replace['<!-- s2_navigation_link -->'] = '';
-        if (isset($this->page['link_navigation'])) {
-            $link_navigation = [];
-            foreach ($this->page['link_navigation'] as $link_rel => $link_href) {
-                $link_navigation[] = '<link rel="' . $link_rel . '" href="' . $link_href . '" />';
-            }
 
-            $replace['<!-- s2_navigation_link -->'] = implode("\n", $link_navigation);
+        $link_navigation = [];
+        foreach ($this->navLinks as $link_rel => $link_href) {
+            $link_navigation[] = '<link rel="' . $link_rel . '" href="' . $link_href . '" />';
         }
+
+        $replace['<!-- s2_navigation_link -->'] = implode("\n", $link_navigation);
 
         $replace['<!-- s2_author -->']      = !empty($this->page['author']) ? '<div class="author">' . $this->page['author'] . '</div>' : '';
         $replace['<!-- s2_title -->']       = !empty($this->page['title']) ? $this->viewer->render('title', array_intersect_key($this->page, ['title' => 1, 'favorite' => 1])) : '';
@@ -200,8 +199,15 @@ class HtmlTemplate
         ];
     }
 
-    public function inTemplate(string $placeholder): bool
+    public function hasPlaceholder(string $placeholder): bool
     {
         return str_contains($this->template, $placeholder);
+    }
+
+    public function setLink(string $rel, string $link): static
+    {
+        $this->navLinks[$rel] = $link;
+
+        return $this;
     }
 }

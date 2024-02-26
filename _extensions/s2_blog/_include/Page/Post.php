@@ -22,7 +22,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
     {
         $params = $request->attributes->all();
 
-        if ($this->inTemplate('<!-- s2_blog_calendar -->'))
+        if ($this->hasPlaceholder('<!-- s2_blog_calendar -->'))
             $this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']);
 
         $this->page['title'] = '';
@@ -95,7 +95,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
         $this->page['canonical_path'] = S2_BLOG_PATH . date('Y/m/d/', $row['create_time']) . $row['url'];
 
-        $is_back_forward = $this->inTemplate('<!-- s2_blog_back_forward -->');
+        $is_back_forward = $this->hasPlaceholder('<!-- s2_blog_back_forward -->');
 
         $queries = [];
         if ($label) {
@@ -180,7 +180,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
             ];
 
         $this->page['commented'] = $row['commented'];
-        if ($row['commented'] && S2_SHOW_COMMENTS && $this->inTemplate('<!-- s2_comments -->'))
+        if ($row['commented'] && S2_SHOW_COMMENTS && $this->hasPlaceholder('<!-- s2_comments -->'))
             $this->page['comments'] = $this->get_comments($post_id);
 
         $row['time']      = s2_date_time($row['create_time']);
@@ -191,7 +191,7 @@ class Page_Post extends Page_HTML implements \Page_Routable
 
         $this->page['text'] = $this->renderPartial('post', $row);
 
-        if ($this->inTemplate('<!-- s2_recommendations -->')) {
+        if ($this->hasPlaceholder('<!-- s2_recommendations -->')) {
             /** @var RecommendationProvider $recommendationProvider */
             $recommendationProvider = \Container::get(RecommendationProvider::class);
             global $request_uri;

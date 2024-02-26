@@ -49,7 +49,7 @@ abstract class Page_HTML extends \Page_HTML
 
         $this->page['head_title'] = empty($this->page['head_title']) ? S2_BLOG_TITLE : $this->page['head_title'] . ' - ' . S2_BLOG_TITLE;
 
-        if (!isset($this->page['s2_blog_navigation']) && $this->inTemplate('<!-- s2_blog_navigation -->')) {
+        if (!isset($this->page['s2_blog_navigation']) && $this->hasPlaceholder('<!-- s2_blog_navigation -->')) {
             $this->page['s2_blog_navigation'] = $this->blog_navigation();
         }
 

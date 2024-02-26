@@ -28,7 +28,7 @@ class Page_Main extends Page_HTML implements \Page_Routable
 
 		$this->template_id = $s2_blog_skip ? 'blog.php' : 'blog_main.php';
 
-		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
+		if ($this->hasPlaceholder('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		$this->last_posts($s2_blog_skip);

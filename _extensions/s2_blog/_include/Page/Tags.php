@@ -33,7 +33,7 @@ class Page_Tags extends Page_HTML implements \Page_Routable
             return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
-		if ($this->inTemplate('<!-- s2_blog_calendar -->'))
+		if ($this->hasPlaceholder('<!-- s2_blog_calendar -->'))
 			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
 
 		// The list of tags
