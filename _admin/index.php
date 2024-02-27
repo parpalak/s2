@@ -102,13 +102,14 @@ function s2_jsvarencode ($var)
 <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="css/style.css" />
-<style>body {background-color: <?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>;}</style>
+<style type="text/css">body {background-color: <?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>;}</style>
 <?php ($hook = s2_hook('ai_head_end')) ? eval($hook) : null; ?>
 </head>
 
 <body tabindex="0">
 	<div id="logout">
 		<div id="loading"></div>
+        <button id="fullscreen" title="<?php echo $lang_admin['Fullscreen']; ?>" onclick="return ToggleFullscreen();">⛶</button>
 		<?php printf($lang_admin['Welcome'], $login); ?>
 		<a href="#" title="<?php echo $lang_admin['Logout info']; ?>" onclick="return Logout();"><?php echo $lang_admin['Logout']; ?></a>
 	</div>

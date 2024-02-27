@@ -4,6 +4,7 @@ $lang_admin = array(
 
 // Common admin panel
 'Welcome'					=> '👤 %s',
+'Fullscreen'			    => 'Full screen',
 'Logout'					=> 'Log out?',
 'Logout info'				=> 'Click here to say goodbye',
 'Delete from list'			=> 'Delete the page from this list',

@@ -3,7 +3,7 @@
  *
  * Drag & drop, event handlers for the admin panel
  *
- * @copyright (C) 2007-2023 Roman Parpalak
+ * @copyright (C) 2007-2024 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
  */
@@ -217,6 +217,20 @@ function optimizeAndUploadFile(file) {
 		}
 	}
 }
+
+function ToggleFullscreen ()
+{
+	if (!document.fullscreenElement) {
+		document.documentElement.requestFullscreen().catch((err) => {
+			console.log(
+				`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`,
+			);
+		});
+	} else {
+		document.exitFullscreen();
+	}
+}
+
 function Logout ()
 {
 	function DoLogout ()

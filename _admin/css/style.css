@@ -77,7 +77,7 @@ body {
 	z-index: 1;
 	top: 0;
 	right: 0;
-	padding: 0 3px;
+	padding: 0 3px 0 0;
 	background: #fff;
 	color: #000;
 	border-left: 1px solid #ccc;
@@ -91,6 +91,17 @@ body {
 	top: 11px;
 	position: absolute;
 	background: url(data:image/gif;base64,R0lGODlhKgAGAJAAAICAgAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgABACwAAAAAKgAGAAACJIQfqcvtf5CKjC47UTRXZt6BHxBs5Fh5CbZqW3iicMqZz43fBQAh+QQJCgABACwBAAAAKAAGAAACI4xvoIvtjxaIch7ZMK021d15SsaFHEiOoCYyl/uqcbjS0I0UACH5BAkKAAEALAEAAAAoAAYAAAIijI9pwK2PGkgyynmqvTg7ry0feFFjwG2dmKoq48bQ085KAQAh+QQJCgABACwBAAAAKAAGAAACI4yPqQntGxxgD0kr58l1d3N5Ichpokk22BiVlLqiXAzV9bwUACH5BAkKAAEALAEAAAApAAYAAAIjjI+pu+APU0Tz1AAzkI87v1laR5HiV6LGaK4t9l4aQ9eMVgAAIfkEBRQAAQAsAQABACgABAAAAhyEEZmHGuzeiQw6q/CatxrKZeH2dR5YiinZqEABADs=) 0 0 no-repeat;
+	}
+
+#fullscreen {
+	font-size: 1.5em;
+	display: inline-block;
+	vertical-align: bottom;
+	padding: 0 2px;
+	margin: 0;
+	border: 0;
+	background: transparent;
+	line-height: 20px;
 	}
 
 a, a:visited {
