@@ -13,12 +13,14 @@ namespace S2\Cms\Template;
 class Viewer
 {
     private string $styleViewDir;
+    private string $extensionDirPattern;
     private string $systemViewDir;
 
     public function __construct(string $rootDir, string $style, private readonly bool $debug)
     {
-        $this->styleViewDir = $rootDir . '_styles/' . $style . '/views/';
-        $this->systemViewDir = S2_ROOT . '_include/views/';
+        $this->styleViewDir        = $rootDir . '_styles/' . $style . '/views/';
+        $this->extensionDirPattern = $rootDir . '_extensions/%s/views/';
+        $this->systemViewDir       = S2_ROOT . '_include/views/';
     }
 
     /**
@@ -70,7 +72,11 @@ class Viewer
         $filename = $name . '.php';
 
         $foundFile = null;
-        $dirs      = [$this->styleViewDir, ...$extraDirs, $this->systemViewDir];
+        $dirs      = [
+            $this->styleViewDir,
+            ...array_map(fn(string $dir) => sprintf($this->extensionDirPattern, $dir), $extraDirs),
+            $this->systemViewDir
+        ];
         foreach ($dirs as $dir) {
             if (file_exists($dir . $filename)) {
                 $foundFile = $dir . $filename;

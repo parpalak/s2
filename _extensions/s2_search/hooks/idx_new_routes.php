@@ -9,7 +9,7 @@
  * @var \Symfony\Component\Routing\RouteCollection $routes
  */
 
-use s2_extensions\s2_search\Page;
+use s2_extensions\s2_search\SearchPageController;
 use Symfony\Component\Routing\Route;
 
 
@@ -17,6 +17,6 @@ if (!defined('S2_ROOT')) {
     die;
 }
 
-$routes->add('search', new Route('/search', ['_controller' => Page::class]));
+$routes->add('search', new Route('/search', ['_controller' => SearchPageController::class]));
 // Hack for alternative URL schemes
-$routes->add('search2', new Route('/', ['_controller' => Page::class], condition: "request.query.get('search') !== null"));
+$routes->add('search2', new Route('/', ['_controller' => SearchPageController::class], condition: "request.query.get('search') !== null"));

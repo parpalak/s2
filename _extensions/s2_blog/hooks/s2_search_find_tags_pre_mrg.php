@@ -9,9 +9,11 @@
  * @var \S2\Cms\Pdo\DbLayer $s2_db
  */
 
- if (!defined('S2_ROOT')) {
+if (!defined('S2_ROOT')) {
      die;
 }
+
+$s2_db = $this->dbLayer;
 
 Lang::load('s2_blog', function ()
 {

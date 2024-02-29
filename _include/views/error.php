@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="Generator" content="S2 <?php echo S2_VERSION; ?>" />
-    <title>Error - <?php echo s2_htmlencode(S2_SITE_NAME); ?></title>
+    <title>Error - <?php echo defined('S2_SITE_NAME') ? s2_htmlencode(S2_SITE_NAME) : 'S2'; ?></title>
     <style>
         body {
             margin: 40px;

@@ -24,7 +24,7 @@ class QueuePublisher
             throw new \DomainException('Id length must not exceed 80 characters');
         }
         if (\strlen($code) > 80) {
-            throw new \DomainException('Id length must not exceed 80 characters');
+            throw new \DomainException('Code length must not exceed 80 characters');
         }
 
         try {

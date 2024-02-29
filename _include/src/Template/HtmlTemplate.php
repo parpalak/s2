@@ -16,6 +16,7 @@ class HtmlTemplate
     protected array $page = [];
     protected array $breadCrumbs = [];
     private array $navLinks = [];
+    private array $replace = [];
 
     public function __construct(
         protected string $template,
@@ -42,6 +43,8 @@ class HtmlTemplate
         global $s2_start;
 
         $template = $this->template;
+
+        $replace = $this->replace;
 
         // HTML head
         $replace['<!-- s2_head_title -->'] = empty($this->page['head_title']) ?
@@ -183,6 +186,25 @@ class HtmlTemplate
         return $response;
     }
 
+    public function hasPlaceholder(string $placeholder): bool
+    {
+        return str_contains($this->template, $placeholder);
+    }
+
+    public function setLink(string $rel, string $link): static
+    {
+        $this->navLinks[$rel] = $link;
+
+        return $this;
+    }
+
+    public function registerPlaceholder(string $placeholder, string $value): static
+    {
+        $this->replace[$placeholder] = $value;
+
+        return $this;
+    }
+
     protected function simplePlaceholders(): array
     {
         return [
@@ -197,17 +219,5 @@ class HtmlTemplate
             'menu_subsections',
             'article_tags'
         ];
-    }
-
-    public function hasPlaceholder(string $placeholder): bool
-    {
-        return str_contains($this->template, $placeholder);
-    }
-
-    public function setLink(string $rel, string $link): static
-    {
-        $this->navLinks[$rel] = $link;
-
-        return $this;
     }
 }

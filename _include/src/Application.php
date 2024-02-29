@@ -41,12 +41,15 @@ use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
 use s2_extensions\s2_search\Fetcher;
 use s2_extensions\s2_search\IndexManager;
+use s2_extensions\s2_search\SearchPageController;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class Application
 {
@@ -64,6 +67,9 @@ class Application
 
         \Container::setContainer($this->container);
 
+        $this->container->set(EventDispatcherInterface::class, function (Container $container) {
+            return new EventDispatcher();
+        });
         $this->container->set(DbLayer::class, function (Container $container) {
             $db_prefix = $container->getParameter('db_prefix');
             $db_type   = $container->getParameter('db_type');
@@ -138,6 +144,20 @@ class Application
         $this->container->set(ExtractorInterface::class, function (Container $container) {
             return new CustomExtractor($container->get(LoggerInterface::class));
         });
+        $this->container->set(SearchPageController::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new SearchPageController(
+                $container->get(Finder::class),
+                $container->get(StemmerInterface::class),
+                $container->get(DbLayer::class),
+                $container->get(HtmlTemplateProvider::class),
+                $container->get(Viewer::class),
+                $container->getParameter('debug_view'),
+                $provider->get('S2_TAGS_URL'),
+            );
+        });
+
 
         $this->container->set(ThumbnailGenerator::class, function (Container $container) {
             return new ThumbnailGenerator(
@@ -184,7 +204,10 @@ class Application
         });
 
         $this->container->set(HtmlTemplateProvider::class, function (Container $container) {
-            return new HtmlTemplateProvider($container->get(Viewer::class));
+            return new HtmlTemplateProvider(
+                $container->get(Viewer::class),
+                $container->get(EventDispatcherInterface::class),
+            );
         });
 
         $this->container->set(Viewer::class, function (Container $container) {
@@ -246,6 +269,8 @@ class Application
                 $container->getParameter('debug'),
             );
         });
+
+        ($hook = s2_hook('app_build_container')) ? eval($hook) : null;
     }
 
     private function addRoutes(): void
@@ -290,7 +315,7 @@ class Application
         $result = [
             'root_dir'     => S2_ROOT,
             'cache_dir'    => S2_CACHE_DIR,
-            'log_dir'      => (defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR),
+            'log_dir'      => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
             'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
             'debug'        => defined('S2_DEBUG'),
             'debug_view'   => defined('S2_DEBUG_VIEW'),

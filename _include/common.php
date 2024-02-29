@@ -44,8 +44,8 @@ if (defined('S2_DEBUG')) {
 HtmlErrorRenderer::setTemplate(realpath(S2_ROOT.'_include/views/error.php'));
 
 $app = new Application();
-$app->boot();
 try {
+    $app->boot();
     $app->container->getParameter('base_url');
 } catch (\S2\Cms\Framework\Exception\ParameterNotFoundException $e) {
     // S2 is not installed

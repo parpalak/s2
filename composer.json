@@ -28,6 +28,7 @@
         "symfony/cache": "^7.0",
         "symfony/error-handler": "^7.0",
         "symfony/expression-language": "^7.0",
+        "symfony/event-dispatcher": "^7.0",
         "symfony/filesystem": "^7.0",
         "symfony/http-foundation": "^7.0",
         "symfony/routing": "^7.0"
