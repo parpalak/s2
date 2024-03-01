@@ -36,10 +36,6 @@ class Viewer
         }
 
         $this->dirs[] = S2_ROOT . '_include/views/';
-
-        if (defined('S2_DEBUG_VIEW') && ($that === null || $that instanceof Page_HTML)) {
-            $this->debug = true;
-        }
     }
 
     /**

@@ -65,10 +65,6 @@ abstract class Page_Abstract
     {
         $this->ensureTemplateIsLoaded();
 
-        if ($this instanceof Page_HTML) {
-            $this->process_template();
-        }
-
         /** @var ?DbLayer $s2_db */
         $s2_db = Container::getIfInstantiated(DbLayer::class);
         $s2_db?->close();

@@ -9,7 +9,7 @@
 
 use Psr\Log\LoggerInterface;
 use S2\Cms\Pdo\DbLayer;
-use Symfony\Component\HttpFoundation\Request;
+use S2\Cms\Template\HtmlTemplateProvider;
 
 define('S2_ROOT', './');
 require S2_ROOT.'_include/common.php';
@@ -19,16 +19,20 @@ require S2_ROOT.'_include/comments.php';
 
 header('X-Powered-By: S2/'.S2_VERSION);
 
+/** @var HtmlTemplateProvider $templateProvider */
+$templateProvider      = $app->container->get(HtmlTemplateProvider::class);
+$template = $templateProvider->getTemplate('service.php');
+
 if (isset($_GET['go']))
 {
 	// Outputs "comment saved" message (used if the premoderation mode is enabled)
-    $controller = new Page_Service([
-        'head_title' => '✅' . Lang::get('Comment sent', 'comments'),
-        'title'      => '<span class="icon-success">✔</span>' . Lang::get('Comment sent', 'comments'),
-        'text'       => sprintf(Lang::get('Comment sent info', 'comments'), s2_htmlencode($_GET['go']), s2_link('/')),
-    ]);
+    $template
+        ->putInPlaceholder('head_title', '✅' . Lang::get('Comment sent', 'comments'))
+        ->putInPlaceholder('title', '<span class="icon-success">✔</span>' . Lang::get('Comment sent', 'comments'))
+        ->putInPlaceholder('text', sprintf(Lang::get('Comment sent info', 'comments'), s2_htmlencode($_GET['go']), s2_link('/')))
+    ;
 
-	$controller->handle(Request::createFromGlobals());
+    $template->toHttpResponse()->send();
 
 	die();
 }
@@ -37,63 +41,64 @@ if (isset($_GET['unsubscribe']))
 {
 	header('Content-Type: text/html; charset=utf-8');
 
-	if (isset($_GET['id']) && isset($_GET['mail']))
-	{
+	if (isset($_GET['id'], $_GET['mail'])) {
         /** @var DbLayer $s2_db */
-        $s2_db = \Container::get(DbLayer::class);
+        $s2_db = $app->container->get(DbLayer::class);
 
-		list($id, $class) = explode('.', $_GET['id']);
+		[$id, $class] = explode('.', $_GET['id']);
 		$id = (int) $id;
 		$class = (string) $class;
 
-		$query = array(
+		$query = [
 			'SELECT'	=> 'id, nick, email, ip, time',
 			'FROM'		=> 'art_comments',
 			'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
-		);
+        ];
 		($hook = s2_hook('cmnt_unsubscribe_pre_get_receivers_qr')) ? eval($hook) : null;
 		$result = $s2_db->buildAndQuery($query);
 
 		$found = false;
-		while ($receiver = $s2_db->fetchAssoc($result))
-			if ($_GET['unsubscribe'] === base_convert(substr(md5($receiver['id'].$receiver['ip'].$receiver['nick'].$receiver['email'].$receiver['time']), 0, 16), 16, 36))
-				$found = true;
+		while ($receiver = $s2_db->fetchAssoc($result)) {
+            if ($_GET['unsubscribe'] === base_convert(substr(md5($receiver['id'] . $receiver['ip'] . $receiver['nick'] . $receiver['email'] . $receiver['time']), 0, 16), 16, 36)) {
+                $found = true;
+            }
+        }
 
-		if ($found)
-		{
-			$query = array(
+		if ($found) {
+			$query = [
 				'UPDATE'	=> 'art_comments',
 				'SET'		=> 'subscribed = 0',
 				'WHERE'		=> 'article_id = '.$id.' and subscribed = 1 and email = \''.$s2_db->escape($_GET['mail']).'\''
-			);
+            ];
 			($hook = s2_hook('cmnt_unsubscribe_pre_upd_qr')) ? eval($hook) : null;
 			$s2_db->buildAndQuery($query);
 
-			$controller = new Page_Service(array(
-				'head_title' => Lang::get('Unsubscribed OK', 'comments'),
-				'title'      => Lang::get('Unsubscribed OK', 'comments'),
-				'text'       => Lang::get('Unsubscribed OK info', 'comments'),
-			));
+            $template
+                ->putInPlaceholder('head_title', Lang::get('Unsubscribed OK', 'comments'))
+                ->putInPlaceholder('title', Lang::get('Unsubscribed OK', 'comments'))
+                ->putInPlaceholder('text', Lang::get('Unsubscribed OK info', 'comments'))
+            ;
 
-			$controller->handle(Request::createFromGlobals());
+            $template->toHttpResponse()->send();
 
 			die();
 		}
 	}
 
-	$controller = new Page_Service(array(
-		'head_title' => Lang::get('Unsubscribed failed', 'comments'),
-		'title'      => Lang::get('Unsubscribed failed', 'comments'),
-		'text'       => Lang::get('Unsubscribed failed info', 'comments'),
-	));
+    $template
+        ->putInPlaceholder('head_title', Lang::get('Unsubscribed failed', 'comments'))
+        ->putInPlaceholder('title', Lang::get('Unsubscribed failed', 'comments'))
+        ->putInPlaceholder('text', Lang::get('Unsubscribed failed info', 'comments'))
+    ;
 
-	$controller->handle(Request::createFromGlobals());
+    $template->toHttpResponse()->send();
 
 	die();
 }
 
-if (!defined('S2_MAX_COMMENT_BYTES'))
-	define('S2_MAX_COMMENT_BYTES', 65535);
+if (!defined('S2_MAX_COMMENT_BYTES')) {
+    define('S2_MAX_COMMENT_BYTES', 65535);
+}
 
 $_POST['show_email'] = $show_email = (int) isset($_POST['show_email']);
 $_POST['subscribed'] = $subscribed = (int) isset($_POST['subscribed']);
@@ -104,7 +109,7 @@ $_POST['subscribed'] = $subscribed = (int) isset($_POST['subscribed']);
 // Starting input validation
 //
 
-$errors = array();
+$errors = [];
 
 if (!S2_ENABLED_COMMENTS) {
     $errors[] = Lang::get('disabled', 'comments');
@@ -155,7 +160,7 @@ if (isset($_POST['preview']))
 
 	($hook = s2_hook('cmnt_preview_pre_comment_merge')) ? eval($hook) : null;
 
-	$viewer = new Viewer();
+	$viewer = $app->container->get(\S2\Cms\Template\Viewer::class);
 	$text_preview = '<p>' . Lang::get('Comment preview info', 'comments') . '</p>' . "\n" .
 		$viewer->render('comment', array(
 			'text'       => $text,
@@ -165,17 +170,17 @@ if (isset($_POST['preview']))
 			'show_email' => $show_email,
 		));
 
-	$controller = new Page_Service(array(
-		'head_title'   => Lang::get('Comment preview', 'comments'),
-		'title'        => Lang::get('Comment preview', 'comments'),
-		'text'         => $text_preview,
-		'id'           => $id,
-		'class'        => $class,
-		'commented'    => true,
-		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
-	));
+    $template
+        ->putInPlaceholder('head_title'   , Lang::get('Comment preview', 'comments'))
+        ->putInPlaceholder('title'        , Lang::get('Comment preview', 'comments'))
+        ->putInPlaceholder('text'         , $text_preview)
+        ->putInPlaceholder('id'           , $id)
+        ->putInPlaceholder('class'        , $class)
+        ->putInPlaceholder('commented'    , true)
+        ->putInPlaceholder('comment_form' , compact('name', 'email', 'show_email', 'subscribed', 'text'))
+	;
 
-	$controller->handle(Request::createFromGlobals());
+    $template->toHttpResponse()->send();
 
 	die();
 }
@@ -185,7 +190,7 @@ $path = false;
 
 if (empty($errors)) {
     /** @var DbLayer $s2_db */
-    $s2_db = \Container::get(DbLayer::class);
+    $s2_db = $app->container->get(DbLayer::class);
 
     $query = array(
         'SELECT' => 'title, parent_id, url',
@@ -213,20 +218,20 @@ if (!empty($errors))
 		$error_text .=  '<li>'.$error.'</li>';
 	$error_text .=  '</ul>';
 
-	$controller = new Page_Service(array(
-		'head_title'   => '❌' . Lang::get('Error'),
-		'title'        => '<span class="icon-error">✖</span>' . Lang::get('Error'),
-		'text'         => $error_text . ($id !== null ? '<p>' . Lang::get('Fix error', 'comments') . '</p>' : ''),
-		'id'           => $id,
-		'class'        => $class,
-		'commented'    => $id !== null,
-		'comment_form' => compact('name', 'email', 'show_email', 'subscribed', 'text'),
-	));
+    $template
+		->putInPlaceholder('head_title'   , '❌' . Lang::get('Error'))
+		->putInPlaceholder('title'        , '<span class="icon-error">✖</span>' . Lang::get('Error'))
+		->putInPlaceholder('text'         , $error_text . ($id !== null ? '<p>' . Lang::get('Fix error', 'comments') . '</p>' : ''))
+		->putInPlaceholder('id'           , $id)
+		->putInPlaceholder('class'        , $class)
+		->putInPlaceholder('commented'    , $id !== null)
+		->putInPlaceholder('comment_form' , compact('name', 'email', 'show_email', 'subscribed', 'text'))
+	;
 
-	$controller->handle(Request::createFromGlobals());
+    $template->toHttpResponse()->send();
 
     /** @var LoggerInterface $logger */
-    $logger = Container::get(LoggerInterface::class);
+    $logger = $app->container->get(LoggerInterface::class);
     $logger->notice('Comment was not saved due to errors.', [
         'errors' => $errors,
         'id'     => s2_ext_var('id'),
@@ -242,7 +247,7 @@ $link = s2_abs_link($path.'/'.urlencode($row['url']));
 //
 
 /** @var DbLayer $s2_db */
-$s2_db = \Container::get(DbLayer::class);
+$s2_db = $app->container->get(DbLayer::class);
 
 // Detect if there is a user logged in
 $is_logged_in = false;
