@@ -157,7 +157,8 @@ class Logger implements LoggerInterface
             fwrite($fh, $logLine);
             fclose($fh);
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Could not open log file {$this->log_file} for writing to log channel {$this->channel}!", 0, $e);
+            /** @noinspection ForgottenDebugOutputInspection */
+            error_log("Could not open log file {$this->log_file} for writing to log channel {$this->channel}!");
         }
 
         // Log to stdout if option set to do so.
