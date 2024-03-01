@@ -7,63 +7,53 @@
  * @package s2_blog
  */
 
-namespace s2_extensions\s2_blog;
+namespace s2_extensions\s2_blog\Controller;
 
 use \Lang;
+use S2\Cms\Template\HtmlTemplate;
+use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class Page_Favorite extends Page_HTML implements \Page_Routable
+class FavoritePageController extends BlogController
 {
-    public function body (Request $request): ?Response
+    public function body (Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
             return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
-		$this->ensureTemplateIsLoaded();
+		if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
+            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar(date('Y'), date('m'), '0'));
+        }
 
-		if ($this->hasPlaceholder('<!-- s2_blog_calendar -->'))
-			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
+        $output = $this->getPosts([
+            'SELECT' => '2 AS favorite',
+            'WHERE'  => 'favorite = 1',
+        ], false);
 
-		$this->favorite_posts();
+        if ($output === '') {
+            // TODO Why 404 in favorite? Where is the message?
+            $template->markAsNotFound();
+        }
 
 		// Bread crumbs
-		$this->page['path'][] = array(
-			'title' => \Model::main_page_title(),
-			'link'  => s2_link('/'),
-		);
-		if (S2_BLOG_URL)
-		{
-			$this->page['path'][] = array(
-				'title' => Lang::get('Blog', 's2_blog'),
-				'link' => S2_BLOG_PATH,
-			);
-		}
-		$this->page['path'][] = array(
-			'title' => Lang::get('Favorite'),
-		);
+        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        if ($this->blogUrl !== '') {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        }
+        $template->addBreadCrumb(Lang::get('Favorite'));
 
-		$this->page['head_title'] = $this->page['title'] = Lang::get('Favorite');
-		$this->page['link_navigation']['up'] = S2_BLOG_PATH;
+        $template
+            ->putInPlaceholder('head_title', Lang::get('Favorite'))
+            ->putInPlaceholder('title', Lang::get('Favorite'))
+            ->putInPlaceholder('text', $output)
+        ;
+
+        $template->setLink('up', $this->blogPath);
 
         return null;
-	}
-
-	public function favorite_posts ()
-	{
-		$query_add = array(
-			'SELECT' => '2 AS favorite',
-			'WHERE'  => 'favorite = 1',
-		);
-		$output = $this->get_posts($query_add, false);
-
-		if ($output == '')
-			$this->s2_404_header();
-		// TODO Why 404 in favorite? Where is the message?
-
-		$this->page['text'] = $output;
 	}
 }

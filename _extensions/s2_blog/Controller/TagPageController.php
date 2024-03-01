@@ -7,158 +7,142 @@
  * @package s2_blog
  */
 
-namespace s2_extensions\s2_blog;
+namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Template\HtmlTemplate;
+use S2\Cms\Template\HtmlTemplateProvider;
+use S2\Cms\Template\Viewer;
+use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class Page_Tag extends Page_HTML implements \Page_Routable
+class TagPageController extends BlogController
 {
-    public function body (Request $request): ?Response
+    public function __construct(
+        DbLayer               $dbLayer,
+        HtmlTemplateProvider  $templateProvider,
+        Viewer                $viewer,
+        string                $tagsUrl,
+        string                $blogUrl,
+        string                $blogTitle,
+        private readonly bool $useHierarchy
+    ) {
+        parent::__construct($dbLayer, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+    }
+
+    public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $params = $request->attributes->all();
 
-		if ($this->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
+        if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
+            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar(date('Y'), date('m'), '0'));
         }
 
-		// A tag
-		$result = $this->posts_by_tag($params['tag'], !empty($params['slash']));
-        if ($result !== null) {
-            return $result;
+        $tag = $params['tag'];
+
+        $query  = [
+            'SELECT' => 'tag_id, description, name, url',
+            'FROM'   => 'tags',
+            'WHERE'  => 'url = \'' . $this->dbLayer->escape($tag) . '\''
+        ];
+        $result = $this->dbLayer->buildAndQuery($query);
+
+        if (!($row = $this->dbLayer->fetchRow($result))) {
+            throw new NotFoundException();
         }
 
-		// Bread crumbs
-		$this->page['path'][] = array(
-			'title' => \Model::main_page_title(),
-			'link'  => s2_link('/'),
-		);
+        [$tagId, $tagDescription, $tagName, $tagUrl] = $row;
 
-		if (S2_BLOG_URL) {
-			$this->page['path'][] = array(
-				'title' => Lang::get('Blog', 's2_blog'),
-				'link' => S2_BLOG_PATH,
-			);
-		}
+        if ($params['slash'] !== '/') {
+            return new RedirectResponse($this->blogTagsPath . urlencode($tagUrl) . '/', Response::HTTP_MOVED_PERMANENTLY);
+        }
 
-		$this->page['path'][] = array(
-			'title' => Lang::get('Tags'),
-			'link'  => S2_BLOG_TAGS_PATH,
-		);
-		$this->page['path'][] = array(
-			'title' => $this->page['title'],
-		);
+        $art_links = $this->articles_by_tag($tagId);
+        if (\count($art_links) > 0) {
+            $tagDescription .= '<p>' . Lang::get('Articles by tag', 's2_blog') . '<br />' . implode('<br />', $art_links) . '</p>';
+        }
 
+        if ($tagDescription) {
+            $tagDescription .= '<hr />';
+        }
 
-        $this->page['head_title'] = s2_htmlencode($this->page['title']);
-        $this->page['title'] = $this->renderPartial('tag_title', ['title' => $this->page['title']]);
+        $output = $this->getPosts([
+            'JOINS' => [
+                [
+                    'INNER JOIN' => 's2_blog_post_tag AS pt',
+                    'ON'         => 'pt.post_id = p.id'
+                ]
+            ],
+            'WHERE' => 'pt.tag_id = ' . $tagId
+        ], false);
 
-		$this->page['link_navigation']['up'] = S2_BLOG_TAGS_PATH;
+        if ($output === '') {
+            throw new NotFoundException();
+        }
+
+        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        if ($this->blogUrl !== '') {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        }
+        $template->addBreadCrumb(Lang::get('Tags'), $this->blogTagsPath);
+        $template->addBreadCrumb($tagName);
+
+        $template
+            ->putInPlaceholder('head_title', s2_htmlencode($tagName))
+            ->putInPlaceholder('title', $this->viewer->render('tag_title', ['title' => $tagName]))
+            ->putInPlaceholder('text', $tagDescription . $output)
+        ;
+
+        $template->setLink('up', $this->blogTagsPath);
 
         return null;
     }
 
-	private function posts_by_tag ($tag, $is_slash): ?Response
-	{
-        /** @var DbLayer $s2_db */
-        $s2_db = \Container::get(DbLayer::class);
 
-		$query = array(
-			'SELECT'	=> 'tag_id, description, name, url',
-			'FROM'		=> 'tags',
-			'WHERE'		=> 'url = \''.$s2_db->escape($tag).'\''
-		);
-		($hook = s2_hook('fn_s2_blog_posts_by_tag_pre_get_tag_qr')) ? eval($hook) : null;
-		$result = $s2_db->buildAndQuery($query);
+    /**
+     * Returns the array of links to the articles with the tag specified
+     */
+    private function articles_by_tag(int $tag_id): array
+    {
+        $subquery   = [
+            'SELECT' => '1',
+            'FROM'   => 'articles AS a1',
+            'WHERE'  => 'a1.parent_id = a.id AND a1.published = 1',
+            'LIMIT'  => '1'
+        ];
+        $raw_query1 = $this->dbLayer->build($subquery);
 
-		if (!($row = $s2_db->fetchRow($result))) {
-            throw new NotFoundException();
+        $query  = [
+            'SELECT' => 'a.id, a.url, a.title, a.parent_id, (' . $raw_query1 . ') IS NOT NULL AS children_exist',
+            'FROM'   => 'articles AS a',
+            'JOINS'  => [
+                [
+                    'INNER JOIN' => 'article_tag AS atg',
+                    'ON'         => 'atg.article_id = a.id'
+                ],
+            ],
+            'WHERE'  => 'atg.tag_id = ' . $tag_id . ' AND a.published = 1',
+        ];
+        $result = $this->dbLayer->buildAndQuery($query);
+
+        $title = $urls = $parentIds = [];
+
+        while ($row = $this->dbLayer->fetchAssoc($result)) {
+            $urls[]      = urlencode($row['url']) . ($this->useHierarchy && $row['children_exist'] ? '/' : '');
+            $parentIds[] = $row['parent_id'];
+            $title[]     = $row['title'];
+        }
+        $urls = \Model::get_group_url($parentIds, $urls);
+
+        foreach ($urls as $k => $v) {
+            $urls[$k] = '<a href="' . s2_link($v) . '">' . $title[$k] . '</a>';
         }
 
-        [$tag_id, $tag_descr, $tag_name, $tag_url] = $row;
-
-        if (!$is_slash) {
-            return new RedirectResponse(s2_link(S2_BLOG_URL.'/'.S2_TAGS_URL.'/'.urlencode($tag_url).'/'), Response::HTTP_MOVED_PERMANENTLY);
-        }
-
-		$art_links = self::articles_by_tag($tag_id);
-		if (count($art_links))
-			$tag_descr .= '<p>'.Lang::get('Articles by tag', 's2_blog').'<br />'.implode('<br />', $art_links).'</p>';
-
-		if ($tag_descr)
-			$tag_descr .= '<hr />';
-
-		$query_add = array(
-			'JOINS'		=> array(
-				array(
-					'INNER JOIN'	=> 's2_blog_post_tag AS pt',
-					'ON'			=> 'pt.post_id = p.id'
-				)
-			),
-			'WHERE'		=> 'pt.tag_id = '.$tag_id
-		);
-		$output = $this->get_posts($query_add, false);
-		if ($output == '') {
-            throw new NotFoundException();
-        }
-
-		$this->page['title'] = $tag_name;
-		$this->page['text'] = $tag_descr.$output;
-
-        return null;
-	}
-
-	/**
-	 * Returns the array of links to the articles with the tag specified
-	 *
-	 * @param $tag_id
-	 * @return array
-	 */
-	private static function articles_by_tag ($tag_id)
-	{
-        /** @var DbLayer $s2_db */
-        $s2_db = \Container::get(DbLayer::class);
-
-		$subquery = array(
-			'SELECT'	=> '1',
-			'FROM'		=> 'articles AS a1',
-			'WHERE'		=> 'a1.parent_id = a.id AND a1.published = 1',
-			'LIMIT'		=> '1'
-		);
-		$raw_query1 = $s2_db->build($subquery);
-
-		$query = array(
-			'SELECT'	=> 'a.id, a.url, a.title, a.parent_id, ('.$raw_query1.') IS NOT NULL AS children_exist',
-			'FROM'		=> 'articles AS a',
-			'JOINS'		=> array(
-				array(
-					'INNER JOIN'	=> 'article_tag AS atg',
-					'ON'			=> 'atg.article_id = a.id'
-				),
-			),
-			'WHERE'		=> 'atg.tag_id = '.$tag_id.' AND a.published = 1',
-		);
-		($hook = s2_hook('fn_articles_by_tag_pre_qr')) ? eval($hook) : null;
-		$result = $s2_db->buildAndQuery($query);
-
-		$title = $urls = $parent_ids = array();
-
-		while ($row = $s2_db->fetchAssoc($result))
-		{
-			$urls[] = urlencode($row['url']).(S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
-			$parent_ids[] = $row['parent_id'];
-			$title[] = $row['title'];
-		}
-		$urls = \Model::get_group_url($parent_ids, $urls);
-
-		foreach ($urls as $k => $v)
-			$urls[$k] = '<a href="'.s2_link($v).'">'.$title[$k].'</a>';
-
-		return $urls;
-	}
+        return $urls;
+    }
 }

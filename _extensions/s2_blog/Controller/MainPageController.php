@@ -7,95 +7,103 @@
  * @package s2_blog
  */
 
-namespace s2_extensions\s2_blog;
+namespace s2_extensions\s2_blog\Controller;
 
-use \Lang;
+use Lang;
+use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Template\HtmlTemplate;
+use S2\Cms\Template\HtmlTemplateProvider;
+use S2\Cms\Template\Viewer;
+use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class Page_Main extends Page_HTML implements \Page_Routable
+class MainPageController extends BlogController
 {
-    public function body (Request $request): ?Response
+    public function __construct(
+        DbLayer              $dbLayer,
+        HtmlTemplateProvider $templateProvider,
+        Viewer               $viewer,
+        string               $tagsUrl,
+        string               $blogUrl,
+        string               $blogTitle,
+        private readonly int $itemsPerPage,
+    ) {
+        parent::__construct($dbLayer, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+    }
+
+    public function handle(Request $request): Response
+    {
+        $s2_blog_skip      = (int)$request->attributes->get('page', 0);
+        $this->template_id = $s2_blog_skip > 0 ? 'blog.php' : 'blog_main.php';
+
+        return parent::handle($request);
+    }
+
+    public function body(Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
             return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
-        $params = $request->attributes->all();
-		$s2_blog_skip = !empty($params['page']) ? (int) $params['page'] : 0;
+        $skipLastPostsNum = (int)$request->attributes->get('page', 0);
+        if ($skipLastPostsNum < 0) {
+            $skipLastPostsNum = 0;
+        }
 
-		$this->template_id = $s2_blog_skip ? 'blog.php' : 'blog_main.php';
+        if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
+            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar(date('Y'), date('m'), '0'));
+        }
 
-		if ($this->hasPlaceholder('<!-- s2_blog_calendar -->'))
-			$this->page['s2_blog_calendar'] = Lib::calendar(date('Y'), date('m'), '0');
+        $postsPerPage = $this->itemsPerPage ?: 10;
+        $posts        = Lib::last_posts_array($postsPerPage, $skipLastPostsNum, true);
 
-		$this->last_posts($s2_blog_skip);
+        $output = '';
+        $i      = 0;
+        foreach ($posts as $post) {
+            $i++;
+            if ($i > $postsPerPage) {
+                break;
+            }
 
-		// Bread crumbs
-		$this->page['path'][] = array(
-			'title' => \Model::main_page_title(),
-			'link'  => s2_link('/'),
-		);
-		if (S2_BLOG_URL)
-		{
-			$this->page['path'][] = array(
-				'title' => Lang::get('Blog', 's2_blog'),
-				'link' => $s2_blog_skip ? S2_BLOG_PATH : null,
-			);
-		}
+            $output .= $this->viewer->render('post', $post, 's2_blog');
+        }
 
-		if ($s2_blog_skip) {
-            $this->page['link_navigation']['up'] = S2_BLOG_PATH;
+        $paging = '';
+        if ($skipLastPostsNum > 0) {
+            $prevLink = $this->blogPath . ($skipLastPostsNum > $postsPerPage ? 'skip/' . ($skipLastPostsNum - $postsPerPage) : '');
+            $template->setLink('prev', $prevLink);
+            $paging = '<a href="' . $prevLink . '">' . Lang::get('Here') . '</a> ';
+            // TODO think about back_forward
+        }
+        if ($i > $postsPerPage) {
+            $nextLink = S2_BLOG_PATH . 'skip/' . ($skipLastPostsNum + $postsPerPage);
+            $template->setLink('next', $nextLink);
+            $paging .= '<a href="' . $nextLink . '">' . Lang::get('There') . '</a>';
+        }
+
+        if ($paging !== '') {
+            $output .= '<p class="s2_blog_pages">' . $paging . '</p>';
+        }
+
+        $template->putInPlaceholder('text', $output);
+
+        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        if ($this->blogUrl !== '') {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $skipLastPostsNum > 0 ? $this->blogPath : null);
+        }
+
+        if ($skipLastPostsNum > 0) {
+            $template->setLink('up', $this->blogPath);
         } else {
-            $this->page['meta_description'] = S2_BLOG_TITLE;
-            if (S2_BLOG_URL) {
-                   $this->page['link_navigation']['up'] = s2_link('/');
+            $template->putInPlaceholder('meta_description', $this->blogTitle);
+            if ($this->blogUrl !== '') {
+                $template->setLink('up', s2_link('/'));
             }
         }
 
         return null;
-	}
-
-	private function last_posts ($skip = 0)
-	{
-		if ($skip < 0)
-			$skip = 0;
-
-		$posts_per_page = S2_MAX_ITEMS ? S2_MAX_ITEMS : 10;
-		$posts = Lib::last_posts_array($posts_per_page, $skip, true);
-
-		$output = '';
-		$i = 0;
-		foreach ($posts as $post)
-		{
-			$i++;
-			if ($i > $posts_per_page)
-				break;
-
-			$output .= $this->renderPartial('post', $post);
-		}
-
-		$paging = '';
-
-		$link_nav = array();
-		if ($skip > 0)
-		{
-			$link_nav['prev'] = S2_BLOG_PATH.($skip > $posts_per_page ? 'skip/'.($skip - $posts_per_page) : '');
-			$paging = '<a href="'.$link_nav['prev'].'">'.Lang::get('Here').'</a> ';
-			// TODO think about back_forward
-		}
-		if ($i > $posts_per_page)
-		{
-			$link_nav['next'] = S2_BLOG_PATH.'skip/'.($skip + $posts_per_page);
-			$paging .= '<a href="'.$link_nav['next'].'">'.Lang::get('There').'</a>';
-		}
-
-		if ($paging)
-			$output .= '<p class="s2_blog_pages">'.$paging.'</p>';
-
-		$this->page['text'] = $output;
-		$this->page['link_navigation'] = $link_nav;
-	}
+    }
 }

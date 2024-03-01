@@ -35,7 +35,8 @@
     },
     "autoload": {
         "psr-4": {
-            "S2\\Cms\\": "_include/src"
+            "S2\\Cms\\": "_include/src",
+            "s2_extensions\\": "_extensions"
         }
     },
     "require-dev": {

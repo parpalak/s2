@@ -426,7 +426,9 @@ class InstallCest
 
         $I->installExtension('s2_search');
 
-        $I->amOnPage('/?search=1&q=new');
+        $I->amOnPage('/section1/new_page1');
+        $I->submitForm('.s2_search_form', ['q' => 'new']);
+        $I->seeCurrentUrlEquals('/index.php?search=1&q=new');
         $I->see('Search', 'h1');
         $I->dontSee('New Blog Post Title');
         $I->dontSee('New Page Title');
@@ -436,7 +438,9 @@ class InstallCest
         $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=s2_search_makeindex');
         $I->see('stop');
 
-        $I->amOnPage('/?search&q=new');
+        $I->amOnPage('/blog/2023/08/12/new_post1');
+        $I->submitForm('.s2_search_form', ['q' => 'new']);
+        $I->seeCurrentUrlEquals('/index.php?search=1&q=new');
         $I->see('Search', 'h1');
         $I->see('New Blog Post Title');
         $I->see('New Page Title');

@@ -25,7 +25,7 @@ use S2\Rose\Storage\Exception\EmptyIndexException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class SearchPageController implements ControllerInterface
+readonly class SearchPageController implements ControllerInterface
 {
     public function __construct(
         private Finder               $finder,

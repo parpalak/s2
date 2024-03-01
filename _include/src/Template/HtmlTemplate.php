@@ -17,6 +17,7 @@ class HtmlTemplate
     protected array $breadCrumbs = [];
     private array $navLinks = [];
     private array $replace = [];
+    private bool $notFound = false;
 
     public function __construct(
         protected string $template,
@@ -29,6 +30,11 @@ class HtmlTemplate
         $this->page[$placeholder] = $content;
 
         return $this;
+    }
+
+    public function getFromPlaceholder(string $placeholder): mixed
+    {
+        return $this->page[$placeholder] ?? null;
     }
 
     public function addBreadCrumb(string $title, ?string $link = null): static
@@ -74,7 +80,7 @@ class HtmlTemplate
         $replace['<!-- s2_rss_link -->'] = implode("\n", $this->page['rss_link']);
 
         // Content
-        $replace['<!-- s2_site_title -->']      = S2_SITE_NAME;
+        $replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
 
         $link_navigation = [];
         foreach ($this->navLinks as $link_rel => $link_href) {
@@ -182,6 +188,9 @@ class HtmlTemplate
 
         $response = new Response($template);
         $response->setEtag(md5($etag));
+        if ($this->notFound) {
+            $response->setStatusCode(Response::HTTP_NOT_FOUND);
+        }
 
         return $response;
     }
@@ -201,6 +210,13 @@ class HtmlTemplate
     public function registerPlaceholder(string $placeholder, string $value): static
     {
         $this->replace[$placeholder] = $value;
+
+        return $this;
+    }
+
+    public function markAsNotFound(): static
+    {
+        $this->notFound = true;
 
         return $this;
     }

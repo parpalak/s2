@@ -7,90 +7,91 @@
  * @package s2_blog
  */
 
-namespace s2_extensions\s2_blog;
+namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
+use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Template\HtmlTemplate;
+use S2\Cms\Template\HtmlTemplateProvider;
+use S2\Cms\Template\Viewer;
+use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class Page_Month extends Page_HTML implements \Page_Routable
+class MonthPageController extends BlogController
 {
-    public function body (Request $request): ?Response
+    public function __construct(
+        DbLayer                 $dbLayer,
+        HtmlTemplateProvider    $templateProvider,
+        Viewer                  $viewer,
+        string                  $tagsUrl,
+        string                  $blogUrl,
+        string                  $blogTitle,
+        private readonly string $startYear,
+    ) {
+        parent::__construct($dbLayer, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+    }
+
+    public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $params = $request->attributes->all();
 
-		if ($this->hasPlaceholder('<!-- s2_blog_calendar -->'))
-			$this->page['s2_blog_calendar'] = Lib::calendar($params['year'], $params['month'], 0);
+        $year  = $params['year'];
+        $month = $params['month'];
 
-		$this->page['title'] = '';
+        if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
+            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar($year, $month, 0));
+        }
 
-		// Posts of a month
-		$this->posts_by_month($params['year'], $params['month']);
-		$this->page['head_title'] = \Lang::month($params['month']).', '.$params['year'];
+        $template->putInPlaceholder('title', '');
 
-		// Bread crumbs
-		$this->page['path'][] = array(
-			'title' => \Model::main_page_title(),
-			'link'  => s2_link('/'),
-		);
-		if (S2_BLOG_URL)
-		{
-			$this->page['path'][] = array(
-				'title' => Lang::get('Blog', 's2_blog'),
-				'link' => S2_BLOG_PATH,
-			);
-		}
+        $startTime = mktime(0, 0, 0, $month, 1, $year);
+        $endTime   = mktime(0, 0, 0, $month + 1, 1, $year);
+        $prevTime  = mktime(0, 0, 0, $month - 1, 1, $year);
 
-		$this->page['path'][] = array(
-			'title' => $params['year'],
-			'link'  => S2_BLOG_PATH.$params['year'].'/',
-		);
-		$this->page['path'][] = array(
-			'title' => $params['month'],
-		);
+        $template->setLink('up', $this->blogPath . date('Y/', $startTime));
+
+        $paging = '';
+        if ($prevTime >= mktime(0, 0, 0, 1, 1, $this->startYear)) {
+            $prevLink = $this->blogPath . date('Y/m/', $prevTime);
+            $template->setLink('prev', $prevLink);
+            $paging = '<a href="' . $prevLink . '">' . Lang::get('Here') . '</a> ';
+        }
+        if ($endTime < time()) {
+            $nextLink = $this->blogPath . date('Y/m/', $endTime);
+            $template->setLink('next', $nextLink);
+            $paging .= '<a href="' . $nextLink . '">' . Lang::get('There') . '</a>';
+            // TODO think about back_forward template
+        }
+
+        if ($paging !== '') {
+            $paging = '<p class="s2_blog_pages">' . $paging . '</p>';
+        }
+
+        $output = $this->getPosts([
+            'WHERE' => 'p.create_time < ' . $endTime . ' AND p.create_time >= ' . $startTime
+        ]);
+
+        if ($output === '') {
+            $template->markAsNotFound();
+            $output = '<p>' . Lang::get('Not found', 's2_blog') . '</p>';
+        }
+
+        $template
+            ->putInPlaceholder('text', $output . $paging)
+            ->putInPlaceholder('head_title', \Lang::month($month) . ', ' . $year)
+        ;
+
+        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        if ($this->blogUrl !== '') {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        }
+        $template
+            ->addBreadCrumb($year, $this->blogPath . $year . '/')
+            ->addBreadCrumb($month)
+        ;
 
         return null;
-	}
-
-	public function posts_by_month ($year, $month)
-	{
-		$link_nav = array();
-		$paging = '';
-
-		$start_time = mktime(0, 0, 0, $month, 1, $year);
-		$end_time = mktime(0, 0, 0, $month + 1, 1, $year);
-		$prev_time = mktime(0, 0, 0, $month - 1, 1, $year);
-
-		$link_nav['up'] = S2_BLOG_PATH.date('Y/', $start_time);
-
-		if ($prev_time >= mktime(0, 0, 0, 1, 1, S2_START_YEAR))
-		{
-			$link_nav['prev'] = S2_BLOG_PATH.date('Y/m/', $prev_time);
-			$paging = '<a href="'.$link_nav['prev'].'">'.Lang::get('Here').'</a> ';
-		}
-		if ($end_time < time())
-		{
-			$link_nav['next'] = S2_BLOG_PATH.date('Y/m/', $end_time);
-			$paging .= '<a href="'.$link_nav['next'].'">'.Lang::get('There').'</a>';
-			// TODO think about back_forward template
-		}
-
-		if ($paging)
-			$paging = '<p class="s2_blog_pages">'.$paging.'</p>';
-
-		$query_add = array(
-			'WHERE'		=> 'p.create_time < '.$end_time.' AND p.create_time >= '.$start_time
-		);
-		$output = $this->get_posts($query_add);
-
-		if ($output == '')
-		{
-			$this->s2_404_header();
-			$output = '<p>'.Lang::get('Not found', 's2_blog').'</p>';
-		}
-
-		$this->page['text'] = $output.$paging;
-		$this->page['link_navigation'] = $link_nav;
-	}
+    }
 }
