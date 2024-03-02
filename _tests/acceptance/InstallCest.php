@@ -574,5 +574,42 @@ class InstallCest
 
         // TODO check showing and hiding comments
         // TODO check deleting comments
+
+        // Disable comments
+        $data = [
+            'opt' => [
+                'S2_SITE_NAME'        => 'Site Title',
+                'S2_WEBMASTER'        => 'Webmaster Name',
+                'S2_WEBMASTER_EMAIL'  => 'webmaster@example.com',
+                'S2_START_YEAR'       => '2023',
+                'S2_COMPRESS'         => '1',
+                'S2_FAVORITE_URL'     => 'favorite',
+                'S2_TAGS_URL'         => 'keywords',
+                'S2_USE_HIERARCHY'    => '1',
+                'S2_MAX_ITEMS'        => '0',
+                'style'               => 'zeta',
+                'lang'                => 'English',
+                'S2_BLOG_TITLE'       => 'Blog Title',
+                'S2_BLOG_URL'         => '/blog',
+                // one has to remove the constant definition to disable it
+                // 'S2_SHOW_COMMENTS'    => '0',
+                // 'S2_ENABLED_COMMENTS' => '0',
+                'S2_PREMODERATION'    => '1',
+                'S2_ADMIN_COLOR'      => '#e7e4f4',
+                'S2_LOGIN_TIMEOUT'    => '120000',
+                'S2_ADMIN_UPDATES'    => '0',
+            ]
+        ];
+
+        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_options', $data);
+        $I->seeResponseCodeIsSuccessful();
+
+        // Check conditional get when the comment form is disabled. Otherwise, there are some random tokens.
+        // Last comments must be also hidden.
+        $I->amOnPage('/index.php?/section1/new_page1');
+        $headers = $I->grabHeaders();
+        $I->haveHttpHeader('If-None-Match', $headers['ETag'][0]);
+        $I->amOnPage('/index.php?/section1/new_page1');
+        $I->seeResponseCodeIs(304);
     }
 }

@@ -59,8 +59,6 @@ $controllerClass = $attributes['_controller'];
 $controller      = $app->container->has($controllerClass) ? $app->container->get($controllerClass) : new $controllerClass($attributes);
 
 if ($controller instanceof Page_Routable || $controller instanceof \S2\Cms\Controller\ControllerInterface) {
-    s2_no_cache(); // TODO пожоже, это внутри if для исключения отправки заголовков в RSS. Надо понять, нужно ли это вообще. Типа, чтобы браузеры не кешировали странички без комментов?
-
     try {
         $response = $controller->handle($request);
         if (\extension_loaded('newrelic')) {
@@ -77,8 +75,16 @@ if ($controller instanceof Page_Routable || $controller instanceof \S2\Cms\Contr
     }
 
     if ($response !== null) {
+        // Disable cache since all the pages are generated dynamically. We only use conditional GET.
+        $response->headers->set('pragma', 'no-cache');
+        $response->setExpires(new DateTimeImmutable('-1 day'));
+        $response->isNotModified($request);
+
         $response->prepare($request);
         $response->send(false);
+    } else {
+        // Disable cache since all the pages are generated dynamically. We only use conditional GET.
+        s2_no_cache();
     }
 }
 

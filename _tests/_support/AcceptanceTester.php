@@ -110,12 +110,34 @@ class AcceptanceTester extends Actor
     public function getEmails(): array
     {
         $result = [];
-        $fi = new FilesystemIterator($this->getEmailDir(), FilesystemIterator::SKIP_DOTS);
+        $fi     = new FilesystemIterator($this->getEmailDir(), FilesystemIterator::SKIP_DOTS);
         foreach ($fi as $f) {
             $result[] = file_get_contents($f);
         }
 
         return $result;
+    }
+
+    /**
+     * A dirty hack to grab response headers from codeception internals
+     */
+    public function grabHeaders(): array
+    {
+        $scenario = self::getProperty($this, 'scenario');
+        $metadata = self::getProperty($scenario, 'metadata');
+        $browser  = $metadata->getService('modules')->getModule('PhpBrowser');
+        return $browser->client->getInternalResponse()->getHeaders();
+    }
+
+    private static function getProperty(object $object, string $property)
+    {
+        return Closure::bind(
+            function () use ($property) {
+                return $this->$property;
+            },
+            $object,
+            $object
+        )();
     }
 
     private function getEmailDir(): string
