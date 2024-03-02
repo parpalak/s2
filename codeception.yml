@@ -11,6 +11,7 @@ suites:
         modules:
             enabled:
                 - Asserts
+                - \Helper\Acceptance
                 - PhpBrowser:
                       url: http://localhost:8881
                       curl:
