@@ -12,11 +12,13 @@
  * @var string $tagsUrl
  */
 
+use s2_extensions\s2_blog\Controller\BlogRss;
 use s2_extensions\s2_blog\Controller\DayPageController;
 use s2_extensions\s2_blog\Controller\FavoritePageController;
 use s2_extensions\s2_blog\Controller\MainPageController;
 use s2_extensions\s2_blog\Controller\MonthPageController;
 use s2_extensions\s2_blog\Controller\PostPageController;
+use s2_extensions\s2_blog\Controller\Sitemap;
 use s2_extensions\s2_blog\Controller\TagPageController;
 use s2_extensions\s2_blog\Controller\TagsPageController;
 use s2_extensions\s2_blog\Controller\YearPageController;
@@ -31,8 +33,8 @@ $s2BlogUrl = $configProvider->get('S2_BLOG_URL');
 $routes->add('blog_main', new Route($s2BlogUrl .'{slash</?>}', ['_controller' => MainPageController::class, 'page' => 0]));
 $routes->add('blog_main_pages', new Route($s2BlogUrl .'/skip/{page<\d+>}', ['_controller' => MainPageController::class, 'slash' => '/']));
 
-$routes->add('blog_rss', new Route($s2BlogUrl .'/rss.xml', ['_controller' => \s2_extensions\s2_blog\Page_RSS::class]));
-$routes->add('blog_sitemap', new Route($s2BlogUrl .'/sitemap.xml', ['_controller' => \s2_extensions\s2_blog\Page_Sitemap::class]));
+$routes->add('blog_rss', new Route($s2BlogUrl .'/rss.xml', ['_controller' => BlogRss::class]));
+$routes->add('blog_sitemap', new Route($s2BlogUrl .'/sitemap.xml', ['_controller' => Sitemap::class]));
 
 $routes->add('blog_favorite', new Route($s2BlogUrl .'/'.$favoriteUrl.'{slash</?>}', ['_controller' => FavoritePageController::class]));
 

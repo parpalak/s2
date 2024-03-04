@@ -55,11 +55,11 @@ class InstallCest
         $this->testAdminEditAndTagsAdded($I);
         $this->testTagsPage($I);
         $this->testFavoritePage($I);
-        $this->testRssAndSitemap($I);
         $this->testBlogExtension($I);
         $this->testBlogRssAndSitemap($I);
         $this->testSearchExtension($I);
         $this->testAdminAddArticles($I);
+        $this->testRssAndSitemap($I);
         $this->testAdminTagListAndEdit($I);
         $this->testAdminCommentManagement($I);
     }
@@ -205,7 +205,7 @@ class InstallCest
                         'modify_time' => [
                             'hour' => '12',
                             'min'  => '15',
-                            'day'  => '11',
+                            'day'  => '12',
                             'mon'  => '08',
                             'year' => '2023',
                         ],
@@ -283,9 +283,18 @@ class InstallCest
         $I->seeResponseCodeIsSuccessful();
         $I->canSee('Site powered by S2');
         $I->canSee('New Page Title');
+        $I->canSee('New Page 4');
+        $I->canSee('New Page 5');
         $I->canSee('/section1/new_page1');
         $I->canSee('Thu, 10 Aug 2023 11:32:00 GMT');
         $I->see('New Excerpt');
+
+        $I->haveHttpHeader('If-Modified-Since', 'Sat, 12 Aug 2023 00:00:00 GMT');
+        $I->amOnPage('/index.php?/rss.xml');
+        $I->dontSee('New Page Title'); // Modified before this date, skip in output
+        $I->see('New Page 4');
+        $I->see('New Page 5');
+
 
         $I->amOnPage('/index.php?/sitemap.xml'); // Same as above
         $I->seeResponseCodeIsSuccessful();

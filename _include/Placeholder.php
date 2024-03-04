@@ -87,55 +87,6 @@ class Placeholder
 	}
 
     //
-    // Fetching articles urls (for sitemap)
-    //
-    public static function articles_urls ()
-    {
-        /** @var DbLayer $s2_db */
-        $s2_db = \Container::get(DbLayer::class);
-
-        $subquery = array(
-            'SELECT'	=> '1',
-            'FROM'		=> 'articles AS a2',
-            'WHERE'		=> 'a2.parent_id = a.id AND a2.published = 1',
-            'LIMIT'		=> '1'
-        );
-        $raw_query_child_num = $s2_db->build($subquery);
-
-        $query = [
-            'SELECT'	=> 'a.id, a.title, a.create_time, a.modify_time, a.url, a.parent_id, ('.$raw_query_child_num.') IS NOT NULL AS children_exist',
-            'FROM'		=> 'articles AS a',
-            'WHERE'		=> '(a.create_time <> 0 OR a.modify_time <> 0) AND a.published = 1',
-        ];
-
-        $result = $s2_db->buildAndQuery($query);
-
-        $articles = $urls = $parent_ids = [];
-        for ($i = 0; $row = $s2_db->fetchAssoc($result); $i++)
-        {
-            $urls[$i] = urlencode($row['url']).(S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
-
-            $parent_ids[$i] = $row['parent_id'];
-
-            $articles[$i]['time'] = $row['create_time'];
-            $articles[$i]['modify_time'] = $row['modify_time'];
-        }
-
-        $urls = Model::get_group_url($parent_ids, $urls);
-
-        foreach ($articles as $k => $v) {
-            if (isset($urls[$k])) {
-                $articles[$k]['rel_path'] = $urls[$k];
-            }
-            else {
-                unset($articles[$k]);
-            }
-        }
-
-        return $articles;
-    }
-
-    //
 	// Formatting last articles (for template placeholders)
 	//
 	public static function last_articles (Viewer|\S2\Cms\Template\Viewer $viewer, $limit)

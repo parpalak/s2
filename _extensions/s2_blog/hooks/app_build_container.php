@@ -16,11 +16,14 @@ use S2\Cms\Framework\Container;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
+use S2\Cms\Template\Viewer;
+use s2_extensions\s2_blog\Controller\BlogRss;
 use s2_extensions\s2_blog\Controller\DayPageController;
 use s2_extensions\s2_blog\Controller\FavoritePageController;
 use s2_extensions\s2_blog\Controller\MainPageController;
 use s2_extensions\s2_blog\Controller\MonthPageController;
 use s2_extensions\s2_blog\Controller\PostPageController;
+use s2_extensions\s2_blog\Controller\Sitemap;
 use s2_extensions\s2_blog\Controller\TagPageController;
 use s2_extensions\s2_blog\Controller\TagsPageController;
 use s2_extensions\s2_blog\Controller\YearPageController;
@@ -39,7 +42,7 @@ $this->container->set(MainPageController::class, function (Container $container)
     return new MainPageController(
         $container->get(DbLayer::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
@@ -52,7 +55,7 @@ $this->container->set(DayPageController::class, function (Container $container) 
     return new DayPageController(
         $container->get(DbLayer::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
@@ -64,7 +67,7 @@ $this->container->set(MonthPageController::class, function (Container $container
     return new MonthPageController(
         $container->get(DbLayer::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
@@ -77,7 +80,7 @@ $this->container->set(YearPageController::class, function (Container $container)
     return new YearPageController(
         $container->get(DbLayer::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
@@ -91,7 +94,7 @@ $this->container->set(PostPageController::class, function (Container $container)
         $container->get(DbLayer::class),
         $container->get(RecommendationProvider::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
@@ -104,7 +107,7 @@ $this->container->set(TagsPageController::class, function (Container $container)
     return new TagsPageController(
         $container->get(DbLayer::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
@@ -116,7 +119,7 @@ $this->container->set(TagPageController::class, function (Container $container) 
     return new TagPageController(
         $container->get(DbLayer::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
@@ -129,9 +132,30 @@ $this->container->set(FavoritePageController::class, function (Container $contai
     return new FavoritePageController(
         $container->get(DbLayer::class),
         $container->get(HtmlTemplateProvider::class),
-        $container->get(\S2\Cms\Template\Viewer::class),
+        $container->get(Viewer::class),
         $provider->get('S2_TAGS_URL'),
         $provider->get('S2_BLOG_URL'),
         $provider->get('S2_BLOG_TITLE'),
+    );
+});
+$this->container->set(BlogRss::class, function (Container $container) {
+    /** @var DynamicConfigProvider $provider */
+    $provider = $container->get(DynamicConfigProvider::class);
+    return new BlogRss(
+        $container->get('strict_viewer'),
+        $container->getParameter('base_url'),
+        $provider->get('S2_WEBMASTER'),
+        $provider->get('S2_SITE_NAME'),
+        $provider->get('S2_BLOG_URL'),
+        $provider->get('S2_BLOG_TITLE'),
+    );
+});
+$this->container->set(Sitemap::class, function (Container $container) {
+    /** @var DynamicConfigProvider $provider */
+    $provider = $container->get(DynamicConfigProvider::class);
+    return new Sitemap(
+        $container->get(DbLayer::class),
+        $container->get('strict_viewer'),
+        $provider->get('S2_BLOG_URL'),
     );
 });

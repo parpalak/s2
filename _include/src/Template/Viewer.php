@@ -28,7 +28,7 @@ class Viewer
      */
     private static function jsonFormat($vars, int $level = 0): string
     {
-        if (\is_array($vars) && \count(array_filter(array_keys($vars), '\is_int')) < \count($vars)) {
+        if (\is_array($vars) && !array_is_list($vars)) {
             $s = "<span style='color:grey'>{</span>\n";
             $i = \count($vars);
             foreach ($vars as $k => $v) {

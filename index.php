@@ -62,7 +62,7 @@ if ($controller instanceof Page_Routable || $controller instanceof \S2\Cms\Contr
     try {
         $response = $controller->handle($request);
         if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction($controllerClass);
+            newrelic_name_transaction($controllerClass . ($response->isRedirection() ? '_' . $response->getStatusCode() : ''));
         }
     } catch (NotFoundException $e) {
         /** @var NotFoundController $errorController */
@@ -76,7 +76,7 @@ if ($controller instanceof Page_Routable || $controller instanceof \S2\Cms\Contr
 
     if ($response !== null) {
         // Disable cache since all the pages are generated dynamically. We only use conditional GET.
-        $response->headers->set('pragma', 'no-cache');
+        $response->headers->set('Pragma', 'no-cache');
         $response->setExpires(new DateTimeImmutable('-1 day'));
         $response->isNotModified($request);
 

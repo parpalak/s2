@@ -17,6 +17,8 @@ use S2\Cms\Controller\PageCommon;
 use S2\Cms\Controller\PageFavorite;
 use S2\Cms\Controller\PageTag;
 use S2\Cms\Controller\PageTags;
+use S2\Cms\Controller\Rss;
+use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
@@ -220,6 +222,16 @@ class Application
             );
         });
 
+        $this->container->set('strict_viewer', function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new Viewer(
+                $container->getParameter('root_dir'),
+                $provider->get('S2_STYLE'),
+                false // no HTML debug info for XML and other non-HTML content
+            );
+        });
+
         $this->container->set(NotFoundController::class, function (Container $container) {
             return new NotFoundController(
                 $container->get(HtmlTemplateProvider::class),
@@ -270,6 +282,24 @@ class Application
             );
         });
 
+        $this->container->set(Rss::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new Rss(
+                $container->get('strict_viewer'),
+                $container->getParameter('base_url'),
+                $provider->get('S2_WEBMASTER'),
+                $provider->get('S2_SITE_NAME'),
+            );
+        });
+
+        $this->container->set(Sitemap::class, function (Container $container) {
+            return new Sitemap(
+                $container->get(DbLayer::class),
+                $container->get('strict_viewer'),
+            );
+        });
+
         ($hook = s2_hook('app_build_container')) ? eval($hook) : null;
     }
 
@@ -283,8 +313,8 @@ class Application
 
         ($hook = s2_hook('idx_new_routes')) ? eval($hook) : null;
 
-        $routes->add('rss', new Route('/rss.xml', ['_controller' => \Page_RSS::class]));
-        $routes->add('sitemap', new Route('/sitemap.xml', ['_controller' => \Page_Sitemap::class]));
+        $routes->add('rss', new Route('/rss.xml', ['_controller' => Rss::class]));
+        $routes->add('sitemap', new Route('/sitemap.xml', ['_controller' => Sitemap::class]));
         $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => PageFavorite::class]));
         $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => PageTags::class]));
         $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => PageTag::class]));
