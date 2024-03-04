@@ -12,6 +12,7 @@ namespace S2\Cms;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Controller\ControllerInterface;
 use S2\Cms\Controller\NotFoundController;
 use S2\Cms\Controller\PageCommon;
 use S2\Cms\Controller\PageFavorite;
@@ -20,6 +21,7 @@ use S2\Cms\Controller\PageTags;
 use S2\Cms\Controller\Rss;
 use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
+use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
@@ -47,6 +49,7 @@ use s2_extensions\s2_search\SearchPageController;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
@@ -61,6 +64,40 @@ class Application
     public function boot(): void
     {
         $this->buildContainer();
+    }
+
+    /**
+     * @note Maybe this method must be a part of framework, but it depends on NotFoundController.
+     */
+    public function handle(Request $request): Response
+    {
+        $attributes      = $this->matchRequest($request);
+        $controllerClass = $attributes['_controller'];
+        if (!$this->container->has($controllerClass)) {
+            throw new \LogicException(sprintf('Controller "%s" must be defined in container.', $controllerClass));
+        }
+
+        $controller = $this->container->get($controllerClass);
+        if (!$controller instanceof ControllerInterface) {
+            throw new \LogicException(sprintf('Controller "%s" must implement "%s".', $controllerClass, ControllerInterface::class));
+        }
+
+        try {
+            $response = $controller->handle($request);
+            if (\extension_loaded('newrelic')) {
+                newrelic_name_transaction($controllerClass . ($response->isRedirection() ? '_' . $response->getStatusCode() : ''));
+            }
+        } catch (NotFoundException $e) {
+            /** @var NotFoundController $errorController */
+            $errorController = $this->container->get(NotFoundController::class);
+            $response        = $errorController->handle($request);
+
+            if (\extension_loaded('newrelic')) {
+                newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
+            }
+        }
+
+        return $response;
     }
 
     private function buildContainer(): void
@@ -323,7 +360,7 @@ class Application
         $this->routes = $routes;
     }
 
-    public function matchRequest(Request $request): array
+    private function matchRequest(Request $request): array
     {
         if ($this->routes === null) {
             $this->addRoutes();

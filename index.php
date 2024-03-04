@@ -7,8 +7,6 @@
  * @package S2
  */
 
-use S2\Cms\Controller\NotFoundController;
-use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -52,40 +50,36 @@ if (!defined('S2_COMMENTS_FUNCTIONS_LOADED')) {
     require S2_ROOT . '_include/comments.php';
 }
 
-$request = Request::createFromGlobals();
-$attributes = $app->matchRequest($request);
+$request  = Request::createFromGlobals();
+$response = $app->handle($request);
 
-$controllerClass = $attributes['_controller'];
-$controller      = $app->container->has($controllerClass) ? $app->container->get($controllerClass) : new $controllerClass($attributes);
+// Disable cache since all the pages are generated dynamically. We only use conditional GET.
+$response->headers->set('Pragma', 'no-cache');
+$response->setExpires(new DateTimeImmutable('-1 day'));
+$response->isNotModified($request);
 
-if ($controller instanceof Page_Routable || $controller instanceof \S2\Cms\Controller\ControllerInterface) {
-    try {
-        $response = $controller->handle($request);
-        if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction($controllerClass . ($response->isRedirection() ? '_' . $response->getStatusCode() : ''));
-        }
-    } catch (NotFoundException $e) {
-        /** @var NotFoundController $errorController */
-        $errorController = $app->container->get(NotFoundController::class);
-        $response = $errorController->handle($request);
+$response->prepare($request);
 
-        if (\extension_loaded('newrelic')) {
-            newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
-        }
+if ($response->isInformational() || $response->isEmpty() || $response->getContent() === false || $response->getContent() === '') {
+    $response->send(false);
+} else {
+    // Custom response sending to set Content-Length properly and to enable compression
+    ob_start();
+
+    if (S2_COMPRESS) {
+        ob_start('ob_gzhandler');
     }
 
-    if ($response !== null) {
-        // Disable cache since all the pages are generated dynamically. We only use conditional GET.
-        $response->headers->set('Pragma', 'no-cache');
-        $response->setExpires(new DateTimeImmutable('-1 day'));
-        $response->isNotModified($request);
+    $response->sendContent();
 
-        $response->prepare($request);
-        $response->send(false);
-    } else {
-        // Disable cache since all the pages are generated dynamically. We only use conditional GET.
-        s2_no_cache();
+    if (S2_COMPRESS) {
+        ob_end_flush();
     }
+
+    $response->headers->set('Content-Length', ob_get_length());
+    $response->sendHeaders();
+
+    ob_end_flush();
 }
 
 if (function_exists('fastcgi_finish_request')) {
@@ -96,7 +90,7 @@ if (function_exists('fastcgi_finish_request')) {
         newrelic_name_transaction('index_background');
     }
     /** @var \S2\Cms\Queue\QueueConsumer $consumer */
-    $consumer = $app->container->get(\S2\Cms\Queue\QueueConsumer::class);
+    $consumer  = $app->container->get(\S2\Cms\Queue\QueueConsumer::class);
     $startedAt = microtime(true);
-    while ($consumer->runQueue() && microtime(true) - $startedAt < 10);
+    while ($consumer->runQueue() && microtime(true) - $startedAt < 10) ;
 }
