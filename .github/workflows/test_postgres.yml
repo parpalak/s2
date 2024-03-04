@@ -10,9 +10,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating_system: ['ubuntu-22.04']
+        operating_system: ['ubuntu-20.04', 'ubuntu-22.04']
         php_versions:
           - '8.2'
+# This param is not supported by ikalnytskyi/action-setup-postgres@v5 since it uses default packages.
+# OS is changed instead.
 #        postgres_versions:
 #          - '12'
 #          - '13'
@@ -22,7 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: ikalnytskyi/action-setup-postgres@v4
+      - uses: ikalnytskyi/action-setup-postgres@v5
         with:
           username: postgres
           password: 12345
@@ -43,4 +45,4 @@ jobs:
 
       - name: Output logs
         if: failure()
-        run: cat _cache/*.log && cat _tests/_output/email/*.txt
+        run: cat _cache/test/*.log && cat _tests/_output/email/*.txt

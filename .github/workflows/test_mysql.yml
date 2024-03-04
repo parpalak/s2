@@ -15,24 +15,17 @@ jobs:
       matrix:
         operating_system: ['ubuntu-22.04']
         mysql_versions:
-          - 'mariadb-10.2'
-          - 'mariadb-10.3'
           - 'mariadb-10.4'
           - 'mariadb-10.5'
           - 'mariadb-10.6'
-          - 'mariadb-10.7'
-          - 'mariadb-10.8'
-          - 'mariadb-10.9'
-          - 'mariadb-10.10'
           - 'mariadb-10.11'
           - 'mariadb-11.0'
           - 'mariadb-11.1'
           - 'mariadb-11.2'
           - 'mariadb-11.3'
-          - '5.7'
           - '8.0'
-          - '8.1'
           - '8.2'
+          - '8.3'
         php_versions:
           - '8.2'
         include:
@@ -67,4 +60,4 @@ jobs:
 
       - name: Output logs
         if: failure()
-        run: cat _cache/*.log && cat _tests/_output/email/*.txt
+        run: cat _cache/test/*.log && cat _tests/_output/email/*.txt
