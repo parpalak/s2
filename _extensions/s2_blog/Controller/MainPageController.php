@@ -54,7 +54,7 @@ class MainPageController extends BlogController
         }
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar(date('Y'), date('m'), '0'));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
         }
 
         $postsPerPage = $this->itemsPerPage ?: 10;

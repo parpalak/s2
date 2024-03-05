@@ -60,7 +60,7 @@ abstract class BlogController implements ControllerInterface
         ;
 
         if ($template->hasPlaceholder('<!-- s2_blog_navigation -->')) {
-            $template->putInPlaceholder('s2_blog_navigation', $this->blog_navigation($request));
+            $template->registerPlaceholder('<!-- s2_blog_navigation -->', $this->blog_navigation($request));
         }
 
         $result = $this->body($request, $template);

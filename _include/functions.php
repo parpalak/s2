@@ -584,39 +584,6 @@ function error()
 
 
 /**
- * @deprecated TODO use Response instead
- * @param $url
- * @param $external
- * @return void
- */
-function s2_permanent_redirect($url, $external = false)
-{
-    global $controller;
-
-    if (\extension_loaded('newrelic')) {
-        if (isset($controller) && is_object($controller)) {
-            newrelic_name_transaction(get_class($controller) . '_redirect');
-        } else {
-            newrelic_name_transaction('redirect');
-        }
-    }
-
-    $url = $external ? $url : s2_link($url);
-    header($_SERVER['SERVER_PROTOCOL'] . ' 301 Moved Permanently');
-    header('Location: ' . $url);
-    die;
-}
-
-function s2_ext_dir_from_ns($namespace)
-{
-    $namespace_array = explode('\\', $namespace);
-    if (count($namespace_array) >= 2 && $namespace_array[0] == 's2_extensions')
-        return S2_ROOT . '_extensions/' . $namespace_array[1];
-
-    return null;
-}
-
-/**
  * @throws \RuntimeException
  */
 function s2_overwrite_file_skip_locked(string $filename, string $content): void

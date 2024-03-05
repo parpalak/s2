@@ -24,8 +24,8 @@ if ($template->hasPlaceholder('<!-- s2_blog_tags -->')) {
         return require S2_ROOT . '/_extensions/s2_blog' . '/lang/English.php';
     });
 
-    $s2_blog_tags         = s2_extensions\s2_blog\Placeholder::blog_tags($articleId);
-    $template->putInPlaceholder('s2_blog_tags', empty($s2_blog_tags) ? '' : $this->viewer->render('menu_block', [
+    $s2_blog_tags = s2_extensions\s2_blog\Placeholder::blog_tags($articleId);
+    $template->registerPlaceholder('<!-- s2_blog_tags -->', empty($s2_blog_tags) ? '' : $this->viewer->render('menu_block', [
         'title' => Lang::get('See in blog', 's2_blog'),
         'menu'  => $s2_blog_tags,
         'class' => 's2_blog_tags',

@@ -41,7 +41,7 @@ class MonthPageController extends BlogController
         $month = $params['month'];
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar($year, $month, 0));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar($year, $month, 0));
         }
 
         $template->putInPlaceholder('title', '');

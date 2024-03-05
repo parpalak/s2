@@ -21,4 +21,3 @@ require_once 'Lang.php';
 require_once 'Model.php';
 require_once 'Placeholder.php';
 require_once 'S2Cache.php';
-require_once 'Viewer.php';

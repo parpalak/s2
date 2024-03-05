@@ -40,7 +40,7 @@ class YearPageController extends BlogController
         $year = $params['year'];
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar($year, '', 0));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar($year, '', 0));
         }
 
         $start_time = mktime(0, 0, 0, 1, 1, $year);

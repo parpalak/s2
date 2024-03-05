@@ -159,3 +159,61 @@ $this->container->set(Sitemap::class, function (Container $container) {
         $provider->get('S2_BLOG_URL'),
     );
 });
+
+/** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher */
+$eventDispatcher = $this->container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class);
+
+$container = $this->container;
+
+$eventDispatcher->addListener(\S2\Cms\Template\HtmlTemplateCreatedEvent::class, function (\S2\Cms\Template\HtmlTemplateCreatedEvent $event) use ($container) {
+    $blogPlaceholders = [];
+    $template         = $event->htmlTemplate;
+
+    foreach (['s2_blog_last_comments', 's2_blog_last_discussions', 's2_blog_last_post'] as $blogPlaceholder) {
+        if ($template->hasPlaceholder('<!-- ' . $blogPlaceholder . ' -->')) {
+            $blogPlaceholders[$blogPlaceholder] = 1;
+        }
+    }
+
+    if (count($blogPlaceholders) === 0) {
+        return;
+    }
+
+    Lang::load('s2_blog', function () {
+        if (file_exists(S2_ROOT . '/_extensions/s2_blog' . '/lang/' . S2_LANGUAGE . '.php'))
+            return require S2_ROOT . '/_extensions/s2_blog' . '/lang/' . S2_LANGUAGE . '.php';
+        else
+            return require S2_ROOT . '/_extensions/s2_blog' . '/lang/English.php';
+    });
+
+    /** @var Viewer $viewer */
+    $viewer = $container->get(Viewer::class);
+
+    if (isset($blogPlaceholders['s2_blog_last_comments'])) {
+        $recentComments = s2_extensions\s2_blog\Placeholder::recent_comments();
+
+        $template->registerPlaceholder('<!-- s2_blog_last_comments -->', empty($recentComments) ? '' : $viewer->render('menu_comments', [
+            'title' => Lang::get('Last comments', 's2_blog'),
+            'menu'  => $recentComments,
+        ]));
+    }
+
+    if (isset($blogPlaceholders['s2_blog_last_discussions'])) {
+        $lastDiscussions = s2_extensions\s2_blog\Placeholder::recent_discussions();
+
+        $template->registerPlaceholder('<!-- s2_blog_last_discussions -->', empty($lastDiscussions) ? '' : $viewer->render('menu_block', [
+            'title' => Lang::get('Last discussions', 's2_blog'),
+            'menu'  => $lastDiscussions,
+            'class' => 's2_blog_last_discussions',
+        ]));
+    }
+    if (isset($blogPlaceholders['s2_blog_last_post'])) {
+        $lastPosts = s2_extensions\s2_blog\Lib::last_posts_array(1);
+
+        foreach ($lastPosts as &$s2_blog_post) {
+            $s2_blog_post = $viewer->render('post_short', $s2_blog_post, 's2_blog');
+        }
+        unset($s2_blog_post);
+        $template->registerPlaceholder('<!-- s2_blog_last_post -->', implode('', $lastPosts));
+    }
+});

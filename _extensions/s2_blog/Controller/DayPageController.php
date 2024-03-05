@@ -27,7 +27,7 @@ class DayPageController extends BlogController
         $day   = $params['day'];
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar($year, $month, $day));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar($year, $month, $day));
         }
 
         $template->putInPlaceholder('title', '');

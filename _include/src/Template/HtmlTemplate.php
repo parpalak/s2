@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace S2\Cms\Template;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class HtmlTemplate
 {
@@ -20,8 +21,9 @@ class HtmlTemplate
     private bool $notFound = false;
 
     public function __construct(
-        protected string $template,
-        protected Viewer $viewer
+        protected string                   $template,
+        protected EventDispatcherInterface $eventDispatcher,
+        protected Viewer                   $viewer
     ) {
     }
 
@@ -142,7 +144,7 @@ class HtmlTemplate
         // Footer
         $replace['<!-- s2_copyright -->'] = s2_build_copyright();
 
-        ($hook = s2_hook('idx_pre_get_queries')) ? eval($hook) : null;
+        $this->eventDispatcher->dispatch(new TemplatePreReplaceEvent());
 
         // Queries
         /** @var ?\S2\Cms\Pdo\PDO $pdo */
@@ -158,7 +160,7 @@ class HtmlTemplate
         // Add here placeholders to be excluded from the ETag calculation
         $etag_skip = array('<!-- s2_comment_form -->');
 
-        ($hook = s2_hook('idx_template_pre_replace')) ? eval($hook) : null;
+        ($hook = s2_hook('idx_template_pre_replace')) ? eval($hook) : null; // todo move up
 
         // Replacing placeholders and calculating hash for ETag header
         foreach ($replace as $what => $to) {
@@ -207,6 +209,10 @@ class HtmlTemplate
         return $this;
     }
 
+    /**
+     * Register a new placeholder that is not known to this class.
+     * Supposed to be used in extensions for their own custom placeholders.
+     */
     public function registerPlaceholder(string $placeholder, string $value): static
     {
         $this->replace[$placeholder] = $value;

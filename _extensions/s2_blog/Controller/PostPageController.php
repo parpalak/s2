@@ -40,7 +40,7 @@ class PostPageController extends BlogController
         $params = $request->attributes->all();
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']));
         }
 
         $template->putInPlaceholder('title', '');
@@ -152,7 +152,7 @@ class PostPageController extends BlogController
         }
 
         if (!empty($back_forward)) {
-            $template->putInPlaceholder('s2_blog_back_forward', $this->viewer->render('back_forward_post', $back_forward, 's2_blog'));
+            $template->registerPlaceholder('<!-- s2_blog_back_forward -->', $this->viewer->render('back_forward_post', $back_forward, 's2_blog'));
         }
 
         // Getting tags

@@ -40,7 +40,7 @@ class TagPageController extends BlogController
         $params = $request->attributes->all();
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar(date('Y'), date('m'), '0'));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
         }
 
         $tag = $params['tag'];

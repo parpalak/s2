@@ -21,7 +21,7 @@ class HtmlTemplateProvider
 
     public function getTemplate(string $templateId): HtmlTemplate
     {
-        $htmlTemplate = new HtmlTemplate(s2_get_template($templateId), $this->viewer);
+        $htmlTemplate = new HtmlTemplate(s2_get_template($templateId), $this->dispatcher, $this->viewer);
 
         $this->dispatcher->dispatch(new HtmlTemplateCreatedEvent($htmlTemplate));
 

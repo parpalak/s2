@@ -25,10 +25,10 @@ class TagsPageController extends BlogController
             return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
-        $template->putInPlaceholder('s2_blog_navigation', '');
+        $template->registerPlaceholder('<!-- s2_blog_navigation -->', '');
 
 		if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->putInPlaceholder('s2_blog_calendar', Lib::calendar(date('Y'), date('m'), '0'));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
         }
 
         $query = [
