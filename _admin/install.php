@@ -12,6 +12,7 @@
 
 use Psr\Log\LogLevel;
 use S2\Cms\CmsExtension;
+use S2\Cms\Framework\Application;
 use S2\Cms\Logger\Logger;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
@@ -443,7 +444,7 @@ else
 
 	// Create the database object (and connect/select db)
     $p_connect = false;
-    $app = new \S2\Cms\Application();
+    $app = new Application();
     $app->addExtension(new CmsExtension());
     $app->boot((static function (): array
     {

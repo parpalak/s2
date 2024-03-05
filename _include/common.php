@@ -8,8 +8,8 @@
  */
 
 use Psr\Log\LoggerInterface;
-use S2\Cms\Application;
 use S2\Cms\CmsExtension;
+use S2\Cms\Framework\Application;
 use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;

@@ -12,6 +12,7 @@ namespace s2_extensions\s2_search;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Template\HtmlTemplateCreatedEvent;
+use s2_extensions\s2_search\Controller\SearchPageController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;

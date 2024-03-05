@@ -10,7 +10,7 @@
 namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
-use S2\Cms\Controller\ControllerInterface;
+use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;

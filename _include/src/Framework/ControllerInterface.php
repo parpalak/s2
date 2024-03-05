@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace S2\Cms\Controller;
+namespace S2\Cms\Framework;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

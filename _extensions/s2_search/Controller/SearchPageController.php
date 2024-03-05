@@ -9,10 +9,10 @@
 
 declare(strict_types=1);
 
-namespace s2_extensions\s2_search;
+namespace s2_extensions\s2_search\Controller;
 
 use Lang;
-use S2\Cms\Controller\ControllerInterface;
+use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;

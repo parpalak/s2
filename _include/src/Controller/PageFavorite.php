@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;

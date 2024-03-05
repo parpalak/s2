@@ -20,6 +20,7 @@ use S2\Cms\Controller\PageTags;
 use S2\Cms\Controller\Rss;
 use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
+use S2\Cms\Framework\Event\NotFoundEvent;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
@@ -43,9 +44,9 @@ use S2\Rose\Stemmer\PorterStemmerEnglish;
 use S2\Rose\Stemmer\PorterStemmerRussian;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
+use s2_extensions\s2_search\Controller\SearchPageController;
 use s2_extensions\s2_search\Fetcher;
 use s2_extensions\s2_search\IndexManager;
-use s2_extensions\s2_search\SearchPageController;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
@@ -287,6 +288,12 @@ class CmsExtension implements ExtensionInterface
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
+        $eventDispatcher->addListener(NotFoundEvent::class, function (NotFoundEvent $event) use ($container) {
+            /** @var NotFoundController $controller */
+            $controller      = $container->get(NotFoundController::class);
+            $event->response = $controller->handle($event->request);
+        });
+
         $eventDispatcher->addListener(TemplatePreReplaceEvent::class, function (TemplatePreReplaceEvent $event) {
 
         });

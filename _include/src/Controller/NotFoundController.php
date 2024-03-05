@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;

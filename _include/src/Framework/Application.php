@@ -7,13 +7,10 @@
 
 declare(strict_types=1);
 
-namespace S2\Cms;
+namespace S2\Cms\Framework;
 
-use S2\Cms\Controller\ControllerInterface;
-use S2\Cms\Controller\NotFoundController;
-use S2\Cms\Framework\Container;
+use S2\Cms\Framework\Event\NotFoundEvent;
 use S2\Cms\Framework\Exception\NotFoundException;
-use S2\Cms\Framework\ExtensionInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +21,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class Application
 {
-    public Framework\Container $container;
+    public Container $container;
     private ?RouteCollection $routes = null;
     /** @var ExtensionInterface[] */
     private array $extensions = [];
@@ -71,9 +68,25 @@ class Application
                 newrelic_name_transaction($controllerClass . ($response->isRedirection() ? '_' . $response->getStatusCode() : ''));
             }
         } catch (NotFoundException $e) {
-            /** @var NotFoundController $errorController */
-            $errorController = $this->container->get(NotFoundController::class);
-            $response        = $errorController->handle($request);
+            /** @var EventDispatcherInterface $eventDispatcher */
+            $eventDispatcher = $this->container->get(EventDispatcherInterface::class);
+            $notFoundEvent   = new NotFoundEvent($request);
+            $eventDispatcher->dispatch($notFoundEvent);
+            $response = $notFoundEvent->response;
+            if ($response === null) {
+                $response = new Response('<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found</title>
+</head>
+<body>
+    <h1>404 Not Found</h1>
+    <p>The page you are looking for does not exist.</p>
+</body>
+</html>', Response::HTTP_NOT_FOUND);
+            }
 
             if (\extension_loaded('newrelic')) {
                 newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
