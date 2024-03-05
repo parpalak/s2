@@ -15,7 +15,8 @@ use S2\Cms\Pdo\DbLayer;
  */
 class S2Cache
 {
-    public const CACHE_HOOK_NAMES_FILENAME = S2_CACHE_DIR . 'cache_hook_names.php';
+    public const CACHE_HOOK_NAMES_FILENAME         = S2_CACHE_DIR . 'cache_hook_names.php';
+    public const CACHE_ENABLED_EXTENSIONS_FILENAME = S2_CACHE_DIR . 'cache_enabled_extensions.php';
 
     /**
      * Delete every .php file in the cache directory
@@ -24,7 +25,7 @@ class S2Cache
      */
     public static function clear(): void
     {
-        $file_list = ['cache_config.php', 'cache_hook_names.php'];
+        $file_list = ['cache_config.php', 'cache_hook_names.php', 'cache_enabled_extensions.php'];
 
         $return = ($hook = s2_hook('fn_clear_cache_start')) ? eval($hook) : null;
         if ($return !== null) {
@@ -34,6 +35,32 @@ class S2Cache
         foreach ($file_list as $entry) {
             @unlink(S2_CACHE_DIR . $entry);
         }
+    }
+
+    public static function generateEnabledExtensionClassNames(DbLayer $dbLayer): array
+    {
+        $result = $dbLayer->buildAndQuery([
+            'SELECT' => 'id',
+            'FROM'   => 'extensions',
+            'WHERE'  => 'disabled=0',
+        ]);
+
+        $extensionClassNames = [];
+        while ($extension = $dbLayer->fetchAssoc($result)) {
+            $className = sprintf('\s2_extensions\%s\Extension', $extension['id']);
+            if (class_exists($className)) {
+                $extensionClassNames[] = $className;
+            }
+        }
+
+        // Output hooks as PHP code
+        try {
+            s2_overwrite_file_skip_locked(self::CACHE_ENABLED_EXTENSIONS_FILENAME, "<?php\n\nreturn " . var_export($extensionClassNames, true) . ';');
+        } catch (\RuntimeException $e) {
+            error('Unable to write hooks cache file to cache directory. Please make sure PHP has write access to the directory \'' . S2_CACHE_DIR . '\'.', __FILE__, __LINE__);
+        }
+
+        return $extensionClassNames;
     }
 
     /**

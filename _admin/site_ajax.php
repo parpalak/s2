@@ -785,6 +785,9 @@ elseif ($action === 'refresh_hooks') {
     s2_test_user_rights($is_permission);
 
     S2Cache::generate_hooks();
+    /** @var DbLayer $s2_db */
+    $s2_db = \Container::get(DbLayer::class);
+    S2Cache::generateEnabledExtensionClassNames($s2_db);
 }
 
 elseif ($action == 'uninstall_extension')

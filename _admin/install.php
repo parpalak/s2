@@ -11,6 +11,7 @@
 
 
 use Psr\Log\LogLevel;
+use S2\Cms\CmsExtension;
 use S2\Cms\Logger\Logger;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
@@ -443,7 +444,26 @@ else
 	// Create the database object (and connect/select db)
     $p_connect = false;
     $app = new \S2\Cms\Application();
-    $app->boot();
+    $app->addExtension(new CmsExtension());
+    $app->boot((static function (): array
+    {
+        $result = [
+            'root_dir'     => S2_ROOT,
+            'cache_dir'    => S2_CACHE_DIR,
+            'log_dir'      => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+            'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+            'debug'        => defined('S2_DEBUG'),
+            'debug_view'   => defined('S2_DEBUG_VIEW'),
+            'redirect_map' => $GLOBALS['s2_redirect'] ?? [],
+        ];
+
+        foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {
+            $result[$globalVarName] = $GLOBALS[$globalVarName] ?? null;
+        }
+
+        return $result;
+    })());
+    \Container::setContainer($app->container);
     $s2_db = $app->container->get(DbLayer::class);
 
 	// Check SQLite prefix collision

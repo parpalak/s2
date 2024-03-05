@@ -32,7 +32,7 @@ spl_autoload_register(static function ($class) {
     if (strpos($class, '\\')) {
         $ns_array = explode('\\', $class);
         $class    = array_pop($ns_array);
-        if (count($ns_array) === 2 && $ns_array[0] === 's2_extensions') {
+        if (count($ns_array) === 2 && $ns_array[0] === 's2_extensions' && $class !== 'Extension') {
             $ns_array = ['_extensions', $ns_array[1], '_include'];
         } else {
             return false;

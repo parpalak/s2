@@ -9,6 +9,7 @@
 
 use Psr\Log\LoggerInterface;
 use S2\Cms\Application;
+use S2\Cms\CmsExtension;
 use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
@@ -43,9 +44,45 @@ if (defined('S2_DEBUG')) {
 }
 HtmlErrorRenderer::setTemplate(realpath(S2_ROOT.'_include/views/error.php'));
 
+function collectParameters(): array
+{
+    $result = [
+        'root_dir'     => S2_ROOT,
+        'cache_dir'    => S2_CACHE_DIR,
+        'log_dir'      => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+        'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+        'debug'        => defined('S2_DEBUG'),
+        'debug_view'   => defined('S2_DEBUG_VIEW'),
+        'redirect_map' => $GLOBALS['s2_redirect'] ?? [],
+    ];
+
+    foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {
+        $result[$globalVarName] = $GLOBALS[$globalVarName] ?? null;
+    }
+
+    return $result;
+}
+
 $app = new Application();
+$app->addExtension(new CmsExtension());
+
+$enabledExtensions = null;
+if (!defined('S2_DISABLE_CACHE') && file_exists(S2Cache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
+    $enabledExtensions = include S2Cache::CACHE_ENABLED_EXTENSIONS_FILENAME;
+}
+
 try {
-    $app->boot();
+    if (!is_array($enabledExtensions)) {
+        $app->boot(collectParameters());
+        \Container::setContainer($app->container);
+        $enabledExtensions = S2Cache::generateEnabledExtensionClassNames($app->container->get(\S2\Cms\Pdo\DbLayer::class));
+    }
+    foreach ($enabledExtensions as $extension) {
+        $app->addExtension(new $extension());
+    }
+
+    $app->boot(collectParameters());
+    \Container::setContainer($app->container);
     $app->container->getParameter('base_url');
 } catch (\S2\Cms\Framework\Exception\ParameterNotFoundException $e) {
     // S2 is not installed

@@ -24,9 +24,12 @@ class Container implements ContainerInterface
     {
     }
 
-    public function set(string $id, callable $factory): void
+    public function set(string $id, callable|object $factory): void
     {
         $this->bindings[$id] = $factory;
+        if (!\is_callable($factory)) {
+            $this->instances[$id] = $factory;
+        }
     }
 
     public function get(string $id): mixed
