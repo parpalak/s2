@@ -15,6 +15,7 @@ use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
+use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\Controller\BlogRss;
 use s2_extensions\s2_blog\Controller\DayPageController;
@@ -161,7 +162,7 @@ class Extension implements ExtensionInterface
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
-        $eventDispatcher->addListener(\S2\Cms\Template\HtmlTemplateCreatedEvent::class, function (\S2\Cms\Template\HtmlTemplateCreatedEvent $event) use ($container) {
+        $eventDispatcher->addListener(TemplateEvent::EVENT_CREATED, function (TemplateEvent $event) use ($container) {
             $blogPlaceholders = [];
             $template         = $event->htmlTemplate;
 

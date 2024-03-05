@@ -11,7 +11,7 @@ namespace s2_extensions\s2_search;
 
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
-use S2\Cms\Template\HtmlTemplateCreatedEvent;
+use S2\Cms\Template\TemplateEvent;
 use s2_extensions\s2_search\Controller\SearchPageController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
@@ -25,7 +25,7 @@ class Extension implements ExtensionInterface
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
-        $eventDispatcher->addListener(HtmlTemplateCreatedEvent::class, function (HtmlTemplateCreatedEvent $event) {
+        $eventDispatcher->addListener(TemplateEvent::EVENT_CREATED, function (TemplateEvent $event) {
             \Lang::load('s2_search', function () {
                 if (file_exists(S2_ROOT . '/_extensions/s2_search' . '/lang/' . S2_LANGUAGE . '.php'))
                     return require S2_ROOT . '/_extensions/s2_search' . '/lang/' . S2_LANGUAGE . '.php';

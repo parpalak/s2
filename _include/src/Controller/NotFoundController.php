@@ -49,12 +49,13 @@ readonly class NotFoundController implements ControllerInterface
         $template = $this->htmlTemplateProvider->getTemplate('error404.php');
 
         $template
+            ->markAsNotFound()
             ->putInPlaceholder('head_title', \Lang::get('Error 404'))
             ->putInPlaceholder('title', '<h1 class="error404-header">' . \Lang::get('Error 404') . '</h1>')
             ->putInPlaceholder('text', sprintf(\Lang::get('Error 404 text'), s2_link('/')))
             ->addBreadCrumb(\Model::main_page_title(), s2_link('/'))
         ;
 
-        return $template->toHttpResponse()->setStatusCode(Response::HTTP_NOT_FOUND);
+        return $template->toHttpResponse();
     }
 }

@@ -21,9 +21,10 @@ class HtmlTemplate
     private bool $notFound = false;
 
     public function __construct(
-        protected string                   $template,
-        protected EventDispatcherInterface $eventDispatcher,
-        protected Viewer                   $viewer
+        private readonly string                   $template,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly Viewer $viewer,
+        private readonly bool $debugView,
     ) {
     }
 
@@ -52,7 +53,7 @@ class HtmlTemplate
 
         $template = $this->template;
 
-        $replace = $this->replace;
+        $replace = [];
 
         // HTML head
         $replace['<!-- s2_head_title -->'] = empty($this->page['head_title']) ?
@@ -144,27 +145,17 @@ class HtmlTemplate
         // Footer
         $replace['<!-- s2_copyright -->'] = s2_build_copyright();
 
-        $this->eventDispatcher->dispatch(new TemplatePreReplaceEvent());
+        $this->eventDispatcher->dispatch(new TemplateEvent($this), TemplateEvent::EVENT_PRE_REPLACE);
 
-        // Queries
-        /** @var ?\S2\Cms\Pdo\PDO $pdo */
-        $pdo = \Container::getIfInstantiated(\PDO::class);
-        if (defined('S2_SHOW_QUERIES')) {
-            $pdoLogs                      = $pdo ? $pdo->cleanLogs() : [];
-            $replace['<!-- s2_debug -->'] = defined('S2_SHOW_QUERIES') ? $this->viewer->render('debug_queries', [
-                'saved_queries' => $pdoLogs,
-            ]) : '';
-        }
+        $replace = array_merge($replace, $this->replace);
 
         $etag = md5($template);
         // Add here placeholders to be excluded from the ETag calculation
         $etag_skip = array('<!-- s2_comment_form -->');
 
-        ($hook = s2_hook('idx_template_pre_replace')) ? eval($hook) : null; // todo move up
-
         // Replacing placeholders and calculating hash for ETag header
         foreach ($replace as $what => $to) {
-            if (defined('S2_DEBUG_VIEW') && $to && !in_array($what, array('<!-- s2_head_title -->', '<!-- s2_navigation_link -->', '<!-- s2_rss_link -->', '<!-- s2_meta -->', '<!-- s2_styles -->'))) {
+            if ($this->debugView && $to && !in_array($what, array('<!-- s2_head_title -->', '<!-- s2_navigation_link -->', '<!-- s2_rss_link -->', '<!-- s2_meta -->', '<!-- s2_styles -->'))) {
 
                 $title = '<pre style="color: red; font-size: 12px; opacity: 0.6; margin: 0 -100% 0 0; width: 100%; text-align: center; line-height: 1; position: relative; float: left; z-index: 1000; pointer-events: none;">' . s2_htmlencode($what) . '</pre>';
                 $to    = '<div style="border: 1px solid rgba(255, 0, 0, 0.4); margin: 1px;">' .
@@ -179,14 +170,9 @@ class HtmlTemplate
             $template = str_replace($what, $to, $template);
         }
 
-        ($hook = s2_hook('idx_template_after_replace')) ? eval($hook) : null;
-
-        // Execution time
-        if (defined('S2_DEBUG') || defined('S2_SHOW_TIME')) {
-            $time_placeholder = 't = ' . \Lang::number_format(microtime(true) - $s2_start, true, 3) . '; q = ' . ($pdo ? (isset($pdoLogs) ? \count($pdoLogs) : $pdo->getQueryCount()) : 0);
-            $template         = str_replace('<!-- s2_querytime -->', $time_placeholder, $template);
-            $etag             .= md5($time_placeholder);
-        }
+        $finalReplaceEvent = new TemplateFinalReplaceEvent($template);
+        $this->eventDispatcher->dispatch($finalReplaceEvent);
+        $etag .= $finalReplaceEvent->getHash();
 
         $response = new Response($template);
         $response->setEtag(md5($etag));
@@ -218,6 +204,11 @@ class HtmlTemplate
         $this->replace[$placeholder] = $value;
 
         return $this;
+    }
+
+    public function isNotFound(): bool
+    {
+        return $this->notFound;
     }
 
     public function markAsNotFound(): static

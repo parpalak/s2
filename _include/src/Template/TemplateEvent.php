@@ -11,8 +11,11 @@ namespace S2\Cms\Template;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
-class HtmlTemplateCreatedEvent extends Event
+class TemplateEvent extends Event
 {
+    public const EVENT_CREATED     = 'template.created';
+    public const EVENT_PRE_REPLACE = 'template.pre_replace';
+
     public function __construct(public readonly HtmlTemplate $htmlTemplate)
     {
     }

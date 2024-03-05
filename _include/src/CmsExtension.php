@@ -35,7 +35,8 @@ use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Rose\CustomExtractor;
 use S2\Cms\Template\HtmlTemplateProvider;
-use S2\Cms\Template\TemplatePreReplaceEvent;
+use S2\Cms\Template\TemplateFinalReplaceEvent;
+use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\Viewer;
 use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
@@ -194,6 +195,7 @@ class CmsExtension implements ExtensionInterface
             return new HtmlTemplateProvider(
                 $container->get(Viewer::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
+                $container->getParameter('debug_view'),
             );
         });
 
@@ -294,9 +296,31 @@ class CmsExtension implements ExtensionInterface
             $event->response = $controller->handle($event->request);
         });
 
-        $eventDispatcher->addListener(TemplatePreReplaceEvent::class, function (TemplatePreReplaceEvent $event) {
-
+        $eventDispatcher->addListener(TemplateEvent::EVENT_PRE_REPLACE, function (TemplateEvent $event) use ($container) {
+            $pdo           = $container->getIfInstantiated(\PDO::class);
+            $showQueries   = $container->getParameter('show_queries');
+            $s2DebugOutput = '';
+            if ($showQueries) {
+                /** @var Viewer $viewer */
+                $viewer        = $container->get(Viewer::class);
+                $pdoLogs       = $pdo !== null ? $pdo->cleanLogs() : [];
+                $s2DebugOutput = $viewer->render('debug_queries', [
+                    'saved_queries' => $pdoLogs,
+                ]);
+            }
+            $event->htmlTemplate->registerPlaceholder('<!-- s2_debug -->', $s2DebugOutput);
         });
+
+        $eventDispatcher->addListener(TemplateFinalReplaceEvent::class, function (TemplateFinalReplaceEvent $event) use ($container) {
+            global $s2_start;
+            /** @var Pdo $pdo */
+            $pdo = $container->getIfInstantiated(\PDO::class);
+            if ($container->getParameter('debug') || defined('S2_SHOW_TIME')) {
+                $time_placeholder = 't = ' . \Lang::number_format(microtime(true) - $s2_start, true, 3) . '; q = ' . ($pdo !== null ? $pdo->getQueryCount() : 0);
+                $event->replace('<!-- s2_querytime -->', $time_placeholder);
+            }
+        });
+
     }
 
     public function registerRoutes(RouteCollection $routes, Container $container): void

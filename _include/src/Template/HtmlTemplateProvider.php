@@ -15,15 +15,16 @@ class HtmlTemplateProvider
 {
     public function __construct(
         private readonly Viewer                   $viewer,
-        private readonly EventDispatcherInterface $dispatcher
+        private readonly EventDispatcherInterface $dispatcher,
+        private readonly bool $debugView,
     ) {
     }
 
     public function getTemplate(string $templateId): HtmlTemplate
     {
-        $htmlTemplate = new HtmlTemplate(s2_get_template($templateId), $this->dispatcher, $this->viewer);
+        $htmlTemplate = new HtmlTemplate(s2_get_template($templateId), $this->dispatcher, $this->viewer, $this->debugView);
 
-        $this->dispatcher->dispatch(new HtmlTemplateCreatedEvent($htmlTemplate));
+        $this->dispatcher->dispatch(new TemplateEvent($htmlTemplate), TemplateEvent::EVENT_CREATED);
 
         return $htmlTemplate;
     }

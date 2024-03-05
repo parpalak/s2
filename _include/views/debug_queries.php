@@ -40,6 +40,8 @@ foreach ($saved_queries as $cur_query) {
 					</tr>
 				</tbody>
 			</table>
-			Peak memory = <?php echo Lang::number_format(memory_get_peak_usage()); ?>, memory = <?php echo Lang::number_format(memory_get_usage()); ?>
+			Peak memory = <?php echo Lang::number_format(memory_get_peak_usage()); ?>,
+            memory = <?php echo Lang::number_format(memory_get_usage()); ?>,
+            total queries = <?php echo count($saved_queries); ?>
 		</div>
 <?php
