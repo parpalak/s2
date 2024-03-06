@@ -14,6 +14,8 @@ use S2\Cms\Framework\Exception\NotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
+use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
@@ -23,8 +25,10 @@ class Application
 {
     public Container $container;
     private ?RouteCollection $routes = null;
+    private ?array $compiledRoutes = null;
     /** @var ExtensionInterface[] */
     private array $extensions = [];
+    private ?string $cachedRoutesFilename = null;
 
     public function addExtension(ExtensionInterface $extension): static
     {
@@ -35,6 +39,7 @@ class Application
 
     public function boot(array $params): void
     {
+        $this->routes    = null;
         $this->container = new Container($params);
 
         $eventDispatcher = new EventDispatcher();
@@ -44,6 +49,11 @@ class Application
             $extension->buildContainer($this->container);
             $extension->registerListeners($eventDispatcher, $this->container);
         }
+    }
+
+    public function setCachedRoutesFilename(string $file): void
+    {
+        $this->cachedRoutesFilename = $file;
     }
 
     /**
@@ -96,31 +106,58 @@ class Application
         return $response;
     }
 
-    private function addRoutes(): void
+    private function getRoutes(): RouteCollection
     {
-        $routes = new RouteCollection();
-
-        foreach ($this->extensions as $extension) {
-            $extension->registerRoutes($routes, $this->container);
+        if ($this->routes === null) {
+            $this->routes = new RouteCollection();
+            foreach ($this->extensions as $extension) {
+                $extension->registerRoutes($this->routes, $this->container);
+            }
         }
 
-        $this->routes = $routes;
+        return $this->routes;
     }
 
     private function matchRequest(Request $request): array
     {
-        if ($this->routes === null) {
-            $this->addRoutes();
-        }
-
         $context = new RequestContext();
         $context->fromRequest($request);
 
-        $matcher = new UrlMatcher($this->routes, $context);
+        if ($this->cachedRoutesFilename !== null) {
+            $matcher = $this->getCompiledUrlMatcher($context);
+        } else {
+            $matcher = $this->getUrlMatcher($context);
+        }
 
         $attributes = $matcher->matchRequest($request);
+
         $request->attributes->add($attributes);
 
         return $attributes;
+    }
+
+    private function getCompiledUrlMatcher(RequestContext $context): CompiledUrlMatcher
+    {
+        if ($this->compiledRoutes === null) {
+            if (file_exists($this->cachedRoutesFilename)) {
+                $compiledRoutes = @include $this->cachedRoutesFilename;
+                if (\is_array($compiledRoutes)) {
+                    $this->compiledRoutes = $compiledRoutes;
+                }
+            }
+
+            if ($this->compiledRoutes === null) {
+                $compiledUrlMatcherDumper = new CompiledUrlMatcherDumper($this->getRoutes());
+                $this->compiledRoutes     = $compiledUrlMatcherDumper->getCompiledRoutes();
+                s2_overwrite_file_skip_locked($this->cachedRoutesFilename, $compiledUrlMatcherDumper->dump());
+            }
+        }
+
+        return new CompiledUrlMatcher($this->compiledRoutes, $context);
+    }
+
+    private function getUrlMatcher(RequestContext $context): UrlMatcher
+    {
+        return new UrlMatcher($this->getRoutes(), $context);
     }
 }

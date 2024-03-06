@@ -17,6 +17,7 @@ class S2Cache
 {
     public const CACHE_HOOK_NAMES_FILENAME         = S2_CACHE_DIR . 'cache_hook_names.php';
     public const CACHE_ENABLED_EXTENSIONS_FILENAME = S2_CACHE_DIR . 'cache_enabled_extensions.php';
+    public const CACHE_ROUTES_FILENAME             = S2_CACHE_DIR . 'cache_routes.php';
 
     /**
      * Delete every .php file in the cache directory
@@ -25,7 +26,12 @@ class S2Cache
      */
     public static function clear(): void
     {
-        $file_list = ['cache_config.php', 'cache_hook_names.php', 'cache_enabled_extensions.php'];
+        $file_list = [
+            S2_CACHE_DIR . 'cache_config.php',
+            self::CACHE_HOOK_NAMES_FILENAME,
+            self::CACHE_ENABLED_EXTENSIONS_FILENAME,
+            self::CACHE_ROUTES_FILENAME,
+        ];
 
         $return = ($hook = s2_hook('fn_clear_cache_start')) ? eval($hook) : null;
         if ($return !== null) {
@@ -33,7 +39,7 @@ class S2Cache
         }
 
         foreach ($file_list as $entry) {
-            @unlink(S2_CACHE_DIR . $entry);
+            @unlink($entry);
         }
     }
 

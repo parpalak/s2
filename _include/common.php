@@ -67,6 +67,10 @@ function collectParameters(): array
 $app = new Application();
 $app->addExtension(new CmsExtension());
 
+if (!defined('S2_DISABLE_CACHE')) {
+    $app->setCachedRoutesFilename(S2Cache::CACHE_ROUTES_FILENAME);
+}
+
 $enabledExtensions = null;
 if (!defined('S2_DISABLE_CACHE') && file_exists(S2Cache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
     $enabledExtensions = include S2Cache::CACHE_ENABLED_EXTENSIONS_FILENAME;
