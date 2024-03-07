@@ -17,7 +17,6 @@ $lang_const_explain = array(
 'S2_ADMIN_COLOR'		=> 'Background color of the control panel (examples: %s).',
 'S2_ADMIN_NEW_POS'		=> 'The created pages are placed before existing ones in the tree structure.',
 'S2_ADMIN_CUT'			=> 'Use page texts above the “&lt;cut&gt;” tag as excerpts.',
-'S2_ADMIN_UPDATES'		=> 'Show notifications when logging in the control panel if a new S2 version is released.',
 'S2_LOGIN_TIMEOUT'		=> 'Idle timeout (minutes). Users have to re-enter their login and password when this timeout expires.'
 
 );
@@ -39,7 +38,6 @@ $lang_const_names = array(
 'S2_ADMIN_COLOR'		=> 'Background color',
 'S2_ADMIN_NEW_POS'		=> 'New pages on top',
 'S2_ADMIN_CUT'			=> '“Cut” istead of excerpts',
-'S2_ADMIN_UPDATES'		=> 'Check for updates',
 'S2_LOGIN_TIMEOUT'		=> 'Timeout'
 
 );
@@ -52,5 +50,5 @@ $lang_admin_opt = array(
 'Invalid webmaster email'	=> 'You have entered an invalid webmaster e-mail. The previous one is used.',
 'Invalid style'				=> 'You have chosen the incorrect style.',
 'Invalid lang pack'			=> 'The language pack “%s” contains errors.',
- 
+
 );

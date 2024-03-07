@@ -20,7 +20,7 @@ use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 16);
+define('S2_DB_REVISION', 17);
 define('MIN_PHP_VERSION', '8.2.0');
 
 define('S2_ROOT', '../');
@@ -981,9 +981,6 @@ else
 	$s2_db->buildAndQuery($query);
 	$admin_uid = $s2_db->insertId();
 
-	// Enable/disable automatic check for updates depending on PHP environment (require cURL, fsockopen or allow_url_fopen)
-	$check_for_updates = (function_exists('curl_init') || function_exists('fsockopen') || in_array(strtolower(@ini_get('allow_url_fopen')), array('on', 'true', '1'))) ? 1 : 0;
-
 	// Insert config data
 	$config = array(
 		'S2_SITE_NAME'				=> "'".$lang_install['Site name']."'",
@@ -1003,7 +1000,6 @@ else
 		'S2_ADMIN_COLOR'			=> "'#eeeeee'",
 		'S2_ADMIN_NEW_POS'			=> "'0'",
 		'S2_ADMIN_CUT'				=> "'0'",
-		'S2_ADMIN_UPDATES'			=> "'".$check_for_updates."'",
 		'S2_LOGIN_TIMEOUT'			=> "'60'",
 		'S2_DB_REVISION'			=> "'".S2_DB_REVISION."'",
 	);

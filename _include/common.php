@@ -123,7 +123,7 @@ if (!defined('S2_CONFIG_LOADED')) {
     include S2_CACHE_DIR . 'cache_config.php';
 }
 
-define('S2_DB_LAST_REVISION', 16);
+define('S2_DB_LAST_REVISION', 17);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION) {
     include S2_ROOT . '_admin/db_update.php';
 }

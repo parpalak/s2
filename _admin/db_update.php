@@ -193,6 +193,13 @@ if (S2_DB_REVISION < 16 && $db_type === 'mysql') {
     }
 }
 
+if (S2_DB_REVISION < 17) {
+    $s2_db->buildAndQuery([
+        'DELETE'	=> 'config',
+        'WHERE'		=> 'name = \'S2_ADMIN_UPDATES\'',
+    ]);
+}
+
 $query = array(
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',

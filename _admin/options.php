@@ -29,7 +29,6 @@ $s2_const_types = array(
 	'S2_ADMIN_COLOR'		=> 'string',
 	'S2_ADMIN_NEW_POS'		=> 'int',
 	'S2_ADMIN_CUT'			=> 'boolean',
-	'S2_ADMIN_UPDATES'		=> 'boolean',
 	'S2_LOGIN_TIMEOUT'		=> 'int',
 );
 
@@ -182,8 +181,6 @@ function s2_get_options ()
 		'S2_ADMIN_CUT' => s2_get_checkbox('S2_ADMIN_CUT', $options['S2_ADMIN_CUT'], $lang_const_names['S2_ADMIN_CUT'], $lang_const_explain['S2_ADMIN_CUT']),
 		'S2_LOGIN_TIMEOUT' => s2_get_input('S2_LOGIN_TIMEOUT', $options['S2_LOGIN_TIMEOUT'], $lang_const_names['S2_LOGIN_TIMEOUT'], $lang_const_explain['S2_LOGIN_TIMEOUT']),
 	);
-	if (function_exists('curl_init') || function_exists('fsockopen') || in_array(strtolower(@ini_get('allow_url_fopen')), array('on', 'true', '1')))
-		$fieldset['S2_ADMIN_UPDATES'] = s2_get_checkbox('S2_ADMIN_UPDATES', $options['S2_ADMIN_UPDATES'], $lang_const_names['S2_ADMIN_UPDATES'], $lang_const_explain['S2_ADMIN_UPDATES']);
 	($hook = s2_hook('fn_get_options_pre_admin_fs_merge')) ? eval($hook) : null;
 	$output .= '<fieldset><legend>'.$lang_admin['Admin panel'].'</legend>'.implode('', $fieldset).'</fieldset>';
 

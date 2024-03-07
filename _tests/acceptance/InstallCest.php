@@ -529,7 +529,6 @@ class InstallCest
                 'S2_PREMODERATION'    => '1',
                 'S2_ADMIN_COLOR'      => '#e7e4f4',
                 'S2_LOGIN_TIMEOUT'    => '120000',
-                'S2_ADMIN_UPDATES'    => '0',
             ]
         ];
 
@@ -606,7 +605,6 @@ class InstallCest
                 'S2_PREMODERATION'    => '1',
                 'S2_ADMIN_COLOR'      => '#e7e4f4',
                 'S2_LOGIN_TIMEOUT'    => '120000',
-                'S2_ADMIN_UPDATES'    => '0',
             ]
         ];
 

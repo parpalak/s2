@@ -82,25 +82,6 @@ if ($action == 'close_other_sessions')
 	s2_close_other_sessions($session_id);
 }
 
-elseif ($action == 'check_updates')
-{
-	$is_permission = $s2_user['edit_users'];
-	($hook = s2_hook('rq_action_check_updates_start')) ? eval($hook) : null;
-	s2_test_user_rights($is_permission);
-
-	@$updates = include S2_CACHE_DIR.'cache_updates.php';
-	if (empty($updates) || $updates['cached'] + 7200 < time())
-		$updates = S2Cache::generate_updates();
-
-	if ($updates['fail'] === false && version_compare($updates['version'], S2_VERSION, '>'))
-		$return = array('is_update' => 1, 'message' => sprintf($lang_admin['New version message'], $updates['version']));
-	else
-		$return = array('is_update' => 0);
-
-	header('Content-Type: application/json; charset=utf-8');
-	echo s2_json_encode($return);
-}
-
 //=======================[Managing items]=======================================
 
 // Drag & Drop
