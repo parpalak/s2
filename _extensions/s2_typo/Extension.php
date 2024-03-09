@@ -24,8 +24,7 @@ class Extension implements ExtensionInterface
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
         $eventDispatcher->addListener(TemplateFinalReplaceEvent::class, function (TemplateFinalReplaceEvent $event) use ($container) {
-            require S2_ROOT.'/_extensions/s2_typo'.'/functions.php';
-            $event->template = s2_typo_make($event->template);
+            $event->template = Typograph::processRussianText($event->template);
         });
     }
 

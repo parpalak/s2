@@ -11,7 +11,5 @@
      die;
 }
 
-require S2_ROOT.'/_extensions/s2_typo'.'/functions.php';
-
-$content['rss_title'] = s2_typo_make($content['rss_title'], true);
-$content['rss_description'] = s2_typo_make($content['rss_description'], true);
+$content['rss_title'] = \s2_extensions\s2_typo\Typograph::processRussianText($content['rss_title'], true);
+$content['rss_description'] = \s2_extensions\s2_typo\Typograph::processRussianText($content['rss_description'], true);

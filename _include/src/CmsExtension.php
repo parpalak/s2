@@ -319,7 +319,7 @@ class CmsExtension implements ExtensionInterface
                 $time_placeholder = 't = ' . \Lang::number_format(microtime(true) - $s2_start, true, 3) . '; q = ' . ($pdo !== null ? $pdo->getQueryCount() : 0);
                 $event->replace('<!-- s2_querytime -->', $time_placeholder);
             }
-        });
+        }, -256);
 
     }
 

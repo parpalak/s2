@@ -11,5 +11,5 @@
      die;
 }
 
-$item['title'] = s2_typo_make($item['title'], true);
-$item['text'] = s2_typo_make($item['text']);
+$item['title'] = \s2_extensions\s2_typo\Typograph::processRussianText($item['title'], true);
+$item['text'] = \s2_extensions\s2_typo\Typograph::processRussianText($item['text']);
