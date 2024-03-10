@@ -1,11 +1,15 @@
-<?php /** @noinspection PhpMissingParamTypeInspection */
-/** @noinspection ReturnTypeCanBeDeclaredInspection */
-/** @noinspection PhpParameterNameChangedDuringInheritanceInspection */
-/** @noinspection PhpMissingReturnTypeInspection */
-
+<?php
 /**
- * Forked to fix a bug with PDO::query()
- * @see https://github.com/filisko/pdo-plus for original code
+ * PDO wrapper for lazy connections and logging.
+ *
+ * Forked from https://github.com/filisko/pdo-plus
+ * 1. Fixed a bug with PDO::query()
+ * 2. Made connections lazy
+ * 3. Updated code to PHP 8.2
+ *
+ * @copyright 2023-2024 Roman Parpalak, based on code (c) 2021 Filis Futsarov
+ * @license MIT
+ * @package S2
  */
 
 declare(strict_types=1);
@@ -31,59 +35,47 @@ class PDOStatement extends NativePdoStatement
 
     /**
      * {@inheritdoc}
-     * @return bool
      */
-    #[\ReturnTypeWillChange]
     public function bindParam(
-        $parameter,
-        &$variable,
-        $data_type = NativePdo::PARAM_STR,
-        $length = null,
-        $driver_options = null
-    ) {
-        $this->bindings[$parameter] = $variable;
-        return parent::bindParam($parameter, $variable, $data_type, $length, $driver_options);
+        int|string $param,
+        mixed      &$var,
+        int        $type = NativePdo::PARAM_STR,
+        int        $maxLength = null,
+        mixed      $driverOptions = null
+    ): bool {
+        $this->bindings[$param] = $var;
+        return parent::bindParam($param, $var, $type, $maxLength, $driverOptions);
     }
 
     /**
      * {@inheritdoc}
-     * @return bool
      */
-    #[\ReturnTypeWillChange]
-    public function bindValue($parameter, $variable, $data_type = NativePdo::PARAM_STR)
+    public function bindValue(int|string $param, mixed $value, int $type = NativePdo::PARAM_STR): bool
     {
-        $this->bindings[$parameter] = $variable;
-        return parent::bindValue($parameter, $variable, $data_type);
+        $this->bindings[$param] = $value;
+        return parent::bindValue($param, $value, $type);
     }
 
     /**
      * {@inheritdoc}
-     * @return bool
      */
-    #[\ReturnTypeWillChange]
-    public function execute($input_parameters = null)
+    public function execute(?array $params = null): bool
     {
-        if (\is_array($input_parameters)) {
-            $this->bindings = $input_parameters;
+        if ($params !== null) {
+            $this->bindings = $params;
         }
 
         $statement = $this->addValuesToQuery($this->bindings, $this->queryString);
 
         $start  = microtime(true);
-        $result = parent::execute($input_parameters);
+        $result = parent::execute($params);
         $this->pdo->addLog($statement, microtime(true) - $start);
         return $result;
     }
 
-    /**
-     * @param array  $bindings
-     * @param string $query
-     * @return string
-     */
-    public function addValuesToQuery($bindings, $query)
+    private function addValuesToQuery(array $bindings, string $query): string
     {
-        /** @noinspection TypeUnsafeComparisonInspection */
-        $indexed = ($bindings == array_values($bindings));
+        $indexed = array_is_list($bindings);
 
         foreach ($bindings as $param => $value) {
             $value = match (true) {

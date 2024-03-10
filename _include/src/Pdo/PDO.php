@@ -1,7 +1,15 @@
 <?php
 /**
- * Forked to fix a bug with PDO::query() and to make connections lazy.
- * @see https://github.com/filisko/pdo-plus for original code
+ * PDO wrapper for lazy connections and logging.
+ *
+ * Forked from https://github.com/filisko/pdo-plus
+ * 1. Fixed a bug with PDO::query()
+ * 2. Made connections lazy
+ * 3. Updated code to PHP 8.2
+ *
+ * @copyright 2023-2024 Roman Parpalak, based on code (c) 2021 Filis Futsarov
+ * @license MIT
+ * @package S2
  */
 
 declare(strict_types=1);
@@ -20,12 +28,12 @@ class PDO extends NativePdo
     /**
      * {@inheritdoc}
      */
-    public function __construct($dsn, $username = null, $passwd = null, $options = null)
+    public function __construct(string $dsn, ?string $username = null, ?string $passwd = null, ?array $options = null)
     {
         $this->connectionParams = [$dsn, $username, $passwd, $options];
     }
 
-    public function addConnectionCallback(callable $callback)
+    public function addConnectionCallback(callable $callback): void
     {
         $this->connectionCallbacks[] = $callback;
     }
@@ -73,7 +81,7 @@ class PDO extends NativePdo
     /**
      * {@inheritdoc}
      */
-    public function exec($statement): int|false
+    public function exec(string $statement): int|false
     {
         $this->connectIfRequired();
 
