@@ -22,6 +22,7 @@ use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Event\NotFoundEvent;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Http\RedirectDetector;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
@@ -35,8 +36,8 @@ use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Rose\CustomExtractor;
 use S2\Cms\Template\HtmlTemplateProvider;
-use S2\Cms\Template\TemplateFinalReplaceEvent;
 use S2\Cms\Template\TemplateEvent;
+use S2\Cms\Template\TemplateFinalReplaceEvent;
 use S2\Cms\Template\Viewer;
 use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
@@ -219,10 +220,15 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(RedirectDetector::class, function (Container $container) {
+            return new RedirectDetector(
+                $container->getParameter('redirect_map')
+            );
+        });
+
         $container->set(NotFoundController::class, function (Container $container) {
             return new NotFoundController(
                 $container->get(HtmlTemplateProvider::class),
-                $container->getParameter('redirect_map')
             );
         });
 
@@ -291,9 +297,18 @@ class CmsExtension implements ExtensionInterface
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
         $eventDispatcher->addListener(NotFoundEvent::class, function (NotFoundEvent $event) use ($container) {
-            /** @var NotFoundController $controller */
-            $controller      = $container->get(NotFoundController::class);
-            $event->response = $controller->handle($event->request);
+            /** @var RedirectDetector $redirectDetector */
+            $redirectDetector = $container->get(RedirectDetector::class);
+            if (null !== ($redirectResponse = $redirectDetector->getRedirectResponse($event->request))) {
+                $event->response = $redirectResponse;
+                return;
+            }
+
+            if ($event->response === null) {
+                /** @var NotFoundController $controller */
+                $controller      = $container->get(NotFoundController::class);
+                $event->response = $controller->handle($event->request);
+            }
         });
 
         $eventDispatcher->addListener(TemplateEvent::EVENT_PRE_REPLACE, function (TemplateEvent $event) use ($container) {

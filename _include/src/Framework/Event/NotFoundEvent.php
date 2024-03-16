@@ -14,9 +14,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class NotFoundEvent
 {
-    public ?Response $response = null;
-
-    public function __construct(public readonly Request $request)
-    {
+    public function __construct(
+        public readonly Request $request,
+        public ?Response        $response = null
+    ) {
     }
 }

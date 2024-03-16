@@ -39,7 +39,9 @@ class Application
 
     public function boot(array $params): void
     {
-        $this->routes    = null;
+        $this->routes         = null;
+        $this->compiledRoutes = null;
+
         $this->container = new Container($params);
 
         $eventDispatcher = new EventDispatcher();
@@ -72,15 +74,19 @@ class Application
             throw new \LogicException(sprintf('Controller "%s" must implement "%s".', $controllerClass, ControllerInterface::class));
         }
 
+        $response = null;
         try {
             $response = $controller->handle($request);
+            if ($response->isNotFound()) {
+                throw new NotFoundException();
+            }
             if (\extension_loaded('newrelic')) {
-                newrelic_name_transaction($controllerClass . ($response->isRedirection() ? '_' . $response->getStatusCode() : ''));
+                newrelic_name_transaction($controllerClass . (!$response->isSuccessful() ? '_' . $response->getStatusCode() : ''));
             }
         } catch (NotFoundException $e) {
             /** @var EventDispatcherInterface $eventDispatcher */
             $eventDispatcher = $this->container->get(EventDispatcherInterface::class);
-            $notFoundEvent   = new NotFoundEvent($request);
+            $notFoundEvent   = new NotFoundEvent($request, $response);
             $eventDispatcher->dispatch($notFoundEvent);
             $response = $notFoundEvent->response;
             if ($response === null) {
