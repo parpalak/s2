@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2023-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
+
+declare(strict_types=1);
 
 namespace S2\Cms\Asset;
 
@@ -12,30 +14,19 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class AssetMerge implements AssetMergeInterface
 {
-    public const FILTER_CSS = 'css';
-    public const FILTER_JS  = 'js';
-
-    private string $publicCacheDir;
-    private string $publicCachePath;
-    private string $cacheFileName;
-    private bool $devEnv;
+    public const TYPE_CSS = 'css';
+    public const TYPE_JS  = 'js';
 
     private array $filesToMerge = [];
     private ?Filesystem $filesystem = null;
-    private string $filter;
 
     public function __construct(
-        string $publicCacheDir,
-        string $publicCachePath,
-        string $cacheFileName,
-        string $filter,
-        bool   $devEnv
+        private readonly string $publicCacheDir,
+        private readonly string $publicCachePath,
+        private readonly string $cacheFilenamePrefix,
+        private readonly string $type,
+        private readonly bool   $devEnv
     ) {
-        $this->publicCacheDir  = $publicCacheDir;
-        $this->publicCachePath = $publicCachePath;
-        $this->cacheFileName   = $cacheFileName;
-        $this->devEnv          = $devEnv;
-        $this->filter          = $filter;
     }
 
     /**
@@ -55,19 +46,19 @@ class AssetMerge implements AssetMergeInterface
             $this->dumpContent();
         }
 
-        return $this->publicCachePath . $this->cacheFileName . '?v=' . $this->getCacheHash();
+        return sprintf('%s%s?v=%s', $this->publicCachePath, $this->getFilename(), $this->getCacheHash());
     }
 
-    protected function dumpContent(): void
+    private function dumpContent(): void
     {
-        if ($this->filter === self::FILTER_CSS) {
+        if ($this->type === self::TYPE_CSS) {
             $minifier = new Minify\CSS();
             $minifier->setMaxImportSize(4);
             foreach ($this->filesToMerge as $fileToMerge) {
                 $minifier->add($fileToMerge);
             }
             $content = $minifier->minify($this->getDumpFilename());
-        } elseif ($this->filter === self::FILTER_JS) {
+        } elseif ($this->type === self::TYPE_JS) {
             $minifier = new Minify\JS();
             foreach ($this->filesToMerge as $fileToMerge) {
                 $minifier->add($fileToMerge);
@@ -105,12 +96,17 @@ class AssetMerge implements AssetMergeInterface
 
     private function getDumpFilename(): string
     {
-        return $this->publicCacheDir . $this->cacheFileName;
+        return sprintf('%s%s', $this->publicCacheDir, $this->getFilename());
     }
 
     private function getHashFilename(): string
     {
-        return $this->publicCacheDir . $this->cacheFileName . '.hash.php';
+        return sprintf('%s%s.hash.php', $this->publicCacheDir, $this->getFilename());
+    }
+
+    private function getFilename(): string
+    {
+        return sprintf('%s.%x.%s', $this->cacheFilenamePrefix, crc32(serialize($this->filesToMerge)), $this->type);
     }
 
     private function fileSystem(): Filesystem
@@ -125,7 +121,7 @@ class AssetMerge implements AssetMergeInterface
         return \is_string($result) ? $result : '';
     }
 
-    public function getConcatenatedContent(): string
+    private function getConcatenatedContent(): string
     {
         $content = '';
         foreach ($this->filesToMerge as $fileToMerge) {

@@ -87,11 +87,11 @@ class HtmlTemplateProvider
 
         $styles  = $assetPack->getStyles(
             S2_PATH . '/_styles/' . $this->styleName . '/',
-            new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_styles.css', AssetMerge::FILTER_CSS, $this->debug)
+            new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_styles', AssetMerge::TYPE_CSS, $this->debug)
         );
         $scripts = $assetPack->getScripts(
             S2_PATH . '/_styles/' . $this->styleName . '/',
-            new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_scripts.js', AssetMerge::FILTER_JS, $this->debug)
+            new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_scripts', AssetMerge::TYPE_JS, $this->debug)
         );
 
         $template = str_replace(['<!-- s2_styles -->', '<!-- s2_scripts -->'], [$styles, $scripts], $template);
