@@ -13,6 +13,7 @@ use S2\Cms\Framework\Event\NotFoundEvent;
 use S2\Cms\Framework\Exception\NotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
@@ -74,6 +75,10 @@ class Application
             throw new \LogicException(sprintf('Controller "%s" must implement "%s".', $controllerClass, ControllerInterface::class));
         }
 
+        /** @var RequestStack $requestStack */
+        $requestStack = $this->container->has(RequestStack::class) ? $this->container->get(RequestStack::class) : null;
+        $requestStack?->push($request);
+
         $response = null;
         try {
             $response = $controller->handle($request);
@@ -107,6 +112,8 @@ class Application
             if (\extension_loaded('newrelic')) {
                 newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
             }
+        } finally {
+            $requestStack?->pop();
         }
 
         return $response;

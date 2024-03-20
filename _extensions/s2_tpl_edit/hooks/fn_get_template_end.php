@@ -16,5 +16,5 @@ if (!defined('S2_ROOT')) {
 }
 
 if (!$s2_tpl_edit_cached) {
-    copy($path, S2_CACHE_DIR . 's2_tpl_edit_' . S2_STYLE . '_' . $templateId);
+    copy($path, S2_CACHE_DIR . 's2_tpl_edit_' . $this->styleName . '_' . $templateId);
 }

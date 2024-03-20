@@ -2,8 +2,8 @@
 /**
  * Hook fn_get_template_start
  *
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2023-2024 Roman Parpalak
+ * @license MIT
  * @package s2_tpl_edit
  *
  * @var $templateId
@@ -14,8 +14,8 @@ if (!defined('S2_ROOT')) {
 }
 
 $s2_tpl_edit_cached = false;
-if (file_exists(S2_CACHE_DIR . 's2_tpl_edit_' . S2_STYLE . '_' . $templateId)) {
-    $path = S2_CACHE_DIR . 's2_tpl_edit_' . S2_STYLE . '_' . $templateId;
+if (file_exists($this->cacheDir . 's2_tpl_edit_' . $this->styleName . '_' . $templateId)) {
+    $path = $this->cacheDir . 's2_tpl_edit_' . $this->styleName . '_' . $templateId;
 
     $s2_tpl_edit_cached = true;
 }

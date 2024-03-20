@@ -146,7 +146,9 @@ function s2_tpl_edit_content($templateFilename = ''): array
         } else {
             // Get template to trigger its caching
             try {
-                $templateExists = (s2_get_template($templateFilename) !== '');
+                /** @var \S2\Cms\Template\HtmlTemplateProvider $provider */
+                $provider = Container::get(\S2\Cms\Template\HtmlTemplateProvider::class);
+                $templateExists = ($provider->getRawTemplateContent($templateFilename) !== '');
             } catch (Exception $e) {
                 $templateExists = false;
             }

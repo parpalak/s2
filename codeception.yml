@@ -6,6 +6,12 @@ suites:
             enabled:
                 - Asserts
         step_decorators: ~
+    integration:
+        actor: IntegrationTester
+        suite_namespace: \Integration
+        modules:
+            enabled:
+                - \Helper\Integration
     acceptance:
         actor: AcceptanceTester
         modules:

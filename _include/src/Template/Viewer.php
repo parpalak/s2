@@ -20,7 +20,7 @@ class Viewer
     {
         $this->styleViewDir        = $rootDir . '_styles/' . $style . '/views/';
         $this->extensionDirPattern = $rootDir . '_extensions/%s/views/';
-        $this->systemViewDir       = S2_ROOT . '_include/views/';
+        $this->systemViewDir       = $rootDir . '_include/views/';
     }
 
     /**

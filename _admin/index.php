@@ -81,7 +81,9 @@ $s2_user = s2_get_user_info($login);
 // Preparing the template for the preview tab
 $return = ($hook = s2_hook('ai_pre_get_template')) ? eval($hook) : null;
 try {
-	$template = $return ?: s2_get_template('site.php');
+    /** @var \S2\Cms\Template\HtmlTemplateProvider $provider */
+    $provider = Container::get(\S2\Cms\Template\HtmlTemplateProvider::class);
+	$template = $return ?: $provider->getRawTemplateContent('site.php');
 }
 catch (Exception $e) {
 	error($e->getMessage());

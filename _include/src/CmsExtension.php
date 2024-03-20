@@ -51,6 +51,7 @@ use s2_extensions\s2_search\Fetcher;
 use s2_extensions\s2_search\IndexManager;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -192,11 +193,22 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(RequestStack::class, function (Container $container) {
+            return new RequestStack();
+        });
+
         $container->set(HtmlTemplateProvider::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new HtmlTemplateProvider(
+                $container->get(RequestStack::class),
                 $container->get(Viewer::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
+                $container->getParameter('debug'),
                 $container->getParameter('debug_view'),
+                $container->getParameter('root_dir'),
+                $container->getParameter('cache_dir'),
+                $provider->get('S2_STYLE'),
             );
         });
 
