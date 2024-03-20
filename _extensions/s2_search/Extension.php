@@ -9,8 +9,11 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_search;
 
+use S2\Cms\Asset\AssetPack;
+use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
 use s2_extensions\s2_search\Controller\SearchPageController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -33,6 +36,18 @@ class Extension implements ExtensionInterface
                     return require S2_ROOT . '/_extensions/s2_search' . '/lang/English.php';
             });
             $event->htmlTemplate->registerPlaceholder('<!-- s2_search_field -->', '<form class="s2_search_form" method="get" action="' . (S2_URL_PREFIX ? S2_PATH . S2_URL_PREFIX : S2_PATH . '/search') . '">' . (S2_URL_PREFIX ? '<input type="hidden" name="search" value="1" />' : '') . '<input type="text" name="q" id="s2_search_input" placeholder="' . \Lang::get('Search', 's2_search') . '"/></form>');
+        });
+
+        $eventDispatcher->addListener(TemplateAssetEvent::class, static function (TemplateAssetEvent $event) use ($container) {
+            $event->assetPack->addCss('../../_extensions/s2_search/style.css', [AssetPack::OPTION_MERGE]);
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            if ($provider->get('S2_SEARCH_QUICK') === '1') {
+                $event->assetPack
+                    ->addJs('../../_extensions/s2_search/autosearch.js', [AssetPack::OPTION_MERGE])
+                    ->addInlineJs('<script>var s2_search_url = "' . S2_PATH . '/_extensions/s2_search";</script>')
+                ;
+            }
         });
     }
 

@@ -9,12 +9,14 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog;
 
+use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
+use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\Controller\BlogRss;
@@ -213,6 +215,9 @@ class Extension implements ExtensionInterface
                 unset($s2_blog_post);
                 $template->registerPlaceholder('<!-- s2_blog_last_post -->', implode('', $lastPosts));
             }
+        });
+        $eventDispatcher->addListener(TemplateAssetEvent::class, static function (TemplateAssetEvent $event) {
+            $event->assetPack->addCss('../../_extensions/s2_blog/style.css', [AssetPack::OPTION_MERGE]);
         });
     }
 

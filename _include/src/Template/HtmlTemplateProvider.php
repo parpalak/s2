@@ -1,6 +1,9 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * Provides the content of templates.
+ * Replaces styles and scripts placeholders.
+ *
+ * @copyright 2009-2024 Roman Parpalak
  * @license MIT
  * @package S2
  */
@@ -20,8 +23,8 @@ class HtmlTemplateProvider
         private readonly RequestStack             $requestStack,
         private readonly Viewer                   $viewer,
         private readonly EventDispatcherInterface $dispatcher,
-        private readonly bool                     $debugView,
         private readonly bool                     $debug,
+        private readonly bool                     $debugView,
         private readonly string                   $rootDir,
         private readonly string                   $cacheDir,
         private readonly string                   $styleName,
@@ -51,12 +54,10 @@ class HtmlTemplateProvider
         $path            = null;
         $cleanTemplateId = preg_replace('#[^0-9a-zA-Z._\-]#', '', $templateId);
 
-        $return = ($hook = s2_hook('fn_get_template_start')) ? eval($hook) : null;//+
-        if ($return) {
-            return $return;
-        }
+        $buildEvent = new TemplateBuildEvent($this->styleName, $cleanTemplateId, $path);
+        $this->dispatcher->dispatch($buildEvent, TemplateBuildEvent::EVENT_START);
 
-        if ($path === null) {
+        if ($path === null) { // Can be modified via event
             $templatePathInStyles = $this->rootDir . '_styles/' . $this->styleName . '/templates/' . $cleanTemplateId;
             if (file_exists($templatePathInStyles)) {
                 $path = $templatePathInStyles;
@@ -71,14 +72,18 @@ class HtmlTemplateProvider
         include $path;
         $template = ob_get_clean();
 
-        $style_filename = '_styles/' . $this->styleName . '/' . $this->styleName . '.php';
-        $assetPack      = require $this->rootDir . $style_filename;
+        $styleFilename = '_styles/' . $this->styleName . '/' . $this->styleName . '.php';
+        $assetPack     = require $this->rootDir . $styleFilename;
 
         if (!($assetPack instanceof AssetPack)) {
-            throw new \LogicException(sprintf('File "%s" must return an AssetPack object.', $style_filename));
+            throw new \LogicException(sprintf(
+                'Style "%s" is broken (file "%s" must return an AssetPack object). Choose another style.',
+                $this->styleName,
+                $styleFilename
+            ));
         }
 
-        ($hook = s2_hook('fn_get_template_pre_includes_merge')) ? eval($hook) : null; // todo event
+        $this->dispatcher->dispatch(new TemplateAssetEvent($assetPack));
 
         $styles  = $assetPack->getStyles(
             S2_PATH . '/_styles/' . $this->styleName . '/',
@@ -91,7 +96,8 @@ class HtmlTemplateProvider
 
         $template = str_replace(['<!-- s2_styles -->', '<!-- s2_scripts -->'], [$styles, $scripts], $template);
 
-        ($hook = s2_hook('fn_get_template_end')) ? eval($hook) : null;//+
+        $this->dispatcher->dispatch($buildEvent, TemplateBuildEvent::EVENT_END);
+
         return $template;
     }
 
