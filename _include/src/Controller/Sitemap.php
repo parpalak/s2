@@ -83,7 +83,7 @@ class Sitemap implements ControllerInterface
             $articles[$i]['modify_time'] = $row['modify_time'];
         }
 
-        $urls = \Model::get_group_url($parent_ids, $urls);
+        $urls = \S2\Cms\Model\Model::get_group_url($parent_ids, $urls);
 
         foreach ($articles as $k => $v) {
             if (isset($urls[$k])) {

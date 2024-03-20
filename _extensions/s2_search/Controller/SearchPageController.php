@@ -112,7 +112,7 @@ readonly class SearchPageController implements ControllerInterface
         $template->putInPlaceholder('title', Lang::get('Search', 's2_search'));
         $template->registerPlaceholder('<!-- s2_search_field -->', '');
 
-        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
         $template->addBreadCrumb(Lang::get('Search', 's2_search'));
 
         return $template->toHttpResponse();

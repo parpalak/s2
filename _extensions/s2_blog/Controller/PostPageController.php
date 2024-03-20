@@ -49,7 +49,7 @@ class PostPageController extends BlogController
             return $result;
         }
 
-        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }

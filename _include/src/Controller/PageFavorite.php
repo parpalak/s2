@@ -57,7 +57,7 @@ readonly class PageFavorite implements ControllerInterface
             $parent_ids[] = $row['parent_id'];
         }
 
-        $urls = \Model::get_group_url($parent_ids, $urls);
+        $urls = \S2\Cms\Model\Model::get_group_url($parent_ids, $urls);
 
         $sections = $articles = $articles_sort_array = $sections_sort_array = [];
         foreach ($urls as $k => $url) {
@@ -113,7 +113,7 @@ readonly class PageFavorite implements ControllerInterface
         $template = $this->htmlTemplateProvider->getTemplate('site.php');
 
         $template
-            ->addBreadCrumb(\Model::main_page_title(), s2_link('/'))
+            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'))
             ->addBreadCrumb(\Lang::get('Favorite'))
             ->putInPlaceholder('title', \Lang::get('Favorite'))
             ->putInPlaceholder('date', '')

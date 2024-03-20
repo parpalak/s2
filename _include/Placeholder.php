@@ -1,5 +1,6 @@
 <?php
 
+use S2\Cms\Model\Model;
 use S2\Cms\Pdo\DbLayer;
 
 /**

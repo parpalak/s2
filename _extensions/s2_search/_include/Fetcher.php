@@ -90,7 +90,7 @@ class Fetcher implements GenericFetcher
             return null;
         }
 
-        $parent_path = \Model::path_from_id($article['parent_id'], true);
+        $parent_path = \S2\Cms\Model\Model::path_from_id($article['parent_id'], true);
         if ($parent_path === false) {
             return null;
         }

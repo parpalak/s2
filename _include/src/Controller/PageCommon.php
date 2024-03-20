@@ -54,7 +54,7 @@ readonly class PageCommon implements ControllerInterface
         $bread_crumbs = [];
 
         $parent_path = '';
-        $parent_id   = \Model::ROOT_ID;
+        $parent_id   = \S2\Cms\Model\Model::ROOT_ID;
         $parent_num  = \count($request_array) - 1 - (int)$was_end_slash;
 
         $template_id = '';
@@ -529,7 +529,7 @@ readonly class PageCommon implements ControllerInterface
         }
 
         if ($hasArticlesInList) {
-            $urls = \Model::get_group_url($parent_ids, $urls);
+            $urls = \S2\Cms\Model\Model::get_group_url($parent_ids, $urls);
         }
 
         // Sorting all obtained article links into groups by each tag

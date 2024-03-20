@@ -30,7 +30,7 @@ readonly class NotFoundController implements ControllerInterface
             ->putInPlaceholder('head_title', \Lang::get('Error 404'))
             ->putInPlaceholder('title', '<h1 class="error404-header">' . \Lang::get('Error 404') . '</h1>')
             ->putInPlaceholder('text', sprintf(\Lang::get('Error 404 text'), s2_link('/')))
-            ->addBreadCrumb(\Model::main_page_title(), s2_link('/'))
+            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'))
         ;
 
         return $template->toHttpResponse();

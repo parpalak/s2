@@ -8,6 +8,7 @@
  */
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Model\Model;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
 

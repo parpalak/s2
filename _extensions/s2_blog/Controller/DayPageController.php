@@ -50,7 +50,7 @@ class DayPageController extends BlogController
             ->putInPlaceholder('head_title', s2_date($startTime))
         ;
 
-        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }

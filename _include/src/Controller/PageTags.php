@@ -37,7 +37,7 @@ class PageTags implements ControllerInterface
         $template = $this->htmlTemplateProvider->getTemplate('site.php');
 
         $template
-            ->addBreadCrumb(\Model::main_page_title(), s2_link('/'))
+            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'))
             ->addBreadCrumb(\Lang::get('Tags'))
             ->putInPlaceholder('title', \Lang::get('Tags'))
             ->putInPlaceholder('date', '')

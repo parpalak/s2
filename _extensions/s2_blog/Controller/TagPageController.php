@@ -85,7 +85,7 @@ class TagPageController extends BlogController
             throw new NotFoundException();
         }
 
-        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }
@@ -137,7 +137,7 @@ class TagPageController extends BlogController
             $parentIds[] = $row['parent_id'];
             $title[]     = $row['title'];
         }
-        $urls = \Model::get_group_url($parentIds, $urls);
+        $urls = \S2\Cms\Model\Model::get_group_url($parentIds, $urls);
 
         foreach ($urls as $k => $v) {
             $urls[$k] = '<a href="' . s2_link($v) . '">' . $title[$k] . '</a>';

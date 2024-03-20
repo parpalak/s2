@@ -9,7 +9,7 @@
 
 namespace s2_extensions\s2_blog\Controller;
 
-use \Lang;
+use Lang;
 use S2\Cms\Template\HtmlTemplate;
 use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -40,7 +40,7 @@ class FavoritePageController extends BlogController
         }
 
 		// Bread crumbs
-        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }

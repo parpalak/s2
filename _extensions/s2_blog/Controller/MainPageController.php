@@ -90,7 +90,7 @@ class MainPageController extends BlogController
 
         $template->putInPlaceholder('text', $output);
 
-        $template->addBreadCrumb(\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $skipLastPostsNum > 0 ? $this->blogPath : null);
         }

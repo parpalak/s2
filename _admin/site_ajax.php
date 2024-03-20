@@ -9,6 +9,7 @@
  * @package S2
  */
 
+use S2\Cms\Model\Model;
 use S2\Cms\Pdo\DbLayer;
 
 define('S2_ROOT', '../');
