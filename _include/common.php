@@ -26,7 +26,6 @@ define('S2_VERSION', '2.0dev');
 //define('S2_SHOW_QUERIES', 1);
 
 require S2_ROOT . '_vendor/autoload.php';
-require S2_ROOT . '_include/functions.php';
 
 // Attempt to load the configuration file config.php
 if (file_exists(S2_ROOT . s2_get_config_filename())) {
@@ -51,6 +50,8 @@ function collectParameters(): array
         'cache_dir'    => S2_CACHE_DIR,
         'log_dir'      => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
         'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+        'base_path'    => defined('S2_PATH') ? S2_PATH : null,
+        'url_prefix'   => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
         'debug'        => defined('S2_DEBUG'),
         'debug_view'   => defined('S2_DEBUG_VIEW'),
         'show_queries' => defined('S2_SHOW_QUERIES'),

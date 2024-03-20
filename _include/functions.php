@@ -8,6 +8,7 @@
  */
 
 
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayerException;
 
 //
@@ -62,23 +63,24 @@ function s2_return_bytes($val)
 //
 // Link processing
 //
-
-function s2_link($path = '', $params = array())
+/**
+ * @deprecated Use UrlBuilder instead
+ */
+function s2_link($path = '', $params = []): string
 {
-    $return = ($hook = s2_hook('fn_link_start')) ? eval($hook) : null;
-    if ($return)
-        return $return;
-
-    return S2_PATH . S2_URL_PREFIX . $path . (!empty($params) && is_array($params) ? (S2_URL_PREFIX ? '&amp;' : '?') . implode('&amp;', $params) : '');
+    /** @var UrlBuilder $urlBuilder */
+    $urlBuilder = Container::get(UrlBuilder::class);
+    return $urlBuilder->link($path, $params);
 }
 
+/**
+ * @deprecated Use UrlBuilder instead
+ */
 function s2_abs_link($path = '', $params = array())
 {
-    $return = ($hook = s2_hook('fn_abs_link_start')) ? eval($hook) : null;
-    if ($return)
-        return $return;
-
-    return S2_BASE_URL . S2_URL_PREFIX . $path . (!empty($params) && is_array($params) ? (S2_URL_PREFIX ? '&amp;' : '?') . implode('&amp;', $params) : '');
+    /** @var UrlBuilder $urlBuilder */
+    $urlBuilder = Container::get(UrlBuilder::class);
+    return $urlBuilder->absLink($path, $params);
 }
 
 // Creates paging navigation (1  2  3 ... total_pages - 1  total_pages)

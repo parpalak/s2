@@ -36,8 +36,12 @@
     "autoload": {
         "psr-4": {
             "S2\\Cms\\": "_include/src",
-            "s2_extensions\\": "_extensions"
-        }
+            "s2_extensions\\": "_extensions",
+            "": "_include/"
+        },
+        "files": [
+            "_include/functions.php"
+        ]
     },
     "require-dev": {
         "codeception/codeception": "^5.0",

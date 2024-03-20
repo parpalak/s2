@@ -26,6 +26,7 @@ use S2\Cms\Http\RedirectDetector;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerPostgres;
 use S2\Cms\Pdo\DbLayerSqlite;
@@ -190,6 +191,14 @@ class CmsExtension implements ExtensionInterface
                 LayoutMatcherFactory::getFourColumns($container->get('recommendations_logger')),
                 $container->get('recommendations_cache'),
                 $container->get(QueuePublisher::class)
+            );
+        });
+
+        $container->set(UrlBuilder::class, function (Container $container) {
+            return new UrlBuilder(
+                $container->getParameter('base_path'),
+                $container->getParameter('base_url'),
+                $container->getParameter('url_prefix'),
             );
         });
 

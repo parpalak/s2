@@ -30,7 +30,6 @@ define('S2_DISABLE_HOOKS', 1);
 
 // We need some stuff
 require S2_ROOT . '_vendor/autoload.php';
-require S2_ROOT . '_include/functions.php';
 
 if (file_exists(S2_ROOT . s2_get_config_filename())) {
     exit(sprintf(
@@ -453,6 +452,7 @@ else
             'cache_dir'    => S2_CACHE_DIR,
             'log_dir'      => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
             'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+            'base_path'    => defined('S2_PATH') ? S2_PATH : null,
             'debug'        => defined('S2_DEBUG'),
             'debug_view'   => defined('S2_DEBUG_VIEW'),
             'redirect_map' => [],
