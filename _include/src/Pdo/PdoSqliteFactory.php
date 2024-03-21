@@ -11,14 +11,8 @@ namespace S2\Cms\Pdo;
 
 class PdoSqliteFactory
 {
-    public static function create(string $dbName, bool $persistentConnection): PDO
+    public static function create(string $dbFilename, bool $persistentConnection): PDO
     {
-        if (!\defined('S2_ROOT')) {
-            throw new \LogicException('S2_ROOT constant must be defined.');
-        }
-
-        $dbFilename = S2_ROOT . $dbName;
-
         if (!file_exists($dbFilename)) {
             @touch($dbFilename);
             @chmod($dbFilename, 0666);

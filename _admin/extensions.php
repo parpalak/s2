@@ -10,6 +10,7 @@
  */
 
 
+use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Pdo\DbLayer;
 
 if (!defined('S2_ROOT'))
@@ -359,10 +360,11 @@ function s2_install_extension ($id)
 		}
 	}
 
-
 	// Regenerate the hooks cache
-	S2Cache::clear();
-	S2Cache::generate_hooks();
+    /** @var ExtensionCache $cache */
+    $cache = \Container::get(ExtensionCache::class);
+    $cache->clear(); // TODO also clear DynamicConfigProvider cache
+	$cache->generateHooks();
 
 	return $messages;
 }
@@ -458,9 +460,11 @@ function s2_flip_extension ($id)
 	$s2_db->buildAndQuery($query);
 
 
-	// Regenerate the hooks cache
-	S2Cache::clear();
-	S2Cache::generate_hooks();
+    // Regenerate the hooks cache
+    /** @var ExtensionCache $cache */
+    $cache = \Container::get(ExtensionCache::class);
+    $cache->clear(); // TODO also clear DynamicConfigProvider cache
+    $cache->generateHooks();
 
 	($hook = s2_hook('fn_flip_extension_end')) ? eval($hook) : null;
 
@@ -539,9 +543,11 @@ function s2_uninstall_extension ($id)
 	$s2_db->buildAndQuery($query);
 
 
-	// Regenerate the hooks cache
-	S2Cache::clear();
-	S2Cache::generate_hooks();
+    // Regenerate the hooks cache
+    /** @var ExtensionCache $cache */
+    $cache = \Container::get(ExtensionCache::class);
+    $cache->clear(); // TODO also clear DynamicConfigProvider cache
+    $cache->generateHooks();
 
 	($hook = s2_hook('fn_uninstall_extension_end')) ? eval($hook) : null;
 

@@ -32,8 +32,11 @@ jobs:
       - name: Install dependencies
         run: COMPOSER_MEMORY_LIMIT=-1 composer install --prefer-dist --no-interaction
 
-      - name: Run test cases
+      - name: Run acceptance test cases
         run: sh ./test_sh
+
+      - name: Run integration test cases
+        run: php _vendor/bin/codecept run integration
 
       - name: Output logs
         if: failure()

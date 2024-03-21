@@ -74,6 +74,7 @@ class DynamicConfigProvider
                 $result[$row[0]]    = $row[1];
             }
 
+            // Deprecated. Remove when all values are accessed through this class, not global constants.
             try {
                 s2_overwrite_file_skip_locked($this->cacheDir . 'cache_config.php', '<?php' . "\n\n" . 'define(\'S2_CONFIG_LOADED\', 1);' . "\n\n" . $legacyConfigOutput . "\n");
             } catch (\RuntimeException $e) {

@@ -14,6 +14,7 @@ use Psr\Log\LogLevel;
 use S2\Cms\CmsExtension;
 use S2\Cms\Framework\Application;
 use S2\Cms\Logger\Logger;
+use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\ErrorHandler\Debug;
@@ -68,7 +69,7 @@ function generate_config_file ()
 	foreach (array('', '/?', '/index.php', '/index.php?') as $prefix) {
 		$url_prefix = $prefix;
 		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
-		if ($content !== null && false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />')) {
+		if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2" />')) {
             break;
         }
 	}
@@ -76,13 +77,14 @@ function generate_config_file ()
 	$path = preg_replace('#^[^:/]+://[^/]*#', '', $base_url);
 
 	$use_https = false;
-	if (substr($base_url, 0, 8) == 'https://')
-		$use_https = true;
-	else
-	{
+	if (str_starts_with($base_url, 'https://')) {
+        $use_https = true;
+    }
+	else {
 		$content = s2_get_remote_file('https://'.substr($base_url, 7).$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
-		if ($content !== null && false !== strpos($content['content'], '<meta name="Generator" content="S2 '.S2_VERSION.'" />'))
-			$use_https = true;
+		if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2" />')) {
+            $use_https = true;
+        }
 	}
 
 	return '<?php'."\n\n".'$db_type = \''.$db_type."';\n".
@@ -448,14 +450,15 @@ else
     $app->boot((static function (): array
     {
         $result = [
-            'root_dir'     => S2_ROOT,
-            'cache_dir'    => S2_CACHE_DIR,
-            'log_dir'      => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
-            'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
-            'base_path'    => defined('S2_PATH') ? S2_PATH : null,
-            'debug'        => defined('S2_DEBUG'),
-            'debug_view'   => defined('S2_DEBUG_VIEW'),
-            'redirect_map' => [],
+            'root_dir'      => S2_ROOT,
+            'cache_dir'     => S2_CACHE_DIR,
+            'disable_cache' => false,
+            'log_dir'       => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+            'base_url'      => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+            'base_path'     => defined('S2_PATH') ? S2_PATH : null,
+            'debug'         => defined('S2_DEBUG'),
+            'debug_view'    => defined('S2_DEBUG_VIEW'),
+            'redirect_map'  => [],
         ];
 
         foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {
@@ -570,7 +573,9 @@ else
 
 	$s2_db->close();
 
-	S2Cache::clear();
+    /** @var ExtensionCache $cache */
+    $cache = \Container::get(ExtensionCache::class);
+    $cache->clear();
 
 	$alerts = array();
 	// Check if the cache directory is writable

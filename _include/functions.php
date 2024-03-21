@@ -8,6 +8,7 @@
  */
 
 
+use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayerException;
 
@@ -114,20 +115,6 @@ function s2_paging($page, $total_pages, $url, &$link_nav)
     }
 
     return '<p class="paging">' . $prev_link . $links . $next_link . '</p>';
-}
-
-
-function s2_build_copyright()
-{
-    global $request_uri;
-
-    $author    = S2_WEBMASTER ? S2_WEBMASTER : S2_SITE_NAME;
-    $copyright = S2_WEBMASTER && S2_WEBMASTER_EMAIL ? s2_js_mailto($author, S2_WEBMASTER_EMAIL) : ($request_uri !== '/' ? '<a href="' . s2_link('/') . '">' . $author . '</a>' : $author);
-
-    return (S2_START_YEAR != date('Y') ?
-            sprintf(Lang::get('Copyright 2'), $copyright, S2_START_YEAR, date('Y')) :
-            sprintf(Lang::get('Copyright 1'), $copyright, date('Y'))) . ' ' .
-        sprintf(Lang::get('Powered by'), '<a href="http://s2cms.ru/">S2</a>');
 }
 
 
@@ -345,12 +332,9 @@ function s2_hook($hook_id)
     static $hookNames = null;
 
     if ($hookNames === null) {
-        if (!defined('S2_DISABLE_CACHE') && file_exists(S2Cache::CACHE_HOOK_NAMES_FILENAME)) {
-            $hookNames = include S2Cache::CACHE_HOOK_NAMES_FILENAME;
-        }
-        if (!is_array($hookNames)) {
-            $hookNames = S2Cache::generate_hooks();
-        }
+        /** @var ExtensionCache $cache */
+        $cache = \Container::get(ExtensionCache::class);
+        $hookNames = $cache->getHookNames();
     }
 
     if (!isset($hookNames[$hook_id])) {
@@ -419,7 +403,7 @@ function error()
     <html>
     <head>
         <meta charset="utf-8"/>
-        <meta name="Generator" content="S2 <?php echo S2_VERSION; ?>"/>
+        <meta name="Generator" content="S2"/>
         <title>Error - <?php echo s2_htmlencode(S2_SITE_NAME); ?></title>
         <style>
             body {

@@ -114,7 +114,7 @@ function s2_stat_info ()
 
 	$version = array(
 		'<a href="http://s2cms.ru/" target="_blank">S2 '.S2_VERSION.' &uarr;</a>',
-		'© 2007–2023 Roman Parpalak',
+		'© 2007–2024 Roman Parpalak',
 	);
 
 	$environment = array(

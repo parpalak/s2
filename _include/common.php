@@ -10,6 +10,7 @@
 use Psr\Log\LoggerInterface;
 use S2\Cms\CmsExtension;
 use S2\Cms\Framework\Application;
+use S2\Cms\Model\ExtensionCache;
 use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
@@ -43,63 +44,6 @@ if (defined('S2_DEBUG')) {
 }
 HtmlErrorRenderer::setTemplate(realpath(S2_ROOT . '_include/views/error.php'));
 
-function collectParameters(): array
-{
-    $result = [
-        'root_dir'     => S2_ROOT,
-        'cache_dir'    => S2_CACHE_DIR,
-        'log_dir'      => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
-        'base_url'     => defined('S2_BASE_URL') ? S2_BASE_URL : null,
-        'base_path'    => defined('S2_PATH') ? S2_PATH : null,
-        'url_prefix'   => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
-        'debug'        => defined('S2_DEBUG'),
-        'debug_view'   => defined('S2_DEBUG_VIEW'),
-        'show_queries' => defined('S2_SHOW_QUERIES'),
-        'redirect_map' => $GLOBALS['s2_redirect'] ?? [],
-    ];
-
-    foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {
-        $result[$globalVarName] = $GLOBALS[$globalVarName] ?? null;
-    }
-
-    return $result;
-}
-
-$app = new Application();
-$app->addExtension(new CmsExtension());
-
-if (!defined('S2_DISABLE_CACHE')) {
-    $app->setCachedRoutesFilename(S2Cache::CACHE_ROUTES_FILENAME);
-}
-
-$enabledExtensions = null;
-if (!defined('S2_DISABLE_CACHE') && file_exists(S2Cache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
-    $enabledExtensions = include S2Cache::CACHE_ENABLED_EXTENSIONS_FILENAME;
-}
-
-try {
-    if (!is_array($enabledExtensions)) {
-        $app->boot(collectParameters());
-        \Container::setContainer($app->container);
-        $enabledExtensions = S2Cache::generateEnabledExtensionClassNames($app->container->get(\S2\Cms\Pdo\DbLayer::class));
-    }
-    foreach ($enabledExtensions as $extension) {
-        $app->addExtension(new $extension());
-    }
-
-    $app->boot(collectParameters());
-    \Container::setContainer($app->container);
-    $app->container->getParameter('base_url');
-} catch (\S2\Cms\Framework\Exception\ParameterNotFoundException $e) {
-    // S2 is not installed
-    error(sprintf(
-        'Cannot read parameters from configuration file "%s".<br />Do you want to <a href="%s_admin/install.php">install S2</a>?',
-        s2_get_config_filename(),
-        preg_replace('#' . (S2_ROOT == '../' ? '/[a-z_\.]*' : '') . '/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME'])
-    ));
-}
-$errorHandler->setDefaultLogger($app->container->get(LoggerInterface::class));
-
 if (!defined('S2_URL_PREFIX')) {
     define('S2_URL_PREFIX', '');
 }
@@ -113,6 +57,68 @@ define('S2_IMG_PATH', S2_ROOT . S2_IMG_DIR);
 if (!defined('S2_ALLOWED_EXTENSIONS')) {
     define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav avi flv mpg mpeg mkv zip 7z doc pdf');
 }
+
+function collectParameters(): array
+{
+    $result = [
+        'root_dir'      => S2_ROOT,
+        'cache_dir'     => S2_CACHE_DIR,
+        'disable_cache' => defined('S2_DISABLE_CACHE'),
+        'log_dir'       => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+        'base_url'      => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+        'base_path'     => defined('S2_PATH') ? S2_PATH : null,
+        'url_prefix'    => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
+        'debug'         => defined('S2_DEBUG'),
+        'debug_view'    => defined('S2_DEBUG_VIEW'),
+        'show_queries'  => defined('S2_SHOW_QUERIES'),
+        'redirect_map'  => $GLOBALS['s2_redirect'] ?? [],
+    ];
+
+    foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {
+        $result[$globalVarName] = $GLOBALS[$globalVarName] ?? null;
+    }
+
+    return $result;
+}
+
+$app = new Application();
+$app->addExtension(new CmsExtension());
+
+$enabledExtensions = null;
+if (!defined('S2_DISABLE_CACHE') && file_exists(S2_CACHE_DIR.ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
+    $enabledExtensions = include S2_CACHE_DIR.ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME;
+}
+
+try {
+    if (!is_array($enabledExtensions)) {
+        $app->boot(collectParameters());
+        \Container::setContainer($app->container);
+        /** @var ExtensionCache $appCache */
+        $appCache          = $app->container->get(ExtensionCache::class);
+        $enabledExtensions = $appCache->generateEnabledExtensionClassNames();
+    }
+    foreach ($enabledExtensions as $extension) {
+        $app->addExtension(new $extension());
+    }
+
+    $app->boot(collectParameters());
+    /** @var ExtensionCache $appCache */
+    $appCache = $app->container->get(ExtensionCache::class);
+    if (!defined('S2_DISABLE_CACHE')) {
+        $app->setCachedRoutesFilename($appCache->getCachedRoutesFilename());
+    }
+
+    \Container::setContainer($app->container);
+    $app->container->getParameter('base_url');
+} catch (\S2\Cms\Framework\Exception\ParameterNotFoundException $e) {
+    // S2 is not installed
+    error(sprintf(
+        'Cannot read parameters from configuration file "%s".<br />Do you want to <a href="%s_admin/install.php">install S2</a>?',
+        s2_get_config_filename(),
+        preg_replace('#' . (S2_ROOT == '../' ? '/[a-z_\.]*' : '') . '/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME'])
+    ));
+}
+$errorHandler->setDefaultLogger($app->container->get(LoggerInterface::class));
 
 // Load cached config
 if (file_exists(S2_CACHE_DIR . 'cache_config.php')) {

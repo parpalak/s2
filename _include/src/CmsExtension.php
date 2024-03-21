@@ -26,6 +26,7 @@ use S2\Cms\Http\RedirectDetector;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
+use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerPostgres;
@@ -58,7 +59,6 @@ use Symfony\Component\Routing\RouteCollection;
 
 class CmsExtension implements ExtensionInterface
 {
-
     public function buildContainer(Container $container): void
     {
         $container->set(DbLayer::class, function (Container $container) {
@@ -95,7 +95,7 @@ class CmsExtension implements ExtensionInterface
 
             return match ($db_type) {
                 'mysql' => new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_username, $db_password),
-                'sqlite' => PdoSqliteFactory::create($db_name, $p_connect),
+                'sqlite' => PdoSqliteFactory::create($container->getParameter('root_dir').$db_name, $p_connect),
                 'pgsql' => new PDO("pgsql:host=$db_host;dbname=$db_name", $db_username, $db_password),
                 default => throw new \RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
             };
@@ -149,6 +149,14 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(ExtensionCache::class, function (Container $container) {
+            return new ExtensionCache(
+                $container->get(DbLayer::class),
+                $container->getParameter('disable_cache'),
+                $container->getParameter('root_dir'),
+                $container->getParameter('cache_dir'),
+            );
+        });
 
         $container->set(ThumbnailGenerator::class, function (Container $container) {
             return new ThumbnailGenerator(
@@ -207,18 +215,16 @@ class CmsExtension implements ExtensionInterface
         });
 
         $container->set(HtmlTemplateProvider::class, function (Container $container) {
-            /** @var DynamicConfigProvider $provider */
-            $provider = $container->get(DynamicConfigProvider::class);
             return new HtmlTemplateProvider(
                 $container->get(RequestStack::class),
                 $container->get(Viewer::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
+                $container->get(DynamicConfigProvider::class),
                 $container->getParameter('debug'),
                 $container->getParameter('debug_view'),
                 $container->getParameter('root_dir'),
                 $container->getParameter('cache_dir'),
                 $container->getParameter('base_path'),
-                $provider->get('S2_STYLE'),
             );
         });
 

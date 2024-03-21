@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2009-2024 Roman Parpalak
  * @license MIT
  * @package S2
  */
@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace S2\Cms\Template;
 
+use Psr\Cache\InvalidArgumentException;
+use S2\Cms\Config\DynamicConfigProvider;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -22,9 +25,11 @@ class HtmlTemplate
 
     public function __construct(
         private readonly string                   $template,
+        private readonly RequestStack             $requestStack,
+        private readonly Viewer                   $viewer,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly Viewer $viewer,
-        private readonly bool $debugView,
+        private readonly DynamicConfigProvider    $dynamicConfigProvider,
+        private readonly bool                     $debugView,
     ) {
     }
 
@@ -57,12 +62,12 @@ class HtmlTemplate
 
         // HTML head
         $replace['<!-- s2_head_title -->'] = empty($this->page['head_title']) ?
-            (!empty($this->page['title']) ? $this->page['title'] . ' - ' : '') . S2_SITE_NAME :
+            (!empty($this->page['title']) ? $this->page['title'] . ' - ' : '') . $this->dynamicConfigProvider->get('S2_SITE_NAME') :
             $this->page['head_title'];
 
         // Meta tags processing
         $meta_tags = [
-            '<meta name="Generator" content="S2 ' . S2_VERSION . '" />',
+            '<meta name="Generator" content="S2" />',
         ];
 
         if (!empty($this->page['meta_keywords'])) {
@@ -83,7 +88,7 @@ class HtmlTemplate
         $replace['<!-- s2_rss_link -->'] = implode("\n", $this->page['rss_link']);
 
         // Content
-        $replace['<!-- s2_site_title -->'] = S2_SITE_NAME;
+        $replace['<!-- s2_site_title -->'] = $this->dynamicConfigProvider->get('S2_SITE_NAME');
 
         $link_navigation = [];
         foreach ($this->navLinks as $link_rel => $link_href) {
@@ -102,7 +107,7 @@ class HtmlTemplate
             $replace['<!-- s2_' . $placeholderName . ' -->'] = $this->page[$placeholderName] ?? '';
         }
 
-        if (S2_ENABLED_COMMENTS && !empty($this->page['commented'])) {
+        if (!empty($this->page['commented']) && S2_ENABLED_COMMENTS) {
             $comment_array = [
                 'id' => $this->page['id'] . '.' . ($this->page['class'] ?? '')
             ];
@@ -143,7 +148,7 @@ class HtmlTemplate
         }
 
         // Footer
-        $replace['<!-- s2_copyright -->'] = s2_build_copyright();
+        $replace['<!-- s2_copyright -->'] = $this->s2_build_copyright();
 
         $this->eventDispatcher->dispatch(new TemplateEvent($this), TemplateEvent::EVENT_PRE_REPLACE);
 
@@ -232,5 +237,25 @@ class HtmlTemplate
             'menu_subsections',
             'article_tags'
         ];
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function s2_build_copyright(): string
+    {
+        $request_uri = $this->requestStack->getCurrentRequest()?->getPathInfo();
+
+        $webmaster = $this->dynamicConfigProvider->get('S2_WEBMASTER');
+        $email     = $this->dynamicConfigProvider->get('S2_WEBMASTER_EMAIL');
+        $startYear = $this->dynamicConfigProvider->get('S2_START_YEAR');
+
+        $author    = $webmaster ?: $this->dynamicConfigProvider->get('S2_SITE_NAME');
+        $copyright = $webmaster && $email ? s2_js_mailto($author, $email) : ($request_uri !== '/' ? '<a href="' . s2_link('/') . '">' . $author . '</a>' : $author);
+
+        return ($startYear !== date('Y') ?
+                sprintf(\Lang::get('Copyright 2'), $copyright, $startYear, date('Y')) :
+                sprintf(\Lang::get('Copyright 1'), $copyright, date('Y'))) . ' ' .
+            sprintf(\Lang::get('Powered by'), '<a href="http://s2cms.ru/">S2</a>');
     }
 }

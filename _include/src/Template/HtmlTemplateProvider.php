@@ -14,22 +14,26 @@ namespace S2\Cms\Template;
 
 use S2\Cms\Asset\AssetMerge;
 use S2\Cms\Asset\AssetPack;
+use S2\Cms\Config\DynamicConfigProvider;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class HtmlTemplateProvider
 {
+    private readonly string $styleName;
+
     public function __construct(
         private readonly RequestStack             $requestStack,
         private readonly Viewer                   $viewer,
         private readonly EventDispatcherInterface $dispatcher,
+        private readonly DynamicConfigProvider    $dynamicConfigProvider,
         private readonly bool                     $debug,
         private readonly bool                     $debugView,
         private readonly string                   $rootDir,
         private readonly string                   $cacheDir,
         private readonly string                   $basePath,
-        private readonly string                   $styleName,
     ) {
+        $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
     }
 
     public function getTemplate(string $templateId): HtmlTemplate
@@ -37,7 +41,14 @@ class HtmlTemplateProvider
         $templateContent = $this->getRawTemplateContent($templateId);
         $templateContent = $this->replaceCurrentLinks($templateContent);
 
-        $htmlTemplate = new HtmlTemplate($templateContent, $this->dispatcher, $this->viewer, $this->debugView);
+        $htmlTemplate = new HtmlTemplate(
+            $templateContent,
+            $this->requestStack,
+            $this->viewer,
+            $this->dispatcher,
+            $this->dynamicConfigProvider,
+            $this->debugView,
+        );
 
         $this->dispatcher->dispatch(new TemplateEvent($htmlTemplate), TemplateEvent::EVENT_CREATED);
 

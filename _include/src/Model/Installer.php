@@ -23,10 +23,6 @@ readonly class Installer
      */
     public function createTables(): void
     {
-        // Start a transaction
-        $this->dbLayer->startTransaction();
-
-
         // Create all tables
         $schema = array(
             'FIELDS'		=> array(

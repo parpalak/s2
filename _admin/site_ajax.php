@@ -10,6 +10,7 @@
  */
 
 use S2\Cms\Model\Model;
+use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Pdo\DbLayer;
 
 define('S2_ROOT', '../');
@@ -766,10 +767,11 @@ elseif ($action === 'refresh_hooks') {
     ($hook = s2_hook('rq_action_refresh_hooks_start')) ? eval($hook) : null;
     s2_test_user_rights($is_permission);
 
-    S2Cache::generate_hooks();
-    /** @var DbLayer $s2_db */
-    $s2_db = \Container::get(DbLayer::class);
-    S2Cache::generateEnabledExtensionClassNames($s2_db);
+    // Regenerate the hooks cache
+    /** @var ExtensionCache $cache */
+    $cache = \Container::get(ExtensionCache::class);
+    $cache->generateHooks();
+    $cache->generateEnabledExtensionClassNames();
 }
 
 elseif ($action == 'uninstall_extension')
