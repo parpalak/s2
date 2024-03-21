@@ -1,5 +1,7 @@
 <?php
 /**
+ * Interface for controllers to be used in the Application.
+ *
  * @copyright 2024 Roman Parpalak
  * @license MIT
  * @package S2

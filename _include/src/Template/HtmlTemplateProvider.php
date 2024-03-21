@@ -27,6 +27,7 @@ class HtmlTemplateProvider
         private readonly bool                     $debugView,
         private readonly string                   $rootDir,
         private readonly string                   $cacheDir,
+        private readonly string                   $basePath,
         private readonly string                   $styleName,
     ) {
     }
@@ -86,11 +87,11 @@ class HtmlTemplateProvider
         $this->dispatcher->dispatch(new TemplateAssetEvent($assetPack));
 
         $styles  = $assetPack->getStyles(
-            S2_PATH . '/_styles/' . $this->styleName . '/',
+            $this->basePath . '/_styles/' . $this->styleName . '/',
             new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_styles', AssetMerge::TYPE_CSS, $this->debug)
         );
         $scripts = $assetPack->getScripts(
-            S2_PATH . '/_styles/' . $this->styleName . '/',
+            $this->basePath . '/_styles/' . $this->styleName . '/',
             new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_scripts', AssetMerge::TYPE_JS, $this->debug)
         );
 

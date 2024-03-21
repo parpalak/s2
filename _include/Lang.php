@@ -20,7 +20,7 @@ class Lang
 		if (empty($values))
 		{
 			$language = defined('S2_LANGUAGE') ? S2_LANGUAGE : 'English';
-			$values = require S2_ROOT.'_lang/'.$language.'/'.$namespace.'.php';
+			$values = require __DIR__ . '/../_lang/'.$language.'/'.$namespace.'.php';
 		}
 
 		if (is_callable($values))

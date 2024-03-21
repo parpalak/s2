@@ -217,6 +217,7 @@ class CmsExtension implements ExtensionInterface
                 $container->getParameter('debug_view'),
                 $container->getParameter('root_dir'),
                 $container->getParameter('cache_dir'),
+                $container->getParameter('base_path'),
                 $provider->get('S2_STYLE'),
             );
         });

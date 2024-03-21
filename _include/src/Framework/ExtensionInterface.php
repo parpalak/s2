@@ -1,5 +1,9 @@
 <?php
 /**
+ * Interface for extensions to be used in the Application class.
+ * Extensions are responsible for building the container and registering listeners and routes.
+ * Thus, they contain the logic of an application.
+ *
  * @copyright 2024 Roman Parpalak
  * @license MIT
  * @package S2

@@ -1,5 +1,8 @@
 <?php
 /**
+ * Application class.
+ * Handles HTTP requests after building container definitions and registering event listeners.
+ *
  * @copyright 2024 Roman Parpalak
  * @license MIT
  * @package S2
@@ -38,6 +41,12 @@ class Application
         return $this;
     }
 
+    /**
+     * Boots the application by initializing the container definitions
+     * and registering event listeners described in the extensions.
+     *
+     * This method can be called again to reinitialize the application.
+     */
     public function boot(array $params): void
     {
         $this->routes         = null;
@@ -54,13 +63,21 @@ class Application
         }
     }
 
+    /**
+     * Set the filename where the cached routes will be stored.
+     */
     public function setCachedRoutesFilename(string $file): void
     {
         $this->cachedRoutesFilename = $file;
     }
 
     /**
-     * @note Maybe this method must be a part of framework, but it depends on NotFoundController.
+     * Method of an HTTP kernel interface.
+     *
+     * 1. Detects a controller based on the routes defined in the extensions.
+     * 2. Pushes the request onto the RequestStack if available.
+     * 3. Executes the controller and returns the response.
+     * 4. If the controller throws NotFoundException, it can be handled via NotFoundEvent.
      */
     public function handle(Request $request): Response
     {

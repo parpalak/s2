@@ -27,6 +27,7 @@ class Integration extends Module
         $this->application = new Application();
         $this->application->addExtension(new CmsExtension());
         $this->application->boot($this->collectParameters());
+        \Container::setContainer($this->application->container);
         $installer = new Installer($this->application->container->get(DbLayer::class));
         $installer->createTables();
     }
@@ -61,10 +62,12 @@ class Integration extends Module
     protected function collectParameters(): array
     {
         $result = [
-            'root_dir'     => '../',
-            'cache_dir'    => '_cache/',
-            'log_dir'      => '_cache/',
+            'root_dir'     => './',
+            'cache_dir'    => '_cache/test/',
+            'log_dir'      => '_cache/test/',
             'base_url'     => 'http://localhost:8881',
+            'base_path'    => '',
+            'url_prefix'   => '',
             'debug'        => false,
             'debug_view'   => false,
             'show_queries' => false,

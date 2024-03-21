@@ -20,7 +20,7 @@ class Container implements ContainerInterface
     private array $bindings = [];
     private array $instances = [];
 
-    public function __construct(private array $parameters)
+    public function __construct(private readonly array $parameters)
     {
     }
 
@@ -64,7 +64,7 @@ class Container implements ContainerInterface
         }
 
         if (!isset($this->parameters[$name])) {
-            throw new ParameterNotFoundException(sprintf('Parameter "%s" is not initialized in container.', $name));
+            throw new ParameterNotFoundException(sprintf('Parameter "%s" is initialized with null value in container.', $name));
         }
 
         return $this->parameters[$name];
