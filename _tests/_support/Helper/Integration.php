@@ -32,12 +32,24 @@ class Integration extends Module
      */
     public function _initialize()
     {
-        $this->application = new Application();
-        $this->application->addExtension(new CmsExtension());
-        $this->application->boot($this->collectParameters());
+        $this->application = $this->createApplication();
         \Container::setContainer($this->application->container);
         $installer = new Installer($this->application->container->get(DbLayer::class));
         $installer->createTables();
+    }
+
+    public function createApplication(): Application
+    {
+        $application = new Application();
+        $application->addExtension(new CmsExtension());
+        $application->boot($this->collectParameters());
+
+        return $application;
+    }
+
+    public function grabService(string $serviceName): mixed
+    {
+        return $this->application->container->get($serviceName);
     }
 
     public function amOnPage(string $url): void

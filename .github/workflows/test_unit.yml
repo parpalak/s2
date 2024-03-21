@@ -1,0 +1,29 @@
+name: Unit tests
+
+on: [ push ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        operating_system: ['ubuntu-22.04']
+        php_versions:
+          - '8.2'
+          - '8.3'
+
+    runs-on: '${{ matrix.operating_system }}'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 'Setup PHP'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php_versions }}
+
+      - name: Install dependencies
+        run: COMPOSER_MEMORY_LIMIT=-1 composer install --prefer-dist --no-interaction
+
+      - name: Run unit test cases
+        run: php _vendor/bin/codecept run unit

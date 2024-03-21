@@ -161,8 +161,8 @@ class CmsExtension implements ExtensionInterface
         $container->set(ThumbnailGenerator::class, function (Container $container) {
             return new ThumbnailGenerator(
                 $container->get(QueuePublisher::class),
-                S2_PATH . '/' . S2_IMG_DIR,
-                S2_IMG_PATH
+                $container->getParameter('base_path') . '/' . (defined('\S2_IMG_DIR') ? \S2_IMG_DIR : '_pictures'),
+                $container->getParameter('root_dir') . (defined('\S2_IMG_DIR') ? \S2_IMG_DIR : '_pictures'),
             );
         });
         $container->set(LoggerInterface::class, function (Container $container) {

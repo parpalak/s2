@@ -1,4 +1,9 @@
 <?php
+/**
+ * @copyright 2024 Roman Parpalak
+ * @license MIT
+ * @package S2
+ */
 
 declare(strict_types=1);
 
@@ -9,10 +14,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RedirectCest
 {
-    public function _before(IntegrationTester $I)
-    {
-    }
-
     // tests
     public function tryToTest(IntegrationTester $I)
     {
