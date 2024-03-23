@@ -61,9 +61,7 @@ p.search-result {
 	.search-result-img-preview .preview-link {
 		text-decoration: none;
 		border: none;
-		background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%);
-		background-size: 20px 20px;
-		background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+		background: repeating-conic-gradient(#eee 0% 25%, transparent 0% 50%) 0 0 / 20px 20px;
 		display: inline-block;
 		margin: 0 5px 5px 0;
 		}
