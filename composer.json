@@ -20,7 +20,6 @@
         "ext-json": "*",
         "ext-dom": "*",
         "ext-gd": "*",
-        "altorouter/altorouter": "dev-master",
         "matthiasmullie/minify": "^1.3",
         "psr/container": "^2.0",
         "psr/log": "^3.0",
