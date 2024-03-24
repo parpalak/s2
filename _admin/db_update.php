@@ -200,11 +200,16 @@ if (S2_DB_REVISION < 17) {
     ]);
 }
 
-$query = array(
+if (S2_DB_REVISION < 18) {
+    $s2_db->dropTable('extension_hooks');
+    $s2_db->dropField('extensions', 'uninstall');
+}
+
+$query = [
 	'UPDATE'	=> 'config',
 	'SET'		=> 'value = \''.S2_DB_LAST_REVISION.'\'',
 	'WHERE'		=> 'name = \'S2_DB_REVISION\''
-);
+];
 
 $s2_db->buildAndQuery($query);
 

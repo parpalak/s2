@@ -21,7 +21,7 @@ use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 17);
+define('S2_DB_REVISION', 18);
 define('MIN_PHP_VERSION', '8.2.0');
 
 define('S2_ROOT', '../');

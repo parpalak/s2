@@ -2,7 +2,7 @@
 /**
  * Extension management.
  *
- * Allows administrators to control the extensions and hotfixes installed in the site.
+ * Allows administrators to control the extensions installed in the site.
  *
  * @copyright (C) 2009-2024 Roman Parpalak, based on code (C) 2008-2009 PunBB
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
@@ -214,9 +214,6 @@ function s2_install_extension($id)
         return $messages + array(sprintf($lang_admin_ext['Missing dependency'], $id, implode(', ', $broken_dependencies)));
     }
 
-    // Is there some uninstall code to store in the db?
-    $uninstall_code = 'NULL';
-
     // Is there an uninstall note to store in the db?
     $uninstall_note = $extensionManifest->getUninstallationNote() !== null ? '\'' . $s2_db->escape(trim($extensionManifest->getUninstallationNote())) . '\'' : 'NULL';
 
@@ -235,7 +232,7 @@ function s2_install_extension($id)
         // Update the existing extension
         $query = [
             'UPDATE' => 'extensions',
-            'SET'    => 'title=\'' . $s2_db->escape($extensionManifest->getTitle()) . '\', version=\'' . $s2_db->escape($extensionManifest->getVersion()) . '\', description=\'' . $s2_db->escape($extensionManifest->getDescription()) . '\', author=\'' . $s2_db->escape($extensionManifest->getAuthor()) . '\', admin_affected=\'' . ($extensionManifest->isAdminAffected() ? '1' : '0') . '\', uninstall=' . $uninstall_code . ', uninstall_note=' . $uninstall_note . ', dependencies=\'|' . implode('|', $extensionManifest->getDependencies()) . '|\'',
+            'SET'    => 'title=\'' . $s2_db->escape($extensionManifest->getTitle()) . '\', version=\'' . $s2_db->escape($extensionManifest->getVersion()) . '\', description=\'' . $s2_db->escape($extensionManifest->getDescription()) . '\', author=\'' . $s2_db->escape($extensionManifest->getAuthor()) . '\', admin_affected=\'' . ($extensionManifest->isAdminAffected() ? '1' : '0') . '\', uninstall_note=' . $uninstall_note . ', dependencies=\'|' . implode('|', $extensionManifest->getDependencies()) . '|\'',
             'WHERE'  => 'id=\'' . $s2_db->escape($id) . '\''
         ];
 
@@ -246,9 +243,9 @@ function s2_install_extension($id)
 
         // Add the new extension
         $query = [
-            'INSERT' => 'id, title, version, description, author, admin_affected, uninstall, uninstall_note, dependencies',
+            'INSERT' => 'id, title, version, description, author, admin_affected, uninstall_note, dependencies',
             'INTO'   => 'extensions',
-            'VALUES' => '\'' . $s2_db->escape($id) . '\', \'' . $s2_db->escape($extensionManifest->getTitle()) . '\', \'' . $s2_db->escape($extensionManifest->getVersion()) . '\', \'' . $s2_db->escape($extensionManifest->getDescription()) . '\', \'' . $s2_db->escape($extensionManifest->getAuthor()) . '\', \'' . ($extensionManifest->isAdminAffected() ? '1' : '0') . '\', ' . $uninstall_code . ', ' . $uninstall_note . ', \'|' . implode('|', $extensionManifest->getDependencies()) . '|\'',
+            'VALUES' => '\'' . $s2_db->escape($id) . '\', \'' . $s2_db->escape($extensionManifest->getTitle()) . '\', \'' . $s2_db->escape($extensionManifest->getVersion()) . '\', \'' . $s2_db->escape($extensionManifest->getDescription()) . '\', \'' . $s2_db->escape($extensionManifest->getAuthor()) . '\', \'' . ($extensionManifest->isAdminAffected() ? '1' : '0') . '\', ' .  $uninstall_note . ', \'|' . implode('|', $extensionManifest->getDependencies()) . '|\'',
         ];
 
         $s2_db->buildAndQuery($query);
@@ -372,7 +369,7 @@ function s2_uninstall_extension($id)
 
     // Fetch info about the extension
     $query = [
-        'SELECT' => 'e.title, e.version, e.description, e.author, e.uninstall, e.uninstall_note',
+        'SELECT' => 'e.title, e.version, e.description, e.author, e.uninstall_note',
         'FROM'   => 'extensions AS e',
         'WHERE'  => 'e.id=\'' . $s2_db->escape($id) . '\''
     ];
