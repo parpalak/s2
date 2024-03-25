@@ -639,7 +639,7 @@ elseif ($action == 'load_tags')
 	require 'tags.php';
 
 	$tag = array('id' => 0, 'name' => '', 'description' => '', 'url' => '');
-	s2_output_tag_form($tag, s2_array_from_time(time()));
+	s2_output_tag_form($tag, s2_html_time_from_timestamp(time()));
 }
 
 elseif ($action == 'load_tag')
@@ -657,7 +657,7 @@ elseif ($action == 'load_tag')
 	if (!$tag)
 		die('Item not found!');
 
-	s2_output_tag_form($tag, s2_array_from_time($tag['modify_time']));
+	s2_output_tag_form($tag, s2_html_time_from_timestamp($tag['modify_time']));
 }
 
 elseif ($action == 'save_tag')
@@ -676,7 +676,7 @@ elseif ($action == 'save_tag')
 	if (!$tag)
 		die('Item not found!');
 
-	s2_output_tag_form($tag, s2_array_from_time($tag['modify_time']));
+	s2_output_tag_form($tag, s2_html_time_from_timestamp($tag['modify_time']));
 }
 
 elseif ($action == 'delete_tag')
@@ -693,7 +693,7 @@ elseif ($action == 'delete_tag')
 	s2_delete_tag((int) $_GET['id']);
 
 	$tag = array('id' => 0, 'name' => '', 'description' => '', 'url' => '');
-	s2_output_tag_form($tag, s2_array_from_time(time()));
+	s2_output_tag_form($tag, s2_html_time_from_timestamp(time()));
 }
 
 //=======================[Options tab]==========================================

@@ -2,8 +2,8 @@
 /**
  * Tag management
  *
- * @copyright (C) 2007-2013 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
 
@@ -41,7 +41,7 @@ function s2_save_tag ($tag)
 	$tag_url = isset($tag['url']) ? $s2_db->escape($tag['url']) : '';
 	$tag_description = isset($tag['description']) ? $s2_db->escape($tag['description']) : '';
 
-	$modify_time = !empty($tag['modify_time']) ? s2_time_from_array($tag['modify_time']) : time();
+	$modify_time = !empty($tag['modify_time']) ? s2_timestamp_from_form_time($tag['modify_time']) : time();
 
 	($hook = s2_hook('fn_save_tag_pre_id_check')) ? eval($hook) : null;
 

@@ -1,4 +1,9 @@
 <?php
+/**
+ * @copyright 2023-2024 Roman Parpalak
+ * @license MIT
+ * @package S2
+ */
 
 declare(strict_types=1);
 
@@ -115,20 +120,8 @@ class InstallCest
                     'meta_desc'   => 'New Meta Description',
                     'excerpt'     => 'New Excerpt',
                     'tags'        => 'tag1, another tag',
-                    'create_time' => [
-                        'hour' => '11',
-                        'min'  => '32',
-                        'day'  => '10',
-                        'mon'  => '08',
-                        'year' => '2023',
-                    ],
-                    'modify_time' => [
-                        'hour' => '12',
-                        'min'  => '15',
-                        'day'  => '11',
-                        'mon'  => '08',
-                        'year' => '2023',
-                    ],
+                    'create_time' => '2023-08-10T11:32',
+                    'modify_time' => '2023-08-11T12:15',
                     'text'        => '<p>Some new page text</p>',
                     'id'          => $id,
                     'revision'    => '1',
@@ -195,20 +188,8 @@ class InstallCest
                         'meta_desc'   => 'New Meta Description',
                         'excerpt'     => 'New Excerpt',
                         'tags'        => 'tag1, another tag',
-                        'create_time' => [
-                            'hour' => '11',
-                            'min'  => '32',
-                            'day'  => '10',
-                            'mon'  => '08',
-                            'year' => '2023',
-                        ],
-                        'modify_time' => [
-                            'hour' => '12',
-                            'min'  => '15',
-                            'day'  => '12',
-                            'mon'  => '08',
-                            'year' => '2023',
-                        ],
+                        'create_time' => '2023-08-10T11:32',
+                        'modify_time' => '2023-08-12T12:15',
                         'text'        => '<p>Some new page text</p>',
                         'id'          => $id,
                         'revision'    => '1',
@@ -286,7 +267,7 @@ class InstallCest
         $I->canSee('New Page 4');
         $I->canSee('New Page 5');
         $I->canSee('/section1/new_page1');
-        $I->canSee('Thu, 10 Aug 2023 11:32:00 GMT');
+        $I->canSee(gmdate('D, d M Y H:i:s', strtotime('2023-08-10 11:32:00')).' GMT');
         $I->see('New Excerpt');
 
         $I->haveHttpHeader('If-Modified-Since', 'Sat, 12 Aug 2023 00:00:00 GMT');
@@ -299,7 +280,7 @@ class InstallCest
         $I->amOnPage('/index.php?/sitemap.xml'); // Same as above
         $I->seeResponseCodeIsSuccessful();
         $I->see('/section1/new_page1');
-        $I->see('2023-08-11T12:15:00+00:00');
+        $I->see(gmdate('c', strtotime('2023-08-11 12:15')));
     }
 
     /**
@@ -325,20 +306,8 @@ class InstallCest
                 'page'  => [
                     'title'       => 'New Blog Post Title',
                     'tags'        => 'tag1, blog tag',
-                    'create_time' => [
-                        'hour' => '11',
-                        'min'  => '32',
-                        'day'  => '12',
-                        'mon'  => '08',
-                        'year' => '2023',
-                    ],
-                    'modify_time' => [
-                        'hour' => '12',
-                        'min'  => '15',
-                        'day'  => '12',
-                        'mon'  => '08',
-                        'year' => '2023',
-                    ],
+                    'create_time' => '2023-08-12T11:32',
+                    'modify_time' => '2023-08-12T12:15',
                     'text'        => '<p>New blog post</p>',
                     'user_id'     => '0',
                     'label'       => '',
@@ -419,13 +388,13 @@ class InstallCest
         $I->canSee('My blog');
         $I->canSee('New Blog Post Title');
         $I->canSee('/blog/2023/08/12/new_post1');
-        $I->canSee('Sat, 12 Aug 2023 11:32:00 GMT');
+        $I->canSee(gmdate('D, d M Y H:i:s', strtotime('2023-08-12 11:32:00')).' GMT');
         $I->see('New blog post');
 
         $I->amOnPage('/index.php?/blog/sitemap.xml'); // Same as above
         $I->seeResponseCodeIsSuccessful();
         $I->see('/blog/2023/08/12/new_post1');
-        $I->see('2023-08-12T12:15:00+00:00');
+        $I->see(gmdate('c', strtotime('2023-08-12 12:15')));
     }
 
     private function testSearchExtension(AcceptanceTester $I): void
@@ -474,13 +443,7 @@ class InstallCest
             return [
                 'tag'   => [
                     'name'        => 'New Tag Name',
-                    'modify_time' => [
-                        'hour' => '12',
-                        'min'  => '15',
-                        'day'  => '12',
-                        'mon'  => '08',
-                        'year' => '2023',
-                    ],
+                    'modify_time' => '2023-08-12T12:15',
                     'description' => 'New tag description text',
                     'url'         => 'new_tag_url1',
                     'id'          => $id,

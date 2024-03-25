@@ -13,8 +13,6 @@
 .aside-column input[type="text"],
 .extension  p.description,
 .error_dialog .error_text {
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 	}
 
@@ -657,12 +655,28 @@ textarea,
 		}
 
 .aside-column input[type="text"],
+.aside-column input[type="datetime-local"],
 .input.text input,
 .input.color input,
 .fields input[type="text"],
+.fields input[type="datetime-local"],
 #search_field {
 	padding: 2px;
 	font: 1em Arial, Helvetica, sans-serif;
+	}
+
+.aside-column input[type="text"],
+.aside-column input[type="datetime-local"],
+.input.text input,
+.input.color input,
+.fields input[type="text"],
+.fields input[type="datetime-local"],
+.full_textarea,
+.aside-column select,
+#search_field {
+	margin: 0;
+	border-radius: 2px;
+	border: #bbb 1px solid;
 	}
 
 .aside-column input[type="text"],
@@ -673,9 +687,6 @@ textarea,
 .aside-column select,
 #search_field {
 	width: 100%;
-	margin: 0;
-	border-radius: 2px;
-	border: #bbb 1px solid;
 	}
 
 .fields input.char-2 {

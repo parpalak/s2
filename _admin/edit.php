@@ -57,8 +57,8 @@ function s2_save_article ($page, $flags)
 	$published = (int) isset($flags['published']);
 	$commented = (int) isset($flags['commented']);
 
-	$create_time = !empty($page['create_time']) ? s2_time_from_array($page['create_time']) : time();
-	$modify_time = !empty($page['modify_time']) ? s2_time_from_array($page['modify_time']) : time();
+	$create_time = !empty($page['create_time']) ? s2_timestamp_from_form_time($page['create_time']) : time();
+	$modify_time = !empty($page['modify_time']) ? s2_timestamp_from_form_time($page['modify_time']) : time();
 
 	$query = array(
 		'SELECT'	=> 'user_id, parent_id, revision, pagetext, title, url',
@@ -188,8 +188,8 @@ function s2_output_article_form ($id)
 	if (!$page['published'])
 		s2_test_user_rights($s2_user['view_hidden'] || $s2_user['id'] == $page['user_id']);
 
-	$create_time = s2_array_from_time($page['create_time']);
-	$modify_time = s2_array_from_time($page['modify_time']);
+	$create_time = s2_html_time_from_timestamp($page['create_time']);
+	$modify_time = s2_html_time_from_timestamp($page['modify_time']);
 
 	// Fetching tags
 	$subquery = array(

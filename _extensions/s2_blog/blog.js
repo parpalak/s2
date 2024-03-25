@@ -1,8 +1,8 @@
 /**
  * Helper functions for blog administrating
  *
- * @copyright (C) 2007-2013 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package s2_blog
  */
 
@@ -85,17 +85,18 @@ function ToggleFavBlog (eItem, iId)
 	return false;
 }
 
-$(document).on('save_article_end.s2', function (e, sAction)
-{
+$(document).on('save_article_end.s2', function (e, sAction) {
 	if (sAction != 'save_blog')
 		return;
 
 	var $a = $('#preview_link'),
 		sLink = $a.attr('href'),
 		frm = document.forms['artform'].elements,
-		sYear = frm['page[create_time][year]'].value,
-		sMonth = frm['page[create_time][mon]'].value,
-		sDay = frm['page[create_time][day]'].value,
+		sDate = frm['page[create_time]'].value,
+		dateObj = new Date(sDate),
+		sYear = dateObj.getFullYear(),
+		sMonth = String(dateObj.getMonth() + 1).padStart(2, '0'),
+		sDay = String(dateObj.getDate()).padStart(2, '0'),
 		sURL = frm['page[url]'].value;
 
 	$a.attr('href', sLink.replace(/\/\d*\/\d*\/\d*\/[^\/]*$/, '/' + sYear + '/' + sMonth + '/' + sDay + '/' + sURL))

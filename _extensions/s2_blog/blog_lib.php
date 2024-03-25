@@ -53,8 +53,8 @@ function s2_blog_save_post ($page, $flags)
 	$published = (int) isset($flags['published']);
 	$commented = (int) isset($flags['commented']);
 
-	$create_time = isset($page['create_time']) ? s2_time_from_array($page['create_time']) : time();
-	$modify_time = isset($page['modify_time']) ? s2_time_from_array($page['modify_time']) : time();
+	$create_time = isset($page['create_time']) ? s2_timestamp_from_form_time($page['create_time']) : time();
+	$modify_time = isset($page['modify_time']) ? s2_timestamp_from_form_time($page['modify_time']) : time();
 
 	$id = (int) $page['id'];
 
@@ -666,8 +666,8 @@ function s2_blog_edit_post_form ($id)
 	elseif ($url_status == 'not_unique')
 		$url_error = $lang_admin['URL not unique'];
 
-	$create_time = s2_array_from_time($page['create_time']);
-	$modify_time = s2_array_from_time($page['modify_time']);
+	$create_time = s2_html_time_from_timestamp($page['create_time']);
+	$modify_time = s2_html_time_from_timestamp($page['modify_time']);
 
 	// Fetching tags
 	$subquery = array(

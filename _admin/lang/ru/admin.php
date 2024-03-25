@@ -96,8 +96,6 @@ $lang_admin = array(
 
 'Cut'						=> 'Обозначить выдержку тегом <cut>',
 
-'Input time format'			=> '[hour]:[minute], [day].[month].[year]', // Determines order of the input fields
-
 // Preview tab
 'Preview'					=> 'Предпросмотр',
 

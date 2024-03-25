@@ -2,8 +2,8 @@
 /**
  * Common functions for the admin panel and pages generation
  *
- * @copyright (C) 2007-2013 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
 
@@ -83,57 +83,24 @@ else
 // Time conversion (for forms)
 //
 
-function s2_array_from_time ($time)
+function s2_html_time_from_timestamp(int $time): string
 {
-	$return = ($hook = s2_hook('fn_array_from_time')) ? eval($hook) : null;
-	if ($return != null)
-		return $return;
-
-	$array['hour'] = $time ? date('H', $time) : '';
-	$array['min'] = $time ? date('i', $time) : '';
-	$array['day'] = $time ? date('d', $time) : '';
-	$array['mon'] = $time ? date('m', $time) : '';
-	$array['year'] = $time ? date('Y', $time) : '';
-
-	return $array;
+	return date('Y-m-d\TH:i', $time);
 }
 
-function s2_time_from_array ($array)
+function s2_timestamp_from_form_time (string $time): int
 {
-
-	$return = ($hook = s2_hook('fn_time_from_array')) ? eval($hook) : null;
-	if ($return != null)
-		return $return;
-
-	$hour = isset($array['hour']) ? (int) $array['hour'] : 0;
-	$min = isset($array['min']) ? (int) $array['min'] : 0;
-	$day = isset($array['day']) ? (int) $array['day'] : 0;
-	$mon = isset($array['mon']) ? (int) $array['mon'] : 0;
-	$year = isset($array['year']) ? (int) $array['year'] : 0;
-
-	return checkdate($mon, $day, $year) ? mktime($hour, $min, 0, $mon, $day, $year) : 0;
+    return DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $time)->getTimestamp();
 }
 
 //
 // Functions below generate HTML-code for some pages in the admin panel
 //
 
-function s2_get_time_input ($name, $values)
+function s2_get_time_input(string $name, string $value): string
 {
-	global $lang_admin;
 
-	$replace = array(
-		'[hour]'	=> '<input type="text" class="char-2" name="'.$name.'[hour]" size="2" value="'.$values['hour'].'" />',
-		'[minute]'	=> '<input type="text" class="char-2" name="'.$name.'[min]" size="2" value="'.$values['min'].'" />',
-		'[day]'		=> '<input type="text" class="char-2" name="'.$name.'[day]" size="2" value="'.$values['day'].'" />',
-		'[month]'	=> '<input type="text" class="char-2" name="'.$name.'[mon]" size="2" value="'.$values['mon'].'" />',
-		'[year]'	=> '<input type="text" class="char-4" name="'.$name.'[year]" size="4" value="'.$values['year'].'" />'
-	);
-
-	$format = $lang_admin['Input time format'];
-
-	($hook = s2_hook('fn_get_time_input')) ? eval($hook) : null;
-	return str_replace(array_keys($replace), array_values($replace), $format);
+    return '<input type="datetime-local" name="' . $name . '" value="' . $value . '" />';
 }
 
 // A button that change a permission

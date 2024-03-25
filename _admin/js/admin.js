@@ -3,8 +3,8 @@
  *
  * Drag & drop, event handlers for the admin panel
  *
- * @copyright (C) 2007-2024 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
 
@@ -44,11 +44,7 @@ function SetTime (eForm, sName)
 
 	d.setTime(time_shift + d.getTime());
 
-	eForm[sName + '[hour]'].value = d.getHours();
-	eForm[sName + '[min]'].value = d.getMinutes();
-	eForm[sName + '[day]'].value = d.getDate();
-	eForm[sName + '[mon]'].value = d.getMonth() + 1;
-	eForm[sName + '[year]'].value = d.getFullYear();
+	eForm[sName].value = d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + "-" +('0' + d.getDate()).slice(-2) + 'T' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
 
 	return false;
 }
