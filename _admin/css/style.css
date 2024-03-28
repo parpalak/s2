@@ -104,16 +104,7 @@ body {
 
 a, a:visited {
 	color: #05c;
-	text-decoration: none;
-	background: -webkit-gradient(linear, 0 0, 100% 0, from(#bce), to(#bce));
-	background: -webkit-linear-gradient(left, #bce, #bce 100%);
-	background: -moz-linear-gradient(left, #bce, #bce 100%);
-	background: -ms-linear-gradient(left, #bce, #bce 100%);
-	background: -o-linear-gradient(left, #bce, #bce 100%);
-	background: linear-gradient(to right, #bce, #bce 100%);
-	background-position: 0 100%;
-	background-size: 10px 1px;
-	background-repeat: repeat-x;
+	text-decoration-color: #0055cc59;
 	}
 
 a > img {
@@ -454,6 +445,12 @@ body > .tabsheets {
 
 /*=======================[Table styles]=======================================*/
 
+thead.sticky {
+	position: sticky;
+	top: 0;
+	z-index: 1; /* fix for opacity transferring to sticky header */
+	}
+
 .sort {
 	background: #fff;
 	border-collapse: collapse;
@@ -462,9 +459,9 @@ body > .tabsheets {
 	}
 
 	.sort .hidden {
-		background: #f5f5f5;
+		background: #eee;
 		color: #666;
-		text-decoration: line-through;
+		opacity: 0.6;
 		}
 	.sort .good {
 		background: #e8ffe8;
@@ -712,6 +709,7 @@ textarea,
 	border-radius: 3px;
 	box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
 	line-height: 18px;
+	white-space: nowrap;
 	}
 .bitbtn {
 	padding: 1px 2px 2px 20px;
@@ -824,6 +822,15 @@ textarea,
 	#search_field.inactive {
 		color: #ccc;
 		}
+
+.icon-button {
+	height: 16px;
+	width: 16px;
+	border: 0;
+	margin: 1px;
+	vertical-align: top;
+	padding: 0;
+	}
 
 /*=======================[Options tab]========================================*/
 
