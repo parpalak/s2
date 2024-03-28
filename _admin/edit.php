@@ -61,7 +61,7 @@ function s2_save_article ($page, $flags)
 	$modify_time = !empty($page['modify_time']) ? s2_timestamp_from_form_time($page['modify_time']) : time();
 
 	$query = array(
-		'SELECT'	=> 'user_id, parent_id, revision, pagetext, title, url',
+		'SELECT'	=> 'user_id, parent_id, revision, pagetext, title, url, meta_keys, meta_desc',
 		'FROM'		=> 'articles',
 		'WHERE'		=> 'id = '.$id
 	);
@@ -69,14 +69,14 @@ function s2_save_article ($page, $flags)
 	$result = $s2_db->buildAndQuery($query);
 
 	if ($row = $s2_db->fetchRow($result))
-		list($user_id, $parent_id, $revision, $pagetext, $title, $url) = $row;
+		list($user_id, $parent_id, $revision, $pagetext, $title, $url, $metaKeys, $metaDesc) = $row;
 	else
 		die('Item not found!');
 
 	if (!$s2_user['edit_site'])
 		s2_test_user_rights($user_id == $s2_user['id']);
 
-	if ($page['text'] != $pagetext || $page['title'] != $title || $page['url'] != $url) {
+	if ($page['text'] != $pagetext || $page['title'] != $title || $page['url'] != $url || $page['meta_keys'] !== $metaKeys || $page['meta_desc'] !== $metaDesc) {
 		// If the page text has been modified, we check if this modification is done by current user
 		if ($revision !== (int)$page['revision']) {
             return array($parent_id, $revision, 'conflict'); // No, it's somebody else
