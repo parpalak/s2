@@ -65,6 +65,7 @@ class TypographTest extends Unit
             ['<a href="/some/url.html">"CSS-стилей"</a>', '<a href="/some/url.html"><nobr>«CSS-стилей»</nobr></a>'], // a bug, should be '«<a href="/some/url.html"><nobr>CSS-стилей</nobr></a>»'
             ['"First level "second level "and third level"" and "second" level again".', '"First level «second level „and third level“» and «second» level again".'],
             ['
+  <title>Приключения Кода и Типо-графа</title>
   <h1>Приключения Кода и Типографа</h1>
 
   <div class="content">
@@ -94,7 +95,8 @@ class TypographTest extends Unit
 
     <p>С тех пор Кодик и Типограф стали неразлучными друзьями, продолжая исследовать мир кода и преображать текст во что-то удивительное.</p>
   </div>
-', '<h1>Приключения Кода и&nbsp;Типографа</h1>
+', '<title>Приключения Кода и Типо-графа</title>
+  <h1>Приключения Кода и&nbsp;Типографа</h1>
 
   <div class="content">
     <p>Однажды в&nbsp;уютном мире браузеров, где <nobr>HTML-теги</nobr> играли в&nbsp;прятки с&nbsp;<nobr>CSS-стилями</nobr> и&nbsp;<nobr>JavaScript-скриптами,</nobr> появился код по имени Кодик.</p>

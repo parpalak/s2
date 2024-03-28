@@ -25,7 +25,7 @@ class Typograph
         $i               = 0;
 
         // Extract sensitive data
-        $contents = preg_replace_callback('#<(script|style|textarea|pre|code|kbd).*?</\\1>|\\$\\$[^<]*?\\$\\$#s', static function ($matches) use (&$savedSubstrings, &$i) {
+        $contents = preg_replace_callback('#<(script|style|textarea|pre|code|kbd|title).*?</\\1>|\\$\\$[^<]*?\\$\\$#s', static function ($matches) use (&$savedSubstrings, &$i) {
             $savedSubstrings[$i] = $matches[0];
             return '<¬' . ($i++) . '¬>';
         }, $contents);
