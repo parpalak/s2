@@ -541,7 +541,7 @@ function s2_blog_output_post_list ($criteria)
 	$raw_sub_query = $s2_db->build($sub_query);
 
 	$query = array(
-		'SELECT'	=> 'id, title, published, commented, ('.$raw_sub_query.') as comment_count, create_time, label, favorite, user_id',
+		'SELECT'	=> 'id, title, published, commented, ('.$raw_sub_query.') as comment_count, create_time, label, favorite, user_id, SUBSTR(text, 1, 200) AS text',
 		'FROM'		=> 's2_blog_posts AS p',
 		'WHERE'		=> $condition,
 		'ORDER BY'	=> 'create_time DESC'
@@ -581,7 +581,7 @@ function s2_blog_output_post_list ($criteria)
 
 			$buttons = array();
 			if ($s2_user['edit_site'])
-				$buttons['favorite'] = '<img class="'.($row['favorite'] ? 'favorite' : 'notfavorite').'" data-class="'.(!$row['favorite'] ? 'favorite' : 'notfavorite').'" src="i/1.gif" alt="'.($row['favorite'] ? Lang::get('Undo favorite', 's2_blog') : Lang::get('Do favorite', 's2_blog')).'" data-alt="'.(!$row['favorite'] ? Lang::get('Undo favorite', 's2_blog') : Lang::get('Do favorite', 's2_blog')).'" onclick="return ToggleFavBlog(this, '.$row['id'].');">';
+				$buttons['favorite'] = '<button class="icon-button '.($row['favorite'] ? 'favorite' : 'notfavorite').'" data-class="'.(!$row['favorite'] ? 'favorite' : 'notfavorite').'" title="'.($row['favorite'] ? Lang::get('Undo favorite', 's2_blog') : Lang::get('Do favorite', 's2_blog')).'" data-title="'.(!$row['favorite'] ? Lang::get('Undo favorite', 's2_blog') : Lang::get('Do favorite', 's2_blog')).'" onclick="return ToggleFavBlog(this, '.$row['id'].');"></button>';
 			if ($s2_user['edit_site'] || $s2_user['id'] == $row['user_id'])
 				$buttons['delete'] = '<img class="delete" src="i/1.gif" alt="'.$lang_admin['Delete'].'" onclick="return DeleteRecord(this, '.$row['id'].', \''.s2_htmlencode(addslashes(sprintf(Lang::get('Delete warning', 's2_blog'), $row['title']))).'\');">';
 
@@ -593,10 +593,23 @@ function s2_blog_output_post_list ($criteria)
 
 			($hook = s2_hook('fn_s2_blog_output_post_list_pre_row_mrg')) ? eval($hook) : null;
 
-			$body .= '<tr'.$class.'><td><a href="#" onclick="return EditRecord('.$row['id'].'); ">'.s2_htmlencode($row['title']).'</a></td><td class="s2_blog_date">'.$date.'</td><td class="s2_blog_tags">'.$tags.'</td><td class="s2_blog_label">'.$row['label'].'</td><td>'.$comment.'</td><td>'.$buttons.'</td></tr>';
+            $body .= '<tr' . $class . '>' .
+                '<td class="s2_blog_title_cell"><a class="s2_blog_title" href="#" onclick="return EditRecord(' . $row['id'] . '); ">' . s2_htmlencode($row['title']) . '</a><span class="s2_blog_text_extra">' . s2_htmlencode(strip_tags($row['text'])) . '</td>' .
+                '<td class="s2_blog_date">' . $date . '</td>' .
+                '<td class="s2_blog_tags">' . $tags . '</td>' .
+                '<td class="s2_blog_label">' . $row['label'] . '</td>' .
+                '<td>' . $comment . '</td>' .
+                '<td>' . $buttons . '</td>' .
+                '</tr>';
 		}
 
-		echo '<table width="100%" class="sort"><thead><tr><td class="sortable">'.Lang::get('Post', 's2_blog').'</td><td width="80" class="sortable curcol_up">'.$lang_admin['Date'].'</td><td width="20%" class="sortable">'.Lang::get('Tags').'</td><td width="5%" class="sortable">'.Lang::get('Label', 's2_blog').'</td><td width="36" class="sortable">'.Lang::get('Comments').'</td><td width="36">&nbsp;</td></tr></thead><tbody>'.$body.'</tbody></table>';
+        echo '<table width="100%" class="sort"><thead class="sticky"><tr>' .
+            '<td class="sortable">' . Lang::get('Post', 's2_blog') . '</td>' .
+            '<td width="80" class="sortable curcol_up">' . $lang_admin['Date'] . '</td>' .
+            '<td width="20%" class="sortable">' . Lang::get('Tags') . '</td>' .
+            '<td width="5%" class="sortable">' . Lang::get('Label', 's2_blog') . '</td>' .
+            '<td width="36" class="sortable">' . Lang::get('Comments') . '</td>' . '<td width="36">&nbsp;</td>' .
+            '</tr></thead><tbody>' . $body . '</tbody></table>';
 	}
 	else
 		echo '<div class="info-box"><p>'.Lang::get('No posts found', 's2_blog').'</p></div>';

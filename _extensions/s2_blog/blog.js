@@ -73,13 +73,11 @@ function ToggleFavBlog (eItem, iId)
 {
 	GETAsyncRequest(sUrl + "action=flip_favorite_post&id=" + iId, function (http)
 	{
-		var temp = eItem.getAttribute('data-class');
-		eItem.setAttribute('data-class', eItem.getAttribute('class'));
-		eItem.setAttribute('class', temp);
+		eItem.classList.toggle('favorite');
+		eItem.classList.toggle('notfavorite');
 
-		temp = eItem.getAttribute('data-alt');
-		eItem.setAttribute('data-alt', eItem.getAttribute('alt'));
-		eItem.setAttribute('alt', temp);
+		temp = eItem.getAttribute('data-title');
+		eItem.setAttribute('data-title', eItem.getAttribute('title'));
 		eItem.setAttribute('title', temp);
 	});
 	return false;
