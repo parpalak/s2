@@ -11,12 +11,10 @@
 	}
 .find_posts:before {
 	content: '🔍';
-	vertical-align: -1px;
 	padding: 0 1px;
 	}
 .add_post:before {
 	content: '➕';
-	vertical-align: -1px;
 	padding: 0 1px;
 	}
 

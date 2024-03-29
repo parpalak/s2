@@ -123,15 +123,7 @@ a > img {
 .js:hover,
 .js:visited,
 .ui-autocomplete a {
-	background: -webkit-gradient(linear, 0 0, 100% 0, from(#9bd), color-stop(0.6, #9bd), color-stop(0.6, transparent));
-	background: -webkit-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
-	background: -moz-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
-	background: -ms-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
-	background: -o-linear-gradient(left, #9bd, #9bd 60%, transparent 60%);
-	background: linear-gradient(to right, #9bd, #9bd 60%, transparent 60%);
-	background-size: 8px 1px;
-	background-repeat: repeat-x;
-	background-position: 0 95%;
+	text-decoration-style: dashed;
 	}
 
 a:hover { outline: none; }
@@ -480,20 +472,15 @@ thead.sticky {
 		}
 		.sort thead {
 			background: #ddd;
-			background: -webkit-gradient(linear, 0 0, 0 bottom, from(#ebebeb), to(#ccc));
-			background: -webkit-linear-gradient(#ebebeb, #ccc);
-			background: -moz-linear-gradient(#ebebeb, #ccc);
-			background: -ms-linear-gradient(#ebebeb, #ccc);
-			background: -o-linear-gradient(#ebebeb, #ccc);
 			background: linear-gradient(#ebebeb, #ccc);
 			cursor: default;
 			color: #840;
 			font: 0.917em "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 			vertical-align: middle;
+			white-space: nowrap;
 			}
 			.sort .sortable {
 				cursor: pointer;
-				cursor: hand;
 				}
 			.sort .curcol_up:before,
 			.sort .curcol_down:before {
@@ -506,11 +493,6 @@ thead.sticky {
 				}
 			.sort .curcol_up, .sort .curcol_down {
 				background: #28f;
-				background: -webkit-gradient(linear, 0 0, 0 bottom, from(#28f), to(#39f));
-				background: -webkit-linear-gradient(#28f, #39f);
-				background: -moz-linear-gradient(#28f, #39f);
-				background: -ms-linear-gradient(#28f, #39f);
-				background: -o-linear-gradient(#28f, #39f);
 				background: linear-gradient(#28f, #39f);
 				color: #fff;
 				}
@@ -708,8 +690,8 @@ textarea,
 	border: 1px solid #777;
 	border-radius: 3px;
 	box-shadow: inset 0 3px 3px -1px rgba(255, 255, 255, 0.9), inset 0 -11px 4px -1px rgba(0, 0, 0, 0.07);
-	line-height: 18px;
 	white-space: nowrap;
+	font: 1em/18px "Segoe UI", "Lucida Grande", "Lucida Sans Unicode", "Droid Sans", Tahoma, Ubuntu, sans-serif;
 	}
 .bitbtn {
 	padding: 1px 2px 2px 20px;
@@ -830,6 +812,7 @@ textarea,
 	margin: 1px;
 	vertical-align: top;
 	padding: 0;
+	background: transparent;
 	}
 
 /*=======================[Options tab]========================================*/
