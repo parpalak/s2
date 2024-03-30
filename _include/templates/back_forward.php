@@ -1,4 +1,4 @@
-<?php if (!defined('S2_ROOT')) die; ?>
+<?php if (!isset($this)) die; ?>
 <!DOCTYPE html>
 <html>
 <head>

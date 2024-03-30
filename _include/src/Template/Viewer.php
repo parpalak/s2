@@ -23,6 +23,47 @@ class Viewer
         $this->systemViewDir       = $rootDir . '_include/views/';
     }
 
+    public function render(string $name, array $vars, string ...$extraDirs): string
+    {
+        $name     = preg_replace('#[^0-9a-zA-Z._\-]#', '', $name);
+        $filename = $name . '.php';
+
+        $foundFile = null;
+        $dirs      = [
+            $this->styleViewDir,
+            ...array_map(fn(string $dir) => sprintf($this->extensionDirPattern, $dir), $extraDirs),
+            $this->systemViewDir
+        ];
+        foreach ($dirs as $dir) {
+            if (file_exists($dir . $filename)) {
+                $foundFile = $dir . $filename;
+                break;
+            }
+        }
+
+        ob_start();
+
+        if ($this->debug) {
+            echo '<div style="border: 1px solid rgba(0, 0, 0, 0.15); margin: 1px; position: relative;">',
+            '<pre style="opacity: 0.4; background: darkgray; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display === \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
+            '<pre style="display: none; font-size: 12px; line-height: 1.3; color: #9e9; background: #003;">';
+            echo self::jsonFormat($vars);
+            echo '</pre>';
+        }
+
+        if ($foundFile !== null) {
+            $this->includeFile($foundFile, $vars);
+        } elseif ($this->debug) {
+            echo 'View file not found in ', s2_htmlencode(var_export($dirs, true));
+        }
+
+        if ($this->debug) {
+            echo '</div>';
+        }
+
+        return ob_get_clean();
+    }
+
     /**
      * @throws \JsonException
      */
@@ -64,47 +105,6 @@ class Viewer
         $str = str_replace(["\r", "\n"], ['', "\n" . str_pad(' ', $level * 4)], $str);
 
         return $str;
-    }
-
-    public function render(string $name, array $vars, string ...$extraDirs): string
-    {
-        $name     = preg_replace('#[^0-9a-zA-Z._\-]#', '', $name);
-        $filename = $name . '.php';
-
-        $foundFile = null;
-        $dirs      = [
-            $this->styleViewDir,
-            ...array_map(fn(string $dir) => sprintf($this->extensionDirPattern, $dir), $extraDirs),
-            $this->systemViewDir
-        ];
-        foreach ($dirs as $dir) {
-            if (file_exists($dir . $filename)) {
-                $foundFile = $dir . $filename;
-                break;
-            }
-        }
-
-        ob_start();
-
-        if ($this->debug) {
-            echo '<div style="border: 1px solid rgba(0, 0, 0, 0.15); margin: 1px; position: relative;">',
-            '<pre style="opacity: 0.4; background: darkgray; color: white; position: absolute; z-index: 10000; right: 0; cursor: pointer; text-decoration: underline; padding: 0.1em 0.65em;" onclick="this.nextSibling.style.display = this.nextSibling.style.display === \'block\' ? \'none\' : \'block\'; ">', $name, '</pre>',
-            '<pre style="display: none; font-size: 12px; line-height: 1.3; color: #9e9; background: #003;">';
-            echo self::jsonFormat($vars);
-            echo '</pre>';
-        }
-
-        if ($foundFile !== null) {
-            $this->includeFile($foundFile, $vars);
-        } elseif ($this->debug) {
-            echo 'View file not found in ', s2_htmlencode(var_export($dirs, true));
-        }
-
-        if ($this->debug) {
-            echo '</div>';
-        }
-
-        return ob_get_clean();
     }
 
     private function includeFile(string $_found_file, array $_vars): void

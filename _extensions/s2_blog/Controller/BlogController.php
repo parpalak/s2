@@ -49,7 +49,7 @@ abstract class BlogController implements ControllerInterface
 
     public function handle(Request $request): Response
     {
-        $template = $this->templateProvider->getTemplate($this->template_id);
+        $template = $this->templateProvider->getTemplate($this->template_id, 's2_blog');
 
         $template
             ->putInPlaceholder('commented', 0)

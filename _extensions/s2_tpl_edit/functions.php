@@ -148,7 +148,8 @@ function s2_tpl_edit_content($templateFilename = ''): array
             try {
                 /** @var \S2\Cms\Template\HtmlTemplateProvider $provider */
                 $provider = Container::get(\S2\Cms\Template\HtmlTemplateProvider::class);
-                $templateExists = ($provider->getRawTemplateContent($templateFilename) !== '');
+                // TODO a template can be in an extension directory only, and it will not be accessible via extraDir === null
+                $templateExists = ($provider->getRawTemplateContent($templateFilename, null) !== '');
             } catch (Exception $e) {
                 $templateExists = false;
             }

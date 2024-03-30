@@ -83,7 +83,7 @@ $return = ($hook = s2_hook('ai_pre_get_template')) ? eval($hook) : null;
 try {
     /** @var \S2\Cms\Template\HtmlTemplateProvider $provider */
     $provider = Container::get(\S2\Cms\Template\HtmlTemplateProvider::class);
-	$template = $return ?: $provider->getRawTemplateContent('site.php');
+	$template = $return ?: $provider->getRawTemplateContent('site.php', null);
 }
 catch (Exception $e) {
 	error($e->getMessage());

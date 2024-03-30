@@ -36,9 +36,9 @@ class HtmlTemplateProvider
         $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
     }
 
-    public function getTemplate(string $templateId): HtmlTemplate
+    public function getTemplate(string $templateId, ?string $extraDir = null): HtmlTemplate
     {
-        $templateContent = $this->getRawTemplateContent($templateId);
+        $templateContent = $this->getRawTemplateContent($templateId, $extraDir);
         $templateContent = $this->replaceCurrentLinks($templateContent);
 
         $htmlTemplate = new HtmlTemplate(
@@ -59,25 +59,16 @@ class HtmlTemplateProvider
     /**
      * Searches for a template file (in the style or 'template' directory)
      */
-    public function getRawTemplateContent(string $templateId): string
+    public function getRawTemplateContent(string $templateId, ?string $extraDir): string
     {
-        $defaultPath = $this->rootDir . '_include/templates/';
-
         $path            = null;
         $cleanTemplateId = preg_replace('#[^0-9a-zA-Z._\-]#', '', $templateId);
 
         $buildEvent = new TemplateBuildEvent($this->styleName, $cleanTemplateId, $path);
         $this->dispatcher->dispatch($buildEvent, TemplateBuildEvent::EVENT_START);
 
-        if ($path === null) { // Can be modified via event
-            $templatePathInStyles = $this->rootDir . '_styles/' . $this->styleName . '/templates/' . $cleanTemplateId;
-            if (file_exists($templatePathInStyles)) {
-                $path = $templatePathInStyles;
-            } elseif (file_exists($defaultPath . $cleanTemplateId)) {
-                $path = $defaultPath . $cleanTemplateId;
-            } else {
-                throw new \RuntimeException(sprintf(\Lang::get('Template not found'), $defaultPath . $cleanTemplateId));
-            }
+        if ($path === null) { // Can be not null via event
+            $path = $this->getTemplateFullFilename($extraDir, $cleanTemplateId);
         }
 
         ob_start();
@@ -142,5 +133,27 @@ class HtmlTemplateProvider
         );
 
         return $templateContent;
+    }
+
+    private function getTemplateFullFilename(?string $extraDir, string $cleanTemplateId): string
+    {
+        if ($extraDir !== null) {
+            $templatePathInExtension = $this->rootDir . '_extensions/' . $extraDir . '/templates/' . $cleanTemplateId;
+            if (file_exists($templatePathInExtension)) {
+                return $templatePathInExtension;
+            }
+        }
+
+        $templatePathInStyles = $this->rootDir . '_styles/' . $this->styleName . '/templates/' . $cleanTemplateId;
+        if (file_exists($templatePathInStyles)) {
+            return $templatePathInStyles;
+        }
+
+        $templateDefaultPath = $this->rootDir . '_include/templates/' . $cleanTemplateId;
+        if (file_exists($templateDefaultPath)) {
+            return $templateDefaultPath;
+        }
+
+        throw new \RuntimeException(sprintf(\Lang::get('Template not found'), $templateDefaultPath));
     }
 }

@@ -1,4 +1,4 @@
-<?php if (!defined('S2_ROOT')) die; ?>
+<?php if (!isset($this)) die; ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -23,7 +23,6 @@
 				<!-- s2_text -->
 			</div>
 			<div id="menu">
-				<!-- s2_menu_siblings -->
 				<!-- s2_menu_children -->
 				<!-- s2_menu_subsections -->
 				<!-- s2_last_comments -->
