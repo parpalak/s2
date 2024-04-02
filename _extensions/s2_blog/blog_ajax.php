@@ -61,7 +61,7 @@ elseif ($action == 'save_blog')
 	($hook = s2_hook('rq_action_save_blog_start')) ? eval($hook) : null;
 	s2_test_user_rights($is_permission);
 
-	if (!isset($_POST['page']) || !isset($_POST['flags']))
+	if (!isset($_POST['page']) && !isset($_POST['flags']))
 		die('Error in POST parameters.');
 
 	Lang::load('s2_blog', function ()
