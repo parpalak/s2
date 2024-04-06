@@ -62,7 +62,7 @@ class HtmlTemplate
 
         // HTML head
         $replace['<!-- s2_head_title -->'] = empty($this->page['head_title']) ?
-            (!empty($this->page['title']) ? $this->page['title'] . ' - ' : '') . $this->dynamicConfigProvider->get('S2_SITE_NAME') :
+            (!empty($this->page['title']) ? $this->page['title'] . ' &mdash; ' : '') . $this->dynamicConfigProvider->get('S2_SITE_NAME') :
             $this->page['head_title'];
 
         // Meta tags processing

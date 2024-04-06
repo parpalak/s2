@@ -69,7 +69,7 @@ abstract class BlogController implements ControllerInterface
         }
 
         $headTitle = $template->getFromPlaceholder('head_title');
-        $template->putInPlaceholder('head_title', $headTitle === null ? $this->blogTitle : $headTitle . ' - ' . $this->blogTitle);
+        $template->putInPlaceholder('head_title', $headTitle === null ? $this->blogTitle : $headTitle . ' &mdash; ' . $this->blogTitle);
 
         return $template->toHttpResponse();
     }
