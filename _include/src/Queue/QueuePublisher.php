@@ -1,21 +1,20 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2023-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
+
+declare(strict_types=1);
 
 namespace S2\Cms\Queue;
 
 use S2\Rose\Storage\Exception\InvalidEnvironmentException;
 
-class QueuePublisher
+readonly class QueuePublisher
 {
-    private \PDO $pdo;
-
-    public function __construct(\PDO $pdo)
+    public function __construct(private \PDO $pdo, private string $dbPrefix)
     {
-        $this->pdo = $pdo;
     }
 
     public function publish(string $id, string $code, array $payload = []): void
@@ -40,13 +39,13 @@ class QueuePublisher
                 // for releasing a lock even if the row was just locked with SELECT ... FOR UPDATE and not modified yet.
                 // Moreover, there is no INSERT ... NOWAIT operator. Let's make it by hands.
                 $this->pdo->exec('SET innodb_lock_wait_timeout = 0;');
-                $statement = $this->pdo->prepare('INSERT IGNORE INTO queue (id, code, payload) VALUES (:id, :code, :payload)');
+                $statement = $this->pdo->prepare('INSERT IGNORE INTO ' . $this->dbPrefix . 'queue (id, code, payload) VALUES (:id, :code, :payload)');
                 break;
 
             case 'sqlite':
-                $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 0);
+                $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 1);
             case 'pgsql':
-                $statement = $this->pdo->prepare('INSERT INTO queue (id, code, payload) VALUES (:id, :code, :payload) ON CONFLICT DO NOTHING');
+                $statement = $this->pdo->prepare('INSERT INTO ' . $this->dbPrefix . 'queue (id, code, payload) VALUES (:id, :code, :payload) ON CONFLICT DO NOTHING');
                 break;
 
             default:

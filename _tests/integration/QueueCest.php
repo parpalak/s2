@@ -39,22 +39,34 @@ class QueueCest
         // Test duplication
         $queuePublisher->publish('test_id', 'code', ['data']);
 
+        // Test another write
+        $queuePublisher->publish('test_id0', 'code', ['data']);
+
         $consumerApplication = $I->createApplication();
-        $queueConsumer       = $consumerApplication->container->get(QueueConsumer::class);
+        /** @var QueueConsumer $queueConsumer */
+        $queueConsumer = $consumerApplication->container->get(QueueConsumer::class);
+        $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
+        $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
+        $I->assertFalse($queueConsumer->runQueue(), 'No more jobs');
+
+        // Test serial run
+        $queuePublisher->publish('test_id', 'code', ['data']);
         $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
         $I->assertFalse($queueConsumer->runQueue(), 'No more jobs');
 
         $queuePublisher->publish('test_id2', 'code', ['data']);
 
-        // Some copy-paste from QueuePublisher::publish() to simulate a parallel run
+        /**
+         * Some copy-paste to simulate a parallel run
+         * @see QueueConsumer::runQueue()
+         */
         /** @var PDO $consumerPdo */
         $consumerPdo = $consumerApplication->container->get(\PDO::class);
         $consumerPdo->beginTransaction();
 
         $driverName = $consumerPdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
         $sql        = match ($driverName) {
-            'mysql' => 'SELECT * FROM queue LIMIT 1 FOR UPDATE', // TODO figure out how to detect support for SKIP LOCKED to make a fallback
-            'pgsql' => 'SELECT * FROM queue LIMIT 1 FOR UPDATE SKIP LOCKED',
+            'mysql', 'pgsql' => 'SELECT * FROM queue LIMIT 1 FOR UPDATE NOWAIT',
             'sqlite' => 'SELECT * FROM queue LIMIT 1',
             default => throw new InvalidEnvironmentException(sprintf('Driver "%s" is not supported.', $driverName)),
         };
@@ -67,7 +79,19 @@ class QueueCest
 
         // Test no lock wait when the parallel transaction is running.
         $queuePublisher->publish('test_id2', 'code', ['data']);
+        $queuePublisher->publish('test_id3', 'code', ['data']);
 
         $consumerPdo->rollBack();
+        $statement = null;
+
+        $queuePublisher->publish('test_id4', 'code', ['data']);
+
+        if ($driverName !== 'sqlite') {
+            // Sqlite loses test_id3 being written during parallel consumer transaction.
+            $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
+        }
+        $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
+        $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
+        $I->assertFalse($queueConsumer->runQueue(), 'No more jobs');
     }
 }

@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2023-2024 Roman Parpalak
+ * @license MIT
  * @package S2
  */
+
+declare(strict_types=1);
 
 namespace S2\Cms\Queue;
 
@@ -11,28 +13,36 @@ use Psr\Log\LoggerInterface;
 
 class QueueConsumer
 {
-    private \PDO $pdo;
-
     /**
      * @var QueueHandlerInterface[]
      */
     private array $handlers;
-    private LoggerInterface $logger;
 
-    public function __construct(\PDO $pdo, LoggerInterface $logger, QueueHandlerInterface ...$handlers)
-    {
-        $this->pdo      = $pdo;
+    public function __construct(
+        private \PDO            $pdo,
+        private string          $dbPrefix,
+        private LoggerInterface $logger,
+        QueueHandlerInterface   ...$handlers
+    ) {
         $this->handlers = $handlers;
-        $this->logger   = $logger;
     }
 
+    /**
+     * Fetches and processes a job from the queue.
+     *
+     * The queue is stored in the 'queue' table of database. Jobs are fetched and locked in a transaction.
+     *
+     * NOWAIT prevents parallel job processing. It can be dangerous in case of several heavy jobs
+     * (PHP-FPM workers can be exhausted).
+     *
+     * @return bool
+     */
     public function runQueue(): bool
     {
         $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
         $sql        = match ($driverName) {
-            'mysql' => 'SELECT * FROM queue LIMIT 1 FOR UPDATE', // TODO figure out how to detect support for SKIP LOCKED to make a fallback
-            'pgsql' => 'SELECT * FROM queue LIMIT 1 FOR UPDATE SKIP LOCKED',
-            'sqlite' => 'SELECT * FROM queue LIMIT 1',
+            'mysql', 'pgsql' => 'SELECT * FROM ' . $this->dbPrefix . 'queue LIMIT 1 FOR UPDATE NOWAIT',
+            'sqlite' => 'SELECT * FROM ' . $this->dbPrefix . 'queue LIMIT 1',
             default => throw new \RuntimeException(sprintf('Driver "%s" is not supported.', $driverName)),
         };
 
@@ -59,7 +69,7 @@ class QueueConsumer
                 $this->logger->warning('Throwable occurred while processing queue: ' . $e->getMessage(), ['exception' => $e]);
             }
 
-            $statement = $this->pdo->prepare('DELETE FROM queue WHERE id = :id AND code = :code');
+            $statement = $this->pdo->prepare('DELETE FROM ' . $this->dbPrefix . 'queue WHERE id = :id AND code = :code');
             $statement->execute([
                 'id'   => $job['id'],
                 'code' => $job['code'],

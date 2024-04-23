@@ -229,11 +229,11 @@ class Logger implements LoggerInterface
         $stack = '';
         $i     = 1;
         foreach ($trace as $node) {
-            $stack .= "#$i " . $node['file'] . ":" . $node['line'] . " ";
+            $stack .= "#$i " . (isset($node['file']) ? $node['file'] . ':' . $node['line'] . ' ' : '');
             if (isset($node['class'])) {
-                $stack .= $node['class'] . "->";
+                $stack .= $node['class'] . '->';
             }
-            $stack .= $node['function'] . "()" . PHP_EOL;
+            $stack .= $node['function'] . '()' . PHP_EOL;
             $i++;
         }
         return $stack;

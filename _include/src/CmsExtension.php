@@ -95,7 +95,7 @@ class CmsExtension implements ExtensionInterface
 
             return match ($db_type) {
                 'mysql' => new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_username, $db_password),
-                'sqlite' => PdoSqliteFactory::create($container->getParameter('root_dir').$db_name, $p_connect),
+                'sqlite' => PdoSqliteFactory::create($container->getParameter('root_dir') . $db_name, $p_connect),
                 'pgsql' => new PDO("pgsql:host=$db_host;dbname=$db_name", $db_username, $db_password),
                 default => throw new \RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
             };
@@ -183,14 +183,18 @@ class CmsExtension implements ExtensionInterface
         });
 
         $container->set(QueuePublisher::class, function (Container $container) {
-            return new QueuePublisher($container->get(\PDO::class));
+            return new QueuePublisher(
+                $container->get(\PDO::class),
+                $container->getParameter('db_prefix'),
+            );
         });
         $container->set(QueueConsumer::class, function (Container $container) {
             return new QueueConsumer(
                 $container->get(\PDO::class),
+                $container->getParameter('db_prefix'),
                 $container->get(LoggerInterface::class),
                 $container->get(RecommendationProvider::class),
-                $container->get(ThumbnailGenerator::class)
+                $container->get(ThumbnailGenerator::class),
             );
         });
         $container->set(RecommendationProvider::class, function (Container $container) {
