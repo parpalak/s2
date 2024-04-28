@@ -338,12 +338,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "3b9b1b9fb697c1ecf7375f138021ef248c82f6d3"
+                "reference": "b4ce01a27e1f5c0d4efdc141dd9c44ae1f300787"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/3b9b1b9fb697c1ecf7375f138021ef248c82f6d3",
-                "reference": "3b9b1b9fb697c1ecf7375f138021ef248c82f6d3",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/b4ce01a27e1f5c0d4efdc141dd9c44ae1f300787",
+                "reference": "b4ce01a27e1f5c0d4efdc141dd9c44ae1f300787",
                 "shasum": ""
             },
             "require": {
@@ -382,7 +382,7 @@
                 "issues": "https://github.com/parpalak/rose/issues",
                 "source": "https://github.com/parpalak/rose/tree/master"
             },
-            "time": "2024-04-05T22:27:25+00:00"
+            "time": "2024-04-28T17:45:10+00:00"
         },
         {
             "name": "symfony/cache",
@@ -3157,16 +3157,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "11.1.0",
+            "version": "11.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "882c5bf7aa85328d1010da2a76f4bb10c43778c6"
+                "reference": "d475be032238173ca3b0a516f5cc291d174708ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/882c5bf7aa85328d1010da2a76f4bb10c43778c6",
-                "reference": "882c5bf7aa85328d1010da2a76f4bb10c43778c6",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/d475be032238173ca3b0a516f5cc291d174708ae",
+                "reference": "d475be032238173ca3b0a516f5cc291d174708ae",
                 "shasum": ""
             },
             "require": {
@@ -3237,7 +3237,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.1.0"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.1.3"
             },
             "funding": [
                 {
@@ -3253,7 +3253,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-04-05T04:44:29+00:00"
+            "time": "2024-04-24T06:34:25+00:00"
         },
         {
             "name": "psr/http-client",
