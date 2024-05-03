@@ -429,7 +429,7 @@ elseif ($action == 'add_user')
 		$query = array(
 			'INSERT'	=> 'login, password',
 			'INTO'		=> 'users',
-			'VALUES'	=> '\''.$login.'\', \''.md5('Life is not so easy :-)').'\''
+			'VALUES'	=> '\''.$login.'\', \''.md5('Life is not so easy :-)' . time() . mt_rand()).'\''
 		);
 		($hook = s2_hook('rq_action_add_user_pre_ins_qr')) ? eval($hook) : null;
 		$s2_db->buildAndQuery($query);
