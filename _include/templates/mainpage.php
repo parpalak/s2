@@ -26,7 +26,9 @@
 				<!-- s2_menu_children -->
 				<!-- s2_menu_subsections -->
 				<!-- s2_last_comments -->
+				<!-- s2_last_discussions -->
 				<!-- s2_blog_last_comments -->
+				<!-- s2_blog_last_discussions -->
 			</div>
 			<div class="clearing"></div>
 		</div>

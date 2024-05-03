@@ -14,12 +14,13 @@ use S2\Cms\Pdo\DbLayer;
 
 class Placeholder
 {
-	public static function recent_comments ()
-	{
+	public static function recent_comments (): array
+    {
 		global $request_uri;
 
-        if (!S2_SHOW_COMMENTS)
-            return '';
+        if (!S2_SHOW_COMMENTS) {
+            return [];
+        }
 
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);
@@ -62,12 +63,13 @@ class Placeholder
 		return $output;
 	}
 
-	public static function recent_discussions ()
-	{
+	public static function recent_discussions (): array
+    {
 		global $request_uri;
 
-        if (!S2_SHOW_COMMENTS)
-            return '';
+        if (!S2_SHOW_COMMENTS) {
+            return [];
+        }
 
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);

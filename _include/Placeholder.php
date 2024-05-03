@@ -180,10 +180,11 @@ class Placeholder
 	//
 	// Fetching last comments (for template placeholders)
 	//
-	public static function last_article_comments ()
-	{
-		if (!S2_SHOW_COMMENTS)
-			return '';
+	public static function last_article_comments (): array
+    {
+		if (!S2_SHOW_COMMENTS) {
+            return [];
+        }
 
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);
@@ -236,10 +237,11 @@ class Placeholder
 		return $output;
 	}
 
-	public static function last_discussions ()
-	{
-		if (!S2_SHOW_COMMENTS)
-			return '';
+	public static function last_discussions (): array
+    {
+		if (!S2_SHOW_COMMENTS) {
+            return [];
+        }
 
         /** @var DbLayer $s2_db */
         $s2_db = \Container::get(DbLayer::class);

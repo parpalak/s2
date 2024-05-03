@@ -574,6 +574,10 @@ class InstallCest
         $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_options', $data);
         $I->seeResponseCodeIsSuccessful();
 
+        // Test <!-- s2_last_comments --> and <!-- s2_last_discussions --> placeholders when comments are disabled
+        $I->amOnPage('/index.php?/');
+        $I->seeResponseCodeIsSuccessful();
+
         // Check conditional get when the comment form is disabled. Otherwise, there are some random tokens.
         // Last comments must be also hidden.
         $I->amOnPage('/index.php?/section1/new_page1');
