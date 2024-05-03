@@ -23,6 +23,7 @@ jobs:
           - 'mariadb-11.1'
           - 'mariadb-11.2'
           - 'mariadb-11.3'
+          - 'mariadb-11.4'
           - '8.0'
           - '8.2'
           - '8.3'
@@ -63,4 +64,4 @@ jobs:
 
       - name: Output logs
         if: failure()
-        run: cat _cache/test/*.log && cat _tests/_output/email/*.txt
+        run: cat _cache/test/*.log && cat _tests/_output/email/*.txt && /home/runner/work/s2/s2/_tests/_output/

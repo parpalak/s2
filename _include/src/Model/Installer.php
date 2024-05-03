@@ -27,7 +27,7 @@ readonly class Installer
         $schema = array(
             'FIELDS'      => array(
                 'name'  => array(
-                    'datatype'   => 'VARCHAR(255)',
+                    'datatype'   => 'VARCHAR(191)',
                     'allow_null' => false,
                     'default'    => '\'\''
                 ),
@@ -270,7 +270,7 @@ readonly class Installer
                     'allow_null' => false
                 ),
                 'name'        => array(
-                    'datatype'   => 'VARCHAR(255)',
+                    'datatype'   => 'VARCHAR(191)',
                     'allow_null' => false,
                     'default'    => '\'\''
                 ),
@@ -284,7 +284,7 @@ readonly class Installer
                     'default'    => '0'
                 ),
                 'url'         => array(
-                    'datatype'   => 'VARCHAR(255)',
+                    'datatype'   => 'VARCHAR(191)',
                     'allow_null' => false,
                     'default'    => '\'\''
                 ),
@@ -344,7 +344,7 @@ readonly class Installer
                     'default'    => '0'
                 ),
                 'login'          => array(
-                    'datatype'   => 'VARCHAR(200)',
+                    'datatype'   => 'VARCHAR(191)',
                     'allow_null' => true
                 ),
                 'ip'             => array(
@@ -379,7 +379,7 @@ readonly class Installer
                     'allow_null' => false
                 ),
                 'login'           => array(
-                    'datatype'   => 'VARCHAR(200)',
+                    'datatype'   => 'VARCHAR(191)',
                     'allow_null' => false,
                     'default'    => '\'\''
                 ),

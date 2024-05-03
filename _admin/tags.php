@@ -148,7 +148,7 @@ function s2_output_tag_form ($tag, $modify_time)
 <?php ($hook = s2_hook('fn_output_tag_form_pre_name')) ? eval($hook) : null; ?>
 			<tr>
 				<td class="label"><?php echo $lang_admin['Tag']; ?></td>
-				<td><input type="text" name="tag[name]" size="50" maxlength="255" value="<?php echo s2_htmlencode($tag['name']); ?>" /></td>
+				<td><input type="text" name="tag[name]" size="50" maxlength="191" value="<?php echo s2_htmlencode($tag['name']); ?>" /></td>
 			</tr>
 <?php ($hook = s2_hook('fn_output_tag_form_pre_time')) ? eval($hook) : null; ?>
 			<tr>
@@ -169,7 +169,7 @@ function s2_output_tag_form ($tag, $modify_time)
         <?php ($hook = s2_hook('fn_output_tag_form_pre_url')) ? eval($hook) : null; ?>
         <?php echo $lang_admin['URL part']; ?>
         <br />
-        <input type="text" name="tag[url]" size="18" maxlength="255" value="<?php echo $tag['url']; ?>" />
+        <input type="text" name="tag[url]" size="18" maxlength="191" value="<?php echo $tag['url']; ?>" />
         <br />
         <?php ($hook = s2_hook('fn_output_tag_form_pre_replace_tag')) ? eval($hook) : null; ?>
         <?php echo $lang_admin['Replace tag']; ?>

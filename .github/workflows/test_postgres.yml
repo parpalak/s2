@@ -48,4 +48,4 @@ jobs:
 
       - name: Output logs
         if: failure()
-        run: cat _cache/test/*.log && cat _tests/_output/email/*.txt
+        run: cat _cache/test/*.log && cat _tests/_output/email/*.txt && /home/runner/work/s2/s2/_tests/_output/
