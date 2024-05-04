@@ -26,6 +26,7 @@ use S2\Cms\Http\RedirectDetector;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
+use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\CommentProvider;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\TagsProvider;
@@ -254,6 +255,17 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(ArticleProvider::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new ArticleProvider(
+                $container->get(DbLayer::class),
+                $container->get(UrlBuilder::class),
+                $container->get(Viewer::class),
+                $provider->get('S2_USE_HIERARCHY') === '1',
+            );
+        });
+
         $container->set(TagsProvider::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
@@ -334,6 +346,7 @@ class CmsExtension implements ExtensionInterface
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new Rss(
+                $container->get(ArticleProvider::class),
                 $container->get('strict_viewer'),
                 $container->getParameter('base_url'),
                 $provider->get('S2_WEBMASTER'),
@@ -368,6 +381,12 @@ class CmsExtension implements ExtensionInterface
 
         $eventDispatcher->addListener(TemplateEvent::EVENT_CREATED, function (TemplateEvent $event) use ($container) {
             $template = $event->htmlTemplate;
+
+            if ($template->hasPlaceholder('<!-- s2_last_articles -->')) {
+                /** @var ArticleProvider $articleProvider */
+                $articleProvider = $container->get(ArticleProvider::class);
+                $template->registerPlaceholder('<!-- s2_last_articles -->', $articleProvider->lastArticlesPlaceholder(5));
+            }
 
             if ($template->hasPlaceholder('<!-- s2_tags_list -->')) {
                 /** @var TagsProvider $tagsProvider */

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2007-2024 Roman Parpalak
  * @license MIT
  * @package S2
  */

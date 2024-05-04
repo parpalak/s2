@@ -16,16 +16,15 @@ use S2\Cms\Controller\Rss;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\Lib;
 
-
 readonly class BlogRss extends Rss
 {
     public function __construct(
-        Viewer         $viewer,
-        string         $baseUrl,
-        string         $webmaster,
-        string         $siteName,
-        private string $blogUrl,
-        private string $blogTitle,
+        protected Viewer $viewer,
+        protected string $baseUrl,
+        protected string $webmaster,
+        protected string $siteName,
+        protected string $blogUrl,
+        protected string $blogTitle,
     )
     {
         Lang::load('s2_blog', function () {
@@ -34,8 +33,6 @@ readonly class BlogRss extends Rss
             else
                 return require __DIR__ . '/../lang/English.php';
         });
-
-        parent::__construct($viewer, $baseUrl, $webmaster, $siteName);
     }
 
     protected function content(): array

@@ -121,10 +121,6 @@ class HtmlTemplate
 
         $replace['<!-- s2_back_forward -->'] = !empty($this->page['back_forward']) ? $this->viewer->render('back_forward', ['links' => $this->page['back_forward']]) : '';
 
-        if (str_contains($template, '<!-- s2_last_articles -->')) {
-            $replace['<!-- s2_last_articles -->'] = \Placeholder::last_articles($this->viewer, 5);
-        }
-
         // Footer
         $replace['<!-- s2_copyright -->'] = $this->s2_build_copyright();
 
