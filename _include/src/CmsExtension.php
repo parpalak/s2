@@ -28,6 +28,7 @@ use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
 use S2\Cms\Model\CommentProvider;
 use S2\Cms\Model\ExtensionCache;
+use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerPostgres;
@@ -253,6 +254,16 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(TagsProvider::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new TagsProvider(
+                $container->get(DbLayer::class),
+                $container->get(UrlBuilder::class),
+                $provider->get('S2_TAGS_URL'),
+            );
+        });
+
         $container->set(CommentProvider::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
@@ -285,7 +296,8 @@ class CmsExtension implements ExtensionInterface
 
         $container->set(PageTags::class, function (Container $container) {
             return new PageTags(
-                $container->get(DbLayer::class),
+                $container->get(TagsProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
             );
@@ -357,10 +369,26 @@ class CmsExtension implements ExtensionInterface
         $eventDispatcher->addListener(TemplateEvent::EVENT_CREATED, function (TemplateEvent $event) use ($container) {
             $template = $event->htmlTemplate;
 
+            if ($template->hasPlaceholder('<!-- s2_tags_list -->')) {
+                /** @var TagsProvider $tagsProvider */
+                $tagsProvider = $container->get(TagsProvider::class);
+                $tagsList     = $tagsProvider->tagsList();
+
+                if (\count($tagsList) > 0) {
+                    /** @var Viewer $viewer */
+                    $viewer  = $container->get(Viewer::class);
+                    $template->registerPlaceholder('<!-- s2_tags_list -->', $viewer->render('tags_list', [
+                        'tags' => $tagsList,
+                    ]));
+                } else {
+                    $template->registerPlaceholder('<!-- s2_tags_list -->', '');
+                }
+            }
+
             if ($template->hasPlaceholder('<!-- s2_last_comments -->')) {
                 /** @var CommentProvider $commentProvider */
                 $commentProvider = $container->get(CommentProvider::class);
-                $lastComments   = $commentProvider->lastArticleComments();
+                $lastComments    = $commentProvider->lastArticleComments();
 
                 if (\count($lastComments) > 0) {
                     /** @var Viewer $viewer */
@@ -369,12 +397,14 @@ class CmsExtension implements ExtensionInterface
                         'title' => \Lang::get('Last comments'),
                         'menu'  => $lastComments,
                     ]));
+                } else {
+                    $template->registerPlaceholder('<!-- s2_last_comments -->', '');
                 }
             }
 
             if ($template->hasPlaceholder('<!-- s2_last_discussions -->')) {
                 /** @var CommentProvider $commentProvider */
-                $commentProvider  = $container->get(CommentProvider::class);
+                $commentProvider = $container->get(CommentProvider::class);
                 $lastDiscussions = $commentProvider->lastDiscussions();
 
                 if (\count($lastDiscussions) > 0) {
@@ -384,6 +414,8 @@ class CmsExtension implements ExtensionInterface
                         'title' => \Lang::get('Last discussions'),
                         'menu'  => $lastDiscussions,
                     ]));
+                } else {
+                    $template->registerPlaceholder('<!-- s2_last_discussions -->', '');
                 }
             }
         });

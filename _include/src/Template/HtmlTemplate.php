@@ -125,12 +125,6 @@ class HtmlTemplate
             $replace['<!-- s2_last_articles -->'] = \Placeholder::last_articles($this->viewer, 5);
         }
 
-        if (str_contains($template, '<!-- s2_tags_list -->')) {
-            $replace['<!-- s2_tags_list -->'] = !\count($tags_list = \Placeholder::tags_list()) ? '' : $this->viewer->render('tags_list', [
-                'tags' => $tags_list,
-            ]);
-        }
-
         // Footer
         $replace['<!-- s2_copyright -->'] = $this->s2_build_copyright();
 

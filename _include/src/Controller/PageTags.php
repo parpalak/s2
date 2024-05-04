@@ -12,17 +12,19 @@ declare(strict_types=1);
 namespace S2\Cms\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
-use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Model\TagsProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class PageTags implements ControllerInterface
+readonly class PageTags implements ControllerInterface
 {
     public function __construct(
-        private DbLayer              $dbLayer,
+        private TagsProvider         $tagsProvider,
+        private UrlBuilder           $urlBuilder,
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer
     ) {
@@ -31,18 +33,18 @@ class PageTags implements ControllerInterface
     public function handle(Request $request): Response
     {
         if ($request->attributes->get('slash') !== '/') {
-            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->urlBuilder->link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $template = $this->htmlTemplateProvider->getTemplate('site.php');
 
         $template
-            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'))
+            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), $this->urlBuilder->link('/'))
             ->addBreadCrumb(\Lang::get('Tags'))
             ->putInPlaceholder('title', \Lang::get('Tags'))
             ->putInPlaceholder('date', '')
             ->putInPlaceholder('text', $this->viewer->render('tags_list', [
-                'tags' => \Placeholder::tags_list()
+                'tags' => $this->tagsProvider->tagsList(),
             ]))
         ;
 
