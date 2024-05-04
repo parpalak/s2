@@ -54,8 +54,6 @@ class HtmlTemplate
 
     public function toHttpResponse(): Response
     {
-        global $s2_start;
-
         $template = $this->template;
 
         $replace = [];
@@ -122,20 +120,6 @@ class HtmlTemplate
         }
 
         $replace['<!-- s2_back_forward -->'] = !empty($this->page['back_forward']) ? $this->viewer->render('back_forward', ['links' => $this->page['back_forward']]) : '';
-
-        if (str_contains($template, '<!-- s2_last_comments -->') && \count($last_comments = \Placeholder::last_article_comments())) {
-            $replace['<!-- s2_last_comments -->'] = $this->viewer->render('menu_comments', [
-                'title' => \Lang::get('Last comments'),
-                'menu'  => $last_comments,
-            ]);
-        }
-
-        if (str_contains($template, '<!-- s2_last_discussions -->') && \count($last_discussions = \Placeholder::last_discussions())) {
-            $replace['<!-- s2_last_discussions -->'] = $this->viewer->render('menu_block', [
-                'title' => \Lang::get('Last discussions'),
-                'menu'  => $last_discussions,
-            ]);
-        }
 
         if (str_contains($template, '<!-- s2_last_articles -->')) {
             $replace['<!-- s2_last_articles -->'] = \Placeholder::last_articles($this->viewer, 5);

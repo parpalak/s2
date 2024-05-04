@@ -18,7 +18,7 @@ use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 if (!defined('S2_ROOT'))
     die;
 
-$s2_start = microtime(true);
+$s2BootTimestamp = microtime(true);
 
 define('S2_VERSION', '2.0dev');
 
@@ -60,18 +60,20 @@ if (!defined('S2_ALLOWED_EXTENSIONS')) {
 
 function collectParameters(): array
 {
+    global $s2BootTimestamp;
     $result = [
-        'root_dir'      => S2_ROOT,
-        'cache_dir'     => S2_CACHE_DIR,
-        'disable_cache' => defined('S2_DISABLE_CACHE'),
-        'log_dir'       => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
-        'base_url'      => defined('S2_BASE_URL') ? S2_BASE_URL : null,
-        'base_path'     => defined('S2_PATH') ? S2_PATH : null,
-        'url_prefix'    => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
-        'debug'         => defined('S2_DEBUG'),
-        'debug_view'    => defined('S2_DEBUG_VIEW'),
-        'show_queries'  => defined('S2_SHOW_QUERIES'),
-        'redirect_map'  => $GLOBALS['s2_redirect'] ?? [],
+        'boot_timestamp' => $s2BootTimestamp,
+        'root_dir'       => S2_ROOT,
+        'cache_dir'      => S2_CACHE_DIR,
+        'disable_cache'  => defined('S2_DISABLE_CACHE'),
+        'log_dir'        => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+        'base_url'       => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+        'base_path'      => defined('S2_PATH') ? S2_PATH : null,
+        'url_prefix'     => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
+        'debug'          => defined('S2_DEBUG'),
+        'debug_view'     => defined('S2_DEBUG_VIEW'),
+        'show_queries'   => defined('S2_SHOW_QUERIES'),
+        'redirect_map'   => $GLOBALS['s2_redirect'] ?? [],
     ];
 
     foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {

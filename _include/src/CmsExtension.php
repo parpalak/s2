@@ -26,6 +26,7 @@ use S2\Cms\Http\RedirectDetector;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
+use S2\Cms\Model\CommentProvider;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -252,6 +253,16 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(CommentProvider::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new CommentProvider(
+                $container->get(DbLayer::class),
+                $container->get(UrlBuilder::class),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+            );
+        });
+
         $container->set(RedirectDetector::class, function (Container $container) {
             return new RedirectDetector(
                 $container->getParameter('redirect_map')
@@ -343,14 +354,49 @@ class CmsExtension implements ExtensionInterface
             }
         });
 
+        $eventDispatcher->addListener(TemplateEvent::EVENT_CREATED, function (TemplateEvent $event) use ($container) {
+            $template = $event->htmlTemplate;
+
+            if ($template->hasPlaceholder('<!-- s2_last_comments -->')) {
+                /** @var CommentProvider $commentProvider */
+                $commentProvider = $container->get(CommentProvider::class);
+                $lastComments   = $commentProvider->lastArticleComments();
+
+                if (\count($lastComments) > 0) {
+                    /** @var Viewer $viewer */
+                    $viewer = $container->get(Viewer::class);
+                    $template->registerPlaceholder('<!-- s2_last_comments -->', $viewer->render('menu_comments', [
+                        'title' => \Lang::get('Last comments'),
+                        'menu'  => $lastComments,
+                    ]));
+                }
+            }
+
+            if ($template->hasPlaceholder('<!-- s2_last_discussions -->')) {
+                /** @var CommentProvider $commentProvider */
+                $commentProvider  = $container->get(CommentProvider::class);
+                $lastDiscussions = $commentProvider->lastDiscussions();
+
+                if (\count($lastDiscussions) > 0) {
+                    /** @var Viewer $viewer */
+                    $viewer = $container->get(Viewer::class);
+                    $template->registerPlaceholder('<!-- s2_last_discussions -->', $viewer->render('menu_block', [
+                        'title' => \Lang::get('Last discussions'),
+                        'menu'  => $lastDiscussions,
+                    ]));
+                }
+            }
+        });
+
         $eventDispatcher->addListener(TemplateEvent::EVENT_PRE_REPLACE, function (TemplateEvent $event) use ($container) {
-            $pdo           = $container->getIfInstantiated(\PDO::class);
-            $showQueries   = $container->getParameter('show_queries');
             $s2DebugOutput = '';
-            if ($showQueries) {
+            if ($container->getParameter('show_queries')) {
+                /** @var PDO $pdo */
+                $pdo     = $container->getIfInstantiated(\PDO::class);
+                $pdoLogs = $pdo !== null ? $pdo->cleanLogs() : [];
+
                 /** @var Viewer $viewer */
                 $viewer        = $container->get(Viewer::class);
-                $pdoLogs       = $pdo !== null ? $pdo->cleanLogs() : [];
                 $s2DebugOutput = $viewer->render('debug_queries', [
                     'saved_queries' => $pdoLogs,
                 ]);
@@ -359,15 +405,19 @@ class CmsExtension implements ExtensionInterface
         });
 
         $eventDispatcher->addListener(TemplateFinalReplaceEvent::class, function (TemplateFinalReplaceEvent $event) use ($container) {
-            global $s2_start;
-            /** @var Pdo $pdo */
-            $pdo = $container->getIfInstantiated(\PDO::class);
+            $content = '';
             if ($container->getParameter('debug') || defined('S2_SHOW_TIME')) {
-                $time_placeholder = 't = ' . \Lang::number_format(microtime(true) - $s2_start, true, 3) . '; q = ' . ($pdo !== null ? $pdo->getQueryCount() : 0);
-                $event->replace('<!-- s2_querytime -->', $time_placeholder);
+                /** @var Pdo $pdo */
+                $pdo           = $container->getIfInstantiated(\PDO::class);
+                $executionTime = microtime(true) - $container->getParameter('boot_timestamp');
+                $content       = sprintf(
+                    't = %s; q = %d',
+                    \Lang::number_format($executionTime, true, 3),
+                    $pdo !== null ? $pdo->getQueryCount() : 0
+                );
             }
+            $event->replace('<!-- s2_querytime -->', $content);
         }, -256);
-
     }
 
     public function registerRoutes(RouteCollection $routes, Container $container): void
