@@ -14,9 +14,10 @@ use S2\Cms\Pdo\DbLayer;
 readonly class CommentProvider
 {
     public function __construct(
-        private DbLayer    $dbLayer,
-        private UrlBuilder $urlBuilder,
-        private bool       $showComments
+        private DbLayer         $dbLayer,
+        private ArticleProvider $articleProvider,
+        private UrlBuilder      $urlBuilder,
+        private bool            $showComments
     ) {
     }
 
@@ -63,7 +64,7 @@ readonly class CommentProvider
             $counts[]    = $row['count'];
         }
 
-        $urls = Model::get_group_url($parentIds, $urls);
+        $urls = $this->articleProvider->getFullUrlsForArticles($parentIds, $urls);
 
         $output = [];
         foreach ($urls as $k => $url) {
@@ -123,7 +124,7 @@ readonly class CommentProvider
             $time[]       = $row['time'];
         }
 
-        $urls = Model::get_group_url($parent_ids, $urls);
+        $urls = $this->articleProvider->getFullUrlsForArticles($parent_ids, $urls);
 
         $output = [];
         foreach ($urls as $k => $url) {

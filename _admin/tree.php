@@ -8,7 +8,7 @@
  */
 
 
-use S2\Cms\Model\Model;
+use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Pdo\DbLayer;
 
 if (!defined('S2_ROOT'))
@@ -221,7 +221,7 @@ function s2_delete_branch ($id)
 	else
 		die('Item not found!');
 
-	if ($parent_id == Model::ROOT_ID)
+	if ($parent_id == ArticleProvider::ROOT_ID)
 		die('Can\'t delete root item!');
 
 	if (!$s2_user['edit_site'])

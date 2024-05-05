@@ -13,6 +13,8 @@ namespace S2\Cms\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Framework\Exception\NotFoundException;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -27,6 +29,8 @@ readonly class PageCommon implements ControllerInterface
 {
     public function __construct(
         private DbLayer                $dbLayer,
+        private ArticleProvider        $articleProvider,
+        private UrlBuilder             $urlBuilder,
         private HtmlTemplateProvider   $htmlTemplateProvider,
         private RecommendationProvider $recommendationProvider,
         private Viewer                 $viewer,
@@ -46,7 +50,7 @@ readonly class PageCommon implements ControllerInterface
 
         // Correcting trailing slash and the rest of URL
         if (!$this->useHierarchy && \count($request_array) > 2) {
-            return new RedirectResponse(s2_link('/' . $request_array[1]), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->urlBuilder->link('/' . $request_array[1]), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $was_end_slash = str_ends_with($request_uri, '/');
@@ -54,7 +58,7 @@ readonly class PageCommon implements ControllerInterface
         $bread_crumbs = [];
 
         $parent_path = '';
-        $parent_id   = \S2\Cms\Model\Model::ROOT_ID;
+        $parent_id   = ArticleProvider::ROOT_ID;
         $parent_num  = \count($request_array) - 1 - (int)$was_end_slash;
 
         $template_id = '';
@@ -103,7 +107,7 @@ readonly class PageCommon implements ControllerInterface
                 }
 
                 $bread_crumbs[] = [
-                    'link'  => s2_link($parent_path),
+                    'link'  => $this->urlBuilder->link($parent_path),
                     'title' => $cur_node['title']
                 ];
             }
@@ -154,7 +158,7 @@ readonly class PageCommon implements ControllerInterface
         if ($template_id === '') {
             if ($this->useHierarchy) {
                 $bread_crumbs[] = [
-                    'link'  => s2_link($parent_path),
+                    'link'  => $this->urlBuilder->link($parent_path),
                     'title' => $page['title'],
                 ];
 
@@ -167,7 +171,7 @@ readonly class PageCommon implements ControllerInterface
         }
 
         if ($this->useHierarchy && $parent_num && $page['children_exist'] != $was_end_slash) {
-            return new RedirectResponse(s2_link($current_path . (!$was_end_slash ? '/' : '')), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->urlBuilder->link($current_path . (!$was_end_slash ? '/' : '')), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $articleId = (int)$page['id'];
@@ -197,13 +201,13 @@ readonly class PageCommon implements ControllerInterface
             foreach ($bread_crumbs as $crumb) {
                 $template->addBreadCrumb($crumb['title'], $crumb['link'] ?? null);
             }
-            $template->setLink('top', s2_link('/'));
+            $template->setLink('top', $this->urlBuilder->link('/'));
 
             if (\count($bread_crumbs) > 1) {
-                $template->setLink('up', s2_link($parent_path));
+                $template->setLink('up', $this->urlBuilder->link($parent_path));
                 $template->putInPlaceholder(
                     'section_link',
-                    '<a href="' . s2_link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'
+                    '<a href="' . $this->urlBuilder->link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'
                 );
             }
         }
@@ -246,7 +250,7 @@ readonly class PageCommon implements ControllerInterface
                     $item = [
                         'id'       => $row['id'],
                         'title'    => $row['title'],
-                        'link'     => s2_link($current_path . '/' . urlencode($row['url']) . '/'),
+                        'link'     => $this->urlBuilder->link($current_path . '/' . urlencode($row['url']) . '/'),
                         'date'     => s2_date($row['create_time']),
                         'excerpt'  => $row['excerpt'],
                         'favorite' => $row['favorite'],
@@ -258,7 +262,7 @@ readonly class PageCommon implements ControllerInterface
                     $item       = array(
                         'id'       => $row['id'],
                         'title'    => $row['title'],
-                        'link'     => s2_link($current_path . '/' . urlencode($row['url'])),
+                        'link'     => $this->urlBuilder->link($current_path . '/' . urlencode($row['url'])),
                         'date'     => s2_date($row['create_time']),
                         'excerpt'  => $row['excerpt'],
                         'favorite' => $row['favorite'],
@@ -310,7 +314,7 @@ readonly class PageCommon implements ControllerInterface
                     $total_pages = ceil(1.0 * \count($subarticles) / $this->maxItems);
 
                     $link_nav = [];
-                    $paging   = s2_paging($page_num + 1, $total_pages, s2_link(str_replace('%', '%%', $current_path . '/'), ['p=%d']), $link_nav) . "\n";
+                    $paging   = s2_paging($page_num + 1, $total_pages, $this->urlBuilder->link(str_replace('%', '%%', $current_path . '/'), ['p=%d']), $link_nav) . "\n";
                     foreach ($link_nav as $rel => $href) {
                         $template->setLink($rel, $href);
                     }
@@ -367,7 +371,7 @@ readonly class PageCommon implements ControllerInterface
             $curr_item = -1;
             while ($row = $this->dbLayer->fetchAssoc($result)) {
                 // A neighbour
-                $url = s2_link($parent_path . urlencode($row['url']));
+                $url = $this->urlBuilder->link($parent_path . urlencode($row['url']));
 
                 $menu_articles[] = [
                     'title'      => $row['title'],
@@ -385,7 +389,7 @@ readonly class PageCommon implements ControllerInterface
 
             if (\count($bread_crumbs) > 1) {
                 $template->putInPlaceholder('menu_siblings', $this->viewer->render('menu_block', [
-                    'title' => sprintf(\Lang::get('More in this section'), '<a href="' . s2_link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'),
+                    'title' => sprintf(\Lang::get('More in this section'), '<a href="' . $this->urlBuilder->link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'),
                     'menu'  => $menu_articles,
                     'class' => 'menu_siblings',
                 ]));
@@ -402,7 +406,7 @@ readonly class PageCommon implements ControllerInterface
                 $template->putInPlaceholder('back_forward', [
                     'up'      => \count($bread_crumbs) <= 1 ? null : [
                         'title' => $bread_crumbs[\count($bread_crumbs) - 2]['title'],
-                        'link'  => s2_link($parent_path),
+                        'link'  => $this->urlBuilder->link($parent_path),
                     ],
                     'back'    => empty($menu_articles[$curr_item - 1]) ? null : [
                         'title' => $menu_articles[$curr_item - 1]['title'],
@@ -529,7 +533,7 @@ readonly class PageCommon implements ControllerInterface
         }
 
         if ($hasArticlesInList) {
-            $urls = \S2\Cms\Model\Model::get_group_url($parent_ids, $urls);
+            $urls = $this->articleProvider->getFullUrlsForArticles($parent_ids, $urls);
         }
 
         // Sorting all obtained article links into groups by each tag
@@ -553,7 +557,7 @@ readonly class PageCommon implements ControllerInterface
         $output = [];
         foreach ($art_by_tags as $tag_id => $articles) {
             $output[] = $this->viewer->render('menu_block', array(
-                'title' => sprintf(\Lang::get('With this tag'), '<a href="' . s2_link('/' . $this->tagsUrl . '/' . urlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
+                'title' => sprintf(\Lang::get('With this tag'), '<a href="' . $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
                 'menu'  => $articles,
                 'class' => 'article_tags',
             ));
@@ -582,7 +586,7 @@ readonly class PageCommon implements ControllerInterface
         while ($row = $this->dbLayer->fetchAssoc($result)) {
             $tags[] = array(
                 'title' => $row['name'],
-                'link'  => s2_link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/'),
+                'link'  => $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/'),
             );
         }
 

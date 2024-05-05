@@ -281,6 +281,7 @@ class CmsExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new CommentProvider(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $provider->get('S2_SHOW_COMMENTS') === '1',
             );
@@ -301,6 +302,8 @@ class CmsExtension implements ExtensionInterface
         $container->set(PageFavorite::class, function (Container $container) {
             return new PageFavorite(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
             );
@@ -320,6 +323,8 @@ class CmsExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new PageTag(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -331,6 +336,8 @@ class CmsExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new PageCommon(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(RecommendationProvider::class),
                 $container->get(Viewer::class),
@@ -357,6 +364,8 @@ class CmsExtension implements ExtensionInterface
         $container->set(Sitemap::class, function (Container $container) {
             return new Sitemap(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get('strict_viewer'),
             );
         });

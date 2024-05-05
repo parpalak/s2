@@ -7,17 +7,22 @@
  * @package s2_blog
  */
 
+declare(strict_types=1);
+
 namespace s2_extensions\s2_blog\Controller;
 
-
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\Viewer;
 
 class Sitemap extends \S2\Cms\Controller\Sitemap
 {
-    public function __construct(DbLayer $dbLayer, Viewer $viewer, private readonly string $blogUrl)
-    {
-        parent::__construct($dbLayer, $viewer);
+    public function __construct(
+        protected DbLayer       $dbLayer,
+        protected UrlBuilder    $urlBuilder,
+        protected Viewer        $viewer,
+        private readonly string $blogUrl
+    ) {
     }
 
     /**

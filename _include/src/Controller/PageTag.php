@@ -13,6 +13,8 @@ namespace S2\Cms\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Framework\Exception\NotFoundException;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
@@ -24,6 +26,8 @@ readonly class PageTag implements ControllerInterface
 {
     public function __construct(
         private DbLayer              $dbLayer,
+        private ArticleProvider      $articleProvider,
+        private UrlBuilder           $urlBuilder,
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer,
         private string               $tagsUrlFragment,
@@ -50,7 +54,7 @@ readonly class PageTag implements ControllerInterface
         [$tagId, $tagDescription, $tagName, $tagUrl] = $row;
 
         if (!$hasSlash) {
-            return new RedirectResponse(s2_link('/' . $this->tagsUrlFragment . '/' . urlencode($tagUrl) . '/'), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->urlBuilder->link('/' . $this->tagsUrlFragment . '/' . urlencode($tagUrl) . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $subquery   = [
@@ -82,7 +86,7 @@ readonly class PageTag implements ControllerInterface
             $parent_ids[] = $row['parent_id'];
         }
 
-        $urls = \S2\Cms\Model\Model::get_group_url($parent_ids, $urls);
+        $urls = $this->articleProvider->getFullUrlsForArticles($parent_ids, $urls);
 
         $sections = $articles = $articles_sort_array = $sections_sort_array = [];
         foreach ($urls as $k => $url) {
@@ -91,7 +95,7 @@ readonly class PageTag implements ControllerInterface
                 $item       = [
                     'id'       => $row['id'],
                     'title'    => $row['title'],
-                    'link'     => s2_link($url . (S2_USE_HIERARCHY ? '/' : '')),
+                    'link'     => $this->urlBuilder->link($url . (S2_USE_HIERARCHY ? '/' : '')),
                     'date'     => s2_date($row['create_time']),
                     'excerpt'  => $row['excerpt'],
                     'favorite' => $row['favorite'],
@@ -104,7 +108,7 @@ readonly class PageTag implements ControllerInterface
                 $item       = [
                     'id'       => $row['id'],
                     'title'    => $row['title'],
-                    'link'     => s2_link($url),
+                    'link'     => $this->urlBuilder->link($url),
                     'date'     => s2_date($row['create_time']),
                     'excerpt'  => $row['excerpt'],
                     'favorite' => $row['favorite'],
@@ -137,8 +141,8 @@ readonly class PageTag implements ControllerInterface
         $template = $this->htmlTemplateProvider->getTemplate('site.php');
 
         $template
-            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'))
-            ->addBreadCrumb(\Lang::get('Tags'), s2_link('/' . $this->tagsUrlFragment . '/'))
+            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), $this->urlBuilder->link('/'))
+            ->addBreadCrumb(\Lang::get('Tags'), $this->urlBuilder->link('/' . $this->tagsUrlFragment . '/'))
             ->addBreadCrumb($tagName)
             ->putInPlaceholder('title', $this->viewer->render('tag_title', ['title' => $tagName]))
             ->putInPlaceholder('date', '')

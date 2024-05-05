@@ -13,6 +13,8 @@ use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -119,6 +121,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new TagPageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -156,6 +160,7 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new Sitemap(
                 $container->get(DbLayer::class),
+                $container->get(UrlBuilder::class),
                 $container->get('strict_viewer'),
                 $provider->get('S2_BLOG_URL'),
             );

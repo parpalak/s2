@@ -11,6 +11,8 @@ namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
 use S2\Cms\Framework\Exception\NotFoundException;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -24,13 +26,15 @@ use Symfony\Component\HttpFoundation\Response;
 class TagPageController extends BlogController
 {
     public function __construct(
-        DbLayer               $dbLayer,
-        HtmlTemplateProvider  $templateProvider,
-        Viewer                $viewer,
-        string                $tagsUrl,
-        string                $blogUrl,
-        string                $blogTitle,
-        private readonly bool $useHierarchy
+        DbLayer                          $dbLayer,
+        private readonly ArticleProvider $articleProvider,
+        private readonly UrlBuilder      $urlBuilder,
+        HtmlTemplateProvider             $templateProvider,
+        Viewer                           $viewer,
+        string                           $tagsUrl,
+        string                           $blogUrl,
+        string                           $blogTitle,
+        private readonly bool            $useHierarchy
     ) {
         parent::__construct($dbLayer, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
     }
@@ -85,7 +89,7 @@ class TagPageController extends BlogController
             throw new NotFoundException();
         }
 
-        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), $this->urlBuilder->link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }
@@ -137,10 +141,10 @@ class TagPageController extends BlogController
             $parentIds[] = $row['parent_id'];
             $title[]     = $row['title'];
         }
-        $urls = \S2\Cms\Model\Model::get_group_url($parentIds, $urls);
+        $urls = $this->articleProvider->getFullUrlsForArticles($parentIds, $urls);
 
         foreach ($urls as $k => $v) {
-            $urls[$k] = '<a href="' . s2_link($v) . '">' . $title[$k] . '</a>';
+            $urls[$k] = '<a href="' . $this->urlBuilder->link($v) . '">' . $title[$k] . '</a>';
         }
 
         return $urls;

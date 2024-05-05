@@ -14,12 +14,82 @@ use S2\Cms\Template\Viewer;
 
 readonly class ArticleProvider
 {
+    public const ROOT_ID = 0;
+
     public function __construct(
         private DbLayer    $dbLayer,
         private UrlBuilder $urlBuilder,
         private Viewer     $viewer,
         private bool       $useHierarchy,
     ) {
+    }
+
+    /**
+     * Fetches hierarchical URLs for several articles. This is done by minimal number of SQL queries,
+     * as if there were only one article.
+     *
+     * Returns an array containing full URLs, keys are preserved.
+     * If somewhere is a hidden parent, the URL is removed from the returning array.
+     *
+     * Actually it's one of the best things in S2! :)
+     *
+     * @throws \S2\Cms\Pdo\DbLayerException
+     */
+    public function getFullUrlsForArticles(array $parentIds, array $urls): array
+    {
+        if (!$this->useHierarchy) {
+            // Flat urls
+            foreach ($urls as $k => $url) {
+                $urls[$k] = '/' . $url;
+            }
+
+            return $urls;
+        }
+
+        /**
+         * We build a parent chain for every article. The chain either goes up to the root
+         * or stops at an unpublished article.
+         *
+         * If the chain goes up to the root, parent URLs are added to the $urls elements on each step up.
+         * If the chain stops at an unpublished article, the URL is removed from the $urls array.
+         */
+        while (\count($parentIds) > 0) {
+            $parentsAreFound = array_combine(array_keys($parentIds), array_fill(0, \count($parentIds), false));
+
+            // Step to fetch parent articles
+            $query  = [
+                'SELECT' => 'id, parent_id, url',
+                'FROM'   => 'articles',
+                'WHERE'  => 'id IN (' . implode(', ', array_unique($parentIds)) . ') AND published = 1'
+            ];
+            $result = $this->dbLayer->buildAndQuery($query);
+
+            while ($row = $this->dbLayer->fetchAssoc($result)) {
+                // Well, the loop may seem not pretty much.
+                // But $parent_ids values don't have to be unique, we have to process all duplicates.
+                foreach ($parentIds as $k => $parentId) {
+                    // Note: check for && !$parentsAreFound[$k] seems to be useless after adding array_unique in query before
+                    if ($parentId === $row['id'] && !$parentsAreFound[$k]) {
+                        $parentIds[$k]       = $row['parent_id'];
+                        $urls[$k]            = urlencode($row['url']) . '/' . $urls[$k];
+                        $parentsAreFound[$k] = true;
+                        if (self::ROOT_ID === (int)$row['parent_id']) {
+                            // The chain is finished - we are at the root.
+                            unset($parentIds[$k]);
+                        }
+                    }
+                }
+            }
+
+            // Chain was cut (published = 0). Remove the entry from $urls.
+            foreach ($parentsAreFound as $k => $parentIsFound) {
+                if (!$parentIsFound) {
+                    unset($urls[$k], $parentIds[$k]);
+                }
+            }
+        }
+
+        return $urls;
     }
 
     /**
@@ -61,10 +131,10 @@ readonly class ArticleProvider
 
         $result = $this->dbLayer->buildAndQuery($query);
 
-        $last = $urls = $parent_ids = [];
+        $last = $urls = $parentIds = [];
         for ($i = 0; $row = $this->dbLayer->fetchAssoc($result); $i++) {
-            $urls[$i]       = urlencode($row['url']);
-            $parent_ids[$i] = $row['parent_id'];
+            $urls[$i]      = urlencode($row['url']);
+            $parentIds[$i] = $row['parent_id'];
 
             $last[$i]['title']        = $row['title'];
             $last[$i]['parent_title'] = $row['parent_title'];
@@ -76,7 +146,7 @@ readonly class ArticleProvider
             $last[$i]['author']       = $row['author'] ?? '';
         }
 
-        $urls = Model::get_group_url($parent_ids, $urls);
+        $urls = $this->getFullUrlsForArticles($parentIds, $urls);
 
         foreach ($last as $k => $v) {
             if (isset($urls[$k])) {
