@@ -145,6 +145,8 @@ class CmsExtension implements ExtensionInterface
                 $container->get(Finder::class),
                 $container->get(StemmerInterface::class),
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $container->getParameter('debug_view'),
@@ -295,6 +297,8 @@ class CmsExtension implements ExtensionInterface
 
         $container->set(NotFoundController::class, function (Container $container) {
             return new NotFoundController(
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
             );
         });
@@ -312,6 +316,7 @@ class CmsExtension implements ExtensionInterface
         $container->set(PageTags::class, function (Container $container) {
             return new PageTags(
                 $container->get(TagsProvider::class),
+                $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),

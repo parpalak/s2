@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace S2\Cms\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -24,6 +25,7 @@ readonly class PageTags implements ControllerInterface
 {
     public function __construct(
         private TagsProvider         $tagsProvider,
+        private ArticleProvider      $articleProvider,
         private UrlBuilder           $urlBuilder,
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer
@@ -39,7 +41,7 @@ readonly class PageTags implements ControllerInterface
         $template = $this->htmlTemplateProvider->getTemplate('site.php');
 
         $template
-            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), $this->urlBuilder->link('/'))
+            ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
             ->addBreadCrumb(\Lang::get('Tags'))
             ->putInPlaceholder('title', \Lang::get('Tags'))
             ->putInPlaceholder('date', '')

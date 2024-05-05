@@ -93,6 +93,23 @@ readonly class ArticleProvider
     }
 
     /**
+     * Returns the title of the main page.
+     *
+     * @throws \S2\Cms\Pdo\DbLayerException
+     */
+    public function mainPageTitle(): string
+    {
+        // TODO cache?
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => 'title',
+            'FROM'   => 'articles',
+            'WHERE'  => 'parent_id = ' . self::ROOT_ID,
+        ]);
+
+        return $this->dbLayer->result($result);
+    }
+
+    /**
      * Fetching last articles info (for template placeholders and RSS)
      *
      * @throws \S2\Cms\Pdo\DbLayerException

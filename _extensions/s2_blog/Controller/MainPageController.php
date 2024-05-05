@@ -10,6 +10,8 @@
 namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -19,11 +21,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-
 class MainPageController extends BlogController
 {
     public function __construct(
         DbLayer              $dbLayer,
+        ArticleProvider      $articleProvider,
+        UrlBuilder           $urlBuilder,
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
         string               $tagsUrl,
@@ -31,7 +34,7 @@ class MainPageController extends BlogController
         string               $blogTitle,
         private readonly int $itemsPerPage,
     ) {
-        parent::__construct($dbLayer, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+        parent::__construct($dbLayer, $articleProvider, $urlBuilder, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
     }
 
     public function handle(Request $request): Response
@@ -45,7 +48,7 @@ class MainPageController extends BlogController
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
-            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->urlBuilder->link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $skipLastPostsNum = (int)$request->attributes->get('page', 0);
@@ -90,7 +93,7 @@ class MainPageController extends BlogController
 
         $template->putInPlaceholder('text', $output);
 
-        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $skipLastPostsNum > 0 ? $this->blogPath : null);
         }
@@ -100,7 +103,7 @@ class MainPageController extends BlogController
         } else {
             $template->putInPlaceholder('meta_description', $this->blogTitle);
             if ($this->blogUrl !== '') {
-                $template->setLink('up', s2_link('/'));
+                $template->setLink('up', $this->urlBuilder->link('/'));
             }
         }
 

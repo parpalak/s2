@@ -117,7 +117,7 @@ readonly class PageFavorite implements ControllerInterface
         $template = $this->htmlTemplateProvider->getTemplate('site.php');
 
         $template
-            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), $this->urlBuilder->link('/'))
+            ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
             ->addBreadCrumb(\Lang::get('Favorite'))
             ->putInPlaceholder('title', \Lang::get('Favorite'))
             ->putInPlaceholder('date', '')

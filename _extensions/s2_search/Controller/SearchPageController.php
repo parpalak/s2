@@ -13,6 +13,8 @@ namespace s2_extensions\s2_search\Controller;
 
 use Lang;
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
@@ -31,6 +33,8 @@ readonly class SearchPageController implements ControllerInterface
         private Finder               $finder,
         private StemmerInterface     $stemmer,
         private DbLayer              $dbLayer,
+        private ArticleProvider      $articleProvider,
+        private UrlBuilder           $urlBuilder,
         private HtmlTemplateProvider $templateProvider,
         private Viewer               $viewer,
         private bool                 $debugView,
@@ -101,7 +105,7 @@ readonly class SearchPageController implements ControllerInterface
                 }
 
                 $link_nav          = [];
-                $content['paging'] = s2_paging($pageNum, $totalPages, s2_link('/search', ['q=' . str_replace('%', '%%', urlencode($query)), 'p=%d']), $link_nav);
+                $content['paging'] = s2_paging($pageNum, $totalPages, $this->urlBuilder->link('/search', ['q=' . str_replace('%', '%%', urlencode($query)), 'p=%d']), $link_nav);
                 foreach ($link_nav as $rel => $href) {
                     $template->setLink($rel, $href);
                 }
@@ -112,7 +116,7 @@ readonly class SearchPageController implements ControllerInterface
         $template->putInPlaceholder('title', Lang::get('Search', 's2_search'));
         $template->registerPlaceholder('<!-- s2_search_field -->', '');
 
-        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         $template->addBreadCrumb(Lang::get('Search', 's2_search'));
 
         return $template->toHttpResponse();
@@ -156,7 +160,7 @@ readonly class SearchPageController implements ControllerInterface
         $tags = [];
         while ($row = $this->dbLayer->fetchAssoc($s2_search_result)) {
             if ($this->tagIsSimilarToWords($row['name'], $words)) {
-                $tags[] = '<a href="' . s2_link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
+                $tags[] = '<a href="' . $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
             }
         }
 

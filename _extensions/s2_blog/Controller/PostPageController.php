@@ -10,6 +10,8 @@
 namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplate;
@@ -24,6 +26,8 @@ class PostPageController extends BlogController
 {
     public function __construct(
         DbLayer                                 $dbLayer,
+        ArticleProvider                         $articleProvider,
+        UrlBuilder                              $urlBuilder,
         private readonly RecommendationProvider $recommendationProvider,
         HtmlTemplateProvider                    $templateProvider,
         Viewer                                  $viewer,
@@ -32,7 +36,7 @@ class PostPageController extends BlogController
         string                                  $blogTitle,
         protected bool                          $showComments,
     ) {
-        parent::__construct($dbLayer, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+        parent::__construct($dbLayer, $articleProvider, $urlBuilder, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
@@ -49,7 +53,7 @@ class PostPageController extends BlogController
             return $result;
         }
 
-        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }

@@ -44,6 +44,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new MainPageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -57,6 +59,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new DayPageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -69,6 +73,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new MonthPageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -82,6 +88,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new YearPageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -95,6 +103,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new PostPageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(RecommendationProvider::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
@@ -109,6 +119,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new TagsPageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -136,6 +148,8 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new FavoritePageController(
                 $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),

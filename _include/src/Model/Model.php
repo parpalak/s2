@@ -10,15 +10,20 @@ use S2\Cms\Pdo\DbLayer;
  * @copyright (C) 2007-2014 Roman Parpalak
  * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * @package S2
+ *
+ * @deprecated Do not use static calls like this in a new code.
  */
 class Model
 {
     const ROOT_ID = 0;
 
 
-    //
-    // Returns the full path for an article
-    //
+    /**
+     * Returns the full path for an article
+     *
+     * @deprecated Do not use static calls like this in a new code.
+     * @throws \S2\Cms\Pdo\DbLayerException
+     */
     public static function path_from_id($id, $visible_for_all = false)
     {
         /** @var DbLayer $s2_db */
@@ -53,26 +58,5 @@ class Model
             $prefix = '';
 
         return $prefix . '/' . urlencode($row[0]);
-    }
-
-    //
-    // Returns the title of the main page
-    // TODO cache
-    //
-    public static function main_page_title()
-    {
-        /** @var DbLayer $s2_db */
-        $s2_db = \Container::get(DbLayer::class);
-
-        $query = array(
-            'SELECT' => 'title',
-            'FROM'   => 'articles',
-            'WHERE'  => 'parent_id = ' . self::ROOT_ID,
-        );
-
-        ($hook = s2_hook('fn_s2_main_page_title_qr')) ? eval($hook) : null;
-
-        $result = $s2_db->buildAndQuery($query);
-        return $s2_db->result($result);
     }
 }

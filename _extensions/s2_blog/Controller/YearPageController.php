@@ -10,6 +10,8 @@
 namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -23,6 +25,8 @@ class YearPageController extends BlogController
 {
     public function __construct(
         DbLayer                 $dbLayer,
+        ArticleProvider         $articleProvider,
+        UrlBuilder              $urlBuilder,
         HtmlTemplateProvider    $templateProvider,
         Viewer                  $viewer,
         string                  $tagsUrl,
@@ -30,7 +34,7 @@ class YearPageController extends BlogController
         string                  $blogTitle,
         private readonly string $startYear,
     ) {
-        parent::__construct($dbLayer, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+        parent::__construct($dbLayer, $articleProvider, $urlBuilder, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
@@ -82,7 +86,7 @@ class YearPageController extends BlogController
             'content' => $content
         ], 's2_blog'));
 
-        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }

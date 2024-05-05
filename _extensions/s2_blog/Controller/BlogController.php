@@ -11,6 +11,8 @@ namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -29,6 +31,8 @@ abstract class BlogController implements ControllerInterface
 
     public function __construct(
         protected DbLayer              $dbLayer,
+        protected ArticleProvider      $articleProvider,
+        protected UrlBuilder           $urlBuilder,
         protected HtmlTemplateProvider $templateProvider,
         protected Viewer               $viewer,
         protected string               $tagsUrl,
@@ -36,7 +40,7 @@ abstract class BlogController implements ControllerInterface
         protected string               $blogTitle, // S2_BLOG_TITLE
     )
     {
-        $this->blogPath     = s2_link(str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . '/'); // S2_BLOG_PATH
+        $this->blogPath     = $this->urlBuilder->link(str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . '/'); // S2_BLOG_PATH
         $this->blogTagsPath = $this->blogPath . urlencode($this->tagsUrl) . '/'; // S2_BLOG_TAGS_PATH
 
         Lang::load('s2_blog', function () {
@@ -54,9 +58,11 @@ abstract class BlogController implements ControllerInterface
         $template
             ->putInPlaceholder('commented', 0)
             ->putInPlaceholder('class', 's2_blog')
-            ->putInPlaceholder('rss_link', ['<link rel="alternate" type="application/rss+xml" title="' .
-                s2_htmlencode(Lang::get('RSS link title', 's2_blog')) . '" href="' .
-                s2_link(str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . '/rss.xml') . '" />'])
+            ->putInPlaceholder('rss_link', [sprintf(
+                '<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />',
+                s2_htmlencode(Lang::get('RSS link title', 's2_blog')),
+                $this->urlBuilder->link(str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . '/rss.xml')
+            )])
         ;
 
         if ($template->hasPlaceholder('<!-- s2_blog_navigation -->')) {

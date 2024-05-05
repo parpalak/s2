@@ -15,7 +15,6 @@ use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-
 class DayPageController extends BlogController
 {
     public function body(Request $request, HtmlTemplate $template): ?Response
@@ -50,7 +49,7 @@ class DayPageController extends BlogController
             ->putInPlaceholder('head_title', s2_date($startTime))
         ;
 
-        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
+        $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }

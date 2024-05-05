@@ -16,16 +16,15 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-
 class FavoritePageController extends BlogController
 {
-    public function body (Request $request, HtmlTemplate $template): ?Response
+    public function body(Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
-            return new RedirectResponse(s2_link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->urlBuilder->link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
-		if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
+        if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
             $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
         }
 
@@ -39,8 +38,8 @@ class FavoritePageController extends BlogController
             $template->markAsNotFound();
         }
 
-		// Bread crumbs
-        $template->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), s2_link('/'));
+        // Bread crumbs
+        $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if ($this->blogUrl !== '') {
             $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
         }
@@ -55,5 +54,5 @@ class FavoritePageController extends BlogController
         $template->setLink('up', $this->blogPath);
 
         return null;
-	}
+    }
 }

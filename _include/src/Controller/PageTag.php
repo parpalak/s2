@@ -141,7 +141,7 @@ readonly class PageTag implements ControllerInterface
         $template = $this->htmlTemplateProvider->getTemplate('site.php');
 
         $template
-            ->addBreadCrumb(\S2\Cms\Model\Model::main_page_title(), $this->urlBuilder->link('/'))
+            ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
             ->addBreadCrumb(\Lang::get('Tags'), $this->urlBuilder->link('/' . $this->tagsUrlFragment . '/'))
             ->addBreadCrumb($tagName)
             ->putInPlaceholder('title', $this->viewer->render('tag_title', ['title' => $tagName]))
