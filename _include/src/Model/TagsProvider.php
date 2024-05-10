@@ -23,8 +23,11 @@ class TagsProvider
     ) {
     }
 
-
-    // Makes tags list for the tags page and the placeholder
+    /**
+     * Makes tags list for the tags page and the placeholder
+     *
+     * @throws \S2\Cms\Pdo\DbLayerException
+     */
     public function tagsList(): array
     {
         if ($this->cachedTags === null) {
@@ -43,17 +46,18 @@ class TagsProvider
             $query    = [
                 'SELECT'   => 'tag_id, name, url, (' . $this->dbLayer->build($subQuery) . ') AS count',
                 'FROM'     => 'tags AS t',
-                'HAVING'   => 'count > 0',
                 'ORDER BY' => 'count DESC',
             ];
             $result   = $this->dbLayer->buildAndQuery($query);
 
             while ($row = $this->dbLayer->fetchAssoc($result)) {
-                $this->cachedTags[] = array(
-                    'title' => $row['name'],
-                    'link'  => $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/'),
-                    'num'   => $row['count'],
-                );
+                if ($row['count'] > 0) {
+                    $this->cachedTags[] = array(
+                        'title' => $row['name'],
+                        'link'  => $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/'),
+                        'num'   => $row['count'],
+                    );
+                }
             }
         }
 
