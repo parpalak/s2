@@ -55,12 +55,12 @@ class YearPageController extends BlogController
 
         $template->setLink('up', $this->blogUrlBuilder->main());
         if ($year > $this->startYear) {
-            $pageTitle = '<a href="' . $this->blogUrlBuilder->year($year - 1) . '/">&larr;</a> ' . $pageTitle;
-            $template->setLink('prev', $this->blogUrlBuilder->year($year - 1) . '/');
+            $pageTitle = '<a href="' . $this->blogUrlBuilder->year($year - 1) . '">&larr;</a> ' . $pageTitle;
+            $template->setLink('prev', $this->blogUrlBuilder->year($year - 1));
         }
         if ($year < date('Y')) {
-            $pageTitle .= ' <a href="' . $this->blogUrlBuilder->year($year + 1) . '/">&rarr;</a>';
-            $template->setLink('next', $this->blogUrlBuilder->year($year + 1) . '/');
+            $pageTitle .= ' <a href="' . $this->blogUrlBuilder->year($year + 1) . '">&rarr;</a>';
+            $template->setLink('next', $this->blogUrlBuilder->year($year + 1));
         }
         $template->putInPlaceholder('title', $pageTitle);
 
