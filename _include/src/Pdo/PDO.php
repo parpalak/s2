@@ -24,6 +24,7 @@ class PDO extends NativePdo
     private array $connectionParams;
     private bool $isConnected = false;
     private array $connectionCallbacks = [];
+    private ?\Exception $connectionException = null;
 
     /**
      * {@inheritdoc}
@@ -134,12 +135,23 @@ class PDO extends NativePdo
         return \count($this->log);
     }
 
+    /**
+     * @throws \Exception
+     */
     private function connectIfRequired(): void
     {
         if (!$this->isConnected) {
+            if ($this->connectionException !== null) {
+                throw $this->connectionException;
+            }
             $start = microtime(true);
 
-            parent::__construct(...$this->connectionParams);
+            try {
+                parent::__construct(...$this->connectionParams);
+            } catch (\Exception $e) {
+                $this->connectionException = $e;
+                throw $e;
+            }
             $this->setAttribute(self::ATTR_STATEMENT_CLASS, [PDOStatement::class, [$this]]);
             $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $this->isConnected = true;
