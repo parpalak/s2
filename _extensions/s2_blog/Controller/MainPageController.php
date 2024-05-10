@@ -16,6 +16,8 @@ use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
+use s2_extensions\s2_blog\BlogUrlBuilder;
+use s2_extensions\s2_blog\CalendarBuilder;
 use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,16 +27,16 @@ class MainPageController extends BlogController
 {
     public function __construct(
         DbLayer              $dbLayer,
+        CalendarBuilder      $calendarBuilder,
+        BlogUrlBuilder       $blogUrlBuilder,
         ArticleProvider      $articleProvider,
         UrlBuilder           $urlBuilder,
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
-        string               $tagsUrl,
-        string               $blogUrl,
         string               $blogTitle,
         private readonly int $itemsPerPage,
     ) {
-        parent::__construct($dbLayer, $articleProvider, $urlBuilder, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
     }
 
     public function handle(Request $request): Response
@@ -57,7 +59,7 @@ class MainPageController extends BlogController
         }
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar());
         }
 
         $postsPerPage = $this->itemsPerPage ?: 10;
@@ -76,13 +78,13 @@ class MainPageController extends BlogController
 
         $paging = '';
         if ($skipLastPostsNum > 0) {
-            $prevLink = $this->blogPath . ($skipLastPostsNum > $postsPerPage ? 'skip/' . ($skipLastPostsNum - $postsPerPage) : '');
+            $prevLink = $this->blogUrlBuilder->main() . ($skipLastPostsNum > $postsPerPage ? 'skip/' . ($skipLastPostsNum - $postsPerPage) : '');
             $template->setLink('prev', $prevLink);
             $paging = '<a href="' . $prevLink . '">' . Lang::get('Here') . '</a> ';
             // TODO think about back_forward
         }
         if ($i > $postsPerPage) {
-            $nextLink = S2_BLOG_PATH . 'skip/' . ($skipLastPostsNum + $postsPerPage);
+            $nextLink = $this->blogUrlBuilder->main() . 'skip/' . ($skipLastPostsNum + $postsPerPage);
             $template->setLink('next', $nextLink);
             $paging .= '<a href="' . $nextLink . '">' . Lang::get('There') . '</a>';
         }
@@ -94,15 +96,15 @@ class MainPageController extends BlogController
         $template->putInPlaceholder('text', $output);
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
-        if ($this->blogUrl !== '') {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $skipLastPostsNum > 0 ? $this->blogPath : null);
+        if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $skipLastPostsNum > 0 ? $this->blogUrlBuilder->main() : null);
         }
 
         if ($skipLastPostsNum > 0) {
-            $template->setLink('up', $this->blogPath);
+            $template->setLink('up', $this->blogUrlBuilder->main());
         } else {
             $template->putInPlaceholder('meta_description', $this->blogTitle);
-            if ($this->blogUrl !== '') {
+            if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
                 $template->setLink('up', $this->urlBuilder->link('/'));
             }
         }

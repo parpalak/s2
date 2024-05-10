@@ -39,17 +39,36 @@ class Extension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
+        $container->set(BlogUrlBuilder::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new BlogUrlBuilder(
+                $container->get(UrlBuilder::class),
+                $provider->get('S2_TAGS_URL'),
+                $provider->get('S2_FAVORITE_URL'),
+                $provider->get('S2_BLOG_URL'),
+            );
+        });
+        $container->set(CalendarBuilder::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new CalendarBuilder(
+                $container->get(DbLayer::class),
+                $container->get(BlogUrlBuilder::class),
+                (int) $provider->get('S2_START_YEAR'),
+            );
+        });
         $container->set(MainPageController::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new MainPageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
                 (int)$provider->get('S2_MAX_ITEMS')
             );
@@ -59,12 +78,12 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new DayPageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
@@ -73,14 +92,14 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new MonthPageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_START_YEAR'),
+                (int)$provider->get('S2_START_YEAR'),
             );
         });
         $container->set(YearPageController::class, function (Container $container) {
@@ -88,14 +107,14 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new YearPageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_START_YEAR'),
+                (int)$provider->get('S2_START_YEAR'),
             );
         });
         $container->set(PostPageController::class, function (Container $container) {
@@ -103,13 +122,13 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new PostPageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(RecommendationProvider::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
                 $provider->get('S2_SHOW_COMMENTS') === '1',
             );
@@ -119,12 +138,12 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new TagsPageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
@@ -133,12 +152,12 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new TagPageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
                 $provider->get('S2_USE_HIERARCHY') === '1',
             );
@@ -148,12 +167,12 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new FavoritePageController(
                 $container->get(DbLayer::class),
+                $container->get(CalendarBuilder::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
@@ -161,11 +180,11 @@ class Extension implements ExtensionInterface
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new BlogRss(
+                $container->get(BlogUrlBuilder::class),
                 $container->get('strict_viewer'),
                 $container->getParameter('base_url'),
                 $provider->get('S2_WEBMASTER'),
                 $provider->get('S2_SITE_NAME'),
-                $provider->get('S2_BLOG_URL'),
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
@@ -174,9 +193,9 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new Sitemap(
                 $container->get(DbLayer::class),
+                $container->get(BlogUrlBuilder::class),
                 $container->get(UrlBuilder::class),
                 $container->get('strict_viewer'),
-                $provider->get('S2_BLOG_URL'),
             );
         });
     }

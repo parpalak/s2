@@ -14,14 +14,15 @@ namespace s2_extensions\s2_blog\Controller;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\Viewer;
+use s2_extensions\s2_blog\BlogUrlBuilder;
 
 class Sitemap extends \S2\Cms\Controller\Sitemap
 {
     public function __construct(
-        protected DbLayer       $dbLayer,
-        protected UrlBuilder    $urlBuilder,
-        protected Viewer        $viewer,
-        private readonly string $blogUrl
+        protected DbLayer        $dbLayer,
+        protected BlogUrlBuilder $blogUrlBuilder,
+        protected UrlBuilder     $urlBuilder,
+        protected Viewer         $viewer,
     ) {
     }
 
@@ -40,7 +41,7 @@ class Sitemap extends \S2\Cms\Controller\Sitemap
 
         $posts = [];
         while ($row = $this->dbLayer->fetchAssoc($result)) {
-            $row['rel_path'] = $this->blogUrl . date('/Y/m/d/', $row['time']) . urlencode($row['url']);
+            $row['rel_path'] = $this->blogUrlBuilder->postFromTimestamp($row['time'], $row['url']);
             $posts[]         = $row;
         }
 

@@ -16,53 +16,52 @@ use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
-use s2_extensions\s2_blog\Lib;
+use s2_extensions\s2_blog\BlogUrlBuilder;
+use s2_extensions\s2_blog\CalendarBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class MonthPageController extends BlogController
 {
     public function __construct(
-        DbLayer                 $dbLayer,
-        ArticleProvider         $articleProvider,
-        UrlBuilder              $urlBuilder,
-        HtmlTemplateProvider    $templateProvider,
-        Viewer                  $viewer,
-        string                  $tagsUrl,
-        string                  $blogUrl,
-        string                  $blogTitle,
-        private readonly string $startYear,
+        DbLayer              $dbLayer,
+        CalendarBuilder      $calendarBuilder,
+        BlogUrlBuilder       $blogUrlBuilder,
+        ArticleProvider      $articleProvider,
+        UrlBuilder           $urlBuilder,
+        HtmlTemplateProvider $templateProvider,
+        Viewer               $viewer,
+        string               $blogTitle,
+        private readonly int $startYear,
     ) {
-        parent::__construct($dbLayer, $articleProvider, $urlBuilder, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
-        $params = $request->attributes->all();
-
-        $year  = $params['year'];
-        $month = $params['month'];
+        $year  = $request->attributes->get('year');
+        $month = $request->attributes->get('month');
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar($year, $month, 0));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar((int)$year, (int)$month, 0));
         }
 
         $template->putInPlaceholder('title', '');
 
-        $startTime = mktime(0, 0, 0, $month, 1, $year);
-        $endTime   = mktime(0, 0, 0, $month + 1, 1, $year);
-        $prevTime  = mktime(0, 0, 0, $month - 1, 1, $year);
+        $startTime = mktime(0, 0, 0, (int)$month, 1, (int)$year);
+        $endTime   = mktime(0, 0, 0, (int)$month + 1, 1, (int)$year);
+        $prevTime  = mktime(0, 0, 0, (int)$month - 1, 1, (int)$year);
 
-        $template->setLink('up', $this->blogPath . date('Y/', $startTime));
+        $template->setLink('up', $this->blogUrlBuilder->year((int)$year));
 
         $paging = '';
         if ($prevTime >= mktime(0, 0, 0, 1, 1, $this->startYear)) {
-            $prevLink = $this->blogPath . date('Y/m/', $prevTime);
+            $prevLink = $this->blogUrlBuilder->monthFromTimestamp($prevTime);
             $template->setLink('prev', $prevLink);
             $paging = '<a href="' . $prevLink . '">' . Lang::get('Here') . '</a> ';
         }
         if ($endTime < time()) {
-            $nextLink = $this->blogPath . date('Y/m/', $endTime);
+            $nextLink = $this->blogUrlBuilder->monthFromTimestamp($endTime);
             $template->setLink('next', $nextLink);
             $paging .= '<a href="' . $nextLink . '">' . Lang::get('There') . '</a>';
             // TODO think about back_forward template
@@ -87,11 +86,11 @@ class MonthPageController extends BlogController
         ;
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
-        if ($this->blogUrl !== '') {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
         }
         $template
-            ->addBreadCrumb($year, $this->blogPath . $year . '/')
+            ->addBreadCrumb($year, $this->blogUrlBuilder->year((int)$year))
             ->addBreadCrumb($month)
         ;
 

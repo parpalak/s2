@@ -17,7 +17,8 @@ use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
-use s2_extensions\s2_blog\Lib;
+use s2_extensions\s2_blog\BlogUrlBuilder;
+use s2_extensions\s2_blog\CalendarBuilder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,16 +28,16 @@ class TagPageController extends BlogController
 {
     public function __construct(
         DbLayer               $dbLayer,
+        CalendarBuilder       $calendarBuilder,
+        BlogUrlBuilder        $blogUrlBuilder,
         ArticleProvider       $articleProvider,
         UrlBuilder            $urlBuilder,
         HtmlTemplateProvider  $templateProvider,
         Viewer                $viewer,
-        string                $tagsUrl,
-        string                $blogUrl,
         string                $blogTitle,
         private readonly bool $useHierarchy
     ) {
-        parent::__construct($dbLayer, $articleProvider, $urlBuilder, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
@@ -44,7 +45,7 @@ class TagPageController extends BlogController
         $params = $request->attributes->all();
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar());
         }
 
         $tag = $params['tag'];
@@ -63,7 +64,7 @@ class TagPageController extends BlogController
         [$tagId, $tagDescription, $tagName, $tagUrl] = $row;
 
         if ($params['slash'] !== '/') {
-            return new RedirectResponse($this->blogTagsPath . urlencode($tagUrl) . '/', Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->blogUrlBuilder->tag($tagUrl), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $art_links = $this->articles_by_tag($tagId);
@@ -90,10 +91,10 @@ class TagPageController extends BlogController
         }
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
-        if ($this->blogUrl !== '') {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
         }
-        $template->addBreadCrumb(Lang::get('Tags'), $this->blogTagsPath);
+        $template->addBreadCrumb(Lang::get('Tags'), $this->blogUrlBuilder->tags());
         $template->addBreadCrumb($tagName);
 
         $template
@@ -102,7 +103,7 @@ class TagPageController extends BlogController
             ->putInPlaceholder('text', $tagDescription . $output)
         ;
 
-        $template->setLink('up', $this->blogTagsPath);
+        $template->setLink('up', $this->blogUrlBuilder->tags());
 
         return null;
     }

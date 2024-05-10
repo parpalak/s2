@@ -11,14 +11,13 @@ namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
 use S2\Cms\Template\HtmlTemplate;
-use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class TagsPageController extends BlogController
 {
-    public function body (Request $request, HtmlTemplate $template): ?Response
+    public function body(Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
             return new RedirectResponse($this->urlBuilder->link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
@@ -26,33 +25,33 @@ class TagsPageController extends BlogController
 
         $template->registerPlaceholder('<!-- s2_blog_navigation -->', '');
 
-		if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
+        if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar());
         }
 
-        $query = [
-            'SELECT'	=> 'tag_id, name, url',
-            'FROM'		=> 'tags'
+        $query  = [
+            'SELECT' => 'tag_id, name, url',
+            'FROM'   => 'tags'
         ];
         $result = $this->dbLayer->buildAndQuery($query);
 
         $tag_name = $tag_url = $tag_count = [];
         while ($row = $this->dbLayer->fetchAssoc($result)) {
-            $tag_name[$row['tag_id']] = $row['name'];
-            $tag_url[$row['tag_id']] = $row['url'];
+            $tag_name[$row['tag_id']]  = $row['name'];
+            $tag_url[$row['tag_id']]   = $row['url'];
             $tag_count[$row['tag_id']] = 0;
         }
 
-        $query = [
-            'SELECT'	=> 'pt.tag_id',
-            'FROM'		=> 's2_blog_post_tag AS pt',
-            'JOINS'		=> [
+        $query  = [
+            'SELECT' => 'pt.tag_id',
+            'FROM'   => 's2_blog_post_tag AS pt',
+            'JOINS'  => [
                 [
-                    'INNER JOIN'	=> 's2_blog_posts AS p',
-                    'ON'			=> 'p.id = pt.post_id'
+                    'INNER JOIN' => 's2_blog_posts AS p',
+                    'ON'         => 'p.id = pt.post_id'
                 ]
             ],
-            'WHERE'		=> 'p.published = 1'
+            'WHERE'  => 'p.published = 1'
         ];
         $result = $this->dbLayer->buildAndQuery($query);
 
@@ -76,17 +75,17 @@ class TagsPageController extends BlogController
         $template->putInPlaceholder('text', $this->viewer->render('tags_list', ['tags' => $tags]));
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
-        if ($this->blogUrl !== '') {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
         }
         $template->addBreadCrumb(Lang::get('Tags'));
 
         $template
             ->putInPlaceholder('head_title', Lang::get('Tags'))
             ->putInPlaceholder('title', Lang::get('Tags'))
-            ->setLink('up', $this->blogPath)
+            ->setLink('up', $this->blogUrlBuilder->main())
         ;
 
         return null;
-	}
+    }
 }

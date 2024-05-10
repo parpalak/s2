@@ -11,7 +11,6 @@ namespace s2_extensions\s2_blog\Controller;
 
 use Lang;
 use S2\Cms\Template\HtmlTemplate;
-use s2_extensions\s2_blog\Lib;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +24,7 @@ class FavoritePageController extends BlogController
         }
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar(date('Y'), date('m'), '0'));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar());
         }
 
         $output = $this->getPosts([
@@ -40,8 +39,8 @@ class FavoritePageController extends BlogController
 
         // Bread crumbs
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
-        if ($this->blogUrl !== '') {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
         }
         $template->addBreadCrumb(Lang::get('Favorite'));
 
@@ -51,7 +50,7 @@ class FavoritePageController extends BlogController
             ->putInPlaceholder('text', $output)
         ;
 
-        $template->setLink('up', $this->blogPath);
+        $template->setLink('up', $this->blogUrlBuilder->main());
 
         return null;
     }

@@ -14,16 +14,17 @@ namespace s2_extensions\s2_blog\Controller;
 use Lang;
 use S2\Cms\Controller\Rss;
 use S2\Cms\Template\Viewer;
+use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\Lib;
 
 readonly class BlogRss extends Rss
 {
     public function __construct(
+        protected BlogUrlBuilder $blogUrlBuilder,
         protected Viewer $viewer,
         protected string $baseUrl,
         protected string $webmaster,
         protected string $siteName,
-        protected string $blogUrl,
         protected string $blogTitle,
     )
     {
@@ -53,7 +54,7 @@ readonly class BlogRss extends Rss
                     ], 's2_blog')),
                 'time'        => $post['create_time'],
                 'modify_time' => $post['modify_time'],
-                'rel_path'    => str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . date('/Y/m/d/', $post['create_time']) . urlencode($post['url']),
+                'rel_path'    => $this->blogUrlBuilder->postFromTimestamp($post['create_time'], $post['url']),
                 'author'      => $post['author'],
             ];
         }
@@ -68,7 +69,7 @@ readonly class BlogRss extends Rss
 
     protected function link(): string
     {
-        return str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . '/';
+        return $this->blogUrlBuilder->main();
     }
 
     protected function description(): string

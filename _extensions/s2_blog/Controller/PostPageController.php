@@ -18,7 +18,8 @@ use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use S2\Rose\Entity\ExternalId;
-use s2_extensions\s2_blog\Lib;
+use s2_extensions\s2_blog\BlogUrlBuilder;
+use s2_extensions\s2_blog\CalendarBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,52 +27,55 @@ class PostPageController extends BlogController
 {
     public function __construct(
         DbLayer                                 $dbLayer,
+        CalendarBuilder                         $calendarBuilder,
+        BlogUrlBuilder                          $blogUrlBuilder,
         ArticleProvider                         $articleProvider,
         UrlBuilder                              $urlBuilder,
         private readonly RecommendationProvider $recommendationProvider,
         HtmlTemplateProvider                    $templateProvider,
         Viewer                                  $viewer,
-        string                                  $tagsUrl,
-        string                                  $blogUrl,
         string                                  $blogTitle,
         protected bool                          $showComments,
     ) {
-        parent::__construct($dbLayer, $articleProvider, $urlBuilder, $templateProvider, $viewer, $tagsUrl, $blogUrl, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
-        $params = $request->attributes->all();
+        $year  = (int)($textYear = $request->attributes->get('year'));
+        $month = (int)($textMonth = $request->attributes->get('month')); // Note: "01" is not parsed with getInt() correctly
+        $day   = (int)($textDay = $request->attributes->get('day'));
+        $url   = $request->attributes->get('url');
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_calendar -->', Lib::calendar($params['year'], $params['month'], $params['day'], $params['url']));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar($year, $month, $day, $url));
         }
 
         $template->putInPlaceholder('title', '');
 
-        if (($result = $this->get_post($request, $template, $params['year'], $params['month'], $params['day'], $params['url'])) !== null) {
+        if (($result = $this->get_post($request, $template, $year, $month, $day, $url)) !== null) {
             return $result;
         }
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
-        if ($this->blogUrl !== '') {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogPath);
+        if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
+            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
         }
         $template
-            ->addBreadCrumb($params['year'], $this->blogPath . $params['year'] . '/')
-            ->addBreadCrumb($params['month'], $this->blogPath . $params['year'] . '/' . $params['month'] . '/')
-            ->addBreadCrumb($params['day'], $this->blogPath . $params['year'] . '/' . $params['month'] . '/' . $params['day'] . '/')
+            ->addBreadCrumb($textYear, $this->blogUrlBuilder->year($year))
+            ->addBreadCrumb($textMonth, $this->blogUrlBuilder->month($year, $month))
+            ->addBreadCrumb($textDay, $this->blogUrlBuilder->day($year, $month, $day))
         ;
 
         return null;
     }
 
-    private function get_post(Request $request, HtmlTemplate $template, $year, $month, $day, $url): ?Response
+    private function get_post(Request $request, HtmlTemplate $template, int $year, int $month, int $day, string $url): ?Response
     {
         $start_time = mktime(0, 0, 0, $month, $day, $year);
-        $end_time   = mktime(0, 0, 0, $month, $day + 1, $year);
+        $end_time   = $start_time + 86400;
 
-        $template->setLink('up', $this->blogPath . date('Y/m/d/', $start_time));
+        $template->setLink('up', $this->blogUrlBuilder->day($year, $month, $day));
 
         $sub_query      = [
             'SELECT' => 'u.name',
@@ -99,7 +103,7 @@ class PostPageController extends BlogController
         $post_id = $row['id'];
         $label   = $row['label'];
 
-        $template->putInPlaceholder('canonical_path', $this->blogPath . date('Y/m/d/', $row['create_time']) . $row['url']);
+        $template->putInPlaceholder('canonical_path', $this->blogUrlBuilder->postFromTimestamp((int)$row['create_time'], $row['url']));
 
         $is_back_forward = $template->hasPlaceholder('<!-- s2_blog_back_forward -->');
 
@@ -141,7 +145,7 @@ class PostPageController extends BlogController
         while ($result && $row1 = $this->dbLayer->fetchAssoc($result)) {
             $post_info = [
                 'title' => $row1['title'],
-                'link'  => S2_BLOG_PATH . date('Y/m/d/', $row1['create_time']) . urlencode($row1['url']),
+                'link'  => $this->blogUrlBuilder->postFromTimestamp((int)$row1['create_time'], $row1['url']),
             ];
 
             if ($row1['type'] === 'label') {
@@ -178,7 +182,7 @@ class PostPageController extends BlogController
         while ($tag = $this->dbLayer->fetchAssoc($result)) {
             $tags[] = [
                 'title' => $tag['name'],
-                'link'  => $this->blogTagsPath . urlencode($tag['url']) . '/',
+                'link'  => $this->blogUrlBuilder->tag($tag['url']),
             ];
         }
 
