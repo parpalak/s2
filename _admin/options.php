@@ -199,7 +199,8 @@ function s2_save_options ($opt)
     /** @var DbLayer $s2_db */
     $s2_db = \Container::get(DbLayer::class);
 
-	$return = array();
+	$return = [];
+    $hasChanged = false;
 	($hook = s2_hook('fn_save_options_start')) ? eval($hook) : null;
 
 	foreach ($s2_const_types as $name => $type) {
@@ -218,15 +219,23 @@ function s2_save_options ($opt)
 		($hook = s2_hook('fn_save_options_loop')) ? eval($hook) : null;
 
 		if (constant($name) !== $value) {
-			$query = array(
+            $hasChanged = true;
+			$query = [
 				'UPDATE'	=> 'config',
 				'SET'		=> 'value = \''.$s2_db->escape($value).'\'',
 				'WHERE'		=> 'name = \''.$s2_db->escape($name).'\''
-			);
+            ];
 			($hook = s2_hook('fn_save_options_loop_pre_update_qr')) ? eval($hook) : null;
 			$s2_db->buildAndQuery($query);
 		}
 	}
+
+    if ($hasChanged) {
+        // URL settings for tags and favorite page may be changed
+        /** @var \S2\Cms\Model\ExtensionCache $extensionCache */
+        $extensionCache = \Container::get(\S2\Cms\Model\ExtensionCache::class);
+        $extensionCache->clearRoutesCache();
+    }
 
 	$style = preg_replace('#[\.\\\/]#', '', $opt['style']);
 	if (!file_exists(S2_ROOT.'_styles/'.$style.'/'.$style.'.php')) {

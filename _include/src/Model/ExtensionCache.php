@@ -157,6 +157,11 @@ class ExtensionCache
         return $hookNames;
     }
 
+    public function clearRoutesCache(): void
+    {
+        @unlink($this->getCachedRoutesFilename());
+    }
+
     public function getCachedRoutesFilename(): string
     {
         return S2_CACHE_DIR . 'cache_routes.php';
