@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <meta name="Generator" content="S2" />
     <title>Error - <?php echo defined('S2_SITE_NAME') ? s2_htmlencode(S2_SITE_NAME) : 'S2'; ?></title>
     <style>

@@ -26,7 +26,7 @@ foreach ($saved_queries as $cur_query) {
 
 ?>
 					<tr>
-						<td class="tcl" style="vertical-align: top; user-select: none; background: 0 0 /auto 24px linear-gradient(to right, rgba(0,0,0,0.13) <?= 100.0*$cur_query['time']/$maximumTime ?>%, rgba(0,0,0,0) <?= 100.0*$cur_query['time']/$maximumTime ?>%) no-repeat;"><?php echo (($cur_query['time'] != 0) ? Lang::number_format($cur_query['time']*1000, true) : '&#160;') ?></td>
+						<td class="tcl" style="vertical-align: top; user-select: none; background: 0 0 /auto 100% linear-gradient(to right, rgba(0,0,0,0.13) <?= 100.0*$cur_query['time']/$maximumTime ?>%, rgba(0,0,0,0) <?= 100.0*$cur_query['time']/$maximumTime ?>%) no-repeat;"><?php echo (($cur_query['time'] != 0) ? Lang::number_format($cur_query['time']*1000, true) : '&#160;') ?></td>
                         <td valign="top" class="tcr"><code><?php echo s2_htmlencode($cur_query['statement']) ?></code></td>
 					</tr>
 <?php

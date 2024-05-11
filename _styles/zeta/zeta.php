@@ -3,6 +3,7 @@
 use S2\Cms\Asset\AssetPack;
 
 return (new AssetPack(__DIR__))
+    ->addMeta('<meta name="viewport" content="width=device-width, initial-scale=1">')
     ->addCss('site.css', [AssetPack::OPTION_MERGE])
 // Here is an example how to add Google Analytics code:
 //    ->addHeadJs('https://www.googletagmanager.com/gtag/js?id=...', [AssetPack::OPTION_ASYNC])

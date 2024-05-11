@@ -1,5 +1,4 @@
 .year-block {
-	width: 197px;
 	display: inline-block;
 	vertical-align: top;
 	margin: 0 2em 1em 0;
@@ -7,10 +6,6 @@
 
 #content .year-block td {
 	border: 0 none;
-	}
-.year-block > tbody > tr > td {
-	vertical-align: top;
-	padding: 0 1em;
 	}
 
 table.cal {
@@ -21,52 +16,30 @@ table.cal {
 	#content .cal td,
 	#content .cal th {
 		width: 28px;
+		font-size: 0.888em;
 		line-height: 1.5;
+		text-align: center;
 		}
 	.cal td {
 		padding: 0;
-		text-align: right;
-		color: #000;
+		color: var(--txt-color, #000);
 		}
- 		.cal td.sun {
-			color: #f33;
+ 		.cal td.sun,
+		.cal th.sun {
+			color: var(--sunday-color, #f33);
 			}
 		.cal td a {
 			display: block;
-			background: #eed;
+			background: var(--highlight-color, #eed);
 			}
-		.cal td:before { /* hack for text-ident from right */
-			content: "\0000a0";
-			float:right;
-			width: 6px;
-			}
-
-	.cal th {
-		font-weight: normal;
-		font-size: 0.786em;
-		line-height: 1.909;
-		}
 		#content .cal th {
 			text-align: left;
 			}
-		.cal .nav th {
-			font-size: 100%;
-			font-weight: bold;
-			line-height: 1.5;
-			}
-		.cal th.sun {
-			color: #f00;
-			}
 
 .cal tr td.cur,
-.cal tr td.cur a{
-	background: #60c0cf;
+.cal tr td.cur a {
 	font-weight: bold;
-	color: #fff;
 	}
-
-.cal tr td a:hover { background: #ffa;}
-.cal tr td.cur a:hover { background: #70cfdf;}
 
 table.cal_mon {
 	border-collapse: collapse;
@@ -82,14 +55,12 @@ a.nav_mon:hover { background: #ffa; }
 	margin: 0;
 	}
 .post.time {
-	margin: 0 0 1.75em;
+	margin: 0 0 0.75em;
 	}
 .post.foot {
-	color: #666;
-	font-size: 0.857em;
-	line-height: 1.75;
-	border-top: 1px solid #ddd;
-	margin: 1.75em 0 5.167em;
+	color: var(--txt-minor-color, #666);
+	font-size: 0.888em;
+	margin: 0 0 4em;
 	}
 
 .post .see_also {
