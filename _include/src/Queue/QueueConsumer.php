@@ -46,11 +46,28 @@ class QueueConsumer
             default => throw new \RuntimeException(sprintf('Driver "%s" is not supported.', $driverName)),
         };
 
+        if ($driverName === 'sqlite') {
+            $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 1);
+        }
+
         $this->pdo->beginTransaction();
 
         try {
-            $statement = $this->pdo->query($sql);
-            $job       = $statement->fetch(\PDO::FETCH_ASSOC);
+            $job = null;
+            try {
+                $statement = $this->pdo->query($sql);
+                $job       = $statement->fetch(\PDO::FETCH_ASSOC);
+            } catch (\PDOException $e) {
+                $message = $e->getMessage();
+                if (
+                    ($driverName === 'mysql' && (str_contains($message, 'Lock wait timeout exceeded') || str_contains($message, 'NOWAIT is set')))
+                    || ($driverName === 'pgsql' && (str_contains($message, 'Lock not available')))
+                ) {
+                    $this->logger->notice('No jobs was found due to locks in parallel process.', ['exception' => $e]);
+                } else {
+                    $this->logger->warning('Failed to fetch queue item: ' . $message, ['exception' => $e]);
+                }
+            }
             if (!$job) {
                 $this->pdo->rollBack();
                 return false;

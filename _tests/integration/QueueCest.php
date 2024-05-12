@@ -81,6 +81,17 @@ class QueueCest
         $queuePublisher->publish('test_id2', 'code', ['data']);
         $queuePublisher->publish('test_id3', 'code', ['data']);
 
+        if ($driverName !== 'sqlite') {
+            /**
+             * In Sqlite there is no for row and runQueue returns the same item.
+             * Skip it in the test.
+             */
+            $consumerApplication2 = $I->createApplication();
+            /** @var QueueConsumer $queueConsumer */
+            $queueConsumer2 = $consumerApplication2->container->get(QueueConsumer::class);
+            $I->assertFalse($queueConsumer2->runQueue(), 'No jobs in parallel process are available');
+        }
+
         $consumerPdo->rollBack();
         $statement = null;
 

@@ -139,6 +139,7 @@ class Logger implements LoggerInterface
         }
 
         // Build log line
+        $pid = \getmypid() ?: -1;
         /** @var string $formattedException */
         [$formattedException, $contextData] = $this->handleException($context);
         try {
@@ -146,7 +147,7 @@ class Logger implements LoggerInterface
         } catch (\JsonException $e) {
             $formattedContext = '{}';
         }
-        $logLine = $this->formatLogLine($level, $message, $formattedContext, $formattedException);
+        $logLine = $this->formatLogLine($level, $pid, $message, $formattedContext, $formattedException);
 
         // Log to file
         try {
@@ -242,16 +243,17 @@ class Logger implements LoggerInterface
     /**
      * Format the log line.
      * ```
-     * YYYY-mm-dd HH:ii:ss.uuuuuu  [loglevel]  [channel]  Log message content  {"Optional":"JSON Contextual Support Data"}  {"Optional":"Exception Data"}
+     * YYYY-mm-dd HH:ii:ss.uuuuuu  [loglevel]  [channel]  [pid:##]  Log message content  {"Optional":"JSON Contextual Support Data"}  {"Optional":"Exception Data"}
      * Exception Trace if any
      * ```
      */
-    private function formatLogLine(string $level, string $message, string $data, string $formattedException): string
+    private function formatLogLine(string $level, int $pid, string $message, string $data, string $formattedException): string
     {
         return
             $this->getTime() . self::TAB .
             "[$level]" . self::TAB .
             "[{$this->channel}]" . self::TAB .
+            "[pid:$pid]" . self::TAB .
             str_replace(\PHP_EOL, '   ', trim($message)) . self::TAB .
             str_replace(\PHP_EOL, '   ', $data) . self::TAB .
             $formattedException . \PHP_EOL;
