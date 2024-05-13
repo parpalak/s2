@@ -150,7 +150,7 @@ class Logger implements LoggerInterface
         $logLine = $this->formatLogLine($level, $pid, $message, $formattedContext, $formattedException);
 
         // Log to NewRelic
-        if (\extension_loaded('newrelic')) {
+        if (self::LEVELS[$level] >= self::LEVELS[LogLevel::WARNING] && \extension_loaded('newrelic')) {
             if (isset($context['exception']) && $context['exception'] instanceof \Throwable) {
                 newrelic_notice_error($message, $context['exception']);
             } else {
