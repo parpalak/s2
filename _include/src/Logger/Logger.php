@@ -149,6 +149,24 @@ class Logger implements LoggerInterface
         }
         $logLine = $this->formatLogLine($level, $pid, $message, $formattedContext, $formattedException);
 
+        // Log to NewRelic
+        if (\extension_loaded('newrelic')) {
+            if (isset($context['exception']) && $context['exception'] instanceof \Throwable) {
+                newrelic_notice_error($message, $context['exception']);
+            } else {
+                newrelic_notice_error($message);
+            }
+            foreach ($contextData as $key => $parameter) {
+                if (\is_array($parameter)) {
+                    foreach ($parameter as $paramKey => $paramValue) {
+                        $this->setNewRelicParameter('context_' . $key . '_' . $paramKey, $paramValue);
+                    }
+                } else {
+                    $this->setNewRelicParameter('context_' . $key, $parameter);
+                }
+            }
+        }
+
         // Log to file
         try {
             $fh = fopen($this->log_file, 'ab');
@@ -268,5 +286,20 @@ class Logger implements LoggerInterface
     private function getTime(): string
     {
         return (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s.u');
+    }
+
+    private function setNewRelicParameter(string $key, mixed $value): void
+    {
+        if (!\extension_loaded('newrelic')) {
+            return;
+        }
+        if (null !== $value && !is_scalar($value)) {
+            try {
+                $value = json_encode($value, JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
+            } catch (\JsonException $e) {
+                $value = serialize($value);
+            }
+        }
+        newrelic_add_custom_parameter($key, $value);
     }
 }
