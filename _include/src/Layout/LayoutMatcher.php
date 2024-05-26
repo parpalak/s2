@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023 Roman Parpalak
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 namespace S2\Cms\Layout;
@@ -32,6 +32,83 @@ class LayoutMatcher
         $this->templatesList[$key] = $blockGroups;
     }
 
+    /**
+     * This function tries to distribute items over blocks based on the mapping of which items can be placed in which
+     * block groups. Example:
+     *  |        | i1 | i2 | i3 | i4 | i5 |
+     *  | b1     | *  | *  |    |    |    |
+     *  | b2, b3 | *  |    | *  |    |    |
+     *  | b4, b5 | *  | *  | *  | *  | *  |
+     *  The result is a match: b1 -> i2, (b2, b3) -> (i1, i3), (b4, b5) -> (i4, i5).
+     *
+     * For this example input parameters will be:
+     * $mapItemToGroups = [
+     *     [0, 1, 2],
+     *     [0, 2],
+     *     [1, 2],
+     *     [2],
+     *     [2],
+     * ];
+     * $blocksInGroup = [
+     *     1,
+     *     2,
+     *     2,
+     * ];
+     *
+     * Result:
+     * $result = [
+     *     [1],
+     *     [0, 2],
+     *     [3, 4],
+     * ];
+     */
+    public static function distributeItemsOverBlocks(array $mapItemToGroups, array $blocksInGroup): ?array
+    {
+        $result = [];
+
+        // Initialize the result array with empty arrays for each group.
+        foreach ($blocksInGroup as $group => $blockCount) {
+            $result[$group] = [];
+        }
+
+        // Sort items by the number of groups they can be placed in (ascending order).
+        uksort($mapItemToGroups, static function ($a, $b) use ($mapItemToGroups) {
+            return \count($mapItemToGroups[$a]) <=> \count($mapItemToGroups[$b]);
+        });
+
+        // Recursive backtracking function to allocate items to groups.
+        $allocate = static function ($item, &$result) use ($mapItemToGroups, $blocksInGroup, &$allocate) {
+            if (!isset($mapItemToGroups[$item])) { // The end is reached: item index is out of range
+                return true;
+            }
+
+            foreach ($mapItemToGroups[$item] as $groupIdx) {
+                if (\count($result[$groupIdx]) < $blocksInGroup[$groupIdx]) {
+                    $result[$groupIdx][] = $item;
+
+                    if ($allocate($item + 1, $result)) {
+                        return true;
+                    }
+
+                    // Backtrack
+                    array_pop($result[$groupIdx]);
+                }
+            }
+
+            return false;
+        };
+
+        if (!$allocate(0, $result)) {
+            return null;
+        }
+
+        foreach ($result as &$items) {
+            sort($items);
+        }
+        unset($items);
+        return $result;
+    }
+
     public function match(string $page, ContentItem ...$contentItems): array
     {
         $start           = microtime(true);
@@ -45,29 +122,36 @@ class LayoutMatcher
             return [null, $log];
         }
 
+        $distributionTimes = [];
+
         foreach ($this->templatesList as $templateName => $templateGroups) {
             $templateName = (string)$templateName; // Integers in array keys are converted to int
             $log[]        = self::formatTime($start) . " >>>>> '$templateName': start";
             $blockCount   = array_sum(array_map(static fn(BlockGroup $bg) => $bg->count(), $templateGroups));
 
             if ($blockCount > $contentItemsNum) {
-                $log[] = self::formatTime($start) . " '$templateName': no match due to count condition ($blockCount > $contentItemsNum)";
+                $log[] = self::formatTime($start) . " '$templateName': no match due to count constraint ($blockCount > $contentItemsNum)";
                 continue;
             }
 
-            $mapGroupToItems  = [];
-            $usedContentItems = [];
+            $mapGroupToItems = [];
+            $mapItemToGroups = [];
 
             $blocksInPrevAndCurGroup = 0;
+            $blocksInGroup           = [];
             foreach ($templateGroups as $idx => $templateGroup) {
                 for ($i = 0; $i < $blockCount; $i++) {
                     $contentItem = $contentItems[$i];
                     if ($contentItem->match($templateGroup->getBlock())) {
                         $mapGroupToItems[$idx][] = $i;
-                        $usedContentItems[$i]    = true;
+                        $mapItemToGroups[$i][]   = $idx;
 
-                        $positions = implode('\', \'', $templateGroup->getPositions());
-                        $log[]     = self::formatTime($start) . " item $i match ['$positions']";
+                        $log[] = sprintf(
+                            "%s item %d match ['%s']",
+                            self::formatTime($start),
+                            $i,
+                            implode('\', \'', $templateGroup->getPositions())
+                        );
                     }
                 }
                 $foundCount       = \count($mapGroupToItems[$idx] ?? []);
@@ -84,90 +168,44 @@ class LayoutMatcher
                     );
                     continue 2;
                 }
+                $blocksInGroup[$idx]     = $blocksInCurGroup;
                 $blocksInPrevAndCurGroup += $blocksInCurGroup;
-                if (($matchedCount = \count($usedContentItems)) < $blocksInPrevAndCurGroup) {
+                if (($matchedCount = \count($mapItemToGroups)) < $blocksInPrevAndCurGroup) {
                     $log[] = self::formatTime($start) . " '$templateName': no match for several groups (0..$idx) $matchedCount < required $blocksInPrevAndCurGroup";
                     continue 2;
                 }
             }
 
             /**
-             * Here we know what items can be placed in groups ($mapGroupToItems). Example:
+             * Here we know what items can be placed in block groups ($mapGroupToItems). Example:
              * |        | i1 | i2 | i3 | i4 | i5 |
-             * | g1     | *  | *  |    |    |    |
-             * | g2, g3 | *  |    | *  |    |    |
-             * | g4, g5 | *  | *  | *  | *  | *  |
-             * Some kind of search algorithm is required to find a match: g1 -> i2, (g2, g3) -> (i1, i3), (g4, g5) -> (i4, i5).
-             *
-             * I try some partial search hoping it would be quite good.
-             *
-             * Main search will go from small to large groups.
+             * | b1     | *  | *  |    |    |    |
+             * | b2, b3 | *  |    | *  |    |    |
+             * | b4, b5 | *  | *  | *  | *  | *  |
+             * Some kind of search algorithm is required to find a match: b1 -> i2, (b2, b3) -> (i1, i3), (b4, b5) -> (i4, i5).
              */
-            $itemsNumInGroups = array_map(static fn(array $a) => \count($a), $mapGroupToItems);
-            asort($itemsNumInGroups);
-
-            /**
-             * Also let's sort items from more specific (has little matched groups) to more universal.
-             */
-            $stat = [];
-            foreach ($mapGroupToItems as $itemsMatchedGroup) {
-                foreach ($itemsMatchedGroup as $itemIdx) {
-                    $stat[$itemIdx] = ($stat[$itemIdx] ?? 0) + 1;
-                }
+            $startDistribution   = microtime(true);
+            $processedMap        = self::distributeItemsOverBlocks($mapItemToGroups, $blocksInGroup);
+            $distributionTimes[] = 1000 * (microtime(true) - $startDistribution);
+            if ($processedMap === null) {
+                $log[] = self::formatTime($start) . " '$templateName': cannot distribute items over blocks";
+                continue;
             }
-            foreach ($mapGroupToItems as &$itemsMatchedGroup) {
-                usort($itemsMatchedGroup, static fn(int $a, $b) => $stat[$a] <=> $stat[$b]);
-            }
-            unset($itemsMatchedGroup);
 
-            $result          = [];
-            $originalMap     = $mapGroupToItems;
             $hasUnusedImages = false;
+            foreach ($processedMap as $groupIdx => $itemsToUse) {
+                $templateGroup = $templateGroups[$groupIdx];
 
-            $accumulatedAvailableItems = [];
-            $accumulatedVacanciesNum   = 0;
-            foreach ($itemsNumInGroups as $idx => $itemNumInGroup) {
-                $idx2          = 0;
-                $templateGroup = $templateGroups[$idx];
-
-                /**
-                 * Recheck size for partial group union after sorting. (Same as above but soring may change the situation.)
-                 */
-                $accumulatedVacanciesNum   += $templateGroup->count();
-                $accumulatedAvailableItems += array_combine($mapGroupToItems[$idx], $mapGroupToItems[$idx]);
-                if (\count($accumulatedAvailableItems) < $accumulatedVacanciesNum) {
-                    $log[] = sprintf(
-                        "%s '%s': no match for several groups (%s) < required (%d)",
-                        self::formatTime($start),
-                        $templateName,
-                        implode(', ', $accumulatedAvailableItems),
-                        $accumulatedVacanciesNum
-                    );
+                if ($templateGroup->count() !== \count($itemsToUse)) {
+                    $this->logger->error(sprintf('Invalid distribution: count mismatch for template "%s" group "%s".', $templateName, $groupIdx), $processedMap);
                     continue 2;
                 }
 
                 $partialResult = [];
                 $positions     = [];
-                foreach ($templateGroup->getPositions() as $position) {
-                    while (true) {
-                        if (!isset($mapGroupToItems[$idx][$idx2])) {
-                            $log[] = self::formatTime($start) . " '$templateName': <b>warning</b> [$idx][$idx2]";
-                            $this->logger->warning(sprintf('Cannot assign content items to block on page "%s": incomplete algorithm.', $page), [
-                                'originalMap'  => $originalMap,
-                                'templateName' => $templateName,
-                            ]);
-                            continue 4;
+                foreach ($templateGroup->getPositions() as $idx2 => $position) {
+                    $i = $itemsToUse[$idx2];
 
-                            // TODO Prove that there is no solution in this case. Maybe it's a bad algorithm
-                            // throw new \LogicException('Invalid group to content items mapping');
-                        }
-                        $i = $mapGroupToItems[$idx][$idx2];
-                        $idx2++;
-                        if (isset($usedContentItems[$i])) {
-                            unset($usedContentItems[$i]);
-                            break;
-                        }
-                    }
                     $contentItem  = $contentItems[$i];
                     $positions[]  = $position;
                     $matchedImage = $contentItem->getMatchedImage($templateGroup->getBlock());
@@ -216,7 +254,7 @@ class LayoutMatcher
                         $partialResult[$k]['image'] = new ImgDto($imgArray['src'], (float)$imgArray['w'], (float)$imgArray['h'], $imgArray['class']);
                     }
                 }
-                $result[$idx] = $partialResult;
+                $result[$groupIdx] = $partialResult;
             }
             // Restore order of layout
             ksort($result);
@@ -235,6 +273,7 @@ class LayoutMatcher
                 'templateName'                                  => $templateName,
                 'tplid ' . str_replace(' ', '_', $templateName) => $page,
                 '$hasUnusedImages'                              => $hasUnusedImages,
+                'distr_times'                                   => implode(' ', $distributionTimes),
             ]);
 
             return [$result, $log];

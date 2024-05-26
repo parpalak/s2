@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023 Roman Parpalak
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 namespace S2\Cms\Layout;
@@ -250,8 +250,8 @@ class LayoutMatcherFactory
             // http://localhost:8081/?/blog/2012/12/09/dropbox_and_hibernate
             new BlockGroup(['1/1/3/3'], (new Block())->img(0, 0.8, $minImgWidth2)->bigTitle()),
             new BlockGroup(['1/3', '1/4'], (new Block())->img(1.0, 4)->imgClass('right')->text(0, 150)),
-            new BlockGroup([''], Block::thumbnail()->text(0, 80)),
-            new BlockGroup([''], (new Block())->text(0, 280)),
+            new BlockGroup(['2/3'], Block::thumbnail()->text(0, 80)),
+            new BlockGroup(['2/4'], (new Block())->text(0, 280)),
             new BlockGroup(['', '', '', ''], (new Block())),
         ]);
         $r->addGroup('i+(1 1) i+2 2t+1', ...[
