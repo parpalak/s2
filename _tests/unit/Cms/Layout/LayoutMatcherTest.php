@@ -175,6 +175,16 @@ class LayoutMatcherTest extends Unit
                     [0],
                 ],
             ],
+            'empty' => [
+                'mapItemToGroups' => [
+                ],
+                'mapGroupToItems' => [
+                ],
+                'blocksInGroup'   => [
+                ],
+                'expectedResult'  => [
+                ],
+            ],
         ];
     }
 

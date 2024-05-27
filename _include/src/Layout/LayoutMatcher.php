@@ -64,34 +64,34 @@ class LayoutMatcher
      */
     public static function distributeItemsOverBlocks(array $mapItemToGroups, array $blocksInGroup): ?array
     {
-        $result = [];
-
         // Initialize the result array with empty arrays for each group.
-        foreach ($blocksInGroup as $group => $blockCount) {
-            $result[$group] = [];
-        }
+        $result = array_map(static fn () => [], $blocksInGroup);
 
         // Sort items by the number of groups they can be placed in (ascending order).
-        uksort($mapItemToGroups, static function ($a, $b) use ($mapItemToGroups) {
+        $itemMap = \array_keys($mapItemToGroups);
+        usort($itemMap, static function ($a, $b) use ($mapItemToGroups) {
             return \count($mapItemToGroups[$a]) <=> \count($mapItemToGroups[$b]);
         });
 
         // Recursive backtracking function to allocate items to groups.
-        $allocate = static function ($item, &$result) use ($mapItemToGroups, $blocksInGroup, &$allocate) {
-            if (!isset($mapItemToGroups[$item])) { // The end is reached: item index is out of range
+        // Recursion may be rewritten as a loop. But this code is shorter and easier to read,
+        // and there are no performance issues worth it.
+        $allocate = static function ($itemIndex, &$result) use ($mapItemToGroups, $itemMap, $blocksInGroup, &$allocate) {
+            if (!isset($itemMap[$itemIndex])) { // The end is reached: item index is out of range
                 return true;
             }
 
-            foreach ($mapItemToGroups[$item] as $groupIdx) {
-                if (\count($result[$groupIdx]) < $blocksInGroup[$groupIdx]) {
-                    $result[$groupIdx][] = $item;
+            $item = $itemMap[$itemIndex];
+            foreach ($mapItemToGroups[$item] as $group) {
+                if (\count($result[$group]) < $blocksInGroup[$group]) {
+                    $result[$group][] = $item;
 
-                    if ($allocate($item + 1, $result)) {
+                    if ($allocate($itemIndex + 1, $result)) {
                         return true;
                     }
 
                     // Backtrack
-                    array_pop($result[$groupIdx]);
+                    array_pop($result[$group]);
                 }
             }
 
