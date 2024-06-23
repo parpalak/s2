@@ -81,6 +81,10 @@ $(function ()
 {
 	$(document).keydown(function (e)
 	{
+		if (e.which === 27) {
+			parentWnd && parentWnd.ClosePictureDialog && parentWnd.ClosePictureDialog();
+		}
+
 		var ch = String.fromCharCode(e.which).toLowerCase();
 
 		if (e.ctrlKey && ch >= '1' && ch <= '9')
@@ -389,7 +393,7 @@ $(function ()
 							parentWnd.ReturnImage(filePath, s2Retina.get() ? Math.round(a[0]/2) : a[0], s2Retina.get() ? Math.round(a[1]/2) : a[1]);
 					};
 
-					str += '<br /><input type="button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
+					str += '<br /><input type="button" class="link-as-button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
 				}
 			}
 			else

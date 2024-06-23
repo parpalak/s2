@@ -3,11 +3,12 @@
  * Loads common data and performs various functions necessary for the site to work properly.
  *
  * @copyright 2009-2024
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Admin\AdminExtension;
 use S2\Cms\CmsExtension;
 use S2\Cms\Framework\Application;
 use S2\Cms\Model\ExtensionCache;
@@ -26,23 +27,23 @@ define('S2_VERSION', '2.0dev');
 //define('S2_DEBUG', 1);
 //define('S2_SHOW_QUERIES', 1);
 
-require S2_ROOT . '_vendor/autoload.php';
+require __DIR__ . '/../_vendor/autoload.php';
 
 // Attempt to load the configuration file config.php
-if (file_exists(S2_ROOT . s2_get_config_filename())) {
-    include S2_ROOT . s2_get_config_filename();
+if (file_exists(__DIR__ . '/../' . s2_get_config_filename())) {
+    include __DIR__ . '/../' . s2_get_config_filename();
 }
 
 error_reporting(defined('S2_DEBUG') ? E_ALL : E_ALL ^ E_NOTICE);
 
-require S2_ROOT . '_include/setup.php';
+require __DIR__ . '/../_include/setup.php';
 
 if (defined('S2_DEBUG')) {
     $errorHandler = Debug::enable();
 } else {
     $errorHandler = ErrorHandler::register();
 }
-HtmlErrorRenderer::setTemplate(realpath(S2_ROOT . '_include/views/error.php'));
+HtmlErrorRenderer::setTemplate(dirname(__DIR__) . '/_include/views/error.php');
 
 if (!defined('S2_URL_PREFIX')) {
     define('S2_URL_PREFIX', '');
@@ -85,10 +86,13 @@ function collectParameters(): array
 
 $app = new Application();
 $app->addExtension(new CmsExtension());
+if (defined('S2_ADMIN_MODE')) {
+    $app->addExtension(new AdminExtension());
+}
 
 $enabledExtensions = null;
-if (!defined('S2_DISABLE_CACHE') && file_exists(S2_CACHE_DIR.ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
-    $enabledExtensions = include S2_CACHE_DIR.ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME;
+if (!defined('S2_DISABLE_CACHE') && file_exists(S2_CACHE_DIR . ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
+    $enabledExtensions = include S2_CACHE_DIR . ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME;
 }
 
 try {
@@ -134,5 +138,5 @@ if (!defined('S2_CONFIG_LOADED')) {
 
 define('S2_DB_LAST_REVISION', 18);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION) {
-    include S2_ROOT . '_admin/db_update.php';
+    include __DIR__ . '/../_admin/db_update.php';
 }

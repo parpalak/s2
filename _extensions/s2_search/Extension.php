@@ -1,20 +1,28 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package s2_search
+ * @license   MIT
+ * @package   s2_search
  */
 
 declare(strict_types=1);
 
 namespace s2_extensions\s2_search;
 
+use S2\AdminYard\TemplateRenderer;
+use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
+use S2\Cms\Admin\DynamicConfigFormExtenderInterface;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
+use S2\Cms\Translation\TranslationProviderInterface;
+use S2\Rose\Storage\Database\PdoStorage;
+use s2_extensions\s2_search\Admin\DashboardSearchProvider;
+use s2_extensions\s2_search\Admin\DynamicConfigFormExtender;
+use s2_extensions\s2_search\Admin\TranslationProvider;
 use s2_extensions\s2_search\Controller\SearchPageController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
@@ -24,6 +32,21 @@ class Extension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
+        $container->set(DynamicConfigFormExtender::class, function (Container $container) {
+            return new DynamicConfigFormExtender();
+        }, [DynamicConfigFormExtenderInterface::class]);
+
+        $container->set(TranslationProvider::class, function (Container $container) {
+            return new TranslationProvider();
+        }, [TranslationProviderInterface::class]);
+
+        $container->set(DashboardSearchProvider::class, function (Container $container) {
+            return new DashboardSearchProvider(
+                $container->get(TemplateRenderer::class),
+                $container->get(PdoStorage::class),
+                $container->getParameter('root_dir')
+            );
+        }, [DashboardStatProviderInterface::class]);
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void

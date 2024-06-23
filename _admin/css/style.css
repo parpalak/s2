@@ -392,7 +392,7 @@ body > .tabsheets {
 .jstree .Search {
 	color: #999;
 	}
-.jstree .Hidden {
+.jstree .Draft {
 	text-decoration: line-through;
 	}
 .jstree .Search.Match {

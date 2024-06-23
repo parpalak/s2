@@ -1,4 +1,4 @@
-/**
+	/**
  * Basic functions: ajax, md5, popup messages.
  *
  * @copyright (C) 2007-2013 Roman Parpalak
@@ -233,16 +233,12 @@ var SetBackground = (function ()
 
 	return function (c)
 	{
-		var css_rule = 'body {background: ' + back_img + ' ' + c + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;} #tag_names li.cur_tag, .tabsheets > dt.active {background-color: ' + c + ';}';
+		var css_rule = 'body {background: ' + back_img + ' ' + c + '; background-attachment: local; background-size: ' + _size*8 + 'px ' + _size + 'px;}';
 
-		if (style.styleSheet)
-			style.styleSheet.cssText = css_rule;
-		else
-		{
-			if (style.firstChild)
-				style.removeChild(style.firstChild);
-			style.appendChild(document.createTextNode(css_rule));
+		if (style.firstChild) {
+			style.removeChild(style.firstChild);
 		}
+		style.appendChild(document.createTextNode(css_rule));
 	};
 }());
 

@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -39,21 +39,16 @@ use S2\Cms\Pdo\PdoSqliteFactory;
 use S2\Cms\Queue\QueueConsumer;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
-use S2\Cms\Rose\CustomExtractor;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\TemplateFinalReplaceEvent;
 use S2\Cms\Template\Viewer;
-use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
-use S2\Rose\Indexer;
 use S2\Rose\Stemmer\PorterStemmerEnglish;
 use S2\Rose\Stemmer\PorterStemmerRussian;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
 use s2_extensions\s2_search\Controller\SearchPageController;
-use s2_extensions\s2_search\Fetcher;
-use s2_extensions\s2_search\IndexManager;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -117,27 +112,7 @@ class CmsExtension implements ExtensionInterface
                 ->setSnippetLineSeparator(' ⋄&nbsp;')
             ;
         });
-        $container->set(Indexer::class, function (Container $container) {
-            return new Indexer(
-                $container->get(PdoStorage::class),
-                $container->get(StemmerInterface::class),
-                $container->get(ExtractorInterface::class),
-                $container->get(LoggerInterface::class),
-            );
-        });
-        $container->set(IndexManager::class, function (Container $container) {
-            return new IndexManager(
-                $container->getParameter('cache_dir'),
-                new Fetcher($container->get(DbLayer::class)),
-                $container->get(Indexer::class),
-                $container->get(PdoStorage::class),
-                $container->get('recommendations_cache'),
-                $container->get(LoggerInterface::class)
-            );
-        });
-        $container->set(ExtractorInterface::class, function (Container $container) {
-            return new CustomExtractor($container->get(LoggerInterface::class));
-        });
+
         $container->set(SearchPageController::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
@@ -409,7 +384,7 @@ class CmsExtension implements ExtensionInterface
 
                 if (\count($tagsList) > 0) {
                     /** @var Viewer $viewer */
-                    $viewer  = $container->get(Viewer::class);
+                    $viewer = $container->get(Viewer::class);
                     $template->registerPlaceholder('<!-- s2_tags_list -->', $viewer->render('tags_list', [
                         'tags' => $tagsList,
                     ]));

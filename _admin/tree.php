@@ -59,9 +59,9 @@ function s2_create_article ($id, $title)
 	}
 
 	$query = array(
-		'INSERT'	=> 'parent_id, title, priority, url, user_id, template',
+		'INSERT'	=> 'parent_id, title, priority, url, user_id, template, excerpt, pagetext',
 		'INTO'		=> 'articles',
-		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($new_priority).', \'new\', '.$s2_user['id'].', '.(S2_USE_HIERARCHY ? '\'\'' : '\'site.php\''),
+		'VALUES'	=> $id.', \''.$s2_db->escape($title).'\', '.($new_priority).', \'new\', '.$s2_user['id'].', '.(S2_USE_HIERARCHY ? '\'\'' : '\'site.php\'').', \'\', \'\''
 	);
 	($hook = s2_hook('fn_create_article_pre_ins_qr')) ? eval($hook) : null;
 	$s2_db->buildAndQuery($query);
@@ -332,7 +332,7 @@ function s2_get_child_branches ($id, $root = true, $search = false)
 				$class[] = 'Match';
 		}
 		if (!$article['published'])
-			$class[] = 'Hidden';
+			$class[] = 'Draft';
 		if (count($class))
 			$item['data']['attr']['class'] = implode(' ', $class);
 

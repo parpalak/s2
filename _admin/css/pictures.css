@@ -1,15 +1,18 @@
+html,
+body,
 #tree_div,
 .treetree,
 #file-wrap,
 #brd {
 	height: 100%;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 	}
 
 #tree_div {
-	padding: 0.833em;
+	padding: 0.75em;
+	}
+#tree_div, input {
+	font-size: 0.875rem;
 	}
 
 #brd,
@@ -18,11 +21,12 @@
 	border-color: #aaa #f6f6f6 #f6f6f6 #aaa;
 	background: #fff;
 	color: #000;
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
 	border-radius: 2px;
 	}
-
+#folders {
+	border-top-width: 0;
+	border-bottom-width: 0;
+}
 #brd,
 .treetree {
 	overflow: auto;
@@ -74,12 +78,14 @@
 	#files.jstree a .no-preview {
 		background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJub25lIiBzdHJva2U9IiM3NzciIHN0cm9rZS13aWR0aD0iMiI+PHBhdGggZD0iTTYyIDUwdjhoOCIvPjxwYXRoIGQ9Im03MCA1Ny04LThIMzB2NTBoNDB6Ii8+PC9zdmc+");
 		}
+#folders .jstree-rename-input {
+	font-size: 0.875rem;
+}
 
 #files ul {
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
-	font: 0.917em/1 Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	}
 	#files .jstree-leaf {
 		display: inline-block;
@@ -92,7 +98,7 @@
 		#files .jstree-rename-input {
 			width: auto !important;
 			min-width: 0;
-			font: 1em/1 Tahoma, Verdana, Arial, Helvetica, sans-serif !important;
+			font-size: 0.875rem;
 			text-align: center;
 			margin: 0 !important;
 			padding: 0 !important;
@@ -115,9 +121,17 @@
 #fupload {
 	clear: both;
 	line-height: 1.6;
+	position: sticky;
+	background: var(--page-secondary-background);
 	}
-
-#fupload,
-#folders {
-	margin: 0 0 1em;
-	}
+	#finfo {
+		bottom: 0;
+		padding-top: 1em;
+		border-top: 1px solid #f6f6f6;
+		word-break: break-word;
+		}
+	#fupload {
+		top: 0;
+		padding-bottom: 1em;
+		border-bottom: 1px solid #aaa;
+		}

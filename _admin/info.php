@@ -40,7 +40,7 @@ function s2_get_counters ()
     /** @var DbLayer $s2_db */
     $s2_db = \Container::get(DbLayer::class);
 
-	$articles_num = s2_count_articles(1);
+	$articles_num = s2_count_articles(0);
 
 	$query = array(
 		'SELECT'	=> 'count(*)',

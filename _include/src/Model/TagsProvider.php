@@ -63,4 +63,28 @@ class TagsProvider
 
         return $this->cachedTags;
     }
+
+    public function getAllTags(): array
+    {
+        $subQuery = [
+            'SELECT' => 'COUNT(*)',
+            'FROM'   => 'article_tag AS at',
+            'JOINS'  => [
+                [
+                    'INNER JOIN' => 'articles AS a',
+                    'ON'         => 'a.id = at.article_id'
+                ]
+            ],
+            // Well, it's an inaccuracy because we don't check parents' "published" property
+            'WHERE'  => 'a.published = 1 AND at.tag_id = t.tag_id'
+        ];
+        $query    = [
+            'SELECT'   => 'name, (' . $this->dbLayer->build($subQuery) . ') AS count',
+            'FROM'     => 'tags AS t',
+            'ORDER BY' => 'count DESC',
+        ];
+        $result   = $this->dbLayer->buildAndQuery($query);
+
+        return array_column($this->dbLayer->fetchAssocAll($result), 'name');
+    }
 }

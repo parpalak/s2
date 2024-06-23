@@ -13,6 +13,7 @@ use S2\Cms\Model\Model;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Pdo\DbLayer;
 
+define('S2_ADMIN_MODE', true);
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 
@@ -27,6 +28,12 @@ require 'login.php';
 require 'site_lib.php';
 
 ($hook = s2_hook('rq_start')) ? eval($hook) : null;
+
+$request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+$request->setSession(new \Symfony\Component\HttpFoundation\Session\Session());
+/** @var \Symfony\Component\HttpFoundation\RequestStack $requestStack */
+$requestStack = $app->container->get(\Symfony\Component\HttpFoundation\RequestStack::class);
+$requestStack->push($request);
 
 s2_no_cache();
 
@@ -174,6 +181,23 @@ elseif ($action == 'load_tree')
 
 	header('Content-Type: application/json; charset=utf-8');
 	echo s2_json_encode(s2_get_child_branches((int)$_GET['id'], true, trim($_GET['search'])));
+}
+
+// Load folder tree
+elseif ($action == 'load_tree_v2')
+{
+	$is_permission = $s2_user['view'];
+	s2_test_user_rights($is_permission);
+
+	if (!isset($_GET['id'])) {
+        die('Error in GET parameters.');
+    }
+
+    /** @var \S2\Cms\Model\ArticleManager $articleManager */
+	$articleManager = $app->container->get(\S2\Cms\Model\ArticleManager::class);
+
+	header('Content-Type: application/json; charset=utf-8');
+	echo s2_json_encode($articleManager->getChildBranches((int)$_GET['id'], isset($_GET['search']) ? trim($_GET['search']) : null));
 }
 
 //=======================[Pages editor]=========================================

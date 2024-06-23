@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -197,5 +197,93 @@ readonly class ArticleProvider
         unset($item);
 
         return $output;
+    }
+
+    public function getTemplateList(): array
+    {
+        $query  = [
+            'SELECT' => 'DISTINCT a.template',
+            'FROM'   => 'articles AS a'
+        ];
+        $result = $this->dbLayer->buildAndQuery($query);
+
+        $usedTemplates = $this->dbLayer->fetchColumn($result);
+
+        return array_values(array_unique(array_merge([
+            '',
+            'site.php',
+            'mainpage.php',
+            'back_forward.php',
+        ], $usedTemplates)));
+    }
+
+    public function pathFromId(int $id, bool $visibleForAll = false): ?string
+    {
+        if ($id < 0) {
+            return null;
+        }
+
+        if ($id === self::ROOT_ID) {
+            return '';
+        }
+
+        $query  = [
+            'SELECT' => 'url, parent_id',
+            'FROM'   => 'articles',
+            'WHERE'  => 'id = ' . $id . ($visibleForAll ? ' AND published = 1' : '')
+        ];
+        $result = $this->dbLayer->buildAndQuery($query);
+
+        $row = $this->dbLayer->fetchRow($result);
+        if (!$row) {
+            return null;
+        }
+
+        if ($row[1] === self::ROOT_ID) {
+            return '';
+        }
+
+        if ($this->useHierarchy) {
+            $prefix = $this->pathFromId($row[1], $visibleForAll);
+            if ($prefix === null) {
+                return null;
+            }
+        } else {
+            $prefix = '';
+        }
+
+        return $prefix . '/' . urlencode($row[0]);
+    }
+
+    public function checkUrlStatus(int $id): string
+    {
+        $query  = [
+            'SELECT' => 'parent_id, url',
+            'FROM'   => 'articles AS a',
+            'WHERE'  => 'a.id = :id'
+        ];
+        $result = $this->dbLayer->buildAndQuery($query, ['id' => $id]);
+        [$parentId, $url] = $this->dbLayer->fetchRow($result);
+
+        if ($parentId !== self::ROOT_ID) {
+            if ($url === '') {
+                return 'empty';
+            }
+
+            // NOTE: seems that this condition must be checked also for root items with ($parentId === self::ROOT_ID).
+            // However, somewhere must be a more strict constraint that allows only one root item.
+            $query  = [
+                'SELECT' => 'COUNT(*)',
+                'FROM'   => 'articles AS a',
+                'WHERE'  => 'a.url = :url' . ($this->useHierarchy ? ' AND a.parent_id = ' . $parentId : '')
+            ];
+            $result = $this->dbLayer->buildAndQuery($query, ['url' => $url]);
+
+            if ($this->dbLayer->result($result) !== 1) {
+                return 'not_unique';
+            }
+        }
+
+        return 'ok';
     }
 }

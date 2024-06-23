@@ -11,6 +11,8 @@
 
 use S2\Cms\Pdo\DbLayer;
 
+define('S2_ADMIN_MODE', true);
+
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 

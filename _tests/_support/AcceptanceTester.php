@@ -99,6 +99,21 @@ class AcceptanceTester extends Actor
         $I->seeElement('.extension.enabled [title=' . $extensionId . ']');
     }
 
+    public function changeSetting(string $paramName, int|string|bool $value): void
+    {
+        $I = $this;
+
+        $I->amOnPage('/_admin/admin.php?entity=Config&action=list');
+        $I->seeResponseCodeIsSuccessful();
+
+        // $I->submitForm('//form[contains(@action, \'S2_PREMODERATION\')]', ['value' => true]);
+
+        $I->submitForm('form[action="?entity=Config&action=patch&field=value&name=' . $paramName . '"]', [
+            'value' => $value,
+        ]);
+        $I->seeResponseCodeIsSuccessful();
+    }
+
     public function clearEmail(): void
     {
         $fi = new FilesystemIterator($this->getEmailDir(), FilesystemIterator::SKIP_DOTS);

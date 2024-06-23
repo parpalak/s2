@@ -12,6 +12,7 @@
 
 use S2\Cms\Pdo\DbLayer;
 
+define('S2_ADMIN_MODE', true);
 define('S2_ROOT', '../');
 
 define('S2_NO_POST_BAD_CHARS', 1);

@@ -2,7 +2,8 @@
     "config": {
         "vendor-dir": "_vendor",
         "preferred-install": {
-            "s2/rose": "src"
+            "s2/rose": "source",
+            "s2/admin-yard": "source"
         }
     },
     "name": "s2/cms",
@@ -30,7 +31,8 @@
         "symfony/event-dispatcher": "^7.0",
         "symfony/filesystem": "^7.0",
         "symfony/http-foundation": "^7.0",
-        "symfony/routing": "^7.0"
+        "symfony/routing": "^7.0",
+        "s2/admin-yard": "dev-master"
     },
     "autoload": {
         "psr-4": {

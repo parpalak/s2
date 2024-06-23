@@ -11,7 +11,9 @@ declare(strict_types=1);
 
 namespace S2\Cms\Framework;
 
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use S2\Cms\Framework\Exception\ParameterNotFoundException;
 use S2\Cms\Framework\Exception\ServiceNotFoundException;
 
@@ -19,16 +21,21 @@ class Container implements ContainerInterface
 {
     private array $bindings = [];
     private array $instances = [];
+    private array $idsByTag = [];
 
     public function __construct(private readonly array $parameters)
     {
     }
 
-    public function set(string $id, callable|object $factory): void
+    public function set(string $id, callable|object $factory, array $tags = []): void
     {
         $this->bindings[$id] = $factory;
         if (!\is_callable($factory)) {
             $this->instances[$id] = $factory;
+        }
+
+        foreach ($tags as $tag) {
+            $this->idsByTag[$tag][] = $id;
         }
     }
 
@@ -45,6 +52,15 @@ class Container implements ContainerInterface
         $factory = $this->bindings[$id];
 
         return $this->instances[$id] = $factory($this);
+    }
+
+    public function getByTag(string $tag): array
+    {
+        try {
+            return array_map(fn(string $id) => $this->get($id), $this->idsByTag[$tag] ?? []);
+        } catch (NotFoundExceptionInterface | ContainerExceptionInterface  $e) {
+            throw new \LogicException('Impossible exception occurred', 0, $e);
+        }
     }
 
     public function getIfInstantiated(string $id): mixed

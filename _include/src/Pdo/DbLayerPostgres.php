@@ -36,10 +36,13 @@ class DbLayerPostgres extends DbLayer
         }
     }
 
-    public function query($sql): \PDOStatement
+    public function query($sql, array $params = []): \PDOStatement
     {
+        $stmt = $this->pdo->prepare($sql);
         try {
-            return $this->pdo->query($sql);
+            $stmt->execute($params);
+
+            return $stmt;
         } catch (\PDOException $e) {
             if ($this->transactionLevel > 0) {
                 $this->pdo->rollBack();

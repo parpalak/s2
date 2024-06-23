@@ -112,20 +112,23 @@ class DbLayer
     /**
      * @throws DbLayerException
      */
-    public function buildAndQuery(array $query): \PDOStatement
+    public function buildAndQuery(array $query, array $params = []): \PDOStatement
     {
         $sql = $this->build($query);
 
-        return $this->query($sql);
+        return $this->query($sql, $params);
     }
 
     /**
      * @throws DbLayerException
      */
-    public function query($sql): \PDOStatement
+    public function query($sql, array $params = []): \PDOStatement
     {
+        $stmt = $this->pdo->prepare($sql);
         try {
-            return $this->pdo->query($sql);
+            $stmt->execute($params);
+
+            return $stmt;
         } catch (\PDOException $e) {
 //            if ($this->transactionLevel > 0) {
 //                $this->pdo->rollBack();
@@ -174,6 +177,11 @@ class DbLayer
     public function fetchRow(\PDOStatement $statement): array|false
     {
         return $statement->fetch(\PDO::FETCH_NUM);
+    }
+
+    public function fetchColumn(\PDOStatement $statement): array|false
+    {
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     public function numRows(\PDOStatement $statement): int
@@ -238,7 +246,7 @@ class DbLayer
         $statement = $this->query('SELECT VERSION()');
 
         return [
-            'name'    => 'MySQL via PDO',
+            'name'    => 'MySQL',
             'version' => $this->result($statement),
         ];
     }

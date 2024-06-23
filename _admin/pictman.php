@@ -11,6 +11,7 @@
 
 use S2\Cms\Pdo\DbLayer;
 
+define('S2_ADMIN_MODE', true);
 define('S2_ROOT', '../');
 require S2_ROOT.'_include/common.php';
 
@@ -76,7 +77,8 @@ function s2_jsvarencode ($var)
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><?php echo $lang_pictures['Pictures'];?></title>
 <meta http-equiv="Pragma" content="no-cache" />
-<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" href="<?php echo S2_PATH; ?>/_vendor/s2/admin-yard/demo/style.css">
+<link rel="stylesheet" type="text/css" href="css/admin-override.css" />
 <link rel="stylesheet" type="text/css" href="css/pictures.css" />
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript">
@@ -84,8 +86,11 @@ var sUrl = '<?php echo S2_PATH; ?>/_admin/pict_ajax.php?';
 var sPicturePrefix = '<?php echo S2_PATH.'/'.S2_IMG_DIR; ?>';
 var iMaxFileSize = <?php echo s2_return_bytes(ini_get('upload_max_filesize')); ?>;
 var sFriendlyMaxFileSize = '<?php echo Lang::friendly_filesize(s2_return_bytes(ini_get('upload_max_filesize'))); ?>';
-SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
+// SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
 </script>
+<style>:root {
+    --page-secondary-background: <?php echo S2_ADMIN_COLOR; ?>;
+}</style>
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/jquery-tools.js"></script>
 <script type="text/javascript" src="js/jquery.jstree.js"></script>

@@ -146,9 +146,9 @@ $lang_admin = array(
 'Administrate'				=> 'Administration',
 
 // Stat tab
-'Already published'			=> 'Published stuff',
-'Articles'					=> 'Articles: %s',
-'Comments'					=> 'Comments: %s',
+'Already published'			=> 'Published on the website',
+'Articles num'				=> '{{ articles }} article|{{ articles }} articles',
+'Comments num'				=> '{{ comments }} comment|{{ comments }} comments',
 'Server load'				=> 'Server load: %s',
 'Stat'						=> 'Statistics',
 'S2 version'				=> 'S2 version',
@@ -157,8 +157,8 @@ $lang_admin = array(
 'OS'						=> 'Operating system: %s',
 'PHP info'					=> 'The information about PHP’s configuration',
 'Database'					=> 'Database',
-'Rows'						=> 'Rows: %s',
-'Size'						=> 'Data size: %s',
+'Rows'						=> '{{ rows }} row|{{ rows }} rows',
+'Size'						=> 'Data size: {{ value }}',
 
 // Options tab
 'Options'					=> 'Options',
@@ -183,7 +183,99 @@ $lang_admin = array(
 'Email'						=> 'E-mail',
 
 // Extensions tab
-'Extensions'				=> 'Extensions',
+'Extensions'                           => 'Extensions',
+'Install extension'                    => 'Install extension',
+'Upgrade extension'                    => 'Upgrade extension',
+'Extensions available'                 => 'Extensions available for install or upgrade',
+'Hotfixes available'                   => 'Hotfixes available for install',
+'Installed extensions'                 => 'Installed extensions',
+'Version'                              => ' v%s',
+'Installed extensions warn'            => '<strong>WARNING!</strong> If you uninstall an extension, any data associated with that extension will be permanently deleted from the database and cannot be restored by re-installing the extension. If you wish to retain the data then you should disable the extension instead.',
+'Uninstall'                            => 'Uninstall',
+'Enable'                               => 'Enable',
+'Disable'                              => 'Disable',
+'Refresh hooks'                        => 'Refresh hooks',
+'Extension loading error'              => 'Loading of extension “%s” failed.',
+'Illegal ID'                           => 'The ID must contain only lowercase alphanumeric characters (a-z and 0-9) and the underscore character (_).',
+'Missing manifest'                     => 'Missing Manifest.php.',
+'Manifest class not found'             => 'Class Manifest not found in Manifest.php.',
+'ManifestInterface is not implemented' => 'Class Manifest does not implement ManifestInterface.',
+
+'No installed extensions' => 'There are no installed extensions.',
+'No available extensions' => 'There are no extensions available for install or upgrade.',
+'Invalid extensions'      => '<strong>Warning!</strong> The extensions listed below were found in the extensions folder but are not available for install or upgrade because the errors displayed below were detected.',
+'Extension by'            => 'Created by %s.',
+
+'Missing dependency'   => 'The extension “%1$s” cannot be installed unless the following extensions are installed and enabled: %2$s.',
+'Uninstall dependency' => 'The extension “%1$s” cannot be uninstalled before the following extensions are installed: %2$s',
+'Disable dependency'   => 'The extension “%1$s” cannot be disabled while the following extensions are enabled: %2$s.',
+'Disabled dependency'  => 'The extension “%1$s” cannot be enabled while the following extensiond are disabled: %2$s.',
+
+// Config tab
+'S2_SITE_NAME_help'        => 'Used in titles and RSS.',
+'S2_WEBMASTER_help'        => 'Used in the copyright, RSS and as the sender name in subscription e-mails; you can leave it empty.',
+'S2_WEBMASTER_EMAIL_help'  => 'Used in the copyright and as the sender address.',
+'S2_COMPRESS_help'         => 'This will reduce bandwidth usage, but use a little more CPU.',
+'S2_SHOW_COMMENTS_help'    => 'You can hide all comments for a while by turning this off.',
+'S2_ENABLED_COMMENTS_help' => 'Show the comment form (at pages where it was not explicitly disabled).',
+'S2_PREMODERATION_help'    => 'All new comments will be hidden by default. They are to be checked by a moderator before publishing.',
+'S2_FAVORITE_URL_help'     => 'The URL part for the favorite page, e.g. “favorite”.',
+'S2_TAGS_URL_help'         => 'The URL part for the tags page, e.g. “tags”.',
+'S2_USE_HIERARCHY_help'    => 'Page URLs reflect the tree structure. Page template and visibility are inherited from parent sections.',
+'S2_MAX_ITEMS_help'        => 'The number of items on the section page. 0 — do not break section content into pages.',
+'S2_START_YEAR_help'       => 'Used in the copyright.',
+'S2_ADMIN_COLOR_help'      => 'Background color of the control panel.',
+'S2_ADMIN_NEW_POS_help'    => 'The created pages are placed before existing ones in the tree structure.',
+'S2_ADMIN_CUT_help'        => 'Use page texts above the “&lt;cut&gt;” tag as excerpts.',
+'S2_LOGIN_TIMEOUT_help'    => 'Idle timeout (minutes). Users have to re-enter their login and password when this timeout expires.',
+'S2_LANGUAGE_help'         => 'The language of the site and the admin panel. Languages are stored in the “_lang” folder.',
+'S2_STYLE_help'            => 'The style of the site. Styles are stored in the “_styles” folder.',
+
+'Site config'         => 'Site settings',
+'S2_SITE_NAME'        => 'Site name',
+'S2_WEBMASTER'        => 'Webmaster name',
+'S2_WEBMASTER_EMAIL'  => 'Webmaster e-mail',
+'S2_COMPRESS'         => 'Output gzip compression',
+
+'Comments config'     => 'Comments',
+'S2_SHOW_COMMENTS'    => 'Show comments',
+'S2_ENABLED_COMMENTS' => 'Enable comments',
+'S2_PREMODERATION'    => 'Comments checking',
+
+'S2_FAVORITE_URL'     => 'Favorite URL',
+'S2_TAGS_URL'         => 'Tags URL',
+
+'Navigation config'   => 'Navigation',
+'S2_USE_HIERARCHY'    => 'Page hierarchy',
+'S2_MAX_ITEMS'        => 'Section paging',
+
+'S2_START_YEAR'       => 'Start year',
+
+'Admin config'        => 'Admin panel',
+'S2_ADMIN_COLOR'      => 'Background color',
+'S2_ADMIN_NEW_POS'    => 'New pages on top',
+'S2_ADMIN_CUT'        => '“Cut” istead of excerpts',
+'S2_LOGIN_TIMEOUT'    => 'Timeout',
+'S2_LANGUAGE'         => 'Language',
+'S2_STYLE'            => 'Style',
+
+'inherited' => 'Inherited',
+
+'Filesize B' => 'B',
+'Filesize КB' => 'КB',
+'Filesize MB' => 'MB',
+'Filesize GB' => 'GB',
+'Filesize ТB' => 'ТB',
+'Filesize PB' => 'PB',
+'Filesize EB' => 'EB',
+'Filesize ZB' => 'ZB',
+'Filesize YB' => 'YB',
+'Filesize format'       => '{{ number }} {{ unit }}',
+'Decimal count'          => 2,
+'Decimal point'          => '.',
+'Thousands separator'    => ',',
+
+'Outdated version' => 'Somebody has modified the text while you have been editing it. Your changes cannot be saved right now without loss of other ones. Open new version in a new window and move your changes to the new version.',
 );
 
 $lang_user_permissions = array (
