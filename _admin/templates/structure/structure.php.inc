@@ -23,16 +23,13 @@
     </span>
     <div id="tree" class="treetree" tabindex="0"></div>
 </section>
-<script src="js/ajax.js"></script>
-<script>
-    SetBackground('<?php echo json_encode(S2_ADMIN_COLOR); ?>');
-</script>
+<script src="<?php echo $basePath; ?>/_admin/js/ajax.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/lang/<?php echo Lang::admin_code(); ?>/ui.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/jquery.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/jquery-tools.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/jquery.jstree.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/structure.js"></script>
 <script>
-    var sUrl = '<?php echo $basePath; ?>/_admin/site_ajax.php?';
-    var new_page_pos = '<?php echo json_encode(S2_ADMIN_NEW_POS); ?>';
+    var sUrl = '<?php echo $basePath; ?>/_admin/ajax.php?';
+    var new_page_pos = <?php echo json_encode(S2_ADMIN_NEW_POS); ?>;
 </script>

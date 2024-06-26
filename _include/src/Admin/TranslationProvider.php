@@ -19,8 +19,8 @@ readonly class TranslationProvider implements TranslationProviderInterface
 
     public function getTranslations(string $language, string $locale): array
     {
-        require $this->rootDir . '_admin/lang/ru/admin.php';
-        $translationsAY = require $this->rootDir . '_vendor/s2/admin-yard/translations/ru.php';
+        require $this->rootDir . '_admin/lang/' . $locale . '/admin.php';
+        $translationsAY = require $this->rootDir . '_vendor/s2/admin-yard/translations/' . $locale . '.php';
 
         return array_merge($lang_admin, $translationsAY);
     }

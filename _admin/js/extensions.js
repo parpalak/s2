@@ -13,11 +13,13 @@ function loadingIndicator(state) {
 
 function RefreshHooks() {
     loadingIndicator(true)
-    fetch(sUrl + 'action=refresh_hooks').finally(() => loadingIndicator(false));
+    fetch(sUrl + 'action=refresh_hooks')
+        .finally(() => loadingIndicator(false))
+    ;
     return false;
 }
 
-function changeExtension(sAction, sId, sMessage, iAdminAffected) {
+function changeExtension(sAction, sId, sMessage) {
     if (sAction === 'install_extension') {
         if (!confirm((sMessage !== '' ? s2_lang.install_message.replaceAll('%s', sMessage) : '') + s2_lang.install_extension.replaceAll('%s', sId))) {
             return false;
@@ -32,8 +34,22 @@ function changeExtension(sAction, sId, sMessage, iAdminAffected) {
         }
     }
 
+    // TODO CSRF token support
     loadingIndicator(true)
-    fetch(sUrl + 'action=' + sAction + '&id=' + sId).then(() => window.location.reload()).finally(() => loadingIndicator(false));
+    fetch(sUrl + 'action=' + sAction + '&id=' + sId)
+        .then(function (response) {
+            if (response.ok) {
+                response.json().then(function (data) {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        PopupMessages.show(data.message, [], 0, 'extensions.' + sId + '.' + sAction);
+                    }
+                });
+            }
+        })
+        .finally(() => loadingIndicator(false))
+    ;
 
     return false;
 }

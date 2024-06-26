@@ -25,7 +25,7 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
                     <div class="options">
                         <button
                                 class="bitbtn <?= isset($item['installed_version']) ? 'upgr_ext' : 'inst_ext' ?>"
-                                onclick="return changeExtension('install_extension', '<?= $htmlEncode(addslashes($item['entry'])) ?>', '<?= implode('\\n', array_map(static fn($s) => s2_htmlencode(addslashes($s)), $item['install_notes'])) ?>', <?= $item['admin_affected'] ?>);"
+                                onclick="return changeExtension('install_extension', '<?= $htmlEncode(addslashes($item['entry'])) ?>', '<?= implode('\\n', array_map(static fn($s) => s2_htmlencode(addslashes($s)), $item['install_notes'])) ?>');"
                         >
                             <?= isset($item['installed_version']) ? $trans('Upgrade extension') : $trans('Install extension') ?>
                         </button>
@@ -76,11 +76,11 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
                     <?php endif; ?>
                     <div class="options">
                         <button class="bitbtn flip_ext"
-                                onclick="return changeExtension('flip_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '', <?= $ext['admin_affected'] ?>);">
+                                onclick="return changeExtension('flip_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '');">
                             <?= $ext['disabled'] != '1' ? $trans('Disable') : $trans('Enable') ?>
                         </button>
                         <button class="bitbtn uninst_ext"
-                                onclick="return changeExtension('uninstall_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '<?= $htmlEncode(addslashes($ext['uninstall_note'] ?? '')) ?>', <?= $ext['admin_affected'] ?>);">
+                                onclick="return changeExtension('uninstall_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '<?= $htmlEncode(addslashes($ext['uninstall_note'] ?? '')) ?>');">
                             <?= $trans('Uninstall') ?>
                         </button>
                     </div>
@@ -95,5 +95,5 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
 </section>
 <script src="<?php echo $basePath; ?>/_admin/js/extensions.js"></script>
 <script>
-    var sUrl = '<?php echo $basePath; ?>/_admin/site_ajax.php?';
+    var sUrl = '<?php echo $basePath; ?>/_admin/ajax.php?';
 </script>

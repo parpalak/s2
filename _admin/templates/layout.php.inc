@@ -24,9 +24,10 @@ if (!isset($this)) {
     <link rel="stylesheet" href="css/admin-override.css">
 
     <script src="<?php echo $basePath; ?>/_vendor/s2/admin-yard/demo/script.js"></script>
-    <script src="js/s2lib.js"></script>
+    <script src="js/lib.js"></script>
 
     <!-- note: move to editor pages only -->
+    <script src="js/s2lib.js"></script>
     <script src="js/conversion.js"></script>
     <script src="js/optipng-setup.js"></script>
 
@@ -37,7 +38,12 @@ if (!isset($this)) {
 </head>
 <body>
 <div id="loading"></div>
-<nav><?= $menu ?></nav>
+<nav>
+    <?= $menu ?>
+    <ul class="main-menu-list">
+        <li class="main-menu-item"><a class="main-menu-link" href="?action=logout"><?= $trans('Logout') ?></a></li>
+    </ul>
+</nav>
 <?php
 foreach ($flashMessages as $type => $messages) {
     foreach ($messages as $message) {
@@ -58,5 +64,10 @@ foreach ($flashMessages as $type => $messages) {
 <?php else: ?>
     <article class="admin-content"><?= $content ?></article>
 <?php endif; ?>
+    <dialog id="error-dialog">
+        <h1><?= $trans('An error encountered') ?></h1>
+        <p><iframe id="error-iframe" src="about:blank"></iframe></p>
+        <button class="primary" id="error-dialog-close"><?= $trans('Close') ?></button>
+    </dialog>
 </body>
 </html>

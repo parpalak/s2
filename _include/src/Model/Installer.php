@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -327,7 +327,7 @@ readonly class Installer
 
 
         $schema = array(
-            'FIELDS'  => array(
+            'FIELDS'      => array(
                 'challenge'      => array(
                     'datatype'   => 'VARCHAR(32)',
                     'allow_null' => false,
@@ -363,10 +363,12 @@ readonly class Installer
                     'default'    => '\'\''
                 ),
             ),
-            'INDEXES' => array(
-                'challenge_idx' => array('challenge'),
-                'login_idx'     => array('login'),
+            'INDEXES'     => array(
+                'login_idx' => array('login'),
             ),
+            'UNIQUE KEYS' => array(
+                'challenge_idx' => array('challenge'),
+            )
         );
 
         $this->dbLayer->createTable('users_online', $schema);

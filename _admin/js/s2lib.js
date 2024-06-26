@@ -76,42 +76,37 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
 
     decorateForm(statusData);
 
-    function saveForm(event) {
+    async function saveForm(event) {
         event.preventDefault();
 
         loadingIndicator(true);
-        fetch(eForm.action, {
-            method: 'POST',
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
-            body: new FormData(eForm)
-        })
-            .then(function (response) {
-                // Handle the response from the server
-                if (response.ok) {
-                    // Form submitted successfully
-                    PopupMessages.hide(sLowerEntityName + '-save');
-                    document.dispatchEvent(new Event('save_article_end.s2'));
-                    response.json().then(function (statusData) {
-                        eForm.elements['revision'].value = statusData['revision'];
-                        decorateForm(statusData);
-                    })
-                } else {
-                    response.json().then(function (data) {
-                        Array.from(data.errors).forEach(function (error) {
-                            // TODO array_merge
-                            PopupMessages.show(error, null, null, sLowerEntityName + '-save');
-                        })
-                    }).catch(function (error) {
-                        PopupMessages.show(error, null, null, sLowerEntityName + '-save');
-                    })
-                    console.warn('Form submission failed');
-                }
-            })
-            .catch(function (error) {
-                console.warn('An error occurred:', error);
-            })
-            .finally(() => loadingIndicator(false))
-        ;
+        try {
+            const response = await fetch(eForm.action, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                body: new FormData(eForm)
+            });
+
+            if (response.ok) {
+                PopupMessages.hide(sLowerEntityName + '-save');
+                document.dispatchEvent(new Event('save_article_end.s2'));
+
+                const statusData = await response.json();
+                eForm.elements['revision'].value = statusData['revision'];
+                // decorateForm(statusData);
+            } else if (response.status === 422) {
+                const data = await response.json();
+                Array.from(data.errors).forEach(function (error) {
+                    // TODO array_merge
+                    PopupMessages.show(error, null, null, sLowerEntityName + '-save');
+                });
+                console.warn('Form submission failed');
+            }
+        } catch (error) {
+            console.warn('An error occurred:', error);
+        } finally {
+            loadingIndicator(false);
+        }
     }
 
     eForm.addEventListener('submit', saveForm);
@@ -433,122 +428,6 @@ function PopupWindow(sTitle, sHeader, sInfo, sText) {
     wnd.document.write('<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>');
     wnd.document.close();
 }
-
-var PopupMessages = {
-
-    show: function (sMessage, aActions, iTime, sId) {
-        var ePopup = document.getElementById('popup_message');
-        var eList, eCross;
-
-        if (!ePopup) {
-            eCross = document.createElement('a');
-            eCross.setAttribute('class', 'cross');
-            eCross.setAttribute('href', '#');
-            eCross.setAttribute('tabindex', '0');
-            eCross.addEventListener('click', function (e) {
-                ePopup.remove();
-                e.preventDefault();
-            });
-
-            eList = document.createElement('div');
-            eList.setAttribute('class', 'message-list');
-            eList.appendChild(eCross);
-
-            ePopup = document.createElement('div');
-            ePopup.setAttribute('id', 'popup_message');
-            ePopup.appendChild(eList);
-            document.body.appendChild(ePopup);
-        } else {
-            eList = ePopup.children[0];
-            eCross = eList.children[0];
-        }
-
-        eCross.focus();
-
-        if (sId) {
-            var message = eList.querySelector('div[data-id="' + sId + '"]');
-            if (message) {
-                message.style.opacity = 0;
-                setTimeout(function () {
-                    message.style.opacity = 1;
-                }, 100);
-                setTimeout(function () {
-                    message.style.opacity = 0;
-                }, 200);
-                setTimeout(function () {
-                    message.style.opacity = 1;
-                }, 300);
-                return;
-            }
-        }
-
-        message = document.createElement('div');
-        message.setAttribute('class', 'message');
-        message.setAttribute('data-id', sId || '');
-        eList.appendChild(message);
-
-        if (iTime) {
-            setTimeout(function () {
-                message.remove();
-                if (!eList.querySelector('.message')) {
-                    ePopup.remove();
-                }
-            }, iTime * 1000);
-        }
-
-        message.innerHTML = sMessage;
-
-        if (aActions) {
-            for (var i = 0; i < aActions.length; i++) {
-                var eA = document.createElement('a');
-                eA.setAttribute('class', 'action');
-                eA.setAttribute('href', '#');
-                eA.setAttribute('tabindex', '0');
-                eA.textContent = aActions[i].name;
-                (function (action, once) {
-                    eA.addEventListener('click', function () {
-                        action();
-                        if (once) {
-                            message.remove();
-                            if (!eList.querySelector('.message')) {
-                                ePopup.remove();
-                            }
-                        }
-                        return false;
-                    });
-                }(aActions[i].action, aActions[i].once));
-                message.appendChild(document.createTextNode('\u00a0'));
-                message.appendChild(eA);
-            }
-        }
-    },
-
-    showUnique: function (sMessage, sId) {
-        this.show(sMessage, null, null, sId);
-    },
-
-    hide: function (sId) {
-        if (!sId) {
-            return;
-        }
-
-        var popup = document.getElementById('popup_message');
-
-        if (!popup) {
-            return;
-        }
-
-        var list = popup.children[0];
-
-        var message = list.querySelector('div[data-id="' + sId + '"]');
-        if (message) {
-            message.remove();
-            if (!list.querySelector('.message')) {
-                popup.remove();
-            }
-        }
-    }
-};
 
 function loadingIndicator(state) {
     document.getElementById('loading').style.display = state ? 'block' : 'none';

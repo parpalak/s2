@@ -105,7 +105,7 @@ $(function()
 
 	function createArticle ()
 	{
-		tree.jstree('create', null, (new_page_pos == '1') ? 'first' : 'last', {data : {title : s2_lang.new_page, attr : {'class' : 'Draft'}}});
+		tree.jstree('create', null, (new_page_pos === '1') ? 'first' : 'last', {data : {title : s2_lang.new_page, attr : {'class' : 'Draft'}}});
 	}
 
 	function editArticle ()
@@ -193,7 +193,7 @@ $(function()
 				data : {title : data.rslt.new_name},
 				success : function (d)
 				{
-					if (!d.status)
+					if (!d.success)
 						rollback(data.rlbk);
 				},
 				error : function ()
@@ -204,7 +204,6 @@ $(function()
 		})
 		.bind('remove.jstree', function (e, data)
 		{
-			debugger;
 			fetch('?entity=Article&action=delete&id=' + data.rslt.obj.attr('data-id'), {
 				method: 'POST',
 				headers: {'X-Requested-With': 'XMLHttpRequest'},
@@ -222,7 +221,7 @@ $(function()
 			// 	url : sUrl + 'action=delete&id=' + data.rslt.obj.attr('id').replace('node_', ''),
 			// 	success : function (d)
 			// 	{
-			// 		if (!d || !d.status)
+			// 		if (!d || !d.success)
 			// 			rollback(data.rlbk);
 			// 	},
 			// 	error : function ()
@@ -238,7 +237,7 @@ $(function()
 				data : {title : data.rslt.name},
 				success : function (d)
 				{
-					if (!d.status)
+					if (!d.success)
 						rollback(data.rlbk);
 					else
 						data.rslt.obj.attr('id', 'node_' + d.id);
@@ -255,7 +254,7 @@ $(function()
 				url : sUrl + 'action=move&source_id=' + data.rslt.o.attr('id').replace('node_', '') + '&new_parent_id=' + data.rslt.np.attr('id').replace('node_', '') + '&new_pos=' + data.rslt.cp,
 				success : function (d)
 				{
-					if (!d.status)
+					if (!d.success)
 						rollback(data.rlbk);
 				},
 				error : function ()
@@ -312,7 +311,7 @@ $(function()
 				ajax : {
 					url : function (node)
 					{
-						return sUrl + 'action=load_tree_v2&id=0&search=' + encodeURIComponent(Search.string());
+						return sUrl + 'action=load_tree&id=0&search=' + encodeURIComponent(Search.string());
 					}
 				}
 			},

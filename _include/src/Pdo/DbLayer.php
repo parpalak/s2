@@ -179,7 +179,7 @@ class DbLayer
         return $statement->fetch(\PDO::FETCH_NUM);
     }
 
-    public function fetchColumn(\PDOStatement $statement): array|false
+    public function fetchColumn(\PDOStatement $statement): array
     {
         return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }

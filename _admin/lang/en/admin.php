@@ -195,7 +195,7 @@ $lang_admin = array(
 'Enable'                               => 'Enable',
 'Disable'                              => 'Disable',
 'Refresh hooks'                        => 'Refresh hooks',
-'Extension loading error'              => 'Loading of extension “%s” failed.',
+'Extension loading error'              => 'Loading of extension “{{ extension }}” failed.',
 'Illegal ID'                           => 'The ID must contain only lowercase alphanumeric characters (a-z and 0-9) and the underscore character (_).',
 'Missing manifest'                     => 'Missing Manifest.php.',
 'Manifest class not found'             => 'Class Manifest not found in Manifest.php.',
@@ -206,10 +206,10 @@ $lang_admin = array(
 'Invalid extensions'      => '<strong>Warning!</strong> The extensions listed below were found in the extensions folder but are not available for install or upgrade because the errors displayed below were detected.',
 'Extension by'            => 'Created by %s.',
 
-'Missing dependency'   => 'The extension “%1$s” cannot be installed unless the following extensions are installed and enabled: %2$s.',
-'Uninstall dependency' => 'The extension “%1$s” cannot be uninstalled before the following extensions are installed: %2$s',
-'Disable dependency'   => 'The extension “%1$s” cannot be disabled while the following extensions are enabled: %2$s.',
-'Disabled dependency'  => 'The extension “%1$s” cannot be enabled while the following extensiond are disabled: %2$s.',
+'Missing dependency'   => 'The extension “{{ extension }}” cannot be installed unless the following extensions are installed and enabled: {{ dependencies }}.',
+'Uninstall dependency' => 'The extension “{{ extension }}” cannot be uninstalled before the following extensions are installed: {{ dependencies }}.',
+'Disable dependency'   => 'The extension “{{ extension }}” cannot be disabled while the following extensions are enabled: {{ dependencies }}.',
+'Disabled dependency'  => 'The extension “{{ extension }}” cannot be enabled while the following extensions are disabled: {{ dependencies }}.',
 
 // Config tab
 'S2_SITE_NAME_help'        => 'Used in titles and RSS.',

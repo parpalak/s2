@@ -33,8 +33,10 @@ use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Model\ArticleManager;
 use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\AuthManager;
 use S2\Cms\Model\CommentNotifier;
 use S2\Cms\Model\ExtensionCache;
+use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -213,11 +215,54 @@ class AdminExtension implements ExtensionInterface
             );
         });
 
+        $container->set(PermissionChecker::class, function (Container $container) {
+            return new PermissionChecker();
+        });
+
+        $container->set(AuthManager::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+
+            return new AuthManager(
+                $container->get(DbLayer::class),
+                $container->get(PermissionChecker::class),
+                $container->get(TemplateRenderer::class),
+                $container->get(Translator::class),
+                $container->getParameter('base_path'),
+                $container->getParameter('cookie_name'),
+                $container->getParameter('force_admin_https'),
+                (int)$provider->get('S2_LOGIN_TIMEOUT'),
+            );
+        });
+
+        // Request handlers
+        $container->set(AdminRequestHandler::class, function (Container $container) {
+            return new AdminRequestHandler(
+                $container->get(RequestStack::class),
+                $container->get(AuthManager::class),
+                $container,
+            );
+        });
+
+        $container->set(AdminAjaxRequestHandler::class, function (Container $container) {
+            return new AdminAjaxRequestHandler(
+                $container->get(RequestStack::class),
+                $container->get(AuthManager::class),
+                $container->get(PermissionChecker::class),
+                $container,
+            );
+        });
+
         // Structure page
         $container->set(ArticleManager::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new ArticleManager(
                 $container->get(DbLayer::class),
                 $container->get(RequestStack::class),
+                $container->get(PermissionChecker::class),
+                $provider->get('S2_ADMIN_NEW_POS') === '1',
+                $provider->get('S2_USE_HIERARCHY') === '1',
             );
         });
 
@@ -231,6 +276,8 @@ class AdminExtension implements ExtensionInterface
         $container->set(ExtensionManager::class, function (Container $container) {
             return new ExtensionManager(
                 $container->get(DbLayer::class),
+                $container->get(ExtensionCache::class),
+                $container->get(DynamicConfigProvider::class),
                 $container->get(Translator::class),
                 $container->get(TemplateRenderer::class),
                 $container->getParameter('root_dir'),

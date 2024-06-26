@@ -33,7 +33,7 @@ class Install2Cest
     {
         $dbType = getenv('APP_DB_TYPE');
         foreach ($this->configProvider() as $config) {
-            if (!is_string($dbType) || $dbType === $config['db_type']) {
+            if (!\is_string($dbType) || $dbType === $config['db_type']) {
                 $file = __DIR__ . '/../../config.test.php';
                 if (file_exists($file)) {
                     unlink($file);
@@ -92,9 +92,11 @@ class Install2Cest
     private function testAdminLogin(AcceptanceTester $I): void
     {
         $I->login('admin', 'no-pass');
+        $I->seeResponseCodeIs(401);
         $I->see('You have entered incorrect username or password.');
 
         $I->login('admin', 'passwd');
+        $I->seeResponseCodeIs(200);
         $I->dontSee('You have entered incorrect username or password.');
 
         $I->amOnPage('/---');
@@ -138,7 +140,7 @@ class Install2Cest
         };
         $csrfToken    = $I->grabValueFrom('input[name=__csrf_token]');
         $I->sendAjaxPostRequest('/_admin/admin.php?entity=Article&action=edit&id=333', $dataProvider($csrfToken));
-        $this->assertJsonResponseContains($I, ['errors', 0], 'Не получилось проверить, что эти данные отправили именно вы.');
+        $this->assertJsonResponseContains($I, ['errors', 0], 'Unable to confirm security token.');
 
         for ($i = 0; $i < 2; $i++) {
             // 2-nd iteration checks that consequent saving of the same entity works fine
@@ -148,9 +150,9 @@ class Install2Cest
             $I->see('{"success":true,"urlStatus":"ok","urlTitle":"","revision":"2"}');
         }
 
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=load_tree');
-        $I->see('Error in GET parameters.');
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=load_tree&id=0&search=');
+        $I->sendAjaxGetRequest('/_admin/ajax.php?action=load_tree');
+        $I->see('{"success":false,"message":"Parameter \u0022id\u0022 is required."}');
+        $I->sendAjaxGetRequest('/_admin/ajax.php?action=load_tree&id=0&search=');
         $I->assertStringContainsString('New Page Title', $I->grabPageSource());
 
         $I->amOnPage('/section1/page1');
@@ -174,10 +176,10 @@ class Install2Cest
     private function testAdminAddArticles(AcceptanceTester $I): void
     {
         foreach ([4, 5] as $newId) {
-            $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=create&id=2&title=New+page+' . $newId);
+            $I->sendAjaxGetRequest('/_admin/ajax.php?action=create&id=2&title=New+page+' . $newId);
             $data = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
-            $I->assertArrayHasKey('status', $data);
-            $I->assertEquals(1, $data['status']);
+            $I->assertArrayHasKey('success', $data);
+            $I->assertTrue($data['success']);
             $I->assertArrayHasKey('id', $data);
             $I->assertEquals($newId, $data['id']);
 
@@ -320,7 +322,7 @@ class Install2Cest
             ];
         };
         $I->sendAjaxPostRequest('/_admin/admin.php?entity=BlogPost&action=edit&id=333', $dataProvider($csrfToken));
-        $this->assertJsonResponseContains($I, ['errors', 0], 'Не получилось проверить, что эти данные отправили именно вы.');
+        $this->assertJsonResponseContains($I, ['errors', 0], 'Unable to confirm security token.');
 
         $I->sendAjaxPostRequest('/_admin/admin.php?entity=BlogPost&action=edit&id=' . $postId, $dataProvider($csrfToken));
         $I->seeResponseCodeIsSuccessful();
@@ -441,7 +443,7 @@ class Install2Cest
         };
         $csrfToken    = $I->grabValueFrom('input[name=__csrf_token]');
         $I->sendAjaxPostRequest('/_admin/admin.php?entity=Tag&action=edit&tag_id=1111' . $tagId, $dataProvider($csrfToken));
-        $this->assertJsonResponseContains($I, ['errors', 0], 'Не получилось проверить, что эти данные отправили именно вы.');
+        $this->assertJsonResponseContains($I, ['errors', 0], 'Unable to confirm security token.');
 
         $I->sendAjaxPostRequest('/_admin/admin.php?entity=Tag&action=edit&tag_id=' . $tagId, $dataProvider($csrfToken));
         $I->see('{"success":true}');

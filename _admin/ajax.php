@@ -1,6 +1,6 @@
 <?php
 /**
- * Front controller for the admin panel.
+ * Front controller for custom ajax requests in the admin panel.
  *
  * @copyright 2024 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-use S2\Cms\Admin\AdminRequestHandler;
+use S2\Cms\Admin\AdminAjaxRequestHandler;
 use Symfony\Component\HttpFoundation\Request;
 
 // NOTE: find a more elegant way to boot the application with the AdminExtension
@@ -19,7 +19,7 @@ define('S2_ROOT', '../');
 require S2_ROOT . '_include/common.php';
 
 $request = Request::createFromGlobals();
-/** @var AdminRequestHandler $handler */
-$handler  = $app->container->get(AdminRequestHandler::class);
+/** @var AdminAjaxRequestHandler $handler */
+$handler  = $app->container->get(AdminAjaxRequestHandler::class);
 $response = $handler->handle($request);
 $response->send();

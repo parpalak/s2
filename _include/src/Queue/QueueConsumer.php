@@ -63,7 +63,7 @@ class QueueConsumer
                     ($driverName === 'mysql' && (str_contains($message, 'Lock wait timeout exceeded') || str_contains($message, 'NOWAIT is set')))
                     || ($driverName === 'pgsql' && (str_contains($message, 'Lock not available')))
                 ) {
-                    $this->logger->notice('No jobs was found due to locks in parallel process.', ['exception' => $e]);
+                    $this->logger->notice('No jobs were found due to locks in parallel process.', ['exception' => $e]);
                 } else {
                     $this->logger->warning('Failed to fetch queue item: ' . $message, ['exception' => $e]);
                 }

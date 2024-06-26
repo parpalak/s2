@@ -296,21 +296,21 @@ function POSTAsyncRequest (sRequestUrl, sParam, fCallback)
 // Displaying messages
 //
 
-function DisplayError (sError)
-{
-	var $button = $('<input>').attr({'type': 'button', 'tabindex': "0", 'class': 'close_error_button'}).val('Ok'),
-		$div = $('<div>').addClass('error_dialog')
-		.append('<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div>')
-		.append($button).appendTo($('body'));
-
-	$button.click(function ()
-	{
-		$div.remove();
-		$('.close_error_button').last().focus();
-	});
-
-	setTimeout(function () { $button.focus() }, 100);
-}
+// function DisplayError (sError)
+// {
+// 	var $button = $('<input>').attr({'type': 'button', 'tabindex': "0", 'class': 'close_error_button'}).val('Ok'),
+// 		$div = $('<div>').addClass('error_dialog')
+// 		.append('<div class="error_back"></div><div class="error_window"><div class="error_text">' + sError + '</div></div>')
+// 		.append($button).appendTo($('body'));
+//
+// 	$button.click(function ()
+// 	{
+// 		$div.remove();
+// 		$('.close_error_button').last().focus();
+// 	});
+//
+// 	setTimeout(function () { $button.focus() }, 100);
+// }
 
 function UnknownError (sError, iStatus)
 {

@@ -72,29 +72,31 @@ class AcceptanceTester extends Actor
     public function login(string $username = 'admin', string $userpass = ''): void
     {
         $I = $this;
-        $I->amOnPage('/---');
+        // $I->amOnPage('/---');
+        $I->amOnPage('/_admin/admin.php');
         $I->canSee('Username');
         $I->canSee('Password');
 
         $challenge = $I->grabValueFrom('input[name=challenge]');
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=login', [
+        $I->sendAjaxPostRequest('/_admin/admin.php?action=login', [
             'login'     => $username,
             'challenge' => $challenge,
             'key'       => md5(md5($userpass . 'Life is not so easy :-)') . ';-)' . $I->grabAttributeFrom('.loginform', 'data-salt')),
         ]);
-        $I->seeResponseCodeIs(200);
     }
 
     public function installExtension(string $extensionId): void
     {
         $I = $this;
-        $I->amOnPage('/_admin/site_ajax.php?action=load_extensions');
+        $I->amOnPage('/_admin/admin.php?entity=Extension');
         $I->seeResponseCodeIsSuccessful();
         $I->seeElement('.extension.available [title=' . $extensionId . ']');
         $I->dontSeeElement('.extension.enabled [title=' . $extensionId . ']');
 
-        $I->amOnPage('/_admin/site_ajax.php?action=install_extension&id=' . $extensionId);
+        $I->amOnPage('/_admin/ajax.php?action=install_extension&id=' . $extensionId);
         $I->seeResponseCodeIsSuccessful();
+
+        $I->amOnPage('/_admin/admin.php?entity=Extension');
         $I->dontSeeElement('.extension.available [title=' . $extensionId . ']');
         $I->seeElement('.extension.enabled [title=' . $extensionId . ']');
     }

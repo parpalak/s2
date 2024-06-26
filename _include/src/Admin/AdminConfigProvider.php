@@ -402,7 +402,7 @@ readonly class AdminConfigProvider
                 useOnActions: [FieldConfig::ACTION_EDIT],
             ))
             ->markAsDefault()
-            ->setEnabledActions([FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST, FieldConfig::ACTION_DELETE])
+            ->setEnabledActions([FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST]) // new and delete actions are on a custom structure page
             ->addListener([EntityConfig::EVENT_AFTER_EDIT_FETCH], function (AfterLoadEvent $event) {
                 if (\is_array($event->data)) {
                     // Convert NULL to an empty string when the edit form is filled with current data
