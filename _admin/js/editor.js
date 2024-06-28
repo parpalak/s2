@@ -79,7 +79,6 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
     async function saveForm(event) {
         event.preventDefault();
 
-        loadingIndicator(true);
         try {
             const response = await fetch(eForm.action, {
                 method: 'POST',
@@ -104,8 +103,6 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
             }
         } catch (error) {
             console.warn('An error occurred:', error);
-        } finally {
-            loadingIndicator(false);
         }
     }
 
@@ -272,21 +269,6 @@ function initTagsAutocomplete(sInputId, aTagsList) {
     )
 }
 
-/*
-function Preview (sTitle, sHtmlContent)
-{
-    /// $(document).trigger('preview_start.s2');
-
-    var d = window.frames['preview_frame'].document,
-        s = str_replace('<!-- s2_text -->',sHtmlContent, template);
-    s = str_replace('<!-- s2_title -->', '<h1>' + sTitle + '</h1>', s);
-
-    d.open();
-    d.write(s);
-    d.close();
-}
-*/
-
 function Preview(sTitle, sHtmlContent) {
     const d = window.frames['preview_frame'].document;
     let eHeader = d.getElementById('preview-header-wrapper');
@@ -412,28 +394,12 @@ function PopupWindow(sTitle, sHeader, sInfo, sText) {
     var body = '<div class="text"><h1>' + sHeader + '</h1>' +
         '<p>' + sInfo + '</p></div><textarea readonly="readonly">' + htmlEncode(sText) + '</textarea>';
 
-    /*
-        var result = Hooks.run('fn_popup_window_filter_head', head);
-        if (result) {
-            head = result;
-        }
-
-        result = Hooks.run('fn_popup_window_filter_body', body);
-        if (result) {
-            body = result;
-        }
-    */
-
     wnd.document.open();
     wnd.document.write('<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>');
     wnd.document.close();
 }
 
-function loadingIndicator(state) {
-    document.getElementById('loading').style.display = state ? 'block' : 'none';
-    document.body.style.cursor = state ? 'progress' : 'inherit';
-}
-
+// NOTE: toolbar with html shortcuts for a raw textarea
 // function TagSelection(eTextarea, sTag) {
 //     return InsertTag(eTextarea, '<' + sTag + '>', '</' + sTag + '>');
 // }
@@ -482,47 +448,6 @@ function loadingIndicator(state) {
 //     e.selectionStart = start_pos;
 //     e.selectionEnd = end_pos;
 // }
-
-function SmartParagraphs(sText) {
-    sText = sText.replace(/(\r\n|\r|\n)/g, '\n');
-    var asParag = sText.split(/\n{2,}/); // split on empty lines
-
-    for (var i = asParag.length; i--;) {
-        // We are working with non-empty contents
-        if (asParag[i].replace(/^\s+|\s+$/g, '') == '')
-            continue;
-
-        // rtrim
-        asParag[i] = asParag[i].replace(/\s+$/gm, '');
-
-        // Do not touch special tags
-        if (/<\/?(?:pre|script|style|ol|ul|li|cut)[^>]*>/.test(asParag[i]))
-            continue;
-
-        // Put <br /> if there are no closing tag like </h2>
-
-        // Remove old tag
-        asParag[i] = asParag[i].replace(/<br \/>$/gm, '').
-            // A hack. Otherwise, the next regex works twice.
-            replace(/$/gm, '-').
-            // Put new tag
-            replace(/(<\/(?:blockquote|p|h[2-4])>)?-$/gm, function ($0, $1) {
-                return $1 ? $1 : '<br />';
-            }).
-            // Remove unnecessary last tag
-            replace(/(?:<br \/>)?$/g, '');
-
-        // Put <p>...</p> tags
-        if (!/<\/?(?:blockquote|h[2-4])[^>]*>/.test(asParag[i])) {
-            if (!/<\/p>\s*$/.test(asParag[i]))
-                asParag[i] = asParag[i].replace(/\s*$/g, '</p>');
-            if (!/^\s*<p[^>]*>/.test(asParag[i]))
-                asParag[i] = asParag[i].replace(/^\s*/g, '<p>');
-        }
-    }
-
-    return asParag.join("\n\n");
-}
 
 //
 // function InsertParagraph(eTextarea, sType) {
@@ -591,6 +516,47 @@ function SmartParagraphs(sText) {
 //     return false;
 // }
 
+function SmartParagraphs(sText) {
+    sText = sText.replace(/(\r\n|\r|\n)/g, '\n');
+    var asParag = sText.split(/\n{2,}/); // split on empty lines
+
+    for (var i = asParag.length; i--;) {
+        // We are working with non-empty contents
+        if (asParag[i].replace(/^\s+|\s+$/g, '') == '')
+            continue;
+
+        // rtrim
+        asParag[i] = asParag[i].replace(/\s+$/gm, '');
+
+        // Do not touch special tags
+        if (/<\/?(?:pre|script|style|ol|ul|li|cut)[^>]*>/.test(asParag[i]))
+            continue;
+
+        // Put <br /> if there are no closing tag like </h2>
+
+        // Remove old tag
+        asParag[i] = asParag[i].replace(/<br \/>$/gm, '').
+            // A hack. Otherwise, the next regex works twice.
+            replace(/$/gm, '-').
+            // Put new tag
+            replace(/(<\/(?:blockquote|p|h[2-4])>)?-$/gm, function ($0, $1) {
+                return $1 ? $1 : '<br />';
+            }).
+            // Remove unnecessary last tag
+            replace(/(?:<br \/>)?$/g, '');
+
+        // Put <p>...</p> tags
+        if (!/<\/?(?:blockquote|h[2-4])[^>]*>/.test(asParag[i])) {
+            if (!/<\/p>\s*$/.test(asParag[i]))
+                asParag[i] = asParag[i].replace(/\s*$/g, '</p>');
+            if (!/^\s*<p[^>]*>/.test(asParag[i]))
+                asParag[i] = asParag[i].replace(/^\s*/g, '<p>');
+        }
+    }
+
+    return asParag.join("\n\n");
+}
+
 function GetImage() {
     const dialog = document.getElementById('picture_dialog');
     dialog.showModal();
@@ -629,22 +595,6 @@ document.addEventListener('DOMContentLoaded', function () {
     isAltPressed = function () {
         return altPressed;
     }
-
-    // document.body.addEventListener('keydown', function(e) {
-    //     if (e.which == 13) {
-    //         return false;
-    //     }
-    // }, true);
-
-    // Tooltips
-    // document.addEventListener('mouseover', function (e) {
-    //     var eItem = e.target,
-    //         title = eItem.title;
-    //
-    //     if (!title && eItem.nodeName == 'IMG') {
-    //         eItem.title = eItem.alt;
-    //     }
-    // });
 });
 
 function uploadBlobToPictureDir(blob, name, extension, successCallback) {
@@ -730,190 +680,3 @@ function optimizeAndUploadFile(file) {
         }
     }
 }
-
-
-function hex_md5(string) {
-    // Based on http://www.webtoolkit.info/javascript-md5.html
-
-    function rot_l(lValue, iShiftBits) {
-        return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
-    }
-
-    function add_usgn(lX, lY) {
-        var lX8 = (lX & 0x80000000),
-            lY8 = (lY & 0x80000000),
-            lX4 = (lX & 0x40000000),
-            lY4 = (lY & 0x40000000),
-            lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
-
-        if (lX4 & lY4)
-            return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
-
-        if (lX4 | lY4)
-            return (lResult & 0x40000000) ? (lResult ^ 0xC0000000 ^ lX8 ^ lY8) : (lResult ^ 0x40000000 ^ lX8 ^ lY8);
-
-        return (lResult ^ lX8 ^ lY8);
-    }
-
-    function F(x, y, z) {
-        return (x & y) | ((~x) & z);
-    }
-
-    function G(x, y, z) {
-        return (x & z) | (y & (~z));
-    }
-
-    function H(x, y, z) {
-        return (x ^ y ^ z);
-    }
-
-    function I(x, y, z) {
-        return (y ^ (x | (~z)));
-    }
-
-    function FF(a, b, c, d, x, s, ac) {
-        a = add_usgn(a, add_usgn(add_usgn(F(b, c, d), x), ac));
-        return add_usgn(rot_l(a, s), b);
-    }
-
-    function GG(a, b, c, d, x, s, ac) {
-        a = add_usgn(a, add_usgn(add_usgn(G(b, c, d), x), ac));
-        return add_usgn(rot_l(a, s), b);
-    }
-
-    function HH(a, b, c, d, x, s, ac) {
-        a = add_usgn(a, add_usgn(add_usgn(H(b, c, d), x), ac));
-        return add_usgn(rot_l(a, s), b);
-    }
-
-    function II(a, b, c, d, x, s, ac) {
-        a = add_usgn(a, add_usgn(add_usgn(I(b, c, d), x), ac));
-        return add_usgn(rot_l(a, s), b);
-    }
-
-    function ConvertToWordArray(s) {
-        var lMsgLen = s.length,
-            lNumWords_tmp1 = lMsgLen + 8,
-            lNumWords_tmp2 = (lNumWords_tmp1 - (lNumWords_tmp1 % 64)) / 64,
-            lNumWords = (lNumWords_tmp2 + 1) * 16,
-            lWrdArr = new Array(lNumWords - 1),
-            lBytePos = 0,
-            lByteCnt = 0;
-        while (lByteCnt < lMsgLen) {
-            var lWordCount = (lByteCnt - (lByteCnt % 4)) / 4;
-            lBytePos = (lByteCnt % 4) * 8;
-            lWrdArr[lWordCount] = (lWrdArr[lWordCount] | (s.charCodeAt(lByteCnt) << lBytePos));
-            lByteCnt++;
-        }
-        lWordCount = (lByteCnt - (lByteCnt % 4)) / 4;
-        lBytePos = (lByteCnt % 4) * 8;
-        lWrdArr[lWordCount] = lWrdArr[lWordCount] | (0x80 << lBytePos);
-        lWrdArr[lNumWords - 2] = lMsgLen << 3;
-        lWrdArr[lNumWords - 1] = lMsgLen >>> 29;
-        return lWrdArr;
-    }
-
-    function word2hex(lValue) {
-        var val = "", tmp = "", lByte, lCount;
-        for (lCount = 0; lCount <= 3; lCount++) {
-            lByte = (lValue >>> (lCount * 8)) & 255;
-            tmp = "0" + lByte.toString(16);
-            val = val + tmp.substr(tmp.length - 2, 2);
-        }
-        return val;
-    }
-
-    var k, AA, BB, CC, DD, a, b, c, d,
-        S11 = 7, S12 = 12, S13 = 17, S14 = 22,
-        S21 = 5, S22 = 9, S23 = 14, S24 = 20,
-        S31 = 4, S32 = 11, S33 = 16, S34 = 23,
-        S41 = 6, S42 = 10, S43 = 15, S44 = 21;
-
-    string = unescape(encodeURIComponent(string));
-
-    var x = ConvertToWordArray(string);
-
-    a = 0x67452301;
-    b = 0xEFCDAB89;
-    c = 0x98BADCFE;
-    d = 0x10325476;
-
-    for (k = 0; k < x.length; k += 16) {
-        AA = a;
-        BB = b;
-        CC = c;
-        DD = d;
-        a = FF(a, b, c, d, x[k + 0], S11, 0xD76AA478);
-        d = FF(d, a, b, c, x[k + 1], S12, 0xE8C7B756);
-        c = FF(c, d, a, b, x[k + 2], S13, 0x242070DB);
-        b = FF(b, c, d, a, x[k + 3], S14, 0xC1BDCEEE);
-        a = FF(a, b, c, d, x[k + 4], S11, 0xF57C0FAF);
-        d = FF(d, a, b, c, x[k + 5], S12, 0x4787C62A);
-        c = FF(c, d, a, b, x[k + 6], S13, 0xA8304613);
-        b = FF(b, c, d, a, x[k + 7], S14, 0xFD469501);
-        a = FF(a, b, c, d, x[k + 8], S11, 0x698098D8);
-        d = FF(d, a, b, c, x[k + 9], S12, 0x8B44F7AF);
-        c = FF(c, d, a, b, x[k + 10], S13, 0xFFFF5BB1);
-        b = FF(b, c, d, a, x[k + 11], S14, 0x895CD7BE);
-        a = FF(a, b, c, d, x[k + 12], S11, 0x6B901122);
-        d = FF(d, a, b, c, x[k + 13], S12, 0xFD987193);
-        c = FF(c, d, a, b, x[k + 14], S13, 0xA679438E);
-        b = FF(b, c, d, a, x[k + 15], S14, 0x49B40821);
-        a = GG(a, b, c, d, x[k + 1], S21, 0xF61E2562);
-        d = GG(d, a, b, c, x[k + 6], S22, 0xC040B340);
-        c = GG(c, d, a, b, x[k + 11], S23, 0x265E5A51);
-        b = GG(b, c, d, a, x[k + 0], S24, 0xE9B6C7AA);
-        a = GG(a, b, c, d, x[k + 5], S21, 0xD62F105D);
-        d = GG(d, a, b, c, x[k + 10], S22, 0x2441453);
-        c = GG(c, d, a, b, x[k + 15], S23, 0xD8A1E681);
-        b = GG(b, c, d, a, x[k + 4], S24, 0xE7D3FBC8);
-        a = GG(a, b, c, d, x[k + 9], S21, 0x21E1CDE6);
-        d = GG(d, a, b, c, x[k + 14], S22, 0xC33707D6);
-        c = GG(c, d, a, b, x[k + 3], S23, 0xF4D50D87);
-        b = GG(b, c, d, a, x[k + 8], S24, 0x455A14ED);
-        a = GG(a, b, c, d, x[k + 13], S21, 0xA9E3E905);
-        d = GG(d, a, b, c, x[k + 2], S22, 0xFCEFA3F8);
-        c = GG(c, d, a, b, x[k + 7], S23, 0x676F02D9);
-        b = GG(b, c, d, a, x[k + 12], S24, 0x8D2A4C8A);
-        a = HH(a, b, c, d, x[k + 5], S31, 0xFFFA3942);
-        d = HH(d, a, b, c, x[k + 8], S32, 0x8771F681);
-        c = HH(c, d, a, b, x[k + 11], S33, 0x6D9D6122);
-        b = HH(b, c, d, a, x[k + 14], S34, 0xFDE5380C);
-        a = HH(a, b, c, d, x[k + 1], S31, 0xA4BEEA44);
-        d = HH(d, a, b, c, x[k + 4], S32, 0x4BDECFA9);
-        c = HH(c, d, a, b, x[k + 7], S33, 0xF6BB4B60);
-        b = HH(b, c, d, a, x[k + 10], S34, 0xBEBFBC70);
-        a = HH(a, b, c, d, x[k + 13], S31, 0x289B7EC6);
-        d = HH(d, a, b, c, x[k + 0], S32, 0xEAA127FA);
-        c = HH(c, d, a, b, x[k + 3], S33, 0xD4EF3085);
-        b = HH(b, c, d, a, x[k + 6], S34, 0x4881D05);
-        a = HH(a, b, c, d, x[k + 9], S31, 0xD9D4D039);
-        d = HH(d, a, b, c, x[k + 12], S32, 0xE6DB99E5);
-        c = HH(c, d, a, b, x[k + 15], S33, 0x1FA27CF8);
-        b = HH(b, c, d, a, x[k + 2], S34, 0xC4AC5665);
-        a = II(a, b, c, d, x[k + 0], S41, 0xF4292244);
-        d = II(d, a, b, c, x[k + 7], S42, 0x432AFF97);
-        c = II(c, d, a, b, x[k + 14], S43, 0xAB9423A7);
-        b = II(b, c, d, a, x[k + 5], S44, 0xFC93A039);
-        a = II(a, b, c, d, x[k + 12], S41, 0x655B59C3);
-        d = II(d, a, b, c, x[k + 3], S42, 0x8F0CCC92);
-        c = II(c, d, a, b, x[k + 10], S43, 0xFFEFF47D);
-        b = II(b, c, d, a, x[k + 1], S44, 0x85845DD1);
-        a = II(a, b, c, d, x[k + 8], S41, 0x6FA87E4F);
-        d = II(d, a, b, c, x[k + 15], S42, 0xFE2CE6E0);
-        c = II(c, d, a, b, x[k + 6], S43, 0xA3014314);
-        b = II(b, c, d, a, x[k + 13], S44, 0x4E0811A1);
-        a = II(a, b, c, d, x[k + 4], S41, 0xF7537E82);
-        d = II(d, a, b, c, x[k + 11], S42, 0xBD3AF235);
-        c = II(c, d, a, b, x[k + 2], S43, 0x2AD7D2BB);
-        b = II(b, c, d, a, x[k + 9], S44, 0xEB86D391);
-        a = add_usgn(a, AA);
-        b = add_usgn(b, BB);
-        c = add_usgn(c, CC);
-        d = add_usgn(d, DD);
-    }
-
-    return (word2hex(a) + word2hex(b) + word2hex(c) + word2hex(d)).toLowerCase();
-}
-
-

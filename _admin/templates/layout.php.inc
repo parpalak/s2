@@ -34,11 +34,6 @@ if (!isset($this)) {
         <script src="<?= $script ?>"></></script>
     <?php endforeach; ?>
 
-    <!-- note: move to editor pages only -->
-    <script src="js/s2lib.js"></script>
-    <script src="js/conversion.js"></script>
-    <script src="js/optipng-setup.js"></script>
-
     <script src="lang/<?php echo Lang::admin_code(); ?>/ui.js"></script>
     <style>:root {
             --page-secondary-background: <?php echo S2_ADMIN_COLOR; ?>;

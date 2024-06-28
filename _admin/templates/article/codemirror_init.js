@@ -102,14 +102,11 @@ const s2_codemirror = (function () {
                                     height: h || 'auto'
                                 }
                             }));
-
-                            loadingIndicator(false);
                         });
                     }
                 }
 
                 if (processed) {
-                    loadingIndicator(true);
                     // Move cursor to a new position where a file was drpopped
                     cm.setSelection(cm.coordsChar({
                         left: e.x,

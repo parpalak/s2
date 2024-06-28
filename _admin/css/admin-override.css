@@ -2,8 +2,6 @@
     --color-btn-primary: #0084b6;
 }
 
-html {height: 100%;}
-
 .form-wrapper .form-control-htmltextarea {
     align-self: center;
 }
@@ -17,7 +15,39 @@ nav {
     justify-content: space-between;
 }
 
-/*=======================[Login screen]=======================================*/
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+article.admin-content {
+    flex: 1 1 auto;
+}
+section.large-edit-form {
+    padding: 1em 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+.large-form-wrapper {
+    height: 100%;
+}
+
+.article-edit-content .article-form-column-1 {
+    grid-template-rows: auto auto auto 1fr;
+}
+
+.article-form-column-1 .form-control-htmltextarea {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+    /*=======================[Login screen]=======================================*/
 
 body, button, input, select, textarea {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -26,8 +56,6 @@ body, button, input, select, textarea {
 
 body.login_page {
     background: #fff;
-    height: 100%;
-    display: flex;
     align-items: center;
     justify-content: center;
     margin: 0;
@@ -77,23 +105,13 @@ body.login_page {
 .list-content .field-Comment-email,
 .list-content .field-Comment-sent,
 .list-content .field-Comment-subscribed,
-.list-content .field-Comment-show_email,
-.list-content .field-BlogPost-published, /* TODO: move to extension */
-.list-content .field-BlogPost-commented,
-.list-content .field-BlogComment-email,
-.list-content .field-BlogComment-sent,
-.list-content .field-BlogComment-subscribed,
-.list-content .field-BlogComment-show_email {
+.list-content .field-Comment-show_email {
     display: none;
 }
 
 .admin-content .list-content td.field-Comment-text,
 .admin-content .list-content td.field-Comment-article_id,
-.admin-content .list-content td.field-Comment-nick,
-.admin-content .list-content td.field-BlogComment-text, /* TODO: move to extension */
-.admin-content .list-content td.field-BlogComment-post_id,
-.admin-content .list-content td.field-BlogComment-nick
-{
+.admin-content .list-content td.field-Comment-nick {
     white-space: pre-wrap;
     line-height: 1.25;
     padding-block: 0.25em;
@@ -103,7 +121,7 @@ body.login_page {
 
 section.large-edit-form,
 section.large-edit-form form {
-    margin-bottom: 0;
+    margin: 0;
 }
 
 .large-form-wrapper {
@@ -129,11 +147,6 @@ section.large-edit-form form {
     width: 100%;
 }
 
-.article-edit-content .form-control-htmltextarea {
-    height: calc(100vh - 160px);
-    display: flex;
-    flex-direction: column;
-}
 .html-textarea-with-preview-wrapper {
     flex: 1 1 auto;
     height: 100%;

@@ -6,16 +6,8 @@
  * @package S2
  */
 
-function loadingIndicator(state) {
-    document.getElementById('loading').style.display = state ? 'block' : 'none';
-    document.body.style.cursor = state ? 'progress' : 'inherit';
-}
-
 function RefreshHooks() {
-    loadingIndicator(true)
-    fetch(sUrl + 'action=refresh_hooks')
-        .finally(() => loadingIndicator(false))
-    ;
+    fetch(sUrl + 'action=refresh_hooks');
     return false;
 }
 
@@ -34,7 +26,6 @@ function changeExtension(sAction, sId, sCsrfToken, sMessage) {
         }
     }
 
-    loadingIndicator(true)
     fetch(sUrl + 'action=' + sAction + '&id=' + sId, {
         method: 'POST',
         body: new URLSearchParams('csrf_token=' + sCsrfToken)
@@ -43,6 +34,7 @@ function changeExtension(sAction, sId, sCsrfToken, sMessage) {
             if (response.ok) {
                 response.json().then(function (data) {
                     if (data.success) {
+                        loadingIndicator(true);
                         window.location.reload();
                     } else {
                         PopupMessages.show(data.message, [], 0, 'extensions.' + sId + '.' + sAction);
@@ -50,7 +42,6 @@ function changeExtension(sAction, sId, sCsrfToken, sMessage) {
                 });
             }
         })
-        .finally(() => loadingIndicator(false))
     ;
 
     return false;

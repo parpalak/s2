@@ -13,7 +13,7 @@
              alt="<?php echo $trans('Collapse'); ?>"/>
         <img class="separator" src="i/1.gif" alt=""/>
         <img class="refresh" src="i/1.gif" alt="<?php echo $trans('Refresh'); ?>"/>
-        <input type="text" name="search" id="search_field" placeholder="<?php echo $trans('Search'); ?>"/>
+        <input type="search" name="search" id="search_field" placeholder="<?php echo $trans('Search'); ?>"/>
     </div>
     <span id="context_buttons">
         <a href="#" class="context-link edit" title="<?php echo $trans('Edit'); ?>"><img id="context_edit" src="i/1.gif" alt=""></a>

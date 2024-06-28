@@ -79,6 +79,8 @@ function s2_jsvarencode($var)
 <script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/searchcursor.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/templates/article/codemirror_init.js"></script>
 
+<script src="<?php echo $basePath; ?>/_admin/js/editor.js"></script>
+
 <section class="edit-content large-edit-form post-edit-content">
     <?php if (!empty($errorMessages)): ?>
         <div class="error-message-box">
@@ -166,7 +168,8 @@ function s2_jsvarencode($var)
     <button class="picture-dialog-close" onclick="this.parentNode.close()">&times;</button>
     <iframe src="" frameborder="0" id="picture_frame" name="picture_frame"></iframe>
 </dialog>
-
+<script src="<?php echo $basePath; ?>/_admin/js/conversion.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/js/optipng-setup.js"></script>
 <script>
     const template = '<?php echo s2_jsvarencode($templateContent); ?>';
     document.forms['article-form'].elements['label'].setAttribute('list', 'post-labels-datalist');
