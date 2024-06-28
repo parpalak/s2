@@ -37,6 +37,7 @@ use S2\Cms\Pdo\DbLayerSqlite;
 use S2\Cms\Pdo\PDO;
 use S2\Cms\Pdo\PdoSqliteFactory;
 use S2\Cms\Queue\QueueConsumer;
+use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -144,7 +145,7 @@ class CmsExtension implements ExtensionInterface
                 $container->getParameter('base_path') . '/' . (defined('\S2_IMG_DIR') ? \S2_IMG_DIR : '_pictures'),
                 $container->getParameter('root_dir') . (defined('\S2_IMG_DIR') ? \S2_IMG_DIR : '_pictures'),
             );
-        });
+        }, [QueueHandlerInterface::class]);
         $container->set(LoggerInterface::class, function (Container $container) {
             return new Logger($container->getParameter('log_dir') . 'app.log', 'app', LogLevel::INFO);
         });
@@ -173,8 +174,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(\PDO::class),
                 $container->getParameter('db_prefix'),
                 $container->get(LoggerInterface::class),
-                $container->get(RecommendationProvider::class),
-                $container->get(ThumbnailGenerator::class),
+                ...$container->getByTag(QueueHandlerInterface::class)
             );
         });
         $container->set(RecommendationProvider::class, function (Container $container) {
@@ -184,7 +184,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get('recommendations_cache'),
                 $container->get(QueuePublisher::class)
             );
-        });
+        }, [QueueHandlerInterface::class]);
 
         $container->set(UrlBuilder::class, function (Container $container) {
             return new UrlBuilder(

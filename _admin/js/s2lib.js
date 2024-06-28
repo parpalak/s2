@@ -93,7 +93,7 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
 
                 const statusData = await response.json();
                 eForm.elements['revision'].value = statusData['revision'];
-                // decorateForm(statusData);
+                decorateForm(statusData);
             } else if (response.status === 422) {
                 const data = await response.json();
                 Array.from(data.errors).forEach(function (error) {

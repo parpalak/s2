@@ -101,12 +101,12 @@ body.login_page {
 
 /* Article edit form */
 
-section.article-edit-content,
-section.article-edit-content form {
+section.large-edit-form,
+section.large-edit-form form {
     margin-bottom: 0;
 }
 
-.article-form-wrapper {
+.large-form-wrapper {
     display: grid;
     grid-template-columns: 1fr minmax(170px, 14%);
     gap: 1rem;
@@ -129,7 +129,7 @@ section.article-edit-content form {
     width: 100%;
 }
 
-.article-form-wrapper .form-control-htmltextarea {
+.article-edit-content .form-control-htmltextarea {
     height: calc(100vh - 160px);
     display: flex;
     flex-direction: column;
@@ -149,18 +149,18 @@ section.article-edit-content form {
 }
 
 
-.article-edit-content label[for="id-url"] {
+.large-edit-form label[for="id-url"] {
     position: absolute;
 }
-.article-edit-content .field-url {
+.large-edit-form .field-url {
     padding-top: 1.5em;
 }
-.article-edit-content .field-url[data-url-status="not_unique"],
-.article-edit-content .field-url[data-url-status="empty"] {
+.large-edit-form .field-url[data-url-status="not_unique"],
+.large-edit-form .field-url[data-url-status="empty"] {
     outline: color-mix(in srgb, var(--color-warning) 90%, var(--page-background)) 3px solid;
     background-color: color-mix(in srgb, var(--color-warning) 40%, var(--page-background));
 }
-.article-edit-content .field-published[data-published-status="1"] {
+.large-edit-form .field-published[data-published-status="1"] {
     outline: color-mix(in srgb, var(--color-success) 50%, var(--page-background)) 3px solid;
     background-color: color-mix(in srgb, var(--color-success) 20%, var(--page-background));
 }
@@ -682,19 +682,13 @@ section.admin-extensions h2 {
 
 .extensions {
     line-height: 23px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2em;
     display: grid;
     grid-template-columns: repeat(auto-fill, 22em);
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     grid-gap: 2em
 }
-.extension {
-    flex: 1 0 22em;
-}
 .extension button {
-    margin: 0 1em 1em 0;
+    margin: 0.5em 1em 1em 0;
 }
 .extension p,
 .extension h3 {

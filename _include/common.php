@@ -105,8 +105,13 @@ try {
         $appCache          = $app->container->get(ExtensionCache::class);
         $enabledExtensions = $appCache->generateEnabledExtensionClassNames();
     }
-    foreach ($enabledExtensions as $extension) {
+    foreach ($enabledExtensions['cms'] as $extension) {
         $app->addExtension(new $extension());
+    }
+    if (defined('S2_ADMIN_MODE')) {
+        foreach ($enabledExtensions['admin'] as $extension) {
+            $app->addExtension(new $extension());
+        }
     }
 
     $app->boot(collectParameters());

@@ -11,13 +11,17 @@ namespace S2\Cms\Extensions;
 
 use Psr\Cache\InvalidArgumentException;
 use S2\AdminYard\Config\AdminConfig;
+use S2\AdminYard\Config\FieldConfig;
+use S2\AdminYard\Form\FormParams;
 use S2\AdminYard\TemplateRenderer;
 use S2\AdminYard\Translator;
 use S2\Cms\Admin\AdminConfigExtenderInterface;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 readonly class ExtensionManager implements AdminConfigExtenderInterface
 {
@@ -25,6 +29,7 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
         private DbLayer               $dbLayer,
         private ExtensionCache        $extensionCache,
         private DynamicConfigProvider $dynamicConfigProvider,
+        private RequestStack          $requestStack,
         private Translator            $translator,
         private TemplateRenderer      $templateRenderer,
         private string                $rootDir,
@@ -131,15 +136,22 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
             'availableExtensions' => $availableExtensions,
             'failedExtensions'    => $failedExtensions,
             'installedExtensions' => $installedExtensions,
+            'csrfTokenGenerator'  => function (string $id) {
+                return $this->getCsrfToken($id);
+            },
         ]);
     }
 
     /**
      * @throws DbLayerException
      */
-    public function flipExtension(string $id): ?string
+    public function flipExtension(string $id, string $csrfToken): ?string
     {
         $id = $this->cleanupExtensionId($id);
+
+        if ($csrfToken !== $this->getCsrfToken($id)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
 
         // Fetch the current status of the extension
         $result = $this->dbLayer->buildAndQuery([
@@ -212,18 +224,17 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
         return null;
     }
 
-    private function cleanupExtensionId(string $id): string
-    {
-        return preg_replace('/[^0-9a-z_]/', '', $id);
-    }
-
     /**
      * @throws DbLayerException
      * @throws InvalidArgumentException
      */
-    public function installExtension(string $id): array
+    public function installExtension(string $id, string $csrfToken): array
     {
         $id = $this->cleanupExtensionId($id);
+
+        if ($csrfToken !== $this->getCsrfToken($id)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
 
         if (!file_exists($this->rootDir . '_extensions/' . $id . '/Manifest.php')) {
             return [
@@ -318,9 +329,13 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
     /**
      * @throws DbLayerException
      */
-    public function uninstallExtension(string $id): ?string
+    public function uninstallExtension(string $id, string $csrfToken): ?string
     {
         $id = $this->cleanupExtensionId($id);
+
+        if ($csrfToken !== $this->getCsrfToken($id)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
 
         // Fetch info about the extension
         $result = $this->dbLayer->buildAndQuery([
@@ -366,5 +381,19 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
         $this->extensionCache->generateHooks();
 
         return null;
+    }
+
+    private function cleanupExtensionId(string $id): string
+    {
+        return preg_replace('/[^0-9a-z_]/', '', $id);
+    }
+
+    private function getCsrfToken(string $id): string
+    {
+        // This token is used for every action in the extension actions.
+        // I chose to use ACTION_DELETE since then it would be compatible with the AdminYard delete token.
+        $formParams = new FormParams('Extension', [], $this->requestStack->getMainRequest(), FieldConfig::ACTION_DELETE, ['id' => $id]);
+
+        return $formParams->getCsrfToken();
     }
 }

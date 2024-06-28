@@ -31,23 +31,26 @@ use S2\AdminYard\Validator\Regex;
 use S2\Cms\Admin\AdminConfigExtenderInterface;
 use S2\Cms\Admin\AdminConfigProvider;
 use S2\Cms\Admin\Controller\CommentController;
+use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\Model\BlogCommentNotifier;
 use s2_extensions\s2_blog\Model\PostProvider;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 readonly class AdminConfigExtender implements AdminConfigExtenderInterface
 {
     public function __construct(
-        private HtmlTemplateProvider $templateProvider,
-        private Translator           $translator,
-        private TagsProvider         $tagsProvider,
-        private PostProvider         $postProvider,
-        private BlogUrlBuilder       $blogUrlBuilder,
-        private BlogCommentNotifier  $blogCommentNotifier,
-        private string               $dbType,
-        private string               $dbPrefix
+        private HtmlTemplateProvider     $templateProvider,
+        private Translator               $translator,
+        private TagsProvider             $tagsProvider,
+        private PostProvider             $postProvider,
+        private BlogUrlBuilder           $blogUrlBuilder,
+        private BlogCommentNotifier      $blogCommentNotifier,
+        private EventDispatcherInterface $eventDispatcher,
+        private string                   $dbType,
+        private string                   $dbPrefix
     ) {
     }
 
@@ -298,9 +301,11 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
 
                 $formData   = $event->data['form']->getData();
                 $createTime = $formData['create_time']?->getTimeStamp() ?? 0;
+                $id         = (int)$event->data['primaryKey']['id'];
 
-                $event->data['previewUrl'] = $this->blogUrlBuilder->postFromTimestamp($createTime, $formData['url']);
-                $event->data['statusData'] = $this->getPostStatusData($createTime, $formData['url']);
+                $event->data['commentsNum'] = $this->postProvider->getCommentNum($id);
+                $event->data['previewUrl']  = $this->blogUrlBuilder->postFromTimestamp($createTime, $formData['url']);
+                $event->data['statusData']  = $this->getPostStatusData($createTime, $formData['url']);
             })
             ->addListener(EntityConfig::EVENT_BEFORE_UPDATE, function (BeforeSaveEvent $event) use ($postEntity) {
                 $oldData = $event->dataProvider->getEntity(
@@ -340,11 +345,27 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                     $event->data['revision'] = (string)($event->data['revision'] + 1);
                 }
 
+                $newPublished = $event->data['published'];
+                $oldPublished = $oldData['column_published'];
+
+                if (
+                    ($newPublished && (!$oldPublished || $changed)) // Publish a new article or update an existing one
+                    || (!$newPublished && $oldPublished) // Withdraw a published article
+                ) {
+                    $event->context['visible_changed_event'] = new VisibleEntityChangedEvent(
+                        $postEntity->getName(),
+                        $event->primaryKey->getIntId()
+                    );
+                }
+
                 $event->context['create_time']  = $event->data['create_time']->getTimestamp();
                 $event->context['url']          = $event->data['url'];
                 $event->context['new_revision'] = $event->data['revision'];
             })
             ->addListener(EntityConfig::EVENT_AFTER_UPDATE, function (AfterSaveEvent $event) {
+                if (isset($event->context['visible_changed_event'])) {
+                    $this->eventDispatcher->dispatch($event->context['visible_changed_event']);
+                }
                 $event->ajaxExtraResponse = [
                     ...$this->getPostStatusData($event->context['create_time'], $event->context['url']),
                     'revision' => $event->context['new_revision'],

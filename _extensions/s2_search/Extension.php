@@ -9,21 +9,23 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_search;
 
-use S2\AdminYard\TemplateRenderer;
-use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
-use S2\Cms\Admin\DynamicConfigFormExtenderInterface;
+use Psr\Log\LoggerInterface;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Queue\QueueHandlerInterface;
+use S2\Cms\Rose\CustomExtractor;
 use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
-use S2\Cms\Translation\TranslationProviderInterface;
+use S2\Rose\Extractor\ExtractorInterface;
+use S2\Rose\Indexer;
+use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
-use s2_extensions\s2_search\Admin\DashboardSearchProvider;
-use s2_extensions\s2_search\Admin\DynamicConfigFormExtender;
-use s2_extensions\s2_search\Admin\TranslationProvider;
 use s2_extensions\s2_search\Controller\SearchPageController;
+use s2_extensions\s2_search\Service\ArticleIndexer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -32,21 +34,28 @@ class Extension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
-        $container->set(DynamicConfigFormExtender::class, function (Container $container) {
-            return new DynamicConfigFormExtender();
-        }, [DynamicConfigFormExtenderInterface::class]);
-
-        $container->set(TranslationProvider::class, function (Container $container) {
-            return new TranslationProvider();
-        }, [TranslationProviderInterface::class]);
-
-        $container->set(DashboardSearchProvider::class, function (Container $container) {
-            return new DashboardSearchProvider(
-                $container->get(TemplateRenderer::class),
+        $container->set(Indexer::class, function (Container $container) {
+            return new Indexer(
                 $container->get(PdoStorage::class),
-                $container->getParameter('root_dir')
+                $container->get(StemmerInterface::class),
+                $container->get(ExtractorInterface::class),
+                $container->get(LoggerInterface::class),
             );
-        }, [DashboardStatProviderInterface::class]);
+        });
+
+        $container->set(ArticleIndexer::class, function (Container $container) {
+            return new ArticleIndexer(
+                $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(Indexer::class),
+                $container->get('recommendations_cache'),
+            );
+        }, [QueueHandlerInterface::class]);
+
+        $container->set(ExtractorInterface::class, function (Container $container) {
+            // TODO move CustomExtractor to s2_search package
+            return new CustomExtractor($container->get(LoggerInterface::class));
+        });
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void

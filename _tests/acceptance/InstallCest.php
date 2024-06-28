@@ -1,12 +1,15 @@
 <?php
 /**
  * @copyright 2023-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
 
+namespace acceptance;
+
+use AcceptanceTester;
 use Codeception\Example;
 
 class InstallCest
@@ -21,13 +24,13 @@ class InstallCest
     }
 
     /**
-     * @throws JsonException
+     * @throws \JsonException
      */
     public function runTest(AcceptanceTester $I): void
     {
         $dbType = getenv('APP_DB_TYPE');
         foreach ($this->configProvider() as $config) {
-            if (!is_string($dbType) || $dbType === $config['db_type']) {
+            if (!\is_string($dbType) || $dbType === $config['db_type']) {
                 $file = __DIR__ . '/../../config.test.php';
                 if (file_exists($file)) {
                     unlink($file);
@@ -39,12 +42,12 @@ class InstallCest
     }
 
     /**
-     * @throws JsonException
+     * @throws \JsonException
      */
     protected function tryToTest(AcceptanceTester $I, Example $example): void
     {
         if (file_exists('config.test.php')) {
-            throw new Exception('config.test.php must not exist for test run');
+            throw new \Exception('config.test.php must not exist for test run');
         }
 
         $I->install('admin', 'passwd', $example['db_type'], $example['db_user'], $example['db_password']);
@@ -86,9 +89,11 @@ class InstallCest
     private function testAdminLogin(AcceptanceTester $I): void
     {
         $I->login('admin', 'no-pass');
+        $I->seeResponseCodeIs(401);
         $I->see('You have entered incorrect username or password.');
 
         $I->login('admin', 'passwd');
+        $I->seeResponseCodeIs(200);
         $I->dontSee('You have entered incorrect username or password.');
 
         $I->amOnPage('/---');
@@ -96,7 +101,7 @@ class InstallCest
     }
 
     /**
-     * @throws JsonException
+     * @throws \JsonException
      */
     private function testAdminEditAndTagsAdded(AcceptanceTester $I): void
     {
@@ -104,52 +109,47 @@ class InstallCest
         $I->seeResponseCodeIsClientError();
         $I->amOnPage('/tags/another tag');
         $I->seeResponseCodeIsClientError();
-        $I->amOnPage('/_admin/site_ajax.php?action=load_tags');
+        $I->amOnPage('/_admin/admin.php?entity=Tag&action=list');
         $I->dontSee('another tag');
 
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=load&id=3');
-        $data = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
-        $I->assertArrayHasKey('form', $data);
-        $I->assertStringContainsString('If you see this text, the install of S2 has been successfully completed.', $data['form']);
+        $I->amOnPage('/_admin/admin.php?entity=Article&action=edit&id=3');
+        $I->assertStringContainsString('If you see this text, the install of S2 has been successfully completed.', $I->grabValueFrom('textarea[name=pagetext]'));
 
-        $dataProvider = static function (string $id) {
+        $dataProvider = static function (string $csrfToken) {
             return [
-                'page'  => [
-                    'title'       => 'New Page Title',
-                    'meta_keys'   => 'New Meta Keywords',
-                    'meta_desc'   => 'New Meta Description',
-                    'excerpt'     => 'New Excerpt',
-                    'tags'        => 'tag1, another tag',
-                    'create_time' => '2023-08-10T11:32',
-                    'modify_time' => '2023-08-11T12:15',
-                    'text'        => '<p>Some new page text</p>',
-                    'id'          => $id,
-                    'revision'    => '1',
-                    'user_id'     => '0',
-                    'template'    => 'site.php',
-                    'url'         => 'new_page1',
-                ],
-                'flags' => [
-                    'favorite'  => '1',
-                    'published' => '1',
-                    'commented' => '1',
-                ],
+                '__csrf_token' => $csrfToken,
+                'title'        => 'New Page Title',
+                'meta_keys'    => 'New Meta Keywords',
+                'meta_desc'    => 'New Meta Description',
+                'excerpt'      => 'New Excerpt',
+                'tags'         => 'tag1, another tag',
+                'create_time'  => '2023-08-10T11:32',
+                'modify_time'  => '2023-08-11T12:15',
+                'pagetext'     => '<p>Some new page text</p>',
+                'revision'     => '1',
+                'user_id'      => '0',
+                'template'     => 'site.php',
+                'url'          => 'new_page1',
+                'favorite'     => '1',
+                'published'    => '1',
+                'commented'    => '1',
             ];
         };
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save', $dataProvider('333'));
-        $I->see('Item not found!');
+        $csrfToken    = $I->grabValueFrom('input[name=__csrf_token]');
+        $I->sendAjaxPostRequest('/_admin/admin.php?entity=Article&action=edit&id=333', $dataProvider($csrfToken));
+        $this->assertJsonResponseContains($I, ['errors', 0], 'Unable to confirm security token.');
 
         for ($i = 0; $i < 2; $i++) {
             // 2-nd iteration checks that consequent saving of the same entity works fine
-            $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save', $dataProvider('3'));
+            $I->sendAjaxPostRequest('/_admin/admin.php?entity=Article&action=edit&id=3', $dataProvider($csrfToken));
             $I->seeResponseCodeIsSuccessful();
             $I->dontSee('Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.');
-            $I->see('{"revision":2,"status":"ok","url_status":"ok"}');
+            $I->see('{"success":true,"urlStatus":"ok","urlTitle":"","revision":"2"}');
         }
 
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=load_tree');
-        $I->see('Error in GET parameters.');
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=load_tree&id=0&search=');
+        $I->sendAjaxGetRequest('/_admin/ajax.php?action=load_tree');
+        $I->see('{"success":false,"message":"Parameter \u0022id\u0022 is required."}');
+        $I->sendAjaxGetRequest('/_admin/ajax.php?action=load_tree&id=0&search=');
         $I->assertStringContainsString('New Page Title', $I->grabPageSource());
 
         $I->amOnPage('/section1/page1');
@@ -166,49 +166,47 @@ class InstallCest
         $I->seeResponseCodeIsSuccessful();
         $I->amOnPage('/tags/another tag');
         $I->seeResponseCodeIsSuccessful();
-        $I->amOnPage('/_admin/site_ajax.php?action=load_tags');
+        $I->amOnPage('/_admin/admin.php?entity=Tag&action=list');
         $I->see('another tag');
     }
 
     private function testAdminAddArticles(AcceptanceTester $I): void
     {
         foreach ([4, 5] as $newId) {
-            $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=create&id=2&title=New+page+' . $newId);
+            $I->sendAjaxGetRequest('/_admin/ajax.php?action=create&id=2&title=New+page+' . $newId);
             $data = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
-            $I->assertArrayHasKey('status', $data);
-            $I->assertEquals(1, $data['status']);
+            $I->assertArrayHasKey('success', $data);
+            $I->assertTrue($data['success']);
             $I->assertArrayHasKey('id', $data);
             $I->assertEquals($newId, $data['id']);
 
-            $dataProvider = static function (string $id) {
+            $I->amOnPage('/_admin/admin.php?entity=Article&action=edit&id=' . $newId);
+            $csrfToken = $I->grabValueFrom('input[name=__csrf_token]');
+
+            $dataProvider = static function (string $id, string $csrfToken) {
                 return [
-                    'page'  => [
-                        'title'       => 'New Page ' . $id,
-                        'meta_keys'   => 'New Meta Keywords',
-                        'meta_desc'   => 'New Meta Description',
-                        'excerpt'     => 'New Excerpt',
-                        'tags'        => 'tag1, another tag',
-                        'create_time' => '2023-08-10T11:32',
-                        'modify_time' => '2023-08-12T12:15',
-                        'text'        => '<p>Some new page text</p>',
-                        'id'          => $id,
-                        'revision'    => '1',
-                        'user_id'     => '0',
-                        'template'    => 'site.php',
-                        'url'         => 'new_page' . $id,
-                    ],
-                    'flags' => [
-                        'favorite'  => '1',
-                        'published' => '1',
-                        'commented' => '1',
-                    ],
+                    '__csrf_token' => $csrfToken,
+                    'title'        => 'New Page ' . $id,
+                    'meta_keys'    => 'New Meta Keywords',
+                    'meta_desc'    => 'New Meta Description',
+                    'excerpt'      => 'New Excerpt',
+                    'tags'         => 'tag1, another tag',
+                    'create_time'  => '2023-08-10T11:32',
+                    'modify_time'  => '2023-08-12T12:15',
+                    'pagetext'     => '<p>Some new page text</p>',
+                    'revision'     => '1',
+                    'user_id'      => '0',
+                    'template'     => 'site.php',
+                    'url'          => 'new_page' . $id,
+                    'favorite'     => '1',
+                    'published'    => '1',
+                    'commented'    => '1',
                 ];
             };
 
-            $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save', $dataProvider((string)$newId));
+            $I->sendAjaxPostRequest('/_admin/admin.php?entity=Article&action=edit&id=' . $newId, $dataProvider((string)$newId, $csrfToken));
             $I->seeResponseCodeIsSuccessful();
-            $I->dontSee('Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.');
-            $I->see('{"revision":2,"status":"ok","url_status":"ok"}');
+            $I->see('{"success":true,"urlStatus":"ok","urlTitle":"","revision":"2"}');
         }
 
         // Links to related pages in section and by tags
@@ -267,7 +265,7 @@ class InstallCest
         $I->canSee('New Page 4');
         $I->canSee('New Page 5');
         $I->canSee('/section1/new_page1');
-        $I->canSee(gmdate('D, d M Y H:i:s', strtotime('2023-08-10 11:32:00')).' GMT');
+        $I->canSee(gmdate('D, d M Y H:i:s', strtotime('2023-08-10 11:32:00')) . ' GMT');
         $I->see('New Excerpt');
 
         $I->haveHttpHeader('If-Modified-Since', 'Sat, 12 Aug 2023 00:00:00 GMT');
@@ -284,67 +282,54 @@ class InstallCest
     }
 
     /**
-     * @throws JsonException
+     * @throws \JsonException
      */
     private function testBlogExtension(AcceptanceTester $I): void
     {
         $I->installExtension('s2_blog');
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=create_blog_post');
-        $I->seeResponseCodeIsSuccessful();
-        $postId = $I->grabPageSource();
-        $I->assertEquals(1, $postId, 'If postId is empty probably hooks are not applied due to lack of opcache invalidation.');
 
         $I->amOnPage('/blog/tags/blog tag');
         $I->seeResponseCodeIsClientError();
 
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=edit_blog_post&id=' . $postId);
-        $data = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
-        $I->assertArrayHasKey('form', $data);
+        $I->amOnPage('/_admin/admin.php?entity=BlogPost&action=new');
+        $I->submitForm('form', [
+            'title' => 'New Blog Post Title',
+            'text'  => '<p>Start text</p>',
+        ]);
+        $I->seeResponseCodeIsSuccessful();
+        $postId    = $I->grabFromCurrentUrl('~id=(\d+)~');
+        $csrfToken = $I->grabValueFrom('input[name=__csrf_token]');
 
-        $dataProvider = static function (string $id) {
+        $dataProvider = static function (string $csrfToken) {
             return [
-                'page'  => [
-                    'title'       => 'New Blog Post Title',
-                    'tags'        => 'tag1, blog tag',
-                    'create_time' => '2023-08-12T11:32',
-                    'modify_time' => '2023-08-12T12:15',
-                    'text'        => '<p>New blog post</p>',
-                    'user_id'     => '0',
-                    'label'       => '',
-                    'id'          => $id,
-                    'revision'    => '1',
-                    'template'    => 'site.php',
-                    'url'         => 'new_post1',
-                ],
-                'flags' => [
-                    'commented' => '1',
-                    'published' => '1',
-                ],
+                '__csrf_token' => $csrfToken,
+                'title'        => 'New Blog Post Title',
+                'tags'         => 'tag1, blog tag',
+                'create_time'  => '2023-08-12T11:32',
+                'modify_time'  => '2023-08-12T12:15',
+                'text'         => '<p>New blog post</p>',
+                'user_id'      => '0',
+                'label'        => '',
+                'revision'     => '1',
+                'template'     => 'site.php',
+                'url'          => 'new_post1',
+
+                'commented' => '1',
+                'published' => '1',
             ];
         };
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_blog', $dataProvider($postId . '0'));
-        $I->see('Item not found!');
+        $I->sendAjaxPostRequest('/_admin/admin.php?entity=BlogPost&action=edit&id=333', $dataProvider($csrfToken));
+        $this->assertJsonResponseContains($I, ['errors', 0], 'Unable to confirm security token.');
 
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_blog', $dataProvider($postId));
+        $I->sendAjaxPostRequest('/_admin/admin.php?entity=BlogPost&action=edit&id=' . $postId, $dataProvider($csrfToken));
         $I->seeResponseCodeIsSuccessful();
-        $I->dontSee('Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.');
-        $I->see('{"revision":2,"status":"ok","url_status":"ok"}');
+        $I->see('{"success":true,"urlStatus":"ok","urlTitle":"","revision":"2"}');
 
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=edit_blog_post&id=' . $postId);
-        $data = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
-        $I->assertArrayHasKey('form', $data);
-        $I->assertStringContainsString('New blog post', $data['form']);
+        $I->amOnPage('/_admin/admin.php?entity=BlogPost&action=edit&id=' . $postId);
+        $postText = $I->grabValueFrom('textarea[name=text]');
+        $I->assertStringContainsString('New blog post', $postText);
 
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=load_blog_posts', [
-            'posts' => [
-                'start_time' => '',
-                'text'       => '',
-                'end_time'   => '',
-                'key'        => '',
-                'author'     => '',
-                'hidden'     => '',
-            ]
-        ]);
+        $I->amOnPage('/_admin/admin.php?entity=BlogPost&action=list');
         $I->canSee('2023-08-12');
         $I->see('New Blog Post Title');
 
@@ -388,7 +373,7 @@ class InstallCest
         $I->canSee('My blog');
         $I->canSee('New Blog Post Title');
         $I->canSee('/blog/2023/08/12/new_post1');
-        $I->canSee(gmdate('D, d M Y H:i:s', strtotime('2023-08-12 11:32:00')).' GMT');
+        $I->canSee(gmdate('D, d M Y H:i:s', strtotime('2023-08-12 11:32:00')) . ' GMT');
         $I->see('New blog post');
 
         $I->amOnPage('/index.php?/blog/sitemap.xml'); // Same as above
@@ -411,9 +396,9 @@ class InstallCest
         $I->dontSee('New Blog Post Title');
         $I->dontSee('New Page Title');
 
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=s2_search_makeindex');
+        $I->sendAjaxGetRequest('/_admin/ajax.php?action=s2_search_makeindex');
         $I->see('go_20');
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=s2_search_makeindex');
+        $I->sendAjaxGetRequest('/_admin/ajax.php?action=s2_search_makeindex');
         $I->see('stop');
 
         $I->amOnPage('/blog/2023/08/12/new_post1');
@@ -427,37 +412,38 @@ class InstallCest
         // todo recommendations
     }
 
+    /**
+     * @throws \JsonException
+     */
     private function testAdminTagListAndEdit(AcceptanceTester $I): void
     {
         $I->amOnPage('/tags/tag1');
         $I->seeResponseCodeIsSuccessful();
 
-        $I->amOnPage('/_admin/site_ajax.php?action=load_tags');
+        $I->amOnPage('/_admin/admin.php?entity=Tag&action=list');
         $I->see('Tag');
-        $I->see('Modified');
         $I->see('another tag');
 
         $tagId = '1';
-        $I->amOnPage('/_admin/site_ajax.php?action=load_tag&id=' . $tagId);
-        $dataProvider = static function (string $id) {
+        $I->amOnPage('/_admin/admin.php?entity=Tag&action=edit&tag_id=' . $tagId);
+        $dataProvider = static function (string $csrfToken) {
             return [
-                'tag'   => [
-                    'name'        => 'New Tag Name',
-                    'modify_time' => '2023-08-12T12:15',
-                    'description' => 'New tag description text',
-                    'url'         => 'new_tag_url1',
-                    'id'          => $id,
-                ],
-                'flags' => [
-                    'commented' => '1',
-                    'published' => '1',
-                ],
+                '__csrf_token' => $csrfToken,
+                'name'         => 'New Tag Name',
+                'modify_time'  => '2023-08-12T12:15',
+                'description'  => 'New tag description text',
+                'url'          => 'new_tag_url1',
+
+                'commented' => '1',
+                'published' => '1',
             ];
         };
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_tag', $dataProvider($tagId . '000'));
-        $I->see('Item not found!');
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_tag', $dataProvider($tagId));
-        $I->see('New tag description text');
+        $csrfToken    = $I->grabValueFrom('input[name=__csrf_token]');
+        $I->sendAjaxPostRequest('/_admin/admin.php?entity=Tag&action=edit&tag_id=1111' . $tagId, $dataProvider($csrfToken));
+        $this->assertJsonResponseContains($I, ['errors', 0], 'Unable to confirm security token.');
+
+        $I->sendAjaxPostRequest('/_admin/admin.php?entity=Tag&action=edit&tag_id=' . $tagId, $dataProvider($csrfToken));
+        $I->see('{"success":true}');
 
         $I->amOnPage('/tags/tag1');
         $I->seeResponseCodeIsClientError();
@@ -469,38 +455,20 @@ class InstallCest
 
     private function testAdminCommentManagement(AcceptanceTester $I): void
     {
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=load_last_comments');
+        $I->sendAjaxPostRequest('/_admin/admin.php?entity=Comment&action=list');
         $I->see('This is my first comment!');
 
-        $data = [
-            'opt' => [
-                'S2_SITE_NAME'        => 'Site Title',
-                'S2_WEBMASTER'        => 'Webmaster Name',
-                'S2_WEBMASTER_EMAIL'  => 'webmaster@example.com',
-                'S2_START_YEAR'       => '2023',
-                'S2_COMPRESS'         => '1',
-                'S2_FAVORITE_URL'     => 'favorite',
-                'S2_TAGS_URL'         => 'keywords',
-                'S2_USE_HIERARCHY'    => '1',
-                'S2_MAX_ITEMS'        => '0',
-                'style'               => 'zeta',
-                'lang'                => 'English',
-                'S2_BLOG_TITLE'       => 'Blog Title',
-                'S2_BLOG_URL'         => '/blog',
-                'S2_SHOW_COMMENTS'    => '1',
-                'S2_ENABLED_COMMENTS' => '1',
-                'S2_PREMODERATION'    => '1',
-                'S2_ADMIN_COLOR'      => '#e7e4f4',
-                'S2_LOGIN_TIMEOUT'    => '120000',
-            ]
-        ];
+        $I->changeSetting('S2_PREMODERATION', true);
+        $I->changeSetting('S2_WEBMASTER_EMAIL', 'webmaster@example.com');
+        $I->changeSetting('S2_WEBMASTER', 'Webmaster Name');
 
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_options', $data);
+        $I->amOnPage('/_admin/admin.php?entity=User&action=list');
         $I->seeResponseCodeIsSuccessful();
-
-        $I->sendAjaxGetRequest('/_admin/site_ajax.php?action=user_set_email&login=admin&email=admin@example.com');
+        $I->submitForm('form[action="?entity=User&action=patch&field=email&id=' . 1 . '"]', [
+            'email' => 'admin@example.com',
+        ]);
         $I->seeResponseCodeIsSuccessful();
-        $I->see('admin@example.com');
+        $I->see('{"success":true}');
 
         $I->clearEmail();
 
@@ -547,32 +515,8 @@ class InstallCest
         // TODO check deleting comments
 
         // Disable comments
-        $data = [
-            'opt' => [
-                'S2_SITE_NAME'        => 'Site Title',
-                'S2_WEBMASTER'        => 'Webmaster Name',
-                'S2_WEBMASTER_EMAIL'  => 'webmaster@example.com',
-                'S2_START_YEAR'       => '2023',
-                'S2_COMPRESS'         => '1',
-                'S2_FAVORITE_URL'     => 'favorite',
-                'S2_TAGS_URL'         => 'keywords',
-                'S2_USE_HIERARCHY'    => '1',
-                'S2_MAX_ITEMS'        => '0',
-                'style'               => 'zeta',
-                'lang'                => 'English',
-                'S2_BLOG_TITLE'       => 'Blog Title',
-                'S2_BLOG_URL'         => '/blog',
-                // one has to remove the constant definition to disable it
-                // 'S2_SHOW_COMMENTS'    => '0',
-                // 'S2_ENABLED_COMMENTS' => '0',
-                'S2_PREMODERATION'    => '1',
-                'S2_ADMIN_COLOR'      => '#e7e4f4',
-                'S2_LOGIN_TIMEOUT'    => '120000',
-            ]
-        ];
-
-        $I->sendAjaxPostRequest('/_admin/site_ajax.php?action=save_options', $data);
-        $I->seeResponseCodeIsSuccessful();
+        $I->changeSetting('S2_SHOW_COMMENTS', false);
+        $I->changeSetting('S2_ENABLED_COMMENTS', false);
 
         // Test <!-- s2_last_comments --> and <!-- s2_last_discussions --> placeholders when comments are disabled
         $I->amOnPage('/index.php?/');
@@ -585,5 +529,15 @@ class InstallCest
         $I->haveHttpHeader('If-None-Match', $headers['ETag'][0]);
         $I->amOnPage('/index.php?/section1/new_page1');
         $I->seeResponseCodeIs(304);
+    }
+
+    private function assertJsonResponseContains(AcceptanceTester $I, array $path, string $needle): void
+    {
+        $response = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
+        foreach ($path as $value) {
+            $I->assertArrayHasKey($value, $response);
+            $response = $response[$value];
+        }
+        $I->assertStringContainsString($needle, $response);
     }
 }

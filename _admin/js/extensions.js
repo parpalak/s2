@@ -19,7 +19,7 @@ function RefreshHooks() {
     return false;
 }
 
-function changeExtension(sAction, sId, sMessage) {
+function changeExtension(sAction, sId, sCsrfToken, sMessage) {
     if (sAction === 'install_extension') {
         if (!confirm((sMessage !== '' ? s2_lang.install_message.replaceAll('%s', sMessage) : '') + s2_lang.install_extension.replaceAll('%s', sId))) {
             return false;
@@ -34,9 +34,11 @@ function changeExtension(sAction, sId, sMessage) {
         }
     }
 
-    // TODO CSRF token support
     loadingIndicator(true)
-    fetch(sUrl + 'action=' + sAction + '&id=' + sId)
+    fetch(sUrl + 'action=' + sAction + '&id=' + sId, {
+        method: 'POST',
+        body: new URLSearchParams('csrf_token=' + sCsrfToken)
+    })
         .then(function (response) {
             if (response.ok) {
                 response.json().then(function (data) {

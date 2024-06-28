@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -69,9 +69,14 @@ class BlogUrlBuilder
         return $this->main() . $year . '/' . self::extendNumber($month) . '/' . self::extendNumber($day) . '/' . urlencode($url);
     }
 
-    public function postFromTimestamp(int $create_time, string $url): string
+    public function postFromTimestamp(int $createTime, string $url): string
     {
-        return $this->main() . date('Y/m/d/', $create_time) . urlencode($url);
+        return $this->main() . date('Y/m/d/', $createTime) . urlencode($url);
+    }
+
+    public function postFromTimestampWithoutPrefix(int $createTime, string $url): string
+    {
+        return str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . date('/Y/m/d', $createTime) . '/' . urldecode($url);
     }
 
     public function blogIsOnTheSiteRoot(): bool

@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2023-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -19,10 +19,10 @@ class QueueConsumer
     private array $handlers;
 
     public function __construct(
-        private \PDO            $pdo,
-        private string          $dbPrefix,
-        private LoggerInterface $logger,
-        QueueHandlerInterface   ...$handlers
+        private readonly \PDO            $pdo,
+        private readonly string          $dbPrefix,
+        private readonly LoggerInterface $logger,
+        QueueHandlerInterface            ...$handlers
     ) {
         $this->handlers = $handlers;
     }
@@ -48,6 +48,8 @@ class QueueConsumer
 
         if ($driverName === 'sqlite') {
             $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 1);
+        } else {
+            $this->pdo->exec('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
         }
 
         $this->pdo->beginTransaction();

@@ -12,6 +12,8 @@ if (!isset($this)) {
 /** @var ?string $content */
 /** @var ?string $errorMessage */
 /** @var array $flashMessages */
+/** @var array $extraStyles */
+/** @var array $extraScripts */
 
 ?>
 <html>
@@ -22,9 +24,15 @@ if (!isset($this)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="<?php echo $basePath; ?>/_vendor/s2/admin-yard/demo/style.css">
     <link rel="stylesheet" href="css/admin-override.css">
+    <?php foreach ($extraStyles as $style): ?>
+        <link rel="stylesheet" href="<?= $style ?>">
+    <?php endforeach; ?>
 
     <script src="<?php echo $basePath; ?>/_vendor/s2/admin-yard/demo/script.js"></script>
     <script src="js/lib.js"></script>
+    <?php foreach ($extraScripts as $script): ?>
+        <script src="<?= $script ?>"></></script>
+    <?php endforeach; ?>
 
     <!-- note: move to editor pages only -->
     <script src="js/s2lib.js"></script>

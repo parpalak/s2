@@ -93,7 +93,9 @@ class AcceptanceTester extends Actor
         $I->seeElement('.extension.available [title=' . $extensionId . ']');
         $I->dontSeeElement('.extension.enabled [title=' . $extensionId . ']');
 
-        $I->amOnPage('/_admin/ajax.php?action=install_extension&id=' . $extensionId);
+        $I->sendAjaxPostRequest('/_admin/ajax.php?action=install_extension&id=' . $extensionId, [
+            'csrf_token' => $I->grabAttributeFrom('[data-id=' . $extensionId . ']', 'data-csrf-token'),
+        ]);
         $I->seeResponseCodeIsSuccessful();
 
         $I->amOnPage('/_admin/admin.php?entity=Extension');

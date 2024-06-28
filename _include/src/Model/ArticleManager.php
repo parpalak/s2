@@ -15,7 +15,6 @@ use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 readonly class ArticleManager
@@ -104,7 +103,7 @@ readonly class ArticleManager
                 ],
                 'attr' => [
                     'data-id'         => $article['id'],
-                    'data-csrf-token' => $this->getDeleteCsrfToken(['id' => (string)$article['id']], $this->requestStack->getMainRequest()),
+                    'data-csrf-token' => $this->getCsrfToken($article['id']),
                     'id'              => 'node_' . $article['id'],
                 ],
             ];
@@ -193,8 +192,16 @@ readonly class ArticleManager
     /**
      * @throws DbLayerException
      */
-    public function renameArticle(int $id, string $title): void
+    public function renameArticle(int $id, string $title, string $csrfToken): void
     {
+        if (!$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_CREATE_ARTICLES, PermissionChecker::PERMISSION_EDIT_SITE)) {
+            throw new AccessDeniedException('Permission denied.');
+        }
+
+        if ($csrfToken !== $this->getCsrfToken($id)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
+
         $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'user_id',
             'FROM'   => 'articles',
@@ -221,8 +228,16 @@ readonly class ArticleManager
     /**
      * @throws DbLayerException
      */
-    public function moveBranch(int $sourceId, int $destinationId, int $position): void
+    public function moveBranch(int $sourceId, int $destinationId, int $position, string $csrfToken): void
     {
+        if (!$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_CREATE_ARTICLES, PermissionChecker::PERMISSION_EDIT_SITE)) {
+            throw new AccessDeniedException('Permission denied.');
+        }
+
+        if ($csrfToken !== $this->getCsrfToken($sourceId)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
+
         $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'priority, parent_id, user_id, id',
             'FROM'   => 'articles',
@@ -277,8 +292,19 @@ readonly class ArticleManager
     /**
      * @throws DbLayerException
      */
-    public function deleteBranch(int $id): void
+    public function deleteBranch(int $id, string $csrfToken): void
     {
+        if (!$this->permissionChecker->isGrantedAny(
+            PermissionChecker::PERMISSION_CREATE_ARTICLES,
+            PermissionChecker::PERMISSION_EDIT_SITE)
+        ) {
+            throw new AccessDeniedException('Permission denied.');
+        }
+
+        if ($csrfToken !== $this->getCsrfToken($id)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
+
         $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'priority, parent_id, user_id',
             'FROM'   => 'articles',
@@ -311,9 +337,11 @@ readonly class ArticleManager
         $this->deleteItemAndChildren($id);
     }
 
-    protected function getDeleteCsrfToken(array $primaryKey, Request $request): string
+    public function getCsrfToken(int $id): string
     {
-        $formParams = new FormParams('Article', [], $request, FieldConfig::ACTION_DELETE, $primaryKey);
+        // This token is used for every action in the tree management actions.
+        // I chose to use ACTION_DELETE since then it would be compatible with the AdminYard delete token.
+        $formParams = new FormParams('Article', [], $this->requestStack->getMainRequest(), FieldConfig::ACTION_DELETE, ['id' => (string)$id]);
 
         return $formParams->getCsrfToken();
     }

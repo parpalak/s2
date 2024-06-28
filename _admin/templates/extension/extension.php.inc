@@ -6,6 +6,7 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
 /** @var array $failedExtensions */
 /** @var array $installedExtensions */
 /** @var callable $trans */
+/** @var callable $csrfTokenGenerator */
 /** @var string $basePath */
 ?>
 <section class="admin-extensions">
@@ -24,8 +25,10 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
                     <?php endif; ?>
                     <div class="options">
                         <button
-                                class="bitbtn <?= isset($item['installed_version']) ? 'upgr_ext' : 'inst_ext' ?>"
-                                onclick="return changeExtension('install_extension', '<?= $htmlEncode(addslashes($item['entry'])) ?>', '<?= implode('\\n', array_map(static fn($s) => s2_htmlencode(addslashes($s)), $item['install_notes'])) ?>');"
+                                data-csrf-token="<?= $csrfTokenGenerator($item['entry']) ?>"
+                                data-id="<?= $htmlEncode($item['entry']) ?>"
+                                class="primary <?= isset($item['installed_version']) ? 'upgr_ext' : 'inst_ext' ?>"
+                                onclick="return changeExtension('install_extension', '<?= $htmlEncode(addslashes($item['entry'])) ?>', '<?= $csrfTokenGenerator($item['entry']) ?>', '<?= implode('\\n', array_map(static fn($s) => s2_htmlencode(addslashes($s)), $item['install_notes'])) ?>');"
                         >
                             <?= isset($item['installed_version']) ? $trans('Upgrade extension') : $trans('Install extension') ?>
                         </button>
@@ -75,12 +78,12 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
                         <p class="description"><?= $htmlEncode($ext['description']) ?></p>
                     <?php endif; ?>
                     <div class="options">
-                        <button class="bitbtn flip_ext"
-                                onclick="return changeExtension('flip_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '');">
+                        <button class="link-as-button secondary flip_ext"
+                                onclick="return changeExtension('flip_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '<?= $csrfTokenGenerator($ext['id']) ?>', '');">
                             <?= $ext['disabled'] != '1' ? $trans('Disable') : $trans('Enable') ?>
                         </button>
-                        <button class="bitbtn uninst_ext"
-                                onclick="return changeExtension('uninstall_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '<?= $htmlEncode(addslashes($ext['uninstall_note'] ?? '')) ?>');">
+                        <button class="link-as-button danger uninst_ext"
+                                onclick="return changeExtension('uninstall_extension', '<?= $htmlEncode(addslashes($ext['id'])) ?>', '<?= $csrfTokenGenerator($ext['id']) ?>', '<?= $htmlEncode(addslashes($ext['uninstall_note'] ?? '')) ?>');">
                             <?= $trans('Uninstall') ?>
                         </button>
                     </div>

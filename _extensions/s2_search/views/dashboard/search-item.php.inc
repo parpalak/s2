@@ -14,6 +14,6 @@
 </div>
 <script src="<?php echo $basePath; ?>/_admin/js/ajax.js"></script>
 <script >
-    var sUrl = '<?php echo $basePath; ?>/_admin/site_ajax.php?';
+    var sUrl = '<?php echo $basePath; ?>/_admin/ajax.php?';
 </script>
 <script src="<?= $basePath ?>/_extensions/s2_search/index-manager.js"></script>

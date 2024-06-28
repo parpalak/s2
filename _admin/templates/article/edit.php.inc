@@ -79,7 +79,7 @@ function s2_jsvarencode ($var)
 <script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/searchcursor.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/templates/article/codemirror_init.js"></script>
 
-<section class="edit-content article-edit-content">
+<section class="edit-content large-edit-form article-edit-content">
     <?php if (!empty($errorMessages)): ?>
         <div class="error-message-box">
             <p><?php printf($trans('Cannot save %s due to the following errors:'), $entityName) ?></p>
@@ -94,7 +94,7 @@ function s2_jsvarencode ($var)
         <?php foreach ($form->getHiddenControls() as $control): ?>
             <?= $control->getHtml() ?>
         <?php endforeach; ?>
-        <div class="article-form-wrapper">
+        <div class="large-form-wrapper">
             <?php foreach ($columns as $columnIndex => $controls): ?>
                 <div class="article-form-column article-form-column-<?= $columnIndex ?>">
                     <?php foreach ($controls as $fieldName => $control): ?>

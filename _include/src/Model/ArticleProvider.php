@@ -1,5 +1,7 @@
 <?php
 /**
+ * Updates search index when a visible article has been changed.
+ *
  * @copyright 2007-2024 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
  * @package   S2
@@ -10,6 +12,7 @@ declare(strict_types=1);
 namespace S2\Cms\Model;
 
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\Viewer;
 
 readonly class ArticleProvider
@@ -217,6 +220,9 @@ readonly class ArticleProvider
         ], $usedTemplates)));
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function pathFromId(int $id, bool $visibleForAll = false): ?string
     {
         if ($id < 0) {

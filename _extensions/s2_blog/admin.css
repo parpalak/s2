@@ -63,3 +63,17 @@
 @media screen and (max-width: 850px) {
 	.s2_blog_text_extra {display: none;}
 	}
+
+.post-edit-content .form-control-htmltextarea {
+    height: calc(100vh - 90px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Comments page */
+.admin-content tbody tr:has(.field-BlogComment-good input[type=checkbox]:checked) {
+    background-color: color-mix(in srgb, var(--color-success) 10%, var(--page-background));
+}
+.admin-content tbody tr:has(.field-BlogComment-shown input[type=checkbox]:not(:checked)) {
+    background-color: color-mix(in srgb, var(--base-2) 50%, var(--page-background));
+}

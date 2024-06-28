@@ -10,12 +10,18 @@ declare(strict_types=1);
 namespace S2\Cms\AdminYard;
 
 use S2\AdminYard\TemplateRenderer;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class CustomTemplateRenderer extends TemplateRenderer
+class CustomTemplateRenderer extends TemplateRenderer
 {
-    public function __construct(TranslatorInterface $translator, private string $basePath)
-    {
+    private ?array $extraAssets = null;
+
+    public function __construct(
+        TranslatorInterface                       $translator,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly string                   $basePath
+    ) {
         parent::__construct($translator);
     }
 
@@ -27,6 +33,7 @@ readonly class CustomTemplateRenderer extends TemplateRenderer
         $friendlyFilesize = $this->friendlyFilesize(...);
         $numberFormat     = $this->numberFormat(...);
         $basePath         = $this->basePath;
+        [$extraStyles, $extraScripts] = $this->getExtraAssets();
 
         extract($data);
         ob_start();
@@ -63,5 +70,16 @@ readonly class CustomTemplateRenderer extends TemplateRenderer
         }
 
         return $result;
+    }
+
+    private function getExtraAssets(): array
+    {
+        if ($this->extraAssets !== null) {
+            return $this->extraAssets;
+        }
+        $event = new CustomTemplateRendererEvent($this->basePath);
+        $this->eventDispatcher->dispatch($event);
+
+        return $this->extraAssets = [$event->extraStyles, $event->extraScripts];
     }
 }

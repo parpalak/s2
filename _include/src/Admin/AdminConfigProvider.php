@@ -31,13 +31,16 @@ use S2\AdminYard\Validator\Length;
 use S2\AdminYard\Validator\NotBlank;
 use S2\AdminYard\Validator\Regex;
 use S2\Cms\Admin\Controller\CommentController;
+use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\CommentNotifier;
 use S2\Cms\Model\ExtensionCache;
+use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Template\HtmlTemplateProvider;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 readonly class AdminConfigProvider
 {
@@ -47,6 +50,7 @@ readonly class AdminConfigProvider
     private array $adminConfigExtenders;
 
     public function __construct(
+        private PermissionChecker        $permissionChecker,
         private HtmlTemplateProvider     $templateProvider,
         private DynamicConfigFormBuilder $dynamicConfigFormBuilder,
         private DynamicConfigProvider    $dynamicConfigProvider,
@@ -56,6 +60,7 @@ readonly class AdminConfigProvider
         private UrlBuilder               $urlBuilder,
         private CommentNotifier          $commentNotifier,
         private ExtensionCache           $extensionCache,
+        private EventDispatcherInterface $eventDispatcher,
         private string                   $dbType,
         private string                   $dbPrefix,
         AdminConfigExtenderInterface     ...$adminConfigExtenders
@@ -458,18 +463,31 @@ readonly class AdminConfigProvider
                         return;
                     }
 
-                    $event->data['revision'] = (string)($event->data['revision'] + 1);
+                    $event->data['revision']        = (string)($event->data['revision'] + 1);
                     $event->context['new_revision'] = $event->data['revision'];
                 } else {
                     // Changes might be in unimportant fields only.
                     // So we ignore $event->data['revision'] and refresh it on client side to the current value.
-                    $event->data['revision'] = $oldData['column_revision'];
+                    $event->data['revision']        = $oldData['column_revision'];
                     $event->context['new_revision'] = $oldData['column_revision'];
                 }
 
-                $event->context['article_id']   = $event->primaryKey->getIntId();
+                $event->context['article_id'] = $event->primaryKey->getIntId();
+
+                $newPublished = $event->data['published'];
+                $oldPublished = $oldData['column_published'];
+                if (
+                    ($newPublished && (!$oldPublished || $changed)) // Publish a new article or update an existing one
+                    || (!$newPublished && $oldPublished) // Withdraw a published article
+                ) {
+                    $event->context['visible_changed_event'] = new VisibleEntityChangedEvent($articleEntity->getName(), $event->context['article_id']);
+                }
             })
-            ->addListener(EntityConfig::EVENT_AFTER_UPDATE, function (AfterSaveEvent $event) {
+            ->addListener(EntityConfig::EVENT_AFTER_UPDATE, function (AfterSaveEvent $event) use ($articleEntity) {
+                if (isset($event->context['visible_changed_event'])) {
+                    $this->eventDispatcher->dispatch($event->context['visible_changed_event']);
+                }
+
                 $event->ajaxExtraResponse = [
                     ...$this->getArticleStatusData($event->context['article_id']),
                     'revision' => $event->context['new_revision'],

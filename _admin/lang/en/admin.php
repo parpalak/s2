@@ -117,6 +117,7 @@ $lang_admin = array(
 'Last comments'				=> 'Last comments on the site',
 'New comments'				=> 'Unchecked comments on the site',
 'No comments'				=> 'No comments',
+'N comments'				=> '{{ count }} comment|{{ count }} comments',
 'Hidden'					=> 'hidden',
 'Subscribed'				=> 'subscribed',
 'Save'						=> 'Save',

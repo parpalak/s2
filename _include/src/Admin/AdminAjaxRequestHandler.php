@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Admin;
 
+use S2\Cms\Admin\Event\AdminAjaxControllerMapEvent;
 use S2\Cms\Extensions\ExtensionManager;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Container as C;
@@ -26,14 +27,16 @@ use Symfony\Component\HttpFoundation\Request as R;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class AdminAjaxRequestHandler
 {
     public function __construct(
-        public RequestStack      $requestStack,
-        public AuthManager       $authManager,
-        public PermissionChecker $permissionChecker,
-        public Container         $container,
+        public RequestStack             $requestStack,
+        public AuthManager              $authManager,
+        public PermissionChecker        $permissionChecker,
+        public EventDispatcherInterface $eventDispatcher,
+        public Container                $container,
     ) {
     }
 
@@ -56,32 +59,27 @@ class AdminAjaxRequestHandler
         $controllerMap = [
             // Articles tree
             'move'                => static function (P $p, R $r, C $c) {
-                if (!$p->isGrantedAny(P::PERMISSION_CREATE_ARTICLES, P::PERMISSION_EDIT_SITE)) {
-                    return new Json(['success' => false, 'message' => 'Permission denied.'], Response::HTTP_FORBIDDEN);
-                }
-                if (!$r->query->has('source_id') || !$r->query->has('new_parent_id') || !$r->query->has('new_pos')) {
+                if (!$r->request->has('source_id') || !$r->request->has('new_parent_id') || !$r->request->has('new_pos')) {
                     return new Json(['success' => false, 'message' => 'Parameters "source_id", "new_parent_id" and "new_pos" are required.'], Response::HTTP_BAD_REQUEST);
                 }
                 /** @var ArticleManager $am */
                 $am = $c->get(ArticleManager::class);
                 $am->moveBranch(
-                    (int)$r->query->get('source_id'),
-                    (int)$r->query->get('new_parent_id'),
-                    (int)$r->query->get('new_pos')
+                    (int)$r->request->get('source_id'),
+                    (int)$r->request->get('new_parent_id'),
+                    (int)$r->request->get('new_pos'),
+                    $r->request->get('csrf_token', '')
                 );
 
                 return new Json(['success' => true]);
             },
             'delete'              => static function (P $p, R $r, C $c) {
-                if (!$p->isGrantedAny(P::PERMISSION_CREATE_ARTICLES, P::PERMISSION_EDIT_SITE)) {
-                    return new Json(['success' => false, 'message' => 'Permission denied.'], Response::HTTP_FORBIDDEN);
-                }
                 if (!$r->query->has('id')) {
                     return new Json(['success' => false, 'message' => 'Parameter "id" is required.'], Response::HTTP_BAD_REQUEST);
                 }
                 /** @var ArticleManager $am */
                 $am = $c->get(ArticleManager::class);
-                $am->deleteBranch((int)$r->query->get('id'));
+                $am->deleteBranch((int)$r->query->get('id'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => true]);
             },
@@ -93,21 +91,18 @@ class AdminAjaxRequestHandler
                     return new Json(['success' => false, 'message' => 'Parameters "id" and "title" are required.'], Response::HTTP_BAD_REQUEST);
                 }
                 /** @var ArticleManager $am */
-                $am = $c->get(ArticleManager::class);
+                $am    = $c->get(ArticleManager::class);
                 $newId = $am->createArticle((int)$r->query->get('id'), $r->query->get('title'));
 
-                return new Json(['success' => true, 'id' => $newId]);
+                return new Json(['success' => true, 'id' => $newId, 'csrfToken' => $am->getCsrfToken($newId)]);
             },
             'rename'              => static function (P $p, R $r, C $c) {
-                if (!$p->isGrantedAny(P::PERMISSION_CREATE_ARTICLES, P::PERMISSION_EDIT_SITE)) {
-                    return new Json(['success' => false, 'message' => 'Permission denied.'], Response::HTTP_FORBIDDEN);
-                }
                 if (!$r->query->has('id') || !$r->request->has('title')) {
                     return new Json(['success' => false, 'message' => 'Parameters "id" and "title" are required.'], Response::HTTP_BAD_REQUEST);
                 }
                 /** @var ArticleManager $am */
                 $am = $c->get(ArticleManager::class);
-                $am->renameArticle((int)$r->query->get('id'), $r->request->get('title'));
+                $am->renameArticle((int)$r->query->get('id'), $r->request->get('title'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => true]);
             },
@@ -135,7 +130,7 @@ class AdminAjaxRequestHandler
                 }
                 /** @var ExtensionManager $em */
                 $em    = $c->get(ExtensionManager::class);
-                $error = $em->flipExtension($r->query->get('id'));
+                $error = $em->flipExtension($r->query->get('id'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => $error === null, 'message' => $error]);
             },
@@ -160,7 +155,7 @@ class AdminAjaxRequestHandler
                 }
                 /** @var ExtensionManager $em */
                 $em     = $c->get(ExtensionManager::class);
-                $errors = $em->installExtension($r->query->get('id'));
+                $errors = $em->installExtension($r->query->get('id'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => $errors === [], 'message' => implode("\n", $errors)]);
             },
@@ -173,14 +168,16 @@ class AdminAjaxRequestHandler
                 }
                 /** @var ExtensionManager $em */
                 $em    = $c->get(ExtensionManager::class);
-                $error = $em->uninstallExtension($r->query->get('id'));
+                $error = $em->uninstallExtension($r->query->get('id'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => $error === null, 'message' => $error]);
             },
         ];
 
+        $this->eventDispatcher->dispatch($event = new AdminAjaxControllerMapEvent($controllerMap));
+
         $action     = $request->get('action', '');
-        $controller = $controllerMap[$action] ?? static function () {
+        $controller = $event->controllerMap[$action] ?? static function () {
             return new Json(['success' => false, 'message' => 'Unknown action.'], Response::HTTP_BAD_REQUEST);
         };
 

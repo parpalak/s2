@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace S2\Cms\Admin;
 
-use Psr\Log\LoggerInterface;
 use S2\AdminYard\AdminPanel;
 use S2\AdminYard\Database\PdoDataProvider;
 use S2\AdminYard\Database\TypeTransformer;
@@ -40,15 +39,8 @@ use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
-use S2\Cms\Rose\CustomExtractor;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Translation\TranslationProviderInterface;
-use S2\Rose\Extractor\ExtractorInterface;
-use S2\Rose\Indexer;
-use S2\Rose\Stemmer\StemmerInterface;
-use S2\Rose\Storage\Database\PdoStorage;
-use s2_extensions\s2_search\Fetcher;
-use s2_extensions\s2_search\IndexManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -58,31 +50,6 @@ class AdminExtension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
-        // TODO move to s2_search
-        $container->set(Indexer::class, function (Container $container) {
-            return new Indexer(
-                $container->get(PdoStorage::class),
-                $container->get(StemmerInterface::class),
-                $container->get(ExtractorInterface::class),
-                $container->get(LoggerInterface::class),
-            );
-        });
-
-        $container->set(IndexManager::class, function (Container $container) {
-            return new IndexManager(
-                $container->getParameter('cache_dir'),
-                new Fetcher($container->get(DbLayer::class)),
-                $container->get(Indexer::class),
-                $container->get(PdoStorage::class),
-                $container->get('recommendations_cache'),
-                $container->get(LoggerInterface::class)
-            );
-        });
-
-        $container->set(ExtractorInterface::class, function (Container $container) {
-            return new CustomExtractor($container->get(LoggerInterface::class));
-        });
-
         $container->set(FormControlFactoryInterface::class, function (Container $container) {
             return new CustomFormControlFactory();
         });
@@ -143,6 +110,7 @@ class AdminExtension implements ExtensionInterface
         $container->set(TemplateRenderer::class, function (Container $container) {
             return new CustomTemplateRenderer(
                 $container->get(Translator::class),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->getParameter('base_path'),
             );
         });
@@ -174,6 +142,7 @@ class AdminExtension implements ExtensionInterface
             $dbType   = $container->getParameter('db_type');
             $dbPrefix = $container->getParameter('db_prefix');
             return new AdminConfigProvider(
+                $container->get(PermissionChecker::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(DynamicConfigFormBuilder::class),
                 $container->get(DynamicConfigProvider::class),
@@ -183,6 +152,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(UrlBuilder::class),
                 $container->get(CommentNotifier::class),
                 $container->get(ExtensionCache::class),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $dbType,
                 $dbPrefix,
                 ...$container->getByTag(AdminConfigExtenderInterface::class)
@@ -249,6 +219,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(RequestStack::class),
                 $container->get(AuthManager::class),
                 $container->get(PermissionChecker::class),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container,
             );
         });
@@ -278,6 +249,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(ExtensionCache::class),
                 $container->get(DynamicConfigProvider::class),
+                $container->get(RequestStack::class),
                 $container->get(Translator::class),
                 $container->get(TemplateRenderer::class),
                 $container->getParameter('root_dir'),

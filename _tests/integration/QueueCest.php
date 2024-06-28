@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -10,7 +10,10 @@ declare(strict_types=1);
 namespace integration;
 
 use IntegrationTester;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Pdo\PDO;
 use S2\Cms\Queue\QueueConsumer;
 use S2\Cms\Queue\QueuePublisher;
@@ -26,7 +29,12 @@ class QueueCest
     {
     }
 
-    public function testQueue(IntegrationTester $I)
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws DbLayerException
+     */
+    public function testQueue(IntegrationTester $I): void
     {
         /** @var DbLayer $publisherDbLayer */
         $publisherDbLayer = $I->grabService(DbLayer::class);
@@ -58,6 +66,7 @@ class QueueCest
 
         /**
          * Some copy-paste to simulate a parallel run
+         *
          * @see QueueConsumer::runQueue()
          */
         /** @var PDO $consumerPdo */
@@ -83,7 +92,7 @@ class QueueCest
 
         if ($driverName !== 'sqlite') {
             /**
-             * In Sqlite there is no for row and runQueue returns the same item.
+             * In Sqlite there is no FOR UPDATE and runQueue returns the same item.
              * Skip it in the test.
              */
             $consumerApplication2 = $I->createApplication();

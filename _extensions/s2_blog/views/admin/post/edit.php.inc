@@ -17,6 +17,7 @@ declare(strict_types=1);
 /** @var string $csrfToken */
 /** @var array $primaryKey */
 /** @var array $actions */
+/** @var int $commentsNum */
 
 $formQueryParams = http_build_query(array_merge([
     'entity' => $entityName,
@@ -78,7 +79,7 @@ function s2_jsvarencode($var)
 <script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/searchcursor.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/templates/article/codemirror_init.js"></script>
 
-<section class="edit-content article-edit-content">
+<section class="edit-content large-edit-form post-edit-content">
     <?php if (!empty($errorMessages)): ?>
         <div class="error-message-box">
             <p><?php printf($trans('Cannot save %s due to the following errors:'), $entityName) ?></p>
@@ -93,7 +94,7 @@ function s2_jsvarencode($var)
         <?php foreach ($form->getHiddenControls() as $control): ?>
             <?= $control->getHtml() ?>
         <?php endforeach; ?>
-        <div class="article-form-wrapper">
+        <div class="large-form-wrapper">
             <?php foreach ($columns as $columnIndex => $controls): ?>
                 <div class="article-form-column article-form-column-<?= $columnIndex ?>">
                     <?php foreach ($controls as $fieldName => $control): ?>
@@ -111,11 +112,15 @@ function s2_jsvarencode($var)
                                     <span class="validation-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                                 <?php endforeach; ?>
                                 <?php if ($fieldName === 'commented') {
-                                    echo '<a href="?' . http_build_query([
-                                            'entity'     => 'Comment',
-                                            'action'     => 'list',
-                                            'article_id' => $primaryKey['id']
-                                        ]) . '">' . $trans('Comments') . ' &rarr;</a>';
+                                    if ($commentsNum > 0) {
+                                        echo '<div><a href="?' . http_build_query([
+                                                        'entity'     => 'BlogComment',
+                                                        'action'     => 'list',
+                                                        'post_id' => $primaryKey['id']
+                                                ]) . '">' . $trans('N comments', ['{{ count }}' => $commentsNum, '%count%' => $commentsNum]) . ' &rarr;</a></div>';
+                                    } else {
+                                        echo '<div>' . $trans('No comments') . '</div>';
+                                    }
                                 } ?>
                             </div>
                         <?php elseif ($control instanceof \S2\Cms\AdminYard\Form\HtmlTextarea): ?>

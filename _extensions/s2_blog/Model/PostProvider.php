@@ -49,16 +49,27 @@ readonly class PostProvider
 
     public function getAllLabels(): array
     {
-        $query = [
-            'SELECT'	=> 'label',
-            'FROM'		=> 's2_blog_posts',
-            'GROUP BY'	=> 'label',
-            'ORDER BY'	=> 'count(label) DESC'
+        $query  = [
+            'SELECT'   => 'label',
+            'FROM'     => 's2_blog_posts',
+            'GROUP BY' => 'label',
+            'ORDER BY' => 'count(label) DESC'
         ];
         $result = $this->dbLayer->buildAndQuery($query);
 
         $labels = $this->dbLayer->fetchColumn($result);
 
         return $labels;
+    }
+
+    public function getCommentNum(int $postId): int
+    {
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => 'COUNT(*)',
+            'FROM'   => 's2_blog_comments',
+            'WHERE'  => 'post_id = :post_id',
+        ], ['post_id' => $postId]);
+
+        return $this->dbLayer->result($result);
     }
 }

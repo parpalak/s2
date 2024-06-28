@@ -5,8 +5,8 @@
  * Adds full-text search with English and Russian morphology.
  *
  * @copyright 2011-2024 Roman Parpalak
- * @license MIT
- * @package s2_search
+ * @license   MIT
+ * @package   s2_search
  */
 
 declare(strict_types=1);
