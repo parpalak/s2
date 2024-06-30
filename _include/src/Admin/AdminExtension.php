@@ -24,8 +24,11 @@ use S2\Cms\Admin\Dashboard\DashboardConfigExtender;
 use S2\Cms\Admin\Dashboard\DashboardDatabaseProvider;
 use S2\Cms\Admin\Dashboard\DashboardEnvironmentProvider;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
+use S2\Cms\AdminYard\CustomMenuGenerator;
+use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\CustomTemplateRenderer;
 use S2\Cms\AdminYard\Form\CustomFormControlFactory;
+use S2\Cms\AdminYard\Signal;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Extensions\ExtensionManager;
 use S2\Cms\Framework\Container;
@@ -34,6 +37,7 @@ use S2\Cms\Model\ArticleManager;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthManager;
 use S2\Cms\Model\CommentNotifier;
+use S2\Cms\Model\CommentProvider;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\TagsProvider;
@@ -118,11 +122,12 @@ class AdminExtension implements ExtensionInterface
         $container->set(MenuGenerator::class, function (Container $container) {
             /** @var AdminConfigProvider $adminConfigProvider */
             $adminConfigProvider = $container->get(AdminConfigProvider::class);
-            $adminConfig         = $adminConfigProvider->getAdminConfig();
+            $adminConfig         = $adminConfigProvider->getAdminConfig(); // TODO: cleanup after request processing
 
-            return new MenuGenerator(
+            return new CustomMenuGenerator(
                 $adminConfig,
-                $container->get(TemplateRenderer::class)
+                $container->get(TemplateRenderer::class),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
             );
         });
 
@@ -143,6 +148,7 @@ class AdminExtension implements ExtensionInterface
             $dbPrefix = $container->getParameter('db_prefix');
             return new AdminConfigProvider(
                 $container->get(PermissionChecker::class),
+                $container->get(AuthManager::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(DynamicConfigFormBuilder::class),
                 $container->get(DynamicConfigProvider::class),
@@ -162,7 +168,7 @@ class AdminExtension implements ExtensionInterface
         $container->set(AdminPanel::class, function (Container $container) {
             /** @var AdminConfigProvider $adminConfigProvider */
             $adminConfigProvider = $container->get(AdminConfigProvider::class);
-            $adminConfig         = $adminConfigProvider->getAdminConfig();
+            $adminConfig         = $adminConfigProvider->getAdminConfig(); // TODO: cleanup after request processing
 
             $eventDispatcher = new EventDispatcher();
             foreach ($adminConfig->getEntities() as $entityConfig) {
@@ -196,6 +202,7 @@ class AdminExtension implements ExtensionInterface
             return new AuthManager(
                 $container->get(DbLayer::class),
                 $container->get(PermissionChecker::class),
+                $container->get(RequestStack::class),
                 $container->get(TemplateRenderer::class),
                 $container->get(Translator::class),
                 $container->getParameter('base_path'),
@@ -252,6 +259,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(RequestStack::class),
                 $container->get(Translator::class),
                 $container->get(TemplateRenderer::class),
+                $container,
                 $container->getParameter('root_dir'),
             );
         }, [AdminConfigExtenderInterface::class]);
@@ -294,12 +302,32 @@ class AdminExtension implements ExtensionInterface
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
-        // TODO: Implement registerListeners() method.
+        $eventDispatcher->addListener(CustomMenuGeneratorEvent::class, function (CustomMenuGeneratorEvent $event) use ($container) {
+            /** @var CommentProvider $commentProvider */
+            $commentProvider = $container->get(CommentProvider::class);
+            $size            = $commentProvider->getPendingCommentsCount();
+
+            if ($size > 0) {
+                $event->addSignal('Comment', new Signal((string)$size, 'New comments', '?entity=Comment&action=list&status=0&apply_filter=0'));
+            }
+
+            /** @var ExtensionManager $extensionManager */
+            $extensionManager = $container->get(ExtensionManager::class);
+            $n = $extensionManager->getUpgradableExtensionNum();
+            if ($n > 0) {
+                $event->addSignal('Extension', new Signal((string)$n, 'New extensions', '?entity=Extension'));
+            }
+
+            /** @var AuthManager $authManager */
+            $authManager = $container->get(AuthManager::class);
+            $totalUserSessionsCount  = $authManager->getTotalUserSessionsCount();
+            if ($totalUserSessionsCount > 1) {
+                $event->addSignal('Session', new Signal((string)$totalUserSessionsCount, 'Other sessions', '?entity=Session'));
+            }
+        });
     }
 
     public function registerRoutes(RouteCollection $routes, Container $container): void
     {
-        // TODO: Implement registerRoutes() method.
     }
-
 }

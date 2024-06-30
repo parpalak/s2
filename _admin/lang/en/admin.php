@@ -14,7 +14,7 @@ $lang_admin = array(
 'Lost session'				=> 'Your session has been closed. Please, enter your password to continue.',
 'Wrong_IP session'			=> 'Your IP address has been changed. Please, enter your password to continue.',
 'No permission'				=> 'You do not have enough permissions to perform this action.',
-'Other sessions'			=> 'You have logged in from different browsers. Here are your sessions: <br />%s',
+'Other sessions'			=> 'You have logged in from different browsers. Check your sessions and delete unnecessary ones.',
 'Close other sessions'		=> 'Close all sessions except the current one',
 
 // Login form
@@ -187,6 +187,7 @@ $lang_admin = array(
 'Extensions'                           => 'Extensions',
 'Install extension'                    => 'Install extension',
 'Upgrade extension'                    => 'Upgrade extension',
+'Extensions for upgrade'               => 'There are extensions for upgrade',
 'Extensions available'                 => 'Extensions available for install or upgrade',
 'Hotfixes available'                   => 'Hotfixes available for install',
 'Installed extensions'                 => 'Installed extensions',
@@ -275,6 +276,9 @@ $lang_admin = array(
 'Decimal count'          => 2,
 'Decimal point'          => '.',
 'Thousands separator'    => ',',
+
+// Session tab
+'Current session' => 'Current session',
 
 'Outdated version' => 'Somebody has modified the text while you have been editing it. Your changes cannot be saved right now without loss of other ones. Open new version in a new window and move your changes to the new version.',
 );

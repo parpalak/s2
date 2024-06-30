@@ -24,6 +24,8 @@ class TranslationProvider implements TranslationProviderInterface
                 'S2_BLOG_URL_help'      => 'Префикс URL блога (слеш в&nbsp;начале нужен, в&nbsp;конце&nbsp;— нет). Например, «/blog». Можно оставить пустым, тогда блог будет сразу на главной.',
                 'Published in the blog' => 'В блоге опубликовано',
                 'Posts num'             => '{{ posts }} пост|{{ posts }} поста|{{ posts }} постов',
+                'Blog new comments'     => 'Непроверенные комментарии в блоге',
+
             ],
             'en' => [
                 'Blog config'           => 'Blog',
@@ -33,6 +35,7 @@ class TranslationProvider implements TranslationProviderInterface
                 'S2_BLOG_URL_help'      => 'Blog URL prefix (it should contain a leading slash and no trailing slash). E.g. “/blog”. Leave it blank to put the blog on the site main page.',
                 'Published in the blog' => 'Published in the blog',
                 'Posts num'             => '{{ posts }} post|{{ posts }} posts',
+                'Blog new comments'     => 'Unverified comments in the blog',
             ],
         };
     }

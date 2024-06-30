@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Extensions;
 
+use S2\Cms\Framework\Container;
 use S2\Cms\Pdo\DbLayer;
 
 interface ManifestInterface
@@ -31,9 +32,9 @@ interface ManifestInterface
 
     public function isAdminAffected(): bool;
 
-    public function install(DbLayer $dbLayer, ?string $currentVersion): void;
+    public function install(DbLayer $dbLayer, Container $container, ?string $currentVersion): void;
 
     public function getUninstallationNote(): ?string;
 
-    public function uninstall(DbLayer $dbLayer): void;
+    public function uninstall(DbLayer $dbLayer, Container $container): void;
 }

@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../../_vendor/s2/admin-yard/templates/list.php.inc';
+require __DIR__ . '/../../../_vendor/s2/admin-yard/templates/list.php.inc';
 
 ?>
 <script src="js/ajax.js"></script>

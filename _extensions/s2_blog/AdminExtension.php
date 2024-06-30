@@ -14,7 +14,9 @@ use S2\AdminYard\Translator;
 use S2\Cms\Admin\AdminConfigExtenderInterface;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
 use S2\Cms\Admin\DynamicConfigFormExtenderInterface;
+use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\CustomTemplateRendererEvent;
+use S2\Cms\AdminYard\Signal;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Model\TagsProvider;
@@ -26,6 +28,7 @@ use s2_extensions\s2_blog\Admin\DashboardBlogProvider;
 use s2_extensions\s2_blog\Admin\DynamicConfigFormExtender;
 use s2_extensions\s2_blog\Admin\TranslationProvider;
 use s2_extensions\s2_blog\Model\BlogCommentNotifier;
+use s2_extensions\s2_blog\Model\BlogCommentProvider;
 use s2_extensions\s2_blog\Model\PostProvider;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\RouteCollection;
@@ -63,12 +66,26 @@ class AdminExtension implements ExtensionInterface
                 $container->getParameter('root_dir')
             );
         }, [DashboardStatProviderInterface::class]);
+
+        $container->set(BlogCommentProvider::class, function (Container $container) {
+            return new BlogCommentProvider($container->get(DbLayer::class));
+        });
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
         $eventDispatcher->addListener(CustomTemplateRendererEvent::class, function (CustomTemplateRendererEvent $event) use ($container) {
             $event->extraStyles[] = $event->basePath . '/_extensions/s2_blog/admin.css';
+        });
+
+        $eventDispatcher->addListener(CustomMenuGeneratorEvent::class, function (CustomMenuGeneratorEvent $event) use ($container) {
+            /** @var BlogCommentProvider $blogCommentProvider */
+            $blogCommentProvider = $container->get(BlogCommentProvider::class);
+            $size                = $blogCommentProvider->getPendingCommentsCount();
+
+            if ($size > 0) {
+                $event->addSignal('BlogComment', new Signal((string)$size, 'Blog new comments', '?entity=BlogComment&action=list&status=0&apply_filter=0'));
+            }
         });
     }
 

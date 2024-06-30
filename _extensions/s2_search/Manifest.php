@@ -15,7 +15,9 @@ namespace s2_extensions\s2_search;
 
 use S2\Cms\Extensions\ManifestInterface;
 use S2\Cms\Extensions\ManifestTrait;
+use S2\Cms\Framework\Container;
 use S2\Cms\Pdo\DbLayer;
+use S2\Rose\Storage\Database\PdoStorage;
 
 class Manifest implements ManifestInterface
 {
@@ -51,7 +53,7 @@ class Manifest implements ManifestInterface
         return 'Do not forget to create search index after extension installation (Admin → Stats page).';
     }
 
-    public function install(DbLayer $dbLayer, ?string $currentVersion): void
+    public function install(DbLayer $dbLayer, Container $container, ?string $currentVersion): void
     {
         $s2_search_config = [
             'S2_SEARCH_QUICK' => '0',
@@ -71,14 +73,22 @@ class Manifest implements ManifestInterface
 
             $dbLayer->buildAndQuery($query);
         }
+
+        /** @var PdoStorage $pdoStorage */
+        $pdoStorage = $container->get(PdoStorage::class);
+        $pdoStorage->erase();
     }
 
-    public function uninstall(DbLayer $dbLayer): void
+    public function uninstall(DbLayer $dbLayer, Container $container): void
     {
         $query = [
             'DELETE' => 'config',
             'WHERE'  => 'name in (\'S2_SEARCH_QUICK\')',
         ];
         $dbLayer->buildAndQuery($query);
+
+        /** @var PdoStorage $pdoStorage */
+        $pdoStorage = $container->get(PdoStorage::class);
+        $pdoStorage->drop();
     }
 }

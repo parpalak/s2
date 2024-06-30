@@ -23,6 +23,7 @@ class TranslationProvider implements TranslationProviderInterface
                 'Search index'         => 'Поисковый индекс',
                 'Reindex'              => 'Проиндексировать заново',
                 'Reindex title'        => 'Долгая операция. Если соединение с сервером прервется, можно запустить повторно.',
+                'Indexing required'    => 'Чтобы на сайте заработал поиск, нужно проиндексировать данные.',
             ],
             'en' => [
                 'Search config'        => 'Search',
@@ -31,6 +32,7 @@ class TranslationProvider implements TranslationProviderInterface
                 'Search index'         => 'Search index',
                 'Reindex'              => 'Reindex',
                 'Reindex title'        => 'May be time-consuming. You can run it again in case of connection loss.',
+                'Indexing required'    => 'In order to enable the site search, indexing is required.',
             ],
         };
     }

@@ -11,10 +11,13 @@ namespace s2_extensions\s2_search;
 
 use Psr\Log\LoggerInterface;
 use S2\AdminYard\TemplateRenderer;
+use S2\AdminYard\Translator;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
 use S2\Cms\Admin\DynamicConfigFormExtenderInterface;
 use S2\Cms\Admin\Event\AdminAjaxControllerMapEvent;
 use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
+use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
+use S2\Cms\AdminYard\Signal;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Model\PermissionChecker;
@@ -92,6 +95,22 @@ class AdminExtension implements ExtensionInterface
                     'status'  => $indexManager->index(),
                 ]);
             };
+        });
+
+        $eventDispatcher->addListener(CustomMenuGeneratorEvent::class, function (CustomMenuGeneratorEvent $event) use ($container) {
+            try {
+                /** @var PdoStorage $pdoStorage */
+                $pdoStorage = $container->get(PdoStorage::class);
+                $size       = $pdoStorage->getTocSize(null);
+            } catch (\Exception $e) {
+                $size = 0;
+            }
+
+            if ($size === 0) {
+                /** @var Translator $translator */
+                $translator = $container->get(Translator::class);
+                $event->addSignal('Dashboard', Signal::createEmpty($translator->trans('Indexing required')));
+            }
         });
     }
 

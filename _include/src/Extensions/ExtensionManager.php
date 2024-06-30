@@ -17,6 +17,7 @@ use S2\AdminYard\TemplateRenderer;
 use S2\AdminYard\Translator;
 use S2\Cms\Admin\AdminConfigExtenderInterface;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Pdo\DbLayer;
@@ -32,6 +33,7 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
         private RequestStack          $requestStack,
         private Translator            $translator,
         private TemplateRenderer      $templateRenderer,
+        private Container             $container, // Note: do not use here as a service locator
         private string                $rootDir,
     ) {
     }
@@ -140,6 +142,34 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
                 return $this->getCsrfToken($id);
             },
         ]);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function getUpgradableExtensionNum(): int
+    {
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => 'e.*',
+            'FROM'   => 'extensions AS e',
+        ]);
+
+        $extensionNum = 0;
+        while ($currentExtension = $this->dbLayer->fetchAssoc($result)) {
+            $manifestClass = '\\s2_extensions\\' . $currentExtension['id'] . '\\Manifest';
+            if (!class_exists($manifestClass)) {
+                continue;
+            }
+            $extensionManifest = new $manifestClass;
+            if (!$extensionManifest instanceof ManifestInterface) {
+                continue;
+            }
+            if (version_compare($currentExtension['version'], $extensionManifest->getVersion(), '<')) {
+                ++$extensionNum;
+            }
+        }
+
+        return $extensionNum;
     }
 
     /**
@@ -286,7 +316,7 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
 
         if ($curr_version = $this->dbLayer->result($result)) {
             // Run the author supplied installation code
-            $extensionManifest->install($this->dbLayer, $curr_version);
+            $extensionManifest->install($this->dbLayer, $this->container, $curr_version);
 
             // Update the existing extension
             $query = [
@@ -296,7 +326,7 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
             ];
         } else {
             // Run the author supplied installation code
-            $extensionManifest->install($this->dbLayer, null);
+            $extensionManifest->install($this->dbLayer, $this->container, null);
 
             // Add the new extension
             $query = [
@@ -369,7 +399,7 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
         $extensionClass = '\\s2_extensions\\' . $id . '\\Manifest';
         /** @var ManifestInterface $extensionManifest */
         $extensionManifest = new $extensionClass();
-        $extensionManifest->uninstall($this->dbLayer);
+        $extensionManifest->uninstall($this->dbLayer, $this->container);
 
         $this->dbLayer->buildAndQuery([
             'DELETE' => 'extensions',

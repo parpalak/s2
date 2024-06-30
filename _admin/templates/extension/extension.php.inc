@@ -30,7 +30,7 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
                                 class="primary <?= isset($item['installed_version']) ? 'upgr_ext' : 'inst_ext' ?>"
                                 onclick="return changeExtension('install_extension', '<?= $htmlEncode(addslashes($item['entry'])) ?>', '<?= $csrfTokenGenerator($item['entry']) ?>', '<?= implode('\\n', array_map(static fn($s) => s2_htmlencode(addslashes($s)), $item['install_notes'])) ?>');"
                         >
-                            <?= isset($item['installed_version']) ? $trans('Upgrade extension') : $trans('Install extension') ?>
+                            <?= isset($item['installed_version']) ? $trans('Upgrade extension') . ' <span class="icon icon-warning"></span>'  : $trans('Install extension') ?>
                         </button>
                     </div>
                 </div>

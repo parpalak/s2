@@ -24,7 +24,9 @@ readonly class DashboardCounterProvider implements DashboardBlockProviderInterfa
     {
         return $this->templateRenderer->render(
             $this->rootDir . '_extensions/s2_counter/views/dashboard/diagrams.php.inc',
-            []
+            [
+                'dirIsWritable' => is_writable($this->rootDir . '_extensions/s2_counter/data/'),
+            ]
         );
     }
 }

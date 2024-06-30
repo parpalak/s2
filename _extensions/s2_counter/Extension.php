@@ -9,12 +9,9 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_counter;
 
-use S2\AdminYard\TemplateRenderer;
-use S2\Cms\Admin\Dashboard\DashboardBlockProviderInterface;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Template\TemplateEvent;
-use s2_extensions\s2_counter\Admin\DashboardCounterProvider;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -22,12 +19,6 @@ class Extension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
-        $container->set(DashboardCounterProvider::class, function (Container $container) {
-            return new DashboardCounterProvider(
-                $container->get(TemplateRenderer::class),
-                $container->getParameter('root_dir'),
-            );
-        }, [DashboardBlockProviderInterface::class]);
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void

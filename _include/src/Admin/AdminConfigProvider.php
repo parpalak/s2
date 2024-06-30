@@ -34,6 +34,7 @@ use S2\Cms\Admin\Controller\CommentController;
 use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\AuthManager;
 use S2\Cms\Model\CommentNotifier;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\PermissionChecker;
@@ -51,6 +52,7 @@ readonly class AdminConfigProvider
 
     public function __construct(
         private PermissionChecker        $permissionChecker,
+        private AuthManager              $authManager,
         private HtmlTemplateProvider     $templateProvider,
         private DynamicConfigFormBuilder $dynamicConfigFormBuilder,
         private DynamicConfigProvider    $dynamicConfigProvider,
@@ -74,6 +76,7 @@ readonly class AdminConfigProvider
     public function getAdminConfig(): AdminConfig
     {
         $adminConfig = new AdminConfig();
+        $adminConfig->setMenuTemplate('templates/menu.php.inc');
 
         $articleEntity = new EntityConfig('Article', $this->dbPrefix . 'articles');
         $articleEntity->setEditTemplate('templates/article/edit.php.inc');
@@ -678,6 +681,36 @@ readonly class AdminConfigProvider
                     ))
                     ->setEnabledActions([FieldConfig::ACTION_LIST])
                 , 70
+            )
+            ->addEntity(
+                (new EntityConfig('Session', $this->dbPrefix . 'users_online'))
+                    ->addField(new FieldConfig(
+                        name: 'challenge',
+                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
+                        useOnActions: [],
+                    ))
+                    ->addField(new FieldConfig(
+                        name: 'time',
+                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
+                        sortable: true,
+                    ))
+                    ->addField(new FieldConfig(
+                        name: 'login',
+                        sortable: true,
+                    ))
+                    ->addField(new FieldConfig(
+                        name: 'ip',
+                    ))
+                    ->addField(new FieldConfig(
+                        name: 'ua',
+                    ))
+                    ->addField(new FieldConfig(
+                        name: 'current',
+                        type: new VirtualFieldType('(CASE WHEN challenge = \'' . $this->authManager->getCurrentChallenge() . '\' THEN \'1\' ELSE \'\' END)'),
+                    ))
+                    ->setEnabledActions([FieldConfig::ACTION_LIST, FieldConfig::ACTION_DELETE])
+                    ->setListActionsTemplate('templates/session/list-actions.php.inc')
+                , 80
             )
 //            ->addEntity(
 //                (new EntityConfig('Extension', $this->dbPrefix . 'extensions'))

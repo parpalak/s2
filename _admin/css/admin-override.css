@@ -47,7 +47,31 @@ section.large-edit-form {
     height: 100%;
 }
 
-    /*=======================[Login screen]=======================================*/
+/* Menu */
+li.main-menu-item {
+    display: flex;
+}
+ul.main-menu-sublist {
+    margin-left: -0.5em;
+    position: relative;
+    z-index: 1;
+    display: inline;
+    padding: 0;
+}
+li.main-menu-subitem {
+    display: inline;
+}
+a.main-menu-sublink {
+    background: var(--color-warning);
+    font-size: 0.75em;
+    padding: 0 4px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--color-text);
+    box-shadow: 2px 2px 0 0 rgb(0 0 0 / 0.2);
+}
+
+/*=======================[Login screen]=======================================*/
 
 body, button, input, select, textarea {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -300,6 +324,14 @@ section.large-edit-form form {
     opacity: 0.6;
 }
 
+/* Session page */
+.admin-content .field-Session-current {
+    display: none;
+}
+.admin-content tbody tr:has(.field-Session-current:not(:empty)) {
+    background-color: color-mix(in srgb, var(--color-success) 10%, var(--page-background));
+}
+
 /* Config page */
 .admin-content .list-content td.field-Config-help {
     max-width: none;
@@ -359,6 +391,12 @@ a.js {
 
 .icon.icon-bell {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 2091 2091'%3E%3Cpath d='M1061 1859q0-16-16-16-60 0-103-43t-43-102q0-16-16-16t-16 16q0 73 52 126 52 52 126 52 16 0 16-17zm-673-291h1313q-268-302-268-840 0-51-25-106-24-54-69-104-46-49-123-81t-171-32q-94 0-171 32-78 32-123 81-46 50-70 104-24 55-24 106 0 538-269 840zm1497 0q0 53-38 91-39 39-91 39h-453q0 107-76 183-75 75-182 75t-183-75q-76-76-76-183H334q-53 0-91-39-39-38-39-91 51-42 92-88 42-47 86-121 45-74 75-160 31-86 51-208t20-263q0-153 118-285t310-160q-8-19-8-40 0-40 28-68 28-29 69-29 40 0 68 29 29 28 29 68 0 21-8 40 191 28 310 160 118 132 118 285 0 141 19 263 20 122 51 208t75 160q45 74 86 121 41 46 92 88z'/%3E%3C/svg%3E");
+}
+
+.icon.icon-warning {
+    background-color: var(--color-warning);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 2h2v8h-2z m0 10h2v2h-2z'/%3E%3C/svg%3E%0A");
+    border-radius: 50%;
 }
 
 #popup_message {

@@ -15,6 +15,7 @@ namespace s2_extensions\s2_blog;
 
 use S2\Cms\Extensions\ManifestInterface;
 use S2\Cms\Extensions\ManifestTrait;
+use S2\Cms\Framework\Container;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 
@@ -55,7 +56,7 @@ class Manifest implements ManifestInterface
     /**
      * @throws DbLayerException
      */
-    public function install(DbLayer $dbLayer, ?string $currentVersion): void
+    public function install(DbLayer $dbLayer, Container $container, ?string $currentVersion): void
     {
         // Setup posts table
         if (!$dbLayer->tableExists('s2_blog_posts')) {
@@ -280,7 +281,7 @@ class Manifest implements ManifestInterface
         $dbLayer->addIndex('tags', 's2_blog_important_idx', array('s2_blog_important'));
     }
 
-    public function uninstall(DbLayer $dbLayer): void
+    public function uninstall(DbLayer $dbLayer, Container $container): void
     {
         $query = [
             'DELETE' => 'config',

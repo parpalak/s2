@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
 readonly class AuthManager
@@ -27,6 +28,7 @@ readonly class AuthManager
     public function __construct(
         private DbLayer           $dbLayer,
         private PermissionChecker $permissionChecker,
+        private RequestStack      $requestStack,
         private TemplateRenderer  $templateRenderer,
         private Translator        $translator,
         private string            $basePath,
@@ -81,6 +83,33 @@ readonly class AuthManager
 
         // Existed session
         return $this->authenticateUser($request, $challenge);
+    }
+
+    public function getCurrentChallenge(): string
+    {
+        return $this->requestStack->getMainRequest()->cookies->get($this->cookieName, '');
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function getTotalUserSessionsCount(): int
+    {
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => 'COUNT(*)',
+            'FROM'   => 'users_online AS u1',
+            'JOINS'  => [
+                [
+                    'INNER JOIN' => 'users_online AS u2',
+                    'ON'         => 'u1.login = u2.login',
+                ]
+            ],
+            'WHERE'  => 'u1.challenge = :challenge'
+        ], [
+            'challenge' => $this->getCurrentChallenge()
+        ]);
+
+        return $this->dbLayer->result($result);
     }
 
     /**
