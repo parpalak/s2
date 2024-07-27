@@ -10,14 +10,17 @@ declare(strict_types=1);
 namespace S2\Cms\AdminYard;
 
 use S2\AdminYard\Config\AdminConfig;
+use S2\AdminYard\Config\FieldConfig;
 use S2\AdminYard\MenuGenerator;
 use S2\AdminYard\TemplateRenderer;
+use S2\Cms\Model\PermissionChecker;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 readonly class CustomMenuGenerator extends MenuGenerator
 {
     public function __construct(
         private AdminConfig              $config,
+        private PermissionChecker        $permissionChecker,
         private TemplateRenderer         $templateRenderer,
         private EventDispatcherInterface $eventDispatcher,
     ) {
@@ -33,7 +36,11 @@ readonly class CustomMenuGenerator extends MenuGenerator
         $signals = $event->getSignals();
 
         foreach ($this->config->getEntities() as $entity) {
-            $name         = $entity->getName();
+            $name = $entity->getName();
+            if (!$entity->isAllowedAction(FieldConfig::ACTION_LIST)) {
+                unset($links[$name]);
+                continue;
+            }
             $links[$name] = [
                 'name'    => $name,
                 'url'     => $baseUrl . '?entity=' . urlencode($name) . '&action=list',
@@ -52,7 +59,9 @@ readonly class CustomMenuGenerator extends MenuGenerator
         }
 
         return $this->templateRenderer->render($this->config->getMenuTemplate(), [
-            'links' => $links
+            'links'    => $links,
+            'login'    => $this->permissionChecker->getUserLogin(),
+            'seeUsers' => $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN),
         ]);
     }
 }

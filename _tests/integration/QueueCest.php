@@ -36,6 +36,12 @@ class QueueCest
      */
     public function testQueue(IntegrationTester $I): void
     {
+        /** @var \PDO $pdo */
+        $pdo = $I->grabService(\PDO::class);
+        // Tests are wrapped in transaction, so we need to stop it
+        // and to start a new one since we want to test commit and rollback.
+        $pdo->rollBack();
+
         /** @var DbLayer $publisherDbLayer */
         $publisherDbLayer = $I->grabService(DbLayer::class);
         $publisherDbLayer->buildAndQuery(['DELETE' => 'queue']);
@@ -113,5 +119,8 @@ class QueueCest
         $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
         $I->assertTrue($queueConsumer->runQueue(), 'Job was processed');
         $I->assertFalse($queueConsumer->runQueue(), 'No more jobs');
+
+        // Start a transaction as if it was an external transaction from tests wrapper
+        $pdo->beginTransaction();
     }
 }

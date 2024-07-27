@@ -10,7 +10,12 @@ declare(strict_types=1);
 namespace S2\Cms\Model;
 
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 
+/**
+ * Retrieves information about the comment and associated article and sends the comment to subscribed commentators.
+ * It also generates an unsubscribe link and marks the comment as sent.
+ */
 readonly class CommentNotifier
 {
     public function __construct(
@@ -21,6 +26,9 @@ readonly class CommentNotifier
     ) {
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function notify(int $commentId): void
     {
         /**

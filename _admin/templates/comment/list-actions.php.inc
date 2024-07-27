@@ -1,6 +1,7 @@
 <?php
 
 /** @var callable $trans */
+/** @var callable $isGranted */
 /** @var array $row */
 /** @var array $rowActions */
 /** @var string $csrfToken */
@@ -15,7 +16,7 @@ $queryParams = http_build_query(array_merge([
     'action' => 'reject',
 ], $primaryKey));
 
-if (!$row['column_sent'] && !$row['column_shown']) {
+if (!$row['column_sent'] && !$row['column_shown'] && $isGranted(\S2\Cms\Model\PermissionChecker::PERMISSION_HIDE_COMMENTS)) {
 ?>
     <a class="list-action-link list-action-link-reject"
        onclick="fetch(this.href, {method: 'POST', body: new URLSearchParams('csrf_token=<?= $csrfToken ?>') }).then(() => { this.parentNode.removeChild(this); } ); return false;"

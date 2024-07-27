@@ -20,6 +20,7 @@ use S2\AdminYard\Config\LinkTo;
 use S2\AdminYard\Config\LinkToEntityParams;
 use S2\AdminYard\Config\VirtualFieldType;
 use S2\AdminYard\Database\Key;
+use S2\AdminYard\Database\LogicalExpression;
 use S2\AdminYard\Database\PdoDataProvider;
 use S2\AdminYard\Event\AfterLoadEvent;
 use S2\AdminYard\Event\AfterSaveEvent;
@@ -40,6 +41,7 @@ use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -76,12 +78,12 @@ readonly class AdminConfigProvider
     public function getAdminConfig(): AdminConfig
     {
         $adminConfig = new AdminConfig();
-        $adminConfig->setMenuTemplate('templates/menu.php.inc');
+        $adminConfig->setMenuTemplate('_admin/templates/menu.php.inc');
 
         $articleEntity = new EntityConfig('Article', $this->dbPrefix . 'articles');
-        $articleEntity->setEditTemplate('templates/article/edit.php.inc');
-        $commentEntity = new EntityConfig('Comment', $this->dbPrefix . 'art_comments');
+        $articleEntity->setEditTemplate('_admin/templates/article/edit.php.inc');
 
+        $commentEntity = new EntityConfig('Comment', $this->dbPrefix . 'art_comments');
         $commentEntity
             ->addField(new FieldConfig(
                 name: 'id',
@@ -90,22 +92,24 @@ readonly class AdminConfigProvider
             ))
             ->addField($articleFieldId = new FieldConfig(
                 name: 'article_id',
+                label: $this->translator->trans('Page'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT),
                 control: 'autocomplete',
                 linkToEntity: new LinkTo($articleEntity, 'title'),
-                useOnActions: [FieldConfig::ACTION_LIST, FieldConfig::ACTION_SHOW],
+                useOnActions: [FieldConfig::ACTION_LIST],
             ))
             ->addField(new FieldConfig(
                 name: 'nick',
-                label: 'Author',
+                label: $this->translator->trans('Author'),
                 control: 'input',
                 validators: [new Length(max: 50)],
-                viewTemplate: 'templates/comment/view-author.php',
+                viewTemplate: '_admin/templates/comment/view-author.php',
             ))
             ->addField(new FieldConfig(
                 name: 'email',
                 control: 'input',
                 validators: [new Length(max: 80)],
+                useOnActions: $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN) ? [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST] : [],
             ))
             ->addField(new FieldConfig(
                 name: 'show_email',
@@ -119,6 +123,7 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'time',
+                label: $this->translator->trans('Date'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
                 control: 'datetime',
                 sortable: true,
@@ -126,19 +131,21 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'text',
+                label: $this->translator->trans('Comment'),
                 control: 'textarea',
             ))
             ->addField(new FieldConfig(
                 name: 'ip',
+                label: $this->translator->trans('IP address'),
                 sortable: true,
-                useOnActions: [FieldConfig::ACTION_SHOW, FieldConfig::ACTION_LIST],
+                useOnActions: $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN) ? [FieldConfig::ACTION_LIST] : [],
             ))
             ->addField(new FieldConfig(
                 name: 'shown',
                 label: $this->translator->trans('Published'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
-                inlineEdit: true,
+                inlineEdit: $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_HIDE_COMMENTS),
                 useOnActions: [FieldConfig::ACTION_LIST],
             ))
             ->addField(new FieldConfig(
@@ -149,35 +156,44 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'good',
+                label: $this->translator->trans('Good comment'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
-                inlineEdit: true,
+                inlineEdit: $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_COMMENTS),
                 useOnActions: [FieldConfig::ACTION_LIST],
             ))
             ->addFilter(new Filter(
                 'search',
-                'Search',
+                $this->translator->trans('Search'),
                 'search_input',
                 'text LIKE %1$s OR nick LIKE %1$s OR email LIKE %1$s OR ip LIKE %1$s',
                 fn(string $value) => $value !== '' ? '%' . $value . '%' : null
             ))
             ->addFilter(new FilterLinkTo(
                 $articleFieldId,
-                'Article',
+                $this->translator->trans('Page'),
             ))
             ->addFilter(new Filter(
                 'good',
-                $this->translator->trans('Good'),
+                $this->translator->trans('Mark'),
                 'radio',
                 'good = %1$s',
-                options: ['' => 'All', 1 => 'Good', 0 => 'Usual']
+                options: [
+                    '' => $this->translator->trans('All'),
+                    1  => $this->translator->trans('Good'),
+                    0  => $this->translator->trans('Usual'),
+                ],
             ))
             ->addFilter(new Filter(
                 'published',
                 $this->translator->trans('Published'),
                 'radio',
                 'shown = %1$s',
-                options: ['' => 'All', 1 => 'Visible', 0 => 'Hidden']
+                options: [
+                    '' => $this->translator->trans('All'),
+                    1  => $this->translator->trans('Visible'),
+                    0  => $this->translator->trans('Hidden'),
+                ]
             ))
             ->addFilter(new Filter(
                 'status',
@@ -187,8 +203,11 @@ readonly class AdminConfigProvider
                 options: ['' => 'All', 0 => 'Pending', 1 => 'Considered']
             ))
             ->setControllerClass(CommentController::class)
-            ->setEnabledActions([FieldConfig::ACTION_LIST, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_DELETE])
-            ->setListActionsTemplate('templates/comment/list-actions.php.inc')
+            ->setEnabledActions([
+                FieldConfig::ACTION_LIST,
+                ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_COMMENTS) ? [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_DELETE] : [],
+            ])
+            ->setListActionsTemplate('_admin/templates/comment/list-actions.php.inc')
             ->addListener(EntityConfig::EVENT_BEFORE_PATCH, function (BeforeSaveEvent $event) {
                 if (isset($event->data['shown'])) {
                     $this->commentNotifier->notify($event->primaryKey->getIntId());
@@ -196,9 +215,19 @@ readonly class AdminConfigProvider
             })
         ;
 
+        if (!$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN)) {
+            $commentEntity->setReadAccessControl(new LogicalExpression('shown', 1));
+        }
+
+        $isAdmin    = $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS);
         $userEntity = new EntityConfig('User', $this->dbPrefix . 'users');
         $userEntity
-            ->setEnabledActions([FieldConfig::ACTION_DELETE, FieldConfig::ACTION_LIST, FieldConfig::ACTION_NEW])
+            ->setEnabledActions(
+                [
+                    ...$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_VIEW_HIDDEN, PermissionChecker::PERMISSION_EDIT_USERS) ? [FieldConfig::ACTION_LIST] : [],
+                    ...$isAdmin ? [FieldConfig::ACTION_DELETE, FieldConfig::ACTION_NEW] : [],
+                ]
+            )
             ->addField(new FieldConfig(
                 name: 'id',
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT, true),
@@ -206,13 +235,15 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'login',
+                label: $this->translator->trans('Login'),
                 control: 'input',
-                validators: [new NotBlank(), new Length(max: 191)],
+                validators: [new NotBlank(), new Length(max: 25)],
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addField(new FieldConfig(
                 name: 'password',
+                label: $this->translator->trans('Password'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_PASSWORD),
                 control: 'password',
                 validators: [new Length(min: 8)],
@@ -221,6 +252,8 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'name',
+                label: $this->translator->trans('Name'),
+                hint: $this->translator->trans('Name help'),
                 control: 'input',
                 validators: [new Length(max: 80)],
                 sortable: true,
@@ -235,52 +268,66 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'view',
+                label: $this->translator->trans('view'),
+                hint: $this->translator->trans('view help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addField(new FieldConfig(
                 name: 'view_hidden',
+                label: $this->translator->trans('view_hidden'),
+                hint: $this->translator->trans('view_hidden help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addField(new FieldConfig(
                 name: 'hide_comments',
+                label: $this->translator->trans('hide_comments'),
+                hint: $this->translator->trans('hide_comments help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addField(new FieldConfig(
                 name: 'edit_comments',
+                label: $this->translator->trans('edit_comments'),
+                hint: $this->translator->trans('edit_comments help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addField(new FieldConfig(
                 name: 'create_articles',
+                label: $this->translator->trans('create_articles'),
+                hint: $this->translator->trans('create_articles help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addField(new FieldConfig(
                 name: 'edit_site',
+                label: $this->translator->trans('edit_site'),
+                hint: $this->translator->trans('edit_site help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addField(new FieldConfig(
                 name: 'edit_users',
+                label: $this->translator->trans('edit_users'),
+                hint: $this->translator->trans('edit_users help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                inlineEdit: true,
+                inlineEdit: $isAdmin,
             ))
             ->addListener(
                 [EntityConfig::EVENT_BEFORE_PATCH, EntityConfig::EVENT_BEFORE_CREATE],
@@ -290,7 +337,64 @@ readonly class AdminConfigProvider
                     }
                 }
             )
+            ->addListener(
+                EntityConfig::EVENT_BEFORE_CREATE,
+                function (BeforeSaveEvent $event) {
+                    // Check that there are no users with the same login.
+                    $otherAdmins = $event->dataProvider->getEntityList(
+                        $this->dbPrefix . 'users',
+                        ['login' => 'string', 'id' => 'int'], // not really used
+                        conditions: [
+                            new LogicalExpression('login', $event->data['login']),
+                        ]
+                    );
+
+                    if (\count($otherAdmins) > 0) {
+                        $event->errorMessages[] = $this->translator->trans('Username exists', ['{{ login }}' => $event->data['login']]);
+                    }
+                }
+            )
+            ->addListener(
+                EntityConfig::EVENT_BEFORE_PATCH,
+                function (BeforeSaveEvent $event) {
+                    if (!isset($event->data['edit_users'])) {
+                        return;
+                    }
+                    // Check that there are other admins except the current one to be edited.
+                    $otherAdmins = $event->dataProvider->getEntityList(
+                        $this->dbPrefix . 'users',
+                        ['login' => 'string', 'id' => 'int'], // not really used
+                        conditions: [
+                            new LogicalExpression('edit_users', 1),
+                            new LogicalExpression('id', $event->primaryKey->getIntId(), 'id != %s'),
+                        ]
+                    );
+
+                    if (\count($otherAdmins) === 0) {
+                        $event->errorMessages[] = $this->translator->trans('No other admin');
+                    }
+                }
+            )
+            ->addListener(EntityConfig::EVENT_BEFORE_DELETE, function (BeforeDeleteEvent $event) {
+                // Check that there are other admins except the current one to be deleted.
+                $otherAdmins = $event->dataProvider->getEntityList(
+                    $this->dbPrefix . 'users',
+                    ['login' => 'string', 'id' => 'int'], // not really used
+                    conditions: [
+                        new LogicalExpression('edit_users', 1),
+                        new LogicalExpression('id', $event->primaryKey->getIntId(), 'id != %s'),
+                    ]
+                );
+
+                if (\count($otherAdmins) === 0) {
+                    $event->errorMessages[] = $this->translator->trans('No other admin delete');
+                }
+            })
         ;
+
+        if (!$isAdmin) {
+            $userEntity->setWriteAccessControl(new LogicalExpression('id', $this->permissionChecker->getUserId()));
+        }
 
         $articleEntity
             ->addField(new FieldConfig(
@@ -300,13 +404,17 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'title',
+                label: $this->translator->trans('Title'),
                 control: 'input',
                 validators: [new Length(max: 255)],
+                // NOTE: do we need a sorting here?
                 actionOnClick: 'edit',
-                viewTemplate: 'templates/article/view-title.php',
+                viewTemplate: '_admin/templates/article/view-title.php',
             ))
             ->addField(new FieldConfig(
                 name: 'tags',
+                label: $this->translator->trans('Tags'),
+                hint: $this->translator->trans('Tags help'),
                 type: new VirtualFieldType((function () {
                     $column     = match ($this->dbType) {
                         'pgsql' => "STRING_AGG(t.name, ', ' ORDER BY pt.id)",
@@ -327,82 +435,109 @@ readonly class AdminConfigProvider
                     })(),
                 ],
                 sortable: true,
+                useOnActions: [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST],
             ))
             ->addField(new FieldConfig(
                 name: 'meta_keys',
+                label: $this->translator->trans('Meta keywords'),
+                hint: $this->translator->trans('Meta help'),
                 control: 'input',
                 validators: [new Length(max: 255)],
-                useOnActions: [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_SHOW],
+                useOnActions: [FieldConfig::ACTION_EDIT],
             ))
             ->addField(new FieldConfig(
                 name: 'meta_desc',
+                label: $this->translator->trans('Meta description'),
+                hint: $this->translator->trans('Meta help'),
                 control: 'input',
                 validators: [new Length(max: 255)],
-                useOnActions: [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_SHOW],
+                useOnActions: [FieldConfig::ACTION_EDIT],
             ))
             ->addField(new FieldConfig(
                 name: 'excerpt',
+                label: $this->translator->trans('Excerpt'),
+                hint: $this->translator->trans('Excerpt help'),
                 control: 'input',
-                useOnActions: [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_SHOW],
+                useOnActions: [FieldConfig::ACTION_EDIT],
             ))
             ->addField(new FieldConfig(
                 name: 'pagetext',
                 control: 'html_textarea',
-                useOnActions: [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_SHOW],
+                useOnActions: [FieldConfig::ACTION_EDIT],
             ))
             ->addField(new FieldConfig(
                 name: 'create_time',
+                label: $this->translator->trans('Create time'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
                 control: 'datetime',
                 sortable: true,
-                viewTemplate: 'templates/date.php.inc',
+                viewTemplate: '_admin/templates/date.php.inc',
             ))
             ->addField(new FieldConfig(
                 name: 'modify_time',
+                label: $this->translator->trans('Modify time'),
+                hint: $this->translator->trans('Modify time help'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
                 control: 'datetime',
                 sortable: true,
-                viewTemplate: 'templates/date.php.inc',
+                useOnActions: [FieldConfig::ACTION_EDIT],
+                viewTemplate: '_admin/templates/date.php.inc',
             ))
             ->addField(new FieldConfig(
                 name: 'published',
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
+                useOnActions: [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST],
             ))
             ->addField(new FieldConfig(
                 name: 'favorite',
+                label: $this->translator->trans('Favorite'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 sortable: true,
-                viewTemplate: 'templates/article/view-favorite.php',
+                useOnActions: [
+                    FieldConfig::ACTION_LIST,
+                    ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_EDIT] : [],
+                ],
+                viewTemplate: '_admin/templates/article/view-favorite.php',
             ))
             ->addField(new FieldConfig(
                 name: 'commented',
+                label: $this->translator->trans('Commented'),
+                hint: $this->translator->trans('Commented info'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
+                useOnActions: [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST],
             ))
             ->addField(new FieldConfig(
                 name: 'comments',
                 type: new LinkedByFieldType($commentEntity, 'CASE WHEN COUNT(*) > 0 THEN COUNT(*) ELSE NULL END', 'article_id'),
                 sortable: true,
-                viewTemplate: 'templates/article/view-comments.php'
+                useOnActions: [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST],
+                viewTemplate: '_admin/templates/article/view-comments.php'
             ))
             ->addField(new FieldConfig(
                 name: 'url',
+                label: $this->translator->trans('URL part'),
                 control: 'input',
                 validators: [new Length(max: 255)],
-                useOnActions: [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_SHOW],
+                useOnActions: [FieldConfig::ACTION_EDIT],
             ))
             ->addField(new FieldConfig(
                 name: 'template',
+                label: $this->translator->trans('Template'),
                 control: 'input',
             ))
-            ->addField(new FieldConfig(
+            ->addField($userIdField = new FieldConfig(
                 name: 'user_id',
-                label: 'Author',
+                label: $this->translator->trans('Author'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT),
                 control: 'select',
-                linkToEntity: new LinkTo($userEntity, 'CASE WHEN name IS NULL OR name = \'\' THEN login ELSE name END'),
+                linkToEntity: new LinkTo($userEntity, 'CASE WHEN name IS NULL OR name = \'\' THEN login ELSE name END', new LogicalExpression('create_articles', 1)),
+                useOnActions: [
+                    FieldConfig::ACTION_LIST,
+                    ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_EDIT] : [],
+                ],
             ))
             ->addField(new FieldConfig(
                 name: 'revision',
@@ -410,7 +545,20 @@ readonly class AdminConfigProvider
                 useOnActions: [FieldConfig::ACTION_EDIT],
             ))
             ->markAsDefault()
-            ->setEnabledActions([FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST]) // new and delete actions are on a custom structure page
+            ->setEnabledActions([
+                FieldConfig::ACTION_LIST,
+                ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_CREATE_ARTICLES) ? [FieldConfig::ACTION_EDIT] : [],
+            ])// new and delete actions are on a custom structure page, disable them here
+            ->setReadAccessControl(
+                $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN)
+                    ? null
+                    : new LogicalExpression('read_access_control_user_id', $this->permissionChecker->getUserId(), 'published = 1 OR user_id = %s')
+            )
+            ->setWriteAccessControl(
+                $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE)
+                    ? null
+                    : new LogicalExpression('user_id', $this->permissionChecker->getUserId())
+            )
             ->addListener([EntityConfig::EVENT_AFTER_EDIT_FETCH], function (AfterLoadEvent $event) {
                 if (\is_array($event->data)) {
                     // Convert NULL to an empty string when the edit form is filled with current data
@@ -425,16 +573,22 @@ readonly class AdminConfigProvider
                 $event->data['templateContent'] = $this->templateProvider->getRawTemplateContent('site.php', null);
                 $event->data['tagsList']        = $this->tagsProvider->getAllTags();
 
-                $path                        = $this->articleProvider->pathFromId((int)$event->data['primaryKey']['id']);
+                $id   = (int)$event->data['primaryKey']['id'];
+                $path = $this->articleProvider->pathFromId($id);
+
+                $event->data['commentsNum']  = $this->articleProvider->getCommentNum($id, $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN));
                 $event->data['previewUrl']   = $this->urlBuilder->link($path);
                 $event->data['templateList'] = $this->articleProvider->getTemplateList();
-                $event->data['statusData']   = $this->getArticleStatusData((int)$event->data['primaryKey']['id']);
+                $event->data['statusData']   = $this->getArticleStatusData($id);
             })
             ->addListener(EntityConfig::EVENT_BEFORE_UPDATE, function (BeforeSaveEvent $event) use ($articleEntity) {
                 $oldData = $event->dataProvider->getEntity(
                     $this->dbPrefix . 'articles',
                     $articleEntity->getFieldDataTypes(FieldConfig::ACTION_EDIT, includePrimaryKey: true),
                     [],
+                    $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [] : [
+                        new LogicalExpression('user_id', $this->permissionChecker->getUserId()),
+                    ],
                     $event->primaryKey
                 );
 
@@ -442,15 +596,12 @@ readonly class AdminConfigProvider
                     $event->errorMessages[] = 'Article not found';
                     return;
                 }
-//                [
-//                    'column_user_id' => $user_id,
-//                ] = $oldData;
-//
-//                if (!$s2_user['edit_site']) {
-//                    s2_test_user_rights($user_id == $s2_user['id']);
-//                }
-//                if ($s2_user['edit_site'])
-//                    $query['SET'] .= ', user_id = '.intval($page['user_id']);
+
+                if ($this->dynamicConfigProvider->get('S2_ADMIN_CUT')) {
+                    $textParts = preg_split('#(<cut\\s*/?>|<p><cut /></p>)#', $event->data['pagetext'], 2);
+
+                    $event->data['excerpt'] = \count($textParts) > 1 ? $textParts[0] : '';
+                }
 
                 $changed = false;
                 foreach (['pagetext', 'title', 'url', 'meta_keys', 'meta_desc'] as $field) {
@@ -486,7 +637,7 @@ readonly class AdminConfigProvider
                     $event->context['visible_changed_event'] = new VisibleEntityChangedEvent($articleEntity->getName(), $event->context['article_id']);
                 }
             })
-            ->addListener(EntityConfig::EVENT_AFTER_UPDATE, function (AfterSaveEvent $event) use ($articleEntity) {
+            ->addListener(EntityConfig::EVENT_AFTER_UPDATE, function (AfterSaveEvent $event) {
                 if (isset($event->context['visible_changed_event'])) {
                     $this->eventDispatcher->dispatch($event->context['visible_changed_event']);
                 }
@@ -512,14 +663,15 @@ readonly class AdminConfigProvider
                 $existingLinks = $event->dataProvider->getEntityList($tableName, [
                     'article_id' => FieldConfig::DATA_TYPE_INT,
                     'tag_id'     => FieldConfig::DATA_TYPE_INT,
-                ], filterData: ['article_id' => $event->primaryKey->getIntId()]);
+                ], conditions: [new LogicalExpression('article_id', $event->primaryKey->getIntId())]);
 
                 $existingTagIds = array_column($existingLinks, 'column_tag_id');
                 if (implode(',', $existingTagIds) !== implode(',', $newTagIds)) {
                     $event->dataProvider->deleteEntity(
                         $tableName,
                         ['article_id' => FieldConfig::DATA_TYPE_INT],
-                        new Key(['article_id' => $event->primaryKey->getIntId()])
+                        new Key(['article_id' => $event->primaryKey->getIntId()]),
+                        [],
                     );
 
                     foreach ($newTagIds as $tagId) {
@@ -534,13 +686,14 @@ readonly class AdminConfigProvider
                 $event->dataProvider->deleteEntity(
                     $this->dbPrefix . 'article_tag',
                     ['article_id' => FieldConfig::DATA_TYPE_INT],
-                    new Key(['article_id' => $event->primaryKey->getIntId()])
+                    new Key(['article_id' => $event->primaryKey->getIntId()]),
+                    [],
                 );
             })
             ->addFilter(
                 new Filter(
                     'search',
-                    'Fulltext Search',
+                    $this->translator->trans('Fulltext Search'),
                     'search_input',
                     'title LIKE %1$s OR pagetext LIKE %1$s OR meta_keys LIKE %1$s OR meta_desc LIKE %1$s OR excerpt LIKE %1$s',
                     fn(string $value) => $value !== '' ? '%' . $value . '%' : null
@@ -549,7 +702,7 @@ readonly class AdminConfigProvider
             ->addFilter(
                 new Filter(
                     'tags',
-                    'Tags',
+                    $this->translator->trans('Tags'),
                     'search_input',
                     'id IN (SELECT at.article_id FROM ' . $this->dbPrefix . 'article_tag AS at JOIN ' . $this->dbPrefix . 'tags AS t ON t.tag_id = at.tag_id WHERE t.name LIKE %1$s)',
                     fn(string $value) => $value !== '' ? '%' . $value . '%' : null
@@ -558,7 +711,7 @@ readonly class AdminConfigProvider
             ->addFilter(
                 new Filter(
                     'is_active',
-                    'Published',
+                    $this->translator->trans('Published'),
                     'radio',
                     'published = %1$s',
                     options: ['' => 'All', 1 => 'Yes', 0 => 'No']
@@ -567,7 +720,7 @@ readonly class AdminConfigProvider
             ->addFilter(
                 new Filter(
                     'created_from',
-                    'Created after',
+                    $this->translator->trans('Created after'),
                     'date',
                     'create_time >= %1$s',
                     fn(?string $value) => $value !== null ? strtotime($value) : null
@@ -576,12 +729,13 @@ readonly class AdminConfigProvider
             ->addFilter(
                 new Filter(
                     'created_to',
-                    'Created before',
+                    $this->translator->trans('Created before'),
                     'date',
                     'create_time < %1$s',
                     fn(?string $value) => $value !== null ? strtotime($value) : null
                 )
             )
+            ->addFilter(new FilterLinkTo($userIdField, null))
         ;
 
         $adminConfig
@@ -596,10 +750,11 @@ readonly class AdminConfigProvider
                 ))
                 ->addField(new FieldConfig(
                     name: 'name',
+                    label: $this->translator->trans('Tag'),
                     control: 'input',
                     validators: [
                         new NotBlank(),
-                        new Length(min: 1, max: 255),
+                        new Length(max: 255),
                         (static function () {
                             $r          = new Regex('#^[\p{L}\p{N}_\- !\.]*$#u');
                             $r->message = 'Tag name must contain only letters, numbers and spaces';
@@ -611,6 +766,8 @@ readonly class AdminConfigProvider
                 ))
                 ->addField(new FieldConfig(
                     name: 'used_in_articles',
+                    label: $this->translator->trans('Used in articles'),
+                    hint: $this->translator->trans('Used in articles info'),
                     type: new VirtualFieldType(
                         'SELECT CAST(COUNT(*) AS CHAR) FROM ' . $this->dbPrefix . 'article_tag AS pt WHERE pt.tag_id = entity.tag_id',
                         new LinkToEntityParams($articleEntity->getName(), ['tags'], ['name' /* tags.name */])
@@ -620,53 +777,113 @@ readonly class AdminConfigProvider
                 ))
                 ->addField(new FieldConfig(
                     name: 'description',
+                    label: $this->translator->trans('Tag description'),
+                    hint: $this->translator->trans('Tag description info'),
                     control: 'textarea',
                     useOnActions: [FieldConfig::ACTION_SHOW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_NEW]
                 ))
                 ->addField(new FieldConfig(
                     name: 'modify_time',
+                    label: $this->translator->trans('Modify time'),
                     type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
                     control: 'datetime',
                     sortable: true
                 ))
                 ->addField(new FieldConfig(
                     name: 'url',
+                    label: $this->translator->trans('URL part'),
                     control: 'input',
                     validators: [new Length(max: 255)],
                     sortable: true
                 ))
                 ->addFilter(new Filter(
                     'search',
-                    'Fulltext Search',
-                    'input',
+                    $this->translator->trans('Fulltext Search'),
+                    'search_input',
                     'name LIKE %1$s OR description LIKE %1$s OR url LIKE %1$s',
                     fn(string $value) => $value !== '' ? '%' . $value . '%' : null
-                )),
+                ))
+                ->setEnabledActions([
+                    FieldConfig::ACTION_LIST,
+                    ...$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_CREATE_ARTICLES, PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT] : [],
+                    ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_DELETE] : [],
+                ])
+                ->addListener(EntityConfig::EVENT_BEFORE_DELETE, function (BeforeDeleteEvent $event) {
+                    $event->dataProvider->deleteEntity(
+                        $this->dbPrefix . 'article_tag',
+                        ['tag_id' => FieldConfig::DATA_TYPE_INT],
+                        new Key(['tag_id' => $event->primaryKey->getIntId('tag_id')]),
+                        [],
+                    );
+                }),
                 20
             )
-            ->addEntity(
-                (new EntityConfig('Config', $this->dbPrefix . 'config'))
-                    ->addField(new FieldConfig(
-                        name: 'name',
-                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
-                    ))
-                    ->addField($this->dynamicConfigFormBuilder->getValueFieldConfig())
-                    ->setEnabledActions([FieldConfig::ACTION_LIST])
-                    ->addListener(EntityConfig::EVENT_BEFORE_LIST_RENDER, function (BeforeRenderEvent $event) {
-                        $this->dynamicConfigFormBuilder->transformConfigTable('Config', $event->data['header'], $event->data['rows']);
-                    })
-                    ->addListener(EntityConfig::EVENT_AFTER_PATCH, function (AfterSaveEvent $event) {
-                        $this->dynamicConfigProvider->regenerate();
-                        switch ($event->primaryKey->toArray()['name']) {
-                            case 'S2_FAVORITE_URL':
-                            case 'S2_TAGS_URL':
-                                $this->extensionCache->clearRoutesCache();
-                        }
-                    })
-                    ->setListTemplate('templates/config/list.php.inc')
-                , 40
-            )
-            ->addEntity(
+        ;
+        if ($this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN)) {
+            $adminConfig
+                ->addEntity(
+                    (new EntityConfig('Config', $this->dbPrefix . 'config'))
+                        ->addField(new FieldConfig(
+                            name: 'name',
+                            type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
+                        ))
+                        ->addField($this->dynamicConfigFormBuilder->getValueFieldConfig())
+                        ->setEnabledActions([FieldConfig::ACTION_LIST])
+                        ->addListener(EntityConfig::EVENT_BEFORE_LIST_RENDER, function (BeforeRenderEvent $event) {
+                            $this->dynamicConfigFormBuilder->transformConfigTable('Config', $event->data['header'], $event->data['rows']);
+                        })
+                        ->addListener(EntityConfig::EVENT_AFTER_PATCH, function (AfterSaveEvent $event) {
+                            $this->dynamicConfigProvider->regenerate();
+                            switch ($event->primaryKey->toArray()['name']) {
+                                case 'S2_FAVORITE_URL':
+                                case 'S2_TAGS_URL':
+                                    $this->extensionCache->clearRoutesCache();
+                            }
+                        })
+                        ->setListTemplate('_admin/templates/config/list.php.inc')
+                    , 40
+                )
+                ->addEntity(
+                    (new EntityConfig('Session', $this->dbPrefix . 'users_online'))
+                        ->addField(new FieldConfig(
+                            name: 'challenge',
+                            type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
+                            useOnActions: [],
+                        ))
+                        ->addField(new FieldConfig(
+                            name: 'time',
+                            label: $this->translator->trans('Last action time'),
+                            type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
+                            sortable: true,
+                        ))
+                        ->addField(new FieldConfig(
+                            name: 'login',
+                            label: $this->translator->trans('Login'),
+                            sortable: true,
+                        ))
+                        ->addField(new FieldConfig(
+                            name: 'ip',
+                            label: $this->translator->trans('IP address'),
+                        ))
+                        ->addField(new FieldConfig(
+                            name: 'ua',
+                            label: $this->translator->trans('Browser'),
+                            viewTemplate: '_admin/templates/session/view-user-agent.php',
+                        ))
+                        ->addField(new FieldConfig(
+                            name: 'current',
+                            type: new VirtualFieldType('(CASE WHEN challenge = \'' . $this->authManager->getCurrentChallenge() . '\' THEN \'1\' ELSE \'\' END)'),
+                        ))
+                        ->setEnabledActions([FieldConfig::ACTION_LIST, FieldConfig::ACTION_DELETE])
+                        ->setReadAccessControl($this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS) ? null : new LogicalExpression('login', $this->permissionChecker->getUserLogin()))
+                        ->setListActionsTemplate('_admin/templates/session/list-actions.php.inc')
+                    , 80
+                )
+            ;
+        }
+
+        if ($this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS)) {
+            $adminConfig->addEntity(
                 (new EntityConfig('Queue', $this->dbPrefix . 'queue'))
                     ->addField(new FieldConfig(
                         name: 'id',
@@ -681,73 +898,14 @@ readonly class AdminConfigProvider
                     ))
                     ->setEnabledActions([FieldConfig::ACTION_LIST])
                 , 70
-            )
-            ->addEntity(
-                (new EntityConfig('Session', $this->dbPrefix . 'users_online'))
-                    ->addField(new FieldConfig(
-                        name: 'challenge',
-                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
-                        useOnActions: [],
-                    ))
-                    ->addField(new FieldConfig(
-                        name: 'time',
-                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
-                        sortable: true,
-                    ))
-                    ->addField(new FieldConfig(
-                        name: 'login',
-                        sortable: true,
-                    ))
-                    ->addField(new FieldConfig(
-                        name: 'ip',
-                    ))
-                    ->addField(new FieldConfig(
-                        name: 'ua',
-                    ))
-                    ->addField(new FieldConfig(
-                        name: 'current',
-                        type: new VirtualFieldType('(CASE WHEN challenge = \'' . $this->authManager->getCurrentChallenge() . '\' THEN \'1\' ELSE \'\' END)'),
-                    ))
-                    ->setEnabledActions([FieldConfig::ACTION_LIST, FieldConfig::ACTION_DELETE])
-                    ->setListActionsTemplate('templates/session/list-actions.php.inc')
-                , 80
-            )
-//            ->addEntity(
-//                (new EntityConfig('Extension', $this->dbPrefix . 'extensions'))
-//                    ->addField(new FieldConfig(
-//                        name: 'id',
-//                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
-//                    ))
-//                    ->addField(new FieldConfig(
-//                        name: 'title',
-//                    ))
-//                    ->addField(new FieldConfig(
-//                        name: 'version',
-//                    ))
-//                    ->addField(new FieldConfig(
-//                        name: 'description',
-//                    ))
-//                    ->addField(new FieldConfig(
-//                        name: 'author',
-//                    ))
-//                    ->addField(new FieldConfig(
-//                        name: 'uninstall_note',
-//                    ))
-//                    ->addField(new FieldConfig(
-//                        name: 'disabled',
-//                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
-//                        control: 'checkbox',
-//                        inlineEdit: true
-//                    ))
-//                ->setEnabledActions([FieldConfig::ACTION_LIST])
-//            )
-        ;
+            );
+        }
 
         foreach ($this->adminConfigExtenders as $adminConfigExtender) {
             $adminConfigExtender->extend($adminConfig);
         }
 
-        $adminConfig->setLayoutTemplate('templates/layout.php.inc');
+        $adminConfig->setLayoutTemplate('_admin/templates/layout.php.inc');
 
         return $adminConfig;
     }
@@ -764,7 +922,7 @@ readonly class AdminConfigProvider
                 'name'   => FieldConfig::DATA_TYPE_STRING,
                 'tag_id' => FieldConfig::DATA_TYPE_INT,
             ],
-            filterData: ['LOWER(name)' => array_map(static fn(string $tag) => mb_strtolower($tag), $tags)],
+            conditions: [new LogicalExpression('name', array_map(static fn(string $tag) => mb_strtolower($tag), $tags), 'LOWER(name) IN (%s)')],
         );
 
         $existingTagsMap = array_column($existingTags, 'column_name', 'column_tag_id');
@@ -795,17 +953,26 @@ readonly class AdminConfigProvider
         return $tagIds;
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function getArticleStatusData(int $articleId): array
     {
-        $urlStatus = $this->articleProvider->checkUrlStatus($articleId);
+        [$urlStatus, $templateStatus] = $this->articleProvider->checkUrlAndTemplateStatus($articleId);
 
         return [
-            'urlStatus' => $urlStatus,
-            'urlTitle'  => match ($urlStatus) {
+            'urlStatus'      => $urlStatus,
+            'urlTitle'       => match ($urlStatus) {
                 'empty' => $this->translator->trans('URL empty'),
                 'not_unique' => $this->translator->trans('URL not unique'),
+                'mainpage' => $this->translator->trans('URL on mainpage'),
                 'ok' => '',
             },
+            'templateStatus' => $templateStatus,
+            'templateTitle'  => match ($templateStatus) {
+                'empty' => $this->translator->trans('Template empty'),
+                'ok' => '',
+            }
         ];
     }
 }

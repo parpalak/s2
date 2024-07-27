@@ -12,15 +12,20 @@ namespace S2\Cms\Model;
 class PermissionChecker
 {
     public const PERMISSION_VIEW            = 'view';
+    public const PERMISSION_VIEW_HIDDEN     = 'view_hidden';
+    public const PERMISSION_HIDE_COMMENTS   = 'hide_comments';
+    public const PERMISSION_EDIT_COMMENTS   = 'edit_comments';
     public const PERMISSION_CREATE_ARTICLES = 'create_articles';
     public const PERMISSION_EDIT_SITE       = 'edit_site';
     public const PERMISSION_EDIT_USERS      = 'edit_users';
 
     private ?array $user = null;
 
-    public function setUser(array $user): void
+    public function setUser(?array $user): void
     {
-        $this->user = $user;
+        if ($user !== null) {
+            $this->user = $user;
+        }
     }
 
     public function isGranted(string $permission): bool
@@ -41,5 +46,10 @@ class PermissionChecker
     public function getUserId(): ?int
     {
         return $this->user['id'] ?? null;
+    }
+
+    public function getUserLogin(): ?string
+    {
+        return $this->user['login'] ?? null;
     }
 }

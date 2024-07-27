@@ -3,8 +3,8 @@
  *
  * Drag & drop, event handlers for the picture manager
  *
- * @copyright (C) 2007-2013 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2007-2024 Roman Parpalak
+ * @license http://opensource.org/licenses/MIT MIT
  * @package S2
  */
 
@@ -84,20 +84,6 @@ $(function ()
 		if (e.which === 27) {
 			parentWnd && parentWnd.ClosePictureDialog && parentWnd.ClosePictureDialog();
 		}
-
-		var ch = String.fromCharCode(e.which).toLowerCase();
-
-		if (e.ctrlKey && ch >= '1' && ch <= '9')
-		{
-			if (parentWnd)
-			{
-				parentWnd.selectTabN(ch);
-				parentWnd.focus();
-				parentWnd.document.body.focus();
-			}
-
-			return false;
-		}
 	});
 
 	var path = '',
@@ -115,8 +101,13 @@ $(function ()
 
 	function initContext ()
 	{
-		$('#context_add').click(createFolder);
-		$('#context_delete').click(function () {folderTree.jstree('remove', folderTree.jstree('get_selected'));});
+        $('#context_buttons').click(function (e) {
+            if (e.target.id === 'context_add') {
+                createFolder();
+            } else if (e.target.id === 'context_delete') {
+                folderTree.jstree('remove', folderTree.jstree('get_selected'));
+            }
+        });
 	}
 
 	initFileDrop();
@@ -132,7 +123,6 @@ $(function ()
 		eButtons = null;
 		$.jstree.rollback(data);
 		eButtons = $('#context_buttons');
-		initContext();
 	}
 
 	var folderTree = $('#folders')
@@ -140,13 +130,9 @@ $(function ()
 		{
 			if (data.func === 'remove' && (!data.args[0].attr('data-path') || !confirm(str_replace('%s', folderTree.jstree('get_text', data.args[0]), s2_lang.delete_item))))
 			{
-				e.stopImmediatePropagation(); 
-				return false; 
+				e.stopImmediatePropagation();
+				return false;
 			}
-		})
-		.bind('refresh.jstree', function ()
-		{
-			setTimeout(initContext, 0);
 		})
 		.bind('dblclick.jstree', function (e)
 		{
@@ -189,7 +175,7 @@ $(function ()
 				url : sUrl + 'action=rename_folder&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(data.rslt.obj.attr('data-path')),
 				success : function (d)
 				{
-					if (!d || !d.status)
+					if (!d || !d.success)
 					{
 						folderRollback(data.rlbk);
 						return;
@@ -217,7 +203,7 @@ $(function ()
 				url : sUrl + 'action=delete_folder&path=' + encodeURIComponent(data.rslt.obj.attr('data-path')),
 				success : function (d)
 				{
-					if (!d || !d.status)
+					if (!d || !d.success)
 						folderRollback(data.rlbk);
 				},
 				error : function ()
@@ -232,7 +218,7 @@ $(function ()
 				url : sUrl + 'action=create_subfolder&name=' + encodeURIComponent(data.rslt.name) + '&path=' + encodeURIComponent(data.rslt.parent.attr('data-path')),
 				success : function (d)
 				{
-					if (!d.status)
+					if (!d.success)
 						folderRollback(data.rlbk);
 					else
 					{
@@ -253,14 +239,14 @@ $(function ()
 					url : sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path')) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')),
 					success : function (d)
 					{
-						if (!d || !d.status)
+						if (!d || !d.success)
 							folderRollback(data.rlbk);
 						else
 						{
 							var len = data.rslt.o.attr('data-path').length;
 							data.rslt.o.attr('data-path', d.new_path).find('li').each(function ()
 							{
-								$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len)); 
+								$(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len));
 							});
 							path = folderTree.jstree('get_selected').attr('data-path');
 						}
@@ -284,7 +270,7 @@ $(function ()
 						if (!fileTree.children().length)
 							fileTree.html('<ul></ul>'); // jstree fix (doesn't work after all roots disappearing)
 
-						if (!d || !d.status)
+						if (!d || !d.success)
 							fileTree.jstree('refresh', -1);
 					},
 					error : function ()
@@ -312,7 +298,7 @@ $(function ()
 				ajax : {
 					url : function (node)
 					{
-						return sUrl + 'action=load_tree' + (node.attr ? '&path=' + encodeURIComponent(node.attr('data-path')) : '');
+						return sUrl + 'action=load_folders' + (node.attr ? '&path=' + encodeURIComponent(node.attr('data-path')) : '');
 					}
 				}
 			},
@@ -350,8 +336,8 @@ $(function ()
 				fileTree.jstree('get_selected').each(function () { names.push(fileTree.jstree('get_text', this)); })
 				if (names.length && !confirm(str_replace('%s', names.join(', '), s2_lang.delete_file)))
 				{
-					e.stopImmediatePropagation(); 
-					return false; 
+					e.stopImmediatePropagation();
+					return false;
 				}
 			}
 		})
@@ -404,24 +390,26 @@ $(function ()
 		.bind('rename.jstree', function (e, data)
 		{
 			isRenaming = false;
-			if (data.rslt.new_name == data.rslt.old_name)
-				return;
+			if (data.rslt.new_name === data.rslt.old_name) {
+                return;
+            }
 
-			$.ajax({
-				url : sUrl + 'action=rename_file&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(path + '/' + data.rslt.obj.attr('data-fname')),
-				success : function (d)
-				{
-					fileTree.jstree('deselect_all');
-					if (!d.status)
-						fileTree.jstree('refresh', -1);
-					else
-						data.rslt.obj.attr('data-fname', d.new_name);
-				},
-				error : function ()
-				{
-					fileTree.jstree('refresh', -1);
-				}
-			});
+            fetch(sUrl + 'action=rename_file&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(path + '/' + data.rslt.obj.attr('data-fname')))
+                .then(response => response.json())
+                .then(d => {
+                    fileTree.jstree('deselect_all');
+                    if (!d.success) {
+                        fileTree.jstree('refresh', -1);
+                        if (d.message) {
+                            PopupMessages.show(d.message);
+                        }
+                    } else {
+                        data.rslt.obj.attr('data-fname', d.new_name);
+                    }
+                })
+                .catch(() => {
+                    fileTree.jstree('refresh', -1);
+                });
 		})
 		.bind('remove.jstree', function (e, data)
 		{
@@ -432,7 +420,7 @@ $(function ()
 				url : sUrl + 'action=delete_files&path=' + encodeURIComponent(path) + '&' + fileNames.join('&'),
 				success : function (d)
 				{
-					if (!d || !d.status)
+					if (!d || !d.success)
 						fileTree.jstree('refresh', -1);
 				},
 				error : function ()
@@ -482,7 +470,7 @@ $(function ()
 					}
 				}
 			},
-			crrm : { 
+			crrm : {
 				move : {
 					check_move : function (m) { return false; }
 				}
@@ -496,23 +484,6 @@ $(function ()
 			sort : function (a, b) { return strNatCmp(this.get_text(a), this.get_text(b)); },
 			plugins : ['json_data', 'dnd', 'ui', 'crrm', 'hotkeys' , 'sort']
 		});
-
-	// Tooltips
-	$(document).mouseover(function (e)
-	{
-		var eItem = e.target,
-			title = eItem.title;
-
-		if (!title && eItem.nodeName == 'IMG')
-			title = eItem.title = eItem.alt;
-
-		if (title)
-			window.status = title;
-	})
-	.mouseout(function ()
-	{
-		window.status = window.defaultStatus;
-	});
 })
 .ajaxStart(function ()
 {
@@ -554,12 +525,7 @@ function initFileDrop ()
 		if (dt.types.indexOf && dt.types.indexOf("Files") == -1) //Chrome
 			return;
 
-		$('#brd').addClass('accept_drag');
-		setTimeout(function () {$('#brd').removeClass('accept_drag');}, 200);
-		setTimeout(function () {$('#brd').removeClass('accept_drag');}, 600);
-		setTimeout(function () {$('#brd').removeClass('accept_drag');}, 1000);
-		setTimeout(function () {$('#brd').addClass('accept_drag');}, 400);
-		setTimeout(function () {$('#brd').addClass('accept_drag');}, 800);
+        document.getElementById('brd').className = 'accept_drag';
 
 		e.preventDefault();
 	}, false);
@@ -572,21 +538,28 @@ function initFileDrop ()
 	brd.addEventListener('drop', function (e)
 	{
 		var dt = e.dataTransfer;
-		if (!dt || !dt.files)
-			return;
+		if (!dt || !dt.files) {
+            return;
+        }
 
 		document.getElementById('brd').className = '';
 
 		FileCounter(0, 0);
-		var files = dt.files, not_sent = '';
-		for (var i = files.length; i-- ;)
-			if (files[i].size <= iMaxFileSize)
-				SendDroppedFile(files[i]);
-			else
-				not_sent += '<br />' + files[i].fileName;
+		var files = dt.files,
+            not_sent = '';
 
-		if (not_sent != '')
-			PopupMessages.show(str_replace('%s', sFriendlyMaxFileSize, s2_lang.files_too_big) + not_sent);
+		for (var i = files.length; i-- ;) {
+            if (files[i].size <= iMaxFileSize) {
+                SendDroppedFile(files[i]);
+            }
+            else {
+                not_sent += '<br />' + files[i].name;
+            }
+        }
+
+		if (not_sent !== '') {
+            PopupMessages.show(str_replace('%s', sFriendlyMaxFileSize, s2_lang.files_too_big) + not_sent);
+        }
 
 		e.preventDefault();
 	}, false);
@@ -602,85 +575,76 @@ var FileCounter = (function (inc, new_value)
 	}
 }());
 
-function DroppedFileUploaded() {
-	if (this.readyState == 4) {
-		var s2_status = this.getResponseHeader('X-S2-Status');
+function SendDroppedFile(file) {
+    var data = new FormData();
+    data.append('pictures[]', file);
+    data.append('dir', getCurDir());
+    data.append('ajax', '1');
 
-		if (s2_status && s2_status !== 'Success') {
-			if (0 == FileCounter(-1)) {
-				SetWait(false);
-				if (this.responseText) {
-					var data = JSON.parse(this.responseText);
-					PopupMessages.show(data.errors.join("\n"));
-				}
-			}
-			return;
-		}
-
-		if (this.responseText) {
-			var data = JSON.parse(this.responseText);
-			if (data.errors) {
-				PopupMessages.show(data.errors.join("\n"));
-			}
-		}
-
-		if (0 == FileCounter(-1)) {
-			SetWait(false);
-			refreshFiles();
-		}
-	}
+    handleFileUpload(data);
 }
 
-function SendDroppedFile (file)
-{
-	var xhr = new XMLHttpRequest();
-
-	FileCounter(1);
-	SetWait(true);
-
-	xhr.onreadystatechange = DroppedFileUploaded;
-
-	var data = new FormData();
-	data.append('pictures[]', file);
-	data.append('dir', getCurDir());
-	data.append('ajax', '1');
-
-	xhr.open('POST', sUrl + 'action=upload');
-	xhr.send(data);
+function handleFileUpload(data, callback) {
+    const fileCounter = FileCounter(1);
+    console.log('handleFileUpload start', fileCounter);
+    SetWait(true);
+    fetch(sUrl + 'action=upload', {
+        method: 'POST',
+        body: data
+    })
+        .then(response => response.json())
+        .then(responseJson => {
+            if (!responseJson.success) {
+                if (responseJson.errors) {
+                    PopupMessages.show(responseJson.errors.join("\n"));
+                } else if (responseJson.message) {
+                    PopupMessages.show(responseJson.message);
+                } else {
+                    PopupMessages.show('Unknown error');
+                }
+            }
+            if (callback) {
+                callback(responseJson);
+            }
+        })
+        .catch(error => {
+            console.error('An error occurred during the upload:', error);
+        })
+        .finally(() => {
+            const fileCounter = FileCounter(-1);
+            console.log('handleFileUpload finally', fileCounter);
+            if (0 === fileCounter) {
+                SetWait(false);
+                refreshFiles();
+            }
+        });
 }
 
-function SetWait (bWait)
-{
-	document.body.style.cursor = bWait ? 'progress' : 'default';
-}
+function UploadSubmit(eForm) {
+    eForm.dir.value = getCurDir();
+    const data = new FormData(eForm);
 
-var was_upload = false;
-
-function UploadSubmit (eForm)
-{
-	eForm.dir.value = getCurDir();
-	was_upload = true;
+    FileCounter(0, 0);
+    handleFileUpload(data, () => {
+        eForm['pictures[]'].value = '';
+    });
 }
 
 function UploadChange (eItem)
 {
-	var eForm = eItem.form;
-	setTimeout(function()
+    let eForm = eItem.form;
+    setTimeout(function()
 	{
 		UploadSubmit(eForm);
-		eForm.submit();
 	}, 0);
 }
 
-function FileUploaded ()
+function SetWait (bWait)
 {
-	if (!was_upload)
-		return;
-
-	var body = window.frames['submit_result'].document.body.innerHTML;
-	if (body.replace(/^\s\s*/, "").replace(/\s\s*$/, ""))
-		PopupMessages.show(body);
-
-	refreshFiles();
-	was_upload = false;
+    const eDiv = document.getElementById('loading_pict');
+    if (!eDiv) {
+        return;
+    }
+    eDiv.style.display = bWait ? 'block' : 'none';
+    document.body.style.cursor = bWait ? 'progress' : 'default';
 }

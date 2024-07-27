@@ -40,7 +40,7 @@ class Manifest implements ManifestInterface
 
     public function getVersion(): string
     {
-        return '2.0dev';
+        return '2.0a1';
     }
 
     public function isAdminAffected(): bool
@@ -117,8 +117,7 @@ class Manifest implements ManifestInterface
                     ],
                     'user_id'     => [
                         'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                        'default'    => '0'
+                        'allow_null' => true,
                     ]
                 ],
                 'PRIMARY KEY' => ['id'],
@@ -279,6 +278,15 @@ class Manifest implements ManifestInterface
         $dbLayer->addField('tags', 's2_blog_important', 'INT(1)', false, '0');
 
         $dbLayer->addIndex('tags', 's2_blog_important_idx', array('s2_blog_important'));
+
+        if ($currentVersion !== null && version_compare($currentVersion, '2.0a1', '<')) {
+            $dbLayer->alterField('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', true);
+            $dbLayer->buildAndQuery([
+                'UPDATE' => 's2_blog_posts',
+                'SET'    => 'user_id = NULL',
+                'WHERE'  => 'user_id = 0'
+            ]);
+        }
     }
 
     public function uninstall(DbLayer $dbLayer, Container $container): void

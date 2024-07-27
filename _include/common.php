@@ -56,25 +56,36 @@ if (!defined('S2_IMG_DIR')) {
 define('S2_IMG_PATH', S2_ROOT . S2_IMG_DIR);
 
 if (!defined('S2_ALLOWED_EXTENSIONS')) {
-    define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav avi flv mpg mpeg mkv zip 7z doc pdf');
+    define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav ogg flac mp4 avi flv mpg mpeg mkv zip 7z rar doc docx ppt pptx odt odt odp ods xlsx xls pdf txt rtf csv');
 }
 
 function collectParameters(): array
 {
     global $s2BootTimestamp;
     $result = [
-        'boot_timestamp'    => $s2BootTimestamp,
-        'root_dir'          => S2_ROOT,
-        'cache_dir'         => S2_CACHE_DIR,
-        'disable_cache'     => defined('S2_DISABLE_CACHE'),
-        'log_dir'           => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
-        'base_url'          => defined('S2_BASE_URL') ? S2_BASE_URL : null,
-        'base_path'         => defined('S2_PATH') ? S2_PATH : null,
-        'url_prefix'        => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
+        'boot_timestamp'     => $s2BootTimestamp,
+        'root_dir'           => S2_ROOT,
+        'cache_dir'          => S2_CACHE_DIR,
+        'allowed_extensions' => S2_ALLOWED_EXTENSIONS,
+        'image_dir'          => S2_ROOT . S2_IMG_DIR, // filesystem; no trailing slash in contrast to root_dir and cache_dir
+        'image_path'         => defined('S2_PATH') ? S2_PATH . '/' . S2_IMG_DIR : null, // web URL prefix
+        'disable_cache'      => defined('S2_DISABLE_CACHE'),
+        'log_dir'            => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+
+        // full prefix for absolute web URLs, i.e. main page URL supposed to be S2_BASE_URL . S2_URL_PREFIX '/'
+        'base_url'           => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+
+        // path prefix for the web URL, i.e. main page URL supposed to be 'http://host' . S2_PATH . S2_URL_PREFIX . '/'
+        'base_path'          => defined('S2_PATH') ? S2_PATH : null,
+
+        // one of '', '/?', '/index.php', '/index.php?'
+        'url_prefix'         => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
+
         'debug'             => defined('S2_DEBUG'),
         'debug_view'        => defined('S2_DEBUG_VIEW'),
         'show_queries'      => defined('S2_SHOW_QUERIES'),
         'force_admin_https' => defined('S2_FORCE_ADMIN_HTTPS'),
+        'version'           => S2_VERSION,
         'redirect_map'      => $GLOBALS['s2_redirect'] ?? [],
         'cookie_name'       => $GLOBALS['s2_cookie_name'] ?? 's2_cookie_6094033457',
     ];
@@ -143,7 +154,7 @@ if (!defined('S2_CONFIG_LOADED')) {
     include S2_CACHE_DIR . 'cache_config.php';
 }
 
-define('S2_DB_LAST_REVISION', 18);
+define('S2_DB_LAST_REVISION', 19);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION) {
     include __DIR__ . '/../_admin/db_update.php';
 }

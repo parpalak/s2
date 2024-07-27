@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection HtmlUnknownTarget */
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023-2024 Roman Parpalak
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
+
+declare(strict_types=1);
 
 namespace S2\Cms\Image;
 
@@ -27,27 +29,27 @@ class ThumbnailGenerator implements QueueHandlerInterface
     }
 
     /**
-     * @param string $src URL of the image
-     * @param string $originalWidth Attr content (may not be valid)
+     * @param string $src            URL of the image
+     * @param string $originalWidth  Attr content (may not be valid)
      * @param string $originalHeight Attr content (may not be valid)
-     * @param int    $maxWidth Limit for the thumbnail
-     * @param int    $maxHeight Limit for the thumbnail
+     * @param int    $maxWidth       Limit for the thumbnail
+     * @param int    $maxHeight      Limit for the thumbnail
      *
      * @return string HTML Markup
      */
     public function getThumbnailHtml(string $src, string $originalWidth, string $originalHeight, int $maxWidth, int $maxHeight): string
     {
-        if (strpos($src, CustomExtractor::YOUTUBE_PROTOCOL) === 0) {
+        if (str_starts_with($src, CustomExtractor::YOUTUBE_PROTOCOL)) {
             $src = 'https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/mqdefault.jpg';
 
             $sizeArray = $this->reduceSize('320', '180', $maxWidth, $maxHeight);
 
-            return sprintf('<span class="video-thumbnail"><img src="%s" width="%s" height="%s"></span>', $src, ...$sizeArray);
+            return sprintf('<span class="video-thumbnail"><img src="%s" width="%s" height="%s" alt=""></span>', $src, ...$sizeArray);
         }
 
         try {
             [$newWidth, $newHeight] = $this->reduceSize($originalWidth, $originalHeight, $maxWidth, $maxHeight);
-            $src = $this->getThumbnailSrc($src, 2*$newWidth, 2*$newHeight); // 2 for retina
+            $src = $this->getThumbnailSrc($src, 2 * $newWidth, 2 * $newHeight); // 2 for retina
 
             return sprintf('<img src="%s" width="%s" height="%s" alt="">', $src, $newWidth, $newHeight);
         } catch (\InvalidArgumentException $e) {
@@ -61,7 +63,7 @@ class ThumbnailGenerator implements QueueHandlerInterface
     public function getReducedImg(ImgDto $img): ImgDto
     {
         $src = $img->getSrc();
-        if (strpos($src, CustomExtractor::YOUTUBE_PROTOCOL) === 0) {
+        if (str_starts_with($src, CustomExtractor::YOUTUBE_PROTOCOL)) {
             return (new ImgDto(
                 'https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/hq720.jpg',
                 640,
@@ -85,7 +87,7 @@ class ThumbnailGenerator implements QueueHandlerInterface
         [$src, $width, $height] = $payload;
 
         // Check if $src file is in the pictures dir
-        $canBeHandled = (strpos($src, $this->cacheUrlPrefix . '/') === 0);
+        $canBeHandled = str_starts_with($src, $this->cacheUrlPrefix . '/');
         if ($canBeHandled) {
             $filename = $this->cacheFilesystemPrefix . self::getCachedFilename($id);
             $dirname  = \dirname($filename);
@@ -104,6 +106,39 @@ class ThumbnailGenerator implements QueueHandlerInterface
         }
 
         return $canBeHandled;
+    }
+
+    public static function createImageFromFile(string $inputFilename): \GdImage
+    {
+        $imageInfo = getimagesize($inputFilename);
+
+        switch ($imageInfo['mime']) {
+            case 'image/gif':
+                if (imagetypes() & IMG_GIF) {
+                    return imagecreatefromgif($inputFilename);
+                }
+                throw new \RuntimeException('GIF images are not supported');
+
+            case 'image/jpeg':
+                if (imagetypes() & IMG_JPG) {
+                    return imagecreatefromjpeg($inputFilename);
+                }
+                throw new \RuntimeException('JPEG images are not supported');
+
+            case 'image/png':
+                if (imagetypes() & IMG_PNG) {
+                    return imagecreatefrompng($inputFilename);
+                }
+                throw new \RuntimeException('PNG images are not supported');
+
+            case 'image/wbmp':
+                if (imagetypes() & IMG_WBMP) {
+                    return imagecreatefromwbmp($inputFilename);
+                }
+                throw new \RuntimeException('WBMP images are not supported');
+        }
+
+        throw new \RuntimeException($imageInfo['mime'] . ' images are not supported');
     }
 
     protected function reduceSize(string $width, string $height, int $maxWidth, int $maxHeight, float $zoom = 1.0): array
@@ -140,40 +175,7 @@ class ThumbnailGenerator implements QueueHandlerInterface
 
     private static function makeThumbnail(string $inputFilename, string $outputFilename, int $width, int $height): void
     {
-        $imageInfo = getimagesize($inputFilename);
-
-        switch ($imageInfo['mime']) {
-            case 'image/gif':
-                if (imagetypes() & IMG_GIF) {
-                    $image = imagecreatefromgif($inputFilename);
-                } else {
-                    throw new \RuntimeException('GIF images are not supported');
-                }
-                break;
-            case 'image/jpeg':
-                if (imagetypes() & IMG_JPG) {
-                    $image = imagecreatefromjpeg($inputFilename);
-                } else {
-                    throw new \RuntimeException('JPEG images are not supported');
-                }
-                break;
-            case 'image/png':
-                if (imagetypes() & IMG_PNG) {
-                    $image = imagecreatefrompng($inputFilename);
-                } else {
-                    throw new \RuntimeException('PNG images are not supported');
-                }
-                break;
-            case 'image/wbmp':
-                if (imagetypes() & IMG_WBMP) {
-                    $image = imagecreatefromwbmp($inputFilename);
-                } else {
-                    throw new \RuntimeException('WBMP images are not supported');
-                }
-                break;
-            default:
-                throw new \RuntimeException($imageInfo['mime'] . ' images are not supported');
-        }
+        $image = self::createImageFromFile($inputFilename);
 
         $inputWidth  = imagesx($image);
         $inputHeight = imagesy($image);

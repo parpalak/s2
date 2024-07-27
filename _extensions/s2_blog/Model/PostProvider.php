@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace s2_extensions\s2_blog\Model;
 
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 
 readonly class PostProvider
 {
@@ -62,14 +63,17 @@ readonly class PostProvider
         return $labels;
     }
 
-    public function getCommentNum(int $postId): int
+    /**
+     * @throws DbLayerException
+     */
+    public function getCommentNum(int $postId, bool $includeHidden): int
     {
         $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'COUNT(*)',
             'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'post_id = :post_id',
+            'WHERE'  => 'post_id = :post_id' . ($includeHidden ? '' : ' AND shown = 0'),
         ], ['post_id' => $postId]);
 
-        return $this->dbLayer->result($result);
+        return (int)$this->dbLayer->result($result);
     }
 }

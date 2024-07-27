@@ -20,7 +20,6 @@ readonly class DashboardDatabaseProvider implements DashboardStatProviderInterfa
         private string           $dbType,
         private string           $dbName,
         private string           $dbPrefix,
-        private string           $rootDir
     ) {
     }
 
@@ -43,7 +42,7 @@ readonly class DashboardDatabaseProvider implements DashboardStatProviderInterfa
 
         $versionInfo = $this->dbLayer->getVersion();
 
-        return $this->templateRenderer->render($this->rootDir . '_admin/templates/dashboard/database-item.php.inc', [
+        return $this->templateRenderer->render('_admin/templates/dashboard/database-item.php.inc', [
             'dbSize'    => $totalSize,
             'dbRecords' => $totalRecords,
             'dbType'    => $versionInfo['name'],

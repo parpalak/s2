@@ -27,41 +27,41 @@ HTML;
     {
         return <<<HTML
 <div class="toolbar" id="{$id}-toolbar">
-    <button type="button" class="b" title="{$trans('Bold')}"></button>
-    <button type="button" class="i" title="{$trans('Italic')}"></button>
-    <button type="button" class="strike" title="{$trans('Strike')}"></button>
+    <button type="button" tabindex="-1" class="b" title="{$trans('Bold')}"></button>
+    <button type="button" tabindex="-1" class="i" title="{$trans('Italic')}"></button>
+    <button type="button" tabindex="-1" class="strike" title="{$trans('Strike')}"></button>
     <span class="separator"></span>
-    <button type="button" class="big" title="{$trans('BIG')}"></button>
-    <button type="button" class="small" title="{$trans('SMALL')}"></button>
+    <button type="button" tabindex="-1" class="big" title="{$trans('BIG')}"></button>
+    <button type="button" tabindex="-1" class="small" title="{$trans('SMALL')}"></button>
     <span class="separator"></span>
-    <button type="button" class="sup" title="{$trans('SUP')}"></button>
-    <button type="button" class="sub" title="{$trans('SUB')}"></button>
+    <button type="button" tabindex="-1" class="sup" title="{$trans('SUP')}"></button>
+    <button type="button" tabindex="-1" class="sub" title="{$trans('SUB')}"></button>
     <span class="separator"></span>
-    <button type="button" class="nobr" title="{$trans('NOBR')}"></button>
+    <button type="button" tabindex="-1" class="nobr" title="{$trans('NOBR')}"></button>
     <span class="separator"></span>
-    <button type="button" class="a" title="{$trans('Link')}"></button>
-    <button type="button" class="img" title="{$trans('Image')}"></button>
+    <button type="button" tabindex="-1" class="a" title="{$trans('Link')}"></button>
+    <button type="button" tabindex="-1" class="img" title="{$trans('Image')}"></button>
     <span class="separator"></span>
-    <button type="button" class="h2" title="{$trans('Header 2')}"></button>
-    <button type="button" class="h3" title="{$trans('Header 3')}"></button>
-    <button type="button" class="h4" title="{$trans('Header 4')}"></button>
+    <button type="button" tabindex="-1" class="h2" title="{$trans('Header 2')}"></button>
+    <button type="button" tabindex="-1" class="h3" title="{$trans('Header 3')}"></button>
+    <button type="button" tabindex="-1" class="h4" title="{$trans('Header 4')}"></button>
     <span class="separator"></span>
-    <button type="button" class="left" title="{$trans('Left')}"></button>
-    <button type="button" class="center" title="{$trans('Center')}"></button>
-    <button type="button" class="right" title="{$trans('Right')}"></button>
-    <button type="button" class="justify" title="{$trans('Justify')}"></button>
+    <button type="button" tabindex="-1" class="left" title="{$trans('Left')}"></button>
+    <button type="button" tabindex="-1" class="center" title="{$trans('Center')}"></button>
+    <button type="button" tabindex="-1" class="right" title="{$trans('Right')}"></button>
+    <button type="button" tabindex="-1" class="justify" title="{$trans('Justify')}"></button>
     <span class="separator"></span>
-    <button type="button" class="quote" title="{$trans('Quote')}"></button>
+    <button type="button" tabindex="-1" class="quote" title="{$trans('Quote')}"></button>
     <span class="separator"></span>
-    <button type="button" class="ul" title="{$trans('UL')}"></button>
-    <button type="button" class="ol" title="{$trans('OL')}"></button>
-    <button type="button" class="li" title="{$trans('LI')}"></button>
+    <button type="button" tabindex="-1" class="ul" title="{$trans('UL')}"></button>
+    <button type="button" tabindex="-1" class="ol" title="{$trans('OL')}"></button>
+    <button type="button" tabindex="-1" class="li" title="{$trans('LI')}"></button>
     <span class="separator"></span>
-    <button type="button" class="pre" title="{$trans('PRE')}"></button>
-    <button type="button" class="code" title="{$trans('CODE')}"></button>
+    <button type="button" tabindex="-1" class="pre" title="{$trans('PRE')}"></button>
+    <button type="button" tabindex="-1" class="code" title="{$trans('CODE')}"></button>
     <span class="separator"></span>
-    <button type="button" class="parag" title="{$trans('Paragraphs info')}"></button>
-    <button type="button" class="fullscreen" title="{$trans('Fullscreen')}"></button>
+    <button type="button" tabindex="-1" class="parag" title="{$trans('Paragraphs info')}"></button>
+    <button type="button" tabindex="-1" class="fullscreen" title="{$trans('Fullscreen')}"></button>
 </div>
 <div class="html-textarea-with-preview-wrapper">
     <div class="html-textarea-wrapper">

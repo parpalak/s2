@@ -1,3 +1,11 @@
+/**
+ * Helper functions
+ *
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
+ * @package S2
+ */
+
 function loadingIndicator(bState) {
     const eDiv = document.getElementById('loading');
     if (!eDiv) {
@@ -18,13 +26,19 @@ window.fetch = async (...args) => {
     if (!config.headers) {
         config.headers = {};
     }
-    config.headers['X-Requested-With'] = 'XMLHttpRequest';
+    if (!resource.includes('action=delete')) {
+        // By default, AdminYard deletes records via fetch but does it only to display a confirmation dialog.
+        // After that, it refreshes the page and displays the flash message.
+        // Header 'X-Requested-With' switches from flash messages to JSON responses. So we do not add
+        // 'X-Requested-With' in a universal fetch interceptor for action=delete.
+        config.headers['X-Requested-With'] = 'XMLHttpRequest';
+    }
 
     loadingIndicator(true);
     try {
         const response = await originalFetch(resource, config);
 
-        if (response.ok || response.status === 422) {
+        if (response.ok || response.status === 422 || response.status === 409) {
             return response;
         }
 
@@ -36,6 +50,17 @@ window.fetch = async (...args) => {
                     PopupMessages.show(data.message, null, null, 'login');
                 } else {
                     DisplayError(JSON.stringify(data));
+                }
+            } else if (response.status === 403) {
+                const data = await response.json();
+
+                if (data.message) {
+                    PopupMessages.show(data.message, null, null);
+                } else if (data.errors) {
+                    Array.from(data.errors).forEach(function (error) {
+                        // TODO array_merge
+                        PopupMessages.show(error);
+                    });
                 }
             } else {
                 const txt = await response.text();
@@ -477,3 +502,28 @@ function LoginInit() {
         }
     };
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.addEventListener('keydown', function(e) {
+        // Disable sending form on Enter on new and edit forms to prevent partial submission
+        if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) {
+            if (e.target.closest('.edit-content') || e.target.closest('.new-content')) {
+                e.preventDefault();
+
+                const formElements = e.target.form.elements;
+                let index = Array.prototype.indexOf.call(formElements, e.target);
+
+                if (index < 0) {
+                    return;
+                }
+                while (index < formElements.length - 1) {
+                    index++;
+                    if (formElements[index].tabIndex !== -1) {
+                        formElements[index].focus();
+                        break;
+                    }
+                }
+            }
+        }
+    });
+})

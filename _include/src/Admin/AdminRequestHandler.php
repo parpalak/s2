@@ -12,6 +12,7 @@ namespace S2\Cms\Admin;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use S2\AdminYard\AdminPanel;
+use S2\Cms\Admin\Event\RedirectFromPublicEvent;
 use S2\Cms\Framework\Container;
 use S2\Cms\Model\AuthManager;
 use S2\Cms\Pdo\DbLayerException;
@@ -19,13 +20,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 readonly class AdminRequestHandler
 {
     public function __construct(
-        public RequestStack $requestStack,
-        public AuthManager  $authManager,
-        public Container    $container,
+        private RequestStack             $requestStack,
+        private AuthManager              $authManager,
+        private EventDispatcherInterface $eventDispatcher,
+        private Container                $container,
     ) {
     }
 
@@ -41,6 +44,11 @@ readonly class AdminRequestHandler
 
         $response = $this->authManager->checkAuth($request);
         if ($response === null) {
+            if ($request->query->has('path') && !$request->query->has('entity')) {
+                // Redirect from public pages to the admin panel.
+                // Listeners must modify the request if they recognize the path.
+                $this->eventDispatcher->dispatch(new RedirectFromPublicEvent($request, $request->query->get('path')));
+            }
             // NOTE: Initialization of the AdminPanel is delayed since its factory is relied on the RequestStack to be populated
             /** @var AdminPanel $adminPanel */
             $adminPanel = $this->container->get(AdminPanel::class);
@@ -48,7 +56,6 @@ readonly class AdminRequestHandler
         }
 
         $this->requestStack->pop();
-        $response->headers->set('X-Powered-By', 'S2/' . S2_VERSION);
 
         return $response;
     }

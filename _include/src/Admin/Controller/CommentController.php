@@ -12,6 +12,7 @@ namespace S2\Cms\Admin\Controller;
 use S2\AdminYard\Config\FieldConfig;
 use S2\AdminYard\Controller\EntityController;
 use S2\AdminYard\Controller\InvalidRequestException;
+use S2\AdminYard\Database\DatabaseHelper;
 use S2\AdminYard\Database\SafeDataProviderException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,16 @@ readonly class CommentController extends EntityController
         $primaryKey = $this->getEntityPrimaryKeyFromRequest($request);
         $csrfToken  = $request->request->get('csrf_token');
 
+        $field = $this->entityConfig->findFieldByName('shown');
+        if ($field === null) {
+            throw new \LogicException('Field "shown" is not defined.');
+        }
+        if (!$field->inlineEdit) {
+            return new JsonResponse(['errors' => [
+                sprintf($this->translator->trans('Action "%s" is not allowed for entity "%s".'), 'reject', $this->entityConfig->getName())
+            ]], Response::HTTP_FORBIDDEN);
+        }
+
         // Borrow CSRF token from delete action
         if ($this->getDeleteCsrfToken($primaryKey->toArray(), $request) !== $csrfToken) {
             return new JsonResponse(['errors' => [
@@ -42,6 +53,7 @@ readonly class CommentController extends EntityController
                     'sent' => FieldConfig::DATA_TYPE_BOOL,
                     ... $this->entityConfig->getFieldDataTypes('patch', includePrimaryKey: true)
                 ],
+                DatabaseHelper::getReadAndWriteAccessControlConditions($this->entityConfig),
                 $primaryKey,
                 ['sent' => true],
             );

@@ -17,7 +17,6 @@ readonly class DashboardEnvironmentProvider implements DashboardStatProviderInte
     public function __construct(
         private TranslatorInterface $translator,
         private TemplateRenderer    $templateRenderer,
-        private string              $rootDir
     ) {
     }
 
@@ -27,11 +26,11 @@ readonly class DashboardEnvironmentProvider implements DashboardStatProviderInte
 
         $environment = [
             sprintf($this->translator->trans('OS'), PHP_OS),
-            '<a href="site_ajax.php?action=phpinfo" title="' . $this->translator->trans('PHP info') . '" target="_blank">PHP: ' . PHP_VERSION . ' &uarr;</a>',
+            '<a href="ajax.php?action=phpinfo" title="' . $this->translator->trans('PHP info') . '" target="_blank">PHP: ' . PHP_VERSION . ' &uarr;</a>',
             sprintf($this->translator->trans('Server load'), $serverLoad),
         ];
 
-        return $this->templateRenderer->render($this->rootDir . '_admin/templates/dashboard/stat-item.php.inc', [
+        return $this->templateRenderer->render( '_admin/templates/dashboard/stat-item.php.inc', [
             'title'  => $this->translator->trans('Environment'),
             'output' => implode('<br>', $environment),
         ]);

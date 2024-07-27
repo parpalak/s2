@@ -1,10 +1,10 @@
 /**
- * Main JS functions
+ * JS functions for site structure
  *
  * Drag & drop, event handlers for the admin panel
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
+ * @license http://opensource.org/licenses/MIT MIT
  * @package S2
  */
 const Search = (function () {
@@ -94,8 +94,6 @@ $(function () {
 
     $('.toolbar .refresh').click(refreshTree);
 
-    // $('#tree').jstree('enable_hotkeys');
-
     var eButtons = $('#context_buttons');
     eButtons.detach();
 
@@ -131,15 +129,32 @@ $(function () {
             }
         })
         .bind('select_node.jstree', function (e, d) {
-            if (!eButtons)
+            if (!eButtons) {
                 return;
+            }
 
             eButtons.detach();
-            selectedId = d.rslt.obj.attr('id').replace('node_', '');
-            commentNum = d.rslt.obj.attr('data-comments');
-            eButtons.find('.edit').attr('href', '?entity=Article&action=edit&id=' + selectedId);
-            eButtons.find('.comments').attr('href', '?entity=Comment&action=list&article_id=' + selectedId);
-            $('.jstree-clicked').append(eButtons);
+            const attachButtons = function () {
+                selectedId = d.rslt.obj.attr('id').replace('node_', '');
+                commentNum = d.rslt.obj.attr('data-comments');
+                eButtons.find('.edit').attr('href', '?entity=Article&action=edit&id=' + selectedId);
+                eButtons.find('.comments').attr('href', '?entity=Comment&action=list&article_id=' + selectedId);
+                $('.jstree-clicked').append(eButtons);
+            }
+            let attempts = 0;
+            const checkComplete = function () {
+                if (attempts > 200) {
+                    return;
+                }
+                if (!d.rslt.obj.attr('id')) {
+                    // A new node was selected and there is no server data with a new ID has been received yet.
+                    attempts++;
+                    setTimeout(checkComplete, 200);
+                } else {
+                    attachButtons();
+                }
+            };
+            setTimeout(checkComplete, 0)
         })
         .bind('deselect_node.jstree', function (e, d) {
             eButtons.detach();
@@ -152,7 +167,6 @@ $(function () {
 
             fetch(sUrl + 'action=rename&id=' + data.rslt.obj.attr('id').replace('node_', ''), {
                     method: 'POST',
-                    headers: {'X-Requested-With': 'XMLHttpRequest'},
                     body: new URLSearchParams('csrf_token=' + data.rslt.obj.attr('data-csrf-token') + '&title=' + data.rslt.new_name)
                 }
             ).then(function (response) {
@@ -168,7 +182,6 @@ $(function () {
         .bind('remove.jstree', function (e, data) {
             fetch(sUrl + 'action=delete&id=' + data.rslt.obj.attr('data-id'), {
                     method: 'POST',
-                    headers: {'X-Requested-With': 'XMLHttpRequest'},
                     body: new URLSearchParams('csrf_token=' + data.rslt.obj.attr('data-csrf-token'))
                 }
             ).then(function (response) {
@@ -202,7 +215,6 @@ $(function () {
         .bind('move_node.jstree', function (e, data) {
             fetch(sUrl + 'action=move', {
                 method: 'POST',
-                headers: {'X-Requested-With': 'XMLHttpRequest'},
                 body: new URLSearchParams(
                     'csrf_token=' + data.rslt.o.attr('data-csrf-token')
                     + '&source_id=' + data.rslt.o.attr('id').replace('node_', '')
@@ -248,7 +260,7 @@ $(function () {
                 input_width_limit: 1000,
                 move: {
                     check_move: function (m) {
-                        return (typeof (m.np.attr('id')) != 'undefined' && m.np.attr('id').substring(0, 5) == 'node_');
+                        return (typeof (m.np.attr('id')) != 'undefined' && m.np.attr('id').substring(0, 5) === 'node_');
                     }
                 }
             },

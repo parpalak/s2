@@ -35,6 +35,8 @@ readonly class ArticleManager
      */
     public function getChildBranches(int $id, ?string $search = null): array
     {
+        // TODO add published=1 if there is no view_hidden permission
+
         $subquery        = [
             'SELECT' => 'COUNT(*)',
             'FROM'   => 'art_comments AS c',
@@ -63,6 +65,7 @@ readonly class ArticleManager
                                     'ON'         => 't.tag_id = at.tag_id'
                                 ]
                             ],
+                            // TODO do not use escaping, use parameters instead
                             'WHERE'  => 'a.id = at.article_id AND t.name LIKE \'%' . $this->dbLayer->escape(substr($word, 1)) . '%\'',
                             'LIMIT'  => '1'
                         ];
@@ -150,6 +153,7 @@ readonly class ArticleManager
         ], ['id' => $parentId]);
 
         if (!$this->dbLayer->fetchAssoc($result)) {
+            // parent_id must be an existing article. E.g. it's impossible to create another root with parent_id = 0.
             throw new NotFoundException('Item not found!');
         }
 

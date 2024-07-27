@@ -15,36 +15,14 @@ nav {
     justify-content: space-between;
 }
 
-html {
+html:has(> body > article > section.large-edit-form) {
     height: 100%;
 }
 
-body {
+body:has(> article > section.large-edit-form) {
     height: 100%;
     display: flex;
     flex-direction: column;
-}
-
-article.admin-content {
-    flex: 1 1 auto;
-}
-section.large-edit-form {
-    padding: 1em 0;
-    height: 100%;
-    box-sizing: border-box;
-}
-.large-form-wrapper {
-    height: 100%;
-}
-
-.article-edit-content .article-form-column-1 {
-    grid-template-rows: auto auto auto 1fr;
-}
-
-.article-form-column-1 .form-control-htmltextarea {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
 }
 
 /* Menu */
@@ -52,11 +30,12 @@ li.main-menu-item {
     display: flex;
 }
 ul.main-menu-sublist {
-    margin-left: -0.5em;
+    margin-left: -0.625em;
     position: relative;
     z-index: 1;
     display: inline;
     padding: 0;
+    line-height: 12px;
 }
 li.main-menu-subitem {
     display: inline;
@@ -80,9 +59,11 @@ body, button, input, select, textarea {
 
 body.login_page {
     background: #fff;
+    display: flex;
     align-items: center;
     justify-content: center;
     margin: 0;
+    height: 100vh;
 }
 #login_wrap {
     line-height: 1.5;
@@ -143,15 +124,37 @@ body.login_page {
 
 /* Article edit form */
 
-section.large-edit-form,
-section.large-edit-form form {
-    margin: 0;
+article.admin-content {
+    flex: 1 1 auto;
 }
 
+section.large-edit-form,
+section.large-edit-form form {
+    height: 100%;
+    margin: 0;
+}
+section.large-edit-form {
+    padding: 1em 0;
+    box-sizing: border-box;
+}
 .large-form-wrapper {
+    height: 100%;
     display: grid;
     grid-template-columns: 1fr minmax(170px, 14%);
     gap: 1rem;
+}
+.large-form-wrapper label[title]:not([title=""]) {
+    cursor: help;
+    text-decoration: underline dotted 1px;
+}
+.article-edit-content .article-form-column-1 {
+    grid-template-rows: auto auto auto 1fr;
+}
+
+.article-form-column-1 .form-control-htmltextarea {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .article-form-column-2 .article-form-control {
@@ -201,7 +204,10 @@ section.large-edit-form form {
     outline: color-mix(in srgb, var(--color-success) 50%, var(--page-background)) 3px solid;
     background-color: color-mix(in srgb, var(--color-success) 20%, var(--page-background));
 }
-
+.large-edit-form .field-url[data-url-status="mainpage"] {
+    outline: color-mix(in srgb, var(--color-muted) 40%, var(--page-background)) 3px solid;
+    background-color: color-mix(in srgb, var(--color-muted) 40%, var(--page-background));
+}
 
 .toolbar {
     font-size: 0;
@@ -320,7 +326,7 @@ section.large-edit-form form {
 
 .list-action-link-reject:before {
     content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='red' width='16' height='16' viewBox='0 0 1792 1792'%3E%3Cpath d='M1344 960V832q0-26-19-45t-45-19H512q-26 0-45 19t-19 45v128q0 26 19 45t45 19h768q26 0 45-19t19-45zm320-64q0 209-103 386t-279 279-386 103-385-103-280-279-103-386 103-385 280-280 385-103 386 103 279 280 103 385z'/%3E%3C/svg%3E");
-    vertical-align: -2px;
+    /*vertical-align: -2px;*/
     opacity: 0.6;
 }
 
@@ -425,8 +431,9 @@ a.js {
 #popup_message .message {
     padding: 2px 0;
 }
-#popup_message .action {
+#popup_message a.action {
     font-weight: bold;
+    color: var(--color-accent);
     white-space: nowrap;
 }
 #popup_message .cross {
@@ -445,7 +452,7 @@ a.js {
     cursor: pointer;
 }
 
-#loading {
+.loading-indicator {
     display: none;
     right: 55px;
     top: 10px;
@@ -613,7 +620,7 @@ img#context_comments {
     min-width: 120px;
     border-color: #aaa #ccc #ccc #aaa !important;
     border-width: 1px !important;
-    height: 18px !important;
+    height: 16px !important;
     display: inline-block !important;
     outline: none;
 }
@@ -642,8 +649,7 @@ img#context_comments {
 
 .jstree .jstree-locked a { color:silver; cursor:default; }
 
-#vakata-dragged,
-.ui-autocomplete {
+#vakata-dragged {
     -moz-box-shadow: 1px 1px 4px -1px #666;
     -webkit-box-shadow: 1px 1px 4px -1px #666;
     box-shadow: 1px 1px 4px -1px #666;

@@ -142,8 +142,8 @@ class CmsExtension implements ExtensionInterface
         $container->set(ThumbnailGenerator::class, function (Container $container) {
             return new ThumbnailGenerator(
                 $container->get(QueuePublisher::class),
-                $container->getParameter('base_path') . '/' . (defined('\S2_IMG_DIR') ? \S2_IMG_DIR : '_pictures'),
-                $container->getParameter('root_dir') . (defined('\S2_IMG_DIR') ? \S2_IMG_DIR : '_pictures'),
+                $container->getParameter('image_path'),
+                $container->getParameter('image_dir'),
             );
         }, [QueueHandlerInterface::class]);
         $container->set(LoggerInterface::class, function (Container $container) {
@@ -266,7 +266,8 @@ class CmsExtension implements ExtensionInterface
 
         $container->set(RedirectDetector::class, function (Container $container) {
             return new RedirectDetector(
-                $container->getParameter('redirect_map')
+                $container->get(UrlBuilder::class),
+                $container->getParameter('redirect_map'),
             );
         });
 

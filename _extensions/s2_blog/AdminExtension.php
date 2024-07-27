@@ -14,11 +14,14 @@ use S2\AdminYard\Translator;
 use S2\Cms\Admin\AdminConfigExtenderInterface;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
 use S2\Cms\Admin\DynamicConfigFormExtenderInterface;
+use S2\Cms\Admin\Event\RedirectFromPublicEvent;
 use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\CustomTemplateRendererEvent;
 use S2\Cms\AdminYard\Signal;
+use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
@@ -26,6 +29,7 @@ use S2\Cms\Translation\TranslationProviderInterface;
 use s2_extensions\s2_blog\Admin\AdminConfigExtender;
 use s2_extensions\s2_blog\Admin\DashboardBlogProvider;
 use s2_extensions\s2_blog\Admin\DynamicConfigFormExtender;
+use s2_extensions\s2_blog\Admin\PathToAdminEntityConverter;
 use s2_extensions\s2_blog\Admin\TranslationProvider;
 use s2_extensions\s2_blog\Model\BlogCommentNotifier;
 use s2_extensions\s2_blog\Model\BlogCommentProvider;
@@ -39,6 +43,7 @@ class AdminExtension implements ExtensionInterface
     {
         $container->set(AdminConfigExtender::class, function (Container $container) {
             return new AdminConfigExtender(
+                $container->get(PermissionChecker::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Translator::class),
                 $container->get(TagsProvider::class),
@@ -70,6 +75,14 @@ class AdminExtension implements ExtensionInterface
         $container->set(BlogCommentProvider::class, function (Container $container) {
             return new BlogCommentProvider($container->get(DbLayer::class));
         });
+
+        $container->set(PathToAdminEntityConverter::class, function (Container $container) {
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new PathToAdminEntityConverter(
+                $container->get(DbLayer::class),
+                $provider->get('S2_BLOG_URL'),
+            );
+        });
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
@@ -85,6 +98,18 @@ class AdminExtension implements ExtensionInterface
 
             if ($size > 0) {
                 $event->addSignal('BlogComment', new Signal((string)$size, 'Blog new comments', '?entity=BlogComment&action=list&status=0&apply_filter=0'));
+            }
+        });
+
+        $eventDispatcher->addListener(RedirectFromPublicEvent::class, function (RedirectFromPublicEvent $event) use ($container) {
+            /** @var PathToAdminEntityConverter $converter */
+            $converter   = $container->get(PathToAdminEntityConverter::class);
+            $queryParams = $converter->getQueryParams($event->path);
+            if ($queryParams !== null) {
+                foreach ($queryParams as $key => $param) {
+                    $event->request->query->set($key, $param);
+                }
+                $event->stopPropagation();
             }
         });
     }

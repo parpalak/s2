@@ -261,35 +261,56 @@ readonly class ArticleProvider
         return $prefix . '/' . urlencode($row[0]);
     }
 
-    public function checkUrlStatus(int $id): string
+    /**
+     * @throws DbLayerException
+     */
+    public function checkUrlAndTemplateStatus(int $id): array
     {
         $query  = [
-            'SELECT' => 'parent_id, url',
+            'SELECT' => 'parent_id, url, template',
             'FROM'   => 'articles AS a',
             'WHERE'  => 'a.id = :id'
         ];
         $result = $this->dbLayer->buildAndQuery($query, ['id' => $id]);
-        [$parentId, $url] = $this->dbLayer->fetchRow($result);
+        [$parentId, $url, $template] = $this->dbLayer->fetchRow($result);
 
-        if ($parentId !== self::ROOT_ID) {
-            if ($url === '') {
-                return 'empty';
-            }
+        $templateStatus = (!$this->useHierarchy || $template !== '') ? 'ok' : 'empty';
 
-            // NOTE: seems that this condition must be checked also for root items with ($parentId === self::ROOT_ID).
-            // However, somewhere must be a more strict constraint that allows only one root item.
-            $query  = [
-                'SELECT' => 'COUNT(*)',
-                'FROM'   => 'articles AS a',
-                'WHERE'  => 'a.url = :url' . ($this->useHierarchy ? ' AND a.parent_id = ' . $parentId : '')
-            ];
-            $result = $this->dbLayer->buildAndQuery($query, ['url' => $url]);
-
-            if ($this->dbLayer->result($result) !== 1) {
-                return 'not_unique';
-            }
+        if ($parentId === self::ROOT_ID) {
+            return ['mainpage', $templateStatus];
         }
 
-        return 'ok';
+        if ($url === '') {
+            return ['empty', $templateStatus];
+        }
+
+        // NOTE: seems that this condition must be checked also for root items with ($parentId === self::ROOT_ID).
+        // However, somewhere must be a more strict constraint that allows only one root item.
+        $query  = [
+            'SELECT' => 'COUNT(*)',
+            'FROM'   => 'articles AS a',
+            'WHERE'  => 'a.url = :url' . ($this->useHierarchy ? ' AND a.parent_id = ' . $parentId : '')
+        ];
+        $result = $this->dbLayer->buildAndQuery($query, ['url' => $url]);
+
+        if ($this->dbLayer->result($result) !== 1) {
+            return ['not_unique', $templateStatus];
+        }
+
+        return ['ok', $templateStatus];
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function getCommentNum(int $id, bool $includeHidden): int
+    {
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => 'COUNT(*)',
+            'FROM'   => 'art_comments',
+            'WHERE'  => 'article_id = :article_id' . ($includeHidden ? '' : ' AND shown = 0'),
+        ], ['article_id' => $id]);
+
+        return (int)$this->dbLayer->result($result);
     }
 }

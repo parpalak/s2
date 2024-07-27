@@ -96,24 +96,6 @@ function checkAjaxStatus (XHR)
 	return true;
 }
 
-function GETAsyncRequest (sRequestUrl, fCallback)
-{
-	$.get(sRequestUrl, function (data, textStatus, jqXHR)
-	{
-		if (!jqXHR.s2ErrorFlag && typeof fCallback == 'function')
-			fCallback(jqXHR, data);
-	});
-}
-
-function POSTAsyncRequest (sRequestUrl, sParam, fCallback)
-{
-	$.post(sRequestUrl, sParam, function (data, textStatus, jqXHR)
-	{
-		if (!jqXHR.s2ErrorFlag && typeof fCallback == 'function')
-			fCallback(jqXHR, data);
-	});
-}
-
 function UnknownError (sError, iStatus)
 {
 	if (sError.indexOf('</body>') == -1 || sError.indexOf('</html>') == -1)

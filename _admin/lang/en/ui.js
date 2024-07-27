@@ -10,9 +10,6 @@ var s2_lang = {
 
 	delete_tag			: 'Do you want to delete the tag “%s” and all its links?',
 
-	empty_tag			: 'One cannot save a tag without a name.',
-	login_too_long		: 'The username is too long. It cannot be longer than 25 characters.',
-
 	install_extension	: 'Do you want to continue installation of the extention “%s”?',
 	install_message		: 'Read carefully before installing:\n\n%s\n\n',
 

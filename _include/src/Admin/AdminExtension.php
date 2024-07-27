@@ -24,6 +24,8 @@ use S2\Cms\Admin\Dashboard\DashboardConfigExtender;
 use S2\Cms\Admin\Dashboard\DashboardDatabaseProvider;
 use S2\Cms\Admin\Dashboard\DashboardEnvironmentProvider;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
+use S2\Cms\Admin\Event\RedirectFromPublicEvent;
+use S2\Cms\Admin\Picture\PictureManager;
 use S2\Cms\AdminYard\CustomMenuGenerator;
 use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\CustomTemplateRenderer;
@@ -114,8 +116,11 @@ class AdminExtension implements ExtensionInterface
         $container->set(TemplateRenderer::class, function (Container $container) {
             return new CustomTemplateRenderer(
                 $container->get(Translator::class),
+                $container->get(DynamicConfigProvider::class),
+                $container->get(PermissionChecker::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->getParameter('base_path'),
+                $container->getParameter('root_dir'),
             );
         });
 
@@ -126,6 +131,7 @@ class AdminExtension implements ExtensionInterface
 
             return new CustomMenuGenerator(
                 $adminConfig,
+                $container->get(PermissionChecker::class),
                 $container->get(TemplateRenderer::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
             );
@@ -133,6 +139,7 @@ class AdminExtension implements ExtensionInterface
 
         $container->set(DynamicConfigFormBuilder::class, function (Container $container) {
             return new DynamicConfigFormBuilder(
+                $container->get(PermissionChecker::class),
                 $container->get(Translator::class),
                 $container->get(TypeTransformer::class),
                 $container->get(FormFactory::class),
@@ -217,6 +224,7 @@ class AdminExtension implements ExtensionInterface
             return new AdminRequestHandler(
                 $container->get(RequestStack::class),
                 $container->get(AuthManager::class),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container,
             );
         });
@@ -226,6 +234,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(RequestStack::class),
                 $container->get(AuthManager::class),
                 $container->get(PermissionChecker::class),
+                $container->get(Translator::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container,
             );
@@ -253,6 +262,7 @@ class AdminExtension implements ExtensionInterface
         // Extensions
         $container->set(ExtensionManager::class, function (Container $container) {
             return new ExtensionManager(
+                $container->get(PermissionChecker::class),
                 $container->get(DbLayer::class),
                 $container->get(ExtensionCache::class),
                 $container->get(DynamicConfigProvider::class),
@@ -269,6 +279,7 @@ class AdminExtension implements ExtensionInterface
             return new DashboardConfigExtender(
                 $container->getByTag(DashboardStatProviderInterface::class),
                 $container->getByTag(DashboardBlockProviderInterface::class),
+                $container->get(PermissionChecker::class),
                 $container->get(TemplateRenderer::class),
             );
         }, [AdminConfigExtenderInterface::class]);
@@ -276,7 +287,6 @@ class AdminExtension implements ExtensionInterface
             return new DashboardEnvironmentProvider(
                 $container->get(Translator::class),
                 $container->get(TemplateRenderer::class),
-                $container->getParameter('root_dir'),
             );
         }, [DashboardStatProviderInterface::class]);
 
@@ -287,7 +297,6 @@ class AdminExtension implements ExtensionInterface
                 $container->getParameter('db_type'),
                 $container->getParameter('db_name'),
                 $container->getParameter('db_prefix'),
-                $container->getParameter('root_dir'),
             );
         }, [DashboardStatProviderInterface::class]);
 
@@ -298,6 +307,26 @@ class AdminExtension implements ExtensionInterface
                 $container->getParameter('root_dir'),
             );
         }, [DashboardStatProviderInterface::class]);
+
+        $container->set(PathToAdminEntityConverter::class, function (Container $container) {
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new PathToAdminEntityConverter(
+                $container->get(DbLayer::class),
+                $provider->get('S2_USE_HIERARCHY') === '1',
+            );
+        });
+
+        $container->set(PictureManager::class, function (Container $container) {
+            return new PictureManager(
+                $container->get(Translator::class),
+                $container->get(TemplateRenderer::class),
+                $container->get(PermissionChecker::class),
+                $container->getParameter('base_path'),
+                $container->getParameter('image_dir'),
+                $container->getParameter('image_path'),
+                $container->getParameter('allowed_extensions'),
+            );
+        });
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
@@ -313,16 +342,28 @@ class AdminExtension implements ExtensionInterface
 
             /** @var ExtensionManager $extensionManager */
             $extensionManager = $container->get(ExtensionManager::class);
-            $n = $extensionManager->getUpgradableExtensionNum();
+            $n                = $extensionManager->getUpgradableExtensionNum();
             if ($n > 0) {
                 $event->addSignal('Extension', new Signal((string)$n, 'New extensions', '?entity=Extension'));
             }
 
             /** @var AuthManager $authManager */
-            $authManager = $container->get(AuthManager::class);
-            $totalUserSessionsCount  = $authManager->getTotalUserSessionsCount();
+            $authManager            = $container->get(AuthManager::class);
+            $totalUserSessionsCount = $authManager->getTotalUserSessionsCount();
             if ($totalUserSessionsCount > 1) {
                 $event->addSignal('Session', new Signal((string)$totalUserSessionsCount, 'Other sessions', '?entity=Session'));
+            }
+        });
+
+        $eventDispatcher->addListener(RedirectFromPublicEvent::class, function (RedirectFromPublicEvent $event) use ($container) {
+            /** @var PathToAdminEntityConverter $converter */
+            $converter   = $container->get(PathToAdminEntityConverter::class);
+            $queryParams = $converter->getQueryParams($event->path);
+            if ($queryParams !== null) {
+                foreach ($queryParams as $key => $param) {
+                    $event->request->query->set($key, $param);
+                }
+                $event->stopPropagation();
             }
         });
     }

@@ -21,7 +21,7 @@ use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 18);
+define('S2_DB_REVISION', 19);
 define('MIN_PHP_VERSION', '8.2.0');
 
 define('S2_ROOT', '../');
@@ -56,8 +56,6 @@ require S2_ROOT . '_include/setup.php';
 $errorHandler = Debug::enable();
 HtmlErrorRenderer::setTemplate(realpath(S2_ROOT.'_include/views/error.php'));
 $errorHandler->setDefaultLogger(new Logger(S2_ROOT . '_cache/install.log', 'install', LogLevel::DEBUG));
-
-require 'options.php';
 
 //
 // Generate output to be used for config.php
@@ -137,6 +135,24 @@ function get_preferred_lang ($languages)
 }
 
 // Check for available language packs
+function s2_read_lang_dir(): array
+{
+    $result = [];
+
+    $directory = dir(S2_ROOT . '_lang');
+    while (($entry = $directory->read()) !== false) {
+        if ($entry !== '.' && $entry !== '..' && is_dir(S2_ROOT . '_lang/' . $entry) && file_exists(S2_ROOT . '_lang/' . $entry . '/common.php')) {
+            $result[] = $entry;
+        }
+    }
+
+    $directory->close();
+
+    return $result;
+}
+// TODO duplicate of DynamicConfigFormBuilder::readLanguages()
+// The only problem is that we do not know db params at this point to boot the kernel.
+// Figure out how not to use the kernel
 $languages = s2_read_lang_dir();
 
 $language = isset($_GET['lang']) ? $_GET['lang'] : (isset($_POST['req_language']) ? trim($_POST['req_language']) : get_preferred_lang($languages));

@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace S2\Cms\AdminYard;
 
 use S2\AdminYard\TemplateRenderer;
+use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Model\PermissionChecker;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -19,17 +21,23 @@ class CustomTemplateRenderer extends TemplateRenderer
 
     public function __construct(
         TranslatorInterface                       $translator,
+        private readonly DynamicConfigProvider    $dynamicConfigProvider,
+        private readonly PermissionChecker        $permissionChecker,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly string                   $basePath
+        private readonly string                   $basePath,
+        private readonly string                   $rootDir,
     ) {
         parent::__construct($translator);
     }
 
     private const FILE_SIZE_UNITS = ['B', 'КB', 'MB', 'GB', 'ТB', 'PB', 'EB', 'ZB', 'YB'];
 
-    public function render(string $_template_path, array $data): string
+    public function render(string $_template_path, array $data = []): string
     {
         $trans            = $this->translator->trans(...);
+        $locale           = $this->translator->getLocale();
+        $param            = $this->dynamicConfigProvider->get(...);
+        $isGranted        = $this->permissionChecker->isGranted(...);
         $friendlyFilesize = $this->friendlyFilesize(...);
         $numberFormat     = $this->numberFormat(...);
         $basePath         = $this->basePath;
@@ -37,11 +45,15 @@ class CustomTemplateRenderer extends TemplateRenderer
 
         extract($data);
         ob_start();
-        require $_template_path;
+        if ($_template_path[0] === '/' || $_template_path[0] === '.') {
+            require $_template_path;
+        } else {
+            require $this->rootDir . $_template_path;
+        }
         return ob_get_clean();
     }
 
-    private function friendlyFilesize(int $size): string
+    public function friendlyFilesize(int $size): string
     {
         $unitIndex = 0;
         $unitsNum  = \count(self::FILE_SIZE_UNITS);

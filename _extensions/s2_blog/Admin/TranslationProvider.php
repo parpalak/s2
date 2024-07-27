@@ -26,6 +26,14 @@ class TranslationProvider implements TranslationProviderInterface
                 'Posts num'             => '{{ posts }} пост|{{ posts }} поста|{{ posts }} постов',
                 'Blog new comments'     => 'Непроверенные комментарии в блоге',
 
+                // Tags
+                'Important tag'         => 'Важное',
+                'Important tag info'    => 'Важные теги входят в навигационные ссылки блога',
+                'Used in posts'         => 'Используется в постах',
+                'Used in posts info'    => 'Количество постов, использующих этот тег, и ссылки на них.',
+
+                'Label'      => 'Метка',
+                'Label help' => 'К этой записи будут добавлены ссылки «см. также» на другие записи с такой же меткой.',
             ],
             'en' => [
                 'Blog config'           => 'Blog',
@@ -36,6 +44,15 @@ class TranslationProvider implements TranslationProviderInterface
                 'Published in the blog' => 'Published in the blog',
                 'Posts num'             => '{{ posts }} post|{{ posts }} posts',
                 'Blog new comments'     => 'Unverified comments in the blog',
+
+                // Tags
+                'Important tag'         => 'Important',
+                'Important tag info'    => 'Important tags are used in the blog navigation menu',
+                'Used in posts'         => 'Used in posts',
+                'Used in posts info'    => 'The number of posts using this tag and links to them.',
+
+                'Label'      => 'Label',
+                'Label help' => '“See also” links (to the posts that have the same label) will be appended to this post.',
             ],
         };
     }

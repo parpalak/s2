@@ -1,3 +1,11 @@
+/**
+ * Form for editing pages in S2.
+ *
+ * @copyright 2007-2024 Roman Parpalak
+ * @license MIT
+ * @package S2
+ */
+
 function initHtmlTextarea(eTextarea) {
     s2_codemirror.get_instance(eTextarea);
 
@@ -65,6 +73,9 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
         const urlWrapper = eForm.querySelector('.field-url');
         urlWrapper.setAttribute('data-url-status', statusData['urlStatus']);
         urlWrapper.title = statusData['urlTitle'];
+        if (statusData['urlStatus'] === 'mainpage') {
+            urlWrapper.querySelector('input').setAttribute('disabled', 'disabled');
+        }
 
         const isPublished = eForm.elements['published'].checked;
         eForm.querySelector('.field-published').setAttribute('data-published-status', isPublished ? '1' : '0');
@@ -613,13 +624,13 @@ function uploadBlobToPictureDir(blob, name, extension, successCallback) {
     formData.append('create_dir', '1');
     formData.append('return_image_info', '1');
 
-    fetch('pict_ajax.php?action=upload', {
+    fetch('ajax.php?action=upload', {
         method: 'POST',
         body: formData
     })
         .then(response => response.json())
         .then(res => {
-            if (res.status === 'ok' && typeof successCallback !== "undefined") {
+            if (res.success === true && typeof successCallback !== "undefined") {
                 successCallback(res, res.image_info[0], res.image_info[1]);
             }
         })

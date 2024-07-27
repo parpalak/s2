@@ -23,11 +23,7 @@ readonly class SiteStructureExtender implements AdminConfigExtenderInterface
     {
         $adminConfig
             ->setServicePage('Site', function () {
-                return $this->templateRenderer->render(
-                    'templates/structure/structure.php.inc',
-                    [
-                    ]
-                );
+                return $this->templateRenderer->render('_admin/templates/structure/structure.php.inc');
             }, -10)
         ;
     }

@@ -150,9 +150,9 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #a22;}
    the editor. You probably shouldn't touch them. */
 
 .CodeMirror {
-	position: relative;
+	/*position: relative;*/
 	/* For compatibility with flex. Alternatively one can use a wrapper div with position: absolute */
-	/*position: absolute;*/
+	position: absolute;
 	top:0;
 	left:0;
 	bottom: 0;

@@ -23,7 +23,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 readonly class AuthManager
 {
-    private const CHALLENGE_EXPIRE_TIMEOUT = 24 * 60 * 60;
+    public const FORCE_AJAX_RESPONSE = '_force_ajax_response';
+
+    private const CHALLENGE_EXPIRE_TIMEOUT  = 24 * 60 * 60;
+    private const CHALLENGE_STATUS_LOST     = 'Lost';
+    private const CHALLENGE_STATUS_OK       = 'Ok';
+    private const CHALLENGE_STATUS_EXPIRED  = 'Expired';
+    private const CHALLENGE_STATUS_WRONG_IP = 'Wrong_IP';
 
     public function __construct(
         private DbLayer           $dbLayer,
@@ -39,6 +45,11 @@ readonly class AuthManager
     }
 
     /**
+     * Checks credentials, processes login form, handles logout and returns unauthorized response if needed
+     * (JSON for AJAX or login form for non-AJAX).
+     *
+     * Supposed to be used for admin main page and AJAX page controllers.
+     *
      * @throws DbLayerException
      */
     public function checkAuth(Request $request): ?Response
@@ -83,6 +94,35 @@ readonly class AuthManager
 
         // Existed session
         return $this->authenticateUser($request, $challenge);
+    }
+
+    /**
+     * Checks credentials and returns unauthorized response if required.
+     *
+     * Supposed to be used in the admin front page controllers not covered by AdminYard pages.
+     *
+     * @throws DbLayerException
+     */
+    public function checkAuthenticatedUser(Request $request): ?Response
+    {
+        if ($this->forceAdminHttps && !$request->isSecure()) {
+            $uri       = $request->getUri();
+            $secureUri = preg_replace('/^http:/i', 'https:', $uri);
+
+            return new RedirectResponse($secureUri);
+        }
+
+        $challenge = $request->cookies->get($this->cookieName, '');
+        if ($challenge === '') {
+            return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc'));
+        }
+
+        $status = $this->checkAndUpdateCurrentUserChallenge($request, $challenge);
+        if ($status !== self::CHALLENGE_STATUS_OK || !$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW)) {
+            return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc'));
+        }
+
+        return null;
     }
 
     public function getCurrentChallenge(): string
@@ -130,46 +170,27 @@ readonly class AuthManager
         $this->dbLayer->buildAndQuery($query, ['time' => time() - $this->cookieExpireTimeout()]);
     }
 
+
     /**
      * @throws DbLayerException
      */
     private function authenticateUser(Request $request, string $challenge): ?Response
     {
-        // If the challenge exists and isn't expired
-        $query  = [
-            'SELECT' => 'login, time, ip',
-            'FROM'   => 'users_online',
-            'WHERE'  => 'challenge = :challenge'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query, ['challenge' => $challenge]);
+        $status = $this->checkAndUpdateCurrentUserChallenge($request, $challenge);
 
-        if ($row = $this->dbLayer->fetchRow($result)) {
-            [$login, $time, $ip] = $row;
-
-            $now = time();
-
-            if ($now > $time + $this->loginExpireTimeout()) {
-                $status = 'Expired';
-            } elseif ($ip !== $request->getClientIp()) {
-                $status = 'Wrong_IP';
-            } else {
-                // Ok, we keep it fresh every 5 seconds.
-                if ($now > $time + 5) {
-                    $this->touchChallenge($request, $challenge);
-                }
-
-                $this->permissionChecker->setUser($this->getUserInfo($login));
-
-                return null;
+        if ($status === self::CHALLENGE_STATUS_OK) {
+            if (!$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW)) {
+                return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc', [
+                ]));
             }
-        } else {
-            $status = 'Lost';
+
+            return null;
         }
 
         // Some error detected
         $this->deleteChallenge($challenge);
 
-        if ($request->isXmlHttpRequest()) {
+        if ($request->isXmlHttpRequest() || $request->attributes->get(self::FORCE_AJAX_RESPONSE)) {
             $response = new JsonResponse([
                 'success' => false,
                 'status'  => $status,
@@ -353,7 +374,7 @@ readonly class AuthManager
      */
     private function createUnauthorizedResponse(Request $request): Response
     {
-        if ($request->isXmlHttpRequest()) {
+        if ($request->isXmlHttpRequest() || $request->attributes->get(self::FORCE_AJAX_RESPONSE)) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $this->translator->trans('Lost session'),
@@ -412,7 +433,7 @@ readonly class AuthManager
     {
         [$challenge, $salt] = $this->generateNewChallenge();
 
-        $content = $this->templateRenderer->render('templates/login.php.inc', [
+        $content = $this->templateRenderer->render('_admin/templates/login.php.inc', [
             'challenge'    => $challenge,
             'salt'         => $salt,
             'errorMessage' => $errorMessage,
@@ -429,5 +450,43 @@ readonly class AuthManager
     private function loginExpireTimeout(): int
     {
         return (max($this->loginTimeoutMinutes, 1)) * 60;
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function checkAndUpdateCurrentUserChallenge(Request $request, string $challenge): string
+    {
+        // Check if the challenge exists and isn't expired
+        $query  = [
+            'SELECT' => 'login, time, ip',
+            'FROM'   => 'users_online',
+            'WHERE'  => 'challenge = :challenge'
+        ];
+        $result = $this->dbLayer->buildAndQuery($query, ['challenge' => $challenge]);
+
+        if (!($row = $this->dbLayer->fetchRow($result))) {
+            return self::CHALLENGE_STATUS_LOST;
+        }
+
+        [$login, $time, $ip] = $row;
+
+        $now = time();
+
+        if ($now > $time + $this->loginExpireTimeout()) {
+            return self::CHALLENGE_STATUS_EXPIRED;
+        }
+
+        if ($ip !== $request->getClientIp()) {
+            return self::CHALLENGE_STATUS_WRONG_IP;
+        }
+
+        // Ok, we keep it fresh every 5 seconds.
+        if ($now > $time + 5) {
+            $this->touchChallenge($request, $challenge);
+        }
+        $this->permissionChecker->setUser($this->getUserInfo($login));
+
+        return self::CHALLENGE_STATUS_OK;
     }
 }

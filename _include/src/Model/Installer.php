@@ -24,7 +24,7 @@ readonly class Installer
     public function createTables(): void
     {
         // Create all tables
-        $schema = array(
+        $this->dbLayer->createTable('config', array(
             'FIELDS'      => array(
                 'name'  => array(
                     'datatype'   => 'VARCHAR(191)',
@@ -37,12 +37,9 @@ readonly class Installer
                 )
             ),
             'PRIMARY KEY' => array('name')
-        );
+        ));
 
-        $this->dbLayer->createTable('config', $schema);
-
-
-        $schema = array(
+        $this->dbLayer->createTable('extensions', array(
             'FIELDS'      => array(
                 'id'             => array(
                     'datatype'   => 'VARCHAR(150)',
@@ -89,11 +86,9 @@ readonly class Installer
                 )
             ),
             'PRIMARY KEY' => array('id')
-        );
+        ));
 
-        $this->dbLayer->createTable('extensions', $schema);
-
-        $schema = array(
+        $this->dbLayer->createTable('articles', array(
             'FIELDS'      => array(
                 'id'          => array(
                     'datatype'   => 'SERIAL',
@@ -174,8 +169,7 @@ readonly class Installer
                 ),
                 'user_id'     => array(
                     'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
+                    'allow_null' => true,
                 )
             ),
             'PRIMARY KEY' => array('id'),
@@ -186,12 +180,9 @@ readonly class Installer
                 'children_idx'    => array('parent_id', 'published'),
                 'template_idx'    => array('template')
             )
-        );
+        ));
 
-        $this->dbLayer->createTable('articles', $schema);
-
-
-        $schema = array(
+        $this->dbLayer->createTable('art_comments', array(
             'FIELDS'      => array(
                 'id'         => array(
                     'datatype'   => 'SERIAL',
@@ -258,12 +249,9 @@ readonly class Installer
                 'sort_idx'       => array('article_id', 'time', 'shown'),
                 'time_idx'       => array('time')
             )
-        );
+        ));
 
-        $this->dbLayer->createTable('art_comments', $schema);
-
-
-        $schema = array(
+        $this->dbLayer->createTable('tags', array(
             'FIELDS'      => array(
                 'tag_id'      => array(
                     'datatype'   => 'SERIAL',
@@ -294,12 +282,9 @@ readonly class Installer
                 'name_idx' => array('name'),
                 'url_idx'  => array('url')
             )
-        );
+        ));
 
-        $this->dbLayer->createTable('tags', $schema);
-
-
-        $schema = array(
+        $this->dbLayer->createTable('article_tag', array(
             'FIELDS'      => array(
                 'id'         => array(
                     'datatype'   => 'SERIAL',
@@ -321,12 +306,9 @@ readonly class Installer
                 'article_id_idx' => array('article_id'),
                 'tag_id_idx'     => array('tag_id'),
             ),
-        );
+        ));
 
-        $this->dbLayer->createTable('article_tag', $schema);
-
-
-        $schema = array(
+        $this->dbLayer->createTable('users_online', array(
             'FIELDS'      => array(
                 'challenge'      => array(
                     'datatype'   => 'VARCHAR(32)',
@@ -369,12 +351,9 @@ readonly class Installer
             'UNIQUE KEYS' => array(
                 'challenge_idx' => array('challenge'),
             )
-        );
+        ));
 
-        $this->dbLayer->createTable('users_online', $schema);
-
-
-        $schema = array(
+        $this->dbLayer->createTable('users', array(
             'FIELDS'      => array(
                 'id'              => array(
                     'datatype'   => 'SERIAL',
@@ -440,9 +419,7 @@ readonly class Installer
             'UNIQUE KEYS' => array(
                 'login_idx' => array('login'),
             )
-        );
-
-        $this->dbLayer->createTable('users', $schema);
+        ));
 
         $this->dbLayer->createTable('queue', array(
             'FIELDS'      => array(
@@ -461,5 +438,21 @@ readonly class Installer
             ),
             'PRIMARY KEY' => array('id', 'code')
         ));
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function dropTables(): void
+    {
+        $this->dbLayer->dropTable('queue');
+        $this->dbLayer->dropTable('users');
+        $this->dbLayer->dropTable('users_online');
+        $this->dbLayer->dropTable('article_tag');
+        $this->dbLayer->dropTable('tags');
+        $this->dbLayer->dropTable('art_comments');
+        $this->dbLayer->dropTable('articles');
+        $this->dbLayer->dropTable('extensions');
+        $this->dbLayer->dropTable('config');
     }
 }

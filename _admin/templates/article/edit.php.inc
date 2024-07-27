@@ -9,14 +9,17 @@ declare(strict_types=1);
 /** @var array $templateList */
 /** @var array $statusData Info about URL status */
 /** @var callable $trans */
+/** @var callable $param */
 /** @var string $title */
 /** @var string $entityName */
 /** @var array $header */
+/** @var array $hint */
 /** @var array $errorMessages */
 /** @var \S2\AdminYard\Form\Form $form */
 /** @var string $csrfToken */
 /** @var array $primaryKey */
 /** @var array $actions */
+/** @var int $commentsNum */
 
 $formQueryParams = http_build_query(array_merge([
     'entity' => $entityName,
@@ -26,32 +29,44 @@ $formQueryParams = http_build_query(array_merge([
 $errorMessages = array_merge($errorMessages, $form->getGlobalFormErrors());
 
 $columnMap = [
-    'excerpt'     => ['column' => 1, 'label_area' => '3/1/4/2', 'input_area' => '3/2/4/5'],
-    'pagetext'    => ['column' => 1, 'input_area' => '4/1/5/5'],
-    'user_id'     => ['column' => 2,],
-    'template'    => ['column' => 2,],
-    'create_time' => ['column' => 2,],
-    'modify_time' => ['column' => 2,],
-    'favorite'    => ['column' => 2,],
-    'commented'   => ['column' => 2,],
-    'url'         => ['column' => 2,],
-    'published'   => ['column' => 2,],
+    // NOTE: order affects the order in HTML and focus (implicit taborder)
+    'title'         => ['column' => 1,],
+    'tags'          => ['column' => 1,],
+    'pagetext'      => ['column' => 1, 'input_area' => '4/1/5/5'],
+    'meta_desc'     => ['column' => 1,],
+    'meta_keywords' => ['column' => 1,],
+    'excerpt'       => ['column' => 1, 'label_area' => '3/1/4/2', 'input_area' => '3/2/4/5'],
+    'user_id'       => ['column' => 2,],
+    'template'      => ['column' => 2,],
+    'create_time'   => ['column' => 2,],
+    'modify_time'   => ['column' => 2,],
+    'favorite'      => ['column' => 2,],
+    'commented'     => ['column' => 2,],
+    'url'           => ['column' => 2,],
+    'published'     => ['column' => 2,],
 ];
 
 $visibleControls = $form->getVisibleControls();
 
+if ($param('S2_ADMIN_CUT')) {
+    unset($visibleControls['excerpt'], $columnMap['excerpt']);
+}
+
 /** @var array<string,\S2\Cms\Framework\ControllerInterface>[] $columns */
 $columns = [1 => [], 2 => []];
 foreach ($columnMap as $fieldName => $columnInfo) {
+    if (!isset($visibleControls[$fieldName])) {
+        continue;
+    }
     $columns[$columnInfo['column']][$fieldName] = $visibleControls[$fieldName];
     unset($visibleControls[$fieldName]);
 }
 
 $columns[1] = array_merge($columns[1], $visibleControls);
 
-function s2_jsvarencode ($var)
+function s2_jsvarencode($var)
 {
-    return str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", '') , $var);
+    return str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", ''), $var);
 }
 
 ?>
@@ -106,30 +121,37 @@ function s2_jsvarencode ($var)
                                     class="article-form-control form-control-<?= strtolower(basename(strtr(get_class($control), ['\\' => '/']))) ?> field-<?= $fieldName ?>">
                                 <label class="field-name"
                                        style="grid-area: <?= $columnMap[$fieldName]['label_area'] ?? 'auto' ?>"
+                                       title="<?= htmlspecialchars($hint[$fieldName] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                        for="id-<?= $fieldName ?>">
                                     <?= $control->getHtml('id-' . $fieldName) ?>
-                                    <?= htmlspecialchars($trans($header[$fieldName]), ENT_QUOTES, 'UTF-8') ?>
+                                    <?= htmlspecialchars($header[$fieldName], ENT_QUOTES, 'UTF-8') ?>
                                 </label>
                                 <?php foreach ($control->getValidationErrors() as $error): ?>
                                     <span class="validation-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                                 <?php endforeach; ?>
                                 <?php if ($fieldName === 'commented') {
-                                    echo '<a href="?' . http_build_query([
-                                            'entity' => 'Comment',
-                                            'action' => 'list',
-                                            'article_id' => $primaryKey['id']
-                                        ]) . '">' . $trans('Comments') . ' &rarr;</a>';
+                                    if ($commentsNum > 0) {
+                                        echo '<div><a href="?' . http_build_query([
+                                                        'entity'  => 'Comment',
+                                                        'action'  => 'list',
+                                                        'article_id' => $primaryKey['id']
+                                                ]) . '">' . $trans('N comments', ['{{ count }}' => $commentsNum, '%count%' => $commentsNum]) . ' &rarr;</a></div>';
+                                    } else {
+                                        echo '<div>' . $trans('No comments') . '</div>';
+                                    }
                                 } ?>
                             </div>
                         <?php elseif ($control instanceof \S2\Cms\AdminYard\Form\HtmlTextarea): ?>
-                            <div style="grid-area: <?= $columnMap[$fieldName]['input_area'] ?? 'auto' ?>" id="id-article-editor-block"
+                            <div style="grid-area: <?= $columnMap[$fieldName]['input_area'] ?? 'auto' ?>"
+                                 id="id-article-editor-block"
                                  class="article-form-control form-control-<?= strtolower(basename(strtr(get_class($control), ['\\' => '/']))) ?> field-<?= $fieldName ?>">
                                 <?= $control->getHtmlWithWrapper($trans, 'id-' . $fieldName) ?>
                             </div>
                         <?php else: ?>
                             <label class="field-name"
                                    style="grid-area: <?= $columnMap[$fieldName]['label_area'] ?? 'auto' ?>"
-                                   for="id-<?= $fieldName ?>"><?= htmlspecialchars($trans($header[$fieldName]), ENT_QUOTES, 'UTF-8') ?></label>
+                                   title="<?= htmlspecialchars($hint[$fieldName] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                   for="id-<?= $fieldName ?>"><?= htmlspecialchars($header[$fieldName], ENT_QUOTES, 'UTF-8') ?></label>
                             <div style="grid-area: <?= $columnMap[$fieldName]['input_area'] ?? 'auto' ?>"
                                  class="article-form-control form-control-<?= strtolower(basename(strtr(get_class($control), ['\\' => '/']))) ?> field-<?= $fieldName ?>">
                                 <?= $control->getHtml('id-' . $fieldName) ?>
@@ -145,7 +167,8 @@ function s2_jsvarencode ($var)
                         </p>
                         <hr>
                         <p>
-                            <a target="_blank" data-href="<?= $previewUrl ?>" href="<?= $previewUrl ?>" id="preview_link"><?= $trans('Preview ready') ?></a>
+                            <a target="_blank" title="<?= $trans('Preview published') ?>" data-href="<?= $previewUrl ?>"
+                               href="<?= $previewUrl ?>" id="preview_link"><?= $trans('Preview ready') ?></a>
                         </p>
                     <?php endif; ?>
                 </div>

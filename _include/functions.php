@@ -44,22 +44,6 @@ function s2_date_time($time)
     return $date;
 }
 
-function s2_return_bytes($val)
-{
-    $val  = trim($val);
-    $last = strtolower(substr($val, -1));
-    $val  = substr($val, 0, -1);
-    switch ($last) {
-        case 'g':
-            $val *= 1024;
-        case 'm':
-            $val *= 1024;
-        case 'k':
-            $val *= 1024;
-    }
-
-    return $val;
-}
 
 //
 // Link processing
@@ -551,4 +535,13 @@ function s2_get_config_filename(): string
     }
 
     return 'config.php';
+}
+
+function s2_json_encode ($data)
+{
+    if (defined('JSON_UNESCAPED_UNICODE'))
+        $result = json_encode($data, JSON_UNESCAPED_UNICODE);
+    else
+        $result = json_encode($data);
+    return $result;
 }

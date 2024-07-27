@@ -6,6 +6,7 @@ if (!isset($this)) {
     die;
 }
 
+/** @var string $locale */
 /** @var string $basePath */
 /** @var callable $trans */
 /** @var string $menu */
@@ -16,14 +17,15 @@ if (!isset($this)) {
 /** @var array $extraScripts */
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="<?= $locale ?>">
 <head>
     <meta charset="utf-8">
     <title><?php echo $trans('Admin panel'), S2_SITE_NAME ? ' - ' . S2_SITE_NAME : ''; ?></title>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="<?php echo $basePath; ?>/_vendor/s2/admin-yard/demo/style.css">
-    <link rel="stylesheet" href="css/admin-override.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/_admin/css/admin-override.css">
     <?php foreach ($extraStyles as $style): ?>
         <link rel="stylesheet" href="<?= $style ?>">
     <?php endforeach; ?>
@@ -40,12 +42,9 @@ if (!isset($this)) {
         }</style>
 </head>
 <body>
-<div id="loading"></div>
+<div id="loading" class="loading-indicator"></div>
 <nav>
     <?= $menu ?>
-    <ul class="main-menu-list">
-        <li class="main-menu-item"><a class="main-menu-link" href="?action=logout"><?= $trans('Logout') ?></a></li>
-    </ul>
 </nav>
 <?php
 foreach ($flashMessages as $type => $messages) {

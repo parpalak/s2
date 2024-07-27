@@ -20,6 +20,7 @@ use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Model\ExtensionCache;
+use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -27,6 +28,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 readonly class ExtensionManager implements AdminConfigExtenderInterface
 {
     public function __construct(
+        private PermissionChecker     $permissionChecker,
         private DbLayer               $dbLayer,
         private ExtensionCache        $extensionCache,
         private DynamicConfigProvider $dynamicConfigProvider,
@@ -40,6 +42,10 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
 
     public function extend(AdminConfig $adminConfig): void
     {
+        if (!$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN)) {
+            return;
+        }
+
         $adminConfig
             ->setServicePage('Extension', function () {
                 return $this->getExtensionList();
@@ -133,7 +139,7 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
         }
         $d->close();
 
-        return $this->templateRenderer->render('templates/extension/extension.php.inc', [
+        return $this->templateRenderer->render('_admin/templates/extension/extension.php.inc', [
             'extensionNum'        => $extensionNum,
             'availableExtensions' => $availableExtensions,
             'failedExtensions'    => $failedExtensions,
