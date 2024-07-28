@@ -262,32 +262,27 @@ function s2_get_remote_file($url, $timeout = 10, $head_only = false, $max_redire
 }
 
 // Removes any "bad" characters (characters which mess with the display of a page, are invisible, etc) from user input
-function s2_remove_bad_characters()
+function s2_remove_bad_characters(): void
 {
     $bad_utf8_chars = array("\0", "\xc2\xad", "\xcc\xb7", "\xcc\xb8", "\xe1\x85\x9F", "\xe1\x85\xA0", "\xe2\x80\x80", "\xe2\x80\x81", "\xe2\x80\x82", "\xe2\x80\x83", "\xe2\x80\x84", "\xe2\x80\x85", "\xe2\x80\x86", "\xe2\x80\x87", "\xe2\x80\x88", "\xe2\x80\x89", "\xe2\x80\x8a", "\xe2\x80\x8b", "\xe2\x80\x8e", "\xe2\x80\x8f", "\xe2\x80\xaa", "\xe2\x80\xab", "\xe2\x80\xac", "\xe2\x80\xad", "\xe2\x80\xae", "\xe2\x80\xaf", "\xe2\x81\x9f", "\xe3\x80\x80", "\xe3\x85\xa4", "\xef\xbb\xbf", "\xef\xbe\xa0", "\xef\xbf\xb9", "\xef\xbf\xba", "\xef\xbf\xbb", "\xE2\x80\x8D");
 
-    function _s2_remove_bad_characters(&$array, &$bad_utf8_chars)
-    {
-        if (is_array($array))
-            foreach (array_keys($array) as $key)
-                _s2_remove_bad_characters($array[$key], $bad_utf8_chars);
-        else
-            $array = str_replace($bad_utf8_chars, '', $array);
+    function _s2_remove_bad_characters(mixed &$data, array $bad_utf8_chars): void {
+        if (is_array($data)) {
+            foreach (array_keys($data) as $key) {
+                _s2_remove_bad_characters($data[$key], $bad_utf8_chars);
+            }
+        }
+        else {
+            $data = str_replace($bad_utf8_chars, '', $data);
+        }
     }
 
     _s2_remove_bad_characters($_GET, $bad_utf8_chars);
-    // Check if we expect binary data in $_POST
-    if (!defined('S2_NO_POST_BAD_CHARS'))
-        _s2_remove_bad_characters($_POST, $bad_utf8_chars);
+    _s2_remove_bad_characters($_POST, $bad_utf8_chars);
     _s2_remove_bad_characters($_COOKIE, $bad_utf8_chars);
     _s2_remove_bad_characters($_REQUEST, $bad_utf8_chars);
 }
 
-// Clean version string from trailing '.0's
-function s2_clean_version($version)
-{
-    return preg_replace('/(\.0)+(?!\.)|(\.0+$)/', '$2', $version);
-}
 
 //
 // Validate an e-mail address
@@ -328,19 +323,6 @@ function s2_hook($hook_id)
     $code = implode("\n", array_map(static fn(string $filename) => "\$_include_result = include S2_ROOT.'$filename'; if (\$_include_result !== 1) { return \$_include_result; }", $hookNames[$hook_id]));
 
     return $code;
-}
-
-//
-// Turning off browser's cache
-//
-function s2_no_cache($full = true)
-{
-    header('Expires: Wed, 07 Aug 1985 07:45:00 GMT');
-    header('Pragma: no-cache');
-    if ($full) {
-        header('Cache-Control: no-cache, must-revalidate');
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-    }
 }
 
 // Display a simple error message
@@ -535,13 +517,4 @@ function s2_get_config_filename(): string
     }
 
     return 'config.php';
-}
-
-function s2_json_encode ($data)
-{
-    if (defined('JSON_UNESCAPED_UNICODE'))
-        $result = json_encode($data, JSON_UNESCAPED_UNICODE);
-    else
-        $result = json_encode($data);
-    return $result;
 }

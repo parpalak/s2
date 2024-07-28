@@ -10,8 +10,8 @@
 // TODO: implement some mechanism for extension ajax queries
 header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 header('Expires: Mon, 26 Jul 1997 00:00:00 GMT');
-header('Chace-Control: no-chace, must-revalidate');
-header('Pragma: no-chace');
+header('Cache-Control: no-cache, must-revalidate');
+header('Pragma: no-cache');
 
 $filename = isset($_GET['file']) ? trim(preg_replace('#[^0-9a-z_\-\.]#', '', $_GET['file']), '.') : '';
 if (!$filename || !is_file('data/'.$filename))

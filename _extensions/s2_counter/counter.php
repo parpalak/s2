@@ -9,8 +9,8 @@
 
 header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 header('Expires: Mon, 26 Jul 1997 00:00:00 GMT');
-header('Chace-Control: no-chace, must-revalidate');
-header('Pragma: no-chace');
+header('Cache-Control: no-cache, must-revalidate');
+header('Pragma: no-cache');
 
 if (!is_file('data/today_info.txt') || false === ($data = file_get_contents('data/today_info.txt')))
 	die;
