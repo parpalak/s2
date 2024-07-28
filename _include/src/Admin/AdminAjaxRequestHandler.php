@@ -231,11 +231,15 @@ class AdminAjaxRequestHandler
                 try {
                     return new Json($pictureManager->getDirContentRecursive($path));
                 } catch (\RuntimeException $e) {
-                    return new Json(['success' => false, 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             },
 
             'create_subfolder' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_CREATE_ARTICLES)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -260,11 +264,15 @@ class AdminAjaxRequestHandler
                     $newName = $pictureManager->createSubfolder($path, $name);
                     return new Json(['success' => true, 'name' => $newName, 'path' => $path . '/' . $newName]);
                 } catch (\RuntimeException $e) {
-                    return new Json(['success' => false, 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             },
 
             'delete_folder' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_EDIT_SITE)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -288,6 +296,10 @@ class AdminAjaxRequestHandler
             },
 
             'delete_files' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_EDIT_SITE)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -323,6 +335,10 @@ class AdminAjaxRequestHandler
             },
 
             'rename_folder' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_EDIT_SITE)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -347,11 +363,15 @@ class AdminAjaxRequestHandler
                     $newName = $pictureManager->renameFolder($path, $name);
                     return new Json(['success' => true, 'new_path' => $newName]);
                 } catch (\RuntimeException $e) {
-                    return new Json(['success' => false, 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             },
 
             'rename_file' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_EDIT_SITE)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -396,6 +416,10 @@ class AdminAjaxRequestHandler
             },
 
             'move_folder' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_EDIT_SITE)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -420,11 +444,15 @@ class AdminAjaxRequestHandler
                     $newPath = $pictureManager->moveFolder($sourcePath, $destinationPath);
                     return new Json(['success' => true, 'new_path' => $newPath]);
                 } catch (\RuntimeException $e) {
-                    return new Json(['success' => false, 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             },
 
             'move_files' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_EDIT_SITE)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -465,7 +493,7 @@ class AdminAjaxRequestHandler
                     $pictureManager->moveFiles($sourcePath, $destinationPath, $fileNames);
                     return new Json(['success' => true]);
                 } catch (\RuntimeException $e) {
-                    return new Json(['success' => false, 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             },
 
@@ -490,6 +518,10 @@ class AdminAjaxRequestHandler
             },
 
             'upload' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
                 if (!$p->isGranted(P::PERMISSION_CREATE_ARTICLES)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }

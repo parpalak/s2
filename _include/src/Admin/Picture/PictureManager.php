@@ -78,7 +78,7 @@ class PictureManager
     public function getDirContentRecursive(string $dir): array
     {
         if (!($dirHandle = opendir($this->imageDir . $dir))) {
-            throw new \RuntimeException($this->translator->trans('Directory not open', ['{{ dir }}' => $this->imageDir . $dir]));
+            throw new \RuntimeException($this->translator->trans('Directory not open', ['{{ dir }}' => $this->imageDir . $dir]), Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         $output = [];
@@ -120,7 +120,7 @@ class PictureManager
         }
 
         if (!mkdir($concurrentDirectory = $this->imageDir . $path . '/' . $name) && !is_dir($concurrentDirectory)) {
-            throw new \RuntimeException($this->translator->trans('Error creating folder', ['{{ dir }}' => $this->imageDir . $path . '/' . $name]));
+            throw new \RuntimeException($this->translator->trans('Error creating folder', ['{{ dir }}' => $this->imageDir . $path . '/' . $name]), Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         chmod($this->imageDir . $path . '/' . $name, 0777);
@@ -164,16 +164,16 @@ class PictureManager
 
         $newFullName = $this->imageDir . $parentPath . '/' . $newName;
         if (file_exists($newFullName)) {
-            throw new \RuntimeException($this->translator->trans('Rename file exists', ['{{ dir }}' => $newName]));
+            throw new \RuntimeException($this->translator->trans('Rename file exists', ['{{ dir }}' => $newName]), Response::HTTP_CONFLICT);
         }
 
         $oldFullName = $this->imageDir . $path;
         if (!is_dir($oldFullName)) {
-            throw new \RuntimeException($this->translator->trans('Directory not found', ['{{ dir }}' => $oldFullName]));
+            throw new \RuntimeException($this->translator->trans('Directory not found', ['{{ dir }}' => $oldFullName]), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (!rename($oldFullName, $newFullName)) {
-            throw new \RuntimeException($this->translator->trans('Rename error'));
+            throw new \RuntimeException($this->translator->trans('Rename error'), Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         return $parentPath . '/' . $newName;
@@ -191,7 +191,7 @@ class PictureManager
         $oldFullPath = $this->imageDir . $path;
         // TODO check if $oldFullPath exists
         if (!rename($oldFullPath, $newFullPath)) {
-            throw new \RuntimeException($this->translator->trans('Rename error'));
+            throw new \RuntimeException($this->translator->trans('Rename error'), Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         return $newName;
@@ -203,12 +203,12 @@ class PictureManager
         $fullDestPath   = $this->imageDir . $destPath . '/' . self::s2_basename($sourcePath);
 
         if (file_exists($fullDestPath)) {
-            throw new \RuntimeException($this->translator->trans('Move file exists', ['{{ dir }}' => $fullDestPath]));
+            throw new \RuntimeException($this->translator->trans('Move file exists', ['{{ dir }}' => $fullDestPath]), Response::HTTP_CONFLICT);
         }
 
         // TODO check if $fullSourcePath exists
         if (!rename($fullSourcePath, $fullDestPath)) {
-            throw new \RuntimeException($this->translator->trans('Move error'));
+            throw new \RuntimeException($this->translator->trans('Move error'), Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         return $destPath . '/' . self::s2_basename($sourcePath);
@@ -216,14 +216,24 @@ class PictureManager
 
     public function moveFiles(string $sourcePath, string $destPath, array $fileNames): void
     {
+        $skippedFiles = [];
         foreach ($fileNames as $fileName) {
             $fileName       = self::s2_basename($fileName);
             $fullSourcePath = $this->imageDir . $sourcePath . '/' . $fileName;
             $fullDestPath   = $this->imageDir . $destPath . '/' . $fileName;
 
-            if (!rename($fullSourcePath, $fullDestPath)) {
-                throw new \RuntimeException($this->translator->trans('Move error'));
+            if (file_exists($fullDestPath)) {
+                $skippedFiles[] = $fileName;
+                continue;
             }
+
+            if (!rename($fullSourcePath, $fullDestPath)) {
+                throw new \RuntimeException($this->translator->trans('Move error'), Response::HTTP_SERVICE_UNAVAILABLE);
+            }
+        }
+
+        if (\count($skippedFiles) > 0) {
+            throw new \RuntimeException($this->translator->trans('Move file exists', ['{{ dir }}' => implode(', ', $skippedFiles)]), Response::HTTP_CONFLICT);
         }
     }
 

@@ -18,7 +18,7 @@ function strNatCmp(a, b) {
         var tz = [], x = 0, y = -1, n = 0, i, j;
 
         while (i = (j = t.charAt(x++)).charCodeAt(0)) {
-            var m = (i == 46 || (i >= 48 && i <= 57));
+            var m = (i === 46 || (i >= 48 && i <= 57));
             if (m !== n) {
                 tz[++y] = "";
                 n = m;
@@ -34,7 +34,7 @@ function strNatCmp(a, b) {
     for (x = 0; aa[x] && bb[x]; x++)
         if (aa[x] !== bb[x]) {
             var c = Number(aa[x]), d = Number(bb[x]);
-            if (c == aa[x] && d == bb[x])
+            if (c === aa[x] && d === bb[x])
                 return c - d;
             else
                 return (aa[x] > bb[x]) ? 1 : -1;
@@ -119,7 +119,7 @@ $(function () {
             }
         })
         .bind('dblclick.jstree', function (e) {
-            if (!isRenaming && e.target.nodeName == 'A') {
+            if (!isRenaming && e.target.nodeName === 'A') {
                 isRenaming = true;
                 folderTree.jstree('rename', e.target);
             }
@@ -134,7 +134,7 @@ $(function () {
 
             var newPath = d.rslt.obj.attr('data-path');
 
-            if (path != newPath) {
+            if (path !== newPath) {
                 path = newPath;
                 fileTree.jstree('refresh', -1);
                 $('#fold_name').html('<b>' + folderTree.jstree('get_text', d.rslt.obj) + '</b>');
@@ -145,14 +145,20 @@ $(function () {
         })
         .bind('rename.jstree', function (e, data) {
             isRenaming = false;
-            if (data.rslt.new_name == data.rslt.old_name)
+            if (data.rslt.new_name === data.rslt.old_name) {
                 return;
+            }
 
-            $.ajax({
-                url: sUrl + 'action=rename_folder&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(data.rslt.obj.attr('data-path')),
-                success: function (d) {
+            const endpointUrl = sUrl + 'action=rename_folder&name=' + encodeURIComponent(data.rslt.new_name)
+                + '&path=' + encodeURIComponent(data.rslt.obj.attr('data-path'));
+            fetch(endpointUrl, {method: 'POST'})
+                .then(response => response.json())
+                .then(d => {
                     if (!d || !d.success) {
                         folderRollback(data.rlbk);
+                        if (d.message) {
+                            PopupMessages.show(d.message);
+                        }
                         return;
                     }
 
@@ -164,81 +170,100 @@ $(function () {
                     var eSelected = folderTree.jstree('get_selected');
                     path = eSelected.attr('data-path');
                     $('#fold_name').html('<b>' + folderTree.jstree('get_text', eSelected) + '</b>');
-                },
-                error: function () {
+                })
+                .catch(() => {
                     folderRollback(data.rlbk);
-                }
-            });
+                });
         })
         .bind('remove.jstree', function (e, data) {
-            $.ajax({
-                url: sUrl + 'action=delete_folder&path=' + encodeURIComponent(data.rslt.obj.attr('data-path')),
-                success: function (d) {
-                    if (!d || !d.success)
+            const endpointUrl = sUrl + 'action=delete_folder&path=' + encodeURIComponent(data.rslt.obj.attr('data-path'));
+
+            fetch(endpointUrl, {method: 'POST'})
+                .then(response => response.json())
+                .then(d => {
+                    if (!d || !d.success) {
                         folderRollback(data.rlbk);
-                },
-                error: function () {
+                        if (d.message) {
+                            PopupMessages.show(d.message);
+                        }
+                    }
+                })
+                .catch(() => {
                     folderRollback(data.rlbk);
-                }
-            });
+                });
         })
         .bind('create.jstree', function (e, data) {
-            $.ajax({
-                url: sUrl + 'action=create_subfolder&name=' + encodeURIComponent(data.rslt.name) + '&path=' + encodeURIComponent(data.rslt.parent.attr('data-path')),
-                success: function (d) {
-                    if (!d.success)
+            const endpointUrl = sUrl + 'action=create_subfolder&name=' + encodeURIComponent(data.rslt.name)
+                + '&path=' + encodeURIComponent(data.rslt.parent.attr('data-path'));
+            fetch(endpointUrl, {method: 'POST'})
+                .then(response => response.json())
+                .then(d => {
+                    if (!d.success) {
                         folderRollback(data.rlbk);
-                    else {
+                        if (d.message) {
+                            PopupMessages.show(d.message);
+                        }
+                    } else {
                         data.rslt.obj.attr('data-path', d.path);
                         folderTree.jstree('rename_node', data.rslt.obj, d.name);
                     }
-                },
-                error: function () {
+                })
+                .catch(() => {
                     folderRollback(data.rlbk);
-                }
-            });
+                });
         })
         .bind('move_node.jstree', function (e, data) {
-            if (typeof (data.rslt.o.attr('data-path')) != 'undefined')
-                $.ajax({
-                    url: sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path')) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')),
-                    success: function (d) {
-                        if (!d || !d.success)
+            if (typeof (data.rslt.o.attr('data-path')) != 'undefined') {
+                const endpointUrl = sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path'))
+                    + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path'));
+                fetch(endpointUrl, {method: 'POST'})
+                    .then(response => response.json())
+                    .then(d => {
+                        if (!d || !d.success) {
                             folderRollback(data.rlbk);
-                        else {
+                            if (d.message) {
+                                PopupMessages.show(d.message);
+                            }
+                        } else {
                             var len = data.rslt.o.attr('data-path').length;
                             data.rslt.o.attr('data-path', d.new_path).find('li').each(function () {
                                 $(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len));
                             });
                             path = folderTree.jstree('get_selected').attr('data-path');
                         }
-                    },
-                    error: function () {
+                    })
+                    .catch(() => {
                         folderRollback(data.rlbk);
-                    }
-                });
-            else {
+                    });
+            } else {
                 var fileNames = [];
                 data.rslt.o.each(function () {
                     fileNames.push('fname[]=' + encodeURIComponent($(this).attr('data-fname')));
                 });
 
-                $.ajax({
-                    url: sUrl + 'action=move_files&spath=' + encodeURIComponent(path) + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path')) + '&' + fileNames.join('&'),
-                    success: function (d) {
+                const endpointUrl = sUrl + 'action=move_files&spath=' + encodeURIComponent(path)
+                    + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path'))
+                    + '&' + fileNames.join('&');
+                fetch(endpointUrl, {method: 'POST'})
+                    .then(response => response.json())
+                    .then(d => {
                         folderRollback(data.rlbk);
 
-                        if (!fileTree.children().length)
+                        if (!fileTree.children().length) {
                             fileTree.html('<ul></ul>'); // jstree fix (doesn't work after all roots disappearing)
+                        }
 
-                        if (!d || !d.success)
+                        if (!d || !d.success) {
                             fileTree.jstree('refresh', -1);
-                    },
-                    error: function () {
+                            if (d.message) {
+                                PopupMessages.show(d.message);
+                            }
+                        }
+                    })
+                    .catch(() => {
                         folderRollback(data.rlbk);
                         fileTree.jstree('refresh', -1);
-                    }
-                });
+                    });
             }
         })
         .bind('focus', function () {
@@ -270,7 +295,7 @@ $(function () {
                 input_width_limit: 1000,
                 move: {
                     check_move: function (m) {
-                        return (typeof (m.np.attr('data-path')) != 'undefined' && m.np.attr('data-path') != path);
+                        return (typeof (m.np.attr('data-path')) !== 'undefined' && m.np.attr('data-path') !== path);
                     }
                 }
             },
@@ -308,7 +333,7 @@ $(function () {
             }
         })
         .bind('dblclick.jstree', function (e) {
-            if (!isRenaming && (e.target.nodeName == 'A' || e.target.nodeName == 'INS')) {
+            if (!isRenaming && (e.target.nodeName === 'A' || e.target.nodeName === 'INS')) {
                 isRenaming = true;
                 fileTree.jstree('rename', e.target);
             }
@@ -318,12 +343,13 @@ $(function () {
 
             var str = '';
 
-            if (fileTree.jstree('get_selected').length == 1) {
+            if (fileTree.jstree('get_selected').length === 1) {
                 var filePath = sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
                 str = s2_lang.file + '<a href="' + filePath + '" target="_blank">' + filePath + ' &uarr;</a>';
 
-                if (d.rslt.obj.attr('data-fsize'))
+                if (d.rslt.obj.attr('data-fsize')) {
                     str += "<br />" + s2_lang.value + d.rslt.obj.attr('data-fsize');
+                }
 
                 if (d.rslt.obj.attr('data-dim')) {
                     var a = d.rslt.obj.attr('data-dim').split('*');
@@ -335,15 +361,17 @@ $(function () {
                     str += '<br /><label><input type="checkbox" onclick="s2Retina.set(this.checked); $(\'#s2_retina_size\').toggle(); "' + (s2Retina.get() ? ' checked="checked"' : '') + '>' + s2_lang.retina_help + '</label>';
 
                     fExecDouble = function () {
-                        if (parentWnd.ReturnImage)
+                        if (parentWnd.ReturnImage) {
                             parentWnd.ReturnImage(filePath, s2Retina.get() ? Math.round(a[0] / 2) : a[0], s2Retina.get() ? Math.round(a[1] / 2) : a[1]);
+                        }
                     };
 
                     str += '<br /><input type="button" class="link-as-button" onclick="fExecDouble(); return false;" value="' + s2_lang.insert + '">';
                 }
-            } else
+            } else {
                 fExecDouble = function () {
                 };
+            }
 
             $('#finfo').html(str);
         })
@@ -353,7 +381,9 @@ $(function () {
                 return;
             }
 
-            fetch(sUrl + 'action=rename_file&name=' + encodeURIComponent(data.rslt.new_name) + '&path=' + encodeURIComponent(path + '/' + data.rslt.obj.attr('data-fname')))
+            const endpointUrl = sUrl + 'action=rename_file&name=' + encodeURIComponent(data.rslt.new_name)
+                + '&path=' + encodeURIComponent(path + '/' + data.rslt.obj.attr('data-fname'));
+            fetch(endpointUrl, {method: 'POST'})
                 .then(response => response.json())
                 .then(d => {
                     fileTree.jstree('deselect_all');
@@ -376,16 +406,22 @@ $(function () {
                 fileNames.push('fname[]=' + encodeURIComponent($(this).attr('data-fname')));
             });
 
-            $.ajax({
-                url: sUrl + 'action=delete_files&path=' + encodeURIComponent(path) + '&' + fileNames.join('&'),
-                success: function (d) {
-                    if (!d || !d.success)
+            const endpointUrl = sUrl + 'action=delete_files&path=' + encodeURIComponent(path)
+                + '&' + fileNames.join('&');
+
+            fetch(endpointUrl, {method: 'POST'})
+                .then(response => response.json())
+                .then(d => {
+                    if (!d || !d.success) {
                         fileTree.jstree('refresh', -1);
-                },
-                error: function () {
+                        if (d.message) {
+                            PopupMessages.show(d.message);
+                        }
+                    }
+                })
+                .catch(() => {
                     fileTree.jstree('refresh', -1);
-                }
-            });
+                });
         })
         .bind('focus', function () {
             fileTree.jstree('set_focus');
@@ -450,6 +486,7 @@ $(function () {
         SetWait(false);
     });
 
+
 $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
     var successCheck = function (data, textStatus, jqXHR) {
             checkAjaxStatus(jqXHR);
@@ -476,10 +513,12 @@ function initFileDrop() {
         if (!dt)
             return;
 
-        if (dt.types.contains && !dt.types.contains("Files")) //FF
+        if (dt.types.contains && !dt.types.contains("Files")) { //FF
             return;
-        if (dt.types.indexOf && dt.types.indexOf("Files") == -1) //Chrome
+        }
+        if (dt.types.indexOf && dt.types.indexOf("Files") === -1) { //Chrome
             return;
+        }
 
         document.getElementById('brd').className = 'accept_drag';
 

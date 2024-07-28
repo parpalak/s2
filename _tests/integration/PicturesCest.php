@@ -52,33 +52,33 @@ class PicturesCest
         $I->see('ftypavif');
 
         // Author cannot rename files
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php');
         $I->seeResponseCodeIs(403);
         $I->assertJsonSubResponseEquals('You do not have enough permissions to perform this action.', ['message']);
 
         // Author cannot delete files
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test1.png');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test1.png');
         $I->seeResponseCodeIs(403);
         $I->assertJsonSubResponseEquals('You do not have enough permissions to perform this action.', ['message']);
 
         // Editor can rename files, but only if extension is allowed
         $I->logout();
         $I->login('editor', 'editor');
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php');
         $I->seeResponseCodeIs(403);
         $I->assertJsonSubResponseEquals('You are not allowed to create “php” files here. Contact administrators or developers if you really need this.', ['message']);
 
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=cest1.png');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=cest1.png');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('cest1.png', ['new_name']);
 
         // Check on renaming if file with same name already exists
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=rename_file&path=/test2.png&name=cest1.png');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test2.png&name=cest1.png');
         $I->seeResponseCodeIs(409);
         $I->assertJsonSubResponseEquals('Rename failed: file or folder “cest1.png” already exists.', ['message']);
 
         // Editor can delete files
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test2.png');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test2.png');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals(true, ['success']);
 
@@ -90,7 +90,7 @@ class PicturesCest
         // Admin can rename files, even if extension is not allowed
         $I->logout();
         $I->login('admin', 'admin');
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=rename_file&path=/cest1.png&name=test1.php');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/cest1.png&name=test1.php');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('test1.php', ['new_name']);
     }
@@ -100,15 +100,15 @@ class PicturesCest
         $I->login('author', 'author');
 
         // creat folder1/folder11, folder1/folder12
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('folder1', ['name']);
 
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('folder11', ['name']);
 
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('folder12', ['name']);
 
@@ -117,16 +117,16 @@ class PicturesCest
         $this->uploadSimplePngFile($I, '/folder1', 'test3.png');
 
         // move files
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png');
         $I->seeResponseCodeIs(403);
 
         $I->logout();
         $I->login('editor', 'editor');
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png');
         $I->seeResponseCodeIs(200);
 
         // move folder with files
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder12&dpath=/folder1/folder11');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder12&dpath=/folder1/folder11');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_files&path=/folder1/folder11/folder12');
@@ -159,19 +159,19 @@ class PicturesCest
         $I->seeResponseCodeIs(200);
 
         // folder1/folder11, folder1/folder12
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1');
         $I->seeResponseCodeIs(200);
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11');
         $I->seeResponseCodeIs(200);
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12');
         $I->seeResponseCodeIs(200);
 
         // folder2/folder21, folder2/folder22
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
         $I->seeResponseCodeIs(200);
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder21');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder21');
         $I->seeResponseCodeIs(200);
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder22');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder22');
         $I->seeResponseCodeIs(200);
 
 
@@ -184,7 +184,7 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('folder12', ['children', 0, 'children', 1, 'data']);
 
         // folder1/folder11 -> folder2
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder11&dpath=/folder2');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder11&dpath=/folder2');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders&path=/folder1');
@@ -198,10 +198,10 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('folder22', [2, 'data']);
 
         // folder2 exists, creating folder21
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
         $I->seeResponseCodeIs(200);
         // folder2 exists, creating folder22
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders');
@@ -213,7 +213,7 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('folder22', ['children', 3, 'data']);
 
         // renaming
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=rename_folder&path=/folder21&name=somenewname');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_folder&path=/folder21&name=somenewname');
         $I->seeResponseCodeIs(200);
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders');
         $I->seeResponseCodeIs(200);
@@ -221,13 +221,13 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('somenewname', ['children', 3, 'data']);
 
         // Remove all
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder1');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder1');
         $I->seeResponseCodeIs(200);
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder2');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder2');
         $I->seeResponseCodeIs(200);
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=delete_folder&path=/somenewname');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/somenewname');
         $I->seeResponseCodeIs(200);
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder22');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder22');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders');
@@ -241,9 +241,31 @@ class PicturesCest
         $I->login('author', 'author');
         $I->seeResponseCodeIs(200);
 
-        $I->amOnPage('https://localhost/_admin/ajax.php?action=create_subfolder');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder');
         $I->seeResponseCodeIs(400);
         $I->assertJsonSubResponseContains('Parameters "path" and "name" are required.', ['message']);
+    }
+
+    public function testInvalidRenameFolder(\IntegrationTester $I): void
+    {
+        $I->login('editor', 'editor');
+        $I->seeResponseCodeIs(200);
+
+        $I->amOnPage('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php');
+        $I->seeResponseCodeIs(405);
+        $I->assertJsonSubResponseEquals('Only POST requests are allowed.', ['message']);
+
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png');
+        $I->seeResponseCodeIs(400);
+        $I->assertJsonSubResponseEquals('Parameters "path" and "name" are required.', ['message']);
+
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=..&name=test1.php');
+        $I->seeResponseCodeIs(400);
+        $I->assertJsonSubResponseEquals('Invalid path.', ['message']);
+
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1&name=./test1.php');
+        $I->seeResponseCodeIs(400);
+        $I->assertJsonSubResponseEquals('Invalid name.', ['message']);
     }
 
     private function removeDir(string $dir): void

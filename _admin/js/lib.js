@@ -38,7 +38,7 @@ window.fetch = async (...args) => {
     try {
         const response = await originalFetch(resource, config);
 
-        if (response.ok || response.status === 422 || response.status === 409) {
+        if (response.ok || response.status === 422 || response.status === 409 || response.status === 503) {
             return response;
         }
 
