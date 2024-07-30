@@ -42,7 +42,7 @@ readonly class CustomMenuGenerator extends MenuGenerator
                 continue;
             }
             $links[$name] = [
-                'name'    => $name,
+                'name'    => $entity->getPluralName(),
                 'url'     => $baseUrl . '?entity=' . urlencode($name) . '&action=list',
                 'active'  => $currentEntity === $name,
                 'signals' => $signals[$name] ?? [],
@@ -51,7 +51,7 @@ readonly class CustomMenuGenerator extends MenuGenerator
 
         foreach ($this->config->getServicePageNames() as $page) {
             $links[$page] = [
-                'name'    => $page,
+                'name'    => $this->config->getReadableName($page),
                 'url'     => $baseUrl . '?entity=' . urlencode($page),
                 'active'  => $currentEntity === $page,
                 'signals' => $signals[$page] ?? [],

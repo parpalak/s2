@@ -90,27 +90,60 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
     async function saveForm(event) {
         event.preventDefault();
 
-        try {
-            const response = await fetch(eForm.action, {
-                method: 'POST',
-                headers: {'X-Requested-With': 'XMLHttpRequest'},
-                body: new FormData(eForm)
+        function successHandler(statusData) {
+            PopupMessages.hide(sLowerEntityName + '-save');
+            document.dispatchEvent(new Event('save_article_end.s2'));
+
+            eForm.elements['revision'].value = statusData['revision'];
+            decorateForm(statusData);
+        }
+
+        function errorHandler(data) {
+            Array.from(data.errors).forEach(function (error) {
+                // TODO array_merge
+                PopupMessages.show(error, null, null, sLowerEntityName + '-save');
             });
+            console.warn('Form submission failed');
+        }
+
+        function getTempCsrfToken() {
+            return document.cookie
+                .split('; ')
+                .find((row) => row.startsWith('adminyard_temp_csrf_token='))
+                ?.split('=')[1] || '';
+        }
+
+        try {
+            const formData = new FormData(eForm);
+            const headers = {'X-Requested-With': 'XMLHttpRequest'};
+            const tempCsrfToken = getTempCsrfToken();
+            if (tempCsrfToken !== '') {
+                headers['X-AdminYard-CSRF-Token'] = tempCsrfToken;
+            }
+            const response = await fetch(eForm.action, {method: 'POST', headers: headers, body: formData});
 
             if (response.ok) {
-                PopupMessages.hide(sLowerEntityName + '-save');
-                document.dispatchEvent(new Event('save_article_end.s2'));
-
-                const statusData = await response.json();
-                eForm.elements['revision'].value = statusData['revision'];
-                decorateForm(statusData);
+                successHandler(await response.json());
             } else if (response.status === 422) {
                 const data = await response.json();
-                Array.from(data.errors).forEach(function (error) {
-                    // TODO array_merge
-                    PopupMessages.show(error, null, null, sLowerEntityName + '-save');
-                });
-                console.warn('Form submission failed');
+                if (data.invalid_csrf_token) {
+                    const response2 = await fetch(eForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-AdminYard-CSRF-Token': getTempCsrfToken()
+                        },
+                        body: formData
+                    });
+
+                    if (response2.ok) {
+                        successHandler(await response2.json());
+                    } else if (response2.status === 422) {
+                        errorHandler(await response2.json());
+                    }
+                } else {
+                    errorHandler(data);
+                }
             }
         } catch (error) {
             console.warn('An error occurred:', error);

@@ -18,8 +18,8 @@
     <span id="context_buttons">
         <a href="#" class="context-link edit" title="<?php echo $trans('Edit'); ?>"><img id="context_edit" src="i/1.gif" alt=""></a>
         <a href="#" class="context-link comments" title="<?php echo $trans('Comments'); ?>"><img id="context_comments" src="i/1.gif" alt=""></a>
-        <img id="context_add" src="i/1.gif" alt="<?= $trans('Create subarticle') ?>">
-        <img id="context_delete" src="i/1.gif" alt="<?php echo $trans('Delete'); ?>">
+        <img id="context_add" src="i/1.gif" alt="<?= $trans('Create subarticle') ?>" title="<?= $trans('Create subarticle') ?>">
+        <img id="context_delete" src="i/1.gif" alt="<?php echo $trans('Delete'); ?>" title="<?php echo $trans('Delete'); ?>">
     </span>
     <div id="tree" class="treetree" tabindex="0"></div>
 </section>

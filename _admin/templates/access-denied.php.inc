@@ -2,6 +2,7 @@
 
 /** @var callable $trans */
 /** @var callable $param */
+/** @var string $locale */
 /** @var string $basePath */
 /** @var string $challenge */
 /** @var string $salt */
@@ -9,7 +10,7 @@
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="<?= $locale ?>">
 <head>
     <meta charset="utf-8">
     <title><?= $trans('Admin panel'), $param('S2_SITE_NAME') ? ' - ' . $param('S2_SITE_NAME') : '' ?></title>

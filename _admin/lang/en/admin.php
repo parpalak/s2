@@ -1,34 +1,38 @@
 <?php
 
-$lang_admin = array(
+$lang_admin = [
 
-// Common admin panel
+    // Common admin panel
     'Welcome'           => '👤 %s',
     'Fullscreen'        => 'Full screen',
     'Logout'            => 'Log out?',
     'Logout info'       => 'Click here to say goodbye',
-    'Delete from list'  => 'Delete the page from this list',
-    'New page'          => 'New page',
-    'Page'              => 'Page',
     'Admin panel'       => 'Control panel',
     'Expired session'   => 'Your session is suspended due to a pause. To continue, please log in in a new tab.',
     'Lost session'      => 'Your session has been closed. To continue, please log in in a new tab.',
     'Wrong_IP session'  => 'Your IP address has been changed. To continue, please log in in a new tab.',
     'No permission'     => 'You do not have enough permissions to perform this action.',
     'Fulltext Search'   => 'Search in all fields',
+    'URL part'          => 'URL part',
+    'All'               => 'All',
+    'Yes'               => 'Yes',
+    'No'                => 'No',
+    'Delete'            => 'Delete',
+    'Edit'              => 'Edit',
 
-// Session tab
+    // Session tab
     'Other sessions'    => 'You have logged in from different browsers. Check your sessions and delete unnecessary ones.',
     'Last action time'  => 'Last action time',
     'Browser'           => 'Browser',
+    'IP address'        => 'IP address',
 
-// Login form
+    // Login form
     'Password'          => 'Password',
     'Log in'            => 'Log in',
-    'Noscript'          => 'You have disabled Javascript in your browser.<br />The system does not work without it.<br />Please enable Javascript.',
-    'Error login page'  => 'You have entered incorrect username or password.<br />Please check the data and try again.',
+    'Noscript'          => 'You have disabled Javascript in your browser.<br>The system does not work without it.<br>Please enable Javascript.',
+    'Error login page'  => 'You have entered incorrect username or password.<br>Please check the data and try again.',
 
-// List tab
+    // List tab
     'Site'              => 'Site',
     'Expand'            => 'Expand',
     'Collapse'          => 'Collapse',
@@ -36,14 +40,12 @@ $lang_admin = array(
     'Search'            => 'Search',
     'Create subarticle' => 'Create a page in this section',
 
-// Editor tab
-    'Empty editor info' => 'Go to the “<a href="#list">Site</a>” tab and choose a page for editing.',
-    'Not saved correct' => 'Warning! An error occurred during page saving. Copy the content to a text editor and save into a file out of caution.',
-    'Editor'            => 'Editor',
+    // Articles and editor tab
+    'Articles'          => 'Pages',
+    'Article'           => 'Page',
     'Author'            => 'Author',
     'Template'          => 'Template',
     'Title'             => 'Title',
-    'Add template info' => 'The filename of the new template:',
     'Meta keywords'     => 'Meta-keywords',
     'Meta description'  => 'Meta-description',
     'Meta help'         => 'The meta-information can be used by search engines. Fill in to improve indexing.',
@@ -64,11 +66,11 @@ $lang_admin = array(
     'Commented info'    => 'Display the comment form at this page.',
     'Preview published' => 'The published page will be opened in a new window.',
     'Preview ready'     => 'View the published page &uarr;',
-    'Go to comments'    => 'Go to the comments',
-    'Preview not found' => '<h1>Page not found</h1><p>The page you want to browse is not published yet or does not exist at all. You can view only the published pages.</p>',
+    'Comments'          => 'Comments',
     'URL not unique'    => 'This URL part is already used. Choose another one.',
     'URL empty'         => 'Set the URL part to form the page address.',
     'URL on mainpage'   => 'You cannot change the URL fragment of the main page.',
+    'inherited'         => 'inherited',
 
     'Bold'   => 'Bold (Ctrl + B)',
     'Italic' => 'Italic (Ctrl + I)',
@@ -103,63 +105,49 @@ $lang_admin = array(
     'NOBR' => 'Disable line breaking (Ctrl + O)',
 
     'Cut'                                  => 'Insert <cut> tag to show excerpt',
+    'Outdated version'                     => 'Somebody has modified the text while you have been editing it. Your changes cannot be saved right now without loss of other ones. Open new version in a new window and move your changes to the new version.',
 
-// Preview tab
-    'Preview'                              => 'Preview',
-
-// Comments tab
+    // Comments tab
     'Leave hidden'                         => 'Leave hidden and do not send',
-    'Show'                                 => 'Show',
-    'Good comments'                        => 'Good',
-    'Usual comments'                       => 'Usual',
     'Good comment'                         => 'Good comment',
     'Mark'                                 => 'Mark',
-    'Unmark comment'                       => 'Remove the mark',
-    'Delete'                               => 'Delete',
-    'Edit'                                 => 'Edit',
-    'All'                                  => 'All',
-    'Go to editor'                         => 'Go to page editing',
-    'All comments to'                      => 'All comments to “%s”',
-    'Show hidden comments'                 => 'Hidden',
-    'Show last comments'                   => 'Last',
-    'Show new comments'                    => 'Unchecked',
-    'Hidden comments'                      => 'Hidden comments on the site',
-    'Last comments'                        => 'Last comments on the site',
+    'Good'                                 => 'Good',
+    'Usual'                                => 'Usual',
+    'Status'                               => 'Status',
+    'Pending'                              => 'Pending',
+    'Considered'                           => 'Considered',
     'New comments'                         => 'Unchecked comments on the site',
     'No comments'                          => 'No comments',
     'N comments'                           => '{{ count }} comment|{{ count }} comments',
+    'Show email'                           => 'Show email to visitors',
     'Hidden'                               => 'hidden',
     'Subscribed'                           => 'subscribed',
+    'Subscribed to comments'               => 'Subscribed to comments',
     'Save'                                 => 'Save',
     'Save info'                            => 'Moreover, CTRL + S works',
-    'Show email'                           => 'Show e-mail',
     'Name'                                 => 'Name',
     'Date'                                 => 'Time',
-    'IP'                                   => 'IP',
     'Comment'                              => 'Comment',
-    'View comments'                        => 'Moderate',
-    'Unchecked comments'                   => 'There are unchecked comments.',
+    'Edit comment'                         => 'Edit comment',
 
-// Pictures tab
+    // Pictures tab
     'Pictures'                             => 'Pictures',
 
-// Tags tab
+    // Tags tab
     'Tag'                                  => 'Tag',
+    'New tag'                              => 'New tag',
+    'Edit tag'                             => 'Edit tag',
     'Used in articles'                     => 'Used in articles',
     'Used in articles info'                => 'The number of articles using this tag and links to them.',
-    'URL part'                             => 'URL part',
     'Tag description'                      => 'Description',
     'Tag description info'                 => 'Displayed on the tag page.',
 
-// Admin tab
-    'Administrate'                         => 'Administration',
-
-// Stat tab
+    // Stat tab
     'Already published'                    => 'Published on the website',
     'Articles num'                         => '{{ articles }} article|{{ articles }} articles',
     'Comments num'                         => '{{ comments }} comment|{{ comments }} comments',
     'Server load'                          => 'Server load: %s',
-    'Stat'                                 => 'Statistics',
+    'Dashboard'                            => 'Dashboard',
     'S2 version'                           => 'S2 version',
     'Environment'                          => 'Environment',
     'N/A'                                  => 'N/A',
@@ -169,18 +157,19 @@ $lang_admin = array(
     'Rows'                                 => '{{ rows }} row|{{ rows }} rows',
     'Size'                                 => 'Data size: {{ value }}',
 
-// Options tab
-    'Options'                              => 'Options',
+    // Options tab
     'Invalid webmaster email'              => 'You have entered an invalid webmaster e-mail.',
 
-// Users tab
+    // Users tab
     'Users'                                => 'Users',
+    'New user'                             => 'New user',
     'No other admin'                       => 'You cannot drop your administrative permissions because there is no another administrator.',
     'No other admin delete'                => 'You cannot delete yourself because there is no another administrator.',
     'Username exists'                      => 'The username “{{ login }}” already exists.',
     'Name help'                            => 'Displayed in RSS and available in templates in the “s2_author” placeholder.', //'Отображается в RSS и доступно в шаблонах в метке s2_author.',
     'Login'                                => 'Username',
     'Email'                                => 'E-mail',
+    'Email help'                           => 'Used for notifications on new comments if the “Hide comments” permission is granted.',
     'view'                                 => 'View',
     'view_hidden'                          => 'View secret data',
     'hide_comments'                        => 'Hide comments',
@@ -196,13 +185,12 @@ $lang_admin = array(
     'edit_site help'                       => 'Allow users to edit and remove another’s pages, to edit and remove tags (editors).',
     'edit_users help'                      => 'Allow users to change options, to create and edit user accounts and to install extensions (administrators).',
 
-// Extensions tab
+    // Extensions tab
     'Extensions'                           => 'Extensions',
-    'Install extension'                    => 'Install extension',
-    'Upgrade extension'                    => 'Upgrade extension',
+    'Install extension'                    => 'Install',
+    'Upgrade extension'                    => 'Upgrade',
     'Extensions for upgrade'               => 'There are extensions for upgrade',
     'Extensions available'                 => 'Extensions available for install or upgrade',
-    'Hotfixes available'                   => 'Hotfixes available for install',
     'Installed extensions'                 => 'Installed extensions',
     'Version'                              => ' v%s',
     'Installed extensions warn'            => '<strong>WARNING!</strong> If you uninstall an extension, any data associated with that extension will be permanently deleted from the database and cannot be restored by re-installing the extension. If you wish to retain the data then you should disable the extension instead.',
@@ -226,7 +214,8 @@ $lang_admin = array(
     'Disable dependency'       => 'The extension “{{ extension }}” cannot be disabled while the following extensions are enabled: {{ dependencies }}.',
     'Disabled dependency'      => 'The extension “{{ extension }}” cannot be enabled while the following extensions are disabled: {{ dependencies }}.',
 
-// Config tab
+    // Config tab
+    'Config'                   => 'Configuration',
     'S2_SITE_NAME_help'        => 'Used in titles and RSS.',
     'S2_WEBMASTER_help'        => 'Used in the copyright, RSS and as the sender name in subscription e-mails; you can leave it empty.',
     'S2_WEBMASTER_EMAIL_help'  => 'Used in the copyright and as the sender address.',
@@ -274,27 +263,23 @@ $lang_admin = array(
     'S2_LANGUAGE'      => 'Language',
     'S2_STYLE'         => 'Style',
 
-    'inherited' => 'Inherited',
+    'Filesize B'             => 'B',
+    'Filesize КB'            => 'КB',
+    'Filesize MB'            => 'MB',
+    'Filesize GB'            => 'GB',
+    'Filesize ТB'            => 'ТB',
+    'Filesize PB'            => 'PB',
+    'Filesize EB'            => 'EB',
+    'Filesize ZB'            => 'ZB',
+    'Filesize YB'            => 'YB',
+    'Filesize format'        => '{{ number }} {{ unit }}',
+    'Decimal count'          => 2,
+    'Decimal point'          => '.',
+    'Thousands separator'    => ',',
 
-    'Filesize B'          => 'B',
-    'Filesize КB'         => 'КB',
-    'Filesize MB'         => 'MB',
-    'Filesize GB'         => 'GB',
-    'Filesize ТB'         => 'ТB',
-    'Filesize PB'         => 'PB',
-    'Filesize EB'         => 'EB',
-    'Filesize ZB'         => 'ZB',
-    'Filesize YB'         => 'YB',
-    'Filesize format'     => '{{ number }} {{ unit }}',
-    'Decimal count'       => 2,
-    'Decimal point'       => '.',
-    'Thousands separator' => ',',
-
-// Session tab
-    'Current session'     => 'Current session',
-
-    'Outdated version'       => 'Somebody has modified the text while you have been editing it. Your changes cannot be saved right now without loss of other ones. Open new version in a new window and move your changes to the new version.',
-
+    // Session tab
+    'Sessions'               => 'Sessions',
+    'Current session'        => 'Current session',
 
     // Pictures
     'Upload file'            => 'Upload file',
@@ -327,7 +312,7 @@ $lang_admin = array(
     'Upload error ' . UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.',
     'Upload error ' . UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
     'Upload error ' . UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
-);
+];
 
 $lang_templates = array(
 

@@ -9,6 +9,7 @@ if (!isset($this)) {
 /** @var string $locale */
 /** @var string $basePath */
 /** @var callable $trans */
+/** @var callable $param */
 /** @var string $menu */
 /** @var ?string $content */
 /** @var ?string $errorMessage */
@@ -21,7 +22,7 @@ if (!isset($this)) {
 <html lang="<?= $locale ?>">
 <head>
     <meta charset="utf-8">
-    <title><?php echo $trans('Admin panel'), S2_SITE_NAME ? ' - ' . S2_SITE_NAME : ''; ?></title>
+    <title><?php echo $trans('Admin panel'), $param('S2_SITE_NAME') ? ' - ' . $param('S2_SITE_NAME') : ''; ?></title>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="<?php echo $basePath; ?>/_vendor/s2/admin-yard/demo/style.css">
@@ -31,12 +32,12 @@ if (!isset($this)) {
     <?php endforeach; ?>
 
     <script src="<?php echo $basePath; ?>/_vendor/s2/admin-yard/demo/script.js"></script>
-    <script src="js/lib.js"></script>
+    <script src="<?= $basePath ?>/_admin/js/lib.js"></script>
     <?php foreach ($extraScripts as $script): ?>
-        <script src="<?= $script ?>"></></script>
+        <script src="<?= $script ?>"></script>
     <?php endforeach; ?>
 
-    <script src="lang/<?php echo Lang::admin_code(); ?>/ui.js"></script>
+    <script src="lang/<?= $locale ?>/ui.js"></script>
     <style>:root {
             --page-secondary-background: <?php echo S2_ADMIN_COLOR; ?>;
         }</style>

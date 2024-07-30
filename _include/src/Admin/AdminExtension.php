@@ -351,7 +351,7 @@ class AdminExtension implements ExtensionInterface
             $authManager            = $container->get(AuthManager::class);
             $totalUserSessionsCount = $authManager->getTotalUserSessionsCount();
             if ($totalUserSessionsCount > 1) {
-                $event->addSignal('Session', new Signal((string)$totalUserSessionsCount, 'Other sessions', '?entity=Session'));
+                $event->addSignal('Session', new Signal((string)$totalUserSessionsCount, 'Other sessions', '?entity=Session&action=list'));
             }
         });
 

@@ -49,7 +49,7 @@ readonly class ExtensionManager implements AdminConfigExtenderInterface
         $adminConfig
             ->setServicePage('Extension', function () {
                 return $this->getExtensionList();
-            }, 60)
+            }, 60, $this->translator->trans('Extensions'))
         ;
     }
 

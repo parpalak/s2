@@ -163,7 +163,7 @@ function s2_jsvarencode($var)
                     <?php endforeach; ?>
                     <?php if ($columnIndex === 2): ?>
                         <p class="article-form-buttons">
-                            <button type="submit"><?= $trans('Save') ?></button>
+                            <button type="submit" title="<?= $trans('Save info') ?>"><?= $trans('Save') ?></button>
                         </p>
                         <hr>
                         <p>

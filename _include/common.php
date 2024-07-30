@@ -149,9 +149,18 @@ if (file_exists(S2_CACHE_DIR . 'cache_config.php')) {
     include S2_CACHE_DIR . 'cache_config.php';
 }
 
+/** @var \S2\Cms\Config\DynamicConfigProvider $dynamicConfigProvider */
+$dynamicConfigProvider = $app->container->get(\S2\Cms\Config\DynamicConfigProvider::class);
 if (!defined('S2_CONFIG_LOADED')) {
-    $app->container->get(\S2\Cms\Config\DynamicConfigProvider::class)->regenerate();
+    $dynamicConfigProvider->regenerate();
     include S2_CACHE_DIR . 'cache_config.php';
+}
+
+if (defined('S2_ADMIN_MODE')) {
+    $loginTimeoutSeconds = $dynamicConfigProvider->get('S2_LOGIN_TIMEOUT') * 60;
+    ini_set('session.cookie_lifetime', $loginTimeoutSeconds);
+    ini_set('session.gc_maxlifetime', $loginTimeoutSeconds);
+    ini_set('session.cookie_httponly', true);
 }
 
 define('S2_DB_LAST_REVISION', 19);

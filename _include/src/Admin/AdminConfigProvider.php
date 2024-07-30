@@ -85,6 +85,8 @@ readonly class AdminConfigProvider
 
         $commentEntity = new EntityConfig('Comment', $this->dbPrefix . 'art_comments');
         $commentEntity
+            ->setPluralName($this->translator->trans('Comments'))
+            ->setEditTitle($this->translator->trans('Edit comment'))
             ->addField(new FieldConfig(
                 name: 'id',
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT, true),
@@ -92,7 +94,7 @@ readonly class AdminConfigProvider
             ))
             ->addField($articleFieldId = new FieldConfig(
                 name: 'article_id',
-                label: $this->translator->trans('Page'),
+                label: $this->translator->trans('Article'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT),
                 control: 'autocomplete',
                 linkToEntity: new LinkTo($articleEntity, 'title'),
@@ -107,17 +109,20 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'email',
+                label: $this->translator->trans('Email'),
                 control: 'input',
                 validators: [new Length(max: 80)],
                 useOnActions: $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN) ? [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST] : [],
             ))
             ->addField(new FieldConfig(
                 name: 'show_email',
+                label: $this->translator->trans('Show email'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
             ))
             ->addField(new FieldConfig(
                 name: 'subscribed',
+                label: $this->translator->trans('Subscribed to comments'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
             ))
@@ -171,7 +176,7 @@ readonly class AdminConfigProvider
             ))
             ->addFilter(new FilterLinkTo(
                 $articleFieldId,
-                $this->translator->trans('Page'),
+                $this->translator->trans('Article'),
             ))
             ->addFilter(new Filter(
                 'good',
@@ -191,8 +196,8 @@ readonly class AdminConfigProvider
                 'shown = %1$s',
                 options: [
                     '' => $this->translator->trans('All'),
-                    1  => $this->translator->trans('Visible'),
-                    0  => $this->translator->trans('Hidden'),
+                    1  => $this->translator->trans('Yes'),
+                    0  => $this->translator->trans('No'),
                 ]
             ))
             ->addFilter(new Filter(
@@ -200,7 +205,11 @@ readonly class AdminConfigProvider
                 $this->translator->trans('Status'),
                 'radio',
                 '(sent = 0 AND shown = 0) = (0 = %1$s)',
-                options: ['' => 'All', 0 => 'Pending', 1 => 'Considered']
+                options: [
+                    '' => $this->translator->trans('All'),
+                    0  => $this->translator->trans('Pending'),
+                    1  => $this->translator->trans('Considered'),
+                ]
             ))
             ->setControllerClass(CommentController::class)
             ->setEnabledActions([
@@ -222,6 +231,8 @@ readonly class AdminConfigProvider
         $isAdmin    = $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS);
         $userEntity = new EntityConfig('User', $this->dbPrefix . 'users');
         $userEntity
+            ->setPluralName($this->translator->trans('Users'))
+            ->setNewTitle($this->translator->trans('New user'))
             ->setEnabledActions(
                 [
                     ...$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_VIEW_HIDDEN, PermissionChecker::PERMISSION_EDIT_USERS) ? [FieldConfig::ACTION_LIST] : [],
@@ -261,6 +272,8 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'email',
+                label: $this->translator->trans('Email'),
+                hint: $this->translator->trans('Email help'),
                 control: 'input',
                 validators: [new Length(max: 80)],
                 sortable: true,
@@ -397,6 +410,7 @@ readonly class AdminConfigProvider
         }
 
         $articleEntity
+            ->setPluralName($this->translator->trans('Articles'))
             ->addField(new FieldConfig(
                 name: 'id',
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT, true),
@@ -468,7 +482,7 @@ readonly class AdminConfigProvider
             ->addField(new FieldConfig(
                 name: 'create_time',
                 label: $this->translator->trans('Create time'),
-                type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
+                type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME, defaultValue: new \DateTimeImmutable()),
                 control: 'datetime',
                 sortable: true,
                 viewTemplate: '_admin/templates/date.php.inc',
@@ -485,6 +499,7 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'published',
+                label: $this->translator->trans('Published'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_BOOL),
                 control: 'checkbox',
                 useOnActions: [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST],
@@ -511,6 +526,7 @@ readonly class AdminConfigProvider
             ))
             ->addField(new FieldConfig(
                 name: 'comments',
+                label: $this->translator->trans('Comments'),
                 type: new LinkedByFieldType($commentEntity, 'CASE WHEN COUNT(*) > 0 THEN COUNT(*) ELSE NULL END', 'article_id'),
                 sortable: true,
                 useOnActions: [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_LIST],
@@ -714,7 +730,11 @@ readonly class AdminConfigProvider
                     $this->translator->trans('Published'),
                     'radio',
                     'published = %1$s',
-                    options: ['' => 'All', 1 => 'Yes', 0 => 'No']
+                    options: [
+                        '' => $this->translator->trans('All'),
+                        1  => $this->translator->trans('Yes'),
+                        0  => $this->translator->trans('No'),
+                    ]
                 )
             )
             ->addFilter(
@@ -743,6 +763,9 @@ readonly class AdminConfigProvider
             ->addEntity($commentEntity, 10)
             ->addEntity($userEntity, 50)
             ->addEntity((new EntityConfig('Tag', $this->dbPrefix . 'tags'))
+                ->setPluralName($this->translator->trans('Tags'))
+                ->setEditTitle($this->translator->trans('Edit tag'))
+                ->setNewTitle($this->translator->trans('New tag'))
                 ->addField(new FieldConfig(
                     name: 'tag_id',
                     type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT, true),
@@ -823,6 +846,7 @@ readonly class AdminConfigProvider
             $adminConfig
                 ->addEntity(
                     (new EntityConfig('Config', $this->dbPrefix . 'config'))
+                        ->setPluralName($this->translator->trans('Config'))
                         ->addField(new FieldConfig(
                             name: 'name',
                             type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
@@ -845,6 +869,7 @@ readonly class AdminConfigProvider
                 )
                 ->addEntity(
                     (new EntityConfig('Session', $this->dbPrefix . 'users_online'))
+                        ->setPluralName($this->translator->trans('Sessions'))
                         ->addField(new FieldConfig(
                             name: 'challenge',
                             type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),

@@ -34,6 +34,11 @@ class TranslationProvider implements TranslationProviderInterface
 
                 'Label'      => 'Метка',
                 'Label help' => 'К этой записи будут добавлены ссылки «см. также» на другие записи с такой же меткой.',
+
+                'Posts'         => 'Посты',
+                'New post'      => 'Новый пост',
+                'Blog comments' => 'Комментарии в блоге',
+                'Text'          => 'Текст',
             ],
             'en' => [
                 'Blog config'           => 'Blog',
@@ -53,6 +58,11 @@ class TranslationProvider implements TranslationProviderInterface
 
                 'Label'      => 'Label',
                 'Label help' => '“See also” links (to the posts that have the same label) will be appended to this post.',
+
+                'Posts'         => 'Posts',
+                'New post'      => 'New post',
+                'Blog comments' => 'Blog comments',
+                'Text'          => 'Text',
             ],
         };
     }
