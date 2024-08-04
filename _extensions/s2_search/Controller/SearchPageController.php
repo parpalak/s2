@@ -3,19 +3,20 @@
  * Displays a page with search results
  *
  * @copyright 2010-2024 Roman Parpalak
- * @license MIT
- * @package s2_search
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_search
  */
 
 declare(strict_types=1);
 
 namespace s2_extensions\s2_search\Controller;
 
-use Lang;
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use S2\Rose\Entity\ExternalId;
@@ -24,32 +25,36 @@ use S2\Rose\Finder;
 use S2\Rose\Helper\ProfileHelper;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Exception\EmptyIndexException;
+use s2_extensions\s2_search\Event\TagsSearchEvent;
+use s2_extensions\s2_search\Service\SimilarWordsDetector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class SearchPageController implements ControllerInterface
 {
     public function __construct(
-        private Finder               $finder,
-        private StemmerInterface     $stemmer,
-        private DbLayer              $dbLayer,
-        private ArticleProvider      $articleProvider,
-        private UrlBuilder           $urlBuilder,
-        private HtmlTemplateProvider $templateProvider,
-        private Viewer               $viewer,
-        private bool                 $debugView,
-        private string               $tagsUrl,
+        private Finder                   $finder,
+        private StemmerInterface         $stemmer,
+        private ThumbnailGenerator       $thumbnailGenerator,
+        private SimilarWordsDetector     $similarWordsDetector,
+        private DbLayer                  $dbLayer,
+        private ArticleProvider          $articleProvider,
+        private EventDispatcherInterface $eventDispatcher,
+        private TranslatorInterface      $translator,
+        private UrlBuilder               $urlBuilder,
+        private HtmlTemplateProvider     $templateProvider,
+        private Viewer                   $viewer,
+        private bool                     $debugView,
+        private string                   $tagsUrl,
+        private int                      $maxItems,
     ) {
-        Lang::load('s2_search', static function () {
-            /** @noinspection PhpUndefinedConstantInspection */
-            if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php')) {
-                /** @noinspection PhpUndefinedConstantInspection */
-                return require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
-            }
-            return require __DIR__ . '/../lang/English.php';
-        });
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function handle(Request $request): Response
     {
         $query   = $request->query->get('q', '');
@@ -60,7 +65,7 @@ readonly class SearchPageController implements ControllerInterface
         $template = $this->templateProvider->getTemplate('service.php');
 
         if ($query !== '') {
-            $items_per_page = S2_MAX_ITEMS ?: 10.0;
+            $items_per_page = $this->maxItems ?: 10.0;
             $queryObj       = new Query($query);
             $queryObj
                 ->setLimit($items_per_page)
@@ -76,13 +81,7 @@ readonly class SearchPageController implements ControllerInterface
             $content += ['tags' => $this->findInTags($queryObj)];
 
             if ($content['num'] > 0) {
-                // Feel free to suggest the code for other languages.
-                /** @noinspection PhpUndefinedConstantInspection */
-                if (str_starts_with(S2_LANGUAGE, 'Russian')) {
-                    $content['num_info'] = sprintf(s2_russian_plural((int)$content['num'], 'Нашлось %d страниц.', 'Нашлась %d страница.', 'Нашлось %d страницы.'), $content['num']);
-                } else {
-                    $content['num_info'] = sprintf(Lang::get('Found', 's2_search'), $content['num']);
-                }
+                $content['num_info'] = $this->translator->trans('Found N pages', ['%count%' => $content['num'], '{{ pages }}' => $content['num']]);
 
                 $totalPages = ceil(1.0 * $content['num'] / $items_per_page);
                 if ($pageNum < 1 || $pageNum > $totalPages) {
@@ -95,12 +94,14 @@ readonly class SearchPageController implements ControllerInterface
                 $content['output'] = '';
                 foreach ($resultSet->getItems() as $item) {
                     $content['output'] .= $this->viewer->render('search_result', [
-                        'title'  => $item->getHighlightedTitle($this->stemmer),
-                        'url'    => $item->getUrl(),
-                        'descr'  => $item->getFormattedSnippet(),
-                        'time'   => $item->getDate()?->getTimestamp(),
-                        'images' => $item->getImageCollection(),
-                        'debug'  => ($content['trace'][(new ExternalId($item->getId()))->toString()]),
+                        'title'         => $item->getHighlightedTitle($this->stemmer),
+                        'url'           => $item->getUrl(),
+                        'link'          => $this->urlBuilder->link($item->getUrl()),
+                        'descr'         => $item->getFormattedSnippet(),
+                        'time'          => $item->getDate()?->getTimestamp(),
+                        'images'        => $item->getImageCollection(),
+                        'debug'         => ($content['trace'][(new ExternalId($item->getId()))->toString()]),
+                        'thumbnailHtml' => $this->thumbnailGenerator->getThumbnailHtml(...),
                     ], 's2_search');
                 }
 
@@ -112,23 +113,26 @@ readonly class SearchPageController implements ControllerInterface
             }
         }
 
+        $content['action'] = $this->urlBuilder->link('/search');
+
         $template->putInPlaceholder('text', $this->viewer->render('search', $content, 's2_search'));
-        $template->putInPlaceholder('title', Lang::get('Search', 's2_search'));
+        $template->putInPlaceholder('title', $this->translator->trans('Search'));
         $template->registerPlaceholder('<!-- s2_search_field -->', '');
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
-        $template->addBreadCrumb(Lang::get('Search', 's2_search'));
+        $template->addBreadCrumb($this->translator->trans('Search'));
 
         return $template->toHttpResponse();
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function findInTags(Query $query): string
     {
-        $return = '';
-
         $words = $query->valueToArray();
         if (\count($words) === 0) {
-            return $return;
+            return '';
         }
 
         $stemmedWords = array_map(fn($word) => $this->stemmer->stemWord($word), $words);
@@ -159,33 +163,21 @@ readonly class SearchPageController implements ControllerInterface
 
         $tags = [];
         while ($row = $this->dbLayer->fetchAssoc($s2_search_result)) {
-            if ($this->tagIsSimilarToWords($row['name'], $words)) {
+            if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
                 $tags[] = '<a href="' . $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
             }
         }
 
-        ($hook = s2_hook('s2_search_find_tags_pre_mrg')) ? eval($hook) : null;
+        $event = new TagsSearchEvent($where, $words);
+        if (\count($tags) > 0) {
+            $event->addLine(sprintf($this->translator->trans('Found tags'), implode(', ', $tags)));
+        }
+        $this->eventDispatcher->dispatch($event);
 
-        if (!empty($tags)) {
-            $return .= '<p class="s2_search_found_tags">' . sprintf(Lang::get('Found tags', 's2_search'), implode(', ', $tags)) . '</p>';
+        if (($string = $event->getLine()) !== null) {
+            return '<p class="s2_search_found_tags">' . $string . '</p>';
         }
 
-        return $return;
-    }
-
-    private function tagIsSimilarToWords(string $name, array $words): bool
-    {
-        $foundWordsInTags = array_filter(explode(' ', $name), static fn($word) => mb_strlen($word) > 2);
-        $foundStemsInTags = array_map(fn(string $keyPart) => $this->stemmer->stemWord($keyPart), $foundWordsInTags);
-
-        foreach ($foundStemsInTags as $foundStemInTags) {
-            foreach ($words as $word) {
-                if ($word === $foundStemInTags || (str_starts_with($foundStemInTags, $word) && mb_strlen($word) >= 5)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return '';
     }
 }

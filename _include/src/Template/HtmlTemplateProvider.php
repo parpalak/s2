@@ -4,8 +4,8 @@
  * Replaces styles and scripts placeholders.
  *
  * @copyright 2009-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -15,8 +15,10 @@ namespace S2\Cms\Template;
 use S2\Cms\Asset\AssetMerge;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Model\UrlBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class HtmlTemplateProvider
 {
@@ -24,6 +26,8 @@ class HtmlTemplateProvider
 
     public function __construct(
         private readonly RequestStack             $requestStack,
+        private readonly UrlBuilder               $urlBuilder,
+        private readonly TranslatorInterface      $translator,
         private readonly Viewer                   $viewer,
         private readonly EventDispatcherInterface $dispatcher,
         private readonly DynamicConfigProvider    $dynamicConfigProvider,
@@ -44,6 +48,8 @@ class HtmlTemplateProvider
         $htmlTemplate = new HtmlTemplate(
             $templateContent,
             $this->requestStack,
+            $this->urlBuilder,
+            $this->translator,
             $this->viewer,
             $this->dispatcher,
             $this->dynamicConfigProvider,

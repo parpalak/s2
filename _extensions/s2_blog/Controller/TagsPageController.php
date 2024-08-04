@@ -3,13 +3,13 @@
  * List of blog tags.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplate;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +17,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TagsPageController extends BlogController
 {
+    /**
+     * @throws DbLayerException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
@@ -76,13 +79,13 @@ class TagsPageController extends BlogController
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
+            $template->addBreadCrumb($this->translator->trans('Blog'), $this->blogUrlBuilder->main());
         }
-        $template->addBreadCrumb(Lang::get('Tags'));
+        $template->addBreadCrumb($this->translator->trans('Tags'));
 
         $template
-            ->putInPlaceholder('head_title', Lang::get('Tags'))
-            ->putInPlaceholder('title', Lang::get('Tags'))
+            ->putInPlaceholder('head_title', $this->translator->trans('Tags'))
+            ->putInPlaceholder('title', $this->translator->trans('Tags'))
             ->setLink('up', $this->blogUrlBuilder->main())
         ;
 

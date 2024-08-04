@@ -3,13 +3,12 @@
  * Blog posts for a specified tag.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -19,9 +18,11 @@ use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\CalendarBuilder;
+use s2_extensions\s2_blog\Model\PostProvider;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 class TagPageController extends BlogController
@@ -31,13 +32,15 @@ class TagPageController extends BlogController
         CalendarBuilder       $calendarBuilder,
         BlogUrlBuilder        $blogUrlBuilder,
         ArticleProvider       $articleProvider,
+        PostProvider          $postProvider,
         UrlBuilder            $urlBuilder,
+        TranslatorInterface   $translator,
         HtmlTemplateProvider  $templateProvider,
         Viewer                $viewer,
         string                $blogTitle,
         private readonly bool $useHierarchy
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
@@ -69,7 +72,7 @@ class TagPageController extends BlogController
 
         $art_links = $this->articles_by_tag($tagId);
         if (\count($art_links) > 0) {
-            $tagDescription .= '<p>' . Lang::get('Articles by tag', 's2_blog') . '<br />' . implode('<br />', $art_links) . '</p>';
+            $tagDescription .= '<p>' . $this->translator->trans('Articles by tag') . '<br />' . implode('<br />', $art_links) . '</p>';
         }
 
         if ($tagDescription) {
@@ -92,9 +95,9 @@ class TagPageController extends BlogController
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
+            $template->addBreadCrumb($this->translator->trans('Blog'), $this->blogUrlBuilder->main());
         }
-        $template->addBreadCrumb(Lang::get('Tags'), $this->blogUrlBuilder->tags());
+        $template->addBreadCrumb($this->translator->trans('Tags'), $this->blogUrlBuilder->tags());
         $template->addBreadCrumb($tagName);
 
         $template

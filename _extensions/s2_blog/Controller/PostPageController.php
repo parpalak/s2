@@ -3,13 +3,12 @@
  * Single blog post.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -20,8 +19,10 @@ use S2\Cms\Template\Viewer;
 use S2\Rose\Entity\ExternalId;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\CalendarBuilder;
+use s2_extensions\s2_blog\Model\PostProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class PostPageController extends BlogController
 {
@@ -30,14 +31,16 @@ class PostPageController extends BlogController
         CalendarBuilder                         $calendarBuilder,
         BlogUrlBuilder                          $blogUrlBuilder,
         ArticleProvider                         $articleProvider,
+        PostProvider                            $postProvider,
         UrlBuilder                              $urlBuilder,
         private readonly RecommendationProvider $recommendationProvider,
+        TranslatorInterface                     $translator,
         HtmlTemplateProvider                    $templateProvider,
         Viewer                                  $viewer,
         string                                  $blogTitle,
         protected bool                          $showComments,
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
@@ -59,7 +62,7 @@ class PostPageController extends BlogController
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
+            $template->addBreadCrumb($this->translator->trans('Blog'), $this->blogUrlBuilder->main());
         }
         $template
             ->addBreadCrumb($textYear, $this->blogUrlBuilder->year($year))
@@ -93,8 +96,8 @@ class PostPageController extends BlogController
 
         if (!$row = $this->dbLayer->fetchAssoc($result)) {
             $template
-                ->putInPlaceholder('head_title', Lang::get('Not found', 's2_blog'))
-                ->putInPlaceholder('text', '<p>' . Lang::get('Not found', 's2_blog') . '</p>')
+                ->putInPlaceholder('head_title', $this->translator->trans('Not found'))
+                ->putInPlaceholder('text', '<p>' . $this->translator->trans('Not found') . '</p>')
             ;
 
             return $template->toHttpResponse()->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -191,9 +194,10 @@ class PostPageController extends BlogController
             $template->putInPlaceholder('comments', $this->get_comments($post_id));
         }
 
-        $row['time']      = s2_date_time($row['create_time']);
-        $row['commented'] = 0; // for template
-        $row['tags']      = $tags;
+        $row['time']             = s2_date_time($row['create_time']);
+        $row['commented']        = 0; // for template
+        $row['tags']             = $tags;
+        $row['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
 
         $template
             ->putInPlaceholder('meta_description', self::extractMetaDescriptions($row['text']))

@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 declare(strict_types=1);
@@ -10,19 +10,21 @@ declare(strict_types=1);
 namespace s2_extensions\s2_blog;
 
 use S2\Cms\Pdo\DbLayer;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CalendarBuilder
 {
     public function __construct(
-        private DbLayer        $dbLayer,
-        private BlogUrlBuilder $blogUrlBuilder,
-        private int            $startYear,
+        private DbLayer             $dbLayer,
+        private BlogUrlBuilder      $blogUrlBuilder,
+        private TranslatorInterface $translator,
+        private int                 $startYear,
     ) {
     }
 
-
     /**
      * @param ?int $day 0 for skipping highlight, null for skipping header
+     *
      * @throws \S2\Cms\Pdo\DbLayerException
      */
     public function calendar(?int $year = null, ?int $month = null, ?int $day = 0, string $url = '', array $dayUrls = null): string
@@ -40,7 +42,7 @@ readonly class CalendarBuilder
 
         // Dealing with week days
         $currentColumnIndex = (int)date('w', $startTime);
-        if (\Lang::get('Sunday starts week', 's2_blog') !== '1') {
+        if ($this->translator->trans('Sunday starts week') !== '1') {
             --$currentColumnIndex;
             if ($currentColumnIndex === -1) {
                 $currentColumnIndex = 6;
@@ -146,10 +148,10 @@ readonly class CalendarBuilder
         if ($n % 7 === 0) {
             return true;
         }
-        if ($n % 7 === 6 && \Lang::get('Sunday starts week', 's2_blog') != '1') {
+        if ($n % 7 === 6 && $this->translator->trans('Sunday starts week') != '1') {
             return true;
         }
-        if ($n % 7 === 1 && \Lang::get('Sunday starts week', 's2_blog') == '1') {
+        if ($n % 7 === 1 && $this->translator->trans('Sunday starts week') == '1') {
             return true;
         }
         return false;

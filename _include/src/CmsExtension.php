@@ -44,12 +44,12 @@ use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\TemplateFinalReplaceEvent;
 use S2\Cms\Template\Viewer;
+use S2\Cms\Translation\ExtensibleTranslator;
 use S2\Rose\Finder;
 use S2\Rose\Stemmer\PorterStemmerEnglish;
 use S2\Rose\Stemmer\PorterStemmerRussian;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
-use s2_extensions\s2_search\Controller\SearchPageController;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -114,22 +114,6 @@ class CmsExtension implements ExtensionInterface
             ;
         });
 
-        $container->set(SearchPageController::class, function (Container $container) {
-            /** @var DynamicConfigProvider $provider */
-            $provider = $container->get(DynamicConfigProvider::class);
-            return new SearchPageController(
-                $container->get(Finder::class),
-                $container->get(StemmerInterface::class),
-                $container->get(DbLayer::class),
-                $container->get(ArticleProvider::class),
-                $container->get(UrlBuilder::class),
-                $container->get(HtmlTemplateProvider::class),
-                $container->get(Viewer::class),
-                $container->getParameter('debug_view'),
-                $provider->get('S2_TAGS_URL'),
-            );
-        });
-
         $container->set(ExtensionCache::class, function (Container $container) {
             return new ExtensionCache(
                 $container->get(DbLayer::class),
@@ -160,7 +144,32 @@ class CmsExtension implements ExtensionInterface
         });
 
         $container->set(DynamicConfigProvider::class, function (Container $container) {
-            return new DynamicConfigProvider($container->get(DbLayer::class), $container->get('config_cache'), $container->getParameter('cache_dir'));
+            return new DynamicConfigProvider(
+                $container->get(DbLayer::class),
+                $container->get('config_cache'),
+                $container->getParameter('cache_dir'),
+            );
+        }, ['request_context']);
+
+        $container->set('translator', function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            $language = $provider->get('S2_LANGUAGE');
+
+            // TODO move mapping somewhere
+            $locale = match ($language) {
+                'Russian' => 'ru',
+                'English' => 'en',
+                default => throw new \LogicException('Unsupported language yet'),
+            };
+
+            $translations = require __DIR__ . '/../../_lang/' . $language . '/common.php';
+
+            return new ExtensibleTranslator(
+                $translations,
+                $language,
+                $locale,
+            );
         });
 
         $container->set(QueuePublisher::class, function (Container $container) {
@@ -201,6 +210,8 @@ class CmsExtension implements ExtensionInterface
         $container->set(HtmlTemplateProvider::class, function (Container $container) {
             return new HtmlTemplateProvider(
                 $container->get(RequestStack::class),
+                $container->get(UrlBuilder::class),
+                $container->get('translator'),
                 $container->get(Viewer::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->get(DynamicConfigProvider::class),
@@ -216,6 +227,7 @@ class CmsExtension implements ExtensionInterface
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new Viewer(
+                $container->get('translator'),
                 $container->getParameter('root_dir'),
                 $provider->get('S2_STYLE'),
                 $container->getParameter('debug_view')
@@ -226,6 +238,7 @@ class CmsExtension implements ExtensionInterface
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new Viewer(
+                $container->get('translator'),
                 $container->getParameter('root_dir'),
                 $provider->get('S2_STYLE'),
                 false // no HTML debug info for XML and other non-HTML content
@@ -318,6 +331,7 @@ class CmsExtension implements ExtensionInterface
             return new PageCommon(
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(RecommendationProvider::class),

@@ -3,23 +3,25 @@
  * Blog posts for a year.
  *
  * @copyright 2007-2014 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\CalendarBuilder;
+use s2_extensions\s2_blog\Model\PostProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 class YearPageController extends BlogController
@@ -29,15 +31,20 @@ class YearPageController extends BlogController
         CalendarBuilder      $calendarBuilder,
         BlogUrlBuilder       $blogUrlBuilder,
         ArticleProvider      $articleProvider,
+        PostProvider         $postProvider,
         UrlBuilder           $urlBuilder,
+        TranslatorInterface  $translator,
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
         string               $blogTitle,
         private readonly int $startYear,
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $year = $request->attributes->getInt('year');
@@ -49,7 +56,7 @@ class YearPageController extends BlogController
         $start_time = mktime(0, 0, 0, 1, 1, $year);
         $end_time   = mktime(0, 0, 0, 1, 1, $year + 1);
 
-        $title = sprintf(Lang::get('Year', 's2_blog'), $year);
+        $title = sprintf($this->translator->trans('Year'), $year);
         $template->putInPlaceholder('head_title', $title);
         $pageTitle = $title;
 
@@ -87,7 +94,7 @@ class YearPageController extends BlogController
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
+            $template->addBreadCrumb($this->translator->trans('Blog'), $this->blogUrlBuilder->main());
         }
         $template->addBreadCrumb($year);
 

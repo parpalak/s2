@@ -3,50 +3,46 @@
  * General blog page.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\CalendarBuilder;
-use s2_extensions\s2_blog\Lib;
+use s2_extensions\s2_blog\Model\PostProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 abstract class BlogController implements ControllerInterface
 {
     protected string $template_id = 'blog.php';
-
-    abstract public function body(Request $request, HtmlTemplate $template): ?Response;
 
     public function __construct(
         protected DbLayer              $dbLayer,
         protected CalendarBuilder      $calendarBuilder,
         protected BlogUrlBuilder       $blogUrlBuilder,
         protected ArticleProvider      $articleProvider,
+        protected PostProvider         $postProvider,
         protected UrlBuilder           $urlBuilder,
+        protected TranslatorInterface  $translator,
         protected HtmlTemplateProvider $templateProvider,
         protected Viewer               $viewer,
-        protected string               $blogTitle, // S2_BLOG_TITLE
-    )
-    {
-        Lang::load('s2_blog', function () {
-            if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php'))
-                return require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
-            else
-                return require __DIR__ . '/../lang/English.php';
-        });
+        protected string               $blogTitle,
+    ) {
     }
+
+    abstract public function body(Request $request, HtmlTemplate $template): ?Response;
 
     public function handle(Request $request): Response
     {
@@ -57,14 +53,10 @@ abstract class BlogController implements ControllerInterface
             ->putInPlaceholder('class', 's2_blog')
             ->putInPlaceholder('rss_link', [sprintf(
                 '<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />',
-                s2_htmlencode(Lang::get('RSS link title', 's2_blog')),
+                s2_htmlencode($this->translator->trans('RSS link title')),
                 $this->blogUrlBuilder->main() . 'rss.xml'
             )])
         ;
-
-        if ($template->hasPlaceholder('<!-- s2_blog_navigation -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_navigation -->', $this->blog_navigation($request));
-        }
 
         $result = $this->body($request, $template);
         if ($result !== null) {
@@ -77,6 +69,9 @@ abstract class BlogController implements ControllerInterface
         return $template->toHttpResponse();
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function getPosts(array $additionalQueryParts, bool $sortAsc = true, string $sortField = 'create_time'): string
     {
         // Obtaining posts
@@ -124,7 +119,7 @@ abstract class BlogController implements ControllerInterface
         }
 
         $see_also = $tags = [];
-        Lib::posts_links($ids, $merge_labels, $see_also, $tags);
+        $this->postProvider->postsLinks($ids, $merge_labels, $see_also, $tags);
 
         array_multisort($sort_array, $sortAsc ? SORT_ASC : SORT_DESC, $ids);
 
@@ -145,115 +140,11 @@ abstract class BlogController implements ControllerInterface
                 }
                 $post['see_also'] = $label_copy;
             }
+            $post['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
 
             $output .= $this->viewer->render('post', $post, 's2_blog');
         }
 
         return $output;
-    }
-
-    public function blog_navigation(Request $request)
-    {
-        $request_uri = $request->getPathInfo();
-
-        $cur_url = str_replace('%2F', '/', urlencode($request_uri));
-
-        if (file_exists(S2_CACHE_DIR . 's2_blog_navigation.php')) {
-            include S2_CACHE_DIR . 's2_blog_navigation.php';
-        }
-
-        $now = time();
-
-        if (empty($s2_blog_navigation) || !isset($s2_blog_navigation_time) || $s2_blog_navigation_time < $now - 900) {
-            $s2_blog_navigation = array('title' => Lang::get('Navigation', 's2_blog'));
-
-            // Last posts on the blog main page
-            $s2_blog_navigation['last'] = array(
-                'title' => sprintf(Lang::get('Nav last', 's2_blog'), S2_MAX_ITEMS ?: 10),
-                'link'  => $this->blogUrlBuilder->main(),
-            );
-
-            // Check for favorite posts
-            $query = array(
-                'SELECT' => '1',
-                'FROM'   => 's2_blog_posts',
-                'WHERE'  => 'published = 1 AND favorite = 1',
-                'LIMIT'  => '1'
-            );
-            ($hook = s2_hook('fn_s2_blog_navigation_pre_is_favorite_qr')) ? eval($hook) : null;
-            $result = $this->dbLayer->buildAndQuery($query);
-
-            if ($this->dbLayer->fetchRow($result)) {
-                $s2_blog_navigation['favorite'] = array(
-                    'title' => Lang::get('Nav favorite', 's2_blog'),
-                    'link'  => $this->blogUrlBuilder->favorite(),
-                );
-            }
-
-            // Fetch important tags
-            $s2_blog_navigation['tags_header'] = array(
-                'title' => Lang::get('Nav tags', 's2_blog'),
-                'link'  => $this->blogUrlBuilder->tags(),
-            );
-
-            $query = array(
-                'SELECT'   => 't.name, t.url, count(t.tag_id)',
-                'FROM'     => 'tags AS t',
-                'JOINS'    => array(
-                    array(
-                        'INNER JOIN' => 's2_blog_post_tag AS pt',
-                        'ON'         => 't.tag_id = pt.tag_id'
-                    ),
-                    array(
-                        'INNER JOIN' => 's2_blog_posts AS p',
-                        'ON'         => 'p.id = pt.post_id'
-                    )
-                ),
-                'WHERE'    => 't.s2_blog_important = 1 AND p.published = 1',
-                'GROUP BY' => 't.tag_id',
-                'ORDER BY' => '3 DESC',
-            );
-            ($hook = s2_hook('fn_s2_blog_navigation_pre_get_tags_qr')) ? eval($hook) : null;
-            $result = $this->dbLayer->buildAndQuery($query);
-
-            $tags = array();
-            while ($tag = $this->dbLayer->fetchAssoc($result))
-                $tags[] = array(
-                    'title' => $tag['name'],
-                    'link'  => S2_BLOG_TAGS_PATH . urlencode($tag['url']) . '/',
-                );
-
-            $s2_blog_navigation['tags'] = $tags;
-
-            // Try to remove very old cache (maybe the file is not writable but removable)
-            if (isset($s2_blog_navigation_time) && $s2_blog_navigation_time < $now - 86400)
-                @unlink(S2_CACHE_DIR . 's2_blog_navigation.php');
-
-            // Output navigation array as PHP code
-            try {
-                s2_overwrite_file_skip_locked(
-                    S2_CACHE_DIR . 's2_blog_navigation.php',
-                    '<?php' . "\n\n" . '$s2_blog_navigation_time = ' . $now . ';' . "\n\n" . '$s2_blog_navigation = ' . var_export($s2_blog_navigation, true) . ';'
-                );
-            } catch (\RuntimeException $e) {
-                // noop
-            }
-        }
-
-        foreach ($s2_blog_navigation as &$item) {
-            if (\is_array($item)) {
-                if (isset($item['link'])) {
-                    $item['is_current'] = $item['link'] == S2_URL_PREFIX . $cur_url;
-                } else {
-                    foreach ($item as &$sub_item) {
-                        if (\is_array($sub_item) && isset($sub_item['link'])) {
-                            $sub_item['is_current'] = $sub_item['link'] == S2_URL_PREFIX . $cur_url;
-                        }
-                    }
-                }
-            }
-        }
-
-        return $this->viewer->render('navigation', $s2_blog_navigation, 's2_blog');
     }
 }

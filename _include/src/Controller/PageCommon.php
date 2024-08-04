@@ -3,8 +3,8 @@
  * Displays a page stored in DB.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -13,6 +13,7 @@ namespace S2\Cms\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Framework\Exception\NotFoundException;
+use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -23,22 +24,24 @@ use S2\Rose\Entity\ExternalId;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 
 readonly class PageCommon implements ControllerInterface
 {
     public function __construct(
-        private DbLayer                $dbLayer,
-        private ArticleProvider        $articleProvider,
-        private UrlBuilder             $urlBuilder,
-        private HtmlTemplateProvider   $htmlTemplateProvider,
-        private RecommendationProvider $recommendationProvider,
-        private Viewer                 $viewer,
-        private bool                   $useHierarchy,
-        private bool                   $showComments,
-        private string                 $tagsUrl,
-        private int                    $maxItems,
-        private bool                   $debug,
+        private DbLayer                  $dbLayer,
+        private ArticleProvider          $articleProvider,
+        private EventDispatcherInterface $eventDispatcher,
+        private UrlBuilder               $urlBuilder,
+        private HtmlTemplateProvider     $htmlTemplateProvider,
+        private RecommendationProvider   $recommendationProvider,
+        private Viewer                   $viewer,
+        private bool                     $useHierarchy,
+        private bool                     $showComments,
+        private string                   $tagsUrl,
+        private int                      $maxItems,
+        private bool                     $debug,
     ) {
     }
 
@@ -460,7 +463,7 @@ readonly class PageCommon implements ControllerInterface
             }
         }
 
-        ($hook = s2_hook('fn_s2_parse_page_url_end')) ? eval($hook) : null;
+        $this->eventDispatcher->dispatch(new ArticleRenderedEvent($template, $articleId));
 
         return $template->toHttpResponse();
     }

@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace S2\Cms\Admin;
 
-use S2\Cms\Translation\TranslationProviderInterface;
-
 readonly class TranslationProvider implements TranslationProviderInterface
 {
     public function __construct(private string $rootDir)

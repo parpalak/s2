@@ -4,8 +4,8 @@
  * Contains default implementation for MySQL database.
  *
  * @copyright (C) 2009-2023 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @license       http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package       S2
  */
 
 declare(strict_types=1);
@@ -112,21 +112,24 @@ class DbLayer
     /**
      * @throws DbLayerException
      */
-    public function buildAndQuery(array $query, array $params = []): \PDOStatement
+    public function buildAndQuery(array $query, array $params = [], array $types = []): \PDOStatement
     {
         $sql = $this->build($query);
 
-        return $this->query($sql, $params);
+        return $this->query($sql, $params, $types);
     }
 
     /**
      * @throws DbLayerException
      */
-    public function query($sql, array $params = []): \PDOStatement
+    public function query($sql, array $params = [], array $types = []): \PDOStatement
     {
         $stmt = $this->pdo->prepare($sql);
         try {
-            $stmt->execute($params);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value, $types[$key] ?? \PDO::PARAM_STR);
+            }
+            $stmt->execute();
 
             return $stmt;
         } catch (\PDOException $e) {

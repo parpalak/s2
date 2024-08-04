@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace S2\Cms\Translation;
+namespace S2\Cms\Admin;
 
 interface TranslationProviderInterface
 {

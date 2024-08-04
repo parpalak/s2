@@ -16,6 +16,7 @@ use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
 use S2\Cms\Admin\DynamicConfigFormExtenderInterface;
 use S2\Cms\Admin\Event\AdminAjaxControllerMapEvent;
 use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
+use S2\Cms\Admin\TranslationProviderInterface;
 use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\Signal;
 use S2\Cms\Framework\Container;
@@ -23,7 +24,6 @@ use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Queue\QueuePublisher;
-use S2\Cms\Translation\TranslationProviderInterface;
 use S2\Rose\Indexer;
 use S2\Rose\Storage\Database\PdoStorage;
 use s2_extensions\s2_search\Admin\DashboardSearchProvider;
@@ -83,7 +83,7 @@ class AdminExtension implements ExtensionInterface
         });
 
         $eventDispatcher->addListener(AdminAjaxControllerMapEvent::class, function (AdminAjaxControllerMapEvent $event) use ($container) {
-            $event->controllerMap['s2_search_makeindex'] = function (PermissionChecker $p, Request $r, Container $c) {
+            $event->controllerMap['s2_search_makeindex'] = static function (PermissionChecker $p, Request $r, Container $c) {
                 if (!$p->isGrantedAny(PermissionChecker::PERMISSION_CREATE_ARTICLES, PermissionChecker::PERMISSION_EDIT_SITE)) {
                     return new JsonResponse(['success' => false, 'message' => 'Permission denied.'], Response::HTTP_FORBIDDEN);
                 }

@@ -3,13 +3,13 @@
  * Favorite blog posts.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplate;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +17,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class FavoritePageController extends BlogController
 {
+    /**
+     * @throws DbLayerException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
@@ -40,13 +43,13 @@ class FavoritePageController extends BlogController
         // Bread crumbs
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
+            $template->addBreadCrumb($this->translator->trans('Blog'), $this->blogUrlBuilder->main());
         }
-        $template->addBreadCrumb(Lang::get('Favorite'));
+        $template->addBreadCrumb($this->translator->trans('Favorite'));
 
         $template
-            ->putInPlaceholder('head_title', Lang::get('Favorite'))
-            ->putInPlaceholder('title', Lang::get('Favorite'))
+            ->putInPlaceholder('head_title', $this->translator->trans('Favorite'))
+            ->putInPlaceholder('title', $this->translator->trans('Favorite'))
             ->putInPlaceholder('text', $output)
         ;
 

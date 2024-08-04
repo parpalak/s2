@@ -3,12 +3,13 @@
  * Renders views.
  *
  * @copyright 2014-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 namespace S2\Cms\Template;
 
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Viewer
 {
@@ -16,8 +17,12 @@ class Viewer
     private string $extensionDirPattern;
     private string $systemViewDir;
 
-    public function __construct(string $rootDir, string $style, private readonly bool $debug)
-    {
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+        string                               $rootDir,
+        string                               $style,
+        private readonly bool                $debug
+    ) {
         $this->styleViewDir        = $rootDir . '_styles/' . $style . '/views/';
         $this->extensionDirPattern = $rootDir . '_extensions/%s/views/';
         $this->systemViewDir       = $rootDir . '_include/views/';
@@ -109,6 +114,8 @@ class Viewer
 
     private function includeFile(string $_found_file, array $_vars): void
     {
+        $trans = $this->translator->trans(...);
+
         extract($_vars, EXTR_OVERWRITE);
         include $_found_file;
     }

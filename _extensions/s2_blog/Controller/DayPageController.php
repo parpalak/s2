@@ -3,15 +3,14 @@
  * Blog posts for a day.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
 use S2\Cms\Template\HtmlTemplate;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,7 +38,7 @@ class DayPageController extends BlogController
 
         if ($output === '') {
             $template->markAsNotFound();
-            $output = '<p>' . Lang::get('Not found', 's2_blog') . '</p>';
+            $output = '<p>' . $this->translator->trans('Not found') . '</p>';
         }
 
         $template
@@ -50,7 +49,7 @@ class DayPageController extends BlogController
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $this->blogUrlBuilder->main());
+            $template->addBreadCrumb($this->translator->trans('Blog'), $this->blogUrlBuilder->main());
         }
         $template
             ->addBreadCrumb($textYear, $this->blogUrlBuilder->year($year))

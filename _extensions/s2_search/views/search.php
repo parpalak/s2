@@ -1,5 +1,7 @@
 <?php
 /**
+ * @var $trans callable
+ * @var $action string
  * @var $query string
  * @var $num ?int
  * @var $num_info string
@@ -9,9 +11,9 @@
  */
 
 ?>
-<form class="search-form" method="get" action="<?php echo S2_URL_PREFIX ? S2_PATH.S2_URL_PREFIX : S2_PATH.'/search'; ?>">
+<form class="search-form" method="get" action="<?php echo s2_htmlencode($action); ?>">
     <input class="search-input" id="s2_search_input_ext" type="text" name="q" value="<?php echo s2_htmlencode($query); ?>" />
-    <input class="search-button" type="submit" name="search" value="<?php echo Lang::get('Search button', 's2_search'); ?>" />
+    <input class="search-button" type="submit" name="search" value="<?php echo $trans('Search button'); ?>" />
 </form>
 <?php
 
@@ -26,6 +28,6 @@ if (isset($num)) {
         echo $output, $paging;
     }
     else {
-        echo '<p class="s2_search_not_found">' . Lang::get('Not found', 's2_search') . '</p>';
+        echo '<p class="s2_search_not_found">' . $trans('No results found') . '</p>';
     }
 }

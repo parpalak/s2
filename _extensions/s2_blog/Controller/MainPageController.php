@@ -3,25 +3,26 @@
  * Main blog page with last posts.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\CalendarBuilder;
-use s2_extensions\s2_blog\Lib;
+use s2_extensions\s2_blog\Model\PostProvider;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class MainPageController extends BlogController
 {
@@ -30,13 +31,15 @@ class MainPageController extends BlogController
         CalendarBuilder      $calendarBuilder,
         BlogUrlBuilder       $blogUrlBuilder,
         ArticleProvider      $articleProvider,
+        PostProvider         $postProvider,
         UrlBuilder           $urlBuilder,
+        TranslatorInterface  $translator,
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
         string               $blogTitle,
         private readonly int $itemsPerPage,
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $urlBuilder, $templateProvider, $viewer, $blogTitle);
+        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
     }
 
     public function handle(Request $request): Response
@@ -47,6 +50,9 @@ class MainPageController extends BlogController
         return parent::handle($request);
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         if ($request->attributes->get('slash') !== '/') {
@@ -63,7 +69,7 @@ class MainPageController extends BlogController
         }
 
         $postsPerPage = $this->itemsPerPage ?: 10;
-        $posts        = Lib::last_posts_array($postsPerPage, $skipLastPostsNum, true);
+        $posts        = $this->postProvider->lastPostsArray($postsPerPage, $skipLastPostsNum, true);
 
         $output = '';
         $i      = 0;
@@ -73,6 +79,7 @@ class MainPageController extends BlogController
                 break;
             }
 
+            $post['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
             $output .= $this->viewer->render('post', $post, 's2_blog');
         }
 
@@ -80,13 +87,13 @@ class MainPageController extends BlogController
         if ($skipLastPostsNum > 0) {
             $prevLink = $this->blogUrlBuilder->main() . ($skipLastPostsNum > $postsPerPage ? 'skip/' . ($skipLastPostsNum - $postsPerPage) : '');
             $template->setLink('prev', $prevLink);
-            $paging = '<a href="' . $prevLink . '">' . Lang::get('Here') . '</a> ';
+            $paging = '<a href="' . $prevLink . '">' . $this->translator->trans('Here') . '</a> ';
             // TODO think about back_forward
         }
         if ($i > $postsPerPage) {
             $nextLink = $this->blogUrlBuilder->main() . 'skip/' . ($skipLastPostsNum + $postsPerPage);
             $template->setLink('next', $nextLink);
-            $paging .= '<a href="' . $nextLink . '">' . Lang::get('There') . '</a>';
+            $paging .= '<a href="' . $nextLink . '">' . $this->translator->trans('There') . '</a>';
         }
 
         if ($paging !== '') {
@@ -97,7 +104,7 @@ class MainPageController extends BlogController
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));
         if (!$this->blogUrlBuilder->blogIsOnTheSiteRoot()) {
-            $template->addBreadCrumb(Lang::get('Blog', 's2_blog'), $skipLastPostsNum > 0 ? $this->blogUrlBuilder->main() : null);
+            $template->addBreadCrumb($this->translator->trans('Blog'), $skipLastPostsNum > 0 ? $this->blogUrlBuilder->main() : null);
         }
 
         if ($skipLastPostsNum > 0) {

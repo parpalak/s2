@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Admin;
 
-use S2\Cms\Translation\TranslationProviderInterface;
+use S2\Cms\Admin\TranslationProviderInterface;
 
 class TranslationProvider implements TranslationProviderInterface
 {

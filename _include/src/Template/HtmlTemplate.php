@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2009-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -11,9 +11,11 @@ namespace S2\Cms\Template;
 
 use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Model\UrlBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class HtmlTemplate
 {
@@ -26,6 +28,8 @@ class HtmlTemplate
     public function __construct(
         private readonly string                   $template,
         private readonly RequestStack             $requestStack,
+        private readonly UrlBuilder               $urlBuilder,
+        private readonly TranslatorInterface      $translator,
         private readonly Viewer                   $viewer,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly DynamicConfigProvider    $dynamicConfigProvider,
@@ -81,7 +85,7 @@ class HtmlTemplate
         $replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
 
         if (empty($this->page['rss_link'])) {
-            $this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="' . \Lang::get('RSS link title') . '" href="' . s2_link('/rss.xml') . '" />';
+            $this->page['rss_link'][] = '<link rel="alternate" type="application/rss+xml" title="' . $this->translator->trans('RSS link title') . '" href="' . $this->urlBuilder->link('/rss.xml') . '" />';
         }
         $replace['<!-- s2_rss_link -->'] = implode("\n", $this->page['rss_link']);
 
@@ -105,7 +109,7 @@ class HtmlTemplate
             $replace['<!-- s2_' . $placeholderName . ' -->'] = $this->page[$placeholderName] ?? '';
         }
 
-        if (!empty($this->page['commented']) && S2_ENABLED_COMMENTS) {
+        if (!empty($this->page['commented']) && $this->dynamicConfigProvider->get('S2_ENABLED_COMMENTS') === '1') {
             $comment_array = [
                 'id' => $this->page['id'] . '.' . ($this->page['class'] ?? '')
             ];
@@ -114,7 +118,13 @@ class HtmlTemplate
                 $comment_array += $this->page['comment_form'];
             }
 
-            $replace['<!-- s2_comment_form -->'] = $this->viewer->render('comment_form', $comment_array);
+            $event = new TemplatePreCommentRenderEvent([$this->translator->trans('Comment syntax info')]);
+            $this->eventDispatcher->dispatch($event);
+            $replace['<!-- s2_comment_form -->'] = $this->viewer->render('comment_form', [
+                ...$comment_array,
+                'syntaxHelpItems' => $event->syntaxHelpItems,
+                'action'          => $this->urlBuilder->linkToFile('/comment.php'),
+            ]);
         } else {
             $replace['<!-- s2_comment_form -->'] = '';
         }
@@ -225,11 +235,11 @@ class HtmlTemplate
         $startYear = $this->dynamicConfigProvider->get('S2_START_YEAR');
 
         $author    = $webmaster ?: $this->dynamicConfigProvider->get('S2_SITE_NAME');
-        $copyright = $webmaster && $email ? s2_js_mailto($author, $email) : ($request_uri !== '/' ? '<a href="' . s2_link('/') . '">' . $author . '</a>' : $author);
+        $copyright = $webmaster && $email ? s2_js_mailto($author, $email) : ($request_uri !== '/' ? '<a href="' . $this->urlBuilder->link('/') . '">' . $author . '</a>' : $author);
 
         return ($startYear !== date('Y') ?
-                sprintf(\Lang::get('Copyright 2'), $copyright, $startYear, date('Y')) :
-                sprintf(\Lang::get('Copyright 1'), $copyright, date('Y'))) . ' ' .
-            sprintf(\Lang::get('Powered by'), '<a href="http://s2cms.ru/">S2</a>');
+                sprintf($this->translator->trans('Copyright 2'), $copyright, $startYear, date('Y')) :
+                sprintf($this->translator->trans('Copyright 1'), $copyright, date('Y'))) . ' ' .
+            sprintf($this->translator->trans('Powered by'), '<a href="http://s2cms.ru/">S2</a>');
     }
 }

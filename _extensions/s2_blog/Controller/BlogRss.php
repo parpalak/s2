@@ -3,42 +3,41 @@
  * RSS feed for blog.
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   s2_blog
  */
 
 declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Controller;
 
-use Lang;
 use S2\Cms\Controller\Rss;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
-use s2_extensions\s2_blog\Lib;
+use s2_extensions\s2_blog\Model\PostProvider;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class BlogRss extends Rss
 {
     public function __construct(
-        protected BlogUrlBuilder $blogUrlBuilder,
-        protected Viewer $viewer,
-        protected string $baseUrl,
-        protected string $webmaster,
-        protected string $siteName,
-        protected string $blogTitle,
-    )
-    {
-        Lang::load('s2_blog', function () {
-            if (file_exists(__DIR__ . '/../lang/' . S2_LANGUAGE . '.php'))
-                return require __DIR__ . '/../lang/' . S2_LANGUAGE . '.php';
-            else
-                return require __DIR__ . '/../lang/English.php';
-        });
+        protected PostProvider        $postProvider,
+        protected BlogUrlBuilder      $blogUrlBuilder,
+        protected TranslatorInterface $translator,
+        protected Viewer              $viewer,
+        protected string              $baseUrl,
+        protected string              $webmaster,
+        protected string              $siteName,
+        protected string              $blogTitle,
+    ) {
     }
 
+    /**
+     * @throws DbLayerException
+     */
     protected function content(): array
     {
-        $posts  = Lib::last_posts_array();
+        $posts  = $this->postProvider->lastPostsArray();
         $viewer = $this->viewer;
         $items  = [];
         foreach ($posts as $post) {
@@ -49,7 +48,7 @@ readonly class BlogRss extends Rss
                         'see_also' => $post['see_also']
                     ], 's2_blog')) .
                     (empty($post['tags']) ? '' : $viewer->render('tags', [
-                        'title' => Lang::get('Tags'),
+                        'title' => $this->translator->trans('Tags'),
                         'tags'  => $post['tags'],
                     ], 's2_blog')),
                 'time'        => $post['create_time'],
@@ -74,6 +73,6 @@ readonly class BlogRss extends Rss
 
     protected function description(): string
     {
-        return sprintf(Lang::get('RSS description', 's2_blog'), $this->blogTitle);
+        return sprintf($this->translator->trans('RSS description'), $this->blogTitle);
     }
 }

@@ -28,8 +28,18 @@ readonly class UrlBuilder
         return $this->baseUrl . $this->getRelativeUrl($path, $params);
     }
 
+    public function hasPrefix(): bool
+    {
+        return $this->urlPrefix !== '';
+    }
+
     private function getRelativeUrl(string $path, array $params): string
     {
         return $this->urlPrefix . $path . (!empty($params) ? ($this->urlPrefix ? '&amp;' : '?') . implode('&amp;', $params) : '');
+    }
+
+    public function linkToFile(string $filePath): string
+    {
+        return $this->basePath . $filePath;
     }
 }

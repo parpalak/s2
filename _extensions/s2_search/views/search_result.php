@@ -1,13 +1,13 @@
 <?php
 /**
+ * @var callable $thumbnailHtml
  * @var $title string
  * @var $url string
+ * @var $link string
  * @var $descr string
  * @var $time string
  * @var $images \S2\Rose\Entity\Metadata\ImgCollection|\S2\Rose\Entity\Metadata\Img[]
  */
-
-use S2\Cms\Image\ThumbnailGenerator;
 
 $a = explode('/', $url);
 foreach ($a as $k => $v) {
@@ -15,16 +15,12 @@ foreach ($a as $k => $v) {
 }
 $link_escaped = implode('/', $a);
 
-$link = s2_link($url);
-
 ?>
 <div class="search-result-img-preview">
 <?php
 
-/** @var ThumbnailGenerator $th */
-$th = Container::get(ThumbnailGenerator::class);
 foreach ($images as $image) {
-    $img = $th->getThumbnailHtml($image->getSrc(), $image->getWidth(), $image->getHeight(), 300, 75);
+    $img = $thumbnailHtml($image->getSrc(), $image->getWidth(), $image->getHeight(), 300, 75);
     echo '<a class="preview-link" href="', $link , '">', $img, '</a>';
 }
 ?>

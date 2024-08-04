@@ -72,10 +72,6 @@ function s2_abs_link($path = '', $params = array())
 // $url must have the following form http://example.com/page?num=%d
 function s2_paging($page, $total_pages, $url, &$link_nav)
 {
-    $return = ($hook = s2_hook('fn_paging_start')) ? eval($hook) : null;
-    if ($return)
-        return $return;
-
     $links = '';
     for ($i = 1; $i <= $total_pages; $i++)
         $links .= ($i == $page ? ' <span class="current digit">' . $i . '</span>' : ' <a class="digit" href="' . sprintf($url, $i) . '">' . $i . '</a>');
@@ -479,29 +475,6 @@ function s2_overwrite_file_skip_locked(string $filename, string $content): void
         flock($fh, LOCK_UN);
     }
     fclose($fh);
-}
-
-function s2_russian_plural(int $number, string $many, string $one, string $two): string
-{
-    $number        = abs($number);
-    $lastTwoDigits = $number % 100;
-    $lastDigit     = $number % 10;
-
-    if ($lastTwoDigits === 1 || ($lastTwoDigits > 20 && $lastDigit === 1)) {
-        return $one;
-    }
-
-    if ($lastTwoDigits === 2 || ($lastTwoDigits > 20 && $lastDigit === 2)) {
-        return $two;
-    }
-    if ($lastTwoDigits === 3 || ($lastTwoDigits > 20 && $lastDigit === 3)) {
-        return $two;
-    }
-    if ($lastTwoDigits === 4 || ($lastTwoDigits > 20 && $lastDigit === 4)) {
-        return $two;
-    }
-
-    return $many;
 }
 
 /**

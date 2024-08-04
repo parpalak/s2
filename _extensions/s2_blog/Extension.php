@@ -13,6 +13,7 @@ use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -22,6 +23,7 @@ use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\Viewer;
+use S2\Cms\Translation\ExtensibleTranslator;
 use S2\Rose\Indexer;
 use s2_extensions\s2_blog\Controller\BlogRss;
 use s2_extensions\s2_blog\Controller\DayPageController;
@@ -34,12 +36,18 @@ use s2_extensions\s2_blog\Controller\TagPageController;
 use s2_extensions\s2_blog\Controller\TagsPageController;
 use s2_extensions\s2_blog\Controller\YearPageController;
 use s2_extensions\s2_blog\Model\BlogCommentNotifier;
+use s2_extensions\s2_blog\Model\BlogPlaceholderProvider;
 use s2_extensions\s2_blog\Model\PostProvider;
 use s2_extensions\s2_blog\Service\PostIndexer;
+use s2_extensions\s2_blog\Service\TagsSearchProvider;
+use s2_extensions\s2_search\Event\TagsSearchEvent;
 use s2_extensions\s2_search\Service\BulkIndexingProviderInterface;
+use s2_extensions\s2_search\Service\SimilarWordsDetector;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Extension implements ExtensionInterface
 {
@@ -55,13 +63,37 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_BLOG_URL'),
             );
         });
+        $container->set('s2_blog_translator', function (Container $container) {
+            /** @var ExtensibleTranslator $translator */
+            $translator = $container->get('translator');
+            $translator->load('s2_blog', function (string $lang) {
+                return require ($dir = __DIR__ . '/lang/') . (file_exists($dir . $lang . '.php') ? $lang : 'English') . '.php';
+            });
+
+            return $translator;
+        });
         $container->set(CalendarBuilder::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new CalendarBuilder(
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 (int)$provider->get('S2_START_YEAR'),
+            );
+        });
+        $container->set(BlogPlaceholderProvider::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new BlogPlaceholderProvider(
+                $container->get(DbLayer::class),
+                $container->get(BlogUrlBuilder::class),
+                $container->get('s2_blog_translator'),
+                $container->get(RequestStack::class),
+                $container->get('config_cache'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                (int)$provider->get('S2_MAX_ITEMS'),
+                $container->getParameter('url_prefix'),
             );
         });
         $container->set(MainPageController::class, function (Container $container) {
@@ -72,7 +104,9 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -87,7 +121,9 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -101,7 +137,9 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -116,7 +154,9 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -131,8 +171,10 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(RecommendationProvider::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -147,7 +189,9 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -161,7 +205,9 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -176,7 +222,9 @@ class Extension implements ExtensionInterface
                 $container->get(CalendarBuilder::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get(ArticleProvider::class),
+                $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
@@ -186,7 +234,9 @@ class Extension implements ExtensionInterface
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new BlogRss(
+                $container->get(PostProvider::class),
                 $container->get(BlogUrlBuilder::class),
+                $container->get('s2_blog_translator'),
                 $container->get('strict_viewer'),
                 $container->getParameter('base_url'),
                 $provider->get('S2_WEBMASTER'),
@@ -208,6 +258,7 @@ class Extension implements ExtensionInterface
         $container->set(PostProvider::class, function (Container $container) {
             return new PostProvider(
                 $container->get(DbLayer::class),
+                $container->get(BlogUrlBuilder::class),
             );
         });
 
@@ -227,6 +278,14 @@ class Extension implements ExtensionInterface
                 $container->get('recommendations_cache'),
             );
         }, [QueueHandlerInterface::class, BulkIndexingProviderInterface::class]);
+
+        $container->set(TagsSearchProvider::class, function (Container $container) {
+            return new TagsSearchProvider(
+                $container->get(DbLayer::class),
+                $container->get(SimilarWordsDetector::class),
+                $container->get(BlogUrlBuilder::class),
+            );
+        });
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
@@ -235,7 +294,7 @@ class Extension implements ExtensionInterface
             $blogPlaceholders = [];
             $template         = $event->htmlTemplate;
 
-            foreach (['s2_blog_last_comments', 's2_blog_last_discussions', 's2_blog_last_post'] as $blogPlaceholder) {
+            foreach (['s2_blog_last_comments', 's2_blog_last_discussions', 's2_blog_last_post', 's2_blog_navigation'] as $blogPlaceholder) {
                 if ($template->hasPlaceholder('<!-- ' . $blogPlaceholder . ' -->')) {
                     $blogPlaceholders[$blogPlaceholder] = 1;
                 }
@@ -245,36 +304,39 @@ class Extension implements ExtensionInterface
                 return;
             }
 
-            \Lang::load('s2_blog', function () {
-                if (file_exists(S2_ROOT . '/_extensions/s2_blog' . '/lang/' . S2_LANGUAGE . '.php'))
-                    return require S2_ROOT . '/_extensions/s2_blog' . '/lang/' . S2_LANGUAGE . '.php';
-                else
-                    return require S2_ROOT . '/_extensions/s2_blog' . '/lang/English.php';
-            });
+            /** @var TranslatorInterface $translator */
+            $translator = $container->get('s2_blog_translator');
 
             /** @var Viewer $viewer */
             $viewer = $container->get(Viewer::class);
 
             if (isset($blogPlaceholders['s2_blog_last_comments'])) {
-                $recentComments = \s2_extensions\s2_blog\Placeholder::recent_comments();
+                /** @var BlogPlaceholderProvider $placeholderProvider */
+                $placeholderProvider = $container->get(BlogPlaceholderProvider::class);
+                $recentComments      = $placeholderProvider->getRecentComments();
 
                 $template->registerPlaceholder('<!-- s2_blog_last_comments -->', empty($recentComments) ? '' : $viewer->render('menu_comments', [
-                    'title' => \Lang::get('Last comments', 's2_blog'),
+                    'title' => $translator->trans('Last comments'),
                     'menu'  => $recentComments,
                 ]));
             }
 
             if (isset($blogPlaceholders['s2_blog_last_discussions'])) {
-                $lastDiscussions = \s2_extensions\s2_blog\Placeholder::recent_discussions();
+                /** @var BlogPlaceholderProvider $placeholderProvider */
+                $placeholderProvider = $container->get(BlogPlaceholderProvider::class);
+                $lastDiscussions     = $placeholderProvider->getRecentDiscussions();
 
                 $template->registerPlaceholder('<!-- s2_blog_last_discussions -->', empty($lastDiscussions) ? '' : $viewer->render('menu_block', [
-                    'title' => \Lang::get('Last discussions', 's2_blog'),
+                    'title' => $translator->trans('Last discussions'),
                     'menu'  => $lastDiscussions,
                     'class' => 's2_blog_last_discussions',
                 ]));
             }
+
             if (isset($blogPlaceholders['s2_blog_last_post'])) {
-                $lastPosts = \s2_extensions\s2_blog\Lib::last_posts_array(1);
+                /** @var PostProvider $postProvider */
+                $postProvider = $container->get(PostProvider::class);
+                $lastPosts    = $postProvider->lastPostsArray(1);
 
                 foreach ($lastPosts as &$s2_blog_post) {
                     $s2_blog_post = $viewer->render('post_short', $s2_blog_post, 's2_blog');
@@ -282,7 +344,52 @@ class Extension implements ExtensionInterface
                 unset($s2_blog_post);
                 $template->registerPlaceholder('<!-- s2_blog_last_post -->', implode('', $lastPosts));
             }
+
+            if (isset($blogPlaceholders['s2_blog_navigation'])) {
+                /** @var BlogPlaceholderProvider $placeholderProvider */
+                $placeholderProvider = $container->get(BlogPlaceholderProvider::class);
+                $template->registerPlaceholder('<!-- s2_blog_navigation -->', $viewer->render(
+                    'navigation',
+                    $placeholderProvider->getBlogNavigationData(),
+                    's2_blog'
+                ));
+            }
         });
+
+        $eventDispatcher->addListener(ArticleRenderedEvent::class, static function (ArticleRenderedEvent $event) use ($container) {
+            if ($event->template->hasPlaceholder('<!-- s2_blog_tags -->')) {
+                /** @var Viewer $viewer */
+                $viewer = $container->get(Viewer::class);
+                /** @var TranslatorInterface $translator */
+                $translator = $container->get('s2_blog_translator');
+                /** @var BlogPlaceholderProvider $placeholderProvider */
+                $placeholderProvider = $container->get(BlogPlaceholderProvider::class);
+
+                $s2_blog_tags = $placeholderProvider->getBlogTagsForArticle($event->articleId);
+                $event->template->registerPlaceholder('<!-- s2_blog_tags -->', empty($s2_blog_tags) ? '' : $viewer->render('menu_block', [
+                    'title' => $translator->trans('See in blog'),
+                    'menu'  => $s2_blog_tags,
+                    'class' => 's2_blog_tags',
+                ]));
+            }
+        });
+
+        $eventDispatcher->addListener(TagsSearchEvent::class, static function (TagsSearchEvent $event) use ($container) {
+            /** @var TagsSearchProvider $tagsSearchProvider */
+            $tagsSearchProvider = $container->get(TagsSearchProvider::class);
+            $blogTagLinks       = $tagsSearchProvider->findBlogTags($event->where, $event->words);
+
+            if (\count($blogTagLinks) > 0) {
+                /** @var TranslatorInterface $translator */
+                $translator = $container->get('s2_blog_translator');
+                if ($event->getLine() !== null) {
+                    $event->addShortLine(sprintf($translator->trans('Found blog tags short'), implode(', ', $blogTagLinks)));
+                } else {
+                    $event->addLine(sprintf($translator->trans('Found blog tags'), implode(', ', $blogTagLinks)));
+                }
+            }
+        });
+
         $eventDispatcher->addListener(TemplateAssetEvent::class, static function (TemplateAssetEvent $event) {
             $event->assetPack->addCss('../../_extensions/s2_blog/style.css', [AssetPack::OPTION_MERGE]);
         });
