@@ -50,6 +50,7 @@ readonly class PageCommon implements ControllerInterface
         $request_uri = $request->getPathInfo();
 
         $request_array = explode('/', $request_uri);   //   []/[dir1]/[dir2]/[dir3]/[file1]
+        $request_array = array_map('rawurldecode', $request_array);
 
         // Correcting trailing slash and the rest of URL
         if (!$this->useHierarchy && \count($request_array) > 2) {
@@ -86,7 +87,7 @@ readonly class PageCommon implements ControllerInterface
              * 3. We determine the template of the page
              */
             for ($i = 0; $i < $parent_num; $i++) {
-                $parent_path .= urlencode($request_array[$i]) . '/';
+                $parent_path .= rawurlencode($request_array[$i]) . '/';
 
                 $cur_node       = [];
                 $found_node_num = 0;
@@ -119,7 +120,7 @@ readonly class PageCommon implements ControllerInterface
             $i           = 1;
         }
         // Path to the requested page (without trailing slash)
-        $current_path = $parent_path . urlencode($request_array[$i]);
+        $current_path = $parent_path . rawurlencode($request_array[$i]);
 
         $subquery           = [
             'SELECT' => '1',
@@ -253,7 +254,7 @@ readonly class PageCommon implements ControllerInterface
                     $item = [
                         'id'       => $row['id'],
                         'title'    => $row['title'],
-                        'link'     => $this->urlBuilder->link($current_path . '/' . urlencode($row['url']) . '/'),
+                        'link'     => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url']) . '/'),
                         'date'     => s2_date($row['create_time']),
                         'excerpt'  => $row['excerpt'],
                         'favorite' => $row['favorite'],
@@ -265,7 +266,7 @@ readonly class PageCommon implements ControllerInterface
                     $item       = array(
                         'id'       => $row['id'],
                         'title'    => $row['title'],
-                        'link'     => $this->urlBuilder->link($current_path . '/' . urlencode($row['url'])),
+                        'link'     => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url'])),
                         'date'     => s2_date($row['create_time']),
                         'excerpt'  => $row['excerpt'],
                         'favorite' => $row['favorite'],
@@ -374,7 +375,7 @@ readonly class PageCommon implements ControllerInterface
             $curr_item = -1;
             while ($row = $this->dbLayer->fetchAssoc($result)) {
                 // A neighbour
-                $url = $this->urlBuilder->link($parent_path . urlencode($row['url']));
+                $url = $this->urlBuilder->link($parent_path . rawurlencode($row['url']));
 
                 $menu_articles[] = [
                     'title'      => $row['title'],
@@ -526,7 +527,7 @@ readonly class PageCommon implements ControllerInterface
             }
             $titles[]       = $row['title'];
             $parent_ids[]   = $row['parent_id'];
-            $urls[]         = urlencode($row['url']) . (S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
+            $urls[]         = rawurlencode($row['url']) . (S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
             $tag_ids[]      = $row['tag_id'];
             $original_ids[] = $row['id'];
         }
@@ -560,7 +561,7 @@ readonly class PageCommon implements ControllerInterface
         $output = [];
         foreach ($art_by_tags as $tag_id => $articles) {
             $output[] = $this->viewer->render('menu_block', array(
-                'title' => sprintf(\Lang::get('With this tag'), '<a href="' . $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
+                'title' => sprintf(\Lang::get('With this tag'), '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
                 'menu'  => $articles,
                 'class' => 'article_tags',
             ));
@@ -589,7 +590,7 @@ readonly class PageCommon implements ControllerInterface
         while ($row = $this->dbLayer->fetchAssoc($result)) {
             $tags[] = array(
                 'title' => $row['name'],
-                'link'  => $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/'),
+                'link'  => $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/'),
             );
         }
 

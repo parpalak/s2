@@ -54,7 +54,7 @@ class TagsProvider
                 if ($row['count'] > 0) {
                     $this->cachedTags[] = array(
                         'title' => $row['name'],
-                        'link'  => $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/'),
+                        'link'  => $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/'),
                         'num'   => $row['count'],
                     );
                 }

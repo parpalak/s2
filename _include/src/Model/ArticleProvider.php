@@ -74,7 +74,7 @@ readonly class ArticleProvider
                     // Note: check for && !$parentsAreFound[$k] seems to be useless after adding array_unique in query before
                     if ($parentId === $row['id'] && !$parentsAreFound[$k]) {
                         $parentIds[$k]       = $row['parent_id'];
-                        $urls[$k]            = urlencode($row['url']) . '/' . $urls[$k];
+                        $urls[$k]            = rawurlencode($row['url']) . '/' . $urls[$k];
                         $parentsAreFound[$k] = true;
                         if (self::ROOT_ID === (int)$row['parent_id']) {
                             // The chain is finished - we are at the root.
@@ -153,7 +153,7 @@ readonly class ArticleProvider
 
         $last = $urls = $parentIds = [];
         for ($i = 0; $row = $this->dbLayer->fetchAssoc($result); $i++) {
-            $urls[$i]      = urlencode($row['url']);
+            $urls[$i]      = rawurlencode($row['url']);
             $parentIds[$i] = $row['parent_id'];
 
             $last[$i]['title']        = $row['title'];
@@ -258,7 +258,7 @@ readonly class ArticleProvider
             $prefix = '';
         }
 
-        return $prefix . '/' . urlencode($row[0]);
+        return $prefix . '/' . rawurlencode($row[0]);
     }
 
     /**

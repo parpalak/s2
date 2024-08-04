@@ -57,6 +57,6 @@ class Model
         } else
             $prefix = '';
 
-        return $prefix . '/' . urlencode($row[0]);
+        return $prefix . '/' . rawurlencode($row[0]);
     }
 }

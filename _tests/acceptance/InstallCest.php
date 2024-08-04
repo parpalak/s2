@@ -317,7 +317,6 @@ class InstallCest
                 'user_id'      => '1',
                 'label'        => '',
                 'revision'     => '1',
-                'template'     => 'site.php',
                 'url'          => 'new_post1',
 
                 'commented' => '1',
@@ -360,7 +359,7 @@ class InstallCest
         $I->amOnPage('/blog/tags/blog tag');
         $I->seeResponseCodeIs(301);
         $I->followRedirect();
-        $I->seeCurrentUrlEquals('/index.php?/blog/tags/blog+tag/');
+        $I->seeCurrentUrlEquals('/index.php?/blog/tags/blog%20tag/');
         $I->seeResponseCodeIsSuccessful();
 
         $I->amOnPage('/blog');

@@ -345,7 +345,7 @@ $(function () {
 
             if (fileTree.jstree('get_selected').length === 1) {
                 var filePath = sPicturePrefix + path + '/' + d.rslt.obj.attr('data-fname');
-                str = s2_lang.file + '<a href="' + filePath + '" target="_blank">' + filePath + ' &uarr;</a>';
+                str = s2_lang.file + '<a href="' + encodeURI(filePath) + '" target="_blank">' + filePath + ' &uarr;</a>';
 
                 if (d.rslt.obj.attr('data-fsize')) {
                     str += "<br />" + s2_lang.value + d.rslt.obj.attr('data-fsize');

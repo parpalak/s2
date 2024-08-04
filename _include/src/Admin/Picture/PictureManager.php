@@ -270,7 +270,7 @@ class PictureManager
             $output[] = [
                 'data' => [
                     'title' => $item,
-                    'icon'  => $displayPreview && $dimensions ? $this->basePath . '/_admin/ajax.php?action=preview&file=' . rawurlencode($dir . '/' . $item) . '&nocache=' . filemtime($this->imageDir . $dir . '/' . $item) : 'no-preview'
+                    'icon'  => $displayPreview && $dimensions ? $this->basePath . '/_admin/ajax.php?action=preview&file=' . urlencode($dir . '/' . $item) . '&nocache=' . filemtime($this->imageDir . $dir . '/' . $item) : 'no-preview'
                 ],
                 'attr' => [
                     'data-fname' => $item,

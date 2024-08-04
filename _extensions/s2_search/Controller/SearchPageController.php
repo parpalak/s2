@@ -167,6 +167,7 @@ readonly class SearchPageController implements ControllerInterface
                 $tags[] = '<a href="' . $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
             }
         }
+//        $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
 
         $event = new TagsSearchEvent($where, $words);
         if (\count($tags) > 0) {

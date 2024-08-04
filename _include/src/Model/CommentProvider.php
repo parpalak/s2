@@ -61,7 +61,7 @@ readonly class CommentProvider
             $nickNames[] = $row['nick'];
             $titles[]    = $row['title'];
             $parentIds[] = $row['parent_id'];
-            $urls[]      = urlencode($row['url']);
+            $urls[]      = rawurlencode($row['url']);
             $counts[]    = $row['count'];
         }
 
@@ -120,7 +120,7 @@ readonly class CommentProvider
         while ($row = $this->dbLayer->fetchAssoc($result)) {
             $titles[]     = $row['title'];
             $parent_ids[] = $row['parent_id'];
-            $urls[]       = urlencode($row['url']);
+            $urls[]       = rawurlencode($row['url']);
             $nicks[]      = $row['nick'];
             $time[]       = $row['time'];
         }

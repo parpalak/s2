@@ -54,7 +54,7 @@ readonly class PageTag implements ControllerInterface
         [$tagId, $tagDescription, $tagName, $tagUrl] = $row;
 
         if (!$hasSlash) {
-            return new RedirectResponse($this->urlBuilder->link('/' . $this->tagsUrlFragment . '/' . urlencode($tagUrl) . '/'), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse($this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/' . rawurlencode($tagUrl) . '/'), Response::HTTP_MOVED_PERMANENTLY);
         }
 
         $subquery   = [
@@ -82,7 +82,7 @@ readonly class PageTag implements ControllerInterface
         $urls = $parent_ids = $rows = [];
         while ($row = $this->dbLayer->fetchAssoc($result)) {
             $rows[]       = $row;
-            $urls[]       = urlencode($row['url']);
+            $urls[]       = rawurlencode($row['url']);
             $parent_ids[] = $row['parent_id'];
         }
 
@@ -142,7 +142,7 @@ readonly class PageTag implements ControllerInterface
 
         $template
             ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
-            ->addBreadCrumb(\Lang::get('Tags'), $this->urlBuilder->link('/' . $this->tagsUrlFragment . '/'))
+            ->addBreadCrumb(\Lang::get('Tags'), $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/'))
             ->addBreadCrumb($tagName)
             ->putInPlaceholder('title', $this->viewer->render('tag_title', ['title' => $tagName]))
             ->putInPlaceholder('date', '')

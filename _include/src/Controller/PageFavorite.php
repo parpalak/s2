@@ -15,6 +15,7 @@ use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -32,6 +33,9 @@ readonly class PageFavorite implements ControllerInterface
     ) {
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function handle(Request $request): Response
     {
         if ($request->attributes->get('slash') !== '/') {
@@ -57,7 +61,7 @@ readonly class PageFavorite implements ControllerInterface
         $urls = $parentIds = $rows = [];
         while ($row = $this->dbLayer->fetchAssoc($result)) {
             $rows[]      = $row;
-            $urls[]      = urlencode($row['url']);
+            $urls[]      = rawurlencode($row['url']);
             $parentIds[] = $row['parent_id'];
         }
 

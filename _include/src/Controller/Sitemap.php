@@ -78,7 +78,7 @@ class Sitemap implements ControllerInterface
 
         $articles = $urls = $parentIds = [];
         for ($i = 0; $row = $this->dbLayer->fetchAssoc($result); $i++) {
-            $urls[$i] = urlencode($row['url']) . (S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
+            $urls[$i] = rawurlencode($row['url']) . (S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
 
             $parentIds[$i] = $row['parent_id'];
 

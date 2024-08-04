@@ -81,7 +81,7 @@ readonly class CommentNotifier
             return;
         }
 
-        $link = $this->urlBuilder->absLink($path . '/' . urlencode($article['url']));
+        $link = $this->urlBuilder->absLink($path . '/' . rawurlencode($article['url']));
 
         // Fetching receivers' names and addresses
         $query  = [

@@ -26,22 +26,22 @@ class BlogUrlBuilder
 
     public function main(): string
     {
-        return $this->blogPath ?? $this->blogPath = $this->urlBuilder->link(str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . '/');
+        return $this->blogPath ?? $this->blogPath = $this->urlBuilder->link($this->encodedBlogUrl() . '/');
     }
 
     public function favorite(): string
     {
-        return $this->main() . urlencode($this->favoriteUrl) . '/';
+        return $this->main() . rawurlencode($this->favoriteUrl) . '/';
     }
 
     public function tags(): string
     {
-        return $this->blogTagsPath ?? $this->blogTagsPath = $this->main() . urlencode($this->tagsUrl) . '/';
+        return $this->blogTagsPath ?? $this->blogTagsPath = $this->main() . rawurlencode($this->tagsUrl) . '/';
     }
 
     public function tag(string $tagUrl): string
     {
-        return $this->tags() . urlencode($tagUrl) . '/';
+        return $this->tags() . rawurlencode($tagUrl) . '/';
     }
 
     public function year(int $year): string
@@ -66,17 +66,17 @@ class BlogUrlBuilder
 
     public function post(int $year, int $month, int $day, string $url): string
     {
-        return $this->main() . $year . '/' . self::extendNumber($month) . '/' . self::extendNumber($day) . '/' . urlencode($url);
+        return $this->main() . $year . '/' . self::extendNumber($month) . '/' . self::extendNumber($day) . '/' . rawurlencode($url);
     }
 
     public function postFromTimestamp(int $createTime, string $url): string
     {
-        return $this->main() . date('Y/m/d/', $createTime) . urlencode($url);
+        return $this->main() . date('Y/m/d/', $createTime) . rawurlencode($url);
     }
 
     public function postFromTimestampWithoutPrefix(int $createTime, string $url): string
     {
-        return str_replace(urlencode('/'), '/', urlencode($this->blogUrl)) . date('/Y/m/d', $createTime) . '/' . urldecode($url);
+        return $this->encodedBlogUrl() . date('/Y/m/d', $createTime) . '/' . rawurlencode($url);
     }
 
     public function blogIsOnTheSiteRoot(): bool
@@ -87,5 +87,10 @@ class BlogUrlBuilder
     private static function extendNumber(int $month): string
     {
         return str_pad((string)$month, 2, '0', STR_PAD_LEFT);
+    }
+
+    private function encodedBlogUrl(): string
+    {
+        return str_replace(rawurlencode('/'), '/', rawurlencode($this->blogUrl));
     }
 }

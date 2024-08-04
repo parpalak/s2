@@ -404,23 +404,23 @@ class Extension implements ExtensionInterface
         $priority       = 1;
 
         if ($s2BlogUrl !== '') {
-            $routes->add('blog_main', new Route($s2BlogUrl . '{slash</?>}', ['_controller' => MainPageController::class, 'page' => 0]), $priority);
+            $routes->add('blog_main', new Route($s2BlogUrl . '{slash</?>}', ['_controller' => MainPageController::class, 'page' => 0], options: ['utf8' => true]), $priority);
         } else {
-            $routes->add('blog_main', new Route('/', ['_controller' => MainPageController::class, 'page' => 0, 'slash' => '/']), $priority);
+            $routes->add('blog_main', new Route('/', ['_controller' => MainPageController::class, 'page' => 0, 'slash' => '/'], options: ['utf8' => true]), $priority);
         }
-        $routes->add('blog_main_pages', new Route($s2BlogUrl . '/skip/{page<\d+>}', ['_controller' => MainPageController::class, 'slash' => '/']), $priority);
+        $routes->add('blog_main_pages', new Route($s2BlogUrl . '/skip/{page<\d+>}', ['_controller' => MainPageController::class, 'slash' => '/'], options: ['utf8' => true]), $priority);
 
-        $routes->add('blog_rss', new Route($s2BlogUrl . '/rss.xml', ['_controller' => BlogRss::class]), $priority);
-        $routes->add('blog_sitemap', new Route($s2BlogUrl . '/sitemap.xml', ['_controller' => Sitemap::class]), $priority);
+        $routes->add('blog_rss', new Route($s2BlogUrl . '/rss.xml', ['_controller' => BlogRss::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_sitemap', new Route($s2BlogUrl . '/sitemap.xml', ['_controller' => Sitemap::class], options: ['utf8' => true]), $priority);
 
-        $routes->add('blog_favorite', new Route($s2BlogUrl . '/' . $favoriteUrl . '{slash</?>}', ['_controller' => FavoritePageController::class]), $priority);
+        $routes->add('blog_favorite', new Route($s2BlogUrl . '/' . $favoriteUrl . '{slash</?>}', ['_controller' => FavoritePageController::class], options: ['utf8' => true]), $priority);
 
-        $routes->add('blog_tags', new Route($s2BlogUrl . '/' . $tagsUrl . '{slash</?>}', ['_controller' => TagsPageController::class]), $priority);
-        $routes->add('blog_tag', new Route($s2BlogUrl . '/' . $tagsUrl . '/{tag}{slash</?>}', ['_controller' => TagPageController::class]), $priority);
+        $routes->add('blog_tags', new Route($s2BlogUrl . '/' . $tagsUrl . '{slash</?>}', ['_controller' => TagsPageController::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_tag', new Route($s2BlogUrl . '/' . $tagsUrl . '/{tag}{slash</?>}', ['_controller' => TagPageController::class], options: ['utf8' => true]), $priority);
 
-        $routes->add('blog_year', new Route($s2BlogUrl . '/{year<\d+>}/', ['_controller' => YearPageController::class]), $priority);
-        $routes->add('blog_month', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/', ['_controller' => MonthPageController::class]), $priority);
-        $routes->add('blog_day', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/', ['_controller' => DayPageController::class]), $priority);
-        $routes->add('blog_post', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/{url}', ['_controller' => PostPageController::class]), $priority);
+        $routes->add('blog_year', new Route($s2BlogUrl . '/{year<\d+>}/', ['_controller' => YearPageController::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_month', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/', ['_controller' => MonthPageController::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_day', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/', ['_controller' => DayPageController::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_post', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/{url}', ['_controller' => PostPageController::class], options: ['utf8' => true]), $priority);
     }
 }

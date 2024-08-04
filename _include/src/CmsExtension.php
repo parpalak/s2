@@ -483,9 +483,9 @@ class CmsExtension implements ExtensionInterface
 
         $routes->add('rss', new Route('/rss.xml', ['_controller' => Rss::class]));
         $routes->add('sitemap', new Route('/sitemap.xml', ['_controller' => Sitemap::class]));
-        $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => PageFavorite::class]));
-        $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => PageTags::class]));
-        $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => PageTag::class]));
+        $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => PageFavorite::class], options: ['utf8' => true]));
+        $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => PageTags::class], options: ['utf8' => true]));
+        $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => PageTag::class], options: ['utf8' => true]));
         $routes->add('common', new Route('/{path<.*>}', ['_controller' => PageCommon::class]), -1); // -1 for last route
     }
 }
