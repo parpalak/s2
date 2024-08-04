@@ -526,55 +526,15 @@ else
 	$s2_db->buildAndQuery($query);
 	$admin_uid = $s2_db->insertId();
 
-	// Insert config data
-	$config = array(
-		'S2_SITE_NAME'				=> "'".$lang_install['Site name']."'",
-		'S2_WEBMASTER'				=> "''",
-		'S2_WEBMASTER_EMAIL'		=> "'".$email."'",
-		'S2_START_YEAR'				=> "'".date('Y')."'",
-		'S2_USE_HIERARCHY'			=> "'1'",
-		'S2_MAX_ITEMS'				=> "'0'",
-		'S2_FAVORITE_URL'			=> "'favorite'",
-		'S2_TAGS_URL'				=> "'tags'",
-		'S2_COMPRESS'				=> "'1'",
-		'S2_STYLE'					=> "'zeta'",
-		'S2_LANGUAGE'				=> "'".$s2_db->escape($default_lang)."'",
-		'S2_SHOW_COMMENTS'			=> "'1'",
-		'S2_ENABLED_COMMENTS'		=> "'1'",
-		'S2_PREMODERATION'			=> "'0'",
-		'S2_ADMIN_COLOR'			=> "'#eeeeee'",
-		'S2_ADMIN_NEW_POS'			=> "'0'",
-		'S2_ADMIN_CUT'				=> "'0'",
-		'S2_LOGIN_TIMEOUT'			=> "'60'",
-		'S2_DB_REVISION'			=> "'".S2_DB_REVISION."'",
-	);
-
-	foreach ($config as $conf_name => $conf_value)
-	{
-		$query = array(
-			'INSERT'	=> 'name, value',
-			'INTO'		=> 'config',
-			'VALUES'	=> '\''.$conf_name.'\', '.$conf_value.''
-		);
-
-		$s2_db->buildAndQuery($query);
-	}
+    $installer->insertConfigData($lang_install['Site name'], $email, $default_lang, S2_DB_REVISION);
 
 	// Insert some other default data
-	$query = array(
-		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template',
-		'INTO'		=> 'articles',
-		'VALUES'	=> '0, \''.$lang_install['Main Page'].'\', 0, '.$now.', 1, \'mainpage.php\''
-	);
-
-	$s2_db->buildAndQuery($query);
-
+    $installer->insertMainPage($lang_install['Main Page'], $now);
 	$query = array(
 		'INSERT'	=> 'parent_id, title, create_time, modify_time, published, template, url',
 		'INTO'		=> 'articles',
 		'VALUES'	=> '1, \''.$lang_install['Section example'].'\', '.$now.', '.$now.', 1, \'site.php\', \'section1\''
 	);
-
 	$s2_db->buildAndQuery($query);
 
 	$query = array(

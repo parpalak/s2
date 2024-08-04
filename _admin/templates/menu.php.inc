@@ -6,6 +6,7 @@ declare(strict_types=1);
 /** @var callable $trans */
 /** @var bool $seeUsers */
 /** @var string $login */
+/** @var ?int $userId */
 
 use S2\Cms\AdminYard\Signal;
 
@@ -58,7 +59,7 @@ $echoSignal = static function (Signal $signal) use ($trans): void {
     <?php endforeach; ?>
 </ul>
 <ul class="main-menu-list">
-    <li class="main-menu-item">
+    <li class="main-menu-item" data-user-id="<?= $userId ?>">
         <?php if ($seeUsers): ?>
             <a class="main-menu-link" href="?entity=User&action=list"><?php printf($trans('Welcome'), $login); ?></a>
         <?php else: ?>

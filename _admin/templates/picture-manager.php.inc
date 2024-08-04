@@ -1,9 +1,8 @@
 <?php
 
-function s2_jsvarencode($var)
-{
+$jsvarencode = static function ($var) {
     return str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", ''), $var);
-}
+};
 
 $bytesFromString = static function ($val)
 {
@@ -27,6 +26,7 @@ $maxFileSize = $bytesFromString(ini_get('upload_max_filesize'))
 /** @var string $basePath */
 /** @var string $locale */
 /** @var callable $trans */
+/** @var callable $param */
 /** @var callable $isGranted */
 /** @var callable $friendlyFilesize */
 
@@ -49,10 +49,10 @@ $maxFileSize = $bytesFromString(ini_get('upload_max_filesize'))
         var sPicturePrefix = '<?php echo $imagePath; ?>';
         var iMaxFileSize = <?php echo $maxFileSize; ?>;
         var sFriendlyMaxFileSize = '<?php echo $friendlyFilesize($maxFileSize); ?>';
-        // SetBackground('<?php echo s2_jsvarencode(S2_ADMIN_COLOR); ?>');
+        // SetBackground('<?php echo $jsvarencode(S2_ADMIN_COLOR); ?>');
     </script>
     <style>:root {
-            --page-secondary-background: <?php echo S2_ADMIN_COLOR; ?>;
+            --page-secondary-background: <?= $param('S2_ADMIN_COLOR') ?>;
         }</style>
     <script src="<?php echo $basePath; ?>/_admin/js/jquery.js"></script>
     <script src="<?php echo $basePath; ?>/_admin/js/jquery-tools.js"></script>

@@ -171,7 +171,7 @@ class ExtensionCache
 
     public function getCachedRoutesFilename(): string
     {
-        return S2_CACHE_DIR . 'cache_routes.php';
+        return $this->cacheDir . 'cache_routes.php';
     }
 
     private function getHookNamesCacheFilename(): string

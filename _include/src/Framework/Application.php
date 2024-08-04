@@ -4,8 +4,8 @@
  * Handles HTTP requests after building container definitions and registering event listeners.
  *
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -81,6 +81,8 @@ class Application
      */
     public function handle(Request $request): Response
     {
+        $this->container->clearByTag('request_context');
+
         $attributes      = $this->matchRequest($request);
         $controllerClass = $attributes['_controller'];
         if (!$this->container->has($controllerClass)) {

@@ -39,7 +39,7 @@ if (!isset($this)) {
 
     <script src="lang/<?= $locale ?>/ui.js"></script>
     <style>:root {
-            --page-secondary-background: <?php echo S2_ADMIN_COLOR; ?>;
+            --page-secondary-background: <?= $param('S2_ADMIN_COLOR') ?>;
         }</style>
 </head>
 <body>

@@ -33,6 +33,7 @@ use S2\Cms\AdminYard\Form\CustomFormControlFactory;
 use S2\Cms\AdminYard\Signal;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Extensions\ExtensionManager;
+use S2\Cms\Extensions\ExtensionManagerAdapter;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Model\ArticleManager;
@@ -46,7 +47,6 @@ use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
-use S2\Cms\Translation\TranslationProviderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -262,15 +262,22 @@ class AdminExtension implements ExtensionInterface
         // Extensions
         $container->set(ExtensionManager::class, function (Container $container) {
             return new ExtensionManager(
-                $container->get(PermissionChecker::class),
                 $container->get(DbLayer::class),
                 $container->get(ExtensionCache::class),
                 $container->get(DynamicConfigProvider::class),
-                $container->get(RequestStack::class),
                 $container->get(Translator::class),
-                $container->get(TemplateRenderer::class),
                 $container,
                 $container->getParameter('root_dir'),
+            );
+        });
+
+        $container->set(ExtensionManagerAdapter::class, function (Container $container) {
+            return new ExtensionManagerAdapter(
+                $container->get(ExtensionManager::class),
+                $container->get(PermissionChecker::class),
+                $container->get(Translator::class),
+                $container->get(RequestStack::class),
+                $container->get(TemplateRenderer::class),
             );
         }, [AdminConfigExtenderInterface::class]);
 

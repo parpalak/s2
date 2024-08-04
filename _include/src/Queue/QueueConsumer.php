@@ -46,13 +46,18 @@ class QueueConsumer
             default => throw new \RuntimeException(sprintf('Driver "%s" is not supported.', $driverName)),
         };
 
+        $outerTransaction = $this->pdo->inTransaction();
         if ($driverName === 'sqlite') {
             $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 1);
         } else {
-            $this->pdo->exec('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+            if (!$outerTransaction) {
+                $this->pdo->exec('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+            }
         }
 
-        $this->pdo->beginTransaction();
+        if (!$outerTransaction) {
+            $this->pdo->beginTransaction();
+        }
 
         try {
             $job = null;
@@ -71,7 +76,9 @@ class QueueConsumer
                 }
             }
             if (!$job) {
-                $this->pdo->rollBack();
+                if (!$outerTransaction) {
+                    $this->pdo->rollBack();
+                }
                 return false;
             }
 
@@ -94,10 +101,14 @@ class QueueConsumer
                 'code' => $job['code'],
             ]);
 
-            $this->pdo->commit();
+            if (!$outerTransaction) {
+                $this->pdo->commit();
+            }
         } catch (\Throwable $e) {
             $this->logger->warning('Unknown throwable occurred, do rollback: ' . $e->getMessage(), ['exception' => $e]);
-            $this->pdo->rollBack();
+            if (!$outerTransaction) {
+                $this->pdo->rollBack();
+            }
         }
 
         return true;

@@ -13,7 +13,7 @@ use S2\AdminYard\Translator;
 use S2\AdminYard\Translator as T;
 use S2\Cms\Admin\Event\AdminAjaxControllerMapEvent;
 use S2\Cms\Admin\Picture\PictureManager;
-use S2\Cms\Extensions\ExtensionManager;
+use S2\Cms\Extensions\ExtensionManagerAdapter;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Container as C;
 use S2\Cms\Framework\Exception\AccessDeniedException;
@@ -51,6 +51,8 @@ class AdminAjaxRequestHandler
      */
     public function handle(Request $request): Response
     {
+        $this->container->clearByTag('request_context');
+
         $request->setSession(new Session());
         $request->attributes->set(AuthManager::FORCE_AJAX_RESPONSE, true);
         $this->requestStack->push($request);
@@ -134,8 +136,8 @@ class AdminAjaxRequestHandler
                 if (!$r->query->has('id')) {
                     return new Json(['success' => false, 'message' => 'Parameter "id" is required.'], Response::HTTP_BAD_REQUEST);
                 }
-                /** @var ExtensionManager $em */
-                $em    = $c->get(ExtensionManager::class);
+                /** @var ExtensionManagerAdapter $em */
+                $em    = $c->get(ExtensionManagerAdapter::class);
                 $error = $em->flipExtension($r->query->get('id'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => $error === null, 'message' => $error]);
@@ -159,8 +161,8 @@ class AdminAjaxRequestHandler
                 if (!$r->query->has('id')) {
                     return new Json(['success' => false, 'message' => 'Parameter "id" is required.'], Response::HTTP_BAD_REQUEST);
                 }
-                /** @var ExtensionManager $em */
-                $em     = $c->get(ExtensionManager::class);
+                /** @var ExtensionManagerAdapter $em */
+                $em     = $c->get(ExtensionManagerAdapter::class);
                 $errors = $em->installExtension($r->query->get('id'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => $errors === [], 'message' => implode("\n", $errors)]);
@@ -172,8 +174,8 @@ class AdminAjaxRequestHandler
                 if (!$r->query->has('id')) {
                     return new Json(['success' => false, 'message' => 'Parameter "id" is required.'], Response::HTTP_BAD_REQUEST);
                 }
-                /** @var ExtensionManager $em */
-                $em    = $c->get(ExtensionManager::class);
+                /** @var ExtensionManagerAdapter $em */
+                $em    = $c->get(ExtensionManagerAdapter::class);
                 $error = $em->uninstallExtension($r->query->get('id'), $r->request->get('csrf_token', ''));
 
                 return new Json(['success' => $error === null, 'message' => $error]);

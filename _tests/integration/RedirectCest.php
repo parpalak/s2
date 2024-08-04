@@ -14,7 +14,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RedirectCest
 {
-    // tests
     public function tryToTest(IntegrationTester $I)
     {
         $I->amOnPage('/redirect');

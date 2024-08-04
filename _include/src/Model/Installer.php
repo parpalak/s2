@@ -455,4 +455,53 @@ readonly class Installer
         $this->dbLayer->dropTable('extensions');
         $this->dbLayer->dropTable('config');
     }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function insertConfigData(string $siteName, string $email, string $defaultLanguage, int $dbRevision): void
+    {
+        // Insert config data
+        $config = [
+            'S2_SITE_NAME'        => "'" . $siteName . "'",
+            'S2_WEBMASTER'        => "''",
+            'S2_WEBMASTER_EMAIL'  => "'" . $email . "'",
+            'S2_START_YEAR'       => "'" . date('Y') . "'",
+            'S2_USE_HIERARCHY'    => "'1'",
+            'S2_MAX_ITEMS'        => "'0'",
+            'S2_FAVORITE_URL'     => "'favorite'",
+            'S2_TAGS_URL'         => "'tags'",
+            'S2_COMPRESS'         => "'1'",
+            'S2_STYLE'            => "'zeta'",
+            'S2_LANGUAGE'         => "'" . $this->dbLayer->escape($defaultLanguage) . "'",
+            'S2_SHOW_COMMENTS'    => "'1'",
+            'S2_ENABLED_COMMENTS' => "'1'",
+            'S2_PREMODERATION'    => "'0'",
+            'S2_ADMIN_COLOR'      => "'#eeeeee'",
+            'S2_ADMIN_NEW_POS'    => "'0'",
+            'S2_ADMIN_CUT'        => "'0'",
+            'S2_LOGIN_TIMEOUT'    => "'60'",
+            'S2_DB_REVISION'      => "'" . $dbRevision . "'",
+        ];
+
+        foreach ($config as $conf_name => $conf_value) {
+            $this->dbLayer->buildAndQuery([
+                'INSERT' => 'name, value',
+                'INTO'   => 'config',
+                'VALUES' => '\'' . $conf_name . '\', ' . $conf_value . ''
+            ]);
+        }
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function insertMainPage(string $title, int $time): void
+    {
+        $this->dbLayer->buildAndQuery([
+            'INSERT' => 'parent_id, title, create_time, modify_time, published, template',
+            'INTO'   => 'articles',
+            'VALUES' => '0, \'' . $title . '\', 0, ' . $time . ', 1, \'mainpage.php\''
+        ]);
+    }
 }

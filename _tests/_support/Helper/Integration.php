@@ -16,11 +16,13 @@ use S2\Cms\Admin\AdminAjaxRequestHandler;
 use S2\Cms\Admin\AdminExtension;
 use S2\Cms\Admin\AdminRequestHandler;
 use S2\Cms\CmsExtension;
+use S2\Cms\Extensions\ExtensionManager;
 use S2\Cms\Framework\Application;
 use S2\Cms\Model\Installer;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use s2_extensions\s2_blog\Manifest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -32,6 +34,7 @@ require_once __DIR__ . '/../../../_vendor/s2/admin-yard/tests/Support/Helper/Abs
 
 class Integration extends AbstractBrowserModule
 {
+    protected const ROOT_DIR = __DIR__ . '/../../../';
     protected ?Application $publicApplication = null;
     protected ?Application $adminApplication = null;
     protected ?Session $session;
@@ -45,18 +48,36 @@ class Integration extends AbstractBrowserModule
     public function _initialize()
     {
         parent::_initialize();
+        @unlink(self::ROOT_DIR . '_cache/test/cache_config.php');
+        @self::deleteRecursive(self::ROOT_DIR . '_cache/test/config/');
         $this->publicApplication = $this->createApplication();
         $this->pdo               = $this->publicApplication->container->get(\PDO::class);
 
         $this->adminApplication = $this->createAdminApplication();
         $this->adminApplication->container->set(\PDO::class, $this->pdo);
 
-        $installer = new Installer($this->adminApplication->container->get(DbLayer::class));
+        $adminDbLayer   = $this->adminApplication->container->get(DbLayer::class);
+        $installer = new Installer($adminDbLayer);
         $installer->dropTables();
         $installer->createTables();
+
+        (new Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
+        (new \s2_extensions\s2_search\Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
+
+        $installer->insertConfigData('Test site', 'admin@example.com', 'English', 19);
+        $installer->insertMainPage('Main page', time());
         $this->createUsers();
 
         $this->session = new Session(new MockArraySessionStorage());
+
+        /**
+         * Install extensions here since CREATE TABLE triggers implicit commit on test transactions in MySQL
+         */
+        /** @var ExtensionManager $extensionManager */
+        $extensionManager = $this->adminApplication->container->get(ExtensionManager::class);
+        $extensionManager->installExtension('s2_blog');
+        $extensionManager->installExtension('s2_search');
+        @self::deleteRecursive(self::ROOT_DIR . '_cache/test/config/');
     }
 
     public function _before(TestInterface $test)
@@ -74,6 +95,8 @@ class Integration extends AbstractBrowserModule
     {
         $application = new Application();
         $application->addExtension(new CmsExtension());
+        $application->addExtension(new \s2_extensions\s2_blog\Extension());
+        $application->addExtension(new \s2_extensions\s2_search\Extension());
         $application->boot($this->collectParameters());
 
         return $application;
@@ -84,6 +107,10 @@ class Integration extends AbstractBrowserModule
         $application = new Application();
         $application->addExtension(new CmsExtension());
         $application->addExtension(new AdminExtension());
+        $application->addExtension(new \s2_extensions\s2_blog\Extension());
+        $application->addExtension(new \s2_extensions\s2_blog\AdminExtension());
+        $application->addExtension(new \s2_extensions\s2_search\Extension());
+        $application->addExtension(new \s2_extensions\s2_search\AdminExtension());
         $application->boot($this->collectParameters());
 
         return $application;
@@ -99,10 +126,10 @@ class Integration extends AbstractBrowserModule
         $imgDir = '_tests/_output/images';
 
         $result = [
-            'root_dir'           => $rootDir = __DIR__ . '/../../../',
+            'root_dir'           => self::ROOT_DIR,
             'cache_dir'          => '_cache/test/',
             'log_dir'            => '_cache/test/',
-            'image_dir'          => $rootDir . $imgDir . '/', // filesystem
+            'image_dir'          => self::ROOT_DIR . $imgDir . '/', // filesystem
             'image_path'         => '/' . $imgDir, // web URL prefix
             'allowed_extensions' => 'gif bmp jpg jpeg png ico svg mp3 wav ogg flac mp4 avi flv mpg mpeg mkv zip 7z rar doc docx ppt pptx odt odt odp ods xlsx xls pdf txt rtf csv',
             'disable_cache'      => false,
@@ -185,5 +212,19 @@ class Integration extends AbstractBrowserModule
             $statement = $this->pdo->prepare('INSERT INTO users (' . implode(', ', array_keys($fields)) . ') VALUES (' . implode(', ', array_fill(0, \count($fields), '?')) . ')');
             $statement->execute(array_values($fields));
         }
+    }
+
+    private static function deleteRecursive($dir): bool
+    {
+        $array = scandir($dir);
+        if ($array === false) {
+            return false;
+        }
+        $files = array_diff($array, array('.', '..'));
+        foreach ($files as $file) {
+            is_dir("$dir/$file") ? self::deleteRecursive("$dir/$file") : unlink("$dir/$file");
+        }
+
+        return rmdir($dir);
     }
 }

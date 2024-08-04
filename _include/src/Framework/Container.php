@@ -63,6 +63,24 @@ class Container implements ContainerInterface
         }
     }
 
+    public function clear(string $id): void
+    {
+        if (!isset($this->bindings[$id])) {
+            throw new ServiceNotFoundException(sprintf('Entity "%s" not found in container.', $id));
+        }
+
+        unset($this->instances[$id]);
+    }
+
+    public function clearByTag(string $tag): array
+    {
+        try {
+            return array_map(fn(string $id) => $this->clear($id), $this->idsByTag[$tag] ?? []);
+        } catch (NotFoundExceptionInterface $e) {
+            throw new \LogicException('Impossible exception occurred', 0, $e);
+        }
+    }
+
     public function getIfInstantiated(string $id): mixed
     {
         return $this->instances[$id] ?? null;

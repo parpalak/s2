@@ -39,6 +39,8 @@ readonly class AdminRequestHandler
      */
     public function handle(Request $request): Response
     {
+        $this->container->clearByTag('request_context');
+
         $request->setSession(new Session());
         $this->requestStack->push($request);
 

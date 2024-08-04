@@ -61,6 +61,7 @@ readonly class CustomMenuGenerator extends MenuGenerator
         return $this->templateRenderer->render($this->config->getMenuTemplate(), [
             'links'    => $links,
             'login'    => $this->permissionChecker->getUserLogin(),
+            'userId'   => $this->permissionChecker->getUserId(),
             'seeUsers' => $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN),
         ]);
     }

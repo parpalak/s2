@@ -64,10 +64,9 @@ foreach ($columnMap as $fieldName => $columnInfo) {
 
 $columns[1] = array_merge($columns[1], $visibleControls);
 
-function s2_jsvarencode($var)
-{
+$jsvarencode = static function ($var) {
     return str_replace(array('\\', '\'', '</script>', "\n", "\r"), array('\\\\', '\\\'', '</scr\' + \'ipt>', "\\\n", ''), $var);
-}
+};
 
 ?>
 <link rel="stylesheet" href="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror.css"/>
@@ -189,7 +188,7 @@ function s2_jsvarencode($var)
 <script src="<?php echo $basePath; ?>/_admin/js/conversion.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/optipng-setup.js"></script>
 <script>
-    const template = '<?php echo s2_jsvarencode($templateContent); ?>';
+    const template = '<?php echo $jsvarencode($templateContent); ?>';
     document.forms['article-form'].elements['template'].setAttribute('list', 'article-templates-datalist');
     document.forms['article-form'].elements['template'].setAttribute('placeholder', '<?= $trans('inherited') ?>');
     document.addEventListener('DOMContentLoaded', () => {
