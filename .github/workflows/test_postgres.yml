@@ -10,15 +10,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating_system: ['ubuntu-20.04', 'ubuntu-22.04']
+        operating_system: ['ubuntu-22.04']
         php_versions:
           - '8.2'
-# This param is not supported by ikalnytskyi/action-setup-postgres@v5 since it uses default packages.
-# OS is changed instead.
-#        postgres_versions:
-#          - '12'
-#          - '13'
-#          - '14'
+          - '8.3'
 
     runs-on: '${{ matrix.operating_system }}'
 

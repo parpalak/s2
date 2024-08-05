@@ -15,25 +15,21 @@ jobs:
       matrix:
         operating_system: ['ubuntu-22.04']
         mysql_versions:
-          - 'mariadb-10.4'
           - 'mariadb-10.5'
           - 'mariadb-10.6'
           - 'mariadb-10.11'
-          - 'mariadb-11.0'
           - 'mariadb-11.1'
           - 'mariadb-11.2'
-          - 'mariadb-11.3'
           - 'mariadb-11.4'
           - '8.0'
-          - '8.2'
-          - '8.3'
+          - '8.4'
         php_versions:
           - '8.2'
         include:
           -
             operating_system: 'ubuntu-22.04'
             php_versions: 8.3
-            mysql_versions: 'mariadb-11.3'
+            mysql_versions: '9.0'
 
     runs-on: '${{ matrix.operating_system }}'
 
