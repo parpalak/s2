@@ -54,19 +54,6 @@ class Lang
 		return $lang_month_big[$month - 1];
 	}
 
-	public static function friendly_filesize ($size)
-	{
-		$i = 0;
-		while (($size/1024) > 1)
-		{
-			$size /= 1024;
-			$i++;
-		}
-
-		$lang_filesize = self::get('File size units');
-		return sprintf(self::get('File size format'), self::number_format($size), $lang_filesize[$i]);
-	}
-
 	/**
 	 * Outputs integers using current language settings
 	 *

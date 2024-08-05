@@ -58,7 +58,7 @@ $maxFileSize = $bytesFromString(ini_get('upload_max_filesize'))
     <script src="<?php echo $basePath; ?>/_admin/js/jquery-tools.js"></script>
     <script src="<?php echo $basePath; ?>/_admin/js/jquery.jstree.js"></script>
     <script src="<?php echo $basePath; ?>/_admin/js/pictman.js"></script>
-    <script src="lang/<?= $locale ?>/ui.js"></script>
+    <script src="<?php echo $basePath; ?>/_admin/lang/<?php echo $locale; ?>/ui.js"></script>
 </head>
 
 <body>

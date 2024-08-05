@@ -74,7 +74,6 @@ class PictureManager
         return new Response($content, Response::HTTP_OK, ['Content-Type' => 'image/avif']);
     }
 
-
     public function getDirContentRecursive(string $dir): array
     {
         if (!($dirHandle = opendir($this->imageDir . $dir))) {
@@ -82,21 +81,28 @@ class PictureManager
         }
 
         $output = [];
+        $dirs   = [];
 
         while (($item = readdir($dirHandle)) !== false) {
             if ($item === '.' || $item === '..') {
                 continue;
             }
             if (is_dir($this->imageDir . $dir . '/' . $item)) {
-                $output[] = [
-                    'data'     => $item,
-                    'attr'     => ['data-path' => $dir . '/' . $item],
-                    'children' => $this->getDirContentRecursive($dir . '/' . $item)
-                ];
+                $dirs[] = $item;
             }
         }
 
         closedir($dirHandle);
+
+        sort($dirs);
+
+        foreach ($dirs as $item) {
+            $output[] = [
+                'data'     => $item,
+                'attr'     => ['data-path' => $dir . '/' . $item],
+                'children' => $this->getDirContentRecursive($dir . '/' . $item)
+            ];
+        }
 
         if ($dir === '') {
             $output = [
@@ -108,6 +114,7 @@ class PictureManager
 
         return $output;
     }
+
 
     public function createSubfolder(string $path, string $name): string
     {
@@ -251,12 +258,20 @@ class PictureManager
             return ['message' => '<p>' . $this->translator->trans('Directory not open', ['{{ dir }}' => $this->imageDir . $dir]) . '</p>'];
         }
 
-        $output = [];
+        $files = [];
         while (($item = readdir($dirHandle)) !== false) {
             if ($item === '.' || $item === '..' || is_dir($this->imageDir . $dir . '/' . $item)) {
                 continue;
             }
+            $files[] = $item;
+        }
 
+        closedir($dirHandle);
+
+        sort($files);
+
+        $output = [];
+        foreach ($files as $item) {
             $bits = $dimensions = '';
 
             if (str_contains($item, '.') && \in_array(pathinfo($item, PATHINFO_EXTENSION), self::EXTENSIONS_FOR_PREVIEW, true)) {
@@ -280,8 +295,6 @@ class PictureManager
                 ]
             ];
         }
-
-        closedir($dirHandle);
 
         return \count($output) > 0 ? $output : ['message' => $this->translator->trans('Empty directory')];
     }

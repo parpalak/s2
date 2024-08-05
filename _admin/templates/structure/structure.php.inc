@@ -1,6 +1,7 @@
 <?php
 
 /** @var callable $trans */
+/** @var string $locale */
 /** @var string $basePath */
 
 ?>
@@ -24,7 +25,7 @@
     <div id="tree" class="treetree" tabindex="0"></div>
 </section>
 <script src="<?php echo $basePath; ?>/_admin/js/ajax.js"></script>
-<script src="<?php echo $basePath; ?>/_admin/lang/<?php echo Lang::admin_code(); ?>/ui.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lang/<?php echo $locale; ?>/ui.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/jquery.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/jquery-tools.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/jquery.jstree.js"></script>

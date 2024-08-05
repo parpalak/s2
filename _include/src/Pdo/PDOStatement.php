@@ -8,8 +8,8 @@
  * 3. Updated code to PHP 8.2
  *
  * @copyright 2023-2024 Roman Parpalak, based on code (c) 2021 Filis Futsarov
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -40,7 +40,7 @@ class PDOStatement extends NativePdoStatement
         int|string $param,
         mixed      &$var,
         int        $type = NativePdo::PARAM_STR,
-        int        $maxLength = null,
+        int        $maxLength = 0,
         mixed      $driverOptions = null
     ): bool {
         $this->bindings[$param] = $var;

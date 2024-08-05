@@ -37,7 +37,7 @@ if (!isset($this)) {
         <script src="<?= $script ?>"></script>
     <?php endforeach; ?>
 
-    <script src="lang/<?= $locale ?>/ui.js"></script>
+    <script src="<?php echo $basePath; ?>/_admin/lang/<?php echo $locale; ?>/ui.js"></script>
     <style>:root {
             --page-secondary-background: <?= $param('S2_ADMIN_COLOR') ?>;
         }</style>

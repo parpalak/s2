@@ -13,8 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
 define('S2_ROOT', './');
 require S2_ROOT . '_include/common.php';
 
-($hook = s2_hook('idx_start')) ? eval($hook) : null;
-
 header('X-Powered-By: S2/' . S2_VERSION);
 
 // We create our own request URI with the path removed and only the parts to rewrite included
@@ -31,8 +29,6 @@ else {
     // Hack for symfony router in case of /? and /index.php? prefix.
     $_SERVER['REQUEST_URI'] = $request_uri;
 }
-
-($hook = s2_hook('idx_pre_redirect')) ? eval($hook) : null;
 
 //
 // Redirect to the admin page

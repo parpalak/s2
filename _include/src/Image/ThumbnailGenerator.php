@@ -25,7 +25,7 @@ class ThumbnailGenerator implements QueueHandlerInterface
     {
         $this->publisher             = $publisher;
         $this->cacheUrlPrefix        = $cacheUrlPrefix;
-        $this->cacheFilesystemPrefix = $cacheFilesystemPrefix;
+        $this->cacheFilesystemPrefix = rtrim($cacheFilesystemPrefix, '/');
     }
 
     /**

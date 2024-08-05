@@ -636,6 +636,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    window.addEventListener('blur', function () {
+        altPressed = false;
+    });
+
     isAltPressed = function () {
         return altPressed;
     }

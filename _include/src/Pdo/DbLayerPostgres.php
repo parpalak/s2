@@ -36,11 +36,14 @@ class DbLayerPostgres extends DbLayer
         }
     }
 
-    public function query($sql, array $params = []): \PDOStatement
+    public function query($sql, array $params = [], array $types = []): \PDOStatement
     {
         $stmt = $this->pdo->prepare($sql);
         try {
-            $stmt->execute($params);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value, $types[$key] ?? \PDO::PARAM_STR);
+            }
+            $stmt->execute();
 
             return $stmt;
         } catch (\PDOException $e) {
