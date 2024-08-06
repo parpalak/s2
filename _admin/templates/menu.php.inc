@@ -58,7 +58,7 @@ $echoSignal = static function (Signal $signal) use ($trans): void {
         </li>
     <?php endforeach; ?>
 </ul>
-<ul class="main-menu-list">
+<ul class="main-menu-list" style="flex: 0 0 auto;">
     <li class="main-menu-item" data-user-id="<?= $userId ?>">
         <?php if ($seeUsers): ?>
             <a class="main-menu-link" href="?entity=User&action=list"><?php printf($trans('Welcome'), $login); ?></a>
