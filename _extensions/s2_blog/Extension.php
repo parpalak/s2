@@ -316,7 +316,7 @@ class Extension implements ExtensionInterface
                 $recentComments      = $placeholderProvider->getRecentComments();
 
                 $template->registerPlaceholder('<!-- s2_blog_last_comments -->', empty($recentComments) ? '' : $viewer->render('menu_comments', [
-                    'title' => $translator->trans('Last comments'),
+                    'title' => $translator->trans('Last blog comments'),
                     'menu'  => $recentComments,
                 ]));
             }
@@ -327,7 +327,7 @@ class Extension implements ExtensionInterface
                 $lastDiscussions     = $placeholderProvider->getRecentDiscussions();
 
                 $template->registerPlaceholder('<!-- s2_blog_last_discussions -->', empty($lastDiscussions) ? '' : $viewer->render('menu_block', [
-                    'title' => $translator->trans('Last discussions'),
+                    'title' => $translator->trans('Last blog discussions'),
                     'menu'  => $lastDiscussions,
                     'class' => 's2_blog_last_discussions',
                 ]));

@@ -1,16 +1,16 @@
 <?php
 
-return array(
+return [
 
     'N Comments'   => '{{ count }} comment|{{ count }} comments',
     'Post comment' => 'Leave a comment',
 
-    'Favorite posts'   => 'Favorite posts',
-    'See also'         => 'See also:',
-    'Last comments'    => 'Last blog comments',
-    'Last discussions' => 'Last blog discussions',
-    'Articles by tag'  => 'Related articles:',
-    'Year'             => '%s year',
+    'Favorite posts'        => 'Favorite posts',
+    'See also'              => 'See also:',
+    'Last blog comments'    => 'Last blog comments',
+    'Last blog discussions' => 'Last blog discussions',
+    'Articles by tag'       => 'Related articles:',
+    'Year'                  => '%s year',
 
     'Navigation'   => 'Posts',
     'Nav last'     => 'Last %d',
@@ -66,12 +66,12 @@ return array(
     'Blog posts now'    => 'Blog posts: %s',
     'Blog comments now' => 'Blog comments: %s',
 
-    'Not found'       => 'No posts',
+    'Not found'            => 'No posts',
 
     // RSS
-    'RSS description' => '%s. Last posts.',
-    'RSS link title'  => 'Last blog posts',
+    'RSS blog description' => '%s. Last posts.',
+    'RSS blog link title'  => 'Last blog posts',
 
     'Found blog tags'       => 'Similar blog tags: %s',
     'Found blog tags short' => '; blog tags: %s',
-);
+];

@@ -1,16 +1,16 @@
 <?php
 
-return array(
+return [
 
     'N Comments'   => '{{ count }} комментарий|{{ count }} комментария|{{ count }} комментариев',
     'Post comment' => 'Оставить комментарий',
 
-    'Favorite posts'   => 'Избранные записи',
-    'See also'         => 'Смотрите также:',
-    'Last comments'    => 'Последние комментарии в блоге',
-    'Last discussions' => 'Обсуждаемое в блоге',
-    'Articles by tag'  => 'Статьи по этой теме:',
-    'Year'             => '%s год',
+    'Favorite posts'        => 'Избранные записи',
+    'See also'              => 'Смотрите также:',
+    'Last blog comments'    => 'Последние комментарии в блоге',
+    'Last blog discussions' => 'Обсуждаемое в блоге',
+    'Articles by tag'       => 'Статьи по этой теме:',
+    'Year'                  => '%s год',
 
     'Navigation'   => 'Записи',
     'Nav last'     => 'Последние %d',
@@ -66,12 +66,12 @@ return array(
     'Blog posts now'    => 'Записей в блоге: %s',
     'Blog comments now' => 'Комментариев в блоге: %s',
 
-    'Not found'       => 'Нет записей',
+    'Not found'            => 'Нет записей',
 
     // RSS
-    'RSS description' => '%s. Последние заметки.',
-    'RSS link title'  => 'Последние заметки в блоге',
+    'RSS blog description' => '%s. Последние заметки.',
+    'RSS blog link title'  => 'Последние заметки в блоге',
 
     'Found blog tags'       => 'Похожие ключевые слова в блоге: %s',
     'Found blog tags short' => '; в блоге: %s',
-);
+];

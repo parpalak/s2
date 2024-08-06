@@ -19,7 +19,7 @@ class TranslationProvider implements TranslationProviderInterface
             'ru' => [
                 'Search config'        => 'Поиск',
                 'S2_SEARCH_QUICK'      => 'Быстрый поиск',
-                'S2_SEARCH_QUICK_help' => 'Показывать подсказки на основе поиска по заголовкам во время набора.',
+                'S2_SEARCH_QUICK_help' => 'По мере набора поискового запроса показывать подсказки с совпадающими заголовками.',
                 'Search index'         => 'Поисковый индекс',
                 'Reindex'              => 'Проиндексировать заново',
                 'Reindex title'        => 'Долгая операция. Если соединение с сервером прервется, можно запустить повторно.',
@@ -28,7 +28,7 @@ class TranslationProvider implements TranslationProviderInterface
             'en' => [
                 'Search config'        => 'Search',
                 'S2_SEARCH_QUICK'      => 'Quick search',
-                'S2_SEARCH_QUICK_help' => 'Show suggestions based on the search over titles while typing.',
+                'S2_SEARCH_QUICK_help' => 'Show suggestions based on the search over titles while typing a search query.',
                 'Search index'         => 'Search index',
                 'Reindex'              => 'Reindex',
                 'Reindex title'        => 'May be time-consuming. You can run it again in case of connection loss.',

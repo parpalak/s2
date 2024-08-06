@@ -73,6 +73,6 @@ readonly class BlogRss extends Rss
 
     protected function description(): string
     {
-        return sprintf($this->translator->trans('RSS description'), $this->blogTitle);
+        return sprintf($this->translator->trans('RSS blog description'), $this->blogTitle);
     }
 }

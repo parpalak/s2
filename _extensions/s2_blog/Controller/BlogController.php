@@ -53,7 +53,7 @@ abstract class BlogController implements ControllerInterface
             ->putInPlaceholder('class', 's2_blog')
             ->putInPlaceholder('rss_link', [sprintf(
                 '<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />',
-                s2_htmlencode($this->translator->trans('RSS link title')),
+                s2_htmlencode($this->translator->trans('RSS blog link title')),
                 $this->blogUrlBuilder->main() . 'rss.xml'
             )])
         ;
