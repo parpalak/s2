@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Admin;
 
+use Psr\Log\LoggerInterface;
 use S2\AdminYard\AdminPanel;
 use S2\AdminYard\Database\PdoDataProvider;
 use S2\AdminYard\Database\TypeTransformer;
@@ -186,7 +187,7 @@ class AdminExtension implements ExtensionInterface
                 }
             }
 
-            return new AdminPanel(
+            $adminPanel = new AdminPanel(
                 $adminConfig,
                 $eventDispatcher,
                 $container->get(PdoDataProvider::class),
@@ -196,6 +197,8 @@ class AdminExtension implements ExtensionInterface
                 $container->get(TemplateRenderer::class),
                 $container->get(FormFactory::class),
             );
+            $adminPanel->setLogger($container->get(LoggerInterface::class));
+            return $adminPanel;
         });
 
         $container->set(PermissionChecker::class, function (Container $container) {

@@ -64,7 +64,22 @@ window.fetch = async (...args) => {
                 }
             } else {
                 const txt = await response.text();
-                DisplayError(txt);
+                try {
+                    const data = JSON.parse(txt);
+
+                    if (data.message) {
+                        PopupMessages.show(data.message, null, null);
+                    } else if (data.errors) {
+                        Array.from(data.errors).forEach(function (error) {
+                            // TODO array_merge
+                            PopupMessages.show(error);
+                        });
+                    } else {
+                        DisplayError(txt);
+                    }
+                } catch (e) {
+                    DisplayError(txt);
+                }
             }
         } catch (error) {
             PopupMessages.show(error);

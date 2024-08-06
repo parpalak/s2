@@ -338,15 +338,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/admin-yard.git",
-                "reference": "edbea31ba558333cd4261a70f1c73aa51ff0a543"
+                "reference": "a1278e3c351425b179cad4350a776da9e315e01d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/admin-yard/zipball/edbea31ba558333cd4261a70f1c73aa51ff0a543",
-                "reference": "edbea31ba558333cd4261a70f1c73aa51ff0a543",
+                "url": "https://api.github.com/repos/parpalak/admin-yard/zipball/a1278e3c351425b179cad4350a776da9e315e01d",
+                "reference": "a1278e3c351425b179cad4350a776da9e315e01d",
                 "shasum": ""
             },
             "require": {
+                "psr/log": "^1.1 || ^2.0 || ^3.0",
                 "symfony/event-dispatcher": "^7.0",
                 "symfony/http-foundation": "^7.0",
                 "symfony/translation-contracts": "^3.5"
@@ -356,7 +357,7 @@
                 "codeception/module-asserts": "^3.0",
                 "codeception/module-phpbrowser": "^3.0",
                 "league/commonmark": "^2.4",
-                "symfony/error-handler": "^5.1"
+                "symfony/error-handler": "^7.0"
             },
             "suggest": {
                 "ext-pdo": "*"
@@ -383,7 +384,7 @@
                 "issues": "https://github.com/parpalak/admin-yard/issues",
                 "source": "https://github.com/parpalak/admin-yard/tree/master"
             },
-            "time": "2024-08-05T20:05:45+00:00"
+            "time": "2024-08-06T10:42:04+00:00"
         },
         {
             "name": "s2/rose",

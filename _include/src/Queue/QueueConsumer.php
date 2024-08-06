@@ -32,7 +32,7 @@ class QueueConsumer
      *
      * The queue is stored in the 'queue' table of database. Jobs are fetched and locked in a transaction.
      *
-     * NOWAIT prevents parallel job processing. It can be dangerous in case of several heavy jobs
+     * NOWAIT prevents parallel job processing for *different* jobs. It can be dangerous in case of several heavy jobs
      * (PHP-FPM workers can be exhausted).
      *
      * @return bool

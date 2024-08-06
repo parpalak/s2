@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-readonly class CommentController extends EntityController
+class CommentController extends EntityController
 {
     public function rejectAction(Request $request): Response
     {
