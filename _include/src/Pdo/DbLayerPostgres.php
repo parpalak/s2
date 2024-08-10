@@ -22,6 +22,43 @@ class DbLayerPostgres extends DbLayer
         '/^FLOAT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i'           => 'REAL'
     ];
 
+    public function build(array $query): string
+    {
+        if (isset($query['UPSERT'])) {
+            /**
+             * INSERT INTO table_name (column1, column2, ...)
+             * VALUES (value1, value2, ...)
+             * ON CONFLICT (conflict_target) DO UPDATE
+             * SET column1 = EXCLUDED.column1, column2 = EXCLUDED.column2, ...;
+             * */
+            $sql = 'INSERT INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
+
+            if (!empty($query['UPSERT'])) {
+                $sql .= ' (' . $query['UPSERT'] . ')';
+            }
+
+            $uniqueFields = explode(',', $query['UNIQUE']);
+            $uniqueFields = array_map('trim', $uniqueFields);
+            $uniqueFields = array_flip($uniqueFields);
+
+            $set = '';
+            foreach (explode(',', $query['UPSERT']) as $field) {
+                if (isset($uniqueFields[$field])) {
+                    continue;
+                }
+                $field = trim($field);
+                $set   .= $field . ' = EXCLUDED.' . $field . ',';
+            }
+            $set = rtrim($set, ',');
+
+            $sql .= ' VALUES(' . $query['VALUES'] . ') ON CONFLICT (' . $query['UNIQUE'] . ') DO UPDATE SET ' . $set;
+
+            return $sql;
+        }
+
+        return parent::build($query);
+    }
+
     public function escape($str): string
     {
         return \is_array($str) ? '' : substr($this->pdo->quote($str), 1, -1);

@@ -16,6 +16,7 @@ use S2\AdminYard\Database\TypeTransformer;
 use S2\AdminYard\Form\FormControlFactoryInterface;
 use S2\AdminYard\Form\FormFactory;
 use S2\AdminYard\MenuGenerator;
+use S2\AdminYard\SettingStorage\SettingStorageInterface;
 use S2\AdminYard\TemplateRenderer;
 use S2\AdminYard\Transformer\ViewTransformer;
 use S2\AdminYard\Translator;
@@ -32,6 +33,7 @@ use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\CustomTemplateRenderer;
 use S2\Cms\AdminYard\Form\CustomFormControlFactory;
 use S2\Cms\AdminYard\Signal;
+use S2\Cms\AdminYard\UserSettingStorage;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Extensions\ExtensionManager;
 use S2\Cms\Extensions\ExtensionManagerAdapter;
@@ -139,6 +141,13 @@ class AdminExtension implements ExtensionInterface
             );
         });
 
+        $container->set(SettingStorageInterface::class, function (Container $container) {
+            return new UserSettingStorage(
+                $container->get(PermissionChecker::class),
+                $container->get(DbLayer::class),
+            );
+        }, [StatefulServiceInterface::class]);
+
         $container->set(DynamicConfigFormBuilder::class, function (Container $container) {
             return new DynamicConfigFormBuilder(
                 $container->get(PermissionChecker::class),
@@ -147,6 +156,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(FormFactory::class),
                 $container->get(TemplateRenderer::class),
                 $container->get(RequestStack::class),
+                $container->get(SettingStorageInterface::class),
                 $container->getParameter('root_dir'),
                 ...$container->getByTag(DynamicConfigFormExtenderInterface::class),
             );
@@ -197,6 +207,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(Translator::class),
                 $container->get(TemplateRenderer::class),
                 $container->get(FormFactory::class),
+                $container->get(SettingStorageInterface::class),
             );
             $adminPanel->setLogger($container->get(LoggerInterface::class));
             return $adminPanel;
@@ -250,7 +261,7 @@ class AdminExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new ArticleManager(
                 $container->get(DbLayer::class),
-                $container->get(RequestStack::class),
+                $container->get(SettingStorageInterface::class),
                 $container->get(PermissionChecker::class),
                 $provider->get('S2_ADMIN_NEW_POS') === '1',
                 $provider->get('S2_USE_HIERARCHY') === '1',
@@ -280,7 +291,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(ExtensionManager::class),
                 $container->get(PermissionChecker::class),
                 $container->get(Translator::class),
-                $container->get(RequestStack::class),
+                $container->get(SettingStorageInterface::class),
                 $container->get(TemplateRenderer::class),
             );
         }, [AdminConfigExtenderInterface::class]);

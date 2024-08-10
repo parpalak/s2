@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
+use S2\Cms\AdminYard\UserSettingStorage;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 
@@ -258,7 +259,7 @@ readonly class Installer
         ));
 
         $this->dbLayer->createTable('art_comments', array(
-            'FIELDS'      => array(
+            'FIELDS'       => array(
                 'id'         => array(
                     'datatype'   => 'SERIAL',
                     'allow_null' => false
@@ -317,7 +318,7 @@ readonly class Installer
                     'allow_null' => true
                 ),
             ),
-            'PRIMARY KEY' => array('id'),
+            'PRIMARY KEY'  => array('id'),
             'FOREIGN KEYS' => array(
                 'fk_article' => array(
                     'columns'           => ['article_id'],
@@ -326,15 +327,15 @@ readonly class Installer
                     'on_delete'         => 'CASCADE',
                 )
             ),
-            'INDEXES'     => array(
-                'sort_idx'       => array('article_id', 'time', 'shown'),
-                'time_idx'       => array('time')
+            'INDEXES'      => array(
+                'sort_idx' => array('article_id', 'time', 'shown'),
+                'time_idx' => array('time')
             )
         ));
 
         $this->dbLayer->createTable('tags', array(
             'FIELDS'      => array(
-                'id'      => array(
+                'id'          => array(
                     'datatype'   => 'SERIAL',
                     'allow_null' => false
                 ),
@@ -366,7 +367,7 @@ readonly class Installer
         ));
 
         $this->dbLayer->createTable('article_tag', array(
-            'FIELDS'      => array(
+            'FIELDS'       => array(
                 'id'         => array(
                     'datatype'   => 'SERIAL',
                     'allow_null' => false
@@ -380,7 +381,7 @@ readonly class Installer
                     'allow_null' => false,
                 ),
             ),
-            'PRIMARY KEY' => array('id'),
+            'PRIMARY KEY'  => array('id'),
             'FOREIGN KEYS' => array(
                 'fk_article' => array(
                     'columns'           => ['article_id'],
@@ -388,21 +389,21 @@ readonly class Installer
                     'reference_columns' => ['id'],
                     'on_delete'         => 'CASCADE',
                 ),
-                'fk_tag' => array(
+                'fk_tag'     => array(
                     'columns'           => ['tag_id'],
                     'reference_table'   => 'tags',
                     'reference_columns' => ['id'],
                     'on_delete'         => 'CASCADE',
                 ),
             ),
-            'INDEXES'     => array(
+            'INDEXES'      => array(
                 'article_id_idx' => array('article_id'),
                 'tag_id_idx'     => array('tag_id'),
             ),
         ));
 
         $this->dbLayer->createTable('users_online', array(
-            'FIELDS'      => array(
+            'FIELDS'       => array(
                 'challenge'      => array(
                     'datatype'   => 'VARCHAR(32)',
                     'allow_null' => false,
@@ -446,13 +447,39 @@ readonly class Installer
                     'on_delete'         => 'CASCADE',
                 )
             ),
-            'INDEXES'     => array(
+            'INDEXES'      => array(
                 'login_idx' => array('login'),
             ),
-            'UNIQUE KEYS' => array(
+            'UNIQUE KEYS'  => array(
                 'challenge_idx' => array('challenge'),
             )
         ));
+
+        $this->dbLayer->createTable(UserSettingStorage::TABLE_NAME, [
+            'FIELDS'       => [
+                'user_id' => [
+                    'datatype'   => 'INT(10) UNSIGNED',
+                    'allow_null' => false
+                ],
+                'name'    => [
+                    'datatype'   => 'VARCHAR(191)',
+                    'allow_null' => false
+                ],
+                'value'   => [
+                    'datatype'   => 'TEXT',
+                    'allow_null' => false
+                ],
+            ],
+            'PRIMARY KEY'  => ['user_id', 'name'],
+            'FOREIGN KEYS' => [
+                'fk_user' => [
+                    'columns'           => ['user_id'],
+                    'reference_table'   => 'users',
+                    'reference_columns' => ['id'],
+                    'on_delete'         => 'CASCADE',
+                ],
+            ]
+        ]);
 
         $this->dbLayer->createTable('queue', array(
             'FIELDS'      => array(
@@ -485,6 +512,7 @@ readonly class Installer
         $this->dbLayer->dropTable('articles');
         $this->dbLayer->dropTable('extensions');
         $this->dbLayer->dropTable('config');
+        $this->dbLayer->dropTable(UserSettingStorage::TABLE_NAME);
         $this->dbLayer->dropTable('users_online');
         $this->dbLayer->dropTable('users');
     }

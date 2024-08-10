@@ -11,20 +11,20 @@ namespace S2\Cms\Model;
 
 use S2\AdminYard\Config\FieldConfig;
 use S2\AdminYard\Form\FormParams;
+use S2\AdminYard\SettingStorage\SettingStorageInterface;
 use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 readonly class ArticleManager
 {
     public function __construct(
-        private DbLayer           $dbLayer,
-        private RequestStack      $requestStack,
-        private PermissionChecker $permissionChecker,
-        private bool              $newPositionOnTop,
-        private bool              $useHierarchy,
+        private DbLayer                 $dbLayer,
+        private SettingStorageInterface $settingStorage,
+        private PermissionChecker       $permissionChecker,
+        private bool                    $newPositionOnTop,
+        private bool                    $useHierarchy,
     ) {
     }
 
@@ -345,7 +345,7 @@ readonly class ArticleManager
     {
         // This token is used for every action in the tree management actions.
         // I chose to use ACTION_DELETE since then it would be compatible with the AdminYard delete token.
-        $formParams = new FormParams('Article', [], $this->requestStack->getMainRequest(), FieldConfig::ACTION_DELETE, ['id' => (string)$id]);
+        $formParams = new FormParams('Article', [], $this->settingStorage, FieldConfig::ACTION_DELETE, ['id' => (string)$id]);
 
         return $formParams->getCsrfToken();
     }

@@ -96,14 +96,33 @@ class DbLayer
             if (!empty($query['WHERE'])) {
                 $sql .= ' WHERE ' . $query['WHERE'];
             }
-        } else if (isset($query['REPLACE'])) {
-            $sql = 'REPLACE INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
+        } else if (isset($query['UPSERT'])) {
+            /**
+             * INSERT INTO table_name (column1, column2, ...)
+             * VALUES (value1, value2, ...)
+             * ON DUPLICATE KEY UPDATE column1 = VALUES(column1), column2 = VALUES(column2), ...;
+             */
+            $sql = 'INSERT INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
 
-            if (!empty($query['REPLACE'])) {
-                $sql .= ' (' . $query['REPLACE'] . ')';
+            if (!empty($query['UPSERT'])) {
+                $sql .= ' (' . $query['UPSERT'] . ')';
             }
 
-            $sql .= ' VALUES(' . $query['VALUES'] . ')';
+            $uniqueFields = explode(',', $query['UNIQUE']);
+            $uniqueFields = array_map('trim', $uniqueFields);
+            $uniqueFields = array_flip($uniqueFields);
+
+            $set = '';
+            foreach (explode(',', $query['UPSERT']) as $field) {
+                if (isset($uniqueFields[$field])) {
+                    continue;
+                }
+                $field = trim($field);
+                $set   .= $field . ' = VALUES(' . $field . '),';
+            }
+            $set = rtrim($set, ',');
+
+            $sql .= ' VALUES(' . $query['VALUES'] . ') ON DUPLICATE KEY UPDATE ' . $set;
         }
 
         return $sql;

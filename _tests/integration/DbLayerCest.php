@@ -57,6 +57,65 @@ class DbLayerCest
     /**
      * @throws DbLayerException
      */
+    public function testInsertOrUpdate(\IntegrationTester $I): void
+    {
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => '*',
+            'FROM'   => 'config',
+            'WHERE'  => 'name = :name',
+        ], [
+            'name' => 'S2_FAVORITE_URL',
+        ]);
+        $data   = $this->dbLayer->fetchAssocAll($result);
+        $I->assertCount(1, $data);
+        $I->assertEquals(['name' => 'S2_FAVORITE_URL', 'value' => 'favorite'], $data[0]);
+
+        $this->dbLayer->buildAndQuery([
+            'UPSERT' => 'name, value',
+            'INTO'   => 'config',
+            'UNIQUE' => 'name',
+            'VALUES' => ':name, :value',
+        ], [
+            'name'  => 'S2_FAVORITE_URL',
+            'value' => 'favorite2',
+        ]);
+
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => '*',
+            'FROM'   => 'config',
+            'WHERE'  => 'name = :name',
+        ], [
+            'name' => 'S2_FAVORITE_URL',
+        ]);
+        $data   = $this->dbLayer->fetchAssocAll($result);
+        $I->assertCount(1, $data);
+        $I->assertEquals(['name' => 'S2_FAVORITE_URL', 'value' => 'favorite2'], $data[0]);
+
+        $this->dbLayer->buildAndQuery([
+            'UPSERT' => 'name, value',
+            'INTO'   => 'config',
+            'UNIQUE' => 'name',
+            'VALUES' => ':name, :value',
+        ], [
+            'name'  => 'S2_UNKNOWN',
+            'value' => 'unknown',
+        ]);
+
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => '*',
+            'FROM'   => 'config',
+            'WHERE'  => 'name = :name',
+        ], [
+            'name' => 'S2_UNKNOWN',
+        ]);
+        $data   = $this->dbLayer->fetchAssocAll($result);
+        $I->assertCount(1, $data);
+        $I->assertEquals(['name' => 'S2_UNKNOWN', 'value' => 'unknown'], $data[0]);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
     public function testFieldManagement(\IntegrationTester $I): void
     {
         // Tests are wrapped in a transaction, so we need to stop it
@@ -160,6 +219,11 @@ class DbLayerCest
         // and to start a new one since we want to test DDL, and it is not transactional in MySQL.
         $this->pdo->rollBack();
 
+        // Otherwise MySQL gives error:
+        // SQLSTATE[42000]: Syntax error or access violation: 1170 BLOB/TEXT column 'value' used in key specification without a key length.
+        // Failed query: ALTER TABLE config ADD INDEX config_value_idx (value). Error code: 42000.
+        $this->dbLayer->alterField('config', 'value', 'VARCHAR(191)', false, '');
+
         $I->assertFalse($this->dbLayer->indexExists('config', 'value_idx'));
         $this->dbLayer->addIndex('config', 'value_idx', ['value']);
 
@@ -246,6 +310,8 @@ class DbLayerCest
         $I->assertTrue($this->dbLayer->indexExists('config', 'value_idx'));
 
         $this->dbLayer->dropIndex('config', 'value_idx');
+
+        $this->dbLayer->alterField('config', 'value', 'TEXT', false);
 
         // Start a transaction as if it was an external transaction from tests wrapper
         $this->pdo->beginTransaction();

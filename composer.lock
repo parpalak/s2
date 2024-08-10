@@ -338,12 +338,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/admin-yard.git",
-                "reference": "4c218c58532bbb0821a5a9675fd70df32aeec770"
+                "reference": "f82ddf2e0808fdd176600f685d686673b04abff2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/admin-yard/zipball/4c218c58532bbb0821a5a9675fd70df32aeec770",
-                "reference": "4c218c58532bbb0821a5a9675fd70df32aeec770",
+                "url": "https://api.github.com/repos/parpalak/admin-yard/zipball/f82ddf2e0808fdd176600f685d686673b04abff2",
+                "reference": "f82ddf2e0808fdd176600f685d686673b04abff2",
                 "shasum": ""
             },
             "require": {
@@ -384,7 +384,7 @@
                 "issues": "https://github.com/parpalak/admin-yard/issues",
                 "source": "https://github.com/parpalak/admin-yard/tree/master"
             },
-            "time": "2024-08-06T19:59:51+00:00"
+            "time": "2024-08-10T20:09:43+00:00"
         },
         {
             "name": "s2/rose",

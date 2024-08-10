@@ -13,22 +13,22 @@ use Psr\Cache\InvalidArgumentException;
 use S2\AdminYard\Config\AdminConfig;
 use S2\AdminYard\Config\FieldConfig;
 use S2\AdminYard\Form\FormParams;
+use S2\AdminYard\SettingStorage\SettingStorageInterface;
 use S2\AdminYard\TemplateRenderer;
 use S2\AdminYard\Translator;
 use S2\Cms\Admin\AdminConfigExtenderInterface;
 use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Pdo\DbLayerException;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 readonly class ExtensionManagerAdapter implements AdminConfigExtenderInterface
 {
-    public function  __construct(
-        private ExtensionManager  $extensionManager,
-        private PermissionChecker $permissionChecker,
-        private Translator        $translator,
-        private RequestStack      $requestStack,
-        private TemplateRenderer  $templateRenderer,
+    public function __construct(
+        private ExtensionManager        $extensionManager,
+        private PermissionChecker       $permissionChecker,
+        private Translator              $translator,
+        private ?SettingStorageInterface $settingStorage,
+        private TemplateRenderer        $templateRenderer,
     ) {
     }
 
@@ -105,7 +105,7 @@ readonly class ExtensionManagerAdapter implements AdminConfigExtenderInterface
     {
         // This token is used for every action in the extension actions.
         // I chose to use ACTION_DELETE since then it would be compatible with the AdminYard delete token.
-        $formParams = new FormParams('Extension', [], $this->requestStack->getMainRequest(), FieldConfig::ACTION_DELETE, ['id' => $id]);
+        $formParams = new FormParams('Extension', [], $this->settingStorage, FieldConfig::ACTION_DELETE, ['id' => $id]);
 
         return $formParams->getCsrfToken();
     }

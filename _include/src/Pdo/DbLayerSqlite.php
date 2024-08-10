@@ -19,6 +19,43 @@ class DbLayerSqlite extends DbLayer
         '/^(TINY|MEDIUM|LONG)?TEXT$/i'                                       => 'TEXT'
     ];
 
+    public function build(array $query): string
+    {
+        if (isset($query['UPSERT'])) {
+            /**
+             * INSERT INTO table_name (column1, column2, ...)
+             * VALUES (value1, value2, ...)
+             * ON CONFLICT (conflict_target) DO UPDATE
+             * SET column1 = excluded.column1, column2 = excluded.column2, ...;
+             * */
+            $sql = 'INSERT INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
+
+            if (!empty($query['UPSERT'])) {
+                $sql .= ' (' . $query['UPSERT'] . ')';
+            }
+
+            $uniqueFields = explode(',', $query['UNIQUE']);
+            $uniqueFields = array_map('trim', $uniqueFields);
+            $uniqueFields = array_flip($uniqueFields);
+
+            $set = '';
+            foreach (explode(',', $query['UPSERT']) as $field) {
+                if (isset($uniqueFields[$field])) {
+                    continue;
+                }
+                $field = trim($field);
+                $set   .= $field . ' = excluded.' . $field . ',';
+            }
+            $set = rtrim($set, ',');
+
+            $sql .= ' VALUES(' . $query['VALUES'] . ') ON CONFLICT (' . $query['UNIQUE'] . ') DO UPDATE SET ' . $set;
+
+            return $sql;
+        }
+
+        return parent::build($query);
+    }
+
     public function escape($str): string
     {
         return \is_array($str) ? '' : substr($this->pdo->quote($str), 1, -1);

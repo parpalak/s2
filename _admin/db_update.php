@@ -210,7 +210,7 @@ if (S2_DB_REVISION < 20) {
 
     $s2_db->addIndex('articles', 'template_idx', ['template']);
     $s2_db->dropIndex('articles', 'parent_id_idx');
-    $result  = $s2_db->buildAndQuery([
+    $result        = $s2_db->buildAndQuery([
         'SELECT' => 'id',
         'FROM'   => 'users',
     ]);
@@ -235,7 +235,7 @@ if (S2_DB_REVISION < 20) {
     $s2_db->addForeignKey('article_tag', 'fk_article', ['article_id'], 'articles', ['id'], 'CASCADE');
     $s2_db->addForeignKey('article_tag', 'fk_tag', ['tag_id'], 'tags', ['id'], 'CASCADE');
 
-    $result  = $s2_db->buildAndQuery([
+    $result         = $s2_db->buildAndQuery([
         'SELECT' => 'login',
         'FROM'   => 'users',
     ]);
@@ -247,6 +247,34 @@ if (S2_DB_REVISION < 20) {
     $s2_db->addForeignKey('users_online', 'fk_user', ['login'], 'users', ['login'], 'CASCADE');
     $s2_db->dropIndex('users_online', 'challenge_idx');
     $s2_db->addIndex('users_online', 'challenge_idx', ['challenge'], true);
+}
+
+if (S2_DB_REVISION < 21) {
+    $s2_db->createTable('user_settings', [
+        'FIELDS'       => [
+            'user_id' => [
+                'datatype'   => 'INT(10) UNSIGNED',
+                'allow_null' => false
+            ],
+            'name'    => [
+                'datatype'   => 'VARCHAR(191)',
+                'allow_null' => false
+            ],
+            'value'   => [
+                'datatype'   => 'TEXT',
+                'allow_null' => false
+            ],
+        ],
+        'PRIMARY KEY'  => ['user_id', 'name'],
+        'FOREIGN KEYS' => [
+            'fk_user' => [
+                'columns'           => ['user_id'],
+                'reference_table'   => 'users',
+                'reference_columns' => ['id'],
+                'on_delete'         => 'CASCADE',
+            ],
+        ]
+    ]);
 }
 
 $s2_db->buildAndQuery([

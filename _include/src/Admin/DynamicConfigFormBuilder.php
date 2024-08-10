@@ -14,6 +14,7 @@ use S2\AdminYard\Config\FieldConfig;
 use S2\AdminYard\Database\TypeTransformer;
 use S2\AdminYard\Form\FormFactory;
 use S2\AdminYard\Form\FormParams;
+use S2\AdminYard\SettingStorage\SettingStorageInterface;
 use S2\AdminYard\TemplateRenderer;
 use S2\AdminYard\Validator\Length;
 use S2\AdminYard\Validator\Regex;
@@ -65,14 +66,15 @@ class DynamicConfigFormBuilder
     private array $dynamicConfigFormExtenders;
 
     public function __construct(
-        private readonly PermissionChecker   $permissionChecker,
-        private readonly TranslatorInterface $translator,
-        private readonly TypeTransformer     $typeTransformer,
-        private readonly FormFactory         $formFactory,
-        private readonly TemplateRenderer    $templateRenderer,
-        private readonly RequestStack        $requestStack,
-        private readonly string              $rootDir,
-        DynamicConfigFormExtenderInterface   ...$dynamicConfigFormExtenders
+        private readonly PermissionChecker       $permissionChecker,
+        private readonly TranslatorInterface     $translator,
+        private readonly TypeTransformer         $typeTransformer,
+        private readonly FormFactory             $formFactory,
+        private readonly TemplateRenderer        $templateRenderer,
+        private readonly RequestStack            $requestStack,
+        private readonly SettingStorageInterface $settingStorage,
+        private readonly string                  $rootDir,
+        DynamicConfigFormExtenderInterface       ...$dynamicConfigFormExtenders
     ) {
         $this->dynamicConfigFormExtenders = $dynamicConfigFormExtenders;
     }
@@ -112,7 +114,7 @@ class DynamicConfigFormBuilder
                 $form = $this->formFactory->createEntityForm(new FormParams(
                     $entityName,
                     [$valFieldName => $field],
-                    $this->requestStack->getMainRequest(),
+                    $this->settingStorage,
                     'patch',
                     $row['primary_key'],
                 ));
