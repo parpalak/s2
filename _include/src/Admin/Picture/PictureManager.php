@@ -146,7 +146,7 @@ class PictureManager
             if ($item === '.' || $item === '..') {
                 continue;
             }
-            if (!@unlink($fullDir . '/' . $item)) {
+            if (is_dir($fullDir . '/' . $item) || !@unlink($fullDir . '/' . $item)) {
                 $this->deleteFolder($dir . '/' . $item);
             }
         }

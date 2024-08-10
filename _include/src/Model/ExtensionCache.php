@@ -43,7 +43,9 @@ class ExtensionCache
         ];
 
         foreach ($file_list as $entry) {
-            @unlink($entry);
+            if (file_exists($entry)) {
+                @unlink($entry);
+            }
         }
     }
 

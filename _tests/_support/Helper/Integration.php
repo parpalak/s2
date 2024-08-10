@@ -48,7 +48,9 @@ class Integration extends AbstractBrowserModule
     public function _initialize()
     {
         parent::_initialize();
-        @unlink(self::ROOT_DIR . '_cache/test/cache_config.php');
+        if (file_exists(self::ROOT_DIR . '_cache/test/cache_config.php')) {
+            @unlink(self::ROOT_DIR . '_cache/test/cache_config.php');
+        }
         @self::deleteRecursive(self::ROOT_DIR . '_cache/test/config/');
         $this->publicApplication = $this->createApplication();
         $this->pdo               = $this->publicApplication->container->get(\PDO::class);
@@ -217,6 +219,9 @@ class Integration extends AbstractBrowserModule
 
     private static function deleteRecursive($dir): bool
     {
+        if (!is_dir($dir)) {
+            return false;
+        }
         $array = scandir($dir);
         if ($array === false) {
             return false;

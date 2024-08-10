@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2023-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -116,7 +116,12 @@ class AssetMerge implements AssetMergeInterface
 
     private function getCacheHash(): string
     {
-        $result = @include $this->getHashFilename();
+        $hashFilename = $this->getHashFilename();
+        if (!file_exists($hashFilename)) {
+            return '';
+        }
+
+        $result = @include $hashFilename;
 
         return \is_string($result) ? $result : '';
     }
