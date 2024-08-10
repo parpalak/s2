@@ -74,12 +74,12 @@ readonly class BlogPlaceholderProvider
             ];
 
             $result = $this->dbLayer->buildAndQuery([
-                'SELECT'   => 't.name, t.url, count(t.tag_id)',
+                'SELECT'   => 't.name, t.url, count(t.id)',
                 'FROM'     => 'tags AS t',
                 'JOINS'    => [
                     [
                         'INNER JOIN' => 's2_blog_post_tag AS pt',
-                        'ON'         => 't.tag_id = pt.tag_id'
+                        'ON'         => 't.id = pt.tag_id'
                     ],
                     [
                         'INNER JOIN' => 's2_blog_posts AS p',
@@ -87,7 +87,7 @@ readonly class BlogPlaceholderProvider
                     ]
                 ],
                 'WHERE'    => 't.s2_blog_important = 1 AND p.published = 1',
-                'GROUP BY' => 't.tag_id',
+                'GROUP BY' => 't.id',
                 'ORDER BY' => '3 DESC',
             ]);
 
@@ -237,7 +237,7 @@ readonly class BlogPlaceholderProvider
             'JOINS'  => [
                 [
                     'INNER JOIN' => 'article_tag AS atg',
-                    'ON'         => 'atg.tag_id = t.tag_id'
+                    'ON'         => 'atg.tag_id = t.id'
                 ]
             ],
             'WHERE'  => 'atg.article_id = :id AND (' . $raw_query . ') IS NOT NULL',

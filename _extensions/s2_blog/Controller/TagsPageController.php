@@ -33,7 +33,7 @@ class TagsPageController extends BlogController
         }
 
         $query  = [
-            'SELECT' => 'tag_id, name, url',
+            'SELECT' => 'id AS tag_id, name, url',
             'FROM'   => 'tags'
         ];
         $result = $this->dbLayer->buildAndQuery($query);

@@ -41,10 +41,10 @@ class TagsProvider
                     ]
                 ],
                 // Well, it's an inaccuracy because we don't check parents' "published" property
-                'WHERE'  => 'a.published = 1 AND at.tag_id = t.tag_id'
+                'WHERE'  => 'a.published = 1 AND at.tag_id = t.id'
             ];
             $query    = [
-                'SELECT'   => 'tag_id, name, url, (' . $this->dbLayer->build($subQuery) . ') AS count',
+                'SELECT'   => 'id AS tag_id, name, url, (' . $this->dbLayer->build($subQuery) . ') AS count',
                 'FROM'     => 'tags AS t',
                 'ORDER BY' => 'count DESC',
             ];
@@ -75,8 +75,8 @@ class TagsProvider
                     'ON'         => 'a.id = at.article_id'
                 ]
             ],
-            // Well, it's an inaccuracy because we don't check parents' "published" property
-            'WHERE'  => 'a.published = 1 AND at.tag_id = t.tag_id'
+            // NOTE: it's an inaccuracy because we don't check parents' "published" property
+            'WHERE'  => 'a.published = 1 AND at.tag_id = t.id'
         ];
         $query    = [
             'SELECT'   => 'name, (' . $this->dbLayer->build($subQuery) . ') AS count',

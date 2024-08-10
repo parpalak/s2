@@ -147,7 +147,7 @@ readonly class SearchPageController implements ControllerInterface
                     'ON'         => 'a.id = at.article_id'
                 ]
             ],
-            'WHERE'  => 'at.tag_id = t.tag_id AND a.published = 1',
+            'WHERE'  => 'at.tag_id = t.id AND a.published = 1',
             'LIMIT'  => '1'
         ];
         $usedSql = $this->dbLayer->build($sql);
@@ -155,7 +155,7 @@ readonly class SearchPageController implements ControllerInterface
         $where = array_map(fn($word) => 'name LIKE \'' . $this->dbLayer->escape($word) . '%\' OR name LIKE \'% ' . $this->dbLayer->escape($word) . '%\'', $words);
 
         $sql              = [
-            'SELECT' => 'tag_id, name, url',
+            'SELECT' => 'id AS tag_id, name, url',
             'FROM'   => 'tags AS t',
             'WHERE'  => '(' . implode(' OR ', $where) . ') AND (' . $usedSql . ') IS NOT NULL',
         ];
@@ -164,10 +164,9 @@ readonly class SearchPageController implements ControllerInterface
         $tags = [];
         while ($row = $this->dbLayer->fetchAssoc($s2_search_result)) {
             if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
-                $tags[] = '<a href="' . $this->urlBuilder->link('/' . $this->tagsUrl . '/' . urlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
+                $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
             }
         }
-//        $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
 
         $event = new TagsSearchEvent($where, $words);
         if (\count($tags) > 0) {

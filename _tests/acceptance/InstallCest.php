@@ -433,7 +433,7 @@ class InstallCest
         $I->see('another tag');
 
         $tagId = '1';
-        $I->amOnPage('/_admin/index.php?entity=Tag&action=edit&tag_id=' . $tagId);
+        $I->amOnPage('/_admin/index.php?entity=Tag&action=edit&id=' . $tagId);
         $dataProvider = static function (string $csrfToken) {
             return [
                 '__csrf_token' => $csrfToken,
@@ -447,10 +447,10 @@ class InstallCest
             ];
         };
         $csrfToken    = $I->grabValueFrom('input[name=__csrf_token]');
-        $I->sendAjaxPostRequest('/_admin/index.php?entity=Tag&action=edit&tag_id=1111' . $tagId, $dataProvider($csrfToken));
+        $I->sendAjaxPostRequest('/_admin/index.php?entity=Tag&action=edit&id=1111' . $tagId, $dataProvider($csrfToken));
         $this->assertJsonResponseContains($I, ['errors', 0], 'Unable to confirm security token.');
 
-        $I->sendAjaxPostRequest('/_admin/index.php?entity=Tag&action=edit&tag_id=' . $tagId, $dataProvider($csrfToken));
+        $I->sendAjaxPostRequest('/_admin/index.php?entity=Tag&action=edit&id=' . $tagId, $dataProvider($csrfToken));
         $I->see('{"success":true}');
 
         $I->amOnPage('/tags/tag1');

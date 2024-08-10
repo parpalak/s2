@@ -5,8 +5,8 @@
  * Allows to add a blog to your S2 site
  *
  * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @license   MIT
+ * @package   s2_blog
  */
 
 declare(strict_types=1);
@@ -40,7 +40,7 @@ class Manifest implements ManifestInterface
 
     public function getVersion(): string
     {
-        return '2.0a1';
+        return '2.0a2';
     }
 
     public function isAdminAffected(): bool
@@ -61,7 +61,7 @@ class Manifest implements ManifestInterface
         // Setup posts table
         if (!$dbLayer->tableExists('s2_blog_posts')) {
             $schema = [
-                'FIELDS'      => [
+                'FIELDS'       => [
                     'id'          => [
                         'datatype'   => 'SERIAL',
                         'allow_null' => false
@@ -120,14 +120,21 @@ class Manifest implements ManifestInterface
                         'allow_null' => true,
                     ]
                 ],
-                'PRIMARY KEY' => ['id'],
-                'INDEXES'     => [
+                'PRIMARY KEY'  => ['id'],
+                'FOREIGN KEYS' => array(
+                    'fk_user' => array(
+                        'columns'           => ['user_id'],
+                        'reference_table'   => 'users',
+                        'reference_columns' => ['id'],
+                        'on_delete'         => 'SET NULL',
+                    )
+                ),
+                'INDEXES'      => [
                     'url_idx'                   => ['url'],
-                    'create_time_idx'           => ['create_time'],
                     'create_time_published_idx' => ['create_time', 'published'],
                     'id_published_idx'          => ['id', 'published'],
                     'favorite_idx'              => ['favorite'],
-                    'label_idx'                 => ['label']
+                    'label_idx'                 => ['label'],
                 ]
             ];
 
@@ -145,7 +152,7 @@ class Manifest implements ManifestInterface
         // Setup blog comments table
         if (!$dbLayer->tableExists('s2_blog_comments')) {
             $schema = [
-                'FIELDS'      => [
+                'FIELDS'       => [
                     'id'         => [
                         'datatype'   => 'SERIAL',
                         'allow_null' => false
@@ -153,7 +160,6 @@ class Manifest implements ManifestInterface
                     'post_id'    => [
                         'datatype'   => 'INT(10) UNSIGNED',
                         'allow_null' => false,
-                        'default'    => '0'
                     ],
                     'time'       => [
                         'datatype'   => 'INT(10) UNSIGNED',
@@ -205,9 +211,16 @@ class Manifest implements ManifestInterface
                         'allow_null' => true
                     ],
                 ],
-                'PRIMARY KEY' => ['id'],
-                'INDEXES'     => [
-                    'post_id_idx' => ['post_id'],
+                'PRIMARY KEY'  => ['id'],
+                'FOREIGN KEYS' => array(
+                    'fk_post' => array(
+                        'columns'           => ['post_id'],
+                        'reference_table'   => 's2_blog_posts',
+                        'reference_columns' => ['id'],
+                        'on_delete'         => 'CASCADE',
+                    )
+                ),
+                'INDEXES'      => [
                     'sort_idx'    => ['post_id', 'time', 'shown'],
                     'time_idx'    => ['time']
                 ]
@@ -222,7 +235,7 @@ class Manifest implements ManifestInterface
         // Setup table to link posts and tags
         if (!$dbLayer->tableExists('s2_blog_post_tag')) {
             $schema = [
-                'FIELDS'      => [
+                'FIELDS'       => [
                     'id'      => [
                         'datatype'   => 'SERIAL',
                         'allow_null' => false
@@ -230,16 +243,28 @@ class Manifest implements ManifestInterface
                     'post_id' => [
                         'datatype'   => 'INT(10) UNSIGNED',
                         'allow_null' => false,
-                        'default'    => '0'
                     ],
                     'tag_id'  => [
                         'datatype'   => 'INT(10) UNSIGNED',
                         'allow_null' => false,
-                        'default'    => '0'
                     ],
                 ],
-                'PRIMARY KEY' => ['id'],
-                'INDEXES'     => [
+                'PRIMARY KEY'  => ['id'],
+                'FOREIGN KEYS' => array(
+                    'fk_post' => array(
+                        'columns'           => ['post_id'],
+                        'reference_table'   => 's2_blog_posts',
+                        'reference_columns' => ['id'],
+                        'on_delete'         => 'CASCADE',
+                    ),
+                    'fk_tag'  => array(
+                        'columns'           => ['tag_id'],
+                        'reference_table'   => 'tags',
+                        'reference_columns' => ['id'],
+                        'on_delete'         => 'CASCADE',
+                    ),
+                ),
+                'INDEXES'      => [
                     'post_id_idx' => ['post_id'],
                     'tag_id_idx'  => ['tag_id'],
                 ],
@@ -287,20 +312,54 @@ class Manifest implements ManifestInterface
                 'WHERE'  => 'user_id = 0'
             ]);
         }
+
+        if ($currentVersion !== null && version_compare($currentVersion, '2.0a2', '<')) {
+            $dbLayer->dropIndex('s2_blog_posts', 'create_time_idx');
+            $result  = $dbLayer->buildAndQuery([
+                'SELECT' => 'id',
+                'FROM'   => 'users',
+            ]);
+            $existingUsers = $dbLayer->fetchColumn($result);
+            $dbLayer->buildAndQuery([
+                'UPDATE' => 's2_blog_posts',
+                'SET'    => 'user_id = NULL',
+                'WHERE'  => 'user_id NOT IN (' . implode(',', $existingUsers) . ')',
+            ]);
+            $dbLayer->addForeignKey('s2_blog_posts', 'fk_user', ['user_id'], 'users', ['id'], 'SET NULL');
+
+            $dbLayer->alterField('s2_blog_comments', 'post_id', 'INT(10) UNSIGNED', false);
+            $dbLayer->addForeignKey('s2_blog_comments', 'fk_post', ['post_id'], 's2_blog_posts', ['id'], 'CASCADE');
+            $dbLayer->dropIndex('s2_blog_comments', 'post_id_idx');
+
+            $dbLayer->query('DELETE FROM ' . $dbLayer->getPrefix() . 's2_blog_post_tag WHERE post_id NOT IN (SELECT id FROM ' . $dbLayer->getPrefix() . 's2_blog_posts)');
+            $dbLayer->query('DELETE FROM ' . $dbLayer->getPrefix() . 's2_blog_post_tag WHERE tag_id NOT IN (SELECT id FROM ' . $dbLayer->getPrefix() . 'tags)');
+
+            $dbLayer->alterField('s2_blog_post_tag', 'post_id', 'INT(10) UNSIGNED', false);
+            $dbLayer->alterField('s2_blog_post_tag', 'tag_id', 'INT(10) UNSIGNED', false);
+            $dbLayer->addForeignKey('s2_blog_post_tag', 'fk_post', ['post_id'], 's2_blog_posts', ['id'], 'CASCADE');
+            $dbLayer->addForeignKey('s2_blog_post_tag', 'fk_tag', ['tag_id'], 'tags', ['id'], 'CASCADE');
+        }
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function uninstall(DbLayer $dbLayer, Container $container): void
     {
-        $query = [
-            'DELETE' => 'config',
-            'WHERE'  => 'name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\')',
-        ];
-        $dbLayer->buildAndQuery($query);
+        if ($dbLayer->tableExists('config')) {
+            $dbLayer->buildAndQuery([
+                'DELETE' => 'config',
+                'WHERE'  => 'name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\')',
+            ]);
+        }
 
-        $dbLayer->dropTable('s2_blog_posts');
         $dbLayer->dropTable('s2_blog_post_tag');
         $dbLayer->dropTable('s2_blog_comments');
+        $dbLayer->dropTable('s2_blog_posts');
 
+        if ($dbLayer->tableExists('tags')) {
+            $dbLayer->dropIndex('tags', 's2_blog_important_idx');
+        }
         $dbLayer->dropField('tags', 's2_blog_important');
     }
 }

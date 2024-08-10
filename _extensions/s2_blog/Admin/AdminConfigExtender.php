@@ -235,7 +235,7 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                     };
                     $tableName  = $this->dbPrefix . 'tags';
                     $tableName2 = $this->dbPrefix . 's2_blog_post_tag';
-                    $sql        = "SELECT $column FROM $tableName AS t JOIN $tableName2 AS pt ON t.tag_id = pt.tag_id WHERE pt.post_id = entity.id";
+                    $sql        = "SELECT $column FROM $tableName AS t JOIN $tableName2 AS pt ON t.id = pt.tag_id WHERE pt.post_id = entity.id";
                     return $sql;
                 })()),
                 control: 'input',
@@ -474,20 +474,6 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                     }
                 }
             })
-            ->addListener(EntityConfig::EVENT_BEFORE_DELETE, function (BeforeDeleteEvent $event) {
-                $event->dataProvider->deleteEntity(
-                    $this->dbPrefix . 's2_blog_post_tag',
-                    ['post_id' => FieldConfig::DATA_TYPE_INT],
-                    new Key(['post_id' => $event->primaryKey->getIntId()]),
-                    [],
-                );
-                $event->dataProvider->deleteEntity(
-                    $this->dbPrefix . 's2_blog_comments',
-                    ['post_id' => FieldConfig::DATA_TYPE_INT],
-                    new Key(['post_id' => $event->primaryKey->getIntId()]),
-                    [],
-                );
-            })
             ->addFilter(
                 new Filter(
                     'search',
@@ -502,7 +488,7 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                     'tags',
                     $this->translator->trans('Tags'),
                     'search_input',
-                    'id IN (SELECT pt.post_id FROM ' . $this->dbPrefix . 's2_blog_post_tag AS pt JOIN ' . $this->dbPrefix . 'tags AS t ON t.tag_id = pt.tag_id WHERE t.name LIKE %1$s)',
+                    'id IN (SELECT pt.post_id FROM ' . $this->dbPrefix . 's2_blog_post_tag AS pt JOIN ' . $this->dbPrefix . 'tags AS t ON t.id = pt.tag_id WHERE t.name LIKE %1$s)',
                     fn(string $value) => $value !== '' ? '%' . $value . '%' : null
                 )
             )
@@ -548,7 +534,7 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                 label: $this->translator->trans('Used in posts'),
                 hint: $this->translator->trans('Used in posts info'),
                 type: new VirtualFieldType(
-                    'SELECT COUNT(*) FROM s2_blog_post_tag AS pt WHERE pt.tag_id = entity.tag_id',
+                    'SELECT COUNT(*) FROM s2_blog_post_tag AS pt WHERE pt.tag_id = entity.id',
                     new LinkToEntityParams($postEntity->getName(), ['tags'], ['name' /* tags.name */])
                 ),
                 sortable: true,
@@ -568,14 +554,6 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                     ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_EDIT] : [],
                 ]
             ))
-            ->addListener(EntityConfig::EVENT_BEFORE_DELETE, function (BeforeDeleteEvent $event) {
-                $event->dataProvider->deleteEntity(
-                    $this->dbPrefix . 's2_blog_post_tag',
-                    ['tag_id' => FieldConfig::DATA_TYPE_INT],
-                    new Key(['tag_id' => $event->primaryKey->getIntId('tag_id')]),
-                    [],
-                );
-            })
         ;
 
         $adminConfig

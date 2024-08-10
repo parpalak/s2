@@ -354,7 +354,7 @@ readonly class AdminConfigProvider
                 EntityConfig::EVENT_BEFORE_CREATE,
                 function (BeforeSaveEvent $event) {
                     // Check that there are no users with the same login.
-                    $otherAdmins = $event->dataProvider->getEntityList(
+                    $otherUsersWithSameLogin = $event->dataProvider->getEntityList(
                         $this->dbPrefix . 'users',
                         ['login' => 'string', 'id' => 'int'], // not really used
                         conditions: [
@@ -362,7 +362,7 @@ readonly class AdminConfigProvider
                         ]
                     );
 
-                    if (\count($otherAdmins) > 0) {
+                    if (\count($otherUsersWithSameLogin) > 0) {
                         $event->errorMessages[] = $this->translator->trans('Username exists', ['{{ login }}' => $event->data['login']]);
                     }
                 }
@@ -437,7 +437,7 @@ readonly class AdminConfigProvider
                     };
                     $tableName  = $this->dbPrefix . 'tags';
                     $tableName2 = $this->dbPrefix . 'article_tag';
-                    $sql        = "SELECT $column FROM $tableName AS t JOIN $tableName2 AS pt ON t.tag_id = pt.tag_id WHERE pt.article_id = entity.id";
+                    $sql        = "SELECT $column FROM $tableName AS t JOIN $tableName2 AS pt ON t.id = pt.tag_id WHERE pt.article_id = entity.id";
                     return $sql;
                 })()),
                 control: 'input',
@@ -698,14 +698,6 @@ readonly class AdminConfigProvider
                     }
                 }
             })
-            ->addListener(EntityConfig::EVENT_BEFORE_DELETE, function (BeforeDeleteEvent $event) {
-                $event->dataProvider->deleteEntity(
-                    $this->dbPrefix . 'article_tag',
-                    ['article_id' => FieldConfig::DATA_TYPE_INT],
-                    new Key(['article_id' => $event->primaryKey->getIntId()]),
-                    [],
-                );
-            })
             ->addFilter(
                 new Filter(
                     'search',
@@ -720,7 +712,7 @@ readonly class AdminConfigProvider
                     'tags',
                     $this->translator->trans('Tags'),
                     'search_input',
-                    'id IN (SELECT at.article_id FROM ' . $this->dbPrefix . 'article_tag AS at JOIN ' . $this->dbPrefix . 'tags AS t ON t.tag_id = at.tag_id WHERE t.name LIKE %1$s)',
+                    'id IN (SELECT at.article_id FROM ' . $this->dbPrefix . 'article_tag AS at JOIN ' . $this->dbPrefix . 'tags AS t ON t.id = at.tag_id WHERE t.name LIKE %1$s)',
                     fn(string $value) => $value !== '' ? '%' . $value . '%' : null
                 )
             )
@@ -767,7 +759,7 @@ readonly class AdminConfigProvider
                 ->setEditTitle($this->translator->trans('Edit tag'))
                 ->setNewTitle($this->translator->trans('New tag'))
                 ->addField(new FieldConfig(
-                    name: 'tag_id',
+                    name: 'id',
                     type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT, true),
                     useOnActions: []
                 ))
@@ -792,7 +784,7 @@ readonly class AdminConfigProvider
                     label: $this->translator->trans('Used in articles'),
                     hint: $this->translator->trans('Used in articles info'),
                     type: new VirtualFieldType(
-                        'SELECT CAST(COUNT(*) AS CHAR) FROM ' . $this->dbPrefix . 'article_tag AS pt WHERE pt.tag_id = entity.tag_id',
+                        'SELECT CAST(COUNT(*) AS CHAR) FROM ' . $this->dbPrefix . 'article_tag AS pt WHERE pt.tag_id = entity.id',
                         new LinkToEntityParams($articleEntity->getName(), ['tags'], ['name' /* tags.name */])
                     ),
                     sortable: true,
@@ -830,15 +822,7 @@ readonly class AdminConfigProvider
                     FieldConfig::ACTION_LIST,
                     ...$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_CREATE_ARTICLES, PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT] : [],
                     ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_DELETE] : [],
-                ])
-                ->addListener(EntityConfig::EVENT_BEFORE_DELETE, function (BeforeDeleteEvent $event) {
-                    $event->dataProvider->deleteEntity(
-                        $this->dbPrefix . 'article_tag',
-                        ['tag_id' => FieldConfig::DATA_TYPE_INT],
-                        new Key(['tag_id' => $event->primaryKey->getIntId('tag_id')]),
-                        [],
-                    );
-                }),
+                ]),
                 20
             )
         ;
@@ -944,13 +928,13 @@ readonly class AdminConfigProvider
         $existingTags = $dataProvider->getEntityList(
             $dbPrefix . 'tags',
             [
-                'name'   => FieldConfig::DATA_TYPE_STRING,
-                'tag_id' => FieldConfig::DATA_TYPE_INT,
+                'name' => FieldConfig::DATA_TYPE_STRING,
+                'id'   => FieldConfig::DATA_TYPE_INT,
             ],
             conditions: [new LogicalExpression('name', array_map(static fn(string $tag) => mb_strtolower($tag), $tags), 'LOWER(name) IN (%s)')],
         );
 
-        $existingTagsMap = array_column($existingTags, 'column_name', 'column_tag_id');
+        $existingTagsMap = array_column($existingTags, 'column_name', 'column_id');
         $existingTagsMap = array_map(static fn(string $tag) => mb_strtolower($tag), $existingTagsMap);
         $existingTagsMap = array_flip($existingTagsMap);
 

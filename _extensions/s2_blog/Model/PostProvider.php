@@ -155,7 +155,7 @@ readonly class PostProvider
             'JOINS'  => [
                 [
                     'INNER JOIN' => 's2_blog_post_tag AS pt',
-                    'ON'         => 'pt.tag_id = t.tag_id'
+                    'ON'         => 'pt.tag_id = t.id'
                 ]
             ],
             'WHERE'  => 'pt.post_id IN (' . implode(', ', $ids) . ')'

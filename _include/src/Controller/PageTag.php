@@ -41,7 +41,7 @@ readonly class PageTag implements ControllerInterface
 
         // Tag preview
         $query  = [
-            'SELECT' => 'tag_id, description, name, url',
+            'SELECT' => 'id AS tag_id, description, name, url',
             'FROM'   => 'tags',
             'WHERE'  => 'url = \'' . $this->dbLayer->escape($name) . '\''
         ];

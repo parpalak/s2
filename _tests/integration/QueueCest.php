@@ -19,6 +19,9 @@ use S2\Cms\Queue\QueueConsumer;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Rose\Storage\Exception\InvalidEnvironmentException;
 
+/**
+ * @group queue
+ */
 class QueueCest
 {
     protected function _before()
@@ -38,7 +41,7 @@ class QueueCest
     {
         /** @var \PDO $pdo */
         $pdo = $I->grabService(\PDO::class);
-        // Tests are wrapped in transaction, so we need to stop it
+        // Tests are wrapped in a transaction, so we need to stop it
         // and to start a new one since we want to test commit and rollback.
         $pdo->rollBack();
 

@@ -13,10 +13,13 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_search;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use S2\Cms\Extensions\ManifestInterface;
 use S2\Cms\Extensions\ManifestTrait;
 use S2\Cms\Framework\Container;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Rose\Storage\Database\PdoStorage;
 
 class Manifest implements ManifestInterface
@@ -79,13 +82,19 @@ class Manifest implements ManifestInterface
         $pdoStorage->erase();
     }
 
+    /**
+     * @throws DbLayerException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function uninstall(DbLayer $dbLayer, Container $container): void
     {
-        $query = [
-            'DELETE' => 'config',
-            'WHERE'  => 'name in (\'S2_SEARCH_QUICK\')',
-        ];
-        $dbLayer->buildAndQuery($query);
+        if ($dbLayer->tableExists('config')) {
+            $dbLayer->buildAndQuery([
+                'DELETE' => 'config',
+                'WHERE'  => 'name in (\'S2_SEARCH_QUICK\')',
+            ]);
+        }
 
         /** @var PdoStorage $pdoStorage */
         $pdoStorage = $container->get(PdoStorage::class);

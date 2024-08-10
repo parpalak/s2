@@ -163,7 +163,7 @@ if (defined('S2_ADMIN_MODE')) {
     ini_set('session.cookie_httponly', true);
 }
 
-define('S2_DB_LAST_REVISION', 19);
+define('S2_DB_LAST_REVISION', 20);
 if (S2_DB_REVISION < S2_DB_LAST_REVISION) {
     include __DIR__ . '/../_admin/db_update.php';
 }

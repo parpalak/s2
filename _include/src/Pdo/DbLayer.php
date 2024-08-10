@@ -33,14 +33,14 @@ class DbLayer
     public function startTransaction(): void
     {
         ++$this->transactionLevel;
-        // $this->pdo->beginTransaction(); // MySQL does not support DDL in transactions so for S2 they are useless
+        $this->pdo->beginTransaction();
     }
 
     public function endTransaction(): void
     {
         if ($this->transactionLevel > 0) {
             --$this->transactionLevel;
-            // $this->pdo->commit(); // MySQL does not support DDL in transactions so for S2 they are useless
+            $this->pdo->commit();
         }
     }
 
@@ -126,17 +126,21 @@ class DbLayer
     {
         $stmt = $this->pdo->prepare($sql);
         try {
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value, $types[$key] ?? \PDO::PARAM_STR);
+            if ($types !== []) {
+                foreach ($params as $key => $value) {
+                    $stmt->bindValue($key, $value, $types[$key] ?? \PDO::PARAM_STR);
+                }
+                $stmt->execute();
+            } else {
+                $stmt->execute($params);
             }
-            $stmt->execute();
 
             return $stmt;
         } catch (\PDOException $e) {
-//            if ($this->transactionLevel > 0) {
-//                $this->pdo->rollBack();
-//                --$this->transactionLevel;
-//            }
+            if ($this->transactionLevel > 0) {
+                $this->pdo->rollBack();
+                --$this->transactionLevel;
+            }
 
             throw new DbLayerException(
                 sprintf("%s. Failed query: %s. Error code: %s.", $e->getMessage(), $sql, $e->getCode()),
@@ -146,7 +150,6 @@ class DbLayer
             );
         }
     }
-
 
     public function fetchAssocAll(\PDOStatement $statement): array
     {
@@ -187,12 +190,6 @@ class DbLayer
         return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 
-    public function numRows(\PDOStatement $statement): int
-    {
-        // TODO check if it works
-        return $statement->rowCount();
-    }
-
     public function affectedRows(\PDOStatement $statement): int
     {
         return $statement->rowCount();
@@ -227,17 +224,11 @@ class DbLayer
 
     public function close(): bool
     {
-        // TODO maybe one has to deal with closing cursor here
+        if ($this->transactionLevel > 0) {
+            $this->pdo->commit();
+        }
+
         return true;
-//        if ($this->link_id) {
-//            if (!is_bool($this->query_result) && $this->query_result) {
-//                @mysqli_free_result($this->query_result);
-//            }
-//
-//            return @mysqli_close($this->link_id);
-//        }
-//
-//        return false;
     }
 
 
@@ -258,20 +249,21 @@ class DbLayer
     /**
      * @throws DbLayerException
      */
-    public function tableExists(string $table_name, bool $no_prefix = false): bool
+    public function tableExists(string $tableName, bool $noPrefix = false): bool
     {
-        $result = $this->query('SHOW TABLES LIKE \'' . ($no_prefix ? '' : $this->prefix) . $this->escape($table_name) . '\'');
-        return $this->numRows($result) > 0;
+        $result = $this->query('SHOW TABLES LIKE \'' . ($noPrefix ? '' : $this->prefix) . $this->escape($tableName) . '\'');
+        return \count($result->fetchAll()) > 0;
     }
 
 
     /**
      * @throws DbLayerException
      */
-    public function fieldExists(string $table_name, string $field_name, bool $no_prefix = false): bool
+    public function fieldExists(string $tableName, string $fieldName, bool $noPrefix = false): bool
     {
-        $result = $this->query('SHOW COLUMNS FROM ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' LIKE \'' . $this->escape($field_name) . '\'');
-        return $this->numRows($result) > 0;
+        $result = $this->query('SHOW COLUMNS FROM ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' LIKE \'' . $this->escape($fieldName) . '\'');
+
+        return \count($result->fetchAll()) > 0;
     }
 
 
@@ -344,6 +336,22 @@ class DbLayer
         $query = substr($query, 0, -2) . "\n" . ') ENGINE = InnoDB CHARACTER SET utf8mb4';
 
         $this->query($query);
+
+        // Add foreign keys
+        if (isset($schema['FOREIGN KEYS'])) {
+            foreach ($schema['FOREIGN KEYS'] as $key_name => $foreign_key) {
+                $this->addForeignKey(
+                    $table_name,
+                    $key_name,
+                    $foreign_key['columns'],
+                    $foreign_key['reference_table'],
+                    $foreign_key['reference_columns'],
+                    $foreign_key['on_delete'] ?? null,
+                    $foreign_key['on_update'] ?? null,
+                    $no_prefix
+                );
+            }
+        }
     }
 
 
@@ -359,42 +367,48 @@ class DbLayer
         $this->query('DROP TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name);
     }
 
-
     /**
      * @throws DbLayerException
      */
-    public function addField(string $table_name, string $field_name, string $field_type, bool $allow_null, $default_value = null, ?string $after_field = null, bool $no_prefix = false): void
+    public function addField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
     {
-        if ($this->fieldExists($table_name, $field_name, $no_prefix)) {
+        if ($this->fieldExists($tableName, $fieldName, $noPrefix)) {
             return;
         }
 
-        $field_type = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $field_type);
+        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
 
-        if ($default_value !== null && !\is_int($default_value) && !\is_float($default_value)) {
-            $default_value = '\'' . $this->escape($default_value) . '\'';
+        if ($defaultValue !== null && !\is_int($defaultValue) && !\is_float($defaultValue)) {
+            $defaultValue = '\'' . $this->escape($defaultValue) . '\'';
         }
 
-        $this->query('ALTER TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' ADD ' . $field_name . ' ' . $field_type . ($allow_null ? ' ' : ' NOT NULL') . ($default_value !== null ? ' DEFAULT ' . $default_value : ' ') . ($after_field != null ? ' AFTER ' . $after_field : ''));
+        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ADD ' . $fieldName . ' ' . $fieldType . ($allowNull ? ' ' : ' NOT NULL') . ($defaultValue !== null ? ' DEFAULT ' . $defaultValue : ' ') . ($afterField != null ? ' AFTER ' . $afterField : ''));
     }
 
+    /**
+     * @throws DbLayerException
+     */
+    public function renameField(string $table_name, string $old_field_name, string $new_field_name, bool $no_prefix = false): void
+    {
+        $this->query('ALTER TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' RENAME COLUMN ' . $old_field_name . ' TO ' . $new_field_name);
+    }
 
     /**
      * @throws DbLayerException
      */
-    public function alterField(string $table_name, string $field_name, string $field_type, bool $allow_null, $default_value = null, ?string $after_field = null, bool $no_prefix = false): void
+    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
     {
-        if (!$this->fieldExists($table_name, $field_name, $no_prefix)) {
+        if (!$this->fieldExists($tableName, $fieldName, $noPrefix)) {
             return;
         }
 
-        $field_type = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $field_type);
+        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
 
-        if ($default_value !== null && !\is_int($default_value) && !\is_float($default_value)) {
-            $default_value = '\'' . $this->escape($default_value) . '\'';
+        if ($defaultValue !== null && !\is_int($defaultValue) && !\is_float($defaultValue)) {
+            $defaultValue = '\'' . $this->escape($defaultValue) . '\'';
         }
 
-        $this->query('ALTER TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' MODIFY ' . $field_name . ' ' . $field_type . ($allow_null ? ' ' : ' NOT NULL') . ($default_value !== null ? ' DEFAULT ' . $default_value : ' ') . ($after_field != null ? ' AFTER ' . $after_field : ''));
+        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' MODIFY ' . $fieldName . ' ' . $fieldType . ($allowNull ? ' ' : ' NOT NULL') . ($defaultValue !== null ? ' DEFAULT ' . $defaultValue : ' ') . ($afterField !== null ? ' AFTER ' . $afterField : ''));
     }
 
 
@@ -403,7 +417,7 @@ class DbLayer
      */
     public function dropField(string $table_name, string $field_name, bool $no_prefix = false): void
     {
-        if (!$this->fieldExists($table_name, $field_name, $no_prefix)) {
+        if (!$this->tableExists($table_name) || !$this->fieldExists($table_name, $field_name, $no_prefix)) {
             return;
         }
 
@@ -434,5 +448,69 @@ class DbLayer
         }
 
         $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' DROP INDEX ' . ($noPrefix ? '' : $this->prefix) . $tableName . '_' . $indexName);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function foreignKeyExists(string $tableName, string $fkName, bool $noPrefix = false): bool
+    {
+        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+
+        // Query to check if the foreign key exists
+        $sql = 'SELECT 1 FROM information_schema.KEY_COLUMN_USAGE
+                WHERE CONSTRAINT_SCHEMA = DATABASE()
+                AND TABLE_NAME = :table_name
+                AND CONSTRAINT_NAME = :foreign_key_name
+                AND REFERENCED_TABLE_NAME IS NOT NULL';
+
+        $result = $this->query($sql, [
+            'table_name'       => $tableNameWithPrefix,
+            'foreign_key_name' => $tableNameWithPrefix . '_' . $fkName
+        ]);
+
+        return (bool)$this->result($result);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function addForeignKey(string $tableName, string $fkName, array $columns, string $referenceTable, array $referenceColumns, ?string $onDelete = null, ?string $onUpdate = null, bool $noPrefix = false): void
+    {
+        if ($this->foreignKeyExists($tableName, $fkName, $noPrefix)) {
+            return;
+        }
+
+        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+
+        $query = 'ALTER TABLE ' . $tableNameWithPrefix . ' ADD CONSTRAINT ' . $tableNameWithPrefix . '_' . $fkName .
+            ' FOREIGN KEY (' . implode(',', $columns) . ')' .
+            ' REFERENCES ' . ($noPrefix ? '' : $this->prefix) . $referenceTable . ' (' . implode(',', $referenceColumns) . ')';
+
+        if ($onDelete !== null) {
+            $query .= ' ON DELETE ' . $onDelete;
+        }
+
+        if ($onUpdate !== null) {
+            $query .= ' ON UPDATE ' . $onUpdate;
+        }
+
+        $this->query($query);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function dropForeignKey(string $tableName, string $fkName, bool $noPrefix = false): void
+    {
+        if (!$this->foreignKeyExists($tableName, $fkName, $noPrefix)) {
+            return;
+        }
+
+        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+
+        $query = 'ALTER TABLE ' . $tableNameWithPrefix . ' DROP FOREIGN KEY ' . $tableNameWithPrefix . '_' . $fkName;
+
+        $this->query($query);
     }
 }

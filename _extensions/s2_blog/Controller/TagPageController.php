@@ -54,7 +54,7 @@ class TagPageController extends BlogController
         $tag = $params['tag'];
 
         $query  = [
-            'SELECT' => 'tag_id, description, name, url',
+            'SELECT' => 'id AS tag_id, description, name, url',
             'FROM'   => 'tags',
             'WHERE'  => 'url = \'' . $this->dbLayer->escape($tag) . '\''
         ];

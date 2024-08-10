@@ -472,12 +472,12 @@ readonly class PageCommon implements ControllerInterface
     private function tagged_articles(int $articleId): string
     {
         $query  = [
-            'SELECT' => 't.tag_id as tag_id, name, t.url as url',
+            'SELECT' => 't.id AS tag_id, name, t.url as url',
             'FROM'   => 'tags AS t',
             'JOINS'  => [
                 [
                     'INNER JOIN' => 'article_tag AS atg',
-                    'ON'         => 'atg.tag_id = t.tag_id'
+                    'ON'         => 'atg.tag_id = t.id'
                 ]
             ],
             'WHERE'  => 'atg.article_id = ' . $articleId
@@ -579,7 +579,7 @@ readonly class PageCommon implements ControllerInterface
             'JOINS'  => [
                 [
                     'INNER JOIN' => 'article_tag AS at',
-                    'ON'         => 'at.tag_id = t.tag_id'
+                    'ON'         => 'at.tag_id = t.id'
                 ]
             ],
             'WHERE'  => 'at.article_id = ' . $articleId

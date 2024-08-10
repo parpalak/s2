@@ -21,7 +21,7 @@ use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 19);
+define('S2_DB_REVISION', 20);
 define('MIN_PHP_VERSION', '8.2.0');
 
 define('S2_ROOT', '../');
@@ -484,10 +484,11 @@ else
         return $result;
     })());
     \Container::setContainer($app->container);
+    /** @var DbLayer $s2_db */
     $s2_db = $app->container->get(DbLayer::class);
 
 	// Check SQLite prefix collision
-	if ($db_type == 'sqlite' && strtolower($db_prefix) == 'sqlite_') {
+	if ($db_type === 'sqlite' && strtolower($db_prefix) == 'sqlite_') {
         error($lang_install['SQLite prefix collision']);
     }
 
@@ -508,8 +509,10 @@ else
 
 	}
 
-    // Start a transaction
-    $s2_db->startTransaction();
+    if ($db_type !== 'mysql') {
+        // Skip for MySQL, as it implicitly commits a transaction on DDL queries
+        $s2_db->startTransaction();
+    }
 
     $installer =new \S2\Cms\Model\Installer($s2_db);
     $installer->createTables();
@@ -545,7 +548,9 @@ else
 
 	$s2_db->buildAndQuery($query);
 
-	$s2_db->endTransaction();
+    if ($db_type !== 'mysql') {
+        $s2_db->endTransaction();
+    }
 
 	$s2_db->close();
 

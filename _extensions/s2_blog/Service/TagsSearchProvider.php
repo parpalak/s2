@@ -37,12 +37,12 @@ readonly class TagsSearchProvider
                     'ON'         => 'p.id = pt.post_id'
                 ]
             ],
-            'WHERE'  => 'pt.tag_id = t.tag_id AND p.published = 1',
+            'WHERE'  => 'pt.tag_id = t.id AND p.published = 1',
             'LIMIT'  => '1'
         ]);
 
         $statement = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'tag_id, name, url, (' . $tagIsUsedSql . ') AS used',
+            'SELECT' => 'id AS tag_id, name, url, (' . $tagIsUsedSql . ') AS used',
             'FROM'   => 'tags AS t',
             'WHERE'  => implode(' OR ', $where),
         ]);

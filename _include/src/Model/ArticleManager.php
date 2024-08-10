@@ -62,7 +62,7 @@ readonly class ArticleManager
                             'JOINS'  => [
                                 [
                                     'INNER JOIN' => 'tags AS t',
-                                    'ON'         => 't.tag_id = at.tag_id'
+                                    'ON'         => 't.id = at.tag_id'
                                 ]
                             ],
                             // TODO do not use escaping, use parameters instead

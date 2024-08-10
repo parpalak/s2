@@ -57,12 +57,11 @@ class Integration extends AbstractBrowserModule
         $this->adminApplication->container->set(\PDO::class, $this->pdo);
 
         $adminDbLayer   = $this->adminApplication->container->get(DbLayer::class);
+        (new Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
+        (new \s2_extensions\s2_search\Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
         $installer = new Installer($adminDbLayer);
         $installer->dropTables();
         $installer->createTables();
-
-        (new Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
-        (new \s2_extensions\s2_search\Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
 
         $installer->insertConfigData('Test site', 'admin@example.com', 'English', 19);
         $installer->insertMainPage('Main page', time());
@@ -88,7 +87,9 @@ class Integration extends AbstractBrowserModule
 
     public function _after(TestInterface $test)
     {
-        $this->pdo->rollBack();
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
     }
 
     public function createApplication(): Application

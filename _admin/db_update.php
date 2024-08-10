@@ -201,6 +201,54 @@ if (S2_DB_REVISION < 19) {
     ]);
 }
 
+if (S2_DB_REVISION < 20) {
+    if ($s2_db->fieldExists('tags', 'tag_id')) {
+        $s2_db->renameField('tags', 'tag_id', 'id');
+    }
+    $s2_db->dropIndex('tags', 'url_idx');
+    $s2_db->addIndex('tags', 'url_idx', ['url'], true);
+
+    $s2_db->addIndex('articles', 'template_idx', ['template']);
+    $s2_db->dropIndex('articles', 'parent_id_idx');
+    $result  = $s2_db->buildAndQuery([
+        'SELECT' => 'id',
+        'FROM'   => 'users',
+    ]);
+    $existingUsers = $s2_db->fetchColumn($result);
+    $s2_db->buildAndQuery([
+        'UPDATE' => 'articles',
+        'SET'    => 'user_id = NULL',
+        'WHERE'  => 'user_id NOT IN (' . implode(',', $existingUsers) . ')',
+    ]);
+    $s2_db->addForeignKey('articles', 'fk_user', ['user_id'], 'users', ['id'], 'SET NULL');
+
+    $s2_db->dropIndex('art_comments', 'article_id_idx');
+    $s2_db->alterField('art_comments', 'article_id', 'INT(10) UNSIGNED', false);
+    $s2_db->query('DELETE FROM ' . $s2_db->getPrefix() . 'art_comments WHERE article_id NOT IN (SELECT id FROM ' . $s2_db->getPrefix() . 'articles)');
+    $s2_db->addForeignKey('art_comments', 'fk_article', ['article_id'], 'articles', ['id'], 'CASCADE');
+
+    $s2_db->query('DELETE FROM ' . $s2_db->getPrefix() . 'article_tag WHERE article_id NOT IN (SELECT id FROM ' . $s2_db->getPrefix() . 'articles)');
+    $s2_db->query('DELETE FROM ' . $s2_db->getPrefix() . 'article_tag WHERE tag_id NOT IN (SELECT id FROM ' . $s2_db->getPrefix() . 'tags)');
+
+    $s2_db->alterField('article_tag', 'article_id', 'INT(10) UNSIGNED', false);
+    $s2_db->alterField('article_tag', 'tag_id', 'INT(10) UNSIGNED', false);
+    $s2_db->addForeignKey('article_tag', 'fk_article', ['article_id'], 'articles', ['id'], 'CASCADE');
+    $s2_db->addForeignKey('article_tag', 'fk_tag', ['tag_id'], 'tags', ['id'], 'CASCADE');
+
+    $result  = $s2_db->buildAndQuery([
+        'SELECT' => 'login',
+        'FROM'   => 'users',
+    ]);
+    $existingLogins = $s2_db->fetchColumn($result);
+    $s2_db->buildAndQuery([
+        'DELETE' => 'users_online',
+        'WHERE'  => 'login NOT IN (' . implode(',', array_fill(0, count($existingLogins), '?')) . ') AND login IS NOT NULL',
+    ], $existingLogins);
+    $s2_db->addForeignKey('users_online', 'fk_user', ['login'], 'users', ['login'], 'CASCADE');
+    $s2_db->dropIndex('users_online', 'challenge_idx');
+    $s2_db->addIndex('users_online', 'challenge_idx', ['challenge'], true);
+}
+
 $s2_db->buildAndQuery([
     'UPDATE' => 'config',
     'SET'    => 'value = \'' . S2_DB_LAST_REVISION . '\'',

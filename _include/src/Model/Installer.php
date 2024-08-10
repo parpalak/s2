@@ -88,13 +88,81 @@ readonly class Installer
             'PRIMARY KEY' => array('id')
         ));
 
-        $this->dbLayer->createTable('articles', array(
+        $this->dbLayer->createTable('users', array(
             'FIELDS'      => array(
+                'id'              => array(
+                    'datatype'   => 'SERIAL',
+                    'allow_null' => false
+                ),
+                'login'           => array(
+                    'datatype'   => 'VARCHAR(191)',
+                    'allow_null' => false,
+                    'default'    => '\'\''
+                ),
+                'password'        => array(
+                    'datatype'   => 'VARCHAR(40)',
+                    'allow_null' => false,
+                    'default'    => '\'\''
+                ),
+                'email'           => array(
+                    'datatype'   => 'VARCHAR(80)',
+                    'allow_null' => false,
+                    'default'    => '\'\''
+                ),
+                'name'            => array(
+                    'datatype'   => 'VARCHAR(80)',
+                    'allow_null' => false,
+                    'default'    => '\'\''
+                ),
+                'view'            => array(
+                    'datatype'   => 'TINYINT(1)',
+                    'allow_null' => false,
+                    'default'    => '0'
+                ),
+                'view_hidden'     => array(
+                    'datatype'   => 'TINYINT(1)',
+                    'allow_null' => false,
+                    'default'    => '0'
+                ),
+                'hide_comments'   => array(
+                    'datatype'   => 'TINYINT(1)',
+                    'allow_null' => false,
+                    'default'    => '0'
+                ),
+                'edit_comments'   => array(
+                    'datatype'   => 'TINYINT(1)',
+                    'allow_null' => false,
+                    'default'    => '0'
+                ),
+                'create_articles' => array(
+                    'datatype'   => 'INT(10) UNSIGNED',
+                    'allow_null' => false,
+                    'default'    => '0'
+                ),
+                'edit_site'       => array(
+                    'datatype'   => 'TINYINT(1)',
+                    'allow_null' => false,
+                    'default'    => '0'
+                ),
+                'edit_users'      => array(
+                    'datatype'   => 'TINYINT(1)',
+                    'allow_null' => false,
+                    'default'    => '0'
+                ),
+            ),
+            'PRIMARY KEY' => array('id'),
+            'UNIQUE KEYS' => array(
+                'login_idx' => array('login'),
+            )
+        ));
+
+        $this->dbLayer->createTable('articles', array(
+            'FIELDS'       => array(
                 'id'          => array(
                     'datatype'   => 'SERIAL',
                     'allow_null' => false
                 ),
-                'parent_id'   => array(
+                'parent_id'   => array( // NOTE think about adding a foreign key here. What value must be set in parent_id for root article? Null? Now it is 0.
                     'datatype'   => 'INT(10) UNSIGNED',
                     'allow_null' => false,
                     'default'    => '0'
@@ -172,11 +240,18 @@ readonly class Installer
                     'allow_null' => true,
                 )
             ),
-            'PRIMARY KEY' => array('id'),
-            'INDEXES'     => array(
+            'PRIMARY KEY'  => array('id'),
+            'FOREIGN KEYS' => array(
+                'fk_user' => array(
+                    'columns'           => ['user_id'],
+                    'reference_table'   => 'users',
+                    'reference_columns' => ['id'],
+                    'on_delete'         => 'SET NULL',
+                )
+            ),
+            'INDEXES'      => array(
                 'url_idx'         => array('url'),
                 'create_time_idx' => array('create_time'),
-                'parent_id_idx'   => array('parent_id'),
                 'children_idx'    => array('parent_id', 'published'),
                 'template_idx'    => array('template')
             )
@@ -191,7 +266,6 @@ readonly class Installer
                 'article_id' => array(
                     'datatype'   => 'INT(10) UNSIGNED',
                     'allow_null' => false,
-                    'default'    => '0'
                 ),
                 'time'       => array(
                     'datatype'   => 'INT(10) UNSIGNED',
@@ -244,8 +318,15 @@ readonly class Installer
                 ),
             ),
             'PRIMARY KEY' => array('id'),
+            'FOREIGN KEYS' => array(
+                'fk_article' => array(
+                    'columns'           => ['article_id'],
+                    'reference_table'   => 'articles',
+                    'reference_columns' => ['id'],
+                    'on_delete'         => 'CASCADE',
+                )
+            ),
             'INDEXES'     => array(
-                'article_id_idx' => array('article_id'),
                 'sort_idx'       => array('article_id', 'time', 'shown'),
                 'time_idx'       => array('time')
             )
@@ -253,7 +334,7 @@ readonly class Installer
 
         $this->dbLayer->createTable('tags', array(
             'FIELDS'      => array(
-                'tag_id'      => array(
+                'id'      => array(
                     'datatype'   => 'SERIAL',
                     'allow_null' => false
                 ),
@@ -277,7 +358,7 @@ readonly class Installer
                     'default'    => '\'\''
                 ),
             ),
-            'PRIMARY KEY' => array('tag_id'),
+            'PRIMARY KEY' => array('id'),
             'UNIQUE KEYS' => array(
                 'name_idx' => array('name'),
                 'url_idx'  => array('url')
@@ -293,15 +374,27 @@ readonly class Installer
                 'article_id' => array(
                     'datatype'   => 'INT(10) UNSIGNED',
                     'allow_null' => false,
-                    'default'    => '0'
                 ),
                 'tag_id'     => array(
                     'datatype'   => 'INT(10) UNSIGNED',
                     'allow_null' => false,
-                    'default'    => '0'
                 ),
             ),
             'PRIMARY KEY' => array('id'),
+            'FOREIGN KEYS' => array(
+                'fk_article' => array(
+                    'columns'           => ['article_id'],
+                    'reference_table'   => 'articles',
+                    'reference_columns' => ['id'],
+                    'on_delete'         => 'CASCADE',
+                ),
+                'fk_tag' => array(
+                    'columns'           => ['tag_id'],
+                    'reference_table'   => 'tags',
+                    'reference_columns' => ['id'],
+                    'on_delete'         => 'CASCADE',
+                ),
+            ),
             'INDEXES'     => array(
                 'article_id_idx' => array('article_id'),
                 'tag_id_idx'     => array('tag_id'),
@@ -345,79 +438,19 @@ readonly class Installer
                     'default'    => '\'\''
                 ),
             ),
+            'FOREIGN KEYS' => array(
+                'fk_user' => array(
+                    'columns'           => ['login'],
+                    'reference_table'   => 'users',
+                    'reference_columns' => ['login'],
+                    'on_delete'         => 'CASCADE',
+                )
+            ),
             'INDEXES'     => array(
                 'login_idx' => array('login'),
             ),
             'UNIQUE KEYS' => array(
                 'challenge_idx' => array('challenge'),
-            )
-        ));
-
-        $this->dbLayer->createTable('users', array(
-            'FIELDS'      => array(
-                'id'              => array(
-                    'datatype'   => 'SERIAL',
-                    'allow_null' => false
-                ),
-                'login'           => array(
-                    'datatype'   => 'VARCHAR(191)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'password'        => array(
-                    'datatype'   => 'VARCHAR(40)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'email'           => array(
-                    'datatype'   => 'VARCHAR(80)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'name'            => array(
-                    'datatype'   => 'VARCHAR(80)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'view'            => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'view_hidden'     => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'hide_comments'   => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'edit_comments'   => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'create_articles' => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'edit_site'       => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'edit_users'      => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-            ),
-            'PRIMARY KEY' => array('id'),
-            'UNIQUE KEYS' => array(
-                'login_idx' => array('login'),
             )
         ));
 
@@ -446,14 +479,14 @@ readonly class Installer
     public function dropTables(): void
     {
         $this->dbLayer->dropTable('queue');
-        $this->dbLayer->dropTable('users');
-        $this->dbLayer->dropTable('users_online');
         $this->dbLayer->dropTable('article_tag');
         $this->dbLayer->dropTable('tags');
         $this->dbLayer->dropTable('art_comments');
         $this->dbLayer->dropTable('articles');
         $this->dbLayer->dropTable('extensions');
         $this->dbLayer->dropTable('config');
+        $this->dbLayer->dropTable('users_online');
+        $this->dbLayer->dropTable('users');
     }
 
     /**

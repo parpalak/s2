@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -34,8 +34,12 @@ class PdoSqliteFactory
         }
 
         if ($persistentConnection) {
-            return new PDO('sqlite:' . $dbFilename, "", "", [\PDO::ATTR_PERSISTENT => true]);
+            $pdo = new PDO('sqlite:' . $dbFilename, "", "", [\PDO::ATTR_PERSISTENT => true]);
+        } else {
+            $pdo = new PDO('sqlite:' . $dbFilename);
         }
-        return new PDO('sqlite:' . $dbFilename);
+        $pdo->exec('PRAGMA foreign_keys = ON;');
+
+        return $pdo;
     }
 }
