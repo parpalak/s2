@@ -506,8 +506,9 @@ a.js {
     }
         #error-iframe {
             width: 100%;
-            height: calc(100% - 140px);
+            height: calc(100vh - 235px);
             background: var(--page-background);
+            border: 0;
         }
 
 #picture_frame,
