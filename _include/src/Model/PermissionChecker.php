@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
-class PermissionChecker
+use S2\Cms\Framework\StatefulServiceInterface;
+
+class PermissionChecker implements StatefulServiceInterface
 {
     public const PERMISSION_VIEW            = 'view';
     public const PERMISSION_VIEW_HIDDEN     = 'view_hidden';
@@ -21,11 +23,17 @@ class PermissionChecker
 
     private ?array $user = null;
 
+
     public function setUser(?array $user): void
     {
         if ($user !== null) {
             $this->user = $user;
         }
+    }
+
+    public function clearState(): void
+    {
+        $this->user = null;
     }
 
     public function isGranted(string $permission): bool

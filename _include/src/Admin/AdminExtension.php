@@ -37,6 +37,7 @@ use S2\Cms\Extensions\ExtensionManager;
 use S2\Cms\Extensions\ExtensionManagerAdapter;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\ArticleManager;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthManager;
@@ -203,7 +204,7 @@ class AdminExtension implements ExtensionInterface
 
         $container->set(PermissionChecker::class, function (Container $container) {
             return new PermissionChecker();
-        });
+        }, [StatefulServiceInterface::class]);
 
         $container->set(AuthManager::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */

@@ -18,6 +18,7 @@ use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Container as C;
 use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Framework\Exception\NotFoundException;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\ArticleManager;
 use S2\Cms\Model\AuthManager;
 use S2\Cms\Model\ExtensionCache;
@@ -51,7 +52,9 @@ class AdminAjaxRequestHandler
      */
     public function handle(Request $request): Response
     {
-        $this->container->clearByTag('request_context');
+        array_map(static function (StatefulServiceInterface $service) {
+            $service->clearState();
+        }, $this->container->getByTagIfInstantiated(StatefulServiceInterface::class));
 
         $request->setSession(new Session());
         $request->attributes->set(AuthManager::FORCE_AJAX_RESPONSE, true);

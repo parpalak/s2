@@ -4,7 +4,7 @@
  * Handles HTTP requests after building container definitions and registering event listeners.
  *
  * @copyright 2024 Roman Parpalak
- * @license   MIT
+ * @license   http://opensource.org/licenses/MIT MIT
  * @package   S2
  */
 
@@ -81,7 +81,9 @@ class Application
      */
     public function handle(Request $request): Response
     {
-        $this->container->clearByTag('request_context');
+        array_map(static function (StatefulServiceInterface $service) {
+            $service->clearState();
+        }, $this->container->getByTagIfInstantiated(StatefulServiceInterface::class));
 
         $attributes      = $this->matchRequest($request);
         $controllerClass = $attributes['_controller'];

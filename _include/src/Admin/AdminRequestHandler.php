@@ -14,6 +14,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use S2\AdminYard\AdminPanel;
 use S2\Cms\Admin\Event\RedirectFromPublicEvent;
 use S2\Cms\Framework\Container;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\AuthManager;
 use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +40,9 @@ readonly class AdminRequestHandler
      */
     public function handle(Request $request): Response
     {
-        $this->container->clearByTag('request_context');
+        array_map(static function (StatefulServiceInterface $service) {
+            $service->clearState();
+        }, $this->container->getByTagIfInstantiated(StatefulServiceInterface::class));
 
         $request->setSession(new Session());
         $this->requestStack->push($request);

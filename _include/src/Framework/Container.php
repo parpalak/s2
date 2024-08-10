@@ -63,6 +63,17 @@ class Container implements ContainerInterface
         }
     }
 
+    public function getByTagIfInstantiated(string $tag): array
+    {
+        try {
+            $services = array_map(fn(string $id) => $this->getIfInstantiated($id), $this->idsByTag[$tag] ?? []);
+
+            return array_filter($services, static fn(mixed $service) => $service !== null);
+        } catch (NotFoundExceptionInterface | ContainerExceptionInterface  $e) {
+            throw new \LogicException('Impossible exception occurred', 0, $e);
+        }
+    }
+
     public function clear(string $id): void
     {
         if (!isset($this->bindings[$id])) {

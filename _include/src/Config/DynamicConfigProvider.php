@@ -1,8 +1,8 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -10,11 +10,12 @@ declare(strict_types=1);
 namespace S2\Cms\Config;
 
 use Psr\Cache\InvalidArgumentException;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Pdo\DbLayer;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
-class DynamicConfigProvider
+class DynamicConfigProvider implements StatefulServiceInterface
 {
     private const DYNAMIC_CONFIG_CACHE_KEY = 'dynamic_config';
     private ?array $params = null;
@@ -25,6 +26,11 @@ class DynamicConfigProvider
         private readonly string         $cacheDir,
     ) {
 
+    }
+
+    public function clearState(): void
+    {
+        $this->params = null;
     }
 
     /**

@@ -22,6 +22,7 @@ use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Event\NotFoundEvent;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Http\RedirectDetector;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
@@ -149,7 +150,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get('config_cache'),
                 $container->getParameter('cache_dir'),
             );
-        }, ['request_context']);
+        }, [StatefulServiceInterface::class]); // TODO not enough, parameters are set into many other services
 
         $container->set('translator', function (Container $container) {
             /** @var DynamicConfigProvider $provider */
