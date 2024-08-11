@@ -23,6 +23,10 @@ readonly class PathToAdminEntityConverter
 
     public function getQueryParams(string $path): ?array
     {
+        if ($path === '/') {
+            return null;
+        }
+
         $pathArray = explode('/', $path);   // e.g. []/[dir1]/[dir2]/[dir3]/[file1]
 
         // Remove last empty element

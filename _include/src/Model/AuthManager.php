@@ -194,7 +194,7 @@ readonly class AuthManager
             $response = new JsonResponse([
                 'success' => false,
                 'status'  => $status,
-                'message' => $this->translator->trans($status . ' session'),
+                'message' => $this->translator->trans($status . ' session ajax'),
             ], Response::HTTP_UNAUTHORIZED);
         } else {
             $response = $this->createLoginFormResponse($this->translator->trans($status . ' session'));
