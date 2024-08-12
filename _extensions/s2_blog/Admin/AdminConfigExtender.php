@@ -23,7 +23,6 @@ use S2\AdminYard\Database\Key;
 use S2\AdminYard\Database\LogicalExpression;
 use S2\AdminYard\Event\AfterLoadEvent;
 use S2\AdminYard\Event\AfterSaveEvent;
-use S2\AdminYard\Event\BeforeDeleteEvent;
 use S2\AdminYard\Event\BeforeRenderEvent;
 use S2\AdminYard\Event\BeforeSaveEvent;
 use S2\AdminYard\Translator;
@@ -35,6 +34,7 @@ use S2\Cms\Admin\Controller\CommentController;
 use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\TagsProvider;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\Model\BlogCommentNotifier;
@@ -328,7 +328,7 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                 label: $this->translator->trans('Author'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT, defaultValue: $this->permissionChecker->getUserId()),
                 control: 'select',
-                linkToEntity: new LinkTo($adminConfig->findEntityByName('User'), 'CASE WHEN name IS NULL OR name = \'\' THEN login ELSE name END',  new LogicalExpression('create_articles', 1)),
+                linkToEntity: new LinkTo($adminConfig->findEntityByName('User'), 'CASE WHEN name IS NULL OR name = \'\' THEN login ELSE name END'),
                 useOnActions: [
                     FieldConfig::ACTION_LIST,
                     ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_EDIT] : [],
@@ -562,11 +562,15 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
         ;
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function getPostStatusData(int $createTime, string $url): array
     {
         $urlStatus = $this->postProvider->checkUrlStatus($createTime, $url);
 
         return [
+            'url'       => $this->blogUrlBuilder->postFromTimestamp($createTime, $url),
             'urlStatus' => $urlStatus,
             'urlTitle'  => match ($urlStatus) {
                 'empty' => $this->translator->trans('URL empty'),

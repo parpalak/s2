@@ -549,7 +549,7 @@ readonly class AdminConfigProvider
                 label: $this->translator->trans('Author'),
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT),
                 control: 'select',
-                linkToEntity: new LinkTo($userEntity, 'CASE WHEN name IS NULL OR name = \'\' THEN login ELSE name END', new LogicalExpression('create_articles', 1)),
+                linkToEntity: new LinkTo($userEntity, 'CASE WHEN name IS NULL OR name = \'\' THEN login ELSE name END'),
                 useOnActions: [
                     FieldConfig::ACTION_LIST,
                     ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_EDIT] : [],
@@ -970,6 +970,7 @@ readonly class AdminConfigProvider
         [$urlStatus, $templateStatus] = $this->articleProvider->checkUrlAndTemplateStatus($articleId);
 
         return [
+            'url'            => $this->articleProvider->pathFromId($articleId),
             'urlStatus'      => $urlStatus,
             'urlTitle'       => match ($urlStatus) {
                 'empty' => $this->translator->trans('URL empty'),

@@ -166,7 +166,7 @@ $jsvarencode = static function ($var) {
                         </p>
                         <hr>
                         <p>
-                            <a target="_blank" title="<?= $trans('Preview published') ?>" data-href="<?= $previewUrl ?>"
+                            <a target="_blank" title="<?= $trans('Preview published') ?>"
                                href="<?= $previewUrl ?>" id="preview_link"><?= $trans('Preview ready') ?></a>
                         </p>
                     <?php endif; ?>

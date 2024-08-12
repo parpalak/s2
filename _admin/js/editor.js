@@ -81,7 +81,7 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
         eForm.querySelector('.field-published').setAttribute('data-published-status', isPublished ? '1' : '0');
 
         const ePreviewLink = eForm.querySelector('#preview_link');
-        ePreviewLink.href = ePreviewLink.getAttribute('data-href').replace(/\/[^\/]*$/, '/') + encodeURIComponent(eForm.elements['url'].value);
+        ePreviewLink.href = statusData['url'];
         ePreviewLink.style.display = isPublished ? 'inline' : 'none';
     }
 
