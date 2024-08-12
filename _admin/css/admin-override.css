@@ -175,9 +175,36 @@ section.large-edit-form {
 
 .article-form-control input[type="text"],
 .article-form-control input[type="number"],
+.article-form-control input[type="password"],
+.article-form-control input[type="email"],
+.article-form-control input[type="url"],
+.article-form-control input[type="tel"],
+.article-form-control input[type="search"],
+.article-form-control input[type="date"],
+.article-form-control input[type="time"],
+.article-form-control input[type="datetime-local"],
+.article-form-control input[type="month"],
+.article-form-control input[type="week"],
+.article-form-control input[type="color"],
 .article-form-control select,
 .article-form-control textarea {
     width: 100%;
+}
+
+.article-form-control.form-control-customdatetime {
+    position: relative;
+}
+
+.form-control-customdatetime .now-control {
+    text-decoration-style: dashed;
+    text-decoration-thickness: 1px;
+    margin-left: 0.5em;
+}
+
+.article-form-control.form-control-customdatetime .now-control {
+    position: absolute;
+    top: -1.375em;
+    right: 0;
 }
 
 .html-textarea-with-preview-wrapper {

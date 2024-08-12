@@ -61,7 +61,9 @@ class AdminExtension implements ExtensionInterface
     public function buildContainer(Container $container): void
     {
         $container->set(FormControlFactoryInterface::class, function (Container $container) {
-            return new CustomFormControlFactory();
+            return new CustomFormControlFactory(
+                $container->get(Translator::class)
+            );
         });
 
         // Helpers
