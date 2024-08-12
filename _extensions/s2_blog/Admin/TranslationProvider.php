@@ -29,7 +29,7 @@ class TranslationProvider implements TranslationProviderInterface
                 // Tags
                 'Important tag'         => 'Важное',
                 'Important tag info'    => 'Важные теги входят в навигационные ссылки блога',
-                'Used in posts'         => 'Используется в постах',
+                'Used in posts'         => '# постов',
                 'Used in posts info'    => 'Количество постов, использующих этот тег, и ссылки на них.',
 
                 'Label'      => 'Метка',
@@ -37,7 +37,7 @@ class TranslationProvider implements TranslationProviderInterface
 
                 'Posts'         => 'Посты',
                 'New post'      => 'Новый пост',
-                'Blog comments' => 'Комментарии в блоге',
+                'Blog comments' => 'Комменты в блоге',
                 'Text'          => 'Текст',
             ],
             'en' => [
