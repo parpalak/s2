@@ -245,10 +245,6 @@ readonly class ArticleProvider
             return null;
         }
 
-        if ($row[1] === self::ROOT_ID) {
-            return '';
-        }
-
         if ($this->useHierarchy) {
             $prefix = $this->pathFromId($row[1], $visibleForAll);
             if ($prefix === null) {
