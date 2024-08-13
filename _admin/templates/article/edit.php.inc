@@ -69,28 +69,28 @@ $jsvarencode = static function ($var) {
 };
 
 ?>
-<link rel="stylesheet" href="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror.css"/>
-<link rel="stylesheet" href="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/foldgutter.css"/>
-<link rel="stylesheet" href="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/dialog.css"/>
-<link rel="stylesheet" href="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/matchesonscrollbar.css"/>
+<link rel="stylesheet" href="<?php echo $basePath; ?>/_admin/lib/codemirror.css"/>
+<link rel="stylesheet" href="<?php echo $basePath; ?>/_admin/lib/codemirror/foldgutter.css"/>
+<link rel="stylesheet" href="<?php echo $basePath; ?>/_admin/lib/codemirror/dialog.css"/>
+<link rel="stylesheet" href="<?php echo $basePath; ?>/_admin/lib/codemirror/matchesonscrollbar.css"/>
 
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/codemirror.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/selection-pointer.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/xml.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/javascript.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/css.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/htmlmixed.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/clike.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/php.min.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/foldcode.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/foldgutter.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/xml-fold.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/annotatescrollbar.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/dialog.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/jump-to-line.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/matchesonscrollbar.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/search.js"></script>
-<script src="<?php echo $basePath; ?>/_extensions/s2_highlight/codemirror/searchcursor.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/codemirror.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/selection-pointer.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/xml.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/javascript.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/css.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/htmlmixed.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/clike.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/php.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/foldcode.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/foldgutter.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/xml-fold.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/annotatescrollbar.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/dialog.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/jump-to-line.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/matchesonscrollbar.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/search.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/codemirror/searchcursor.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/templates/article/codemirror_init.js"></script>
 
 <script src="<?php echo $basePath; ?>/_admin/js/editor.js"></script>
