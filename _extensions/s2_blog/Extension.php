@@ -18,6 +18,7 @@ use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Queue\QueueHandlerInterface;
+use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\TemplateAssetEvent;
@@ -276,6 +277,7 @@ class Extension implements ExtensionInterface
                 $container->get(BlogUrlBuilder::class),
                 $container->has(Indexer::class) ? $container->get(Indexer::class) : null,
                 $container->get('recommendations_cache'),
+                $container->get(QueuePublisher::class),
             );
         }, [QueueHandlerInterface::class, BulkIndexingProviderInterface::class]);
 

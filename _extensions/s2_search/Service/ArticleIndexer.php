@@ -15,6 +15,7 @@ use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Queue\QueueHandlerInterface;
+use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Indexer;
@@ -25,7 +26,8 @@ readonly class ArticleIndexer implements QueueHandlerInterface
         private DbLayer                $dbLayer,
         private ArticleProvider        $articleProvider,
         private Indexer                $indexer,
-        private CacheItemPoolInterface $cache
+        private CacheItemPoolInterface $cache,
+        private QueuePublisher         $queuePublisher,
     ) {
     }
 
@@ -42,6 +44,7 @@ readonly class ArticleIndexer implements QueueHandlerInterface
         $indexable = $this->getIndexable((int)$id);
         if ($indexable !== null) {
             $this->indexer->index($indexable);
+            $this->queuePublisher->publish($indexable->getExternalId()->toString(), RecommendationProvider::RECOMMENDATIONS_QUEUE);
         } else {
             $this->indexer->removeById($id, null);
         }

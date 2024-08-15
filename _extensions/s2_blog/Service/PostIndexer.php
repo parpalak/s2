@@ -17,6 +17,7 @@ use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Queue\QueueHandlerInterface;
+use S2\Cms\Queue\QueuePublisher;
 use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Indexer;
@@ -29,7 +30,8 @@ readonly class PostIndexer implements QueueHandlerInterface, BulkIndexingProvide
         private DbLayer                $dbLayer,
         private BlogUrlBuilder         $blogUrlBuilder,
         private ?Indexer               $indexer,
-        private CacheItemPoolInterface $cache
+        private CacheItemPoolInterface $cache,
+        private QueuePublisher         $queuePublisher,
     ) {
     }
 
@@ -50,6 +52,7 @@ readonly class PostIndexer implements QueueHandlerInterface, BulkIndexingProvide
         $indexable = $this->getIndexable((int)$id);
         if ($indexable !== null) {
             $this->indexer->index($indexable);
+            $this->queuePublisher->publish($indexable->getExternalId()->toString(), RecommendationProvider::RECOMMENDATIONS_QUEUE);
         } else {
             $this->indexer->removeById('s2_blog_' . $id, null);
         }
