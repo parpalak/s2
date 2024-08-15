@@ -589,11 +589,9 @@ readonly class AdminConfigProvider
                 $event->data['templateContent'] = $this->templateProvider->getRawTemplateContent('site.php', null);
                 $event->data['tagsList']        = $this->tagsProvider->getAllTags();
 
-                $id   = (int)$event->data['primaryKey']['id'];
-                $path = $this->articleProvider->pathFromId($id);
+                $id = (int)$event->data['primaryKey']['id'];
 
                 $event->data['commentsNum']  = $this->articleProvider->getCommentNum($id, $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN));
-                $event->data['previewUrl']   = $this->urlBuilder->link($path);
                 $event->data['templateList'] = $this->articleProvider->getTemplateList();
                 $event->data['statusData']   = $this->getArticleStatusData($id);
             })
@@ -970,7 +968,7 @@ readonly class AdminConfigProvider
         [$urlStatus, $templateStatus] = $this->articleProvider->checkUrlAndTemplateStatus($articleId);
 
         return [
-            'url'            => $this->articleProvider->pathFromId($articleId),
+            'url'            => $this->urlBuilder->link($this->articleProvider->pathFromId($articleId)),
             'urlStatus'      => $urlStatus,
             'urlTitle'       => match ($urlStatus) {
                 'empty' => $this->translator->trans('URL empty'),

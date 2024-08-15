@@ -373,7 +373,6 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                 $id         = (int)$event->data['primaryKey']['id'];
 
                 $event->data['commentsNum'] = $this->postProvider->getCommentNum($id, $this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW_HIDDEN));
-                $event->data['previewUrl']  = $this->blogUrlBuilder->postFromTimestamp($createTime, $formData['url']);
                 $event->data['statusData']  = $this->getPostStatusData($createTime, $formData['url']);
             })
             ->addListener(EntityConfig::EVENT_BEFORE_UPDATE, function (BeforeSaveEvent $event) use ($postEntity) {

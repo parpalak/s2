@@ -233,28 +233,43 @@ readonly class ArticleProvider
             return '';
         }
 
-        $query  = [
-            'SELECT' => 'url, parent_id',
-            'FROM'   => 'articles',
-            'WHERE'  => 'id = ' . $id . ($visibleForAll ? ' AND published = 1' : '')
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $tablePrefix = $this->dbLayer->getPrefix();
 
-        $row = $this->dbLayer->fetchRow($result);
-        if (!$row) {
+        $query = "
+        WITH RECURSIVE path_cte AS (
+            SELECT id, url, parent_id, 1 AS level
+            FROM {$tablePrefix}articles
+            WHERE id = :id" . ($visibleForAll ? " AND published = 1" : "") . "
+
+            UNION ALL
+
+            SELECT a.id, a.url, a.parent_id, p.level + 1
+            FROM {$tablePrefix}articles a
+            INNER JOIN path_cte p ON a.id = p.parent_id " . ($visibleForAll ? " AND a.published = 1" : "") . "
+        )
+        SELECT url, parent_id FROM path_cte ORDER BY level DESC
+    ";
+
+        $result = $this->dbLayer->query($query, [
+            ':id' => $id,
+        ]);
+
+        $urls = [];
+
+        $rootIsFound = false;
+        while ($row = $this->dbLayer->fetchAssoc($result)) {
+            $urls[] = rawurlencode($row['url']);
+            if ($row['parent_id'] === self::ROOT_ID) {
+                $rootIsFound = true;
+            }
+        }
+
+        if (!$rootIsFound) {
             return null;
         }
 
-        if ($this->useHierarchy) {
-            $prefix = $this->pathFromId($row[1], $visibleForAll);
-            if ($prefix === null) {
-                return null;
-            }
-        } else {
-            $prefix = '';
-        }
-
-        return $prefix . '/' . rawurlencode($row[0]);
+        $path = implode('/', $urls);
+        return $path === '' ? '/' : $path;
     }
 
     /**

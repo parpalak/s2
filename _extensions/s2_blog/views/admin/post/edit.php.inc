@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 /** @var string $basePath */
-/** @var string $previewUrl */
 /** @var string $templateContent */
 /** @var array $tagsList */
 /** @var array $labelList */
@@ -156,7 +155,7 @@ $jsvarencode = static function ($var) {
                         </p>
                         <hr>
                         <p>
-                            <a target="_blank" title="<?= $trans('Preview published') ?>" href="<?= $previewUrl ?>" id="preview_link"><?= $trans('Preview ready') ?></a>
+                            <a target="_blank" title="<?= $trans('Preview published') ?>" href="#" id="preview_link"><?= $trans('Preview ready') ?></a>
                         </p>
                     <?php endif; ?>
                 </div>
