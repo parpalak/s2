@@ -67,7 +67,7 @@ function generate_config_file ()
 	foreach (array('', '/?', '/index.php', '/index.php?') as $prefix) {
 		$url_prefix = $prefix;
 		$content = s2_get_remote_file($base_url.$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
-		if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2" />')) {
+		if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2">')) {
             break;
         }
 	}
@@ -80,7 +80,7 @@ function generate_config_file ()
     }
 	else {
 		$content = s2_get_remote_file('https://'.substr($base_url, 7).$url_prefix.'/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
-		if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2" />')) {
+		if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2">')) {
             $use_https = true;
         }
 	}

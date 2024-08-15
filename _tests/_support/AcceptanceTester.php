@@ -45,6 +45,13 @@ class AcceptanceTester extends Actor
         $I->click('start');
         $I->canSeeResponseCodeIs(200);
         $I->see('S2 is completely installed!');
+
+        // We need '/index.php?' prefix to test urls like /rss.xml
+        $configFileName = __DIR__ . '/../../config.test.php';
+        file_put_contents(
+            $configFileName,
+            str_replace("define('S2_URL_PREFIX', '');", "define('S2_URL_PREFIX', '/index.php?');", file_get_contents($configFileName))
+        );
     }
 
     public function canWriteComment(bool $premoderation = false): void

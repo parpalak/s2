@@ -14,6 +14,8 @@ use Codeception\Example;
 
 class InstallCest
 {
+    private const URL_PREFIX = '/index.php?';
+
     protected function configProvider(): array
     {
         return [
@@ -78,11 +80,11 @@ class InstallCest
         $I->amOnPage('/section1');
         $I->seeResponseCodeIs(301);
         $I->followRedirect();
-        $I->seeCurrentUrlEquals('/index.php?/section1/');
+        $I->seeCurrentUrlEquals(self::URL_PREFIX . '/section1/');
         $I->amOnPage('/section1/page1/');
         $I->seeResponseCodeIs(301);
         $I->followRedirect();
-        $I->seeCurrentUrlEquals('/index.php?/section1/page1');
+        $I->seeCurrentUrlEquals(self::URL_PREFIX . '/section1/page1');
         $I->startFollowingRedirects();
     }
 
@@ -359,13 +361,13 @@ class InstallCest
         $I->amOnPage('/blog/tags/blog tag');
         $I->seeResponseCodeIs(301);
         $I->followRedirect();
-        $I->seeCurrentUrlEquals('/index.php?/blog/tags/blog%20tag/');
+        $I->seeCurrentUrlEquals(self::URL_PREFIX . '/blog/tags/blog%20tag/');
         $I->seeResponseCodeIsSuccessful();
 
         $I->amOnPage('/blog');
         $I->seeResponseCodeIs(301);
         $I->followRedirect();
-        $I->seeCurrentUrlEquals('/index.php?/blog/');
+        $I->seeCurrentUrlEquals( self::URL_PREFIX . '/blog/');
         $I->seeResponseCodeIsSuccessful();
         $I->see('New Blog Post Title');
         $I->see('New blog post');
@@ -527,15 +529,15 @@ class InstallCest
         $I->changeSetting('S2_ENABLED_COMMENTS', false);
 
         // Test <!-- s2_last_comments --> and <!-- s2_last_discussions --> placeholders when comments are disabled
-        $I->amOnPage('/index.php?/');
+        $I->amOnPage('/');
         $I->seeResponseCodeIsSuccessful();
 
         // Check conditional get when the comment form is disabled. Otherwise, there are some random tokens.
         // Last comments must be also hidden.
-        $I->amOnPage('/index.php?/section1/new_page1');
+        $I->amOnPage('/section1/new_page1');
         $headers = $I->grabHeaders();
         $I->haveHttpHeader('If-None-Match', $headers['ETag'][0]);
-        $I->amOnPage('/index.php?/section1/new_page1');
+        $I->amOnPage('/section1/new_page1');
         $I->seeResponseCodeIs(304);
     }
 

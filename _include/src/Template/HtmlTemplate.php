@@ -69,7 +69,7 @@ class HtmlTemplate
 
         // Meta tags processing
         $meta_tags = [
-            '<meta name="Generator" content="S2" />',
+            '<meta name="Generator" content="S2">',
         ];
 
         if (!empty($this->page['meta_keywords'])) {

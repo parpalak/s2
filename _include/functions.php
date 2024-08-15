@@ -364,8 +364,8 @@ function error()
     <!DOCTYPE html>
     <html>
     <head>
-        <meta charset="utf-8"/>
-        <meta name="Generator" content="S2"/>
+        <meta charset="utf-8">
+        <meta name="Generator" content="S2">
         <title>Error - <?php echo s2_htmlencode(S2_SITE_NAME); ?></title>
         <style>
             body {
