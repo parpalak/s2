@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright 2024 Roman Parpalak
- * @license   MIT
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_search
  */
 
@@ -14,13 +14,13 @@ use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Image\ThumbnailGenerateEvent;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
-use S2\Cms\Rose\CustomExtractor;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
@@ -32,6 +32,7 @@ use S2\Rose\Indexer;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
 use s2_extensions\s2_search\Controller\SearchPageController;
+use s2_extensions\s2_search\Rose\CustomExtractor;
 use s2_extensions\s2_search\Service\ArticleIndexer;
 use s2_extensions\s2_search\Service\SimilarWordsDetector;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -43,6 +44,7 @@ class Extension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
+        // Note: Indexing is performed in the QueueConsumer, so it cannot be moved to AdminExtension right now.
         $container->set(Indexer::class, function (Container $container) {
             return new Indexer(
                 $container->get(PdoStorage::class),
@@ -63,8 +65,10 @@ class Extension implements ExtensionInterface
         }, [QueueHandlerInterface::class]);
 
         $container->set(ExtractorInterface::class, function (Container $container) {
-            // TODO move CustomExtractor to s2_search package
-            return new CustomExtractor($container->get(LoggerInterface::class));
+            return new CustomExtractor(
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
+                $container->get(LoggerInterface::class),
+            );
         });
 
         $container->set('s2_search_translator', function (Container $container) {
@@ -130,6 +134,21 @@ class Extension implements ExtensionInterface
                     ->addJs('../../_extensions/s2_search/autosearch.js', [AssetPack::OPTION_MERGE])
                     ->addInlineJs('<script>var s2_search_url = "' . S2_PATH . '/_extensions/s2_search";</script>')
                 ;
+            }
+        });
+
+        // Thumbnails in search results page
+        $eventDispatcher->addListener(ThumbnailGenerateEvent::class, static function (ThumbnailGenerateEvent $event) {
+            $maxWidth  = $event->maxWidth;
+            $maxHeight = $event->maxHeight;
+            $src       = $event->src;
+
+            if (str_starts_with($src, CustomExtractor::YOUTUBE_PROTOCOL)) {
+                $src = 'https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/mqdefault.jpg';
+
+                $sizeArray = ThumbnailGenerator::reduceSize('320', '180', $maxWidth, $maxHeight);
+
+                $event->setResult(sprintf('<span class="video-thumbnail"><img src="%s" width="%s" height="%s" alt=""></span>', $src, ...$sizeArray));
             }
         });
     }

@@ -39,6 +39,16 @@ class Container implements ContainerInterface
         }
     }
 
+    public function decorate(string $id, callable $decorator): void
+    {
+        if (!isset($this->bindings[$id])) {
+            // NOTE: ServiceDecorator may accept $factory later via a setter.
+            throw new ServiceNotFoundException(sprintf('Entity "%s" not found in container.', $id));
+        }
+
+        $this->bindings[$id] = new ServiceDecorator($this->bindings[$id], $decorator, $this);
+    }
+
     public function get(string $id): mixed
     {
         if (!isset($this->bindings[$id])) {

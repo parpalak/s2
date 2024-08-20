@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace unit\extensions\s2_search;
+namespace unit\extensions\s2_counter;
 
 use Codeception\Test\Unit;
 

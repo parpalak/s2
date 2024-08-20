@@ -1,21 +1,54 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * Custom extraction logic for indexing.
  *
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023-2024 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_search
  */
 
-namespace S2\Cms\Rose;
+declare(strict_types=1);
 
+namespace s2_extensions\s2_search\Rose;
+
+use Psr\Log\LoggerInterface;
+use S2\Rose\Extractor\ExtractionErrors;
 use S2\Rose\Extractor\HtmlDom\DomExtractor;
 use S2\Rose\Extractor\HtmlDom\DomState;
+use s2_extensions\s2_search\Event\TextNodeExtractEvent;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class CustomExtractor extends DomExtractor
 {
     public const YOUTUBE_PROTOCOL = 'youtube://';
 
+    public function __construct(
+        private EventDispatcherInterface $dispatcher,
+        ?LoggerInterface                 $logger = null,
+    ) {
+        parent::__construct($logger);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function processTextNode(\DOMText $domNode, DomState $domState, ExtractionErrors $extractionErrors, int $level): void
+    {
+        $textContent = $domNode->textContent;
+
+        $this->checkContentForWarnings($level, $textContent, $extractionErrors, $domNode);
+
+        $event = new TextNodeExtractEvent($domNode->parentNode, $domState, $textContent, $domNode->getNodePath());
+        $this->dispatcher->dispatch($event);
+
+        if (!$event->isPropagationStopped()) {
+            $domState->attachContent($domNode->getNodePath(), $textContent);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected static function processDomElement(\DOMNode $domNode, DomState $domState): string
     {
         switch ($domNode->nodeName) {
@@ -30,9 +63,6 @@ class CustomExtractor extends DomExtractor
 
     /**
      * https://stackoverflow.com/questions/5830387/how-do-i-find-all-youtube-video-ids-in-a-string-using-a-regex
-     *
-     * @param string $src
-     * @return string|null
      */
     protected static function getYoutubeId(string $src): ?string
     {

@@ -1,7 +1,7 @@
 <?php /** @noinspection HtmlUnknownTarget */
 /**
  * @copyright 2023-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @license   https://opensource.org/license/MIT MIT
  * @package   S2
  */
 
@@ -11,20 +11,19 @@ namespace S2\Cms\Image;
 
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
-use S2\Cms\Rose\CustomExtractor;
+use s2_extensions\s2_search\Rose\CustomExtractor;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ThumbnailGenerator implements QueueHandlerInterface
 {
     private const CACHE_SUBDIRECTORY = '/cache/';
 
-    private QueuePublisher $publisher;
-    private string $cacheUrlPrefix;
-    private string $cacheFilesystemPrefix;
-
-    public function __construct(QueuePublisher $publisher, string $cacheUrlPrefix, string $cacheFilesystemPrefix)
-    {
-        $this->publisher             = $publisher;
-        $this->cacheUrlPrefix        = $cacheUrlPrefix;
+    public function __construct(
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly QueuePublisher           $publisher,
+        private readonly string                   $cacheUrlPrefix,
+        private string                            $cacheFilesystemPrefix
+    ) {
         $this->cacheFilesystemPrefix = rtrim($cacheFilesystemPrefix, '/');
     }
 
@@ -39,16 +38,14 @@ class ThumbnailGenerator implements QueueHandlerInterface
      */
     public function getThumbnailHtml(string $src, string $originalWidth, string $originalHeight, int $maxWidth, int $maxHeight): string
     {
-        if (str_starts_with($src, CustomExtractor::YOUTUBE_PROTOCOL)) {
-            $src = 'https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/mqdefault.jpg';
-
-            $sizeArray = $this->reduceSize('320', '180', $maxWidth, $maxHeight);
-
-            return sprintf('<span class="video-thumbnail"><img src="%s" width="%s" height="%s" alt=""></span>', $src, ...$sizeArray);
+        $event = new ThumbnailGenerateEvent($src, $originalWidth, $originalHeight, $maxWidth, $maxHeight);
+        $this->eventDispatcher->dispatch($event);
+        if (($result = $event->getResult()) !== null) {
+            return $result;
         }
 
         try {
-            [$newWidth, $newHeight] = $this->reduceSize($originalWidth, $originalHeight, $maxWidth, $maxHeight);
+            [$newWidth, $newHeight] = self::reduceSize($originalWidth, $originalHeight, $maxWidth, $maxHeight);
             $src = $this->getThumbnailSrc($src, 2 * $newWidth, 2 * $newHeight); // 2 for retina
 
             return sprintf('<img src="%s" width="%s" height="%s" alt="">', $src, $newWidth, $newHeight);
@@ -58,6 +55,7 @@ class ThumbnailGenerator implements QueueHandlerInterface
     }
 
     /**
+     * TODO move to a separate class like ImageReducer
      * Get slightly reduced image for recommendations.
      */
     public function getReducedImg(ImgDto $img): ImgDto
@@ -141,7 +139,7 @@ class ThumbnailGenerator implements QueueHandlerInterface
         throw new \RuntimeException($imageInfo['mime'] . ' images are not supported');
     }
 
-    protected function reduceSize(string $width, string $height, int $maxWidth, int $maxHeight, float $zoom = 1.0): array
+    public static function reduceSize(string $width, string $height, int $maxWidth, int $maxHeight, float $zoom = 1.0): array
     {
         if (!is_numeric($height) || !is_numeric($width)) {
             throw new \InvalidArgumentException();

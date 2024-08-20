@@ -126,6 +126,7 @@ class CmsExtension implements ExtensionInterface
 
         $container->set(ThumbnailGenerator::class, function (Container $container) {
             return new ThumbnailGenerator(
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->get(QueuePublisher::class),
                 $container->getParameter('image_path'),
                 $container->getParameter('image_dir'),

@@ -7,7 +7,7 @@
 
 namespace S2\Cms\Layout;
 
-use S2\Cms\Rose\CustomExtractor;
+use s2_extensions\s2_search\Rose\CustomExtractor;
 
 class ContentItem
 {
