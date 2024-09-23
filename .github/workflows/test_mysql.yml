@@ -18,9 +18,10 @@ jobs:
           - 'mariadb-10.5'
           - 'mariadb-10.6'
           - 'mariadb-10.11'
+          - 'mariadb-11.0'
           - 'mariadb-11.1'
           - 'mariadb-11.2'
-          - 'mariadb-11.4'
+          - 'mariadb-11.3'
           - '8.0'
           - '8.4'
         php_versions:
