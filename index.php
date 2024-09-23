@@ -42,10 +42,6 @@ if (str_ends_with($request_uri, '---')) {
     die;
 }
 
-if (!defined('S2_COMMENTS_FUNCTIONS_LOADED')) {
-    require S2_ROOT . '_include/comments.php';
-}
-
 $request  = Request::createFromGlobals();
 $response = $app->handle($request);
 

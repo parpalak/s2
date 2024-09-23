@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace S2\Cms\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\AuthProvider;
 use S2\Cms\Model\Comment\CommentStrategyInterface;
 use S2\Cms\Model\UrlBuilder;
@@ -37,6 +38,7 @@ readonly class CommentSentController implements ControllerInterface
         private TranslatorInterface  $translator,
         private UrlBuilder           $urlBuilder,
         private HtmlTemplateProvider $templateProvider,
+        private CommentMailer        $commentMailer,
         CommentStrategyInterface     ...$strategies
     ) {
         $this->commentStrategies = $strategies;
@@ -72,7 +74,7 @@ readonly class CommentSentController implements ControllerInterface
                     $message = s2_bbcode_to_mail($comment->text);
                     $target  = $commentStrategy->getTargetById($comment->targetId);
                     foreach ($moderators as $moderator) {
-                        s2_mail_moderator($moderator->login, $moderator->email, $message, $target->title ?? 'unknown item', $link, $comment->name, $comment->email);
+                        $this->commentMailer->mailToModerator($moderator->login, $moderator->email, $message, $target->title ?? 'unknown item', $link, $comment->name, $comment->email);
                     }
                 }
                 break;

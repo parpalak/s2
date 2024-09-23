@@ -11,6 +11,7 @@ namespace S2\Cms\Controller;
 
 use Psr\Log\LoggerInterface;
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\AuthProvider;
 use S2\Cms\Model\Comment\CommentStrategyInterface;
 use S2\Cms\Model\UrlBuilder;
@@ -35,6 +36,7 @@ readonly class CommentController implements ControllerInterface
         private HtmlTemplateProvider     $templateProvider,
         private Viewer                   $viewer,
         private LoggerInterface          $logger,
+        private CommentMailer            $commentMailer,
         private bool                     $commentsEnabled,
         private bool                     $premoderationEnabled,
     ) {
@@ -172,9 +174,8 @@ readonly class CommentController implements ControllerInterface
         $message = s2_bbcode_to_mail($text);
 
         // Sending the comment to moderators
-
         foreach ($this->userProvider->getModerators([], $moderationRequired && $isOnline ? [$email] : []) as $moderator) {
-            s2_mail_moderator($moderator->login, $moderator->email, $message, $target->title, $link, $name, $email);
+            $this->commentMailer->mailToModerator($moderator->login, $moderator->email, $message, $target->title, $link, $name, $email);
         }
 
         if (!$moderationRequired) {

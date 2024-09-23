@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
+use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 
@@ -27,6 +28,7 @@ readonly class CommentNotifier
         private DbLayer         $dbLayer,
         private ArticleProvider $articleProvider,
         private UrlBuilder      $urlBuilder,
+        private CommentMailer   $commentMailer,
     ) {
     }
 
@@ -61,10 +63,6 @@ readonly class CommentNotifier
          * $comment['sent'] === 0 as pre-moderation was enabled when the comment was added.
          * We have to send the comment to subscribed commentators.
          */
-
-        if (!defined('S2_COMMENTS_FUNCTIONS_LOADED')) {
-            require S2_ROOT . '_include/comments.php';
-        }
 
         // Getting some info about the article commented
         $result = $this->dbLayer->buildAndQuery([
@@ -106,7 +104,7 @@ readonly class CommentNotifier
                 'code=' . $receiver['hash'],
             ]);
 
-            s2_mail_comment($receiver['nick'], $receiver['email'], $message, $article['title'], $link, $comment['nick'], $unsubscribeLink);
+            $this->commentMailer->mailToSubscriber($receiver['nick'], $receiver['email'], $message, $article['title'], $link, $comment['nick'], $unsubscribeLink);
         }
 
         // Toggle sent mark

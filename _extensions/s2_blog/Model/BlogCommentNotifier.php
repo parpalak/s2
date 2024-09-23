@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Model;
 
+use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
@@ -29,6 +30,7 @@ readonly class BlogCommentNotifier
         private DbLayer        $dbLayer,
         private UrlBuilder     $urlBuilder,
         private BlogUrlBuilder $blogUrlBuilder,
+        private CommentMailer  $commentMailer,
     ) {
     }
 
@@ -64,10 +66,6 @@ readonly class BlogCommentNotifier
          * We have to send the comment to subscribed commentators.
          */
 
-        if (!defined('S2_COMMENTS_FUNCTIONS_LOADED')) {
-            require S2_ROOT . '_include/comments.php';
-        }
-
         // Getting some info about the post commented
         $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'title, create_time, url',
@@ -102,7 +100,7 @@ readonly class BlogCommentNotifier
                 'code=' . $receiver['hash'],
             ]);
 
-            s2_mail_comment($receiver['nick'], $receiver['email'], $message, $post['title'], $link, $comment['nick'], $unsubscribeLink);
+            $this->commentMailer->mailToSubscriber($receiver['nick'], $receiver['email'], $message, $post['title'], $link, $comment['nick'], $unsubscribeLink);
         }
 
         // Toggle sent mark

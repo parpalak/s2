@@ -30,6 +30,7 @@ use S2\Cms\Http\RedirectDetector;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
+use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthProvider;
 use S2\Cms\Model\Comment\ArticleCommentStrategy;
@@ -354,11 +355,19 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(CommentMailer::class, function (Container $container) {
+            return new CommentMailer(
+                $container->get('comments_translator'),
+                $container->get(DynamicConfigProvider::class)
+            );
+        });
+
         $container->set(CommentNotifier::class, function (Container $container) {
             return new CommentNotifier(
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get(CommentMailer::class),
             );
         });
 
@@ -405,6 +414,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $container->get(LoggerInterface::class),
+                $container->get(CommentMailer::class),
                 $provider->get('S2_ENABLED_COMMENTS') === '1',
                 $provider->get('S2_PREMODERATION') === '1',
             );
@@ -417,6 +427,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get('comments_translator'),
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
+                $container->get(CommentMailer::class),
                 ...$container->getByTag(CommentStrategyInterface::class)
             );
         });

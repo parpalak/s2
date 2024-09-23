@@ -15,6 +15,7 @@ use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\CommentController;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthProvider;
@@ -280,6 +281,7 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $container->get(LoggerInterface::class),
+                $container->get(CommentMailer::class),
                 $provider->get('S2_ENABLED_COMMENTS') === '1',
                 $provider->get('S2_PREMODERATION') === '1',
             );
@@ -297,6 +299,7 @@ class Extension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(UrlBuilder::class),
                 $container->get(BlogUrlBuilder::class),
+                $container->get(CommentMailer::class),
             );
         });
 

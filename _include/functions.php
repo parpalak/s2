@@ -488,3 +488,120 @@ function s2_get_config_filename(): string
 
     return 'config.php';
 }
+
+
+//
+// Parses BB-codes in comments
+//
+function s2_bbcode_to_html($s)
+{
+    $s = str_replace("''", '"', $s);
+    $s = str_replace("\r", '', $s);
+
+    $s = preg_replace('#\[I\](.*?)\[/I\]#isS', '<em>\1</em>', $s);
+    $s = preg_replace('#\[B\](.*?)\[/B\]#isS', '<strong>\1</strong>', $s);
+
+    while (preg_match('/\[Q\s*=\s*([^\]]*)\].*?\[\/Q\]/isS', $s))
+        $s = preg_replace('/\s*\[Q\s*=\s*([^\]]*)\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote><strong>\\1</strong> ' . Lang::get('Wrote') . '<br/><br/><em>\\2</em></blockquote>', $s);
+
+    while (preg_match('/\[Q\].*?\[\/Q\]/isS', $s))
+        $s = preg_replace('/\s*\[Q\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote>\\1</blockquote>', $s);
+
+    $s = preg_replace_callback(
+        '#(https?://\S{2,}?)(?=[\s),\'><\]]|&lt;|&gt;|[.;:](?:\s|$)|$)#u',
+        function ($matches) {
+            $href = $link = $matches[1];
+
+            if (mb_strlen($matches[1]) > 55)
+                $link = mb_substr($matches[1], 0, 42) . ' &hellip; ' . mb_substr($matches[1], -10);
+
+            return '<noindex><a href="' . $href . '" rel="nofollow">' . $link . '</a></noindex>';
+        },
+        $s
+    );
+    $s = str_replace("\n", '<br />', $s);
+    return $s;
+}
+
+//
+// wordwrap() with utf-8 support
+//
+function s2_utf8_wordwrap($string, $width = 75, $break = "\n")
+{
+    $a = explode("\n", $string);
+    foreach ($a as $k => $str) {
+        $str    = preg_split('#[\s\r]+#', $str);
+        $len    = 0;
+        $return = '';
+        foreach ($str as $val) {
+            $val .= ' ';
+            $tmp = mb_strlen($val);
+            $len += $tmp;
+            if ($len >= $width) {
+                $return .= $break . $val;
+                $len    = $tmp;
+            } else
+                $return .= $val;
+        }
+        $a[$k] = $return;
+    }
+    return implode("\n", $a);
+}
+
+//
+// Parses BB-codes in comments and makes quotes mail-styled (used '>')
+//
+function s2_bbcode_to_mail($s)
+{
+    $s = str_replace("\r", '', $s);
+    $s = str_replace(array('&quot;', '&laquo;', '&raquo;'), '"', $s);
+    $s = preg_replace('/\[I\s*?\](.*?)\[\/I\s*?\]/isu', "_\\1_", $s);
+    $s = preg_replace('/\[B\s*?\](.*?)\[\/B\s*?\]/isu', "*\\1*", $s);
+
+    // Do not ask me how the rest of the function works.
+    // It just works :)
+
+    while (preg_match('/\[Q\s*?=?\s*?([^\]]*)\s*?\].*?\[\/Q.*?\]/is', $s))
+        $s = preg_replace('/\s*\[Q\s*?=?\s*?([^\]]*)\s*?\]\s*(.*?)\s*\[\/Q.*?\]\s*/is', "<q/>\\2</q>", $s);
+
+    $strings = $levels = array();
+
+    $curr  = 0;
+    $level = 0;
+
+    while (1) {
+        $up   = strpos($s, '<q/>', $curr);
+        $down = strpos($s, '</q>', $curr);
+        if ($up === false) {
+            if ($down === false)
+                break;
+            $dl = -1;
+            $c  = $down;
+        } elseif ($down === false || $up < $down) {
+            $dl = 1;
+            $c  = $up;
+        } else {
+            $dl = -1;
+            $c  = $down;
+        }
+        $strings[] = substr($s, $curr, $c - $curr);
+        $curr      = $c + 4;
+        $levels[]  = $level;
+        $level     += $dl;
+    }
+
+    $strings[] = substr($s, $curr);
+    $levels[]  = 0;
+
+    $out = array();
+    foreach ($strings as $i => $string) {
+        if (trim($string) == '')
+            continue;
+        $delimiter = "\n" . str_repeat('> ', $levels[$i]);
+        $out[]     = $delimiter . s2_utf8_wordwrap(str_replace("\n", $delimiter, $string), 70 - 2 * $levels[$i], $delimiter);
+    }
+
+    $s = implode("\n", $out);
+
+    return trim($s);
+}
