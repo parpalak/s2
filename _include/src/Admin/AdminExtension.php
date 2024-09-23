@@ -66,16 +66,6 @@ class AdminExtension implements ExtensionInterface
             );
         });
 
-        // Helpers
-        $container->set(CommentNotifier::class, function (Container $container) {
-            return new CommentNotifier(
-                $container->get(DbLayer::class),
-                $container->get(ArticleProvider::class),
-                $container->get(UrlBuilder::class),
-                $container->getParameter('base_url'),
-            );
-        });
-
         // AdminYard services
         $container->set(TypeTransformer::class, function (Container $container) {
             return new TypeTransformer();
@@ -230,6 +220,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(TemplateRenderer::class),
                 $container->get(Translator::class),
                 $container->getParameter('base_path'),
+                $container->getParameter('url_prefix'),
                 $container->getParameter('cookie_name'),
                 $container->getParameter('force_admin_https'),
                 (int)$provider->get('S2_LOGIN_TIMEOUT'),
@@ -333,10 +324,8 @@ class AdminExtension implements ExtensionInterface
         }, [DashboardStatProviderInterface::class]);
 
         $container->set(PathToAdminEntityConverter::class, function (Container $container) {
-            $provider = $container->get(DynamicConfigProvider::class);
             return new PathToAdminEntityConverter(
-                $container->get(DbLayer::class),
-                $provider->get('S2_USE_HIERARCHY') === '1',
+                $container->get(ArticleProvider::class),
             );
         });
 

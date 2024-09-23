@@ -181,7 +181,7 @@ readonly class PageCommon implements ControllerInterface
         $articleId = (int)$page['id'];
         $template  = $this->htmlTemplateProvider->getTemplate($template_id);
         $template
-            ->putInPlaceholder('id', $articleId) // for comments form
+            ->putInPlaceholder('id', md5('article_' . $articleId)) // for comments form
             ->putInPlaceholder('meta_keywords', $page['meta_keywords'])
             ->putInPlaceholder('meta_description', $page['meta_description'])
             ->putInPlaceholder('excerpt', $page['excerpt'])

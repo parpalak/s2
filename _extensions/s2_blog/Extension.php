@@ -9,13 +9,18 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog;
 
+use Psr\Log\LoggerInterface;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Controller\CommentController;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\AuthProvider;
+use S2\Cms\Model\Comment\CommentStrategyInterface;
 use S2\Cms\Model\UrlBuilder;
+use S2\Cms\Model\User\UserProvider;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
@@ -37,6 +42,7 @@ use s2_extensions\s2_blog\Controller\TagPageController;
 use s2_extensions\s2_blog\Controller\TagsPageController;
 use s2_extensions\s2_blog\Controller\YearPageController;
 use s2_extensions\s2_blog\Model\BlogCommentNotifier;
+use s2_extensions\s2_blog\Model\BlogCommentStrategy;
 use s2_extensions\s2_blog\Model\BlogPlaceholderProvider;
 use s2_extensions\s2_blog\Model\PostProvider;
 use s2_extensions\s2_blog\Service\PostIndexer;
@@ -256,6 +262,29 @@ class Extension implements ExtensionInterface
             );
         });
 
+        $container->set(BlogCommentStrategy::class, function (Container $container) {
+            return new BlogCommentStrategy(
+                $container->get(DbLayer::class),
+                $container->get(BlogCommentNotifier::class),
+            );
+        }, [CommentStrategyInterface::class]);
+        $container->set('s2_blog.comment_controller', function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new CommentController(
+                $container->get(AuthProvider::class),
+                $container->get(UserProvider::class),
+                $container->get(BlogCommentStrategy::class),
+                $container->get('comments_translator'),
+                $container->get(UrlBuilder::class),
+                $container->get(HtmlTemplateProvider::class),
+                $container->get(Viewer::class),
+                $container->get(LoggerInterface::class),
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
+                $provider->get('S2_PREMODERATION') === '1',
+            );
+        });
+
         $container->set(PostProvider::class, function (Container $container) {
             return new PostProvider(
                 $container->get(DbLayer::class),
@@ -266,8 +295,8 @@ class Extension implements ExtensionInterface
         $container->set(BlogCommentNotifier::class, function (Container $container) {
             return new BlogCommentNotifier(
                 $container->get(DbLayer::class),
+                $container->get(UrlBuilder::class),
                 $container->get(BlogUrlBuilder::class),
-                $container->getParameter('base_url'),
             );
         });
 
@@ -406,23 +435,89 @@ class Extension implements ExtensionInterface
         $priority       = 1;
 
         if ($s2BlogUrl !== '') {
-            $routes->add('blog_main', new Route($s2BlogUrl . '{slash</?>}', ['_controller' => MainPageController::class, 'page' => 0], options: ['utf8' => true]), $priority);
+            $routes->add('blog_main', new Route(
+                $s2BlogUrl . '{slash</?>}',
+                ['_controller' => MainPageController::class, 'page' => 0],
+                options: ['utf8' => true],
+                methods: ['GET'],
+            ), $priority);
         } else {
-            $routes->add('blog_main', new Route('/', ['_controller' => MainPageController::class, 'page' => 0, 'slash' => '/'], options: ['utf8' => true]), $priority);
+            $routes->add('blog_main', new Route(
+                '/',
+                ['_controller' => MainPageController::class, 'page' => 0, 'slash' => '/'],
+                options: ['utf8' => true],
+                methods: ['GET'],
+            ), $priority);
         }
-        $routes->add('blog_main_pages', new Route($s2BlogUrl . '/skip/{page<\d+>}', ['_controller' => MainPageController::class, 'slash' => '/'], options: ['utf8' => true]), $priority);
+        $routes->add('blog_main_pages', new Route(
+            $s2BlogUrl . '/skip/{page<\d+>}',
+            ['_controller' => MainPageController::class, 'slash' => '/'],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
 
-        $routes->add('blog_rss', new Route($s2BlogUrl . '/rss.xml', ['_controller' => BlogRss::class], options: ['utf8' => true]), $priority);
-        $routes->add('blog_sitemap', new Route($s2BlogUrl . '/sitemap.xml', ['_controller' => Sitemap::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_rss', new Route(
+            $s2BlogUrl . '/rss.xml',
+            ['_controller' => BlogRss::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
+        $routes->add('blog_sitemap', new Route(
+            $s2BlogUrl . '/sitemap.xml',
+            ['_controller' => Sitemap::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
 
-        $routes->add('blog_favorite', new Route($s2BlogUrl . '/' . $favoriteUrl . '{slash</?>}', ['_controller' => FavoritePageController::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_favorite', new Route(
+            $s2BlogUrl . '/' . $favoriteUrl . '{slash</?>}',
+            ['_controller' => FavoritePageController::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
 
-        $routes->add('blog_tags', new Route($s2BlogUrl . '/' . $tagsUrl . '{slash</?>}', ['_controller' => TagsPageController::class], options: ['utf8' => true]), $priority);
-        $routes->add('blog_tag', new Route($s2BlogUrl . '/' . $tagsUrl . '/{tag}{slash</?>}', ['_controller' => TagPageController::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_tags', new Route(
+            $s2BlogUrl . '/' . $tagsUrl . '{slash</?>}',
+            ['_controller' => TagsPageController::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
+        $routes->add('blog_tag', new Route(
+            $s2BlogUrl . '/' . $tagsUrl . '/{tag}{slash</?>}',
+            ['_controller' => TagPageController::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
 
-        $routes->add('blog_year', new Route($s2BlogUrl . '/{year<\d+>}/', ['_controller' => YearPageController::class], options: ['utf8' => true]), $priority);
-        $routes->add('blog_month', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/', ['_controller' => MonthPageController::class], options: ['utf8' => true]), $priority);
-        $routes->add('blog_day', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/', ['_controller' => DayPageController::class], options: ['utf8' => true]), $priority);
-        $routes->add('blog_post', new Route($s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/{url}', ['_controller' => PostPageController::class], options: ['utf8' => true]), $priority);
+        $routes->add('blog_year', new Route(
+            $s2BlogUrl . '/{year<\d+>}/',
+            ['_controller' => YearPageController::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
+        $routes->add('blog_month', new Route(
+            $s2BlogUrl . '/{year<\d+>}/{month<\d+>}/',
+            ['_controller' => MonthPageController::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
+        $routes->add('blog_day', new Route(
+            $s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/',
+            ['_controller' => DayPageController::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
+        $routes->add('blog_post', new Route(
+            $s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/{url}',
+            ['_controller' => PostPageController::class],
+            options: ['utf8' => true],
+            methods: ['GET'],
+        ), $priority);
+        $routes->add('blog_comment', new Route(
+            $s2BlogUrl . '/{year<\d+>}/{month<\d+>}/{day<\d+>}/{url}',
+            ['_controller' => 's2_blog.comment_controller'],
+            options: ['utf8' => true],
+            methods: ['POST'],
+        ), $priority);
     }
 }

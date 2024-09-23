@@ -13,8 +13,9 @@ use S2\Cms\Model\UrlBuilder;
 
 class BlogUrlBuilder
 {
-    protected ?string $blogPath = null;
-    protected ?string $blogTagsPath = null;
+    private ?string $blogPath = null;
+    private ?string $absBlogPath = null;
+    private ?string $blogTagsPath = null;
 
     public function __construct(
         private readonly UrlBuilder $urlBuilder,
@@ -27,6 +28,11 @@ class BlogUrlBuilder
     public function main(): string
     {
         return $this->blogPath ?? $this->blogPath = $this->urlBuilder->link($this->encodedBlogUrl() . '/');
+    }
+
+    public function absMain(): string
+    {
+        return $this->absBlogPath ?? $this->absBlogPath = $this->urlBuilder->absLink($this->encodedBlogUrl() . '/');
     }
 
     public function favorite(): string
@@ -72,6 +78,11 @@ class BlogUrlBuilder
     public function postFromTimestamp(int $createTime, string $url): string
     {
         return $this->main() . date('Y/m/d/', $createTime) . rawurlencode($url);
+    }
+
+    public function absPostFromTimestamp(int $createTime, string $url): string
+    {
+        return $this->absMain() . date('Y/m/d/', $createTime) . rawurlencode($url);
     }
 
     public function postFromTimestampWithoutPrefix(int $createTime, string $url): string

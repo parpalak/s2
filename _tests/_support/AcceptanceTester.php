@@ -61,6 +61,7 @@ class AcceptanceTester extends Actor
         $name = 'Roman 🌞';
         $I->fillField('name', $name);
         $I->fillField('email', 'roman@example.com');
+        $I->checkOption('subscribed');
         $I->fillField('text', 'This is my first comment! 👪🐶');
         $text = $I->grabTextFrom('p#qsp');
         preg_match('#(\d\d)\+(\d)#', $text, $matches);
@@ -74,6 +75,19 @@ class AcceptanceTester extends Actor
             $I->see($name . ' wrote:');
             $I->see('This is my first comment!');
         }
+    }
+
+    public function sendComment(string $name, string $email, string $text): void
+    {
+        $I = $this;
+
+        $I->fillField('name', $name);
+        $I->fillField('email', $email);
+        $I->fillField('text', $text);
+        $text = $I->grabTextFrom('p#qsp');
+        preg_match('#(\d\d)\+(\d)#', $text, $matches);
+        $I->fillField('question', (int)$matches[1] + (int)$matches[2]);
+        $I->click('submit');
     }
 
     public function login(string $username = 'admin', string $userpass = ''): void
@@ -117,15 +131,13 @@ class AcceptanceTester extends Actor
         $I->amOnPage('/_admin/index.php?entity=Config&action=list');
         $I->seeResponseCodeIsSuccessful();
 
-        // $I->submitForm('//form[contains(@action, \'S2_PREMODERATION\')]', ['value' => true]);
-
         $I->submitForm('form[action="?entity=Config&action=patch&field=value&name=' . $paramName . '"]', [
             'value' => $value,
         ]);
         $I->seeResponseCodeIsSuccessful();
     }
 
-    public function clearEmail(): void
+    public function clearEmails(): void
     {
         $fi = new FilesystemIterator($this->getEmailDir(), FilesystemIterator::SKIP_DOTS);
         foreach ($fi as $f) {

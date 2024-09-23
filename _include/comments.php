@@ -66,17 +66,17 @@ function s2_mail_comment ($name, $email, $text, $title, $url, $auth_name, $unsub
         }
     }
 
-	mail($email, $subject, $message, $headers);
+    mail($email, $subject, $message, $headers);
 }
 
 //
 // Sends comments to subscribed users
 //
-function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $auth_email)
+function s2_mail_moderator ($name, $email, $text, $title, $url, $authorName, $authorEmail)
 {
 	$message = Lang::get('Email moderator pattern', 'comments');
 	$message = str_replace(array('<name>', '<author>', '<title>', '<url>', '<text>'),
-		array($name, $auth_name, $title, $url, $text), $message);
+		array($name, $authorName, $title, $url, $text), $message);
 
 	// Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
 	$message = str_replace(array("\n", "\0"), array("\r\n", ''), $message);
@@ -89,7 +89,7 @@ function s2_mail_moderator ($name, $email, $text, $title, $url, $auth_name, $aut
 	$sender = S2_WEBMASTER ? "=?UTF-8?B?".base64_encode(S2_WEBMASTER)."?=".' <'.$sender_email.'>' : $sender_email;
 
 	// Author email
-	$from = trim($auth_name) ? "=?UTF-8?B?".base64_encode($auth_name)."?=".' <'.$auth_email.'>' : $auth_email;
+	$from = trim($authorName) ? "=?UTF-8?B?".base64_encode($authorName)."?=".' <'.$authorEmail.'>' : $authorEmail;
 	$headers =
 		'From: '.$sender."\r\n". // One cannot use the real author email in "From:" header due to DMARC. Use our one.
 		'Sender: '.$from."\r\n". // Let's use the real author email at least here.

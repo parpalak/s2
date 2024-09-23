@@ -18,14 +18,36 @@ readonly class UrlBuilder
     ) {
     }
 
+    /**
+     * @return string HTML-escaped relative link
+     */
     public function link(string $path = '', array $params = []): string
     {
         return $this->basePath . $this->getRelativeUrl($path, $params);
     }
 
+    /**
+     * @return string Raw relative link, suitable for headers
+     */
+    public function rawLink(string $path = '', array $params = []): string
+    {
+        return $this->basePath . $this->getRelativeUrl($path, $params, '&');
+    }
+
+    /**
+     * @return string HTML-escaped full link with protocol and domain
+     */
     public function absLink(string $path = '', array $params = []): string
     {
         return $this->baseUrl . $this->getRelativeUrl($path, $params);
+    }
+
+    /**
+     * @return string Raw full link with protocol and domain, suitable for headers
+     */
+    public function rawAbsLink(string $path = '', array $params = []): string
+    {
+        return $this->baseUrl . $this->getRelativeUrl($path, $params, '&');
     }
 
     public function hasPrefix(): bool
@@ -33,13 +55,8 @@ readonly class UrlBuilder
         return $this->urlPrefix !== '';
     }
 
-    private function getRelativeUrl(string $path, array $params): string
+    private function getRelativeUrl(string $path, array $params, string $amp = '&amp;'): string
     {
-        return $this->urlPrefix . $path . (!empty($params) ? ($this->urlPrefix ? '&amp;' : '?') . implode('&amp;', $params) : '');
-    }
-
-    public function linkToFile(string $filePath): string
-    {
-        return $this->basePath . $filePath;
+        return $this->urlPrefix . $path . (!empty($params) ? ($this->urlPrefix ? $amp : '?') . implode($amp, $params) : '');
     }
 }

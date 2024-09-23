@@ -18,7 +18,7 @@ APP_ENV=test \
  nohup php \
   -d "max_execution_time=-1" \
   -d "opcache.revalidate_freq=0" \
-  -d "sendmail_path=_tests/_resources/sendmail.php --dir\\=_tests/_output/email/" \
+  -d "sendmail_path=$(realpath $(dirname "$0")/_tests/_resources/sendmail.php) --dir\\=$(realpath $(dirname "$0")/_tests/_output/email/)" \
   -S localhost:8881 >/dev/null 2>&1 &
 
 serverPID=$!

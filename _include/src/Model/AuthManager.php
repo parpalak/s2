@@ -38,6 +38,7 @@ readonly class AuthManager
         private TemplateRenderer  $templateRenderer,
         private Translator        $translator,
         private string            $basePath,
+        private string            $urlPrefix,
         private string            $cookieName,
         private bool              $forceAdminHttps,
         private int               $loginTimeoutMinutes,
@@ -74,12 +75,7 @@ readonly class AuthManager
                 path: $this->basePath . '/_admin/',
                 secure: $this->forceAdminHttps,
             ));
-            $response->headers->setCookie(Cookie::create(
-                name: $this->cookieName . '_c',
-                value: '',
-                path: $this->basePath . '/comment.php',
-                secure: false,
-            ));
+            $response->headers->setCookie($this->createCommentCookie(''));
             return $response;
         }
 
@@ -206,12 +202,7 @@ readonly class AuthManager
             path: $this->basePath . '/_admin/',
             secure: $this->forceAdminHttps,
         ));
-        $response->headers->setCookie(Cookie::create(
-            name: $this->cookieName . '_c',
-            value: '',
-            path: $this->basePath . '/comment.php',
-            secure: false,
-        ));
+        $response->headers->setCookie($this->createCommentCookie(''));
 
         return $response;
     }
@@ -358,13 +349,7 @@ readonly class AuthManager
             path: $this->basePath . '/_admin/',
             secure: $this->forceAdminHttps,
         ));
-        $response->headers->setCookie(Cookie::create(
-            name: $this->cookieName . '_c',
-            value: $commentCookie,
-            expire: $time + $this->cookieExpireTimeout(),
-            path: $this->basePath . '/comment.php',
-            secure: false,
-        ));
+        $response->headers->setCookie($this->createCommentCookie($commentCookie));
 
         return $response;
     }
@@ -488,5 +473,20 @@ readonly class AuthManager
         $this->permissionChecker->setUser($this->getUserInfo($login));
 
         return self::CHALLENGE_STATUS_OK;
+    }
+
+    /**
+     * Special cookie to mark that a user is logged in.
+     * If this user has a permission, his comment will be published even in pre-moderation mode.
+     */
+    private function createCommentCookie(string $value): Cookie
+    {
+        return Cookie::create(
+            name: $this->cookieName . '_c',
+            value: $value,
+            expire: $value !== '' ? $this->cookieExpireTimeout() + time() : 0,
+            path: $this->basePath . ($this->urlPrefix === '' ? '/comment_sent' : '/'),
+            secure: false,
+        );
     }
 }

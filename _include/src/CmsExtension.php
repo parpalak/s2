@@ -12,6 +12,9 @@ namespace S2\Cms;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Controller\CommentController;
+use S2\Cms\Controller\CommentSentController;
+use S2\Cms\Controller\CommentUnsubscribeController;
 use S2\Cms\Controller\NotFoundController;
 use S2\Cms\Controller\PageCommon;
 use S2\Cms\Controller\PageFavorite;
@@ -28,10 +31,15 @@ use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
 use S2\Cms\Model\ArticleProvider;
+use S2\Cms\Model\AuthProvider;
+use S2\Cms\Model\Comment\ArticleCommentStrategy;
+use S2\Cms\Model\Comment\CommentStrategyInterface;
+use S2\Cms\Model\CommentNotifier;
 use S2\Cms\Model\CommentProvider;
 use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
+use S2\Cms\Model\User\UserProvider;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerPostgres;
 use S2\Cms\Pdo\DbLayerSqlite;
@@ -346,6 +354,81 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(CommentNotifier::class, function (Container $container) {
+            return new CommentNotifier(
+                $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
+            );
+        });
+
+        $container->set('comments_translator', function (Container $container) {
+            /** @var ExtensibleTranslator $translator */
+            $translator = $container->get('translator');
+            $translator->load('comments', function (string $lang) {
+                return require __DIR__ . '/../../_lang/' . $lang . '/comments.php';
+            });
+
+            return $translator;
+        });
+
+        $container->set(ArticleCommentStrategy::class, function (Container $container) {
+            return new ArticleCommentStrategy(
+                $container->get(DbLayer::class),
+                $container->get(ArticleProvider::class),
+                $container->get(CommentNotifier::class),
+            );
+        }, [CommentStrategyInterface::class]);
+
+        $container->set(AuthProvider::class, function (Container $container) {
+            return new AuthProvider(
+                $container->get(DbLayer::class),
+                $container->getParameter('cookie_name'),
+            );
+        });
+
+        $container->set(UserProvider::class, function (Container $container) {
+            return new UserProvider(
+                $container->get(DbLayer::class),
+            );
+        });
+
+        $container->set(CommentController::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new CommentController(
+                $container->get(AuthProvider::class),
+                $container->get(UserProvider::class),
+                $container->get(ArticleCommentStrategy::class),
+                $container->get('comments_translator'),
+                $container->get(UrlBuilder::class),
+                $container->get(HtmlTemplateProvider::class),
+                $container->get(Viewer::class),
+                $container->get(LoggerInterface::class),
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
+                $provider->get('S2_PREMODERATION') === '1',
+            );
+        });
+
+        $container->set(CommentSentController::class, function (Container $container) {
+            return new CommentSentController(
+                $container->get(AuthProvider::class),
+                $container->get(UserProvider::class),
+                $container->get('comments_translator'),
+                $container->get(UrlBuilder::class),
+                $container->get(HtmlTemplateProvider::class),
+                ...$container->getByTag(CommentStrategyInterface::class)
+            );
+        });
+
+        $container->set(CommentUnsubscribeController::class, function (Container $container) {
+            return new CommentUnsubscribeController(
+                $container->get('comments_translator'),
+                $container->get(HtmlTemplateProvider::class),
+                ...$container->getByTag(CommentStrategyInterface::class)
+            );
+        });
+
         $container->set(Rss::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
@@ -483,11 +566,53 @@ class CmsExtension implements ExtensionInterface
         $favoriteUrl    = $configProvider->get('S2_FAVORITE_URL');
         $tagsUrl        = $configProvider->get('S2_TAGS_URL');
 
-        $routes->add('rss', new Route('/rss.xml', ['_controller' => Rss::class]));
-        $routes->add('sitemap', new Route('/sitemap.xml', ['_controller' => Sitemap::class]));
-        $routes->add('favorite', new Route('/' . $favoriteUrl . '{slash</?>}', ['_controller' => PageFavorite::class], options: ['utf8' => true]));
-        $routes->add('tags', new Route('/' . $tagsUrl . '{slash</?>}', ['_controller' => PageTags::class], options: ['utf8' => true]));
-        $routes->add('tag', new Route('/' . $tagsUrl . '/{name}{slash</?>}', ['_controller' => PageTag::class], options: ['utf8' => true]));
-        $routes->add('common', new Route('/{path<.*>}', ['_controller' => PageCommon::class]), -1); // -1 for last route
+        $routes->add('rss', new Route(
+            '/rss.xml',
+            ['_controller' => Rss::class],
+            methods: ['GET']
+        ));
+        $routes->add('sitemap', new Route(
+            '/sitemap.xml',
+            ['_controller' => Sitemap::class],
+            methods: ['GET']
+        ));
+        $routes->add('favorite', new Route(
+            '/' . $favoriteUrl . '{slash</?>}',
+            ['_controller' => PageFavorite::class],
+            options: ['utf8' => true],
+            methods: ['GET']
+        ));
+        $routes->add('tags', new Route(
+            '/' . $tagsUrl . '{slash</?>}',
+            ['_controller' => PageTags::class],
+            options: ['utf8' => true],
+            methods: ['GET']
+        ));
+        $routes->add('tag', new Route(
+            '/' . $tagsUrl . '/{name}{slash</?>}',
+            ['_controller' => PageTag::class],
+            options: ['utf8' => true],
+            methods: ['GET']
+        ));
+        $routes->add('common', new Route(
+            '/{path<.*>}',
+            ['_controller' => PageCommon::class],
+            methods: ['GET']
+        ), -1); // -1 for last route
+        $routes->add('comment_sent', new Route(
+            '/comment_sent',
+            ['_controller' => CommentSentController::class],
+            methods: ['GET']
+        ));
+        $routes->add('comment_unsubscribe', new Route(
+            '/comment_unsubscribe',
+            ['_controller' => CommentUnsubscribeController::class],
+            methods: ['GET']
+        ));
+        $routes->add('comment', new Route(
+            '/{path<.*>}',
+            ['_controller' => CommentController::class],
+            methods: ['POST']
+        ), -1); // -1 for last route
     }
 }

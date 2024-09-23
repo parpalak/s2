@@ -237,7 +237,7 @@ readonly class PostProvider
         $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'COUNT(*)',
             'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'post_id = :post_id' . ($includeHidden ? '' : ' AND shown = 0'),
+            'WHERE'  => 'post_id = :post_id' . ($includeHidden ? '' : ' AND shown = 1'),
         ], ['post_id' => $postId]);
 
         return (int)$this->dbLayer->result($result);

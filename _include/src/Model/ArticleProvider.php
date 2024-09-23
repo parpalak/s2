@@ -275,6 +275,50 @@ readonly class ArticleProvider
     /**
      * @throws DbLayerException
      */
+    public function articleFromPath(string $path, bool $publishedOnly): ?array
+    {
+        $pathArray = explode('/', $path);   // e.g. []/[dir1]/[dir2]/[dir3]/[file1]
+        $pathArray = array_map('rawurldecode', $pathArray);
+
+        // Remove the last empty element
+        if ($pathArray[\count($pathArray) - 1] === '') {
+            unset($pathArray[\count($pathArray) - 1]);
+        }
+
+        if (!$this->useHierarchy) {
+            $pathArray = \count($pathArray) > 0 ? [$pathArray[1]] : [''];
+        }
+
+        $id        = self::ROOT_ID;
+        $title     = null;
+        $commented = null;
+
+        // Walking through page parents
+        foreach ($pathArray as $pathItem) {
+            $query  = [
+                'SELECT' => 'a.id, a.title, a.commented',
+                'FROM'   => 'articles AS a',
+                'WHERE'  => 'url = :url' . ($this->useHierarchy ? ' AND parent_id = :id' : '') . ($publishedOnly ? ' AND published = 1' : '')
+            ];
+            $result = $this->dbLayer->buildAndQuery($query, [
+                'url' => $pathItem,
+                ...$this->useHierarchy ? ['id' => $id] : []
+            ]);
+
+            $row = $this->dbLayer->fetchRow($result);
+            if (!\is_array($row)) {
+                return null;
+            }
+
+            [$id, $title, $commented] = $row;
+        }
+
+        return ['id' => $id, 'title' => $title, 'commented' => $commented];
+    }
+
+    /**
+     * @throws DbLayerException
+     */
     public function checkUrlAndTemplateStatus(int $id): array
     {
         $query  = [
@@ -319,7 +363,7 @@ readonly class ArticleProvider
         $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'COUNT(*)',
             'FROM'   => 'art_comments',
-            'WHERE'  => 'article_id = :article_id' . ($includeHidden ? '' : ' AND shown = 0'),
+            'WHERE'  => 'article_id = :article_id' . ($includeHidden ? '' : ' AND shown = 1'),
         ], ['article_id' => $id]);
 
         return (int)$this->dbLayer->result($result);

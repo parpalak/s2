@@ -9,18 +9,32 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Model;
 
+use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 
+/**
+ * 1. Sends notifications on new comments:
+ *    - Retrieves information about the comment and associated post.
+ *    - Sends the comment to commentators who subscribed to this post.
+ *    - Generates an unsubscribe link.
+ *    - Marks the comment as sent.
+ *
+ * 2. Unsubscribes commentators by parameters from the unsubscribe links.
+ */
 readonly class BlogCommentNotifier
 {
     public function __construct(
         private DbLayer        $dbLayer,
+        private UrlBuilder     $urlBuilder,
         private BlogUrlBuilder $blogUrlBuilder,
-        private string         $baseUrl,
     ) {
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function notify(int $commentId): void
     {
         /**
@@ -55,41 +69,40 @@ readonly class BlogCommentNotifier
         }
 
         // Getting some info about the post commented
-        $query  = [
+        $result = $this->dbLayer->buildAndQuery([
             'SELECT' => 'title, create_time, url',
             'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'id = ' . $comment['post_id'] . ' AND published = 1 AND commented = 1'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+            'WHERE'  => 'id = :post_id AND published = 1 AND commented = 1'
+        ], [
+            'post_id' => $comment['post_id']
+        ]);
 
         $post = $this->dbLayer->fetchAssoc($result);
         if (!$post) {
             return;
         }
 
-        $link = $this->blogUrlBuilder->postFromTimestamp($post['create_time'], $post['url']);
+        $link = $this->blogUrlBuilder->absPostFromTimestamp($post['create_time'], $post['url']);
 
         // Fetching receivers' names and addresses
-        $query  = [
-            'SELECT' => 'id, nick, email, ip, time',
-            'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'post_id = ' . $comment['post_id'] . ' AND subscribed = 1 AND shown = 1 AND email <> \'' . $this->dbLayer->escape($comment['email']) . '\''
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $allReceivers = $this->getCommentReceivers($comment['post_id'], $comment['email'], '<>');
 
+        // Group by email, taking last records
         $receivers = [];
-        while ($receiver = $this->dbLayer->fetchAssoc($result)) {
+        foreach ($allReceivers as $receiver) {
             $receivers[$receiver['email']] = $receiver;
         }
 
-        foreach ($receivers as $receiver) {
-            $hash = md5($receiver['id'] . $receiver['ip'] . $receiver['nick'] . $receiver['email'] . $receiver['time']);
+        $message = s2_bbcode_to_mail($comment['text']);
 
-            $unsubscribeLink = $this->baseUrl
-                . '/comment.php?mail=' . urlencode($receiver['email'])
-                . '&id=' . $comment['post_id'] . '.s2_blog'
-                . '&unsubscribe=' . base_convert(substr($hash, 0, 16), 16, 36);
-            s2_mail_comment($receiver['nick'], $receiver['email'], $comment['text'], $post['title'], $link, $comment['nick'], $unsubscribeLink);
+        foreach ($receivers as $receiver) {
+            $unsubscribeLink = $this->urlBuilder->rawAbsLink('/comment_unsubscribe', [
+                'mail=' . urlencode($receiver['email']),
+                'id=' . $comment['post_id'],
+                'code=' . $receiver['hash'],
+            ]);
+
+            s2_mail_comment($receiver['nick'], $receiver['email'], $message, $post['title'], $link, $comment['nick'], $unsubscribeLink);
         }
 
         // Toggle sent mark
@@ -99,5 +112,57 @@ readonly class BlogCommentNotifier
             'WHERE'  => 'id = ' . $commentId
         ];
         $this->dbLayer->buildAndQuery($query);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function unsubscribe(int $postId, string $email, string $code): bool
+    {
+        $receivers = $this->getCommentReceivers($postId, $email, '=');
+
+        foreach ($receivers as $receiver) {
+            if ($code === $receiver['hash']) {
+                $this->dbLayer->buildAndQuery([
+                    'UPDATE' => 's2_blog_comments',
+                    'SET'    => 'subscribed = 0',
+                    'WHERE'  => 'post_id = :post_id and subscribed = 1 and email = :email'
+                ], [
+                    'post_id' => $postId,
+                    'email'   => $email,
+                ]);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function getCommentReceivers(int $postId, string $email, string $operation): array
+    {
+        if (!\in_array($operation, ['=', '<>'], true)) {
+            throw new \InvalidArgumentException(sprintf('Invalid operation "%s".', $operation));
+        }
+
+        $result = $this->dbLayer->buildAndQuery([
+            'SELECT' => 'id, nick, email, ip, time',
+            'FROM'   => 's2_blog_comments',
+            'WHERE'  => 'post_id = :post_id AND subscribed = 1 AND shown = 1 AND email ' . $operation . ' :email'
+        ], [
+            'post_id' => $postId,
+            'email'   => $email,
+        ]);
+
+        $receivers = $this->dbLayer->fetchAssocAll($result);
+        foreach ($receivers as &$receiver) {
+            $receiver['hash'] = substr(base_convert(md5('s2_blog_comments' . serialize($receiver)), 16, 36), 0, 13);
+        }
+        unset($receiver);
+
+        return $receivers;
     }
 }

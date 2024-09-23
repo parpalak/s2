@@ -111,7 +111,7 @@ class HtmlTemplate
 
         if (!empty($this->page['commented']) && $this->dynamicConfigProvider->get('S2_ENABLED_COMMENTS') === '1') {
             $comment_array = [
-                'id' => $this->page['id'] . '.' . ($this->page['class'] ?? '')
+                'id' => $this->page['id'],
             ];
 
             if (!empty($this->page['comment_form']) && \is_array($this->page['comment_form'])) {
@@ -123,7 +123,7 @@ class HtmlTemplate
             $replace['<!-- s2_comment_form -->'] = $this->viewer->render('comment_form', [
                 ...$comment_array,
                 'syntaxHelpItems' => $event->syntaxHelpItems,
-                'action'          => $this->urlBuilder->linkToFile('/comment.php'),
+                'action'          => '',
             ]);
         } else {
             $replace['<!-- s2_comment_form -->'] = '';

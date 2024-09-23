@@ -32,7 +32,7 @@ The author of the new comment is <author>.
 <text>
 ----------------------------------------------------------------------
 
-This e-mail was sent automatically. If you reply, the author
+This e-mail has been sent automatically. If you reply, the author
 of the site will receive your answer. To unsubscribe, follow the link
 
 <unsubscribe>',
@@ -62,7 +62,7 @@ of the comment will receive your answer.',
     'links_in_text'            => 'Remove http:// or https:// from links. Author will add links to the article if they are valuable.',
 	'long_nick'                => 'Is your name length more than 50 symbols? It is something strange...',
 	'question'                 => 'You gave the wrong answer to the question. Try again.',
-	'email'                    => 'Invalid e-mail. Please enter the correct e-mail, and the author of the site will contact you if it is needed. If you clear the &laquo;Show to other visitors&raquo; checkbox, your e-mail will not be shown.',
+	'email'                    => 'Invalid e-mail. Please enter the correct e-mail, and the author of the site will contact you if it is needed. If you clear the “Show to other visitors” checkbox, your e-mail will not be shown.',
 	'disabled'                 => 'Sorry, but&nbsp;you cannot send comments&nbsp;to this site at this moment. Try it later.',
 	'no_item'                  => 'Because of an error the destination page cannot be detected. Go to the page you have commented and try again (you can copy and paste the comment text).',
 

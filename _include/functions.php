@@ -285,12 +285,9 @@ function s2_remove_bad_characters(): void
 //
 function s2_is_valid_email($email)
 {
-    $return = ($hook = s2_hook('fn_is_valid_email_start')) ? eval($hook) : null;
-    if ($return != null)
-        return $return;
-
-    if (strlen($email) > 80)
+    if (strlen($email) > 80) {
         return false;
+    }
 
     return preg_match('/^(([^<>()[\]\\.,;:\s@"\']+(\.[^<>()[\]\\.,;:\s@"\']+)*)|("[^"\']+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\d\-]+\.)+[a-zA-Z]{2,}))$/', $email);
 }

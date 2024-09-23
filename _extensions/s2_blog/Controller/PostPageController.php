@@ -202,7 +202,7 @@ class PostPageController extends BlogController
         $template
             ->putInPlaceholder('meta_description', self::extractMetaDescriptions($row['text']))
             ->putInPlaceholder('text', $this->viewer->render('post', $row, 's2_blog'))
-            ->putInPlaceholder('id', $post_id)
+            ->putInPlaceholder('id', md5('s2_blog_post_' . $post_id))
             ->putInPlaceholder('head_title', s2_htmlencode($row['title']))
         ;
 
