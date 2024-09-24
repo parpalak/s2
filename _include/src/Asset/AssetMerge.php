@@ -57,13 +57,15 @@ class AssetMerge implements AssetMergeInterface
             foreach ($this->filesToMerge as $fileToMerge) {
                 $minifier->add($fileToMerge);
             }
-            $content = $minifier->minify($this->getDumpFilename());
+            // Taking realpath here since there are some bugs in dependency for relative paths
+            $content = $minifier->minify($this->getDumpFilename(true));
         } elseif ($this->type === self::TYPE_JS) {
             $minifier = new Minify\JS();
             foreach ($this->filesToMerge as $fileToMerge) {
                 $minifier->add($fileToMerge);
             }
-            $content = $minifier->minify($this->getDumpFilename());
+            // Taking realpath here since there are some bugs in dependency for relative paths
+            $content = $minifier->minify($this->getDumpFilename(true));
         } else {
             $content = $this->getConcatenatedContent();
         }
@@ -94,9 +96,9 @@ class AssetMerge implements AssetMergeInterface
         return false;
     }
 
-    private function getDumpFilename(): string
+    private function getDumpFilename(bool $realPath = false): string
     {
-        return sprintf('%s%s', $this->publicCacheDir, $this->getFilename());
+        return sprintf('%s%s', $realPath ? realpath($this->publicCacheDir) . '/' : $this->publicCacheDir, $this->getFilename());
     }
 
     private function getHashFilename(): string
