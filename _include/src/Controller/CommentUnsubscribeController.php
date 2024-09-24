@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
-use S2\Cms\Model\Comment\CommentStrategyInterface;
 use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

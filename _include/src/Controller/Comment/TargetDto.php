@@ -7,16 +7,13 @@
 
 declare(strict_types=1);
 
-namespace S2\Cms\Model\Comment;
+namespace S2\Cms\Controller\Comment;
 
-readonly class CommentDto
+readonly class TargetDto
 {
     public function __construct(
         public int    $id,
-        public int    $targetId,
-        public string $name,
-        public string $email,
-        public string $text,
+        public string $title,
     ) {
     }
 }

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace S2\Cms\Model\Comment;
+namespace S2\Cms\Controller\Comment;
 
 use Symfony\Component\HttpFoundation\Request;
 

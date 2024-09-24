@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\AuthProvider;
-use S2\Cms\Model\Comment\CommentStrategyInterface;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Model\User\UserProvider;
 use S2\Cms\Pdo\DbLayerException;

@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model\Comment;
 
+use S2\Cms\Controller\Comment\CommentDto;
+use S2\Cms\Controller\Comment\CommentStrategyInterface;
+use S2\Cms\Controller\Comment\TargetDto;
 use S2\Cms\Controller\CommentController;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\CommentNotifier;
