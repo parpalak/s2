@@ -134,6 +134,24 @@ class ThumbnailGenerator implements QueueHandlerInterface
                     return imagecreatefromwbmp($inputFilename);
                 }
                 throw new \RuntimeException('WBMP images are not supported');
+
+            case 'image/webp':
+                if (imagetypes() & IMG_WEBP) {
+                    return imagecreatefromwebp($inputFilename);
+                }
+                throw new \RuntimeException('WebP images are not supported');
+
+            case 'image/avif':
+                if (imagetypes() & IMG_AVIF) {
+                    return imagecreatefromavif($inputFilename);
+                }
+                throw new \RuntimeException('AVIF images are not supported');
+
+            case 'image/bmp':
+                if (imagetypes() & IMG_BMP) {
+                    return imagecreatefrombmp($inputFilename);
+                }
+                throw new \RuntimeException('BMP images are not supported');
         }
 
         throw new \RuntimeException($imageInfo['mime'] . ' images are not supported');
