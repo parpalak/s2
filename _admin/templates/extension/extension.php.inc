@@ -56,11 +56,6 @@ $htmlEncode = static fn(string $str) => htmlspecialchars($str, ENT_QUOTES, 'UTF-
         </div>
     <?php endif; ?>
 
-    <?php if (count($installedExtensions) > 0): ?>
-        <button class="bitbtn refresh-hooks" style="position: relative; float:right; top:1em;"
-                onclick="return RefreshHooks();"><?= $trans('Refresh hooks') ?></button>
-    <?php endif; ?>
-
     <h2><?= $trans('Installed extensions') ?></h2>
 
     <?php if (count($installedExtensions) > 0): ?>

@@ -129,7 +129,6 @@ class CmsExtension implements ExtensionInterface
             return new ExtensionCache(
                 $container->get(DbLayer::class),
                 $container->getParameter('disable_cache'),
-                $container->getParameter('root_dir'),
                 $container->getParameter('cache_dir'),
             );
         });

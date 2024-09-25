@@ -6,11 +6,6 @@
  * @package S2
  */
 
-function RefreshHooks() {
-    fetch(sUrl + 'action=refresh_hooks');
-    return false;
-}
-
 function changeExtension(sAction, sId, sCsrfToken, sMessage) {
     if (sAction === 'install_extension') {
         if (!confirm((sMessage !== '' ? s2_lang.install_message.replaceAll('%s', sMessage) : '') + s2_lang.install_extension.replaceAll('%s', sId))) {

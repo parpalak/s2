@@ -145,18 +145,6 @@ class AdminAjaxRequestHandler
 
                 return new Json(['success' => $error === null, 'message' => $error]);
             },
-            'refresh_hooks'       => static function (P $p, R $r, C $c, T $t) {
-                if (!$p->isGranted(P::PERMISSION_EDIT_USERS)) {
-                    return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
-                }
-                /** @var ExtensionCache $extensionManager */
-                $cache = $c->get(ExtensionCache::class);
-                // Regenerate the hooks cache
-                $cache->generateHooks();
-                $cache->generateEnabledExtensionClassNames();
-
-                return new Json(['success' => true]);
-            },
             'install_extension'   => static function (P $p, R $r, C $c, T $t) {
                 if (!$p->isGranted(P::PERMISSION_EDIT_USERS)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);

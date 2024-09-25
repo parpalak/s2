@@ -27,7 +27,6 @@ define('MIN_PHP_VERSION', '8.2.0');
 define('S2_ROOT', '../');
 define('S2_DEBUG', 1);
 define('S2_SHOW_QUERIES', 1);
-define('S2_DISABLE_HOOKS', 1);
 
 // We need some stuff
 require S2_ROOT . '_vendor/autoload.php';

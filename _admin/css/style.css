@@ -719,7 +719,6 @@ textarea,
 .bitbtn.saveopt { background-position: 1px -160px; }
 .enabled .bitbtn.flip_ext { background-position: 1px -52px; }
 .disabled .bitbtn.flip_ext { background-position: 1px -34px; }
-.bitbtn.refresh-hooks { background: url(../i/r.png) 1px 2px no-repeat #f2f2f2; }
 .bitbtn.uninst_ext { background-position: 1px -88px; }
 .bitbtn.inst_ext { background-position: 1px -70px; }
 .bitbtn.upgr_ext { background-position: 1px -178px; }

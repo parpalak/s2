@@ -220,9 +220,8 @@ readonly class ExtensionManager
             'WHERE'  => 'id = :id',
         ], ['id' => $id]);
 
-        // Regenerate the hooks cache
+        // Regenerate the extension cache
         $this->extensionCache->clear();
-        $this->extensionCache->generateHooks();
 
         return null;
     }
@@ -316,9 +315,8 @@ readonly class ExtensionManager
         // Extensions may add their own config params
         $this->dynamicConfigProvider->regenerate();
 
-        // Regenerate the hooks cache
+        // Regenerate the extension cache
         $this->extensionCache->clear();
-        $this->extensionCache->generateHooks();
 
         return [];
     }
@@ -367,9 +365,8 @@ readonly class ExtensionManager
             'WHERE'  => 'id = :id',
         ], ['id' => $id]);
 
-        // Regenerate the hooks cache
+        // Regenerate the extension cache
         $this->extensionCache->clear();
-        $this->extensionCache->generateHooks();
 
         return null;
     }

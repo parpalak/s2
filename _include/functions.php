@@ -292,32 +292,6 @@ function s2_is_valid_email($email)
     return preg_match('/^(([^<>()[\]\\.,;:\s@"\']+(\.[^<>()[\]\\.,;:\s@"\']+)*)|("[^"\']+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\d\-]+\.)+[a-zA-Z]{2,}))$/', $email);
 }
 
-//
-// Return all code blocks that hook into $hook_id
-//
-function s2_hook($hook_id)
-{
-    if (defined('S2_DISABLE_HOOKS')) {
-        return false;
-    }
-
-    static $hookNames = null;
-
-    if ($hookNames === null) {
-        /** @var ExtensionCache $cache */
-        $cache = \Container::get(ExtensionCache::class);
-        $hookNames = $cache->getHookNames();
-    }
-
-    if (!isset($hookNames[$hook_id])) {
-        return false;
-    }
-
-    $code = implode("\n", array_map(static fn(string $filename) => "\$_include_result = include S2_ROOT.'$filename'; if (\$_include_result !== 1) { return \$_include_result; }", $hookNames[$hook_id]));
-
-    return $code;
-}
-
 // Display a simple error message
 function error()
 {

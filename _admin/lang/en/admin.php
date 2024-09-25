@@ -200,7 +200,6 @@ $lang_admin = [
     'Uninstall'                            => 'Uninstall',
     'Enable'                               => 'Enable',
     'Disable'                              => 'Disable',
-    'Refresh hooks'                        => 'Refresh hooks',
     'Extension loading error'              => 'Loading of extension “{{ extension }}” failed.',
     'Illegal ID'                           => 'The ID must contain only lowercase alphanumeric characters (a-z and 0-9) and the underscore character (_).',
     'Missing manifest'                     => 'Missing Manifest.php.',
