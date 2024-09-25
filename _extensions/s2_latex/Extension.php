@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace s2_extensions\s2_latex;
 
 use S2\Cms\Asset\AssetPack;
+use S2\Cms\Controller\Rss\FeedItemRenderEvent;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Image\ThumbnailGenerateEvent;
@@ -60,6 +61,10 @@ class Extension implements ExtensionInterface
             array_unshift($event->syntaxHelpItems, $translator->trans('Comment latex syntax'));
         });
 
+        $eventDispatcher->addListener(FeedItemRenderEvent::class, static function (FeedItemRenderEvent $event) {
+            $event->feedItemDto->text = self::convertLatexInHtml($event->feedItemDto->text);
+        }, 10);
+
         // Note: Indexing is performed in the QueueConsumer, so it cannot be moved to AdminExtension right now.
         $eventDispatcher->addListener(TextNodeExtractEvent::class, [self::class, 'textNodeExtractListener']);
 
@@ -67,7 +72,7 @@ class Extension implements ExtensionInterface
         $eventDispatcher->addListener(ThumbnailGenerateEvent::class, static function (ThumbnailGenerateEvent $event) {
             $src = $event->src;
             if (str_starts_with($src, self::CUSTOM_UPMATH_PROTOCOL)) {
-                $url = 'https://i.upmath.me/svg/' . LatexHelper::encodeURIComponent(substr($src, \strlen(self::CUSTOM_UPMATH_PROTOCOL)));
+                $url = 'https://i.upmath.me/svg/' . self::encodeURIComponent(substr($src, \strlen(self::CUSTOM_UPMATH_PROTOCOL)));
                 $event->setResult(sprintf('<img src="%s" style="background: white" alt=""></span>', $url));
             }
         });
@@ -111,6 +116,21 @@ class Extension implements ExtensionInterface
                 $event->domState->attachImg(self::CUSTOM_UPMATH_PROTOCOL . $formula, '', '', '');
             }
         }
+    }
+
+    public static function convertLatexInHtml(string $text): string
+    {
+        return preg_replace_callback('#\\$\\$([^<]*?)\\$\\$#S', static function ($matches) {
+            $formula = str_replace(['&nbsp;', '&lt;', '&gt;', '&amp;'], [' ', '<', '>', '&'], $matches[1]);
+            return '<img border="0" style="vertical-align: middle;" src="//i.upmath.me/svg/' . s2_htmlencode(self::encodeURIComponent($formula)) . '" alt="' . s2_htmlencode($formula) . '" />';
+        }, $text);
+    }
+
+    public static function encodeURIComponent(string $str): string
+    {
+        $revert = ['%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')'];
+
+        return strtr(rawurlencode($str), $revert);
     }
 
     public function registerRoutes(RouteCollection $routes, Container $container): void

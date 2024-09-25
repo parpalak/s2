@@ -21,7 +21,7 @@ use S2\Cms\Controller\PageCommon;
 use S2\Cms\Controller\PageFavorite;
 use S2\Cms\Controller\PageTag;
 use S2\Cms\Controller\PageTags;
-use S2\Cms\Controller\Rss;
+use S2\Cms\Controller\RssController;
 use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Event\NotFoundEvent;
@@ -32,6 +32,7 @@ use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
 use S2\Cms\Mail\CommentMailer;
+use S2\Cms\Model\Article\ArticleRssStrategy;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthProvider;
 use S2\Cms\Model\Comment\ArticleCommentStrategy;
@@ -440,15 +441,28 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
-        $container->set(Rss::class, function (Container $container) {
+        $container->set(ArticleRssStrategy::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
-            return new Rss(
+            return new ArticleRssStrategy(
                 $container->get(ArticleProvider::class),
+                $container->get(UrlBuilder::class),
+                $container->get('translator'),
+                $provider->get('S2_SITE_NAME'),
+            );
+        });
+
+        $container->set(RssController::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new RssController(
+                $container->get(ArticleRssStrategy::class),
+                $container->get(UrlBuilder::class),
                 $container->get('strict_viewer'),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
+                $container->getParameter('base_path'),
                 $container->getParameter('base_url'),
                 $provider->get('S2_WEBMASTER'),
-                $provider->get('S2_SITE_NAME'),
             );
         });
 
@@ -579,7 +593,7 @@ class CmsExtension implements ExtensionInterface
 
         $routes->add('rss', new Route(
             '/rss.xml',
-            ['_controller' => Rss::class],
+            ['_controller' => RssController::class],
             methods: ['GET']
         ));
         $routes->add('sitemap', new Route(

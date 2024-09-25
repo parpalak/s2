@@ -14,6 +14,7 @@ use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Controller\CommentController;
+use S2\Cms\Controller\RssController;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Mail\CommentMailer;
@@ -32,7 +33,6 @@ use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\Viewer;
 use S2\Cms\Translation\ExtensibleTranslator;
 use S2\Rose\Indexer;
-use s2_extensions\s2_blog\Controller\BlogRss;
 use s2_extensions\s2_blog\Controller\DayPageController;
 use s2_extensions\s2_blog\Controller\FavoritePageController;
 use s2_extensions\s2_blog\Controller\MainPageController;
@@ -45,6 +45,7 @@ use s2_extensions\s2_blog\Controller\YearPageController;
 use s2_extensions\s2_blog\Model\BlogCommentNotifier;
 use s2_extensions\s2_blog\Model\BlogCommentStrategy;
 use s2_extensions\s2_blog\Model\BlogPlaceholderProvider;
+use s2_extensions\s2_blog\Model\BlogRssStrategy;
 use s2_extensions\s2_blog\Model\PostProvider;
 use s2_extensions\s2_blog\Service\PostIndexer;
 use s2_extensions\s2_blog\Service\TagsSearchProvider;
@@ -238,23 +239,31 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
-        $container->set(BlogRss::class, function (Container $container) {
+        $container->set(BlogRssStrategy::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
-            return new BlogRss(
+            return new BlogRssStrategy(
                 $container->get(PostProvider::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get('s2_blog_translator'),
                 $container->get('strict_viewer'),
-                $container->getParameter('base_url'),
-                $provider->get('S2_WEBMASTER'),
-                $provider->get('S2_SITE_NAME'),
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
-        $container->set(Sitemap::class, function (Container $container) {
+        $container->set('s2_blog.rss_controller', function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
+            return new RssController(
+                $container->get(BlogRssStrategy::class),
+                $container->get(UrlBuilder::class),
+                $container->get('strict_viewer'),
+                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
+                $container->getParameter('base_path'),
+                $container->getParameter('base_url'),
+                $provider->get('S2_WEBMASTER'),
+            );
+        });
+        $container->set(Sitemap::class, function (Container $container) {
             return new Sitemap(
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
@@ -461,7 +470,7 @@ class Extension implements ExtensionInterface
 
         $routes->add('blog_rss', new Route(
             $s2BlogUrl . '/rss.xml',
-            ['_controller' => BlogRss::class],
+            ['_controller' => 's2_blog.rss_controller'],
             options: ['utf8' => true],
             methods: ['GET'],
         ), $priority);

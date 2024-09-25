@@ -6,9 +6,9 @@
  * characters according to Russian typography conventions.
  *
  * @copyright 2010-2024 Roman Parpalak, partially based on code (C) by Dmitry Smirnov
- * @see http://spectator.ru/technology/php/quotation_marks_stike_back
- * @license MIT
- * @package S2
+ * @see       http://spectator.ru/technology/php/quotation_marks_stike_back
+ * @license   MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -83,29 +83,31 @@ class Typograph
             $contents
         );
 
-        /**
-         * @note Quite a general regex. In case of bugs try a more restricted one
-         *
-         * $contents = preg_replace('~
-         * (^|\s|\(|>|«)      # Start matching at the beginning of words
-         * \K                 # Reset match (faster than lookbehind)
-         * (?!«)              # Reset match (faster than lookbehind)
-         * [^\-\s<>()\\\\]++  # First word part
-         * -                  # Match a hyphen
-         * [^\s<>()\\\\]+     # Second word part
-         * ~x',               # Use the 'x' modifier to enable whitespace and comments in the pattern
-         * '<nobr>\\0</nobr>',
-         * $contents
-         * );
-         */
-        $contents = preg_replace_callback('~
+        if (!$soft) {
+            /**
+             * @note Quite a general regex. In case of bugs try a more restricted one
+             *
+             * $contents = preg_replace('~
+             * (^|\s|\(|>|«)      # Start matching at the beginning of words
+             * \K                 # Reset match (faster than lookbehind)
+             * (?!«)              # Reset match (faster than lookbehind)
+             * [^\-\s<>()\\\\]++  # First word part
+             * -                  # Match a hyphen
+             * [^\s<>()\\\\]+     # Second word part
+             * ~x',               # Use the 'x' modifier to enable whitespace and comments in the pattern
+             * '<nobr>\\0</nobr>',
+             * $contents
+             * );
+             */
+            $contents = preg_replace_callback('~
                 [^\s<>\-]++ # First word part
                 -           # Match a hyphen
                 [^\s<]+     # Second word part
                 ~x',
-            static fn(array $matches) => mb_strlen($matches[0]) < 40 ? '<nobr>' . $matches[0] . '</nobr>' : $matches[0],
-            $contents
-        );
+                static fn(array $matches) => mb_strlen($matches[0]) < 40 ? '<nobr>' . $matches[0] . '</nobr>' : $matches[0],
+                $contents
+            );
+        }
 
         // Prepositions and particles
         $contents = preg_replace(
