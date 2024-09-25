@@ -2,14 +2,13 @@
 /**
  * Functions of the counter extension
  *
- * @copyright (C) 2007-2013 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package s2_counter
+ * @copyright 2007-2024 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_counter
  */
 
-
-if (!defined('S2_ROOT'))
-    die;
+use S2\Cms\Controller\Rss\RssStrategyInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 if (!defined('S2_COUNTER_TOTAL_HITS_FNAME'))
     define('S2_COUNTER_TOTAL_HITS_FNAME', '/data/total_hits.txt');
@@ -104,10 +103,12 @@ function s2_counter_get_total_hits($dir)
     return $hits;
 }
 
-function s2_counter_process($dir)
+function s2_counter_process()
 {
     if (s2_counter_is_bot())
         return;
+
+    $dir = __DIR__;
 
     if (!is_file($dir . S2_COUNTER_TODAY_DATA_FNAME) && !is_writable(dirname($dir . S2_COUNTER_TODAY_DATA_FNAME)))
         return;
@@ -190,42 +191,46 @@ function s2_counter_get_aggregator(string $userAgent): ?array
     return null;
 }
 
-function s2_counter_rss_count($dir)
-{
+function s2_counter_rss_count(Request $request, RssStrategyInterface $rssStrategy) {
     if (s2_counter_is_bot()) {
         return;
     }
 
-    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-    $client_ip  = $_SERVER['REMOTE_ADDR'];
-    $filename   = '/data/rss_main.txt';
+    $dir = __DIR__;
 
-    ($hook = s2_hook('fn_s2_count_rss_count_start')) ? eval($hook) : null;
+    $userAgent = $request->headers->get('User-Agent', '');
+    $clientIp  = $request->getClientIp() ?? $_SERVER['REMOTE_ADDR'];
+    $fileName   = match (get_class($rssStrategy)) {
+        \S2\Cms\Model\Article\ArticleRssStrategy::class => '/data/rss_main.txt',
+        \s2_extensions\s2_blog\Model\BlogRssStrategy::class => '/data/rss_s2_blog.txt',
+        default => '/data/rss_'.array_reverse(explode('\\', get_class($rssStrategy)))[0].'.txt',
+    };
 
-    if (!is_file($dir . $filename) && !is_writable(dirname($dir . $filename))) {
+    $fullFileName = $dir . $fileName;
+    if (!is_file($fullFileName) && !is_writable(dirname($fullFileName))) {
         return;
     }
 
     clearstatcache();
-    if (!is_file($dir . $filename) || date('j', filemtime($dir . $filename)) === date('j')) {
-        s2_counter_append_file($dir . $filename, time() . '^' . $client_ip . '^' . $user_agent . "\n");
+    if (!is_file($fullFileName) || date('j', filemtime($fullFileName)) === date('j')) {
+        s2_counter_append_file($fullFileName, time() . '^' . $clientIp . '^' . $userAgent . "\n");
     } else {
-        $f_day_info = fopen($dir . $filename, 'a+');
-        flock($f_day_info, LOCK_EX);
+        $fileDayInfo = fopen($fullFileName, 'a+');
+        flock($fileDayInfo, LOCK_EX);
 
-        $yesterday_log = @file_get_contents($dir . $filename);
+        $yesterdayLog = @file_get_contents($fullFileName);
 
-        $total_readers = s2_counter_get_total_readers($yesterday_log);
+        $totalReaders = s2_counter_get_total_readers($yesterdayLog);
 
-        s2_counter_append_file($dir . $filename . '.log', date('Y-m-d', time() - 86400) . '^' . $total_readers . "\n");
+        s2_counter_append_file($fullFileName . '.log', date('Y-m-d', time() - 86400) . '^' . $totalReaders . "\n");
 
-        ftruncate($f_day_info, 0);
-        fwrite($f_day_info, time() . '^' . $client_ip . '^' . $user_agent . "\n");
-        fflush($f_day_info);
-        fflush($f_day_info);
+        ftruncate($fileDayInfo, 0);
+        fwrite($fileDayInfo, time() . '^' . $clientIp . '^' . $userAgent . "\n");
+        fflush($fileDayInfo);
+        fflush($fileDayInfo);
 
-        flock($f_day_info, LOCK_UN);
-        fclose($f_day_info);
+        flock($fileDayInfo, LOCK_UN);
+        fclose($fileDayInfo);
     }
 
 }

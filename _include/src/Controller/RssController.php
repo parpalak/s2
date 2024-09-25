@@ -13,6 +13,7 @@ namespace S2\Cms\Controller;
 
 use S2\Cms\Controller\Rss\FeedItemRenderEvent;
 use S2\Cms\Controller\Rss\FeedRenderEvent;
+use S2\Cms\Controller\Rss\RssHitEvent;
 use S2\Cms\Controller\Rss\RssStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Model\UrlBuilder;
@@ -36,7 +37,7 @@ readonly class RssController implements ControllerInterface
 
     public function handle(Request $request): Response
     {
-        ($hook = s2_hook('pr_render_start')) ? eval($hook) : null;
+        $this->eventDispatcher->dispatch(new RssHitEvent($request, $this->rssStrategy));
 
         $modifiedSince   = $request->headers->get('If-Modified-Since');
         $lastRequestTime = $modifiedSince !== null ? strtotime($modifiedSince) : 0;
