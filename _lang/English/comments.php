@@ -64,6 +64,6 @@ of the comment will receive your answer.',
 	'question'                 => 'You gave the wrong answer to the question. Try again.',
 	'email'                    => 'Invalid e-mail. Please enter the correct e-mail, and the author of the site will contact you if it is needed. If you clear the “Show to other visitors” checkbox, your e-mail will not be shown.',
 	'disabled'                 => 'Sorry, but&nbsp;you cannot send comments&nbsp;to this site at this moment. Try it later.',
-	'no_item'                  => 'Because of an error the destination page cannot be detected. Go to the page you have commented and try again (you can copy and paste the comment text).',
+	'no_item'                  => 'The destination page cannot be detected due to an error. Go to the page you have commented and try again (you can copy and paste the comment text).',
 
 );

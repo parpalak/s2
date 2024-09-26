@@ -38,7 +38,7 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
 
         $article = $this->articleProvider->articleFromPath($path, true);
 
-        if ($article !== null && $article['commented'] === 0) {
+        if ($article === null || $article['commented'] === 0) {
             return null;
         }
         return new TargetDto($article['id'], $article['title']);

@@ -48,10 +48,8 @@ readonly class BlogCommentStrategy implements CommentStrategyInterface
         ]);
 
         $post = $this->dbLayer->fetchAssoc($result);
-        if (\is_array($post)) {
-            return new TargetDto($post['id'], $post['title']);
-        }
-        return null;
+
+        return \is_array($post) ? new TargetDto($post['id'], $post['title']) : null;
     }
 
     /**
