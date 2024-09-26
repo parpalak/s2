@@ -31,7 +31,6 @@ foreach ($images as $image) {
     </a><br />
 	<?php echo trim($descr) ? $descr . '<br />' : '';  ?>
 	<small class="stuff">
-<!--		<a class="url" href="--><?php //echo s2_link($url); ?><!--">--><?php //echo (s2_abs_link($link_escaped)); ?><!--</a>-->
-		<?php if (!empty($time)) echo /*' &mdash; ',*/ s2_date($time); ?>
+		<?php if (!empty($time)) echo s2_date($time); ?>
 	</small>
 </p>

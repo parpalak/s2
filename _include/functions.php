@@ -8,7 +8,6 @@
  */
 
 
-use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayerException;
 
@@ -58,15 +57,6 @@ function s2_link($path = '', $params = []): string
     return $urlBuilder->link($path, $params);
 }
 
-/**
- * @deprecated Use UrlBuilder instead
- */
-function s2_abs_link($path = '', $params = array())
-{
-    /** @var UrlBuilder $urlBuilder */
-    $urlBuilder = Container::get(UrlBuilder::class);
-    return $urlBuilder->absLink($path, $params);
-}
 
 // Creates paging navigation (1  2  3 ... total_pages - 1  total_pages)
 // $url must have the following form http://example.com/page?num=%d
