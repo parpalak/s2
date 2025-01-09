@@ -3,8 +3,8 @@
  * Application class.
  * Handles HTTP requests after building container definitions and registering event listeners.
  *
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace S2\Cms\Framework;
 
 use S2\Cms\Framework\Event\NotFoundEvent;
+use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\Exception\NotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -121,10 +122,17 @@ class Application
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="Generator" content="S2">
     <title>404 Not Found</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+    </style>
 </head>
 <body>
     <h1>404 Not Found</h1>
+    <hr>
     <p>The page you are looking for does not exist.</p>
 </body>
 </html>', Response::HTTP_NOT_FOUND);
@@ -133,6 +141,26 @@ class Application
             if (\extension_loaded('newrelic')) {
                 newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
             }
+        } catch (ConfigurationException $e) {
+            $response = new Response('<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="Generator" content="S2">
+    <title>Error</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+    </style>
+</head>
+<body>
+    <h1>An error was encountered</h1>
+    <hr>
+    <p>'.htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8').'</p>
+</body>
+</html>', Response::HTTP_SERVICE_UNAVAILABLE);
         } finally {
             $requestStack?->pop();
         }

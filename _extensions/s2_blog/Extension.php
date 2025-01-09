@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/licenses/MIT MIT
  * @package   s2_blog
  */
 
@@ -62,7 +62,7 @@ class Extension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
-        $container->set(BlogUrlBuilder::class, function (Container $container) {
+        $container->set(BlogUrlBuilder::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new BlogUrlBuilder(
@@ -72,16 +72,16 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_BLOG_URL'),
             );
         });
-        $container->set('s2_blog_translator', function (Container $container) {
+        $container->set('s2_blog_translator', static function (Container $container) {
             /** @var ExtensibleTranslator $translator */
             $translator = $container->get('translator');
-            $translator->load('s2_blog', function (string $lang) {
+            $translator->attachLoader('s2_blog', static function (string $lang) {
                 return require ($dir = __DIR__ . '/lang/') . (file_exists($dir . $lang . '.php') ? $lang : 'English') . '.php';
             });
 
             return $translator;
         });
-        $container->set(CalendarBuilder::class, function (Container $container) {
+        $container->set(CalendarBuilder::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new CalendarBuilder(
@@ -91,7 +91,7 @@ class Extension implements ExtensionInterface
                 (int)$provider->get('S2_START_YEAR'),
             );
         });
-        $container->set(BlogPlaceholderProvider::class, function (Container $container) {
+        $container->set(BlogPlaceholderProvider::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new BlogPlaceholderProvider(
@@ -105,7 +105,7 @@ class Extension implements ExtensionInterface
                 $container->getParameter('url_prefix'),
             );
         });
-        $container->set(MainPageController::class, function (Container $container) {
+        $container->set(MainPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new MainPageController(
@@ -122,7 +122,7 @@ class Extension implements ExtensionInterface
                 (int)$provider->get('S2_MAX_ITEMS')
             );
         });
-        $container->set(DayPageController::class, function (Container $container) {
+        $container->set(DayPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new DayPageController(
@@ -138,7 +138,7 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
-        $container->set(MonthPageController::class, function (Container $container) {
+        $container->set(MonthPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new MonthPageController(
@@ -155,7 +155,7 @@ class Extension implements ExtensionInterface
                 (int)$provider->get('S2_START_YEAR'),
             );
         });
-        $container->set(YearPageController::class, function (Container $container) {
+        $container->set(YearPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new YearPageController(
@@ -172,7 +172,7 @@ class Extension implements ExtensionInterface
                 (int)$provider->get('S2_START_YEAR'),
             );
         });
-        $container->set(PostPageController::class, function (Container $container) {
+        $container->set(PostPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new PostPageController(
@@ -190,7 +190,7 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_SHOW_COMMENTS') === '1',
             );
         });
-        $container->set(TagsPageController::class, function (Container $container) {
+        $container->set(TagsPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new TagsPageController(
@@ -206,7 +206,7 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
-        $container->set(TagPageController::class, function (Container $container) {
+        $container->set(TagPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new TagPageController(
@@ -223,7 +223,7 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_USE_HIERARCHY') === '1',
             );
         });
-        $container->set(FavoritePageController::class, function (Container $container) {
+        $container->set(FavoritePageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new FavoritePageController(
@@ -239,7 +239,7 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
-        $container->set(BlogRssStrategy::class, function (Container $container) {
+        $container->set(BlogRssStrategy::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new BlogRssStrategy(
@@ -250,7 +250,7 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_BLOG_TITLE'),
             );
         });
-        $container->set('s2_blog.rss_controller', function (Container $container) {
+        $container->set('s2_blog.rss_controller', static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new RssController(
@@ -263,7 +263,7 @@ class Extension implements ExtensionInterface
                 $provider->get('S2_WEBMASTER'),
             );
         });
-        $container->set(Sitemap::class, function (Container $container) {
+        $container->set(Sitemap::class, static function (Container $container) {
             return new Sitemap(
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
@@ -272,13 +272,13 @@ class Extension implements ExtensionInterface
             );
         });
 
-        $container->set(BlogCommentStrategy::class, function (Container $container) {
+        $container->set(BlogCommentStrategy::class, static function (Container $container) {
             return new BlogCommentStrategy(
                 $container->get(DbLayer::class),
                 $container->get(BlogCommentNotifier::class),
             );
         }, [CommentStrategyInterface::class]);
-        $container->set('s2_blog.comment_controller', function (Container $container) {
+        $container->set('s2_blog.comment_controller', static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new CommentController(
@@ -296,14 +296,14 @@ class Extension implements ExtensionInterface
             );
         });
 
-        $container->set(PostProvider::class, function (Container $container) {
+        $container->set(PostProvider::class, static function (Container $container) {
             return new PostProvider(
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
             );
         });
 
-        $container->set(BlogCommentNotifier::class, function (Container $container) {
+        $container->set(BlogCommentNotifier::class, static function (Container $container) {
             return new BlogCommentNotifier(
                 $container->get(DbLayer::class),
                 $container->get(UrlBuilder::class),
@@ -312,7 +312,7 @@ class Extension implements ExtensionInterface
             );
         });
 
-        $container->set(PostIndexer::class, function (Container $container) {
+        $container->set(PostIndexer::class, static function (Container $container) {
             return new PostIndexer(
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
@@ -322,7 +322,7 @@ class Extension implements ExtensionInterface
             );
         }, [QueueHandlerInterface::class, BulkIndexingProviderInterface::class]);
 
-        $container->set(TagsSearchProvider::class, function (Container $container) {
+        $container->set(TagsSearchProvider::class, static function (Container $container) {
             return new TagsSearchProvider(
                 $container->get(DbLayer::class),
                 $container->get(SimilarWordsDetector::class),

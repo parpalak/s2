@@ -18,7 +18,7 @@
 </head>
 <body>
 <div class="container">
-    <h1><?php echo Lang::get('Error encountered') ?: 'An error was encountered'; ?></h1>
+    <h1>An error was encountered</h1>
 
     <p>
         Please refer to logs to find out the cause.

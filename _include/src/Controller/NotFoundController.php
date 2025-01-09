@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -15,12 +15,14 @@ use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class NotFoundController implements ControllerInterface
 {
     public function __construct(
         private ArticleProvider      $articleProvider,
         private UrlBuilder           $urlBuilder,
+        private TranslatorInterface  $translator,
         private HtmlTemplateProvider $htmlTemplateProvider,
     ) {
     }
@@ -31,9 +33,9 @@ readonly class NotFoundController implements ControllerInterface
 
         $template
             ->markAsNotFound()
-            ->putInPlaceholder('head_title', \Lang::get('Error 404'))
-            ->putInPlaceholder('title', '<h1 class="error404-header">' . \Lang::get('Error 404') . '</h1>')
-            ->putInPlaceholder('text', sprintf(\Lang::get('Error 404 text'), $this->urlBuilder->link('/')))
+            ->putInPlaceholder('head_title', $this->translator->trans('Error 404'))
+            ->putInPlaceholder('title', '<h1 class="error404-header">' . $this->translator->trans('Error 404') . '</h1>')
+            ->putInPlaceholder('text', sprintf($this->translator->trans('Error 404 text'), $this->urlBuilder->link('/')))
             ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
         ;
 

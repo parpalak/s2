@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   s2_search
  */
@@ -45,7 +45,7 @@ class Extension implements ExtensionInterface
     public function buildContainer(Container $container): void
     {
         // Note: Indexing is performed in the QueueConsumer, so it cannot be moved to AdminExtension right now.
-        $container->set(Indexer::class, function (Container $container) {
+        $container->set(Indexer::class, static function (Container $container) {
             return new Indexer(
                 $container->get(PdoStorage::class),
                 $container->get(StemmerInterface::class),
@@ -54,7 +54,7 @@ class Extension implements ExtensionInterface
             );
         });
 
-        $container->set(ArticleIndexer::class, function (Container $container) {
+        $container->set(ArticleIndexer::class, static function (Container $container) {
             return new ArticleIndexer(
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
@@ -64,30 +64,30 @@ class Extension implements ExtensionInterface
             );
         }, [QueueHandlerInterface::class]);
 
-        $container->set(ExtractorInterface::class, function (Container $container) {
+        $container->set(ExtractorInterface::class, static function (Container $container) {
             return new CustomExtractor(
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->get(LoggerInterface::class),
             );
         });
 
-        $container->set('s2_search_translator', function (Container $container) {
+        $container->set('s2_search_translator', static function (Container $container) {
             /** @var ExtensibleTranslator $translator */
             $translator = $container->get('translator');
-            $translator->load('s2_search', function (string $lang) {
+            $translator->attachLoader('s2_search', static function (string $lang) {
                 return require ($dir = __DIR__ . '/lang/') . (file_exists($dir . $lang . '.php') ? $lang : 'English') . '.php';
             });
 
             return $translator;
         });
 
-        $container->set(SimilarWordsDetector::class, function (Container $container) {
+        $container->set(SimilarWordsDetector::class, static function (Container $container) {
             return new SimilarWordsDetector(
                 $container->get(StemmerInterface::class),
             );
         });
 
-        $container->set(SearchPageController::class, function (Container $container) {
+        $container->set(SearchPageController::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new SearchPageController(

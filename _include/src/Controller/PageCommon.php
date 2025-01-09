@@ -2,8 +2,8 @@
 /**
  * Displays a page stored in DB.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 readonly class PageCommon implements ControllerInterface
@@ -34,6 +35,7 @@ readonly class PageCommon implements ControllerInterface
         private ArticleProvider          $articleProvider,
         private EventDispatcherInterface $eventDispatcher,
         private UrlBuilder               $urlBuilder,
+        private TranslatorInterface      $translator,
         private HtmlTemplateProvider     $htmlTemplateProvider,
         private RecommendationProvider   $recommendationProvider,
         private Viewer                   $viewer,
@@ -102,7 +104,7 @@ readonly class PageCommon implements ControllerInterface
                     throw new NotFoundException();
                 }
                 if ($found_node_num > 1) {
-                    error(\Lang::get('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . s2_htmlencode($request_array[$i]) . '")' : ''));
+                    error($this->translator->trans('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . s2_htmlencode($request_array[$i]) . '")' : ''));
                 }
 
                 $parent_id = $cur_node['id'];
@@ -152,7 +154,7 @@ readonly class PageCommon implements ControllerInterface
         }
 
         if ($this->dbLayer->fetchAssoc($result)) {
-            error(\Lang::get('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . $request_array[$i] . '")' : ''));
+            error($this->translator->trans('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . $request_array[$i] . '")' : ''));
         }
 
         if ($page['template']) {
@@ -166,11 +168,11 @@ readonly class PageCommon implements ControllerInterface
                     'title' => $page['title'],
                 ];
 
-                error(sprintf(\Lang::get('Error no template'), implode('<br />', array_map(static function ($a) {
+                error(sprintf($this->translator->trans('Error no template'), implode('<br />', array_map(static function ($a) {
                     return '<a href="' . $a['link'] . '">' . s2_htmlencode($a['title']) . '</a>';
                 }, $bread_crumbs))));
             } else {
-                error(\Lang::get('Error no template flat'));
+                error($this->translator->trans('Error no template flat'));
             }
         }
 
@@ -282,7 +284,7 @@ readonly class PageCommon implements ControllerInterface
             if (\count($subsections) > 0) {
                 // There are subsections in the section
                 $template->putInPlaceholder('menu_subsections', $this->viewer->render('menu_block', [
-                    'title' => \Lang::get('Subsections'),
+                    'title' => $this->translator->trans('Subsections'),
                     'menu'  => $subsections,
                     'class' => 'menu_subsections',
                 ]));
@@ -296,7 +298,7 @@ readonly class PageCommon implements ControllerInterface
             if (\count($subarticles) > 0) {
                 // There are articles in the section
                 $template->putInPlaceholder('menu_children', $this->viewer->render('menu_block', [
-                    'title' => \Lang::get('In this section'),
+                    'title' => $this->translator->trans('In this section'),
                     'menu'  => $subarticles,
                     'class' => 'menu_children',
                 ]));
@@ -393,7 +395,7 @@ readonly class PageCommon implements ControllerInterface
 
             if (\count($bread_crumbs) > 1) {
                 $template->putInPlaceholder('menu_siblings', $this->viewer->render('menu_block', [
-                    'title' => sprintf(\Lang::get('More in this section'), '<a href="' . $this->urlBuilder->link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'),
+                    'title' => sprintf($this->translator->trans('More in this section'), '<a href="' . $this->urlBuilder->link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'),
                     'menu'  => $menu_articles,
                     'class' => 'menu_siblings',
                 ]));
@@ -561,7 +563,7 @@ readonly class PageCommon implements ControllerInterface
         $output = [];
         foreach ($art_by_tags as $tag_id => $articles) {
             $output[] = $this->viewer->render('menu_block', array(
-                'title' => sprintf(\Lang::get('With this tag'), '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
+                'title' => sprintf($this->translator->trans('With this tag'), '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
                 'menu'  => $articles,
                 'class' => 'article_tags',
             ));
@@ -599,7 +601,7 @@ readonly class PageCommon implements ControllerInterface
         }
 
         return $this->viewer->render('tags', [
-            'title' => \Lang::get('Tags'),
+            'title' => $this->translator->trans('Tags'),
             'tags'  => $tags,
         ]);
     }

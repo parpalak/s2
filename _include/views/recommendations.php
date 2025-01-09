@@ -1,5 +1,6 @@
 <?php
 /**
+ * @var callable $trans
  * @var array  $raw
  * @var array  $log
  * @var ?array $content
@@ -77,7 +78,7 @@ foreach ($content as $recommendation) {
 }
 
 ?>
-<h2 class="recommendation-title" id="recommendations"><?php echo Lang::get('Read next'); ?></h2>
+<h2 class="recommendation-title" id="recommendations"><?php echo $trans('Read next'); ?></h2>
 <!-- <?php echo end($log); ?> -->
 <div class="recommendations" style="<?php if ($maxLine > 5) {echo 'grid-template-columns: repeat(' . ($maxLine - 1) . ', 1fr);'; } ?>">
     <?php foreach ($content as $recommendation) : ?>

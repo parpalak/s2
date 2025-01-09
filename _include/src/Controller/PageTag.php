@@ -2,9 +2,9 @@
 /**
  * Displays the list of pages and excerpts for a specified tag.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -21,6 +21,7 @@ use S2\Cms\Template\Viewer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class PageTag implements ControllerInterface
 {
@@ -28,6 +29,7 @@ readonly class PageTag implements ControllerInterface
         private DbLayer              $dbLayer,
         private ArticleProvider      $articleProvider,
         private UrlBuilder           $urlBuilder,
+        private TranslatorInterface  $translator,
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer,
         private string               $tagsUrlFragment,
@@ -142,7 +144,7 @@ readonly class PageTag implements ControllerInterface
 
         $template
             ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
-            ->addBreadCrumb(\Lang::get('Tags'), $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/'))
+            ->addBreadCrumb($this->translator->trans('Tags'), $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/'))
             ->addBreadCrumb($tagName)
             ->putInPlaceholder('title', $this->viewer->render('tag_title', ['title' => $tagName]))
             ->putInPlaceholder('date', '')

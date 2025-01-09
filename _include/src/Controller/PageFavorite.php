@@ -2,9 +2,9 @@
 /**
  * Displays the list of favorite pages and excerpts.
  *
- * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -21,6 +21,7 @@ use S2\Cms\Template\Viewer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class PageFavorite implements ControllerInterface
 {
@@ -28,6 +29,7 @@ readonly class PageFavorite implements ControllerInterface
         private DbLayer              $dbLayer,
         private ArticleProvider      $articleProvider,
         private UrlBuilder           $urlBuilder,
+        private TranslatorInterface  $translator,
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer
     ) {
@@ -122,8 +124,8 @@ readonly class PageFavorite implements ControllerInterface
 
         $template
             ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
-            ->addBreadCrumb(\Lang::get('Favorite'))
-            ->putInPlaceholder('title', \Lang::get('Favorite'))
+            ->addBreadCrumb($this->translator->trans('Favorite'))
+            ->putInPlaceholder('title', $this->translator->trans('Favorite'))
             ->putInPlaceholder('date', '')
             ->putInPlaceholder('text', $this->viewer->render('list_text', [
                 'articles' => $article_text,

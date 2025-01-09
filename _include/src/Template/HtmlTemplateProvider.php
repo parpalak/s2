@@ -3,7 +3,7 @@
  * Provides the content of templates.
  * Replaces styles and scripts placeholders.
  *
- * @copyright 2009-2024 Roman Parpalak
+ * @copyright 2009-2025 Roman Parpalak
  * @license   MIT
  * @package   S2
  */
@@ -20,22 +20,22 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class HtmlTemplateProvider
+readonly class HtmlTemplateProvider
 {
-    private readonly string $styleName;
+    private string $styleName;
 
     public function __construct(
-        private readonly RequestStack             $requestStack,
-        private readonly UrlBuilder               $urlBuilder,
-        private readonly TranslatorInterface      $translator,
-        private readonly Viewer                   $viewer,
-        private readonly EventDispatcherInterface $dispatcher,
-        private readonly DynamicConfigProvider    $dynamicConfigProvider,
-        private readonly bool                     $debug,
-        private readonly bool                     $debugView,
-        private readonly string                   $rootDir,
-        private readonly string                   $cacheDir,
-        private readonly string                   $basePath,
+        private RequestStack             $requestStack,
+        private UrlBuilder               $urlBuilder,
+        private TranslatorInterface      $translator,
+        private Viewer                   $viewer,
+        private EventDispatcherInterface $dispatcher,
+        private DynamicConfigProvider    $dynamicConfigProvider,
+        private bool                     $debug,
+        private bool                     $debugView,
+        private string                   $rootDir,
+        private string                   $cacheDir,
+        private string                   $basePath,
     ) {
         $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
     }
@@ -158,6 +158,6 @@ class HtmlTemplateProvider
             return $path;
         }
 
-        throw new \RuntimeException(sprintf(\Lang::get('Template not found'), $path));
+        throw new \RuntimeException(sprintf($this->translator->trans('Template not found'), $path));
     }
 }

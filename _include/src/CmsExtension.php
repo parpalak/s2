@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -25,6 +25,7 @@ use S2\Cms\Controller\RssController;
 use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Event\NotFoundEvent;
+use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Http\RedirectDetector;
@@ -66,6 +67,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CmsExtension implements ExtensionInterface
 {
@@ -167,21 +169,26 @@ class CmsExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             $language = $provider->get('S2_LANGUAGE');
 
-            // TODO move mapping somewhere
-            $locale = match ($language) {
-                'Russian' => 'ru',
-                'English' => 'en',
-                default => throw new \LogicException('Unsupported language yet'),
-            };
+            $translator = new ExtensibleTranslator($language);
 
-            $translations = require __DIR__ . '/../../_lang/' . $language . '/common.php';
+            $translator->attachLoader('common', function (string $language, ExtensibleTranslator $translator) {
+                $fileName = __DIR__ . '/../../_lang/' . $language . '/common.php';
+                if (!\file_exists($fileName)) {
+                    throw new ConfigurationException(sprintf('The language pack "%s" you have chosen seems to be corrupt. Please check that file "common.php" exists.', $language));
+                }
+                $translations = require $fileName;
+                if (!\is_array($translations)) {
+                    throw new ConfigurationException(sprintf('The language pack "%s" you have chosen seems to be corrupt. Please check that file "common.php" has the correct format.', $language));
+                }
+                $locale = $translations['Lang Code'] ?? 'en';
 
-            return new ExtensibleTranslator(
-                $translations,
-                $language,
-                $locale,
-            );
-        });
+                $translator->setLocale($locale);
+
+                return $translations;
+            });
+
+            return $translator;
+        }, [StatefulServiceInterface::class]);
 
         $container->set(QueuePublisher::class, function (Container $container) {
             return new QueuePublisher(
@@ -299,6 +306,7 @@ class CmsExtension implements ExtensionInterface
             return new NotFoundController(
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
             );
         });
@@ -308,6 +316,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
             );
@@ -318,6 +327,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(TagsProvider::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
             );
@@ -330,6 +340,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
@@ -344,6 +355,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(ArticleProvider::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->get(UrlBuilder::class),
+                $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(RecommendationProvider::class),
                 $container->get(Viewer::class),
@@ -374,7 +386,7 @@ class CmsExtension implements ExtensionInterface
         $container->set('comments_translator', function (Container $container) {
             /** @var ExtensibleTranslator $translator */
             $translator = $container->get('translator');
-            $translator->load('comments', function (string $lang) {
+            $translator->attachLoader('comments', function (string $lang) {
                 return require __DIR__ . '/../../_lang/' . $lang . '/comments.php';
             });
 
@@ -525,8 +537,10 @@ class CmsExtension implements ExtensionInterface
                 if (\count($lastComments) > 0) {
                     /** @var Viewer $viewer */
                     $viewer = $container->get(Viewer::class);
+                    /** @var TranslatorInterface $translator */
+                    $translator = $container->get('translator');
                     $template->registerPlaceholder('<!-- s2_last_comments -->', $viewer->render('menu_comments', [
-                        'title' => \Lang::get('Last comments'),
+                        'title' => $translator->trans('Last comments'),
                         'menu'  => $lastComments,
                     ]));
                 } else {
@@ -542,8 +556,10 @@ class CmsExtension implements ExtensionInterface
                 if (\count($lastDiscussions) > 0) {
                     /** @var Viewer $viewer */
                     $viewer = $container->get(Viewer::class);
+                    /** @var TranslatorInterface $translator */
+                    $translator = $container->get('translator');
                     $template->registerPlaceholder('<!-- s2_last_discussions -->', $viewer->render('menu_block', [
-                        'title' => \Lang::get('Last discussions'),
+                        'title' => $translator->trans('Last discussions'),
                         'menu'  => $lastDiscussions,
                     ]));
                 } else {

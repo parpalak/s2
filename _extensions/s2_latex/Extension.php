@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_latex
  */
 
@@ -32,7 +32,7 @@ class Extension implements ExtensionInterface
         $container->set('s2_latex_translator', static function (Container $container) {
             /** @var ExtensibleTranslator $translator */
             $translator = $container->get('translator');
-            $translator->load('s2_latex', static function (string $lang) {
+            $translator->attachLoader('s2_latex', static function (string $lang) {
                 return require ($dir = __DIR__ . '/lang/') . (file_exists($dir . $lang . '.php') ? $lang : 'English') . '.php';
             });
 

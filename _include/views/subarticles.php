@@ -2,23 +2,23 @@
 /**
  * Content of <!-- s2_subarticles --> placeholder
  *
- * @var string $sections
- * @var string $articles
+ * @var callable $trans
+ * @var string   $sections
+ * @var string   $articles
  */
 
+if (!empty($sections)) {
+    if ($trans('Subsections')) {
+        echo '<h2 class="subsections">' . $trans('Subsections') . '</h2>' . "\n";
+    }
 
-if (!empty($sections))
-{
-	if (Lang::get('Subsections'));
-		echo '<h2 class="subsections">' . Lang::get('Subsections') . '</h2>' . "\n";
-
-	echo $sections;
+    echo $sections;
 }
 
-if (!empty($articles))
-{
-	if (Lang::get('Read in this section'))
-		echo '<h2 class="articles">' . Lang::get('Read in this section') . '</h2>' . "\n";
+if (!empty($articles)) {
+    if ($trans('Read in this section')) {
+        echo '<h2 class="articles">' . $trans('Read in this section') . '</h2>' . "\n";
+    }
 
-	echo $articles;
+    echo $articles;
 }

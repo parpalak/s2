@@ -2,6 +2,7 @@
 /**
  * An item of <!-- s2_subarticles --> content
  *
+ * @var callable $trans
  * @var string $parent_link
  * @var string $parent_title
  * @var string $link
@@ -15,9 +16,9 @@ $class = array('subsection');
 if (!empty($favorite))
 {
 	if ($favorite != 2)
-        $postfix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.Lang::get('Favorite').'">★</a>';
+        $postfix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.$trans('Favorite').'">★</a>';
 	else
-        $postfix = '<span class="favorite-star" title="'.Lang::get('Favorite').'">★</span>';
+        $postfix = '<span class="favorite-star" title="'.$trans('Favorite').'">★</span>';
 	$class[] = 'favorite-item';
 }
 
