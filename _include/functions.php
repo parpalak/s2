@@ -281,8 +281,7 @@ function error()
         define('S2_COMPRESS', 0);
     }
 
-    $translator = \Container::isSet() ? \Container::get('translator') : null;
-    $title = $translator?->trans('Error encountered') ?? 'An error was encountered';
+    $title = 'An error was encountered';
 
     // Empty all output buffers and stop buffering
     while (@ob_end_clean()) ;

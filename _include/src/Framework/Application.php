@@ -142,6 +142,9 @@ class Application
                 newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
             }
         } catch (ConfigurationException $e) {
+            // $e->getMessage() may contain HTML markup so it's not escaped here
+            $message  = $e->getMessage();
+            $title    = $e->title ?? 'An error was encountered';
             $response = new Response('<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -156,9 +159,9 @@ class Application
     </style>
 </head>
 <body>
-    <h1>An error was encountered</h1>
+    <h1>' . $title . '</h1>
     <hr>
-    <p>'.htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8').'</p>
+    <p>' . $message . '</p>
 </body>
 </html>', Response::HTTP_SERVICE_UNAVAILABLE);
         } finally {

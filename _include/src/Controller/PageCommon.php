@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace S2\Cms\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
@@ -104,7 +105,10 @@ readonly class PageCommon implements ControllerInterface
                     throw new NotFoundException();
                 }
                 if ($found_node_num > 1) {
-                    error($this->translator->trans('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . s2_htmlencode($request_array[$i]) . '")' : ''));
+                    throw new ConfigurationException(
+                        $this->translator->trans('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . s2_htmlencode($request_array[$i]) . '")' : ''),
+                        $this->translator->trans('Error encountered')
+                    );
                 }
 
                 $parent_id = $cur_node['id'];
@@ -154,7 +158,10 @@ readonly class PageCommon implements ControllerInterface
         }
 
         if ($this->dbLayer->fetchAssoc($result)) {
-            error($this->translator->trans('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . $request_array[$i] . '")' : ''));
+            throw new ConfigurationException(
+                $this->translator->trans('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . s2_htmlencode($request_array[$i]) . '")' : ''),
+                $this->translator->trans('Error encountered')
+            );
         }
 
         if ($page['template']) {
@@ -168,12 +175,17 @@ readonly class PageCommon implements ControllerInterface
                     'title' => $page['title'],
                 ];
 
-                error(sprintf($this->translator->trans('Error no template'), implode('<br />', array_map(static function ($a) {
+                $errorMessage = sprintf($this->translator->trans('Error no template'), implode('<br />', array_map(static function ($a) {
                     return '<a href="' . $a['link'] . '">' . s2_htmlencode($a['title']) . '</a>';
-                }, $bread_crumbs))));
+                }, $bread_crumbs)));
             } else {
-                error($this->translator->trans('Error no template flat'));
+                $errorMessage = $this->translator->trans('Error no template flat');
             }
+
+            throw new ConfigurationException(
+                $errorMessage,
+                $this->translator->trans('Error encountered')
+            );
         }
 
         if ($this->useHierarchy && $parent_num && $page['children_exist'] != $was_end_slash) {
