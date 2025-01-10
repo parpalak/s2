@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -67,7 +67,7 @@ readonly class CalendarBuilder
         }
 
         // Header
-        $monthName = \Lang::month($month);
+        $monthName = $this->month($month);
         if ($day === null) {
             // One of 12 year tables
             if ($startTime < time()) {
@@ -80,10 +80,10 @@ readonly class CalendarBuilder
             }
 
             // Links in the header
-            $next_month = $endTime < time() ? '<a class="nav_mon" href="' . $this->blogUrlBuilder->monthFromTimestamp($endTime) . '" title="' . \Lang::month(date('m', $endTime)) . date(', Y', $endTime) . '">&rarr;</a>' : '&rarr;';
+            $next_month = $endTime < time() ? '<a class="nav_mon" href="' . $this->blogUrlBuilder->monthFromTimestamp($endTime) . '" title="' . $this->month((int)date('m', $endTime)) . date(', Y', $endTime) . '">&rarr;</a>' : '&rarr;';
 
             $prevTime  = mktime(0, 0, 0, $month - 1, 1, $year);
-            $prevMonth = $prevTime >= mktime(0, 0, 0, 1, 1, $this->startYear) ? '<a class="nav_mon" href="' . $this->blogUrlBuilder->monthFromTimestamp($prevTime) . '" title="' . \Lang::month(date('m', $prevTime)) . date(', Y', $prevTime) . '">&larr;</a>' : '&larr;';
+            $prevMonth = $prevTime >= mktime(0, 0, 0, 1, 1, $this->startYear) ? '<a class="nav_mon" href="' . $this->blogUrlBuilder->monthFromTimestamp($prevTime) . '" title="' . $this->month((int)date('m', $prevTime)) . date(', Y', $prevTime) . '">&larr;</a>' : '&larr;';
 
             $header = '<tr class="nav"><th>' . $prevMonth . '</th><th align="center" colspan="5">'
                 . $monthName . ', <a href="' . $this->blogUrlBuilder->year($year) . '">' . $year . '</a></th><th>' . $next_month . '</th></tr>';
@@ -142,6 +142,15 @@ readonly class CalendarBuilder
         return $output;
     }
 
+    public function month(int $month): string
+    {
+        if ($month < 1 || $month > 12) {
+            throw new \InvalidArgumentException('Month must be between 1 and 12');
+        }
+        $months = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+
+        return $this->translator->trans($months[$month - 1]);
+    }
 
     private function isWeekend(int $n): bool
     {

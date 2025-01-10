@@ -1,6 +1,7 @@
 <?php
 /**
  * @var callable $trans
+ * @var callable $dateAndTime
  * @var array  $raw
  * @var array  $log
  * @var ?array $content
@@ -97,7 +98,7 @@ foreach ($content as $recommendation) {
             </a>
             <div class="recommendation-snippet"><?= $recommendation['snippet'] ?></div>
             <div class="recommendation-date"
-                 title="<?php echo $recommendation['date'] ? s2_date_time($recommendation['date']->getTimestamp()) : ''; ?>">
+                 title="<?php echo $recommendation['date'] ? $dateAndTime($recommendation['date']->getTimestamp()) : ''; ?>">
                 <?= $recommendation['date'] ? $recommendation['date']->format('Y') : '' ?>
             </div>
         </div>

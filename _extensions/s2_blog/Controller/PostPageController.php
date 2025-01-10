@@ -194,7 +194,7 @@ class PostPageController extends BlogController
             $template->putInPlaceholder('comments', $this->get_comments($post_id));
         }
 
-        $row['time']             = s2_date_time($row['create_time']);
+        $row['time']             = $this->viewer->dateAndTime($row['create_time']);
         $row['commented']        = 0; // for template
         $row['tags']             = $tags;
         $row['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();

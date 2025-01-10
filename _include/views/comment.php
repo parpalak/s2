@@ -1,6 +1,7 @@
 <?php
 /**
  * @var callable $trans
+ * @var callable $dateAndTime
  * @var string $text
  * @var string $time
  * @var string $nick
@@ -16,8 +17,8 @@ $link = !empty($i) ? '<a name="'.$i.'" href="#'.$i.'">#'.$i.'</a>. ' : '';
 
 ?>
 <div class="reply_info<?php echo (!empty($good) ? ' good' : ''); ?>">
-	<?php echo $link, sprintf($trans('Comment info format'), s2_date_time($time), $name); ?>
+	<?php echo $link, sprintf($trans('Comment info format'), $dateAndTime($time), $name); ?>
 </div>
 <div class="reply<?php echo (!empty($good) ? ' good' : ''); ?>">
-	<?php echo s2_bbcode_to_html(s2_htmlencode($text)); ?>
+	<?php echo s2_bbcode_to_html(s2_htmlencode($text), $trans('Wrote')); ?>
 </div>

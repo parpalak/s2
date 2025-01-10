@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -11,13 +11,15 @@ namespace s2_extensions\s2_blog\Model;
 
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 
 readonly class PostProvider
 {
     public function __construct(
         private DbLayer        $dbLayer,
-        private BlogUrlBuilder $blogUrlBuilder
+        private BlogUrlBuilder $blogUrlBuilder,
+        private Viewer         $viewer,
     ) {
     }
 
@@ -105,7 +107,7 @@ readonly class PostProvider
             $link               = $this->blogUrlBuilder->postFromTimestamp($post['create_time'], $post['url']);
             $post['title_link'] = $link;
             $post['link']       = $link;
-            $post['time']       = s2_date_time($post['create_time']);
+            $post['time']       = $this->viewer->dateAndTime($post['create_time']);
         }
 
         return $posts;

@@ -149,20 +149,55 @@ function s2_read_lang_dir(): array
 
     return $result;
 }
-// TODO duplicate of DynamicConfigFormBuilder::readLanguages()
-// The only problem is that we do not know db params at this point to boot the kernel.
-// Figure out how not to use the kernel
-$languages = s2_read_lang_dir();
 
-$language = isset($_GET['lang']) ? $_GET['lang'] : (isset($_POST['req_language']) ? trim($_POST['req_language']) : get_preferred_lang($languages));
+$emptyApp = new Application();
+$emptyApp->addExtension(new CmsExtension());
+$emptyApp->addExtension(new \S2\Cms\Admin\AdminExtension());
+$emptyApp->addExtension(new \S2\Cms\Install\InstallExtension());
+$emptyApp->boot((static function (): array
+{
+    $result = [
+        'root_dir'      => S2_ROOT,
+        'cache_dir'     => S2_CACHE_DIR,
+        'disable_cache' => false,
+        'log_dir'       => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+        'base_url'      => defined('S2_BASE_URL') ? S2_BASE_URL : null,
+        'base_path'     => defined('S2_PATH') ? S2_PATH : null,
+        'debug'         => defined('S2_DEBUG'),
+        'debug_view'    => defined('S2_DEBUG_VIEW'),
+        'redirect_map'  => [],
+    ];
+
+    foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {
+        $result[$globalVarName] = $GLOBALS[$globalVarName] ?? null;
+    }
+
+    return $result;
+})());
+
+
+/** @var \S2\Cms\Admin\ResourceProvider $resourceProvider */
+$resourceProvider = $emptyApp->container->get(\S2\Cms\Admin\ResourceProvider::class);
+$languages = $resourceProvider->readLanguages();
+
+$language = $_GET['lang'] ?? (isset($_POST['req_language']) ? trim($_POST['req_language']) : get_preferred_lang($languages));
 $language = preg_replace('#[\.\\\/]#', '', $language);
 if (!file_exists(S2_ROOT.'_lang/'.$language.'/common.php'))
 	exit('The language pack you have chosen doesn\'t seem to exist or is corrupt. Please recheck and try again.');
 
+/** @var \S2\Cms\Config\InstallationConfigProvider $dynamicConfigProvider */
+$dynamicConfigProvider = $emptyApp->container->get(\S2\Cms\Config\DynamicConfigProvider::class);
+$dynamicConfigProvider->setCallback(static function (string $paramName) use ($language) {
+    return match ($paramName) {
+        'S2_LANGUAGE' => $language,
+        default => throw new LogicException(sprintf('Parameter "%s" is not available during installation.', $paramName))
+    };
+});
+
 // Load the language files
-$lang_common = require S2_ROOT.'_lang/'.$language.'/common.php';
-Lang::load('common', $lang_common);
-require S2_ROOT.'_admin/lang/'.Lang::admin_code().'/install.php';
+/** @var \Symfony\Contracts\Translation\TranslatorInterface $translator */
+$translator = $emptyApp->container->get('translator');
+require S2_ROOT . '_admin/lang/' . $translator->getLocale() . '/install.php';
 
 if (isset($_POST['generate_config']))
 {

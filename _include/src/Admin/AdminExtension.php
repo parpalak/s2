@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -140,6 +140,12 @@ class AdminExtension implements ExtensionInterface
             );
         }, [StatefulServiceInterface::class]);
 
+        $container->set(ResourceProvider::class, function (Container $container) {
+            return new ResourceProvider(
+                $container->getParameter('root_dir'),
+            );
+        });
+
         $container->set(DynamicConfigFormBuilder::class, function (Container $container) {
             return new DynamicConfigFormBuilder(
                 $container->get(PermissionChecker::class),
@@ -147,9 +153,9 @@ class AdminExtension implements ExtensionInterface
                 $container->get(TypeTransformer::class),
                 $container->get(FormFactory::class),
                 $container->get(TemplateRenderer::class),
+                $container->get(ResourceProvider::class),
                 $container->get(RequestStack::class),
                 $container->get(SettingStorageInterface::class),
-                $container->getParameter('root_dir'),
                 ...$container->getByTag(DynamicConfigFormExtenderInterface::class),
             );
         });

@@ -42,7 +42,8 @@ class Container implements ContainerInterface
     public function decorate(string $id, callable $decorator): void
     {
         if (!isset($this->bindings[$id])) {
-            // NOTE: ServiceDecorator may accept $factory later via a setter.
+            // NOTE: If this case of primordial decoration of non-existent service is needed,
+            // ServiceDecorator can be refactored to accept $factory later via a setter.
             throw new ServiceNotFoundException(sprintf('Entity "%s" not found in container.', $id));
         }
 

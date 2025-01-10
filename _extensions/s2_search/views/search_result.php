@@ -1,6 +1,7 @@
 <?php
 /**
  * @var callable $thumbnailHtml
+ * @var callable $date
  * @var $title string
  * @var $url string
  * @var $link string
@@ -31,6 +32,6 @@ foreach ($images as $image) {
     </a><br />
 	<?php echo trim($descr) ? $descr . '<br />' : '';  ?>
 	<small class="stuff">
-		<?php if (!empty($time)) echo s2_date($time); ?>
+		<?php if (!empty($time)) echo $date($time); ?>
 	</small>
 </p>

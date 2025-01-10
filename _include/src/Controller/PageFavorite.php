@@ -77,7 +77,7 @@ readonly class PageFavorite implements ControllerInterface
                     'id'       => $row['id'],
                     'title'    => $row['title'],
                     'link'     => $this->urlBuilder->link($url . (S2_USE_HIERARCHY ? '/' : '')),
-                    'date'     => s2_date($row['create_time']),
+                    'date'     => $this->viewer->date($row['create_time']),
                     'excerpt'  => $row['excerpt'],
                     'favorite' => 2,
                 ];
@@ -90,7 +90,7 @@ readonly class PageFavorite implements ControllerInterface
                     'id'       => $row['id'],
                     'title'    => $row['title'],
                     'link'     => $this->urlBuilder->link($url),
-                    'date'     => s2_date($row['create_time']),
+                    'date'     => $this->viewer->date($row['create_time']),
                     'excerpt'  => $row['excerpt'],
                     'favorite' => 2,
                 ];

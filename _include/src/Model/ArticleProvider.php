@@ -191,7 +191,7 @@ readonly class ArticleProvider
         $output = '';
         foreach ($articles as &$item) {
             $parentPath          = $this->useHierarchy ? preg_replace('#/\\K[^/]*$#', '', $item['rel_path']) : '/' . $item['p_url'];
-            $item['date']        = s2_date($item['time']);
+            $item['date']        = $this->viewer->date($item['time']);
             $item['link']        = $this->urlBuilder->link($item['rel_path']);
             $item['parent_link'] = $this->urlBuilder->link($parentPath);
 

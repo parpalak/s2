@@ -69,6 +69,62 @@ class Viewer
         return ob_get_clean();
     }
 
+
+    /**
+     * Puts the date into a string
+     */
+    public function date(int $time): string
+    {
+        if (!$time) {
+            return '';
+        }
+
+        $format = $this->translator->trans('Date format');
+        $date   = date($format, $time);
+        if (str_contains($format, 'F')) {
+            $date = str_replace(date('F', $time), $this->translator->trans(date('F', $time) . ' genitive'), $date);
+        }
+
+        return $date;
+    }
+
+    /**
+     * Puts the date and time into a string
+     */
+    public function dateAndTime(int $time): string
+    {
+        if (!$time) {
+            return '';
+        }
+
+        $format = $this->translator->trans('Time format');
+        $date   = date($format, $time);
+        if (str_contains($format, 'F')) {
+            $date = str_replace(date('F', $time), $this->translator->trans(date('F', $time)), $date);
+        }
+
+        return $date;
+    }
+
+    /**
+     * Outputs integers using current language settings
+     */
+    public function numberFormat(float $number, bool $trailingZeros = false, ?int $decimalCount = null): string
+    {
+        $decimalPoint = $this->translator->trans('Decimal point');
+        $result       = number_format(
+            $number,
+            $decimalCount ?? (int)$this->translator->trans('Decimal count'),
+            $decimalPoint,
+            $this->translator->trans('Thousands separator')
+        );
+        if (!$trailingZeros) {
+            $result = preg_replace('#' . preg_quote($decimalPoint, '#') . '?0*$#', '', $result);
+        }
+
+        return $result;
+    }
+
     /**
      * @throws \JsonException
      */
@@ -114,7 +170,10 @@ class Viewer
 
     private function includeFile(string $_found_file, array $_vars): void
     {
-        $trans = $this->translator->trans(...);
+        $trans        = $this->translator->trans(...);
+        $date         = $this->date(...);
+        $dateAndTime  = $this->dateAndTime(...);
+        $numberFormat = $this->numberFormat(...);
 
         extract($_vars, EXTR_OVERWRITE);
         include $_found_file;

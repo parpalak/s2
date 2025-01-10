@@ -129,7 +129,7 @@ abstract class BlogController implements ControllerInterface
             $link               = $this->blogUrlBuilder->postFromTimestamp((int)$post['create_time'], $post['url']);
             $post['link']       = $link;
             $post['title_link'] = $link;
-            $post['time']       = s2_date_time($post['create_time']);
+            $post['time']       = $this->viewer->dateAndTime($post['create_time']);
             $post['tags']       = $tags[$id] ?? [];
 
             $post['see_also'] = [];

@@ -257,7 +257,7 @@ readonly class PageCommon implements ControllerInterface
                         'id'       => $row['id'],
                         'title'    => $row['title'],
                         'link'     => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url']) . '/'),
-                        'date'     => s2_date($row['create_time']),
+                        'date'     => $this->viewer->date($row['create_time']),
                         'excerpt'  => $row['excerpt'],
                         'favorite' => $row['favorite'],
                     ];
@@ -269,7 +269,7 @@ readonly class PageCommon implements ControllerInterface
                         'id'       => $row['id'],
                         'title'    => $row['title'],
                         'link'     => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url'])),
-                        'date'     => s2_date($row['create_time']),
+                        'date'     => $this->viewer->date($row['create_time']),
                         'excerpt'  => $row['excerpt'],
                         'favorite' => $row['favorite'],
                     );

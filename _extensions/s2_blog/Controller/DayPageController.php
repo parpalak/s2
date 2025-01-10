@@ -44,7 +44,7 @@ class DayPageController extends BlogController
         $template
             ->putInPlaceholder('text', $output)
             ->setLink('up', $this->blogUrlBuilder->monthFromTimestamp($startTime))
-            ->putInPlaceholder('head_title', s2_date($startTime))
+            ->putInPlaceholder('head_title', $this->viewer->date($startTime))
         ;
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));

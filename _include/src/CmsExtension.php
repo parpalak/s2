@@ -180,7 +180,7 @@ class CmsExtension implements ExtensionInterface
                 if (!\is_array($translations)) {
                     throw new ConfigurationException(sprintf('The language pack "%s" you have chosen seems to be corrupt. Please check that file "common.php" has the correct format.', $language));
                 }
-                $locale = $translations['Lang Code'] ?? 'en';
+                $locale = $translations['locale'] ?? 'en';
 
                 $translator->setLocale($locale);
 
@@ -291,6 +291,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
+                $container->get(Viewer::class),
                 $provider->get('S2_SHOW_COMMENTS') === '1',
             );
         });
@@ -587,12 +588,15 @@ class CmsExtension implements ExtensionInterface
         $eventDispatcher->addListener(TemplateFinalReplaceEvent::class, function (TemplateFinalReplaceEvent $event) use ($container) {
             $content = '';
             if ($container->getParameter('debug') || defined('S2_SHOW_TIME')) {
+                /** @var Viewer $viewer */
+                $viewer = $container->get(Viewer::class);
+
                 /** @var Pdo $pdo */
                 $pdo           = $container->getIfInstantiated(\PDO::class);
                 $executionTime = microtime(true) - $container->getParameter('boot_timestamp');
                 $content       = sprintf(
                     't = %s; q = %d',
-                    \Lang::number_format($executionTime, true, 3),
+                    $viewer->numberFormat($executionTime, true, 3),
                     $pdo !== null ? $pdo->getQueryCount() : 0
                 );
             }

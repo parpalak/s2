@@ -2,13 +2,14 @@
 /**
  * Blog posts for a month.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
+use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -43,7 +44,12 @@ class MonthPageController extends BlogController
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $year  = $request->attributes->get('year');
+        // Here is a leading zero for months from 01 to 09, cannot be cast to int
         $month = $request->attributes->get('month');
+
+        if ((int)$month < 1 || (int)$month > 12) {
+            throw new NotFoundException();
+        }
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
             $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar((int)$year, (int)$month, 0));
@@ -85,7 +91,7 @@ class MonthPageController extends BlogController
 
         $template
             ->putInPlaceholder('text', $output . $paging)
-            ->putInPlaceholder('head_title', \Lang::month($month) . ', ' . $year)
+            ->putInPlaceholder('head_title', $this->calendarBuilder->month($month) . ', ' . $year)
         ;
 
         $template->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'));

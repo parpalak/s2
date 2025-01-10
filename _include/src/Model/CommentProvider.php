@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -11,6 +11,7 @@ namespace S2\Cms\Model;
 
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Template\Viewer;
 
 readonly class CommentProvider
 {
@@ -18,6 +19,7 @@ readonly class CommentProvider
         private DbLayer         $dbLayer,
         private ArticleProvider $articleProvider,
         private UrlBuilder      $urlBuilder,
+        private Viewer          $viewer,
         private bool            $showComments
     ) {
     }
@@ -132,7 +134,7 @@ readonly class CommentProvider
             $output[] = [
                 'title' => $titles[$k],
                 'link'  => $this->urlBuilder->link($url),
-                'hint'  => $nicks[$k] . ' (' . s2_date_time($time[$k]) . ')',
+                'hint'  => $nicks[$k] . ' (' . $this->viewer->dateAndTime($time[$k]) . ')',
             ];
         }
 

@@ -98,6 +98,7 @@ class Extension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get('s2_blog_translator'),
+                $container->get(Viewer::class),
                 $container->get(RequestStack::class),
                 $container->get('config_cache'),
                 $provider->get('S2_SHOW_COMMENTS') === '1',
@@ -300,6 +301,7 @@ class Extension implements ExtensionInterface
             return new PostProvider(
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
+                $container->get(Viewer::class),
             );
         });
 

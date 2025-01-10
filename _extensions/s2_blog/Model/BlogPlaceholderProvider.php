@@ -2,8 +2,8 @@
 /**
  * Content for blog placeholders.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -12,6 +12,7 @@ namespace s2_extensions\s2_blog\Model;
 use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Template\Viewer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -26,6 +27,7 @@ readonly class BlogPlaceholderProvider
         private DbLayer             $dbLayer,
         private BlogUrlBuilder      $blogUrlBuilder,
         private TranslatorInterface $translator,
+        private Viewer              $viewer,
         private RequestStack        $requestStack,
         private CacheInterface      $cache,
         private bool                $showComments,
@@ -205,7 +207,7 @@ readonly class BlogPlaceholderProvider
             $output[] = array(
                 'title'      => $row['title'],
                 'link'       => $cur_url,
-                'hint'       => $row['nick'] . ' (' . s2_date_time($row['time']) . ')',
+                'hint'       => $row['nick'] . ' (' . $this->viewer->dateAndTime($row['time']) . ')',
                 'is_current' => $request_uri === $cur_url,
             );
         }

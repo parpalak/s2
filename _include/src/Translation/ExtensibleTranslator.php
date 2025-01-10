@@ -17,6 +17,7 @@ class ExtensibleTranslator implements TranslatorInterface, StatefulServiceInterf
 {
     use TranslatorTrait {
         TranslatorTrait::trans as protected parentTrans;
+        TranslatorTrait::getLocale as protected parentGetLocale;
     }
 
     /**
@@ -32,18 +33,18 @@ class ExtensibleTranslator implements TranslatorInterface, StatefulServiceInterf
 
     public function trans(?string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
     {
-        if ($this->loadingQueue !== null) {
-            foreach ($this->loadingQueue as $namespace => $required) {
-                if (isset($this->loaders[$namespace])) {
-                    $this->translations = array_merge($this->loaders[$namespace]($this->language, $this), $this->translations);
-                }
-            }
-            $this->loadingQueue = null;
-        }
+        $this->processQueueIfRequired();
 
         $id = isset($this->translations[$id]) ? (string)$this->translations[$id] : $id;
 
         return $this->parentTrans($id, $parameters, $domain, $locale);
+    }
+
+    public function getLocale(): string
+    {
+        $this->processQueueIfRequired();
+
+        return $this->parentGetLocale();
     }
 
     public function attachLoader(string $namespace, \Closure $closure): void
@@ -70,6 +71,19 @@ class ExtensibleTranslator implements TranslatorInterface, StatefulServiceInterf
         $this->translations = [];
         foreach ($this->loaders as $namespace => $loader) {
             $this->markAsRequired($namespace);
+        }
+    }
+
+    private function processQueueIfRequired(): void
+    {
+        if ($this->loadingQueue !== null) {
+            foreach ($this->loadingQueue as $namespace => $required) {
+                if (isset($this->loaders[$namespace])) {
+                    /** @noinspection SlowArrayOperationsInLoopInspection */
+                    $this->translations = array_merge($this->loaders[$namespace]($this->language, $this), $this->translations);
+                }
+            }
+            $this->loadingQueue = null;
         }
     }
 }

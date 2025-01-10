@@ -12,39 +12,6 @@ use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayerException;
 
 //
-// Dealing with date and time
-//
-
-// Puts the date into a string
-function s2_date($time)
-{
-    if (!$time)
-        return '';
-
-    $date             = date(Lang::get('Date format'), $time);
-    $lang_month_small = Lang::get('Inline Months');
-    if (isset($lang_month_small))
-        $date = str_replace(array_keys($lang_month_small), array_values($lang_month_small), $date);
-
-    return $date;
-}
-
-// Puts the date and time into a string
-function s2_date_time($time)
-{
-    if (!$time)
-        return '';
-
-    $date             = date(Lang::get('Time format'), $time);
-    $lang_month_small = Lang::get('Inline Months');
-    if (!empty($lang_month_small))
-        $date = str_replace(array_keys($lang_month_small), array_values($lang_month_small), $date);
-
-    return $date;
-}
-
-
-//
 // Link processing
 //
 /**
@@ -314,6 +281,9 @@ function error()
         define('S2_COMPRESS', 0);
     }
 
+    $translator = \Container::isSet() ? \Container::get('translator') : null;
+    $title = $translator?->trans('Error encountered') ?? 'An error was encountered';
+
     // Empty all output buffers and stop buffering
     while (@ob_end_clean()) ;
 
@@ -349,7 +319,7 @@ function error()
         </style>
     </head>
     <body>
-    <h1><?php echo Lang::get('Error encountered') ?: 'An error was encountered'; ?></h1>
+    <h1><?php echo $title; ?></h1>
     <hr/>
     <?php
 
@@ -457,7 +427,7 @@ function s2_get_config_filename(): string
 //
 // Parses BB-codes in comments
 //
-function s2_bbcode_to_html($s)
+function s2_bbcode_to_html($s, $wroteText)
 {
     $s = str_replace("''", '"', $s);
     $s = str_replace("\r", '', $s);
@@ -466,7 +436,7 @@ function s2_bbcode_to_html($s)
     $s = preg_replace('#\[B\](.*?)\[/B\]#isS', '<strong>\1</strong>', $s);
 
     while (preg_match('/\[Q\s*=\s*([^\]]*)\].*?\[\/Q\]/isS', $s))
-        $s = preg_replace('/\s*\[Q\s*=\s*([^\]]*)\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote><strong>\\1</strong> ' . Lang::get('Wrote') . '<br/><br/><em>\\2</em></blockquote>', $s);
+        $s = preg_replace('/\s*\[Q\s*=\s*([^\]]*)\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote><strong>\\1</strong> ' . $wroteText . '<br/><br/><em>\\2</em></blockquote>', $s);
 
     while (preg_match('/\[Q\].*?\[\/Q\]/isS', $s))
         $s = preg_replace('/\s*\[Q\]\s*(.*?)\s*\[\/Q\]\s*/isS', '<blockquote>\\1</blockquote>', $s);

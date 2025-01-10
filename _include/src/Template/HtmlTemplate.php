@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2009-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2009-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -101,7 +101,7 @@ class HtmlTemplate
 
         $replace['<!-- s2_author -->']      = !empty($this->page['author']) ? '<div class="author">' . $this->page['author'] . '</div>' : '';
         $replace['<!-- s2_title -->']       = !empty($this->page['title']) ? $this->viewer->render('title', array_intersect_key($this->page, ['title' => 1, 'favorite' => 1])) : '';
-        $replace['<!-- s2_date -->']        = !empty($this->page['date']) ? '<div class="date">' . s2_date($this->page['date']) . '</div>' : '';
+        $replace['<!-- s2_date -->']        = !empty($this->page['date']) ? '<div class="date">' . $this->viewer->date($this->page['date']) . '</div>' : '';
         $replace['<!-- s2_crumbs -->']      = \count($this->breadCrumbs) > 0 ? $this->viewer->render('breadcrumbs', ['breadcrumbs' => $this->breadCrumbs]) : '';
         $replace['<!-- s2_subarticles -->'] = $this->page['subcontent'] ?? '';
 

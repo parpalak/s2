@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -71,9 +71,9 @@ class DynamicConfigFormBuilder
         private readonly TypeTransformer         $typeTransformer,
         private readonly FormFactory             $formFactory,
         private readonly TemplateRenderer        $templateRenderer,
+        private readonly ResourceProvider        $resourceProvider,
         private readonly RequestStack            $requestStack,
         private readonly SettingStorageInterface $settingStorage,
-        private readonly string                  $rootDir,
         DynamicConfigFormExtenderInterface       ...$dynamicConfigFormExtenders
     ) {
         $this->dynamicConfigFormExtenders = $dynamicConfigFormExtenders;
@@ -201,48 +201,16 @@ class DynamicConfigFormBuilder
             'language' => new FieldConfig(
                 'value',
                 control: 'select',
-                options: array_combine($languages = $this->readLanguages(), $languages),
+                options: array_combine($languages = $this->resourceProvider->readLanguages(), $languages),
                 inlineEdit: $inlineEdit
             ),
             'style' => new FieldConfig(
                 'value',
                 control: 'select',
-                options: array_combine($styles = $this->readStyles(), $styles),
+                options: array_combine($styles = $this->resourceProvider->readStyles(), $styles),
                 inlineEdit: $inlineEdit
             ),
         };
-    }
-
-    public function readLanguages(): array
-    {
-        $result = [];
-
-        $directory = dir($this->rootDir . '_lang');
-        while (($entry = $directory->read()) !== false) {
-            if ($entry !== '.' && $entry !== '..' && is_dir($this->rootDir . '_lang/' . $entry) && file_exists($this->rootDir . '_lang/' . $entry . '/common.php')) {
-                $result[] = $entry;
-            }
-        }
-
-        $directory->close();
-
-        return $result;
-    }
-
-    private function readStyles(): array
-    {
-        $result = [];
-
-        $directory = dir($this->rootDir . '_styles');
-        while (($entry = $directory->read()) !== false) {
-            if ($entry !== '.' && $entry !== '..' && is_dir($this->rootDir . '_styles/' . $entry) && file_exists($this->rootDir . '_styles/' . $entry . '/' . $entry . '.php')) {
-                $result[] = $entry;
-            }
-        }
-
-        $directory->close();
-
-        return $result;
     }
 
     private function getParamTypes(): array
