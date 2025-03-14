@@ -102,7 +102,7 @@ class Viewer
         $format = $this->translator->trans('Time format');
         $date   = date($format, $time);
         if (str_contains($format, 'F')) {
-            $date = str_replace(date('F', $time), $this->translator->trans(date('F', $time)), $date);
+            $date = str_replace(date('F', $time), $this->translator->trans(date('F', $time) . ' genitive'), $date);
         }
 
         return $date;
