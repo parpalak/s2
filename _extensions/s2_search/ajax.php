@@ -2,12 +2,13 @@
 /**
  * Ajax request processing for autosearch
  *
- * @copyright (C) 2011-2014 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package s2_search
+ * @copyright 2011-2014 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_search
  */
 
 
+use S2\Cms\Model\UrlBuilder;
 use S2\Rose\Storage\Database\PdoStorage;
 
 header('Content-Type: text/html; charset=utf-8');
@@ -20,6 +21,14 @@ header('X-Powered-By: S2/' . S2_VERSION);
 $s2_search_query = $_GET['q'] ?? '';
 
 if ($s2_search_query !== '') {
+    if (!function_exists('s2_link')) {
+        function s2_link($path = '', $params = []): string {
+            /** @var UrlBuilder $urlBuilder */
+            $urlBuilder = Container::get(UrlBuilder::class);
+            return $urlBuilder->link($path, $params);
+        }
+    }
+
     /** @var PdoStorage $pdoStorage */
     $pdoStorage = Container::get(PdoStorage::class);
     $toc        = $pdoStorage->getTocByTitlePrefix($s2_search_query);

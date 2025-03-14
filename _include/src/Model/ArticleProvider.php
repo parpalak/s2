@@ -23,6 +23,7 @@ readonly class ArticleProvider
         private DbLayer    $dbLayer,
         private UrlBuilder $urlBuilder,
         private Viewer     $viewer,
+        private string     $favoriteUrl,
         private bool       $useHierarchy,
     ) {
     }
@@ -189,15 +190,19 @@ readonly class ArticleProvider
         $articles = $this->lastArticlesList($limit);
 
         $output = '';
-        foreach ($articles as &$item) {
-            $parentPath          = $this->useHierarchy ? preg_replace('#/\\K[^/]*$#', '', $item['rel_path']) : '/' . $item['p_url'];
-            $item['date']        = $this->viewer->date($item['time']);
-            $item['link']        = $this->urlBuilder->link($item['rel_path']);
-            $item['parent_link'] = $this->urlBuilder->link($parentPath);
+        if (\count($articles) > 0) {
+            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/');
+            foreach ($articles as &$item) {
+                $parentPath            = $this->useHierarchy ? preg_replace('#/\\K[^/]*$#', '', $item['rel_path']) : '/' . $item['p_url'];
+                $item['date']          = $this->viewer->date($item['time']);
+                $item['link']          = $this->urlBuilder->link($item['rel_path']);
+                $item['parent_link']   = $this->urlBuilder->link($parentPath);
+                $item['favorite_link'] = $favoriteLink;
 
-            $output .= $this->viewer->render('last_articles_item', $item);
+                $output .= $this->viewer->render('last_articles_item', $item);
+            }
+            unset($item);
         }
-        unset($item);
 
         return $output;
     }

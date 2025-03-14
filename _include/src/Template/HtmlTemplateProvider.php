@@ -120,8 +120,8 @@ readonly class HtmlTemplateProvider
         $requestUri = $request->getPathInfo();
 
         $templateContent = preg_replace_callback('#<a href="([^"]*)">([^<]*)</a>#',
-            static function ($matches) use ($requestUri) {
-                $real_request_uri = s2_link($requestUri);
+            function ($matches) use ($requestUri) {
+                $real_request_uri = $this->urlBuilder->link($requestUri);
 
                 [, $url, $text] = $matches;
 

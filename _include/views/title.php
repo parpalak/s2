@@ -5,13 +5,14 @@
  * @var callable $trans
  * @var string $title
  * @var string $favorite
+ * @var string $favorite_link
  */
 
 $postfix = '';
 $class = array();
 if (!empty($favorite))
 {
-    $postfix = '<a href="'.s2_link('/'.S2_FAVORITE_URL.'/').'" class="favorite-star" title="'.$trans('Favorite').'">★</a>';
+    $postfix = ' <a href="'.$favorite_link.'" class="favorite-star" title="'.$trans('Favorite').'">★</a>';
 	$class[] = 'favorite-item';
 }
 

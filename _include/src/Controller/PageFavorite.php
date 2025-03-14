@@ -31,7 +31,8 @@ readonly class PageFavorite implements ControllerInterface
         private UrlBuilder           $urlBuilder,
         private TranslatorInterface  $translator,
         private HtmlTemplateProvider $htmlTemplateProvider,
-        private Viewer               $viewer
+        private Viewer               $viewer,
+        private string               $favoriteUrl,
     ) {
     }
 
@@ -74,12 +75,13 @@ readonly class PageFavorite implements ControllerInterface
             $row = $rows[$k];
             if ($row['children_exist']) {
                 $item       = [
-                    'id'       => $row['id'],
-                    'title'    => $row['title'],
-                    'link'     => $this->urlBuilder->link($url . (S2_USE_HIERARCHY ? '/' : '')),
-                    'date'     => $this->viewer->date($row['create_time']),
-                    'excerpt'  => $row['excerpt'],
-                    'favorite' => 2,
+                    'id'            => $row['id'],
+                    'title'         => $row['title'],
+                    'link'          => $this->urlBuilder->link($url . (S2_USE_HIERARCHY ? '/' : '')),
+                    'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                    'date'          => $this->viewer->date($row['create_time']),
+                    'excerpt'       => $row['excerpt'],
+                    'favorite'      => 2,
                 ];
                 $sort_field = $row['create_time'];
 
@@ -87,12 +89,13 @@ readonly class PageFavorite implements ControllerInterface
                 $sections_sort_array[] = $sort_field;
             } else {
                 $item       = [
-                    'id'       => $row['id'],
-                    'title'    => $row['title'],
-                    'link'     => $this->urlBuilder->link($url),
-                    'date'     => $this->viewer->date($row['create_time']),
-                    'excerpt'  => $row['excerpt'],
-                    'favorite' => 2,
+                    'id'            => $row['id'],
+                    'title'         => $row['title'],
+                    'link'          => $this->urlBuilder->link($url),
+                    'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                    'date'          => $this->viewer->date($row['create_time']),
+                    'excerpt'       => $row['excerpt'],
+                    'favorite'      => 2,
                 ];
                 $sort_field = $row['create_time'];
 

@@ -246,6 +246,7 @@ class CmsExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new Viewer(
                 $container->get('translator'),
+                $container->get(UrlBuilder::class),
                 $container->getParameter('root_dir'),
                 $provider->get('S2_STYLE'),
                 $container->getParameter('debug_view')
@@ -257,6 +258,7 @@ class CmsExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new Viewer(
                 $container->get('translator'),
+                $container->get(UrlBuilder::class),
                 $container->getParameter('root_dir'),
                 $provider->get('S2_STYLE'),
                 false // no HTML debug info for XML and other non-HTML content
@@ -270,6 +272,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(UrlBuilder::class),
                 $container->get(Viewer::class),
+                $provider->get('S2_FAVORITE_URL'),
                 $provider->get('S2_USE_HIERARCHY') === '1',
             );
         });
@@ -313,6 +316,8 @@ class CmsExtension implements ExtensionInterface
         });
 
         $container->set(PageFavorite::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new PageFavorite(
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
@@ -320,6 +325,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
+                $provider->get('S2_FAVORITE_URL'),
             );
         });
 
@@ -345,6 +351,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
+                $provider->get('S2_FAVORITE_URL'),
             );
         });
 
@@ -363,6 +370,7 @@ class CmsExtension implements ExtensionInterface
                 $provider->get('S2_USE_HIERARCHY') === '1',
                 $provider->get('S2_SHOW_COMMENTS') === '1',
                 $provider->get('S2_TAGS_URL'),
+                $provider->get('S2_FAVORITE_URL'),
                 (int)$provider->get('S2_MAX_ITEMS'),
                 $container->getParameter('debug'),
             );

@@ -2,13 +2,14 @@
 /**
  * Renders views.
  *
- * @copyright 2014-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2014-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
 namespace S2\Cms\Template;
 
+use S2\Cms\Model\UrlBuilder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Viewer
@@ -19,6 +20,7 @@ class Viewer
 
     public function __construct(
         private readonly TranslatorInterface $translator,
+        private readonly UrlBuilder          $urlBuilder,
         string                               $rootDir,
         string                               $style,
         private readonly bool                $debug
@@ -36,7 +38,7 @@ class Viewer
         $foundFile = null;
         $dirs      = [
             $this->styleViewDir,
-            ...array_map(fn(string $dir) => sprintf($this->extensionDirPattern, $dir), $extraDirs),
+            ...array_map(fn(string $dir) => \sprintf($this->extensionDirPattern, $dir), $extraDirs),
             $this->systemViewDir
         ];
         foreach ($dirs as $dir) {
@@ -151,7 +153,7 @@ class Viewer
             $i = \count($vars);
             foreach ($vars as $k => $v) {
                 $i--;
-                $s .= sprintf("%s%s<span style='color:grey'>%s</span>\n",
+                $s .= \sprintf("%s%s<span style='color:grey'>%s</span>\n",
                     str_pad(' ', ($level + 1) * 4),
                     self::jsonFormat($v, $level + 1),
                     $i > 0 ? ',' : ''
@@ -171,6 +173,7 @@ class Viewer
     private function includeFile(string $_found_file, array $_vars): void
     {
         $trans        = $this->translator->trans(...);
+        $makeLink     = $this->urlBuilder->link(...);
         $date         = $this->date(...);
         $dateAndTime  = $this->dateAndTime(...);
         $numberFormat = $this->numberFormat(...);

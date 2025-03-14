@@ -19,7 +19,7 @@ header('X-Powered-By: S2/' . S2_VERSION);
 if (isset($_SERVER['PATH_INFO']) && S2_URL_PREFIX != '')
     $request_uri = $_SERVER['PATH_INFO'];
 else {
-    $request_uri = substr(($_SERVER['REQUEST_URI']), strlen(s2_link()));
+    $request_uri = substr(($_SERVER['REQUEST_URI']), strlen(S2_URL_PREFIX));
     if (!str_starts_with($request_uri, '/')) {
         // Fix for usual URLS (e.g. '/?search=1&q=text' in case of prefix === '/?')
         $request_uri = '/';

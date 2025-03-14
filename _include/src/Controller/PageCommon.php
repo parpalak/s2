@@ -43,6 +43,7 @@ readonly class PageCommon implements ControllerInterface
         private bool                     $useHierarchy,
         private bool                     $showComments,
         private string                   $tagsUrl,
+        private string                   $favoriteUrl,
         private int                      $maxItems,
         private bool                     $debug,
     ) {
@@ -201,10 +202,15 @@ readonly class PageCommon implements ControllerInterface
             ->putInPlaceholder('excerpt', $page['excerpt'])
             ->putInPlaceholder('text', $page['text'])
             ->putInPlaceholder('date', $page['date'])
+            ->putInPlaceholder('favorite', $page['favorite'])
             ->putInPlaceholder('commented', $page['commented'])
             ->putInPlaceholder('author', $page['author'])
             ->putInPlaceholder('canonical_path', $current_path . ($was_end_slash ? '/' : ''))
         ;
+
+        if ($page['favorite'] === 1) {
+            $template->putInPlaceholder('favorite_link', $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'));
+        }
 
         $bread_crumbs[] = [
             'title' => $page['title']
@@ -266,24 +272,26 @@ readonly class PageCommon implements ControllerInterface
                 if ($row['children_exist']) {
                     // The child is a subsection
                     $item = [
-                        'id'       => $row['id'],
-                        'title'    => $row['title'],
-                        'link'     => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url']) . '/'),
-                        'date'     => $this->viewer->date($row['create_time']),
-                        'excerpt'  => $row['excerpt'],
-                        'favorite' => $row['favorite'],
+                        'id'            => $row['id'],
+                        'title'         => $row['title'],
+                        'link'          => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url']) . '/'),
+                        'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                        'date'          => $this->viewer->date($row['create_time']),
+                        'excerpt'       => $row['excerpt'],
+                        'favorite'      => $row['favorite'],
                     ];
 
                     $subsections[] = $item;
                 } else {
                     // The child is an article
                     $item       = array(
-                        'id'       => $row['id'],
-                        'title'    => $row['title'],
-                        'link'     => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url'])),
-                        'date'     => $this->viewer->date($row['create_time']),
-                        'excerpt'  => $row['excerpt'],
-                        'favorite' => $row['favorite'],
+                        'id'            => $row['id'],
+                        'title'         => $row['title'],
+                        'link'          => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url'])),
+                        'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                        'date'          => $this->viewer->date($row['create_time']),
+                        'excerpt'       => $row['excerpt'],
+                        'favorite'      => $row['favorite'],
                     );
                     $sort_field = $row['create_time'];
 

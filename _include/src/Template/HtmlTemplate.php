@@ -100,7 +100,10 @@ class HtmlTemplate
         $replace['<!-- s2_navigation_link -->'] = implode("\n", $link_navigation);
 
         $replace['<!-- s2_author -->']      = !empty($this->page['author']) ? '<div class="author">' . $this->page['author'] . '</div>' : '';
-        $replace['<!-- s2_title -->']       = !empty($this->page['title']) ? $this->viewer->render('title', array_intersect_key($this->page, ['title' => 1, 'favorite' => 1])) : '';
+        $replace['<!-- s2_title -->']       = !empty($this->page['title']) ? $this->viewer->render(
+            'title',
+            array_intersect_key($this->page, ['title' => 1, 'favorite' => 1, 'favorite_link' => 1])
+        ) : '';
         $replace['<!-- s2_date -->']        = !empty($this->page['date']) ? '<div class="date">' . $this->viewer->date($this->page['date']) . '</div>' : '';
         $replace['<!-- s2_crumbs -->']      = \count($this->breadCrumbs) > 0 ? $this->viewer->render('breadcrumbs', ['breadcrumbs' => $this->breadCrumbs]) : '';
         $replace['<!-- s2_subarticles -->'] = $this->page['subcontent'] ?? '';
