@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2023-2024 Roman Parpalak
+ * @copyright 2023-2025 Roman Parpalak
  * @license   MIT
  * @package   S2
  */
@@ -9,7 +9,10 @@ declare(strict_types=1);
 
 namespace S2\Cms\Asset;
 
-use MatthiasMullie\Minify;
+use MatthiasMullie\Minify\CSS;
+use MatthiasMullie\Minify\JS;
+use MatthiasMullie\Minify\Minify;
+use S2\Cms\HttpClient\HttpClient;
 use Symfony\Component\Filesystem\Filesystem;
 
 class AssetMerge implements AssetMergeInterface
@@ -21,11 +24,12 @@ class AssetMerge implements AssetMergeInterface
     private ?Filesystem $filesystem = null;
 
     public function __construct(
-        private readonly string $publicCacheDir,
-        private readonly string $publicCachePath,
-        private readonly string $cacheFilenamePrefix,
-        private readonly string $type,
-        private readonly bool   $devEnv
+        private readonly HttpClient $httpClient,
+        private readonly string     $publicCacheDir,
+        private readonly string     $publicCachePath,
+        private readonly string     $cacheFilenamePrefix,
+        private readonly string     $type,
+        private readonly bool       $devEnv
     ) {
     }
 
@@ -46,26 +50,44 @@ class AssetMerge implements AssetMergeInterface
             $this->dumpContent();
         }
 
-        return sprintf('%s%s?v=%s', $this->publicCachePath, $this->getFilename(), $this->getCacheHash());
+        return \sprintf('%s%s?v=%s', $this->publicCachePath, $this->getFilename(), $this->getCacheHash());
+    }
+
+    private function minifyFiles(Minify $minifier): string
+    {
+        foreach ($this->filesToMerge as $fileToMerge) {
+            $parsedUrl = parse_url($fileToMerge);
+            if (isset($parsedUrl['host'])) {
+                // file is elsewhere
+                $response    = $this->httpClient->fetch($fileToMerge);
+                if (!$response->isSuccessful()) {
+                    throw new \RuntimeException('Failed to fetch ' . $fileToMerge);
+                }
+                $fileToMerge = $response->content;
+            }
+            if ($fileToMerge !== null) {
+                $minifier->add($fileToMerge);
+            }
+        }
+
+        /**
+         * Using a "fake" temp filename to dump.
+         * 1. It is constructed using a realpath(). Otherwise, the minifier converts relative paths in CSS with errors.
+         * 2. Minifier allows file corruptions on race condition. We do not trust the resulted file and ignore it.
+         * The file will be dumped again later with an atomic operation.
+         */
+        return $minifier->minify($this->getDumpTempFilename());
     }
 
     private function dumpContent(): void
     {
         if ($this->type === self::TYPE_CSS) {
-            $minifier = new Minify\CSS();
+            $minifier = new CSS();
             $minifier->setMaxImportSize(4);
-            foreach ($this->filesToMerge as $fileToMerge) {
-                $minifier->add($fileToMerge);
-            }
-            // Taking realpath here since there are some bugs in dependency for relative paths
-            $content = $minifier->minify($this->getDumpFilename(true));
+            $content = $this->minifyFiles($minifier);
         } elseif ($this->type === self::TYPE_JS) {
-            $minifier = new Minify\JS();
-            foreach ($this->filesToMerge as $fileToMerge) {
-                $minifier->add($fileToMerge);
-            }
-            // Taking realpath here since there are some bugs in dependency for relative paths
-            $content = $minifier->minify($this->getDumpFilename(true));
+            $minifier = new JS();
+            $content  = $this->minifyFiles($minifier);
         } else {
             $content = $this->getConcatenatedContent();
         }
@@ -87,6 +109,11 @@ class AssetMerge implements AssetMergeInterface
             // TODO add images embedding in CSS
             $dumpModifiedAt = filemtime($this->getDumpFilename());
             foreach ($this->filesToMerge as $fileToMerge) {
+                $parsedUrl = parse_url($fileToMerge);
+                if (isset($parsedUrl['host'])) {
+                    // file is elsewhere
+                    continue;
+                }
                 if (filemtime($fileToMerge) > $dumpModifiedAt) {
                     return true;
                 }
@@ -96,19 +123,29 @@ class AssetMerge implements AssetMergeInterface
         return false;
     }
 
-    private function getDumpFilename(bool $realPath = false): string
+    private function getDumpFilename(): string
     {
-        return sprintf('%s%s', $realPath ? realpath($this->publicCacheDir) . '/' : $this->publicCacheDir, $this->getFilename());
+        return \sprintf('%s%s', $this->publicCacheDir, $this->getFilename());
+    }
+
+    private function getDumpTempFilename(): string
+    {
+        return \sprintf('%s%s', realpath($this->publicCacheDir) . '/', $this->getFilename('tmp'));
     }
 
     private function getHashFilename(): string
     {
-        return sprintf('%s%s.hash.php', $this->publicCacheDir, $this->getFilename());
+        return \sprintf('%s%s.hash.php', $this->publicCacheDir, $this->getFilename());
     }
 
-    private function getFilename(): string
+    private function getFilename(?string $postfix = null): string
     {
-        return sprintf('%s.%x.%s', $this->cacheFilenamePrefix, crc32(serialize($this->filesToMerge)), $this->type);
+        return \sprintf(
+            '%s.%x.%s',
+            $this->cacheFilenamePrefix,
+            crc32(serialize($this->filesToMerge)),
+            ($postfix !== null ? $postfix . '.' : '') . $this->type
+        );
     }
 
     private function fileSystem(): Filesystem

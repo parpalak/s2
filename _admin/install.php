@@ -12,6 +12,8 @@ use Psr\Log\LogLevel;
 use S2\Cms\Admin\AdminExtension;
 use S2\Cms\CmsExtension;
 use S2\Cms\Framework\Application;
+use S2\Cms\HttpClient\HttpClient;
+use S2\Cms\HttpClient\HttpClientException;
 use S2\Cms\Install\InstallExtension;
 use S2\Cms\Logger\Logger;
 use S2\Cms\Model\ExtensionCache;
@@ -59,15 +61,19 @@ $errorHandler->setDefaultLogger(new Logger(S2_ROOT . '_cache/install.log', 'inst
 //
 // Generate output to be used for config.php
 //
-function generate_config_file()
+function generate_config_file(HttpClient $httpClient)
 {
     global $db_type, $db_host, $db_name, $db_username, $db_password, $db_prefix, $base_url, $s2_cookie_name;
 
     foreach (array('', '/?', '/index.php', '/index.php?') as $prefix) {
         $url_prefix = $prefix;
-        $content    = s2_get_remote_file($base_url . $url_prefix . '/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
-        if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2">')) {
-            break;
+        try {
+            $response = $httpClient->fetch($base_url . $url_prefix . '/this/URL/_DoEs_/_NoT_/_eXiSt');
+            if ($response->content !== null && str_contains($response->content, '<meta name="Generator" content="S2">')) {
+                break;
+            }
+        } catch (HttpClientException $e) {
+            continue;
         }
     }
 
@@ -77,9 +83,13 @@ function generate_config_file()
     if (str_starts_with($base_url, 'https://')) {
         $use_https = true;
     } else {
-        $content = s2_get_remote_file('https://' . substr($base_url, 7) . $url_prefix . '/this/URL/_DoEs_/_NoT_/_eXiSt', 1, false, 10, true);
-        if ($content !== null && str_contains($content['content'], '<meta name="Generator" content="S2">')) {
-            $use_https = true;
+        try {
+            $response = $httpClient->fetch('https://' . substr($base_url, 7) . $url_prefix . '/this/URL/_DoEs_/_NoT_/_eXiSt');
+            if ($response->content !== null && str_contains($response->content, '<meta name="Generator" content="S2">')) {
+                $use_https = true;
+            }
+        } catch (HttpClientException $e) {
+            ; // no op
         }
     }
 
@@ -192,7 +202,7 @@ if (isset($_POST['generate_config'])) {
     $base_url       = $_POST['base_url'];
     $s2_cookie_name = $_POST['cookie_name'];
 
-    echo generate_config_file();
+    echo generate_config_file($emptyApp->container->get(HttpClient::class));
     exit;
 }
 
@@ -705,7 +715,7 @@ if (!$uploads) {
 $s2_cookie_name = 's2_cookie_' . mt_rand();
 
 /// Generate the config.php file data
-$config = generate_config_file();
+$config = generate_config_file($app->container->get(HttpClient::class));
 
 // Attempt to write config.php and serve it up for download if writing fails
 $written = false;

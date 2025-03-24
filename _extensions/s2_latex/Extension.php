@@ -52,7 +52,7 @@ class Extension implements ExtensionInterface
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
         $eventDispatcher->addListener(TemplateAssetEvent::class, static function (TemplateAssetEvent $event) use ($container) {
-            $event->assetPack->addJs('//i.upmath.me/latex.js', [AssetPack::OPTION_PRELOAD, AssetPack::OPTION_DEFER]);
+            $event->assetPack->addJs('//i.upmath.me/latex.js', [AssetPack::OPTION_MERGE, AssetPack::OPTION_DEFER]);
         });
 
         $eventDispatcher->addListener(TemplatePreCommentRenderEvent::class, static function (TemplatePreCommentRenderEvent $event) use ($container) {

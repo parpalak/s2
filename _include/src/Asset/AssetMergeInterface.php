@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023-2025 Roman Parpalak
+ * @license   MIT
+ * @package   S2
  */
+
+declare(strict_types=1);
 
 namespace S2\Cms\Asset;
 

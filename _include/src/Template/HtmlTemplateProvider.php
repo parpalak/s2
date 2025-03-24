@@ -15,6 +15,7 @@ namespace S2\Cms\Template;
 use S2\Cms\Asset\AssetMerge;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\HttpClient\HttpClient;
 use S2\Cms\Model\UrlBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -29,6 +30,7 @@ readonly class HtmlTemplateProvider
         private UrlBuilder               $urlBuilder,
         private TranslatorInterface      $translator,
         private Viewer                   $viewer,
+        private HttpClient               $httpClient,
         private EventDispatcherInterface $dispatcher,
         private DynamicConfigProvider    $dynamicConfigProvider,
         private bool                     $debug,
@@ -85,7 +87,7 @@ readonly class HtmlTemplateProvider
         $assetPack     = require $this->rootDir . $styleFilename;
 
         if (!($assetPack instanceof AssetPack)) {
-            throw new \LogicException(sprintf(
+            throw new \LogicException(\sprintf(
                 'Style "%s" is broken (file "%s" must return an AssetPack object). Choose another style.',
                 $this->styleName,
                 $styleFilename
@@ -96,11 +98,25 @@ readonly class HtmlTemplateProvider
 
         $styles  = $assetPack->getStyles(
             $this->basePath . '/_styles/' . $this->styleName . '/',
-            new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_styles', AssetMerge::TYPE_CSS, $this->debug)
+            new AssetMerge(
+                $this->httpClient,
+                $this->cacheDir,
+                '/_cache/',
+                $this->styleName . '_styles',
+                AssetMerge::TYPE_CSS,
+                $this->debug
+            )
         );
         $scripts = $assetPack->getScripts(
             $this->basePath . '/_styles/' . $this->styleName . '/',
-            new AssetMerge($this->cacheDir, '/_cache/', $this->styleName . '_scripts', AssetMerge::TYPE_JS, $this->debug)
+            new AssetMerge(
+                $this->httpClient,
+                $this->cacheDir,
+                '/_cache/',
+                $this->styleName . '_scripts',
+                AssetMerge::TYPE_JS,
+                $this->debug
+            )
         );
 
         $template = str_replace(['<!-- s2_styles -->', '<!-- s2_scripts -->'], [$styles, $scripts], $template);
@@ -158,6 +174,6 @@ readonly class HtmlTemplateProvider
             return $path;
         }
 
-        throw new \RuntimeException(sprintf($this->translator->trans('Template not found'), $path));
+        throw new \RuntimeException(\sprintf($this->translator->trans('Template not found'), $path));
     }
 }

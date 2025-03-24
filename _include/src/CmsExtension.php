@@ -29,6 +29,7 @@ use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Http\RedirectDetector;
+use S2\Cms\HttpClient\HttpClient;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
@@ -225,12 +226,17 @@ class CmsExtension implements ExtensionInterface
             return new RequestStack();
         });
 
+        $container->set(HttpClient::class, function (Container $container) {
+            return new HttpClient();
+        });
+
         $container->set(HtmlTemplateProvider::class, function (Container $container) {
             return new HtmlTemplateProvider(
                 $container->get(RequestStack::class),
                 $container->get(UrlBuilder::class),
                 $container->get('translator'),
                 $container->get(Viewer::class),
+                $container->get(HttpClient::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->get(DynamicConfigProvider::class),
                 $container->getParameter('debug'),

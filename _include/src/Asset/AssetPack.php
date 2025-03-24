@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection HtmlUnknownTarget */
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
+
+declare(strict_types=1);
 
 namespace S2\Cms\Asset;
 
@@ -36,7 +38,7 @@ class AssetPack
         $merge = isset($o[self::OPTION_MERGE]);
         unset($o[self::OPTION_MERGE]);
         if (\count($o) > 0) {
-            throw new \DomainException(sprintf('Found unknown options [%s] for style "%s".', implode(', ', array_keys($o)), $filename));
+            throw new \DomainException(\sprintf('Found unknown options [%s] for style "%s".', implode(', ', array_keys($o)), $filename));
         }
 
         $this->css[] = ['src' => $filename, 'merge' => $merge];
@@ -53,12 +55,12 @@ class AssetPack
         $isDefer   = isset($o[self::OPTION_DEFER]);
         $merge     = isset($o[self::OPTION_MERGE]);
         if ($isAsync && $isDefer) {
-            throw new \DomainException(sprintf('Async and defer options cannot be used together for script "%s".', $filename));
+            throw new \DomainException(\sprintf('Async and defer options cannot be used together for script "%s".', $filename));
         }
 
         unset($o[self::OPTION_MERGE], $o[self::OPTION_ASYNC], $o[self::OPTION_DEFER], $o[self::OPTION_PRELOAD]);
         if (\count($o) > 0) {
-            throw new \DomainException(sprintf('Found unknown options [%s] for script "%s".', implode(', ', array_keys($o)), $filename));
+            throw new \DomainException(\sprintf('Found unknown options [%s] for script "%s".', implode(', ', array_keys($o)), $filename));
         }
 
         if ($isPreload) {
@@ -88,22 +90,22 @@ class AssetPack
     {
         $o = array_flip($options);
         if (isset($o[self::OPTION_PRELOAD])) {
-            throw new \DomainException(sprintf('JS script "%s" in head cannot be preloaded.', $filename));
+            throw new \DomainException(\sprintf('JS script "%s" in head cannot be preloaded.', $filename));
         }
 
         if (isset($o[self::OPTION_MERGE])) {
-            throw new \DomainException(sprintf('JS script "%s" in head cannot be merged. Try to use addJs() method instead.', $filename));
+            throw new \DomainException(\sprintf('JS script "%s" in head cannot be merged. Try to use addJs() method instead.', $filename));
         }
 
         $isAsync = isset($o[self::OPTION_ASYNC]);
         $isDefer = isset($o[self::OPTION_DEFER]);
         if ($isAsync && $isDefer) {
-            throw new \DomainException(sprintf('Async and defer options cannot be used together for script "%s".', $filename));
+            throw new \DomainException(\sprintf('Async and defer options cannot be used together for script "%s".', $filename));
         }
 
         unset($o[self::OPTION_ASYNC], $o[self::OPTION_DEFER]);
         if (\count($o) > 0) {
-            throw new \DomainException(sprintf('Found unknown options [%s] for script "%s".', implode(', ', array_keys($o)), $filename));
+            throw new \DomainException(\sprintf('Found unknown options [%s] for script "%s".', implode(', ', array_keys($o)), $filename));
         }
 
         $this->headJs[] = ['src' => $filename, 'is_async' => $isAsync, 'is_defer' => $isDefer];
@@ -132,6 +134,7 @@ class AssetPack
      * @param AssetMergeInterface $assetMerge
      *
      * @return string
+     * @noinspection HtmlWrongAttributeValue
      */
     public function getStyles(string $pathPrefix, AssetMergeInterface $assetMerge): string
     {
@@ -139,7 +142,7 @@ class AssetPack
 
         foreach ($this->preload as $preloadItem) {
             $preloadPath = self::getPrefixedPath($preloadItem['src'], $pathPrefix);
-            $result[]    = sprintf('<link rel="preload" href="%s" as="%s">', $preloadPath, $preloadItem['as']);
+            $result[]    = \sprintf('<link rel="preload" href="%s" as="%s">', $preloadPath, $preloadItem['as']);
         }
 
         foreach ($this->css as $cssItem) {
@@ -147,17 +150,17 @@ class AssetPack
                 $assetMerge->concat((self::requireDirPrefix($cssItem['src']) ? $this->localDir . '/' : '') . $cssItem['src']);
             } else {
                 $cssPath  = self::getPrefixedPath($cssItem['src'], $pathPrefix);
-                $result[] = sprintf('<link rel="stylesheet" href="%s">', $cssPath);
+                $result[] = \sprintf('<link rel="stylesheet" href="%s">', $cssPath);
             }
         }
 
         if (($mergedPath = $assetMerge->getMergedPath()) !== null) {
-            $result[] = sprintf('<link rel="stylesheet" href="%s" />', $mergedPath);
+            $result[] = \sprintf('<link rel="stylesheet" href="%s" />', $mergedPath);
         }
 
         foreach ($this->headJs as $jsItem) {
-            $result[] = sprintf(
-                '<script src="%s"%s%s></script>',
+            $result[] = \sprintf(
+                /** @lang text */ '<script src="%s"%s%s></script>',
                 self::getPrefixedPath($jsItem['src'], $pathPrefix),
                 ($jsItem['is_defer'] ?? false) ? ' defer' : '',
                 ($jsItem['is_async'] ?? false) ? ' async' : ''
@@ -176,7 +179,8 @@ class AssetPack
     /**
      * Return scripts to be included in the body section.
      *
-     * @param string $pathPrefix Path prefix to be prepended to local file names
+     * @param string              $pathPrefix Path prefix to be prepended to local file names
+     * @param AssetMergeInterface $assetMerge
      *
      * @return string
      */
@@ -187,8 +191,8 @@ class AssetPack
             if ($jsItem['merge'] ?? false) {
                 $assetMerge->concat((self::requireDirPrefix($jsItem['src']) ? $this->localDir . '/' : '') . $jsItem['src']);
             } else {
-                $result[] = sprintf(
-                    '<script src="%s"%s%s></script>',
+                $result[] = \sprintf(
+                    /** @lang text */ '<script src="%s"%s%s></script>',
                     self::getPrefixedPath($jsItem['src'], $pathPrefix),
                     ($jsItem['is_defer'] ?? false) ? ' defer' : '',
                     ($jsItem['is_async'] ?? false) ? ' async' : ''
@@ -197,7 +201,7 @@ class AssetPack
         }
 
         if (($mergedPath = $assetMerge->getMergedPath()) !== null) {
-            $result[] = sprintf('<script src="%s" defer></script>', $mergedPath);
+            $result[] = \sprintf('<script src="%s" defer></script>', $mergedPath);
         }
 
         $result = array_merge($result, $this->inlineJs);
@@ -225,18 +229,17 @@ class AssetPack
         throw new \InvalidArgumentException('This file type is not allowed for a favicon image');
     }
 
-    /** @noinspection SubStrUsedAsStrPosInspection */
     private static function requireDirPrefix(string $path): bool
     {
         if ($path[0] === '/') {
             return false;
         }
 
-        if (substr($path, 0, 7) === 'http://') {
+        if (str_starts_with($path, 'http://')) {
             return false;
         }
 
-        if (substr($path, 0, 8) === 'https://') {
+        if (str_starts_with($path, 'https://')) {
             return false;
         }
 
