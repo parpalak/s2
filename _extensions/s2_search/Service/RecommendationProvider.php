@@ -1,20 +1,22 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_search
  */
 
-namespace S2\Cms\Recommendation;
+declare(strict_types=1);
+
+namespace s2_extensions\s2_search\Service;
 
 use Psr\Cache\InvalidArgumentException;
-use S2\Cms\Layout\ContentItem;
-use S2\Cms\Layout\LayoutMatcher;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Rose\Entity\ExternalId;
 use S2\Rose\Entity\TocEntryWithMetadata;
 use S2\Rose\Storage\Database\PdoStorage;
+use s2_extensions\s2_search\Layout\ContentItem;
+use s2_extensions\s2_search\Layout\LayoutMatcher;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 

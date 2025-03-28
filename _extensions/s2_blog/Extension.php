@@ -26,7 +26,6 @@ use S2\Cms\Model\User\UserProvider;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
-use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
@@ -51,6 +50,7 @@ use s2_extensions\s2_blog\Service\PostIndexer;
 use s2_extensions\s2_blog\Service\TagsSearchProvider;
 use s2_extensions\s2_search\Event\TagsSearchEvent;
 use s2_extensions\s2_search\Service\BulkIndexingProviderInterface;
+use s2_extensions\s2_search\Service\RecommendationProvider;
 use s2_extensions\s2_search\Service\SimilarWordsDetector;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -183,7 +183,7 @@ class Extension implements ExtensionInterface
                 $container->get(ArticleProvider::class),
                 $container->get(PostProvider::class),
                 $container->get(UrlBuilder::class),
-                $container->get(RecommendationProvider::class),
+                $container->getIfDefined(RecommendationProvider::class),
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
@@ -318,8 +318,8 @@ class Extension implements ExtensionInterface
             return new PostIndexer(
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
-                $container->has(Indexer::class) ? $container->get(Indexer::class) : null,
-                $container->get('recommendations_cache'),
+                $container->getIfDefined(Indexer::class),
+                $container->getIfDefined('recommendations_cache'),
                 $container->get(QueuePublisher::class),
             );
         }, [QueueHandlerInterface::class, BulkIndexingProviderInterface::class]);
@@ -428,9 +428,9 @@ class Extension implements ExtensionInterface
                 /** @var TranslatorInterface $translator */
                 $translator = $container->get('s2_blog_translator');
                 if ($event->getLine() !== null) {
-                    $event->addShortLine(sprintf($translator->trans('Found blog tags short'), implode(', ', $blogTagLinks)));
+                    $event->addShortLine(\sprintf($translator->trans('Found blog tags short'), implode(', ', $blogTagLinks)));
                 } else {
-                    $event->addLine(sprintf($translator->trans('Found blog tags'), implode(', ', $blogTagLinks)));
+                    $event->addLine(\sprintf($translator->trans('Found blog tags'), implode(', ', $blogTagLinks)));
                 }
             }
         });

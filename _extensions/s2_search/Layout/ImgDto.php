@@ -5,7 +5,7 @@
  * @package S2
  */
 
-namespace S2\Cms\Image;
+namespace s2_extensions\s2_search\Layout;
 
 class ImgDto
 {

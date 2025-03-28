@@ -5,7 +5,7 @@
  * @package S2
  */
 
-namespace S2\Cms\Layout;
+namespace s2_extensions\s2_search\Layout;
 
 use s2_extensions\s2_search\Rose\CustomExtractor;
 

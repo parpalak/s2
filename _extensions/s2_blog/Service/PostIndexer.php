@@ -18,20 +18,20 @@ use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
-use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Indexer;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_search\Service\BulkIndexingProviderInterface;
+use s2_extensions\s2_search\Service\RecommendationProvider;
 
 readonly class PostIndexer implements QueueHandlerInterface, BulkIndexingProviderInterface
 {
     public function __construct(
-        private DbLayer                $dbLayer,
-        private BlogUrlBuilder         $blogUrlBuilder,
-        private ?Indexer               $indexer,
-        private CacheItemPoolInterface $cache,
-        private QueuePublisher         $queuePublisher,
+        private DbLayer                 $dbLayer,
+        private BlogUrlBuilder          $blogUrlBuilder,
+        private ?Indexer                $indexer,
+        private ?CacheItemPoolInterface $cache,
+        private QueuePublisher          $queuePublisher,
     ) {
     }
 

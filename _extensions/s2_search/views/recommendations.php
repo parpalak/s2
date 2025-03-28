@@ -7,14 +7,14 @@
  * @var ?array $content
  */
 
-use S2\Cms\Image\ImgDto;
-use S2\Cms\Image\ThumbnailGenerator;
+use s2_extensions\s2_search\Layout\ImgDto;
+use s2_extensions\s2_search\Rose\CustomExtractor;
 
 if ($content === null) {
     return;
 }
 
-function getImgMarkup(ImgDto $imgDto, int $columnNum): string
+$getImgMarkup = static function (ImgDto $imgDto, int $columnNum): string
 {
     $percent         = 100.0 * $imgDto->getRatio();
     $src             = $imgDto->getSrc();
@@ -52,9 +52,9 @@ function getImgMarkup(ImgDto $imgDto, int $columnNum): string
     }
 
     return "<div class='recommendation-img-wrapper {$class}' style='padding-top: $percent%'><img loading='lazy' class='recommendation-img' src='$src' alt='' {$fallbackHandler}></div>";
-}
+};
 
-function getColumnsNumFromGridArea(string $area): int
+$getColumnsNumFromGridArea = static function (string $area): int
 {
     $parts = explode('/', $area);
     if (count($parts) === 4 && ctype_digit($parts[3]) && ctype_digit($parts[1])) {
@@ -62,7 +62,22 @@ function getColumnsNumFromGridArea(string $area): int
     }
 
     return 1;
-}
+};
+
+$getReducedImg = function (ImgDto $img): ImgDto
+{
+    $src = $img->getSrc();
+    if (str_starts_with($src, CustomExtractor::YOUTUBE_PROTOCOL)) {
+        return (new ImgDto(
+            'https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/hq720.jpg',
+            640,
+            360,
+            $img->getClass()
+        ))/*->addSrc('https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/hq720.jpg')*/ ;
+    }
+
+    return $img;
+};
 
 /** @var ThumbnailGenerator $th */
 $th = Container::get(ThumbnailGenerator::class);
@@ -72,7 +87,7 @@ foreach ($content as $recommendation) {
     $pos = $recommendation['position'];
     $posPieces = explode('/', $pos);
     if (count($posPieces) === 2) {
-        $maxLine = max($maxLine, $posPieces[1] + 1);
+        $maxLine = max($maxLine, (int)$posPieces[1] + 1);
     } elseif (count($posPieces) === 4) {
         $maxLine = max($maxLine, $posPieces[3]);
     }
@@ -87,11 +102,11 @@ foreach ($content as $recommendation) {
             <a class="recommendation-link" href="<?= s2_link($recommendation['url']) ?>">
                 <?php
                 if ($recommendation['image'] !== null) {
-                    $columnNum = getColumnsNumFromGridArea($recommendation['position']);
+                    $columnNum = $getColumnsNumFromGridArea($recommendation['position']);
 
-                    $imgDto = $th->getReducedImg($recommendation['image']);
+                    $imgDto = $getReducedImg($recommendation['image']);
 
-                    echo $img = getImgMarkup($imgDto, $columnNum);
+                    echo $getImgMarkup($imgDto, $columnNum);
                 }
                 ?>
                 <span class="recommendation-header recommendation-header-<?= $recommendation['headingSize'] ?>"><?php echo s2_htmlencode($recommendation['title']); ?></span>

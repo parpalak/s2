@@ -14,7 +14,9 @@ namespace S2\Cms\Framework;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use S2\Cms\Framework\Exception\DecoratedServiceNotFoundException;
 use S2\Cms\Framework\Exception\ParameterNotFoundException;
+use S2\Cms\Framework\Exception\ServiceAlreadyDefinedException;
 use S2\Cms\Framework\Exception\ServiceNotFoundException;
 
 class Container implements ContainerInterface
@@ -29,6 +31,13 @@ class Container implements ContainerInterface
 
     public function set(string $id, callable|object $factory, array $tags = []): void
     {
+        if (isset($this->bindings[$id])) {
+            if ($this->bindings[$id] instanceof ServiceDecorator) {
+                $this->bindings[$id]->setFactory($factory);
+                return;
+            }
+            throw new ServiceAlreadyDefinedException(\sprintf('Entity "%s" already exists in container.', $id));
+        }
         $this->bindings[$id] = $factory;
         if (!\is_callable($factory)) {
             $this->instances[$id] = $factory;
@@ -41,19 +50,13 @@ class Container implements ContainerInterface
 
     public function decorate(string $id, callable $decorator): void
     {
-        if (!isset($this->bindings[$id])) {
-            // NOTE: If this case of primordial decoration of non-existent service is needed,
-            // ServiceDecorator can be refactored to accept $factory later via a setter.
-            throw new ServiceNotFoundException(sprintf('Entity "%s" not found in container.', $id));
-        }
-
-        $this->bindings[$id] = new ServiceDecorator($this->bindings[$id], $decorator, $this);
+        $this->bindings[$id] = new ServiceDecorator($this->bindings[$id] ?? null, $decorator, $this);
     }
 
     public function get(string $id): mixed
     {
         if (!isset($this->bindings[$id])) {
-            throw new ServiceNotFoundException(sprintf('Entity "%s" not found in container.', $id));
+            throw new ServiceNotFoundException(\sprintf('Entity "%s" not found in container.', $id));
         }
 
         if (isset($this->instances[$id])) {
@@ -62,7 +65,20 @@ class Container implements ContainerInterface
 
         $factory = $this->bindings[$id];
 
-        return $this->instances[$id] = $factory($this);
+        try {
+            return $this->instances[$id] = $factory($this);
+        } catch (DecoratedServiceNotFoundException $e) {
+            throw new ServiceNotFoundException(\sprintf('Service "%s" was decorated, but original service was not defined in container.', $id), 0, $e);
+        }
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function getIfDefined(string $id): mixed
+    {
+        return $this->has($id) ? $this->get($id) : null;
     }
 
     public function getByTag(string $tag): array

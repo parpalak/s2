@@ -10,12 +10,15 @@ declare(strict_types=1);
 namespace s2_extensions\s2_search;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Image\ThumbnailGenerateEvent;
 use S2\Cms\Image\ThumbnailGenerator;
+use S2\Cms\Logger\Logger;
+use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -26,16 +29,23 @@ use S2\Cms\Template\TemplateAssetEvent;
 use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\Viewer;
 use S2\Cms\Translation\ExtensibleTranslator;
+use S2\Rose\Entity\ExternalId;
 use S2\Rose\Extractor\ExtractorInterface;
 use S2\Rose\Finder;
 use S2\Rose\Indexer;
+use S2\Rose\Stemmer\PorterStemmerEnglish;
+use S2\Rose\Stemmer\PorterStemmerRussian;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
 use s2_extensions\s2_search\Controller\SearchPageController;
+use s2_extensions\s2_search\Layout\LayoutMatcherFactory;
 use s2_extensions\s2_search\Rose\CustomExtractor;
 use s2_extensions\s2_search\Service\ArticleIndexer;
+use s2_extensions\s2_search\Service\RecommendationProvider;
 use s2_extensions\s2_search\Service\SimilarWordsDetector;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -44,6 +54,19 @@ class Extension implements ExtensionInterface
 {
     public function buildContainer(Container $container): void
     {
+        $container->set(PdoStorage::class, function (Container $container) {
+            return new PdoStorage($container->get(\PDO::class), $container->getParameter('db_prefix') . 's2_search_idx_');
+        });
+        $container->set(StemmerInterface::class, function (Container $container) {
+            return new PorterStemmerRussian(new PorterStemmerEnglish());
+        });
+        $container->set(Finder::class, function (Container $container) {
+            return (new Finder($container->get(PdoStorage::class), $container->get(StemmerInterface::class)))
+                ->setHighlightTemplate('<span class="s2_search_highlight">%s</span>')
+                ->setSnippetLineSeparator(' ⋄&nbsp;')
+            ;
+        });
+
         // Note: Indexing is performed in the QueueConsumer, so it cannot be moved to AdminExtension right now.
         $container->set(Indexer::class, static function (Container $container) {
             return new Indexer(
@@ -108,6 +131,20 @@ class Extension implements ExtensionInterface
             );
         });
 
+        $container->set('recommendations_logger', function (Container $container) {
+            return new Logger($container->getParameter('log_dir') . 'recommendations.log', 'recommendations', LogLevel::INFO);
+        });
+        $container->set('recommendations_cache', function (Container $container) {
+            return new FilesystemAdapter('recommendations', 0, $container->getParameter('cache_dir'));
+        });
+        $container->set(RecommendationProvider::class, function (Container $container) {
+            return new RecommendationProvider(
+                $container->get(PdoStorage::class),
+                LayoutMatcherFactory::getFourColumns($container->get('recommendations_logger')),
+                $container->get('recommendations_cache'),
+                $container->get(QueuePublisher::class)
+            );
+        }, [QueueHandlerInterface::class]);
     }
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
@@ -137,6 +174,26 @@ class Extension implements ExtensionInterface
             }
         });
 
+        $eventDispatcher->addListener(ArticleRenderedEvent::class, static function (ArticleRenderedEvent $event) use ($container) {
+            if ($event->template->hasPlaceholder('<!-- s2_recommendations -->')) {
+                /** @var RecommendationProvider $recommendationProvider */
+                $recommendationProvider = $container->get(RecommendationProvider::class);
+                /** @var RequestStack $requestStack */
+                $requestStack = $container->get(RequestStack::class);
+                $request_uri  = $requestStack->getCurrentRequest()?->getPathInfo();
+                [$recommendations, $log, $rawRecommendations] = $recommendationProvider->getRecommendations($request_uri, new ExternalId($event->articleId));
+
+                /** @var Viewer $viewer */
+                $viewer = $container->get(Viewer::class);
+
+                $event->template->putInPlaceholder('recommendations', $viewer->render('recommendations', [
+                    'raw'     => $rawRecommendations,
+                    'content' => $recommendations,
+                    'log'     => $log,
+                ], 's2_search'));
+            }
+        });
+
         // Thumbnails in search results page
         $eventDispatcher->addListener(ThumbnailGenerateEvent::class, static function (ThumbnailGenerateEvent $event) {
             $maxWidth  = $event->maxWidth;
@@ -148,7 +205,7 @@ class Extension implements ExtensionInterface
 
                 $sizeArray = ThumbnailGenerator::reduceSize('320', '180', $maxWidth, $maxHeight);
 
-                $event->setResult(sprintf('<span class="video-thumbnail"><img src="%s" width="%s" height="%s" alt=""></span>', $src, ...$sizeArray));
+                $event->setResult(\sprintf('<span class="video-thumbnail"><img src="%s" width="%s" height="%s" alt=""></span>', $src, ...$sizeArray));
             }
         });
     }

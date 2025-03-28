@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace unit\Cms\Layout;
+namespace unit\extensions\s2_search\Layout;
 
 use Codeception\Test\Unit;
-use S2\Cms\Layout\LayoutMatcher;
+use s2_extensions\s2_search\Layout\LayoutMatcher;
 
 /**
  * @group layout-matcher

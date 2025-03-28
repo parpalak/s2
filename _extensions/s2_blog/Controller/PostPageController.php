@@ -12,7 +12,6 @@ namespace s2_extensions\s2_blog\Controller;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
-use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
@@ -20,6 +19,7 @@ use S2\Rose\Entity\ExternalId;
 use s2_extensions\s2_blog\BlogUrlBuilder;
 use s2_extensions\s2_blog\CalendarBuilder;
 use s2_extensions\s2_blog\Model\PostProvider;
+use s2_extensions\s2_search\Service\RecommendationProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -27,18 +27,18 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class PostPageController extends BlogController
 {
     public function __construct(
-        DbLayer                                 $dbLayer,
-        CalendarBuilder                         $calendarBuilder,
-        BlogUrlBuilder                          $blogUrlBuilder,
-        ArticleProvider                         $articleProvider,
-        PostProvider                            $postProvider,
-        UrlBuilder                              $urlBuilder,
-        private readonly RecommendationProvider $recommendationProvider,
-        TranslatorInterface                     $translator,
-        HtmlTemplateProvider                    $templateProvider,
-        Viewer                                  $viewer,
-        string                                  $blogTitle,
-        protected bool                          $showComments,
+        DbLayer                                  $dbLayer,
+        CalendarBuilder                          $calendarBuilder,
+        BlogUrlBuilder                           $blogUrlBuilder,
+        ArticleProvider                          $articleProvider,
+        PostProvider                             $postProvider,
+        UrlBuilder                               $urlBuilder,
+        private readonly ?RecommendationProvider $recommendationProvider,
+        TranslatorInterface                      $translator,
+        HtmlTemplateProvider                     $templateProvider,
+        Viewer                                   $viewer,
+        string                                   $blogTitle,
+        protected bool                           $showComments,
     ) {
         parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
     }
@@ -206,14 +206,14 @@ class PostPageController extends BlogController
             ->putInPlaceholder('head_title', s2_htmlencode($row['title']))
         ;
 
-        if ($template->hasPlaceholder('<!-- s2_recommendations -->')) {
+        if ($this->recommendationProvider !== null && $template->hasPlaceholder('<!-- s2_recommendations -->')) {
             $request_uri = $request->getPathInfo();
             [$recommendations, $log, $rawRecommendations] = $this->recommendationProvider->getRecommendations($request_uri, new ExternalId('s2_blog_' . $post_id));
             $template->putInPlaceholder('recommendations', $this->viewer->render('recommendations', [
                 'raw'     => $rawRecommendations,
                 'content' => $recommendations,
                 'log'     => $log,
-            ]));
+            ], 's2_search'));
         }
 
         return null;

@@ -31,7 +31,6 @@ use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Http\RedirectDetector;
 use S2\Cms\HttpClient\HttpClient;
 use S2\Cms\Image\ThumbnailGenerator;
-use S2\Cms\Layout\LayoutMatcherFactory;
 use S2\Cms\Logger\Logger;
 use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\Article\ArticleRssStrategy;
@@ -52,17 +51,12 @@ use S2\Cms\Pdo\PdoSqliteFactory;
 use S2\Cms\Queue\QueueConsumer;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
-use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\TemplateFinalReplaceEvent;
 use S2\Cms\Template\Viewer;
 use S2\Cms\Translation\ExtensibleTranslator;
-use S2\Rose\Finder;
-use S2\Rose\Stemmer\PorterStemmerEnglish;
-use S2\Rose\Stemmer\PorterStemmerRussian;
-use S2\Rose\Stemmer\StemmerInterface;
-use S2\Rose\Storage\Database\PdoStorage;
+use s2_extensions\s2_search\Service\RecommendationProvider;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -114,20 +108,6 @@ class CmsExtension implements ExtensionInterface
             };
         });
 
-        // TODO move to s2_search
-        $container->set(PdoStorage::class, function (Container $container) {
-            return new PdoStorage($container->get(\PDO::class), $container->getParameter('db_prefix') . 's2_search_idx_');
-        });
-        $container->set(StemmerInterface::class, function (Container $container) {
-            return new PorterStemmerRussian(new PorterStemmerEnglish());
-        });
-        $container->set(Finder::class, function (Container $container) {
-            return (new Finder($container->get(PdoStorage::class), $container->get(StemmerInterface::class)))
-                ->setHighlightTemplate('<span class="s2_search_highlight">%s</span>')
-                ->setSnippetLineSeparator(' ⋄&nbsp;')
-            ;
-        });
-
         $container->set(ExtensionCache::class, function (Container $container) {
             return new ExtensionCache(
                 $container->get(DbLayer::class),
@@ -146,12 +126,6 @@ class CmsExtension implements ExtensionInterface
         }, [QueueHandlerInterface::class]);
         $container->set(LoggerInterface::class, function (Container $container) {
             return new Logger($container->getParameter('log_dir') . 'app.log', 'app', LogLevel::INFO);
-        });
-        $container->set('recommendations_logger', function (Container $container) {
-            return new Logger($container->getParameter('log_dir') . 'recommendations.log', 'recommendations', LogLevel::INFO);
-        });
-        $container->set('recommendations_cache', function (Container $container) {
-            return new FilesystemAdapter('recommendations', 0, $container->getParameter('cache_dir'));
         });
         $container->set('config_cache', function (Container $container) {
             return new FilesystemAdapter('config', 0, $container->getParameter('cache_dir'));
@@ -205,14 +179,6 @@ class CmsExtension implements ExtensionInterface
                 ...$container->getByTag(QueueHandlerInterface::class)
             );
         });
-        $container->set(RecommendationProvider::class, function (Container $container) {
-            return new RecommendationProvider(
-                $container->get(PdoStorage::class),
-                LayoutMatcherFactory::getFourColumns($container->get('recommendations_logger')),
-                $container->get('recommendations_cache'),
-                $container->get(QueuePublisher::class)
-            );
-        }, [QueueHandlerInterface::class]);
 
         $container->set(UrlBuilder::class, function (Container $container) {
             return new UrlBuilder(

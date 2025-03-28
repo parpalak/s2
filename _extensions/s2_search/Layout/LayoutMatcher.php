@@ -5,11 +5,10 @@
  * @package   S2
  */
 
-namespace S2\Cms\Layout;
+namespace s2_extensions\s2_search\Layout;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use S2\Cms\Image\ImgDto;
 
 class LayoutMatcher
 {

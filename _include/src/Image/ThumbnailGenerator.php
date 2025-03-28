@@ -11,7 +11,6 @@ namespace S2\Cms\Image;
 
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
-use s2_extensions\s2_search\Rose\CustomExtractor;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ThumbnailGenerator implements QueueHandlerInterface
@@ -52,25 +51,6 @@ class ThumbnailGenerator implements QueueHandlerInterface
         } catch (\InvalidArgumentException $e) {
             return sprintf('<img src="%s" alt="">', $src);
         }
-    }
-
-    /**
-     * TODO move to a separate class like ImageReducer
-     * Get slightly reduced image for recommendations.
-     */
-    public function getReducedImg(ImgDto $img): ImgDto
-    {
-        $src = $img->getSrc();
-        if (str_starts_with($src, CustomExtractor::YOUTUBE_PROTOCOL)) {
-            return (new ImgDto(
-                'https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/hq720.jpg',
-                640,
-                360,
-                $img->getClass()
-            ))/*->addSrc('https://img.youtube.com/vi/' . substr($src, \strlen(CustomExtractor::YOUTUBE_PROTOCOL)) . '/hq720.jpg')*/ ;
-        }
-
-        return $img;
     }
 
     /**

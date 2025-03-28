@@ -12,12 +12,12 @@ namespace s2_extensions\s2_search\Admin;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
-use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Exception\RuntimeException;
 use S2\Rose\Indexer;
 use S2\Rose\Storage\Database\PdoStorage;
 use s2_extensions\s2_search\Service\BulkIndexingProviderInterface;
+use s2_extensions\s2_search\Service\RecommendationProvider;
 
 class IndexManager
 {

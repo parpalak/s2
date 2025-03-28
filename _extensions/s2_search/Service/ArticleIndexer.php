@@ -16,7 +16,6 @@ use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
-use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Rose\Entity\Indexable;
 use S2\Rose\Indexer;
 

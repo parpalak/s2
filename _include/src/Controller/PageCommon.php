@@ -18,10 +18,9 @@ use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
-use S2\Cms\Recommendation\RecommendationProvider;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
-use S2\Rose\Entity\ExternalId;
+use s2_extensions\s2_search\Service\RecommendationProvider;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -453,16 +452,6 @@ readonly class PageCommon implements ControllerInterface
 
         if ($template->hasPlaceholder('<!-- s2_tags -->')) {
             $template->putInPlaceholder('tags', $this->get_tags($articleId));
-        }
-
-        // Recommendations
-        if ($template->hasPlaceholder('<!-- s2_recommendations -->')) {
-            [$recommendations, $log, $rawRecommendations] = $this->recommendationProvider->getRecommendations($request_uri, new ExternalId($articleId));
-            $template->putInPlaceholder('recommendations', $this->viewer->render('recommendations', [
-                'raw'     => $rawRecommendations,
-                'content' => $recommendations,
-                'log'     => $log,
-            ]));
         }
 
         // Comments
