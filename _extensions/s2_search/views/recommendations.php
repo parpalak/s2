@@ -1,6 +1,7 @@
 <?php
 /**
  * @var callable $trans
+ * @var callable $makeLink
  * @var callable $dateAndTime
  * @var array  $raw
  * @var array  $log
@@ -79,9 +80,6 @@ $getReducedImg = function (ImgDto $img): ImgDto
     return $img;
 };
 
-/** @var ThumbnailGenerator $th */
-$th = Container::get(ThumbnailGenerator::class);
-
 $maxLine = 0;
 foreach ($content as $recommendation) {
     $pos = $recommendation['position'];
@@ -99,7 +97,7 @@ foreach ($content as $recommendation) {
 <div class="recommendations" style="<?php if ($maxLine > 5) {echo 'grid-template-columns: repeat(' . ($maxLine - 1) . ', 1fr);'; } ?>">
     <?php foreach ($content as $recommendation) : ?>
         <div class="recommendation" style="grid-area: <?php echo $recommendation['position'] ?: 'auto'; ?>">
-            <a class="recommendation-link" href="<?= s2_link($recommendation['url']) ?>">
+            <a class="recommendation-link" href="<?= $makeLink($recommendation['url']) ?>">
                 <?php
                 if ($recommendation['image'] !== null) {
                     $columnNum = $getColumnsNumFromGridArea($recommendation['position']);
@@ -119,40 +117,3 @@ foreach ($content as $recommendation) {
         </div>
     <?php endforeach; ?>
 </div>
-<?php
-
-return;
-
-?>
-
-<div style="display: grid; gap: 1em; grid-template-columns: repeat(5, 1fr);">
-    <?php foreach ($raw as $recommendation) : ?>
-        <div class="s2_blog_recommendation <?= $recommendation['relevance'] < 0.0 ? 'gray' : '' ?>">
-            <?php
-            /** @var \S2\Rose\Entity\TocEntryWithMetadata $tocWithMetadata */
-            $tocWithMetadata = $recommendation['tocWithMetadata'];
-
-            $tocEntry = $tocWithMetadata->getTocEntry();
-            $link     = s2_link($tocEntry->getUrl());
-
-            foreach ($tocWithMetadata->getImgCollection() as $image) {
-                $img = $th->getImgHtml($image, 120, 60);
-                echo '<a class="preview-link" href="', $link, '">', $img, '</a>';
-            }
-            ?>
-
-            <h3 class="header s2_blog_recommendation">
-                <a href="<?= $link ?>"><?php echo $tocEntry->getTitle(); ?></a>
-            </h3>
-            <?= $recommendation['snippet'] ?> <?= $recommendation['snippet2'] ?><br>
-            <span style="color: #999"><?= str_replace(',', ' ', $recommendation['names']) ?></span><br>
-            <?= $recommendation['relevance'] ?>
-            <?= $recommendation['word_count'] ?>
-            <?= $tocEntry->getDate() ? $tocEntry->getDate()->format('Y') : ''; ?>
-        </div>
-    <?php endforeach; ?>
-</div>
-
-<?php
-
-// echo '<pre>', implode('<br>', $log), '</pre>';

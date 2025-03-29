@@ -423,6 +423,13 @@ class InstallCest
         $I->see('stop');
 
         $I->amOnPage('/blog/2023/08/12/new_post1');
+        $I->seeElement('h2.recommendation-title#recommendations');
+        $I->seeElement('div.recommendations > div.recommendation > a.recommendation-link');
+        $I->see('Read next', 'h2.recommendation-title');
+        $I->see('New Page Title', '.recommendation-header-2');
+        $I->see('Some new page text', '.recommendation-snippet');
+        $I->see('2023', '.recommendation-date');
+
         $I->submitForm('.s2_search_form', ['q' => 'new']);
         $I->seeCurrentUrlEquals('/index.php?search=1&q=new');
         $I->see('Search', 'h1');
@@ -430,7 +437,6 @@ class InstallCest
         $I->see('New Page Title');
 
         // todo save and check indexing
-        // todo recommendations
     }
 
     /**

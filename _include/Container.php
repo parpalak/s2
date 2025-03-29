@@ -23,9 +23,4 @@ class Container
     {
         return self::$container->get($className);
     }
-
-    public static function getIfInstantiated(string $className): ?object
-    {
-        return self::$container?->getIfInstantiated($className);
-    }
 }

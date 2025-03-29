@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * @copyright 2023 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
- * @package   S2
+ * @copyright 2023-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_search
  */
+
+declare(strict_types=1);
 
 namespace s2_extensions\s2_search\Layout;
 
@@ -26,7 +28,7 @@ class LayoutMatcher
     public function addGroup(string $key, BlockGroup ...$blockGroups): void
     {
         if (isset($this->templatesList[$key])) {
-            throw new \InvalidArgumentException(sprintf('Block group "%s" is already registered.', $key));
+            throw new \InvalidArgumentException(\sprintf('Block group "%s" is already registered.', $key));
         }
         $this->templatesList[$key] = $blockGroups;
     }
@@ -114,7 +116,7 @@ class LayoutMatcher
         $log             = [];
         $contentItemsNum = \count($contentItems);
         if ($contentItemsNum === 0) {
-            $this->logger->warning(sprintf('Requested layout for empty recommendations for page "%s".', $page), [
+            $this->logger->warning(\sprintf('Requested layout for empty recommendations for page "%s".', $page), [
                 'time' => self::formatTime($start),
             ]);
 
@@ -145,7 +147,7 @@ class LayoutMatcher
                         $mapGroupToItems[$idx][] = $i;
                         $mapItemToGroups[$i][]   = $idx;
 
-                        $log[] = sprintf(
+                        $log[] = \sprintf(
                             "%s item %d match ['%s']",
                             self::formatTime($start),
                             $i,
@@ -156,7 +158,7 @@ class LayoutMatcher
                 $foundCount       = \count($mapGroupToItems[$idx] ?? []);
                 $blocksInCurGroup = $templateGroup->count();
                 if ($foundCount < $blocksInCurGroup) {
-                    $log[] = sprintf(
+                    $log[] = \sprintf(
                         "%s '%s': not enough match [%s] for group [%s] found (%s < %s)",
                         self::formatTime($start),
                         $templateName,
@@ -196,7 +198,7 @@ class LayoutMatcher
                 $templateGroup = $templateGroups[$groupIdx];
 
                 if ($templateGroup->count() !== \count($itemsToUse)) {
-                    $this->logger->error(sprintf('Invalid distribution: count mismatch for template "%s" group "%s".', $templateName, $groupIdx), $processedMap);
+                    $this->logger->error(\sprintf('Invalid distribution: count mismatch for template "%s" group "%s".', $templateName, $groupIdx), $processedMap);
                     continue 2;
                 }
 
@@ -267,7 +269,7 @@ class LayoutMatcher
             }
             $log[] = $formattedTime . " match" . ($hasUnusedImages ? ' (not all images used!)' : '') . " &nbsp; $templateName";
 
-            $this->logger->log($hasUnusedImages ? LogLevel::WARNING : LogLevel::INFO, sprintf('Recommendations for page "%s" completed.', $page), [
+            $this->logger->log($hasUnusedImages ? LogLevel::WARNING : LogLevel::INFO, \sprintf('Recommendations for page "%s" completed.', $page), [
                 'time'                                          => $formattedTime,
                 'templateName'                                  => $templateName,
                 'tplid ' . str_replace(' ', '_', $templateName) => $page,
@@ -278,7 +280,7 @@ class LayoutMatcher
             return [$result, $log];
         }
 
-        $this->logger->warning(sprintf('No recommendations found for page "%s".', $page), [
+        $this->logger->warning(\sprintf('No recommendations found for page "%s".', $page), [
             'time' => self::formatTime($start),
         ]);
 

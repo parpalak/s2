@@ -52,11 +52,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Extension implements ExtensionInterface
 {
+    public static function PdoStorageFactory(Container $container): PdoStorage {
+        return new PdoStorage($container->get(\PDO::class), $container->getParameter('db_prefix') . 's2_search_idx_');
+    }
+
     public function buildContainer(Container $container): void
     {
-        $container->set(PdoStorage::class, function (Container $container) {
-            return new PdoStorage($container->get(\PDO::class), $container->getParameter('db_prefix') . 's2_search_idx_');
-        });
+        $container->set(PdoStorage::class, self::PdoStorageFactory(...));
         $container->set(StemmerInterface::class, function (Container $container) {
             return new PorterStemmerRussian(new PorterStemmerEnglish());
         });

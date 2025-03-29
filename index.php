@@ -35,10 +35,6 @@ else {
 //
 if (str_ends_with($request_uri, '---')) {
     header('Location: ' . S2_PATH . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
-
-    /** @var DbLayer $s2_db */
-    $s2_db = \Container::getIfInstantiated(DbLayer::class);
-    $s2_db?->close();
     die;
 }
 

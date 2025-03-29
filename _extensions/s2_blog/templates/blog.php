@@ -20,6 +20,7 @@
             <!-- s2_title -->
             <!-- s2_date -->
             <!-- s2_text -->
+            <!-- s2_recommendations -->
             <!-- s2_comments -->
             <!-- s2_comment_form -->
         </div>

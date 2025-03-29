@@ -37,7 +37,6 @@ readonly class PageCommon implements ControllerInterface
         private UrlBuilder               $urlBuilder,
         private TranslatorInterface      $translator,
         private HtmlTemplateProvider     $htmlTemplateProvider,
-        private RecommendationProvider   $recommendationProvider,
         private Viewer                   $viewer,
         private bool                     $useHierarchy,
         private bool                     $showComments,

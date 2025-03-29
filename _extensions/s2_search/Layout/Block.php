@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * @copyright (C) 2023 Roman Parpalak
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2023-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_search
  */
+
+declare(strict_types=1);
 
 namespace s2_extensions\s2_search\Layout;
 
@@ -78,11 +80,11 @@ class Block
         }
 
         if ($maxRatio !== null && $minRatio > $maxRatio) {
-            throw new \InvalidArgumentException(sprintf('Invalid constraints: $minRatio (%s)> $maxRatio (%s).', $minRatio, $maxRatio));
+            throw new \InvalidArgumentException(\sprintf('Invalid constraints: $minRatio (%s)> $maxRatio (%s).', $minRatio, $maxRatio));
         }
 
         if ($minWidth !== null && $maxWidth !== null && $minWidth > $maxWidth) {
-            throw new \InvalidArgumentException(sprintf('Invalid constraints: $minWidth (%s) > $maxWidth (%s).', $minWidth, $maxWidth));
+            throw new \InvalidArgumentException(\sprintf('Invalid constraints: $minWidth (%s) > $maxWidth (%s).', $minWidth, $maxWidth));
         }
 
         $this->imageMinRatio = $minRatio;

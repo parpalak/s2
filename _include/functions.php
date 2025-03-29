@@ -8,22 +8,7 @@
  */
 
 
-use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayerException;
-
-//
-// Link processing
-//
-/**
- * @deprecated Use UrlBuilder instead
- */
-function s2_link($path = '', $params = []): string
-{
-    /** @var UrlBuilder $urlBuilder */
-    $urlBuilder = Container::get(UrlBuilder::class);
-    return $urlBuilder->link($path, $params);
-}
-
 
 // Creates paging navigation (1  2  3 ... total_pages - 1  total_pages)
 // $url must have the following form http://example.com/page?num=%d
@@ -234,11 +219,6 @@ function error()
     </body>
     </html>
     <?php
-
-    // If a database connection was established (before this error) we close it
-    /** @var ?\S2\Cms\Pdo\DbLayer $s2_db */
-    $s2_db = Container::getIfInstantiated(\S2\Cms\Pdo\DbLayer::class);
-    $s2_db?->close();
 
     exit;
 }

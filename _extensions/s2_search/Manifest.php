@@ -77,8 +77,8 @@ class Manifest implements ManifestInterface
             $dbLayer->buildAndQuery($query);
         }
 
-        /** @var PdoStorage $pdoStorage */
-        $pdoStorage = $container->get(PdoStorage::class);
+        // The extension is not installed yet, so we can't take the storage from the container directly
+        $pdoStorage = Extension::PdoStorageFactory($container);
         $pdoStorage->erase();
     }
 

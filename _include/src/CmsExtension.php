@@ -76,7 +76,7 @@ class CmsExtension implements ExtensionInterface
                 'mysql' => new DbLayer($container->get(\PDO::class), $db_prefix),
                 'sqlite' => new DbLayerSqlite($container->get(\PDO::class), $db_prefix),
                 'pgsql' => new DbLayerPostgres($container->get(\PDO::class), $db_prefix),
-                default => throw new \RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
+                default => throw new \RuntimeException(\sprintf('Unsupported db_type="%s"', $db_type)),
             };
         });
         $container->set(\PDO::class, function (Container $container) {
@@ -104,7 +104,7 @@ class CmsExtension implements ExtensionInterface
                 'mysql' => new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_username, $db_password),
                 'sqlite' => PdoSqliteFactory::create($container->getParameter('root_dir') . $db_name, $p_connect),
                 'pgsql' => new PDO("pgsql:host=$db_host;dbname=$db_name", $db_username, $db_password),
-                default => throw new \RuntimeException(sprintf('Unsupported db_type="%s"', $db_type)),
+                default => throw new \RuntimeException(\sprintf('Unsupported db_type="%s"', $db_type)),
             };
         });
 
@@ -149,11 +149,11 @@ class CmsExtension implements ExtensionInterface
             $translator->attachLoader('common', function (string $language, ExtensibleTranslator $translator) {
                 $fileName = __DIR__ . '/../../_lang/' . $language . '/common.php';
                 if (!\file_exists($fileName)) {
-                    throw new ConfigurationException(sprintf('The language pack "%s" you have chosen seems to be corrupt. Please check that file "common.php" exists.', $language));
+                    throw new ConfigurationException(\sprintf('The language pack "%s" you have chosen seems to be corrupt. Please check that file "common.php" exists.', $language));
                 }
                 $translations = require $fileName;
                 if (!\is_array($translations)) {
-                    throw new ConfigurationException(sprintf('The language pack "%s" you have chosen seems to be corrupt. Please check that file "common.php" has the correct format.', $language));
+                    throw new ConfigurationException(\sprintf('The language pack "%s" you have chosen seems to be corrupt. Please check that file "common.php" has the correct format.', $language));
                 }
                 $locale = $translations['locale'] ?? 'en';
 
@@ -337,7 +337,6 @@ class CmsExtension implements ExtensionInterface
                 $container->get(UrlBuilder::class),
                 $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
-                $container->get(RecommendationProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_USE_HIERARCHY') === '1',
                 $provider->get('S2_SHOW_COMMENTS') === '1',
@@ -574,7 +573,7 @@ class CmsExtension implements ExtensionInterface
                 /** @var Pdo $pdo */
                 $pdo           = $container->getIfInstantiated(\PDO::class);
                 $executionTime = microtime(true) - $container->getParameter('boot_timestamp');
-                $content       = sprintf(
+                $content       = \sprintf(
                     't = %s; q = %d',
                     $viewer->numberFormat($executionTime, true, 3),
                     $pdo !== null ? $pdo->getQueryCount() : 0

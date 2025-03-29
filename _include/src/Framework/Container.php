@@ -92,19 +92,15 @@ class Container implements ContainerInterface
 
     public function getByTagIfInstantiated(string $tag): array
     {
-        try {
-            $services = array_map(fn(string $id) => $this->getIfInstantiated($id), $this->idsByTag[$tag] ?? []);
+        $services = array_map(fn(string $id) => $this->getIfInstantiated($id), $this->idsByTag[$tag] ?? []);
 
-            return array_filter($services, static fn(mixed $service) => $service !== null);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface  $e) {
-            throw new \LogicException('Impossible exception occurred', 0, $e);
-        }
+        return array_filter($services, static fn(mixed $service) => $service !== null);
     }
 
     public function clear(string $id): void
     {
         if (!isset($this->bindings[$id])) {
-            throw new ServiceNotFoundException(sprintf('Entity "%s" not found in container.', $id));
+            throw new ServiceNotFoundException(\sprintf('Entity "%s" not found in container.', $id));
         }
 
         unset($this->instances[$id]);
@@ -132,11 +128,11 @@ class Container implements ContainerInterface
     public function getParameter(string $name): mixed
     {
         if (!\array_key_exists($name, $this->parameters)) {
-            throw new ParameterNotFoundException(sprintf('Unknown parameter "%s" has been requested from container. Either define one or fix its name.', $name));
+            throw new ParameterNotFoundException(\sprintf('Unknown parameter "%s" has been requested from container. Either define one or fix its name.', $name));
         }
 
         if (!isset($this->parameters[$name])) {
-            throw new ParameterNotFoundException(sprintf('Parameter "%s" is initialized with null value in container.', $name));
+            throw new ParameterNotFoundException(\sprintf('Parameter "%s" is initialized with null value in container.', $name));
         }
 
         return $this->parameters[$name];

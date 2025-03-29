@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Helper;
 
 use Codeception\TestInterface;
+use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use S2\Cms\Admin\AdminAjaxRequestHandler;
@@ -44,6 +45,7 @@ class Integration extends AbstractBrowserModule
      * @throws ContainerExceptionInterface
      * @throws DbLayerException
      * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
      */
     public function _initialize()
     {
@@ -56,9 +58,11 @@ class Integration extends AbstractBrowserModule
         $this->pdo               = $this->publicApplication->container->get(\PDO::class);
 
         $this->adminApplication = $this->createAdminApplication();
-        $this->adminApplication->container->set(\PDO::class, $this->pdo);
+        $this->adminApplication->container->decorate(\PDO::class, function () {
+            return $this->pdo;
+        });
 
-        $adminDbLayer   = $this->adminApplication->container->get(DbLayer::class);
+        $adminDbLayer = $this->adminApplication->container->get(DbLayer::class);
         (new Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
         (new \s2_extensions\s2_search\Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
         $installer = new Installer($adminDbLayer);
