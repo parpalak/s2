@@ -77,7 +77,7 @@ class InstallCest
         $this->testFavoritePage($I);
         $this->testBlogExtension($I);
         $this->testBlogRssAndSitemap($I);
-        $this->testSearchExtension($I);
+        $this->testSearchExtension($I, $example['db_type']);
         $this->testAdminAddArticles($I);
         $this->testRssAndSitemap($I);
         $this->testAdminTagListAndEdit($I);
@@ -403,7 +403,7 @@ class InstallCest
         $I->see(gmdate('c', strtotime('2023-08-12 12:15')));
     }
 
-    private function testSearchExtension(AcceptanceTester $I): void
+    private function testSearchExtension(AcceptanceTester $I, string $dbType): void
     {
         $I->amOnPage('/?search=1&q=new');
         $I->dontSee('Search', 'h1');
@@ -423,12 +423,14 @@ class InstallCest
         $I->see('stop');
 
         $I->amOnPage('/blog/2023/08/12/new_post1');
-        $I->seeElement('h2.recommendation-title#recommendations');
-        $I->seeElement('div.recommendations > div.recommendation > a.recommendation-link');
-        $I->see('Read next', 'h2.recommendation-title');
-        $I->see('New Page Title', '.recommendation-header-2');
-        $I->see('Some new page text', '.recommendation-snippet');
-        $I->see('2023', '.recommendation-date');
+        if ($dbType !== 'sqlite') {
+            $I->seeElement('h2.recommendation-title#recommendations');
+            $I->seeElement('div.recommendations > div.recommendation > a.recommendation-link');
+            $I->see('Read next', 'h2.recommendation-title');
+            $I->see('New Page Title', '.recommendation-header-2');
+            $I->see('Some new page text', '.recommendation-snippet');
+            $I->see('2023', '.recommendation-date');
+        }
 
         $I->submitForm('.s2_search_form', ['q' => 'new']);
         $I->seeCurrentUrlEquals('/index.php?search=1&q=new');

@@ -20,27 +20,19 @@ use s2_extensions\s2_search\Layout\LayoutMatcher;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
-class RecommendationProvider implements QueueHandlerInterface
+readonly class RecommendationProvider implements QueueHandlerInterface
 {
     public const INVALIDATED_AT        = 'invalidatedAt';
     public const RECOMMENDATIONS_QUEUE = 'recommendations';
     public const CACHE_KEY_PREFIX      = 'recommendations_';
 
-    private PdoStorage $pdoStorage;
-    private LayoutMatcher $layoutMatcher;
-    private CacheInterface $cache;
-    private QueuePublisher $queuePublisher;
-
     public function __construct(
-        PdoStorage     $pdoStorage,
-        LayoutMatcher  $layoutMatcher,
-        CacheInterface $cache,
-        QueuePublisher $queuePublisher
+        private PdoStorage     $pdoStorage,
+        private LayoutMatcher  $layoutMatcher,
+        private CacheInterface $cache,
+        private QueuePublisher $queuePublisher,
+        private string         $dbType,
     ) {
-        $this->pdoStorage     = $pdoStorage;
-        $this->layoutMatcher  = $layoutMatcher;
-        $this->cache          = $cache;
-        $this->queuePublisher = $queuePublisher;
     }
 
     /**
@@ -48,6 +40,9 @@ class RecommendationProvider implements QueueHandlerInterface
      */
     public function getRecommendations(string $page, ExternalId $externalId): array
     {
+        if ($this->dbType === 'sqlite') {
+            return [[], [], []];
+        }
         [$recommendations, $generatedAt] = ($this->cache->get(
             $this->getCacheKey($externalId),
             fn(ItemInterface $item) => $this->getValueForCache($externalId)
@@ -121,10 +116,14 @@ class RecommendationProvider implements QueueHandlerInterface
 
     private function getValueForCache(ExternalId $externalId): array
     {
-        return [
-            $this->pdoStorage->getSimilar($externalId, true, null, 4, 9)
-                ?: $this->pdoStorage->getSimilar($externalId, true, null, 2, 9),
-            time()
-        ];
+        try {
+            return [
+                $this->pdoStorage->getSimilar($externalId, true, null, 4, 9)
+                    ?: $this->pdoStorage->getSimilar($externalId, true, null, 2, 9),
+                time()
+            ];
+        } catch (\LogicException $e) {
+            return [[], time()];
+        }
     }
 }

@@ -144,7 +144,8 @@ class Extension implements ExtensionInterface
                 $container->get(PdoStorage::class),
                 LayoutMatcherFactory::getFourColumns($container->get('recommendations_logger')),
                 $container->get('recommendations_cache'),
-                $container->get(QueuePublisher::class)
+                $container->get(QueuePublisher::class),
+                $container->getParameter('db_type'),
             );
         }, [QueueHandlerInterface::class]);
     }
