@@ -52,7 +52,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Extension implements ExtensionInterface
 {
-    public static function PdoStorageFactory(Container $container): PdoStorage {
+    public static function PdoStorageFactory(Container $container): PdoStorage
+    {
         return new PdoStorage($container->get(\PDO::class), $container->getParameter('db_prefix') . 's2_search_idx_');
     }
 
@@ -139,13 +140,24 @@ class Extension implements ExtensionInterface
         $container->set('recommendations_cache', function (Container $container) {
             return new FilesystemAdapter('recommendations', 0, $container->getParameter('cache_dir'));
         });
+        $container->set(LayoutMatcherFactory::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new LayoutMatcherFactory(
+                $container->get('recommendations_logger'),
+                (int)$provider->get('S2_SEARCH_RECOMMENDATIONS_LIMIT'),
+            );
+        });
         $container->set(RecommendationProvider::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new RecommendationProvider(
                 $container->get(PdoStorage::class),
-                LayoutMatcherFactory::getFourColumns($container->get('recommendations_logger')),
+                $container->get(LayoutMatcherFactory::class),
                 $container->get('recommendations_cache'),
                 $container->get(QueuePublisher::class),
                 $container->getParameter('db_type'),
+                (int)$provider->get('S2_SEARCH_RECOMMENDATIONS_LIMIT') > 0,
             );
         }, [QueueHandlerInterface::class]);
     }

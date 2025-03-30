@@ -4,8 +4,8 @@
  *
  * Adds full-text search with English and Russian morphology.
  *
- * @copyright 2011-2024 Roman Parpalak
- * @license   MIT
+ * @copyright 2011-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_search
  */
 
@@ -43,7 +43,7 @@ class Manifest implements ManifestInterface
 
     public function getVersion(): string
     {
-        return '2.0dev';
+        return '2.0a1';
     }
 
     public function isAdminAffected(): bool
@@ -59,7 +59,8 @@ class Manifest implements ManifestInterface
     public function install(DbLayer $dbLayer, Container $container, ?string $currentVersion): void
     {
         $s2_search_config = [
-            'S2_SEARCH_QUICK' => '0',
+            'S2_SEARCH_QUICK'                 => '0',
+            'S2_SEARCH_RECOMMENDATIONS_LIMIT' => '0',
         ];
 
         foreach ($s2_search_config as $conf_name => $conf_value) {
@@ -92,7 +93,7 @@ class Manifest implements ManifestInterface
         if ($dbLayer->tableExists('config')) {
             $dbLayer->buildAndQuery([
                 'DELETE' => 'config',
-                'WHERE'  => 'name in (\'S2_SEARCH_QUICK\')',
+                'WHERE'  => 'name in (\'S2_SEARCH_QUICK\', \'S2_SEARCH_RECOMMENDATIONS_LIMIT\')',
             ]);
         }
 

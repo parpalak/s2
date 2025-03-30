@@ -11,13 +11,25 @@ namespace s2_extensions\s2_search\Layout;
 
 use Psr\Log\LoggerInterface;
 
-class LayoutMatcherFactory
+readonly class LayoutMatcherFactory
 {
-    /** @noinspection PhpUnnecessarySpreadOperatorForFunctionCallArgumentInspection */
-    public static function getFourColumns(LoggerInterface $logger): LayoutMatcher
-    {
-        $r = new LayoutMatcher($logger);
+    public function __construct(
+        private LoggerInterface $logger,
+        private int             $recommendationsLimit
+    ) {
+    }
 
+    public function createLayoutMatcher(): LayoutMatcher
+    {
+        $layoutMatcher = new LayoutMatcher($this->logger, $this->recommendationsLimit);
+        self::fillFourColumns($layoutMatcher);
+
+        return $layoutMatcher;
+    }
+
+    /** @noinspection PhpUnnecessarySpreadOperatorForFunctionCallArgumentInspection */
+    private static function fillFourColumns(LayoutMatcher $r): void
+    {
         // Blocks for more important (relevant) content go first
         $minImgWidth2 = 560;
         $minImgWidth1 = 300;
@@ -958,7 +970,5 @@ class LayoutMatcherFactory
             // http://localhost:8081/?/blog/2011/07/20/Sultanov
             new BlockGroup(['1/1/2/4'], (new Block())->bigTitle()->text()),
         ]);
-
-        return $r;
     }
 }

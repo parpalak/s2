@@ -423,6 +423,9 @@ class InstallCest
         $I->see('stop');
 
         $I->amOnPage('/blog/2023/08/12/new_post1');
+        $I->dontSeeElement('h2.recommendation-title#recommendations');
+        $I->changeSetting('S2_SEARCH_RECOMMENDATIONS_LIMIT', 10);
+        $I->amOnPage('/blog/2023/08/12/new_post1');
         if ($dbType !== 'sqlite') {
             $I->seeElement('h2.recommendation-title#recommendations');
             $I->seeElement('div.recommendations > div.recommendation > a.recommendation-link');
@@ -506,9 +509,10 @@ class InstallCest
 
     private function testETag(AcceptanceTester $I): void
     {
-        // Disable comments
+        // Disable comments and recommendations
         $I->changeSetting('S2_SHOW_COMMENTS', false);
         $I->changeSetting('S2_ENABLED_COMMENTS', false);
+        $I->changeSetting('S2_SEARCH_RECOMMENDATIONS_LIMIT', 0);
 
         // Test <!-- s2_last_comments --> and <!-- s2_last_discussions --> placeholders when comments are disabled
         $I->amOnPage('/');

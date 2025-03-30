@@ -16,7 +16,7 @@ use S2\Rose\Entity\ExternalId;
 use S2\Rose\Entity\TocEntryWithMetadata;
 use S2\Rose\Storage\Database\PdoStorage;
 use s2_extensions\s2_search\Layout\ContentItem;
-use s2_extensions\s2_search\Layout\LayoutMatcher;
+use s2_extensions\s2_search\Layout\LayoutMatcherFactory;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -27,11 +27,12 @@ readonly class RecommendationProvider implements QueueHandlerInterface
     public const CACHE_KEY_PREFIX      = 'recommendations_';
 
     public function __construct(
-        private PdoStorage     $pdoStorage,
-        private LayoutMatcher  $layoutMatcher,
-        private CacheInterface $cache,
-        private QueuePublisher $queuePublisher,
-        private string         $dbType,
+        private PdoStorage           $pdoStorage,
+        private LayoutMatcherFactory $layoutMatcherFactory,
+        private CacheInterface       $cache,
+        private QueuePublisher       $queuePublisher,
+        private string               $dbType,
+        private bool                 $recommendationsEnabled,
     ) {
     }
 
@@ -40,7 +41,7 @@ readonly class RecommendationProvider implements QueueHandlerInterface
      */
     public function getRecommendations(string $page, ExternalId $externalId): array
     {
-        if ($this->dbType === 'sqlite') {
+        if (!$this->recommendationsEnabled || $this->dbType === 'sqlite') {
             return [[], [], []];
         }
         [$recommendations, $generatedAt] = ($this->cache->get(
@@ -104,7 +105,8 @@ readonly class RecommendationProvider implements QueueHandlerInterface
             $contentItems[] = $contentItem;
         }
 
-        [$config, $log] = $this->layoutMatcher->match($page, ...$contentItems);
+        $layoutMatcher  = $this->layoutMatcherFactory->createLayoutMatcher();
+        [$config, $log] = $layoutMatcher->match($page, ...$contentItems);
 
         return [$config, $log];
     }

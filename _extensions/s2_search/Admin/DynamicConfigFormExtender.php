@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2025 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
- * @package   S2
+ * @package   s2_search
  */
 
 declare(strict_types=1);
@@ -16,8 +16,9 @@ class DynamicConfigFormExtender implements DynamicConfigFormExtenderInterface
     public function getExtraParamTypes(): array
     {
         return [
-            'Search config'   => 'title',
-            'S2_SEARCH_QUICK' => 'boolean',
+            'Search config'                   => 'title',
+            'S2_SEARCH_QUICK'                 => 'boolean',
+            'S2_SEARCH_RECOMMENDATIONS_LIMIT' => 'int',
         ];
     }
 }

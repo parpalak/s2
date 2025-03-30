@@ -18,17 +18,24 @@ class LayoutMatcher
      * @var array|BlockGroup[][]
      */
     private array $templatesList = [];
-    private LoggerInterface $logger;
 
-    public function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly int             $recommendationsLimit,
+    ) {
     }
 
     public function addGroup(string $key, BlockGroup ...$blockGroups): void
     {
         if (isset($this->templatesList[$key])) {
             throw new \InvalidArgumentException(\sprintf('Block group "%s" is already registered.', $key));
+        }
+        $count = 0;
+        foreach ($blockGroups as $blockGroup) {
+            $count += $blockGroup->count();
+        }
+        if ($count > $this->recommendationsLimit) {
+            return;
         }
         $this->templatesList[$key] = $blockGroups;
     }
@@ -66,7 +73,7 @@ class LayoutMatcher
     public static function distributeItemsOverBlocks(array $mapItemToGroups, array $blocksInGroup): ?array
     {
         // Initialize the result array with empty arrays for each group.
-        $result = array_map(static fn () => [], $blocksInGroup);
+        $result = array_map(static fn() => [], $blocksInGroup);
 
         // Sort items by the number of groups they can be placed in (ascending order).
         $itemMap = \array_keys($mapItemToGroups);

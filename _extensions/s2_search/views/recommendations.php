@@ -11,7 +11,7 @@
 use s2_extensions\s2_search\Layout\ImgDto;
 use s2_extensions\s2_search\Rose\CustomExtractor;
 
-if ($content === null) {
+if ($content === null || $content === []) {
     return;
 }
 
