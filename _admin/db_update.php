@@ -277,6 +277,19 @@ if (S2_DB_REVISION < 21) {
     ]);
 }
 
+if (S2_DB_REVISION < 22) {
+    $query = array(
+        'INSERT' => 'name, value',
+        'INTO'   => 'config',
+        'VALUES' => '\'S2_AKISMET_KEY\', \'\''
+    );
+
+    $s2_db->buildAndQuery($query);
+
+    define('S2_AKISMET_KEY', '');
+}
+
+
 $s2_db->buildAndQuery([
     'UPDATE' => 'config',
     'SET'    => 'value = \'' . S2_DB_LAST_REVISION . '\'',

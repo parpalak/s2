@@ -224,7 +224,8 @@ $lang_admin = [
     'S2_COMPRESS_help'         => 'This will reduce bandwidth usage, but use a little more CPU.',
     'S2_SHOW_COMMENTS_help'    => 'You can hide all comments for a while by turning this off.',
     'S2_ENABLED_COMMENTS_help' => 'Show the comment form (at pages where it was not explicitly disabled).',
-    'S2_PREMODERATION_help'    => 'All new comments will be hidden by default. They are to be checked by a moderator before publishing.',
+    'S2_PREMODERATION_help'    => 'All new comments will be hidden by default. They are to be checked by a moderator (or Akismet antispam) before publishing.',
+    'S2_AKISMET_KEY_help'      => 'Enables antispam service akismet.com. If specified, comments will be checked by Akismet and automatically published if they are not spam.',
     'S2_FAVORITE_URL_help'     => 'The URL part for the favorite page, e.g. “favorite”.',
     'S2_TAGS_URL_help'         => 'The URL part for the tags page, e.g. “tags”.',
     'S2_USE_HIERARCHY_help'    => 'Page URLs reflect the tree structure. Page template and visibility are inherited from parent sections.',
@@ -247,6 +248,7 @@ $lang_admin = [
     'S2_SHOW_COMMENTS'    => 'Show comments',
     'S2_ENABLED_COMMENTS' => 'Enable comments',
     'S2_PREMODERATION'    => 'Comments checking',
+    'S2_AKISMET_KEY'      => 'Akismet API key',
 
     'S2_FAVORITE_URL' => 'Favorite URL',
     'S2_TAGS_URL'     => 'Tags URL',

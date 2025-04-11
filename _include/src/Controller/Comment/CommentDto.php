@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -18,5 +18,10 @@ readonly class CommentDto
         public string $email,
         public string $text,
     ) {
+    }
+
+    public function toArray(): array
+    {
+        return get_object_vars($this);
     }
 }

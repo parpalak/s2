@@ -20,6 +20,7 @@ use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,6 +52,7 @@ readonly class CommentController implements ControllerInterface
 
     /**
      * @throws DbLayerException
+     * @throws BadRequestException
      */
     public function handle(Request $request): Response
     {
@@ -76,7 +78,7 @@ readonly class CommentController implements ControllerInterface
             $errors[] = $this->translator->trans('missing_text');
         }
         if (\strlen($text) > self::S2_MAX_COMMENT_BYTES) {
-            $errors[] = sprintf($this->translator->trans('long_text'), self::S2_MAX_COMMENT_BYTES);
+            $errors[] = \sprintf($this->translator->trans('long_text'), self::S2_MAX_COMMENT_BYTES);
         } elseif (self::linkCount($text) > 0) {
             $errors[] = $this->translator->trans('links_in_text');
         }
@@ -173,7 +175,15 @@ readonly class CommentController implements ControllerInterface
 
         $message = s2_bbcode_to_mail($text);
 
-        // Sending the comment to moderators
+        /**
+         * Sending the comment to moderators.
+         * We DO NOT SEND the comment to a moderator if his email is used and he is online.
+         * We'll do it later if required in CommentSentController.
+         * It cannot be done right now due to a special cookie is available in CommentSentController only.
+         *
+         * @see CommentSentController
+         * @see \S2\Cms\Model\AuthManager::createCommentCookie
+         */
         foreach ($this->userProvider->getModerators([], $moderationRequired && $isOnline ? [$email] : []) as $moderator) {
             $this->commentMailer->mailToModerator($moderator->login, $moderator->email, $message, $target->title, $link, $name, $email);
         }

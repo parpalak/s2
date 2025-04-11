@@ -231,18 +231,18 @@ class HtmlTemplate
      */
     private function s2_build_copyright(): string
     {
-        $request_uri = $this->requestStack->getCurrentRequest()?->getPathInfo();
+        $requestUri = $this->requestStack->getCurrentRequest()?->getPathInfo();
 
         $webmaster = $this->dynamicConfigProvider->get('S2_WEBMASTER');
         $email     = $this->dynamicConfigProvider->get('S2_WEBMASTER_EMAIL');
         $startYear = $this->dynamicConfigProvider->get('S2_START_YEAR');
 
         $author    = $webmaster ?: $this->dynamicConfigProvider->get('S2_SITE_NAME');
-        $copyright = $webmaster && $email ? s2_js_mailto($author, $email) : ($request_uri !== '/' ? '<a href="' . $this->urlBuilder->link('/') . '">' . $author . '</a>' : $author);
+        $copyright = $webmaster && $email ? s2_js_mailto($author, $email) : ($requestUri !== '/' ? '<a href="' . $this->urlBuilder->link('/') . '">' . $author . '</a>' : $author);
 
         return ($startYear !== date('Y') ?
-                sprintf($this->translator->trans('Copyright 2'), $copyright, $startYear, date('Y')) :
-                sprintf($this->translator->trans('Copyright 1'), $copyright, date('Y'))) . ' ' .
-            sprintf($this->translator->trans('Powered by'), '<a href="http://s2cms.ru/">S2</a>');
+                \sprintf($this->translator->trans('Copyright 2'), $copyright, $startYear, date('Y')) :
+                \sprintf($this->translator->trans('Copyright 1'), $copyright, date('Y'))) . ' ' .
+            \sprintf($this->translator->trans('Powered by'), '<a href="http://s2cms.ru/">S2</a>');
     }
 }

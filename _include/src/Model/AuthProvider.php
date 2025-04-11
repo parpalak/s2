@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -11,6 +11,7 @@ namespace S2\Cms\Model;
 
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 
 readonly class AuthProvider
@@ -40,13 +41,14 @@ readonly class AuthProvider
             'email' => $email,
         ]);
 
-        $isOnline = $this->dbLayer->result($result) > 0;
+        $count = $this->dbLayer->result($result);
 
-        return $isOnline;
+        return $count > 0;
     }
 
     /**
      * @throws DbLayerException
+     * @throws BadRequestException
      */
     public function getAuthenticatedModeratorEmail(Request $request): ?string
     {

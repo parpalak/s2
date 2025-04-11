@@ -11,6 +11,7 @@ namespace S2\Cms;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use S2\Cms\Comment\AkismetProxy;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Controller\CommentController;
@@ -26,6 +27,7 @@ use S2\Cms\Controller\Sitemap;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Event\NotFoundEvent;
 use S2\Cms\Framework\Exception\ConfigurationException;
+use S2\Cms\Framework\Exception\ServiceAlreadyDefinedException;
 use S2\Cms\Framework\ExtensionInterface;
 use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Http\RedirectDetector;
@@ -56,7 +58,6 @@ use S2\Cms\Template\TemplateEvent;
 use S2\Cms\Template\TemplateFinalReplaceEvent;
 use S2\Cms\Template\Viewer;
 use S2\Cms\Translation\ExtensibleTranslator;
-use s2_extensions\s2_search\Service\RecommendationProvider;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -66,6 +67,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CmsExtension implements ExtensionInterface
 {
+    /**
+     * @throws ServiceAlreadyDefinedException
+     */
     public function buildContainer(Container $container): void
     {
         $container->set(DbLayer::class, function (Container $container) {
@@ -394,6 +398,17 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(AkismetProxy::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
+            return new AkismetProxy(
+                $container->get(HttpClient::class),
+                $container->get(UrlBuilder::class),
+                $container->get(LoggerInterface::class),
+                $provider->get('S2_AKISMET_KEY'),
+            );
+        });
+
         $container->set(CommentController::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
@@ -420,6 +435,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(CommentMailer::class),
+                $container->get(AkismetProxy::class),
                 ...$container->getByTag(CommentStrategyInterface::class)
             );
         });

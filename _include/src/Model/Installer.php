@@ -538,6 +538,7 @@ readonly class Installer
             'S2_SHOW_COMMENTS'    => "'1'",
             'S2_ENABLED_COMMENTS' => "'1'",
             'S2_PREMODERATION'    => "'0'",
+            'S2_AKISMET_KEY'      => "''",
             'S2_ADMIN_COLOR'      => "'#eeeeee'",
             'S2_ADMIN_NEW_POS'    => "'0'",
             'S2_ADMIN_CUT'        => "'0'",
