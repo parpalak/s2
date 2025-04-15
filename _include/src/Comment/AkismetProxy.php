@@ -38,13 +38,13 @@ readonly class AkismetProxy
             'api_key'              => $this->apiKey,
             'blog'                 => $this->urlBuilder->rawAbsLink('/'),
             'user_ip'              => $clientIp,
+            // NOTE: try to add this in case of mistakes
             // 'user_agent'           => $request->headers->get('User-Agent'),
             // 'referrer'             => $request->headers->get('Referer'),
             'comment_type'         => self::TYPE_COMMENT,
             'comment_author'       => $comment->name,
             'comment_author_email' => $comment->email,
             'comment_content'      => $comment->text,
-            // 'is_test'              => true,
         ];
 
         $this->logger->info('Sending comment to Akismet', $comment->toArray());

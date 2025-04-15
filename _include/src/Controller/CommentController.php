@@ -40,6 +40,7 @@ readonly class CommentController implements ControllerInterface
         private CommentMailer            $commentMailer,
         private bool                     $commentsEnabled,
         private bool                     $premoderationEnabled,
+        private bool                     $automaticSpamCheckerEnabled,
     ) {
     }
 
@@ -79,7 +80,7 @@ readonly class CommentController implements ControllerInterface
         }
         if (\strlen($text) > self::S2_MAX_COMMENT_BYTES) {
             $errors[] = \sprintf($this->translator->trans('long_text'), self::S2_MAX_COMMENT_BYTES);
-        } elseif (self::linkCount($text) > 0) {
+        } elseif (!$this->automaticSpamCheckerEnabled && self::linkCount($text) > 0) {
             $errors[] = $this->translator->trans('links_in_text');
         }
 

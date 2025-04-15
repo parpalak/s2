@@ -411,7 +411,8 @@ class CmsExtension implements ExtensionInterface
 
         $container->set(CommentController::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
-            $provider = $container->get(DynamicConfigProvider::class);
+            $provider             = $container->get(DynamicConfigProvider::class);
+            $premoderationEnabled = $provider->get('S2_PREMODERATION') === '1';
             return new CommentController(
                 $container->get(AuthProvider::class),
                 $container->get(UserProvider::class),
@@ -423,7 +424,8 @@ class CmsExtension implements ExtensionInterface
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
                 $provider->get('S2_ENABLED_COMMENTS') === '1',
-                $provider->get('S2_PREMODERATION') === '1',
+                $premoderationEnabled,
+                $premoderationEnabled && $provider->get('S2_AKISMET_KEY') !== '',
             );
         });
 

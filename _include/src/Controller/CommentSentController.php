@@ -64,7 +64,7 @@ readonly class CommentSentController implements ControllerInterface
                 continue;
             }
 
-            if ($moderatorEmail === $comment->email /*|| $this->akismetProxy->isSpam($comment, $authorIp) === false*/) {
+            if ($moderatorEmail === $comment->email || $this->akismetProxy->isSpam($comment, $authorIp) === false) {
                 // We have confirmed that the moderator is the one who has really sent the comment
                 $commentStrategy->notifySubscribers($comment->id);
                 $commentStrategy->publishComment($comment->id);
@@ -75,8 +75,6 @@ readonly class CommentSentController implements ControllerInterface
 
                 return new RedirectResponse($redirectLink);
             }
-
-            $this->akismetProxy->isSpam($comment, $authorIp); // Test, logging only
 
             $moderators = $this->userProvider->getModerators([$comment->email]);
             if (\count($moderators) > 0) {
