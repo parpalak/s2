@@ -64,20 +64,18 @@ readonly class CommentSentController implements ControllerInterface
                 continue;
             }
 
-            if ($moderatorEmail === $comment->email || $this->akismetProxy->isSpam($comment, $authorIp) === false) {
+            if ($moderatorEmail === $comment->email) {
                 // We have confirmed that the moderator is the one who has really sent the comment
-                $commentStrategy->notifySubscribers($comment->id);
-                $commentStrategy->publishComment($comment->id);
-                $hash = $commentStrategy->getHashForPublishedComment($comment->targetId);
-
-                // Redirect to the last comment
-                $redirectLink = $this->urlBuilder->link($targetPath) . ($hash !== null ? '#' . $hash : '');
-
-                return new RedirectResponse($redirectLink);
+                return $this->publishAndNotifyAndGetRedirectResponse($commentStrategy, $comment, $targetPath);
             }
 
             $moderators = $this->userProvider->getModerators([$comment->email]);
             if (\count($moderators) > 0) {
+                /**
+                 * The comment was sent with a moderator email but the moderator is not logged in.
+                 * We assume that this comment has been written by somebody else.
+                 * So we have to notify this moderator.
+                 */
                 $link    = $this->urlBuilder->absLink($targetPath);
                 $message = s2_bbcode_to_mail($comment->text);
                 $target  = $commentStrategy->getTargetById($comment->targetId);
@@ -85,6 +83,12 @@ readonly class CommentSentController implements ControllerInterface
                     $this->commentMailer->mailToModerator($moderator->login, $moderator->email, $message, $target->title ?? 'unknown item', $link, $comment->name, $comment->email);
                 }
             }
+
+            if ($this->akismetProxy->isSpam($comment, $authorIp) === false) {
+                // Automatically publish the comment if it is not a spam.
+                return $this->publishAndNotifyAndGetRedirectResponse($commentStrategy, $comment, $targetPath);
+            }
+
             break;
         }
 
@@ -97,5 +101,20 @@ readonly class CommentSentController implements ControllerInterface
         ;
 
         return $template->toHttpResponse();
+    }
+
+    private function publishAndNotifyAndGetRedirectResponse(
+        CommentStrategyInterface $commentStrategy,
+        Comment\CommentDto       $comment,
+        mixed                    $targetPath
+    ): RedirectResponse {
+        $commentStrategy->notifySubscribers($comment->id);
+        $commentStrategy->publishComment($comment->id);
+        $hash = $commentStrategy->getHashForPublishedComment($comment->targetId);
+
+        // Redirect to the last comment
+        $redirectLink = $this->urlBuilder->link($targetPath) . ($hash !== null ? '#' . $hash : '');
+
+        return new RedirectResponse($redirectLink);
     }
 }
