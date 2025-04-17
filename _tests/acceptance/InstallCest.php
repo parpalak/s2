@@ -602,6 +602,8 @@ class InstallCest
             'This is my first comment! 👪🐶' . "\r\n" .
             '----------------------------------------------------------------------' . "\r\n" .
             '' . "\r\n" .
+            '🔴 Comment has been hidden (report=disabled). Publish it if it is appropriate.' . "\r\n" .
+            '' . "\r\n" .
             'This e-mail has been sent automatically. If you reply, the author' . "\r\n" .
             'of the comment will receive your answer.' . "\r\n" .
             '', $emails[0]);
@@ -700,6 +702,8 @@ class InstallCest
             '----------------------------------------------------------------------' . "\r\n" .
             'This is a comment from a moderator2.' . "\r\n" .
             '----------------------------------------------------------------------' . "\r\n" .
+            '' . "\r\n" .
+            '🔴 Comment has been hidden (report=unknown). Publish it if it is appropriate.' . "\r\n" .
             '' . "\r\n" .
             'This e-mail has been sent automatically. If you reply, the author' . "\r\n" .
             'of the comment will receive your answer.' . "\r\n" .
