@@ -60,10 +60,11 @@ of the comment will receive your answer.',
 	'missing_nick'             => 'You have forgotten to enter your name.',
 	'long_text'                => 'The message cannot be larger than%s bytes.',
     'links_in_text'            => 'Remove http:// or https:// from links. Author will add links to the article if they are valuable.',
+    'spam_message_rejected'    => 'Your comment cannot be saved because it contains spam. Please contact the author of the site if you believe this is a mistake.',
 	'long_nick'                => 'Is your name length more than 50 symbols? It is something strange...',
 	'question'                 => 'You gave the wrong answer to the question. Try again.',
 	'email'                    => 'Invalid e-mail. Please enter the correct e-mail, and the author of the site will contact you if it is needed. If you clear the “Show to other visitors” checkbox, your e-mail will not be shown.',
-	'disabled'                 => 'Sorry, but&nbsp;you cannot send comments&nbsp;to this site at this moment. Try it later.',
+	'disabled'                 => 'Sorry, but&nbsp;you cannot send comments&nbsp;to this site at&nbsp;this moment. Try it later.',
 	'no_item'                  => 'The destination page cannot be detected due to an error. Go to the page you have commented and try again (you can copy and paste the comment text).',
 
 );

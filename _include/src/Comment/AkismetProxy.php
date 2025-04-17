@@ -10,12 +10,11 @@ declare(strict_types=1);
 namespace S2\Cms\Comment;
 
 use Psr\Log\LoggerInterface;
-use S2\Cms\Controller\Comment\CommentDto;
 use S2\Cms\HttpClient\HttpClient;
 use S2\Cms\HttpClient\HttpClientException;
 use S2\Cms\Model\UrlBuilder;
 
-readonly class AkismetProxy
+readonly class AkismetProxy implements SpamDetectorInterface
 {
     private const SERVICE_ENDPOINT = "https://rest.akismet.com/1.1/comment-check";
     private const TYPE_COMMENT     = 'comment';
@@ -28,10 +27,10 @@ readonly class AkismetProxy
     ) {
     }
 
-    public function isSpam(CommentDto $comment, string $clientIp): ?bool
+    public function getReport(SpamDetectorComment $comment, string $clientIp): SpamDetectorReport
     {
         if ($this->apiKey === '') {
-            return null;
+            return SpamDetectorReport::disabled();
         }
 
         $data = [
@@ -49,11 +48,14 @@ readonly class AkismetProxy
 
         $this->logger->info('Sending comment to Akismet', $comment->toArray());
         try {
-            $response = $this->httpClient->post(self::SERVICE_ENDPOINT, $data);
+            $response = $this->httpClient->post(self::SERVICE_ENDPOINT, $data, [
+                HttpClient::CONNECT_TIMEOUT => 2,
+                HttpClient::READ_TIMEOUT    => 2,
+            ]);
         } catch (HttpClientException $e) {
             $this->logger->error(\sprintf('Error requesting Akismet: %s', $e->getMessage()), ['exception' => $e]);
 
-            return null;
+            return SpamDetectorReport::failed();
         }
         $this->logger->info('Akismet response', [
             'headers' => $response->headers,
@@ -62,13 +64,15 @@ readonly class AkismetProxy
 
         if ($response->isSuccessful()) {
             if (trim($response->content) === 'true') {
-                return true;
+                return $response->getHeader('X-akismet-pro-tip') === 'discard'
+                    ? SpamDetectorReport::blatant()
+                    : SpamDetectorReport::spam();
             }
             if (trim($response->content) === 'false') {
-                return false;
+                return SpamDetectorReport::ham();
             }
         }
 
-        return null;
+        return SpamDetectorReport::failed();
     }
 }

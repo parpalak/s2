@@ -12,6 +12,7 @@ namespace S2\Cms;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Comment\AkismetProxy;
+use S2\Cms\Comment\SpamDetectorInterface;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Controller\CommentController;
@@ -398,7 +399,7 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
-        $container->set(AkismetProxy::class, function (Container $container) {
+        $container->set(SpamDetectorInterface::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             return new AkismetProxy(
@@ -411,8 +412,7 @@ class CmsExtension implements ExtensionInterface
 
         $container->set(CommentController::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
-            $provider             = $container->get(DynamicConfigProvider::class);
-            $premoderationEnabled = $provider->get('S2_PREMODERATION') === '1';
+            $provider = $container->get(DynamicConfigProvider::class);
             return new CommentController(
                 $container->get(AuthProvider::class),
                 $container->get(UserProvider::class),
@@ -423,9 +423,9 @@ class CmsExtension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
+                $container->get(SpamDetectorInterface::class),
                 $provider->get('S2_ENABLED_COMMENTS') === '1',
-                $premoderationEnabled,
-                $premoderationEnabled && $provider->get('S2_AKISMET_KEY') !== '',
+                $provider->get('S2_PREMODERATION') === '1',
             );
         });
 
@@ -437,7 +437,6 @@ class CmsExtension implements ExtensionInterface
                 $container->get(UrlBuilder::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(CommentMailer::class),
-                $container->get(AkismetProxy::class),
                 ...$container->getByTag(CommentStrategyInterface::class)
             );
         });

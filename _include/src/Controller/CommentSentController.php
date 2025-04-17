@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
-use S2\Cms\Comment\AkismetProxy;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Mail\CommentMailer;
@@ -35,14 +34,13 @@ readonly class CommentSentController implements ControllerInterface
     private array $commentStrategies;
 
     public function __construct(
-        private AuthProvider         $authProvider,
-        private UserProvider         $userProvider,
-        private TranslatorInterface  $translator,
-        private UrlBuilder           $urlBuilder,
-        private HtmlTemplateProvider $templateProvider,
-        private CommentMailer        $commentMailer,
-        private AkismetProxy         $akismetProxy,
-        CommentStrategyInterface     ...$strategies
+        private AuthProvider          $authProvider,
+        private UserProvider          $userProvider,
+        private TranslatorInterface   $translator,
+        private UrlBuilder            $urlBuilder,
+        private HtmlTemplateProvider  $templateProvider,
+        private CommentMailer         $commentMailer,
+        CommentStrategyInterface      ...$strategies
     ) {
         $this->commentStrategies = $strategies;
     }
@@ -82,11 +80,6 @@ readonly class CommentSentController implements ControllerInterface
                 foreach ($moderators as $moderator) {
                     $this->commentMailer->mailToModerator($moderator->login, $moderator->email, $message, $target->title ?? 'unknown item', $link, $comment->name, $comment->email);
                 }
-            }
-
-            if ($this->akismetProxy->isSpam($comment, $authorIp) === false) {
-                // Automatically publish the comment if it is not a spam.
-                return $this->publishAndNotifyAndGetRedirectResponse($commentStrategy, $comment, $targetPath);
             }
 
             break;

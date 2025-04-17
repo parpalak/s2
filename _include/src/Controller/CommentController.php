@@ -10,6 +10,9 @@ declare(strict_types=1);
 namespace S2\Cms\Controller;
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Comment\SpamDetectorComment;
+use S2\Cms\Comment\SpamDetectorInterface;
+use S2\Cms\Comment\SpamDetectorReport;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Mail\CommentMailer;
@@ -38,9 +41,9 @@ readonly class CommentController implements ControllerInterface
         private Viewer                   $viewer,
         private LoggerInterface          $logger,
         private CommentMailer            $commentMailer,
+        private SpamDetectorInterface    $spamDetector,
         private bool                     $commentsEnabled,
         private bool                     $premoderationEnabled,
-        private bool                     $automaticSpamCheckerEnabled,
     ) {
     }
 
@@ -80,8 +83,6 @@ readonly class CommentController implements ControllerInterface
         }
         if (\strlen($text) > self::S2_MAX_COMMENT_BYTES) {
             $errors[] = \sprintf($this->translator->trans('long_text'), self::S2_MAX_COMMENT_BYTES);
-        } elseif (!$this->automaticSpamCheckerEnabled && self::linkCount($text) > 0) {
-            $errors[] = $this->translator->trans('links_in_text');
         }
 
         $email = $request->request->get('email', '');
@@ -127,15 +128,26 @@ readonly class CommentController implements ControllerInterface
             return $template->toHttpResponse();
         }
 
+        $spamReport = SpamDetectorReport::disabled();
+        if (\count($errors) === 0) {
+            $spamReport = $this->spamDetector->getReport(new SpamDetectorComment($name, $email, $text), (string)$request->getClientIp());
+            // Convert spam detection report to some validation errors
+            if (self::linkCount($text) > 0 && !$spamReport->isHam()) {
+                $errors[] = $this->translator->trans('links_in_text');
+            } elseif ($spamReport->isBlatant()) {
+                $errors[] = $this->translator->trans('spam_message_rejected');
+            }
+        }
+
         // What are we going to comment?
         $target = $this->commentStrategy->getTargetByRequest($request);
         $path   = $request->getPathInfo();
 
-        if (empty($errors) && $target === null) {
+        if ($target === null && \count($errors) === 0) {
             $errors[] = $this->translator->trans('no_item');
         }
 
-        if (!empty($errors)) {
+        if (\count($errors) > 0) {
             $errorText = '<p>' . $this->translator->trans('Error message') . '</p><ul>';
             foreach ($errors as $error) {
                 $errorText .= '<li>' . $error . '</li>';
@@ -169,7 +181,7 @@ readonly class CommentController implements ControllerInterface
         // Detect if there is a user logged in
         $isOnline = $this->authProvider->isOnline($email);
 
-        $moderationRequired = $this->premoderationEnabled;
+        $moderationRequired = $spamReport->shouldGoToModeration($this->premoderationEnabled);
 
         // Save the comment
         $commentId = $this->commentStrategy->save($target->id, $name, $email, $showEmail, $subscribed, $text, (string)$request->getClientIp());

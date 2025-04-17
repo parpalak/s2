@@ -23,4 +23,16 @@ readonly class HttpResponse
     {
         return $this->statusCode >= 200 && $this->statusCode < 300;
     }
+
+    public function getHeader(string $headerType): ?string
+    {
+        $headerPrefix = $headerType . ': ';
+        foreach ($this->headers as $header) {
+            if (stripos($header, $headerPrefix) === 0) {
+                return substr($header, \strlen($headerPrefix));
+            }
+        }
+
+        return null;
+    }
 }

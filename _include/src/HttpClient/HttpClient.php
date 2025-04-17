@@ -14,6 +14,8 @@ readonly class HttpClient
     public const  TRANSPORT_CURL              = 'curl';
     public const  TRANSPORT_FSOCKOPEN         = 'fsockopen';
     public const  TRANSPORT_FILE_GET_CONTENTS = 'file_get_contents';
+    public const  CONNECT_TIMEOUT             = 'connect_timeout';
+    public const  READ_TIMEOUT                = 'read_timeout';
     private const ALLOWED_METHODS             = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
 
     public function __construct(
@@ -40,6 +42,7 @@ readonly class HttpClient
         string  $url,
         array   $headers = [],
         ?string $body = null,
+        array   $options = [],
     ): HttpResponse {
         $method = strtoupper($method);
 
@@ -49,10 +52,16 @@ readonly class HttpClient
 
         $url = $this->normalizeUrl($url);
 
+        foreach ($headers as $k => $v) {
+            if (!\is_string($v)) {
+                throw new \InvalidArgumentException(\sprintf('Header "%s" must be a string', $k));
+            }
+        }
+
         return match ($this->getPreferredTransport()) {
-            self::TRANSPORT_CURL => $this->requestWithCurl($method, $url, $headers, $body),
-            self::TRANSPORT_FSOCKOPEN => $this->requestWithFsockopen($method, $url, $headers, $body),
-            self::TRANSPORT_FILE_GET_CONTENTS => $this->requestWithFileGetContents($method, $url, $headers, $body),
+            self::TRANSPORT_CURL => $this->requestWithCurl($method, $url, $headers, $body, $options),
+            self::TRANSPORT_FSOCKOPEN => $this->requestWithFsockopen($method, $url, $headers, $body, $options),
+            self::TRANSPORT_FILE_GET_CONTENTS => $this->requestWithFileGetContents($method, $url, $headers, $body, $options),
             default => throw new HttpClientException('No available method to fetch the URL'),
         };
     }
@@ -69,17 +78,29 @@ readonly class HttpClient
      * @throws HttpClientException
      * @throws \JsonException
      */
-    public function postJson(string $url, array $body): HttpResponse
+    public function postJson(string $url, array $body, array $options = []): HttpResponse
     {
-        return $this->request('POST', $url, ['Content-Type' => 'application/json'], \json_encode($body, JSON_THROW_ON_ERROR));
+        return $this->request(
+            'POST',
+            $url,
+            ['Content-Type' => 'application/json'],
+            \json_encode($body, JSON_THROW_ON_ERROR),
+            $options
+        );
     }
 
     /**
      * @throws HttpClientException
      */
-    public function post(string $url, array $body): HttpResponse
+    public function post(string $url, array $body, array $options = []): HttpResponse
     {
-        return $this->request('POST', $url, ['Content-Type' => 'application/x-www-form-urlencoded'], http_build_query($body));
+        return $this->request(
+            'POST',
+            $url,
+            ['Content-Type' => 'application/x-www-form-urlencoded'],
+            http_build_query($body),
+            $options
+        );
     }
 
     /**
@@ -137,6 +158,7 @@ readonly class HttpClient
         string  $url,
         array   $requestHeaders,
         ?string $requestBody,
+        array   $options = [],
         int     $redirects = 0
     ): HttpResponse {
         if ($redirects > $this->maxRedirects) {
@@ -147,7 +169,8 @@ readonly class HttpClient
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $options[self::CONNECT_TIMEOUT] ?? $this->timeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, isset($options[self::CONNECT_TIMEOUT], $options[self::READ_TIMEOUT]) ? $options[self::CONNECT_TIMEOUT] + $options[self::READ_TIMEOUT] : $this->timeout);
         curl_setopt($ch, CURLOPT_USERAGENT, $this->userAgent);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
@@ -169,11 +192,16 @@ readonly class HttpClient
 
         $content      = curl_exec($ch);
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error        = curl_errno($ch) ? curl_error($ch) : null;
+        $errorNum     = curl_errno($ch);
+        $error        = $errorNum ? curl_error($ch) : null;
         curl_close($ch);
 
         if ($content === false || $error !== null) {
-            throw new HttpClientException($error ?? 'Unknown error');
+            throw new HttpClientException($error ?? 'Unknown error', match ($errorNum) {
+                CURLE_OPERATION_TIMEOUTED => HttpClientException::REASON_TIMEOUT,
+                CURLE_COULDNT_RESOLVE_HOST => HttpClientException::REASON_HOST_RESOLVE_FAILURE,
+                default => null
+            });
         }
 
         $contentStart = strpos($content, "\r\n\r\n");
@@ -182,13 +210,13 @@ readonly class HttpClient
         } else {
             $rawHeaders = '';
         }
-        $requestHeaders = explode("\r\n", $rawHeaders);
+        $responseHeaders = explode("\r\n", $rawHeaders);
 
         if (preg_match('/^Location:\s*(.*)/mi', $rawHeaders, $matches)) {
-            return $this->requestWithCurl($method, self::newUrlFromLocation(trim($matches[1]), $url), $requestHeaders, $requestBody, $redirects + 1);
+            return $this->requestWithCurl($method, self::newUrlFromLocation(trim($matches[1]), $url), $requestHeaders, $requestBody, $options, $redirects + 1);
         }
 
-        return $this->createResponse($responseCode, $requestHeaders, $content);
+        return $this->createResponse($responseCode, $responseHeaders, $content);
     }
 
     /**
@@ -199,21 +227,31 @@ readonly class HttpClient
         string  $url,
         array   $requestHeaders = [],
         ?string $requestBody = null,
+        array   $options = [],
         int     $redirects = 0
     ): HttpResponse {
         if ($redirects > $this->maxRedirects) {
             throw new HttpClientException('Too many redirects');
         }
 
+        $connectTimeout = $options[self::CONNECT_TIMEOUT] ?? $this->timeout;
+        $readTimeout    = $options[self::READ_TIMEOUT] ?? $this->timeout;
+
         $parsedUrl = parse_url($url);
         $scheme    = $parsedUrl['scheme'] ?? 'http';
         $host      = $parsedUrl['host'] ?? '';
         $port      = $parsedUrl['port'] ?? ($scheme === 'https' ? 443 : 80);
-        $remote    = @fsockopen(($scheme === 'https' ? 'ssl://' : '') . $host, $port, $errno, $errstr, $this->timeout);
+        $remote    = @fsockopen(($scheme === 'https' ? 'ssl://' : '') . $host, $port, $errno, $errstr, $connectTimeout);
 
         if (!$remote) {
-            throw new HttpClientException($errstr ?: 'Connection failed');
+            throw new HttpClientException($errstr ?: 'Connection failed', match (true) {
+                $errno === 110 => HttpClientException::REASON_TIMEOUT,
+                str_contains($errstr, 'getaddrinfo') => HttpClientException::REASON_HOST_RESOLVE_FAILURE,
+                default => null
+            });
         }
+
+        stream_set_timeout($remote, $readTimeout);
 
         $path = ($parsedUrl['path'] ?? '/')
             . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '')
@@ -238,7 +276,12 @@ readonly class HttpClient
         fwrite($remote, $request);
 
         $content = stream_get_contents($remote);
+        $meta    = stream_get_meta_data($remote);
         fclose($remote);
+
+        if ($meta['timed_out']) {
+            throw new HttpClientException('Read timed out', HttpClientException::REASON_TIMEOUT);
+        }
 
         $contentStart = strpos($content, "\r\n\r\n");
         if ($contentStart !== false) {
@@ -249,7 +292,7 @@ readonly class HttpClient
         $responseHeaders = explode("\r\n", $rawHeaders);
 
         if (preg_match('/^Location:\s*(.*)/mi', $rawHeaders, $matches)) {
-            return $this->requestWithFsockopen($method, self::newUrlFromLocation(trim($matches[1]), $url), $requestHeaders, $requestBody, $redirects + 1);
+            return $this->requestWithFsockopen($method, self::newUrlFromLocation(trim($matches[1]), $url), $requestHeaders, $requestBody, $options, $redirects + 1);
         }
 
         $responseCode = isset($responseHeaders[0]) && preg_match('/\d{3}/', $responseHeaders[0], $matches) ? (int)$matches[0] : 0;
@@ -264,8 +307,14 @@ readonly class HttpClient
         string  $method,
         string  $url,
         array   $requestHeaders,
-        ?string $requestBody
+        ?string $requestBody,
+        array   $options = [],
     ): HttpResponse {
+
+        // NOTE: it seems like file_get_contents does not support connection timeout
+        $connectTimeout = $options[self::CONNECT_TIMEOUT] ?? $this->timeout;
+        $readTimeout    = $options[self::READ_TIMEOUT] ?? $this->timeout;
+
         $headerLines = array_map(static fn($k, $v) => "$k: $v", array_keys($requestHeaders), $requestHeaders);
         $context     = stream_context_create([
             'http' => [
@@ -274,14 +323,21 @@ readonly class HttpClient
                 'content'       => $requestBody ?? '',
                 'user_agent'    => $this->userAgent,
                 'max_redirects' => $this->maxRedirects + 1,
-                'timeout'       => $this->timeout,
+                'timeout'       => $readTimeout,
                 'ignore_errors' => true,
             ]
         ]);
 
+        $start   = microtime(true);
         $content = @file_get_contents($url, false, $context);
         if ($content === false) {
-            throw new HttpClientException(error_get_last()['message']);
+            $errorMessage = error_get_last()['message'];
+            throw new HttpClientException($errorMessage, match (true) {
+                preg_match('/timed?[\s_-]?out/i', $errorMessage) === 1 => HttpClientException::REASON_TIMEOUT,
+                str_contains($errorMessage, 'HTTP request failed') && (microtime(true) - $start >= $readTimeout) => HttpClientException::REASON_TIMEOUT,
+                str_contains($errorMessage, 'getaddrinfo') => HttpClientException::REASON_HOST_RESOLVE_FAILURE,
+                default => null
+            });
         }
 
         $responseCode    = 0;

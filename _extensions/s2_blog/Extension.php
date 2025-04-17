@@ -11,6 +11,7 @@ namespace s2_extensions\s2_blog;
 
 use Psr\Log\LoggerInterface;
 use S2\Cms\Asset\AssetPack;
+use S2\Cms\Comment\SpamDetectorInterface;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Controller\CommentController;
@@ -281,8 +282,7 @@ class Extension implements ExtensionInterface
         }, [CommentStrategyInterface::class]);
         $container->set('s2_blog.comment_controller', static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
-            $provider             = $container->get(DynamicConfigProvider::class);
-            $premoderationEnabled = $provider->get('S2_PREMODERATION') === '1';
+            $provider = $container->get(DynamicConfigProvider::class);
             return new CommentController(
                 $container->get(AuthProvider::class),
                 $container->get(UserProvider::class),
@@ -293,9 +293,9 @@ class Extension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
+                $container->get(SpamDetectorInterface::class),
                 $provider->get('S2_ENABLED_COMMENTS') === '1',
-                $premoderationEnabled,
-                $premoderationEnabled && $provider->get('S2_AKISMET_KEY') !== '',
+                $provider->get('S2_PREMODERATION') === '1',
             );
         });
 

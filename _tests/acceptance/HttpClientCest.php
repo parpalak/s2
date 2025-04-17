@@ -43,7 +43,7 @@ class HttpClientCest
 
     protected function requestConfigProvider(): array
     {
-        $cases = [];
+        $cases     = [];
         $urlPrefix = 'http://localhost:8881/_tests/_resources/http_client_mocks/';
         foreach ([HttpClient::TRANSPORT_CURL, HttpClient::TRANSPORT_FSOCKOPEN, HttpClient::TRANSPORT_FILE_GET_CONTENTS] as $transport) {
             foreach ([
@@ -113,6 +113,91 @@ class HttpClientCest
         $response = $client->postJson('http://localhost:8881/_tests/_resources/http_client_mocks/json_only.php', $data);
         $I->assertEquals(200, $response->statusCode);
         $I->assertEquals(json_encode($data, JSON_THROW_ON_ERROR), $response->content);
+    }
+
+    /**
+     * @dataProvider transportProvider
+     * @throws HttpClientException
+     */
+    public function testHeaders(AcceptanceTester $I, Example $example): void
+    {
+        $client = new HttpClient(preferredTransport: $example['transport']);
+
+        $response = $client->request('GET', 'http://localhost:8881/_tests/_resources/http_client_mocks/200.php', [
+            'X-Test' => 'Some test',
+        ]);
+        $I->assertEquals(200, $response->statusCode);
+        $I->assertEquals('Some test', $response->getHeader('X-Test'));
+        $I->assertEquals('Some test', $response->getHeader('x-test'));
+        $I->assertEquals('Some test', $response->getHeader('X-TEST-2'));
+    }
+
+    /**
+     * @dataProvider transportProvider
+     */
+    public function testHostResolveError(AcceptanceTester $I, Example $example): void
+    {
+        $client = new HttpClient(preferredTransport: $example['transport']);
+
+        $e = null;
+        try {
+            $client->request(
+                'GET',
+                'http://this-domain-should-not-exist-12345.test',
+                options: [HttpClient::CONNECT_TIMEOUT => 1],
+            );
+        } catch (HttpClientException $e) {
+        }
+        $I->assertNotNull($e);
+        $I->assertEquals(HttpClientException::REASON_HOST_RESOLVE_FAILURE, $e->reason);
+    }
+
+    /**
+     * @dataProvider transportProvider
+     */
+    public function testConnectTimeout(AcceptanceTester $I, Example $example): void
+    {
+        $client = new HttpClient(preferredTransport: $example['transport']);
+
+        $now = microtime(true);
+        $e = null;
+        try {
+            $client->request(
+                'GET',
+                'http://192.0.2.1',
+                options: [HttpClient::CONNECT_TIMEOUT => 1],
+            );
+        } catch (HttpClientException $e) {
+        }
+        $I->assertNotNull($e);
+        $I->assertEquals(HttpClientException::REASON_TIMEOUT, $e->reason);
+        if ($example['transport'] !== HttpClient::TRANSPORT_FILE_GET_CONTENTS) {
+            // Cannot control the timeout value in file_get_contents
+            $I->assertLessThan(1.5, microtime(true) - $now);
+        }
+
+    }
+
+    /**
+     * @dataProvider transportProvider
+     */
+    public function testReadTimeout(AcceptanceTester $I, Example $example): void
+    {
+        $client = new HttpClient(preferredTransport: $example['transport']);
+        $now = microtime(true);
+        $e = null;
+        try {
+            $client->request(
+                'GET',
+                'http://localhost:8881/_tests/_resources/http_client_mocks/sleep.php?time=2',
+                options: [HttpClient::READ_TIMEOUT => 1, HttpClient::CONNECT_TIMEOUT => 1],
+            );
+        } catch (HttpClientException $e) {
+        }
+        $I->assertNotNull($e);
+        $I->assertEquals(HttpClientException::REASON_TIMEOUT, $e->reason);
+        // Curl total timeout is set to connect+read = 2
+        $I->assertLessThan(2.5, microtime(true) - $now);
     }
 
     protected function transportProvider(): array
