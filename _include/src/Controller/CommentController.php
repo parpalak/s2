@@ -198,7 +198,17 @@ readonly class CommentController implements ControllerInterface
          * @see \S2\Cms\Model\AuthManager::createCommentCookie
          */
         foreach ($this->userProvider->getModerators([], $moderationRequired && $isOnline ? [$email] : []) as $moderator) {
-            $this->commentMailer->mailToModerator($moderator->login, $moderator->email, $message, $target->title, $link, $name, $email);
+            $this->commentMailer->mailToModerator(
+                $moderator->login,
+                $moderator->email,
+                $message,
+                $target->title,
+                $link,
+                $name,
+                $email,
+                !$moderationRequired,
+                $spamReport->status
+            );
         }
 
         if (!$moderationRequired) {

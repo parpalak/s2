@@ -66,12 +66,16 @@ readonly class CommentMailer
         string $title,
         string $url,
         string $authorName,
-        string $authorEmail
+        string $authorEmail,
+        bool $isPublished,
+        string $spamReportStatus,
     ): bool {
         $messageTemplate = $this->translator->trans('Email moderator pattern');
         $message         = str_replace(
-            ['<name>', '<author>', '<title>', '<url>', '<text>'],
-            [$moderatorName, $authorName, $title, $url, $text],
+            ['<name>', '<author>', '<title>', '<url>', '<text>', '<status>'],
+            [$moderatorName, $authorName, $title, $url, $text, \sprintf(
+                $this->translator->trans($isPublished ? 'Comment check passed' : 'Comment check failed'), $spamReportStatus
+            )],
             $messageTemplate
         );
 

@@ -78,7 +78,17 @@ readonly class CommentSentController implements ControllerInterface
                 $message = s2_bbcode_to_mail($comment->text);
                 $target  = $commentStrategy->getTargetById($comment->targetId);
                 foreach ($moderators as $moderator) {
-                    $this->commentMailer->mailToModerator($moderator->login, $moderator->email, $message, $target->title ?? 'unknown item', $link, $comment->name, $comment->email);
+                    $this->commentMailer->mailToModerator(
+                        $moderator->login,
+                        $moderator->email,
+                        $message,
+                            $target->title ?? 'unknown item',
+                        $link,
+                        $comment->name,
+                        $comment->email,
+                        false,
+                        'unknown'
+                    );
                 }
             }
 
