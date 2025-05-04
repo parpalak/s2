@@ -33,7 +33,7 @@
 
 	function doSearch (str)
 	{
-		xhr.open('GET', s2_search_url + '/ajax.php?q=' + encodeURIComponent(str), true);
+		xhr.open('GET', s2_search_url + encodeURIComponent(str), true);
 		xhr.onreadystatechange = function ()
 		{
 			if (xhr.readyState == 4 && xhr.status == 200)
@@ -256,7 +256,7 @@
 		// Add extension styles
 		var head = document.getElementsByTagName('head')[0],
 			style = document.createElement('style'),
-			rules = '#s2_search_tip { display: block; position: absolute; background: #fff; border: 1px solid #ccc; font-size: 0.85em; max-height: 25em; overflow: auto; overflow-x: hidden; -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); } #s2_search_tip a {display: block; padding: 2px; width: auto; outline: none;} #s2_search_tip a:hover {background: #ffd;} #s2_search_tip a.current {padding: 1px; border: 1px dotted #000;} #s2_search_tip em {background: #fff8d3; text-decoration: inherit; font-style: normal; }';
+			rules = '#s2_search_tip { display: block; position: absolute; background: #fff; border: 1px solid #ccc; font-size: 0.85em; max-height: 25em; overflow: auto; overflow-x: hidden; -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); } #s2_search_tip a {display: block; padding: 2px; width: auto; } #s2_search_tip a:hover {background: #ffd;} #s2_search_tip a.current {outline: 1px dotted #000; outline-offset: -1px;} #s2_search_tip em {background: #fff8d3; text-decoration: inherit; font-style: normal; }';
 
 		style.type = 'text/css';
 		if (style.styleSheet)

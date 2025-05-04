@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -57,6 +57,10 @@ readonly class UrlBuilder
 
     private function getRelativeUrl(string $path, array $params, string $amp = '&amp;'): string
     {
-        return $this->urlPrefix . $path . (!empty($params) ? ($this->urlPrefix ? $amp : '?') . implode($amp, $params) : '');
+        return $this->urlPrefix . $path
+            . (!empty($params)
+                ? (str_contains($this->urlPrefix, '?') ? $amp : '?') . implode($amp, $params)
+                : ''
+            );
     }
 }

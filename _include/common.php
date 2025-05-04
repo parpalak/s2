@@ -2,8 +2,8 @@
 /**
  * Loads common data and performs various functions necessary for the site to work properly.
  *
- * @copyright 2009-2024
- * @license   MIT
+ * @copyright 2009-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -111,7 +111,6 @@ if (!defined('S2_DISABLE_CACHE') && file_exists(S2_CACHE_DIR . ExtensionCache::C
 try {
     if (!is_array($enabledExtensions)) {
         $app->boot(collectParameters());
-        \Container::setContainer($app->container);
         /** @var ExtensionCache $appCache */
         $appCache          = $app->container->get(ExtensionCache::class);
         $enabledExtensions = $appCache->generateEnabledExtensionClassNames();
@@ -132,7 +131,6 @@ try {
         $app->setCachedRoutesFilename($appCache->getCachedRoutesFilename());
     }
 
-    \Container::setContainer($app->container);
     $app->container->getParameter('base_url');
 } catch (\S2\Cms\Framework\Exception\ParameterNotFoundException $e) {
     // S2 is not installed

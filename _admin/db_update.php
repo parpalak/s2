@@ -2,8 +2,8 @@
 /**
  * Database migrations script.
  *
- * @copyright 2011-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2011-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -15,7 +15,7 @@ if (!defined('S2_DB_LAST_REVISION')) {
 }
 
 /** @var DbLayer $s2_db */
-$s2_db = \Container::get(DbLayer::class);
+$s2_db = $app->container->get(DbLayer::class);
 
 if (S2_DB_REVISION < 2) {
     $query = array(
@@ -296,4 +296,6 @@ $s2_db->buildAndQuery([
     'WHERE'  => 'name = \'S2_DB_REVISION\''
 ]);
 
-\Container::get(\S2\Cms\Config\DynamicConfigProvider::class)->regenerate();
+/** @var \S2\Cms\Config\DynamicConfigProvider $dynamicConfigProvider */
+$dynamicConfigProvider = $app->container->get(\S2\Cms\Config\DynamicConfigProvider::class);
+$dynamicConfigProvider->regenerate();

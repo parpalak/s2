@@ -2,8 +2,8 @@
 /**
  * Displays a page with search results
  *
- * @copyright 2010-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2010-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_search
  */
 
@@ -24,6 +24,7 @@ use S2\Rose\Entity\Query;
 use S2\Rose\Finder;
 use S2\Rose\Helper\ProfileHelper;
 use S2\Rose\Stemmer\StemmerInterface;
+use S2\Rose\Storage\Database\PdoStorage;
 use S2\Rose\Storage\Exception\EmptyIndexException;
 use s2_extensions\s2_search\Event\TagsSearchEvent;
 use s2_extensions\s2_search\Service\SimilarWordsDetector;
@@ -37,6 +38,7 @@ readonly class SearchPageController implements ControllerInterface
     public function __construct(
         private Finder                   $finder,
         private StemmerInterface         $stemmer,
+        private PdoStorage               $pdoStorage,
         private ThumbnailGenerator       $thumbnailGenerator,
         private SimilarWordsDetector     $similarWordsDetector,
         private DbLayer                  $dbLayer,
@@ -57,6 +59,9 @@ readonly class SearchPageController implements ControllerInterface
      */
     public function handle(Request $request): Response
     {
+        if (($titleQuery = $request->query->get('title')) !== null) {
+            return $this->searchByTitle($titleQuery);
+        }
         $query   = $request->query->get('q', '');
         $pageNum = (int)$request->query->get('p', 1);
 
@@ -170,7 +175,7 @@ readonly class SearchPageController implements ControllerInterface
 
         $event = new TagsSearchEvent($where, $words);
         if (\count($tags) > 0) {
-            $event->addLine(sprintf($this->translator->trans('Found tags'), implode(', ', $tags)));
+            $event->addLine(\sprintf($this->translator->trans('Found tags'), implode(', ', $tags)));
         }
         $this->eventDispatcher->dispatch($event);
 
@@ -179,5 +184,23 @@ readonly class SearchPageController implements ControllerInterface
         }
 
         return '';
+    }
+
+    private function searchByTitle(string $titleQuery): Response
+    {
+        $pdoStorage = $this->pdoStorage;
+        $toc        = $pdoStorage->getTocByTitlePrefix($titleQuery);
+
+        $result = '';
+        foreach ($toc as $tocEntryWithExtId) {
+            $result .= '<a href="' . $this->urlBuilder->link($tocEntryWithExtId->getTocEntry()->getUrl()) . '">' .
+                preg_replace(
+                    '#(' . preg_quote($titleQuery, '#') . ')#ui',
+                    '<em>\\1</em>'
+                    , s2_htmlencode($tocEntryWithExtId->getTocEntry()->getTitle())) .
+                '</a>';
+        }
+
+        return new Response($result);
     }
 }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_search;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Asset\AssetPack;
@@ -52,9 +54,16 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Extension implements ExtensionInterface
 {
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public static function PdoStorageFactory(Container $container): PdoStorage
     {
-        return new PdoStorage($container->get(\PDO::class), $container->getParameter('db_prefix') . 's2_search_idx_');
+        return new PdoStorage(
+            $container->get(\PDO::class),
+            $container->getParameter('db_prefix') . 's2_search_idx_'
+        );
     }
 
     public function buildContainer(Container $container): void
@@ -119,6 +128,7 @@ class Extension implements ExtensionInterface
             return new SearchPageController(
                 $container->get(Finder::class),
                 $container->get(StemmerInterface::class),
+                $container->get(PdoStorage::class),
                 $container->get(ThumbnailGenerator::class),
                 $container->get(SimilarWordsDetector::class),
                 $container->get(DbLayer::class),
@@ -162,6 +172,7 @@ class Extension implements ExtensionInterface
         }, [QueueHandlerInterface::class]);
     }
 
+    /** @noinspection HtmlUnknownTarget */
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
         $eventDispatcher->addListener(TemplateEvent::EVENT_CREATED, static function (TemplateEvent $event) use ($container) {
@@ -182,9 +193,17 @@ class Extension implements ExtensionInterface
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
             if ($provider->get('S2_SEARCH_QUICK') === '1') {
+                /** @var UrlBuilder $urlBuilder */
+                $urlBuilder = $container->get(UrlBuilder::class);
                 $event->assetPack
                     ->addJs('../../_extensions/s2_search/autosearch.js', [AssetPack::OPTION_MERGE])
-                    ->addInlineJs('<script>var s2_search_url = "' . S2_PATH . '/_extensions/s2_search";</script>')
+                    ->addInlineJs(\sprintf(
+                        '<script>var s2_search_url = "%s";</script>',
+                        $urlBuilder->rawLink(
+                            '/search',
+                            $urlBuilder->hasPrefix() ? ['search=1', 'title='] : ['title=']
+                        )
+                    ))
                 ;
             }
         });
