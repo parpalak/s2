@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace s2_extensions\s2_search\Controller;
 
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Helper\StringHelper;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -88,7 +89,7 @@ readonly class SearchPageController implements ControllerInterface
             if ($content['num'] > 0) {
                 $content['num_info'] = $this->translator->trans('Found N pages', ['%count%' => $content['num'], '{{ pages }}' => $content['num']]);
 
-                $totalPages = ceil(1.0 * $content['num'] / $items_per_page);
+                $totalPages = (int)ceil(1.0 * $content['num'] / $items_per_page);
                 if ($pageNum < 1 || $pageNum > $totalPages) {
                     $pageNum = 1;
                 }
@@ -111,7 +112,7 @@ readonly class SearchPageController implements ControllerInterface
                 }
 
                 $link_nav          = [];
-                $content['paging'] = s2_paging($pageNum, $totalPages, $this->urlBuilder->link('/search', ['q=' . str_replace('%', '%%', urlencode($query)), 'p=%d']), $link_nav);
+                $content['paging'] = StringHelper::paging($pageNum, $totalPages, $this->urlBuilder->link('/search', ['q=' . str_replace('%', '%%', urlencode($query)), 'p=%d']), $link_nav);
                 foreach ($link_nav as $rel => $href) {
                     $template->setLink($rel, $href);
                 }

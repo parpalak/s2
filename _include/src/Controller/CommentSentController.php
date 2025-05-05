@@ -11,6 +11,7 @@ namespace S2\Cms\Controller;
 
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Helper\StringHelper;
 use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\AuthProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -75,7 +76,7 @@ readonly class CommentSentController implements ControllerInterface
                  * So we have to notify this moderator.
                  */
                 $link    = $this->urlBuilder->absLink($targetPath);
-                $message = s2_bbcode_to_mail($comment->text);
+                $message = StringHelper::bbcodeToMail($comment->text);
                 $target  = $commentStrategy->getTargetById($comment->targetId);
                 foreach ($moderators as $moderator) {
                     $this->commentMailer->mailToModerator(

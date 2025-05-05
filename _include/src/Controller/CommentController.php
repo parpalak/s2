@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
+ * @copyright 2007-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -15,6 +15,7 @@ use S2\Cms\Comment\SpamDetectorInterface;
 use S2\Cms\Comment\SpamDetectorReport;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
+use S2\Cms\Helper\StringHelper;
 use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\AuthProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -87,7 +88,7 @@ readonly class CommentController implements ControllerInterface
 
         $email = $request->request->get('email', '');
         $email = trim($email);
-        if (!s2_is_valid_email($email)) {
+        if (!StringHelper::isValidEmail($email)) {
             $errors[] = $this->translator->trans('email');
         }
 
@@ -186,7 +187,7 @@ readonly class CommentController implements ControllerInterface
         // Save the comment
         $commentId = $this->commentStrategy->save($target->id, $name, $email, $showEmail, $subscribed, $text, (string)$request->getClientIp());
 
-        $message = s2_bbcode_to_mail($text);
+        $message = StringHelper::bbcodeToMail($text);
 
         /**
          * Sending the comment to moderators.

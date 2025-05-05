@@ -11,6 +11,7 @@ namespace S2\Cms\Template;
 
 use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Helper\StringHelper;
 use S2\Cms\Model\UrlBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -238,7 +239,7 @@ class HtmlTemplate
         $startYear = $this->dynamicConfigProvider->get('S2_START_YEAR');
 
         $author    = $webmaster ?: $this->dynamicConfigProvider->get('S2_SITE_NAME');
-        $copyright = $webmaster && $email ? s2_js_mailto($author, $email) : ($requestUri !== '/' ? '<a href="' . $this->urlBuilder->link('/') . '">' . $author . '</a>' : $author);
+        $copyright = $webmaster && $email ? StringHelper::jsMailTo($author, $email) : ($requestUri !== '/' ? '<a href="' . $this->urlBuilder->link('/') . '">' . $author . '</a>' : $author);
 
         return ($startYear !== date('Y') ?
                 \sprintf($this->translator->trans('Copyright 2'), $copyright, $startYear, date('Y')) :

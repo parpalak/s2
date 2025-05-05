@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Model;
 
+use S2\Cms\Helper\StringHelper;
 use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -91,7 +92,7 @@ readonly class BlogCommentNotifier
             $receivers[$receiver['email']] = $receiver;
         }
 
-        $message = s2_bbcode_to_mail($comment['text']);
+        $message = StringHelper::bbcodeToMail($comment['text']);
 
         foreach ($receivers as $receiver) {
             $unsubscribeLink = $this->urlBuilder->rawAbsLink('/comment_unsubscribe', [

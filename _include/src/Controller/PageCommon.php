@@ -14,13 +14,14 @@ namespace S2\Cms\Controller;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\Exception\NotFoundException;
+use S2\Cms\Helper\StringHelper;
 use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
-use s2_extensions\s2_search\Service\RecommendationProvider;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,6 +48,9 @@ readonly class PageCommon implements ControllerInterface
     ) {
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function handle(Request $request): Response
     {
         $request_uri = $request->getPathInfo();
@@ -174,7 +178,7 @@ readonly class PageCommon implements ControllerInterface
                     'title' => $page['title'],
                 ];
 
-                $errorMessage = sprintf($this->translator->trans('Error no template'), implode('<br />', array_map(static function ($a) {
+                $errorMessage = \sprintf($this->translator->trans('Error no template'), implode('<br />', array_map(static function ($a) {
                     return '<a href="' . $a['link'] . '">' . s2_htmlencode($a['title']) . '</a>';
                 }, $bread_crumbs)));
             } else {
@@ -335,10 +339,10 @@ readonly class PageCommon implements ControllerInterface
                         $page_num = $start = 0;
                     }
 
-                    $total_pages = ceil(1.0 * \count($subarticles) / $this->maxItems);
+                    $total_pages = (int)ceil(1.0 * \count($subarticles) / $this->maxItems);
 
                     $link_nav = [];
-                    $paging   = s2_paging($page_num + 1, $total_pages, $this->urlBuilder->link(str_replace('%', '%%', $current_path . '/'), ['p=%d']), $link_nav) . "\n";
+                    $paging   = StringHelper::paging($page_num + 1, $total_pages, $this->urlBuilder->link(str_replace('%', '%%', $current_path . '/'), ['p=%d']), $link_nav) . "\n";
                     foreach ($link_nav as $rel => $href) {
                         $template->setLink($rel, $href);
                     }
@@ -413,7 +417,7 @@ readonly class PageCommon implements ControllerInterface
 
             if (\count($bread_crumbs) > 1) {
                 $template->putInPlaceholder('menu_siblings', $this->viewer->render('menu_block', [
-                    'title' => sprintf($this->translator->trans('More in this section'), '<a href="' . $this->urlBuilder->link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'),
+                    'title' => \sprintf($this->translator->trans('More in this section'), '<a href="' . $this->urlBuilder->link($parent_path) . '">' . $bread_crumbs[\count($bread_crumbs) - 2]['title'] . '</a>'),
                     'menu'  => $menu_articles,
                     'class' => 'menu_siblings',
                 ]));
@@ -479,6 +483,9 @@ readonly class PageCommon implements ControllerInterface
         return $template->toHttpResponse();
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function tagged_articles(int $articleId): string
     {
         $query  = [
@@ -571,7 +578,7 @@ readonly class PageCommon implements ControllerInterface
         $output = [];
         foreach ($art_by_tags as $tag_id => $articles) {
             $output[] = $this->viewer->render('menu_block', array(
-                'title' => sprintf($this->translator->trans('With this tag'), '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
+                'title' => \sprintf($this->translator->trans('With this tag'), '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
                 'menu'  => $articles,
                 'class' => 'article_tags',
             ));
@@ -580,7 +587,9 @@ readonly class PageCommon implements ControllerInterface
         return implode("\n", $output);
     }
 
-
+    /**
+     * @throws DbLayerException
+     */
     private function get_tags(int $articleId): string
     {
         $query  = [

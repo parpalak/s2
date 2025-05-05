@@ -12,6 +12,7 @@ use Psr\Log\LogLevel;
 use S2\Cms\Admin\AdminExtension;
 use S2\Cms\CmsExtension;
 use S2\Cms\Framework\Application;
+use S2\Cms\Helper\StringHelper;
 use S2\Cms\HttpClient\HttpClient;
 use S2\Cms\HttpClient\HttpClientException;
 use S2\Cms\Install\InstallExtension;
@@ -564,7 +565,7 @@ if (mb_strlen($password) > 100) {
 }
 
 // Validate email
-if ($email !== '' && !s2_is_valid_email($email)) {
+if ($email !== '' && !StringHelper::isValidEmail($email)) {
     $validationErrors['adm_email'][] = $lang_install['Invalid email'];
 }
 
