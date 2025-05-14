@@ -12,6 +12,8 @@
 /** @var $comment_num int */
 /** @var $favorite bool */
 /** @var string $favoritePostsUrl */
+/** @var bool $showComments */
+/** @var bool $enabledComments */
 
 ?>
 <div class="post author"><?php if (!empty($author)) echo s2_htmlencode($author); ?></div>
@@ -46,11 +48,11 @@
 		$footer['tags'] = $trans('Tags') . ': ' . implode(', ', $tags);
 	}
 
-	if ($commented && S2_SHOW_COMMENTS) {
+	if ($commented && $showComments) {
         if ($comment_num) {
             $footer['comments'] = '<a href="' . $link . '#comment">' . $trans('N Comments', ['%count%' => $comment_num, '{{ count }}' => $comment_num]) . '</a>';
         } else {
-            $footer['comments'] = '<a href="' . $link . '#add-comment">' . (S2_ENABLED_COMMENTS ? $trans('Post comment') : '') . '</a>';
+            $footer['comments'] = '<a href="' . $link . '#add-comment">' . ($enabledComments ? $trans('Post comment') : '') . '</a>';
         }
     }
 

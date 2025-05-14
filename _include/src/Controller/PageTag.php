@@ -16,6 +16,7 @@ use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -34,9 +35,14 @@ readonly class PageTag implements ControllerInterface
         private Viewer               $viewer,
         private string               $tagsUrlFragment,
         private string               $favoriteUrl,
+        private bool                 $useHierarchy,
     ) {
     }
 
+    /**
+     * {@inheritdoc}
+     * @throws DbLayerException
+     */
     public function handle(Request $request): Response
     {
         $name     = $request->attributes->get('name');
@@ -98,7 +104,7 @@ readonly class PageTag implements ControllerInterface
                 $item       = [
                     'id'            => $row['id'],
                     'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url . (S2_USE_HIERARCHY ? '/' : '')),
+                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy ? '/' : '')),
                     'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
                     'date'          => $this->viewer->date($row['create_time']),
                     'excerpt'       => $row['excerpt'],

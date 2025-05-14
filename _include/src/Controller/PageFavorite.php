@@ -33,6 +33,7 @@ readonly class PageFavorite implements ControllerInterface
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer,
         private string               $favoriteUrl,
+        private bool                 $useHierarchy,
     ) {
     }
 
@@ -77,7 +78,7 @@ readonly class PageFavorite implements ControllerInterface
                 $item       = [
                     'id'            => $row['id'],
                     'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url . (S2_USE_HIERARCHY ? '/' : '')),
+                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy ? '/' : '')),
                     'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
                     'date'          => $this->viewer->date($row['create_time']),
                     'excerpt'       => $row['excerpt'],

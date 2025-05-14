@@ -2,8 +2,8 @@
 /**
  * Blog posts for a year.
  *
- * @copyright 2007-2014 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -23,7 +23,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-
 class YearPageController extends BlogController
 {
     public function __construct(
@@ -37,9 +36,24 @@ class YearPageController extends BlogController
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
         string               $blogTitle,
+        bool                 $showComments,
+        bool                 $enabledComments,
         private readonly int $startYear,
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
+        parent::__construct(
+            $dbLayer,
+            $calendarBuilder,
+            $blogUrlBuilder,
+            $articleProvider,
+            $postProvider,
+            $urlBuilder,
+            $translator,
+            $templateProvider,
+            $viewer,
+            $blogTitle,
+            $showComments,
+            $enabledComments,
+        );
     }
 
     /**

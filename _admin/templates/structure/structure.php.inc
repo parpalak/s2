@@ -1,5 +1,5 @@
 <?php
-
+/** @var callable $param */
 /** @var callable $trans */
 /** @var string $locale */
 /** @var string $basePath */
@@ -32,5 +32,5 @@
 <script src="<?php echo $basePath; ?>/_admin/js/structure.js"></script>
 <script>
     var sUrl = '<?php echo $basePath; ?>/_admin/ajax.php?';
-    var new_page_pos = <?php echo json_encode(S2_ADMIN_NEW_POS); ?>;
+    var new_page_pos = <?php echo json_encode($param('S2_ADMIN_NEW_POS'), JSON_THROW_ON_ERROR); ?>;
 </script>

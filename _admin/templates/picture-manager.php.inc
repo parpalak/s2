@@ -49,7 +49,6 @@ $maxFileSize = $bytesFromString(ini_get('upload_max_filesize'))
         var sPicturePrefix = '<?php echo $imagePath; ?>';
         var iMaxFileSize = <?php echo $maxFileSize; ?>;
         var sFriendlyMaxFileSize = '<?php echo $friendlyFilesize($maxFileSize); ?>';
-        // SetBackground('<?php echo $jsvarencode(S2_ADMIN_COLOR); ?>');
     </script>
     <style>:root {
             --page-secondary-background: <?= $param('S2_ADMIN_COLOR') ?>;

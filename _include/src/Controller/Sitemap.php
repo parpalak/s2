@@ -2,9 +2,9 @@
 /**
  * Creates Sitemap.
  *
- * @copyright 2021-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2021-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -15,6 +15,7 @@ use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\Viewer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,11 +27,13 @@ class Sitemap implements ControllerInterface
         protected ArticleProvider $articleProvider,
         protected UrlBuilder      $urlBuilder,
         protected Viewer          $viewer,
+        protected bool            $useHierarchy,
     ) {
     }
 
     /**
      * {@inheritdoc}
+     * @throws DbLayerException
      */
     public function handle(Request $request): Response
     {
@@ -58,6 +61,9 @@ class Sitemap implements ControllerInterface
         return $response;
     }
 
+    /**
+     * @throws DbLayerException
+     */
     protected function getItems(): array
     {
         $subquery            = [
@@ -78,7 +84,7 @@ class Sitemap implements ControllerInterface
 
         $articles = $urls = $parentIds = [];
         for ($i = 0; $row = $this->dbLayer->fetchAssoc($result); $i++) {
-            $urls[$i] = rawurlencode($row['url']) . (S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
+            $urls[$i] = rawurlencode($row['url']) . ($this->useHierarchy && $row['children_exist'] ? '/' : '');
 
             $parentIds[$i] = $row['parent_id'];
 

@@ -2,9 +2,9 @@
 /**
  * Sitemap for blog.
  *
- * @copyright 2022-2024 Roman Parpalak
- * @license MIT
- * @package s2_blog
+ * @copyright 2022-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_blog
  */
 
 declare(strict_types=1);

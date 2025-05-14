@@ -303,6 +303,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_FAVORITE_URL'),
+                $provider->get('S2_USE_HIERARCHY') === '1',
             );
         });
 
@@ -329,6 +330,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $provider->get('S2_TAGS_URL'),
                 $provider->get('S2_FAVORITE_URL'),
+                $provider->get('S2_USE_HIERARCHY') === '1',
             );
         });
 
@@ -475,11 +477,14 @@ class CmsExtension implements ExtensionInterface
         });
 
         $container->set(Sitemap::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new Sitemap(
                 $container->get(DbLayer::class),
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get('strict_viewer'),
+                $provider->get('S2_USE_HIERARCHY') === '1',
             );
         });
     }

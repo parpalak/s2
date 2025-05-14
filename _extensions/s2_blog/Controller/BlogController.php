@@ -2,8 +2,8 @@
 /**
  * General blog page.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -39,6 +39,8 @@ abstract class BlogController implements ControllerInterface
         protected HtmlTemplateProvider $templateProvider,
         protected Viewer               $viewer,
         protected string               $blogTitle,
+        protected bool                 $showComments,
+        protected bool                 $enabledComments,
     ) {
     }
 
@@ -51,7 +53,7 @@ abstract class BlogController implements ControllerInterface
         $template
             ->putInPlaceholder('commented', 0)
             ->putInPlaceholder('class', 's2_blog')
-            ->putInPlaceholder('rss_link', [sprintf(
+            ->putInPlaceholder('rss_link', [\sprintf(
                 '<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />',
                 s2_htmlencode($this->translator->trans('RSS blog link title')),
                 $this->blogUrlBuilder->main() . 'rss.xml'
@@ -141,6 +143,8 @@ abstract class BlogController implements ControllerInterface
                 $post['see_also'] = $label_copy;
             }
             $post['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
+            $post['showComments']     = $this->showComments;
+            $post['enabledComments']  = $this->enabledComments;
 
             $output .= $this->viewer->render('post', $post, 's2_blog');
         }

@@ -544,7 +544,7 @@ readonly class PageCommon implements ControllerInterface
             }
             $titles[]       = $row['title'];
             $parent_ids[]   = $row['parent_id'];
-            $urls[]         = rawurlencode($row['url']) . (S2_USE_HIERARCHY && $row['children_exist'] ? '/' : '');
+            $urls[]         = rawurlencode($row['url']) . ($this->useHierarchy && $row['children_exist'] ? '/' : '');
             $tag_ids[]      = $row['tag_id'];
             $original_ids[] = $row['id'];
         }

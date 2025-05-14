@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Comment\SpamDetectorInterface;
@@ -121,6 +123,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
                 (int)$provider->get('S2_MAX_ITEMS')
             );
         });
@@ -138,6 +142,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
             );
         });
         $container->set(MonthPageController::class, static function (Container $container) {
@@ -154,6 +160,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
                 (int)$provider->get('S2_START_YEAR'),
             );
         });
@@ -171,6 +179,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
                 (int)$provider->get('S2_START_YEAR'),
             );
         });
@@ -190,6 +200,7 @@ class Extension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
                 $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
             );
         });
         $container->set(TagsPageController::class, static function (Container $container) {
@@ -206,6 +217,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
             );
         });
         $container->set(TagPageController::class, static function (Container $container) {
@@ -222,6 +235,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
                 $provider->get('S2_USE_HIERARCHY') === '1',
             );
         });
@@ -239,6 +254,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $provider->get('S2_BLOG_TITLE'),
+                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->get('S2_ENABLED_COMMENTS') === '1',
             );
         });
         $container->set(BlogRssStrategy::class, static function (Container $container) {
@@ -442,6 +459,11 @@ class Extension implements ExtensionInterface
         });
     }
 
+    /**
+     * {@inheritdoc}
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function registerRoutes(RouteCollection $routes, Container $container): void
     {
         $configProvider = $container->get(DynamicConfigProvider::class);

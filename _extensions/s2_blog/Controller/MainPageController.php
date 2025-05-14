@@ -2,8 +2,8 @@
 /**
  * Main blog page with last posts.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -37,9 +37,24 @@ class MainPageController extends BlogController
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
         string               $blogTitle,
+        bool                 $showComments,
+        bool                 $enabledComments,
         private readonly int $itemsPerPage,
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
+        parent::__construct(
+            $dbLayer,
+            $calendarBuilder,
+            $blogUrlBuilder,
+            $articleProvider,
+            $postProvider,
+            $urlBuilder,
+            $translator,
+            $templateProvider,
+            $viewer,
+            $blogTitle,
+            $showComments,
+            $enabledComments
+        );
     }
 
     public function handle(Request $request): Response
@@ -80,7 +95,9 @@ class MainPageController extends BlogController
             }
 
             $post['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
-            $output .= $this->viewer->render('post', $post, 's2_blog');
+            $post['showComments']     = $this->showComments;
+            $post['enabledComments']  = $this->enabledComments;
+            $output                   .= $this->viewer->render('post', $post, 's2_blog');
         }
 
         $paging = '';

@@ -36,9 +36,24 @@ class MonthPageController extends BlogController
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
         string               $blogTitle,
+        bool                 $showComments,
+        bool                 $enabledComments,
         private readonly int $startYear,
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
+        parent::__construct(
+            $dbLayer,
+            $calendarBuilder,
+            $blogUrlBuilder,
+            $articleProvider,
+            $postProvider,
+            $urlBuilder,
+            $translator,
+            $templateProvider,
+            $viewer,
+            $blogTitle,
+            $showComments,
+            $enabledComments
+        );
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response

@@ -2,8 +2,8 @@
 /**
  * Single blog post.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -38,9 +38,23 @@ class PostPageController extends BlogController
         HtmlTemplateProvider                     $templateProvider,
         Viewer                                   $viewer,
         string                                   $blogTitle,
-        protected bool                           $showComments,
+        bool                                     $showComments,
+        bool                                     $enabledComments,
     ) {
-        parent::__construct($dbLayer, $calendarBuilder, $blogUrlBuilder, $articleProvider, $postProvider, $urlBuilder, $translator, $templateProvider, $viewer, $blogTitle);
+        parent::__construct(
+            $dbLayer,
+            $calendarBuilder,
+            $blogUrlBuilder,
+            $articleProvider,
+            $postProvider,
+            $urlBuilder,
+            $translator,
+            $templateProvider,
+            $viewer,
+            $blogTitle,
+            $showComments,
+            $enabledComments
+        );
     }
 
     public function body(Request $request, HtmlTemplate $template): ?Response
@@ -198,6 +212,8 @@ class PostPageController extends BlogController
         $row['commented']        = 0; // for template
         $row['tags']             = $tags;
         $row['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
+        $row['showComments']     = $this->showComments;
+        $row['enabledComments']  = $this->enabledComments;
 
         $template
             ->putInPlaceholder('meta_description', self::extractMetaDescriptions($row['text']))
