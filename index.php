@@ -7,7 +7,7 @@
  * @package   S2
  */
 
-use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Config\DynamicConfigProvider;
 use Symfony\Component\HttpFoundation\Request;
 
 define('S2_ROOT', './');
@@ -54,13 +54,14 @@ if ($response->isInformational() || $response->isEmpty() || $response->getConten
     // Custom response sending to set Content-Length properly and to enable compression
     ob_start();
 
-    if (S2_COMPRESS) {
+    $useCompression = $app->container->get(DynamicConfigProvider::class)->get('S2_COMPRESS');
+    if ($useCompression) {
         ob_start('ob_gzhandler');
     }
 
     $response->sendContent();
 
-    if (S2_COMPRESS) {
+    if ($useCompression) {
         ob_end_flush();
     }
 
