@@ -137,11 +137,11 @@ try {
     $app->container->getParameter('base_url');
 } catch (ParameterNotFoundException $e) {
     // S2 is not installed
-    error(sprintf(
-        'Cannot read parameters from configuration file "%s".<br />Do you want to <a href="%s_admin/install.php">install S2</a>?',
-        s2_get_config_filename(),
-        preg_replace('#' . (S2_ROOT == '../' ? '/[a-z_\.]*' : '') . '/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME'])
-    ));
+    $configFilename = s2_get_config_filename();
+    $installationPath = preg_replace('#' . (S2_ROOT === '../' ? '/[a-z_\.]*' : '') . '/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME']) . '_admin/install.php';
+    require  'installation_required.php';
+
+    exit;
 }
 $errorHandler->setDefaultLogger($app->container->get(LoggerInterface::class));
 

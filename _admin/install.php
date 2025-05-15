@@ -34,6 +34,92 @@ define('S2_SHOW_QUERIES', 1);
 // We need some stuff
 require S2_ROOT . '_vendor/autoload.php';
 
+/**
+ * Display styled error message and terminate script execution
+ *
+ * @param string $message Error message to display (can contain HTML)
+ * @param string $title Page title and heading (default: 'Error')
+ */
+function error(string $message, string $title = 'Error'): void
+{
+    if (!headers_sent()) {
+        $protocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
+        header("$protocol 503", true, 503);
+        header('Content-Type: text/html; charset=utf-8');
+        header('X-Error-Message: ' . rawurlencode(strip_tags($message)));
+    }
+
+    // Clean all output buffers
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    // Security: escape output unless message contains HTML tags
+    $safeMessage = strip_tags($message) === $message
+        ? htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
+        : $message;
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?> | S2</title>
+        <style>
+            :root {
+                --error-color: #d32f2f;
+                --text-color: #333;
+                --border-color: rgba(0, 0, 0, 0.1);
+                --code-bg: #f5f5f5;
+            }
+
+            body {
+                padding: 2rem;
+                font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+                line-height: 1.6;
+                color: var(--text-color);
+                background-color: #fefefe;
+                max-width: 800px;
+                margin: 3rem auto;
+            }
+
+            .error-container {
+                padding: 2rem;
+                border-left: 4px solid var(--error-color);
+                background: white;
+                box-shadow: 0 1px 8px -2px rgba(0, 0, 0, 0.13);
+                border-radius: 0 4px 4px 0;
+            }
+
+            h1 {
+                margin: 0 0 1rem;
+                color: var(--error-color);
+                font-size: 1.8rem;
+            }
+
+            .error-message {
+                margin: 1rem 0;
+                white-space: pre-wrap;
+            }
+
+            pre, code {
+                font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+                font-size: 0.9em;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="error-container">
+        <h1><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></h1>
+        <div class="error-message"><?php echo $safeMessage ?></div>
+    </div>
+    </body>
+    </html>
+    <?php
+
+    exit;
+}
+
 if (file_exists(S2_ROOT . s2_get_config_filename())) {
     error(sprintf(
         'The file \'%s\' already exists which would mean that S2 is already installed. You should go <a href="%s">here</a> instead.',

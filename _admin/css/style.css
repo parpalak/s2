@@ -12,6 +12,9 @@ body {
 h1, h2 {
     margin: 1em 0 0.25em;
     }
+h1 {
+    color: #007093;
+    }
 
 body, button, input, select, textarea {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -48,7 +51,7 @@ hr {
 form .button-wrapper {
 	margin: 0 0 1em;
 	}
-    form .button-wrapper input {
+    form .button-wrapper input, a.link-button {
         background: #fffffb;
         background: linear-gradient(to bottom, #fffffb 0%, #f1f1f1 100%);
         border: 1px solid #999;
@@ -57,22 +60,27 @@ form .button-wrapper {
         box-shadow: 0 2px 0 rgba(255, 255, 255, 0.2) inset, 0 2px 2px rgba(0, 0, 0, 0.1);
         cursor: pointer;
         }
-        form .button-wrapper input:hover {
+        form .button-wrapper input:hover, a.link-button:hover {
             background: #f6f6f1;
             background: linear-gradient(to bottom, #f6f6f1 0%, #ecebe3 100%);
             }
-        form .button-wrapper input:active {
+        form .button-wrapper input:active, a.link-button:active {
             box-shadow: 0 2px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 1px rgba(0, 0, 0, 0.05);
             }
-    form .button-wrapper input.main-button {
+    form .button-wrapper input.main-button, a.link-button.main-button {
         background: #bde4ed;
         background: linear-gradient(to bottom, #ccf6ff 0%, #a7dde5 100%);
         border-color: #54b2bf;
         }
-        form .button-wrapper input.main-button:hover {
+        form .button-wrapper input.main-button:hover, a.link-button.main-button:hover {
             background: #bde4ed;
             background: linear-gradient(to bottom, #b4e4ee 0%, #8dcfd9 100%);
             }
+
+a.link-button {
+    color: #000;
+    text-decoration: none;
+}
 
 .input {
 	margin: 0 0 0.75em;

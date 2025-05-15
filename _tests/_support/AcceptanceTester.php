@@ -30,7 +30,7 @@ class AcceptanceTester extends Actor
     {
         $I = $this;
         $I->amOnPage('/');
-        $I->seeLink('install S2', '/_admin/install.php');
+        $I->seeLink('Run Installation', '/_admin/install.php');
         $I->amOnPage('/_admin/install.php');
         $I->seeResponseCodeIs(200);
         $I->see('S2 2.0dev', 'h1');
