@@ -40,7 +40,7 @@ require S2_ROOT . '_vendor/autoload.php';
  * @param string $message Error message to display (can contain HTML)
  * @param string $title Page title and heading (default: 'Error')
  */
-function error(string $message, string $title = 'Error'): void
+function error(string $message, string $title = 'An error was encountered'): void
 {
     if (!headers_sent()) {
         $protocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
@@ -64,13 +64,13 @@ function error(string $message, string $title = 'Error'): void
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?> | S2</title>
+        <meta name="Generator" content="S2">
+        <title><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?> - S2</title>
         <style>
             :root {
                 --error-color: #d32f2f;
                 --text-color: #333;
                 --border-color: rgba(0, 0, 0, 0.1);
-                --code-bg: #f5f5f5;
             }
 
             body {

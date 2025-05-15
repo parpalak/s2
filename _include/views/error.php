@@ -1,23 +1,73 @@
-<?php if (!defined('S2_ROOT')) die; ?>
+<?php
+
+use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Framework\Application;
+
+if (!defined('S2_ROOT')) {
+    die;
+}
+
+if (isset($GLOBALS['app']) && $GLOBALS['app'] instanceof Application) {
+    $siteName = $GLOBALS['app']->container->get(DynamicConfigProvider::class)->get('S2_SITE_NAME');
+} else {
+    $siteName = 'S2';
+}
+
+?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="Generator" content="S2">
-    <title>Error - <?php echo defined('S2_SITE_NAME') ? s2_htmlencode(S2_SITE_NAME) : 'S2'; ?></title>
+    <title>Error - <?php echo s2_htmlencode($siteName); ?></title>
     <style>
-        body {
-            margin: 40px;
-            font: 16px/1.5 Helvetica, Arial, sans-serif;
-            color: #333;
+        :root {
+            --error-color: #d32f2f;
+            --text-color: #333;
+            --border-color: rgba(0, 0, 0, 0.1);
         }
-        p {
-            max-width: 40em;
+
+        body {
+            padding: 2rem;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fefefe;
+            max-width: 800px;
+            margin: 3rem auto;
+        }
+
+        .error-container {
+            padding: 2rem;
+            border-left: 4px solid var(--error-color);
+            background: white;
+            box-shadow: 0 1px 8px -2px rgba(0, 0, 0, 0.13);
+            border-radius: 0 4px 4px 0;
+        }
+
+        h1 {
+            margin: 0 0 1rem;
+            color: var(--error-color);
+            font-size: 1.8rem;
+        }
+
+        .error-message {
+            margin: 1rem 0;
+            white-space: pre-wrap;
+        }
+
+        pre, code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9em;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 2px;
+            border-radius: 3px;
         }
     </style>
 </head>
 <body>
-<div class="container">
+<div class="error-container">
     <h1>An error was encountered</h1>
 
     <p>

@@ -17,9 +17,12 @@ declare(strict_types=1);
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>S2 Setup Required</title>
-    <link rel="stylesheet" href="<?php echo S2_ROOT ?>_admin/css/style.css">
     <style>
         body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            font-size: 1rem;
+            color: #000;
+            background: #fffdf5;
             margin: 0;
             padding: 0;
             line-height: 1.5;
@@ -34,6 +37,7 @@ declare(strict_types=1);
             box-shadow: 0 2px 10px -3px rgba(0, 0, 0, 0.2);
         }
         h1 {
+            color: #007093;
             font-size: 2.5em;
             margin: 0 0 0.5rem;
             display: flex;
@@ -43,6 +47,25 @@ declare(strict_types=1);
         .icon {
             width: 36px;
             height: 36px;
+        }
+        a.link-button.main-button {
+            background: #bde4ed;
+            background: linear-gradient(to bottom, #ccf6ff 0%, #a7dde5 100%);
+            border-color: #54b2bf;
+        }
+        a.link-button.main-button:hover {
+            background: #bde4ed;
+            background: linear-gradient(to bottom, #b4e4ee 0%, #8dcfd9 100%);
+        }
+        a.link-button {
+            font-size: 1.25em;
+            color: #000;
+            text-decoration: none;
+            border: 1px solid #999;
+            border-radius: 4px;
+            padding: 0.375em 0.75em;
+            box-shadow: 0 2px 0 rgba(255, 255, 255, 0.2) inset, 0 2px 2px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
         }
         .help {
             margin-top: 2em;
