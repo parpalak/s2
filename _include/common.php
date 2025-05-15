@@ -10,8 +10,11 @@
 use Psr\Log\LoggerInterface;
 use S2\Cms\Admin\AdminExtension;
 use S2\Cms\CmsExtension;
+use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Application;
+use S2\Cms\Framework\Exception\ParameterNotFoundException;
 use S2\Cms\Model\ExtensionCache;
+use S2\Cms\Model\MigrationManager;
 use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
@@ -75,7 +78,7 @@ function collectParameters(): array
         // full prefix for absolute web URLs, i.e. main page URL supposed to be S2_BASE_URL . S2_URL_PREFIX '/'
         'base_url'           => defined('S2_BASE_URL') ? S2_BASE_URL : null,
 
-        // path prefix for the web URL, i.e. main page URL supposed to be 'http://host' . S2_PATH . S2_URL_PREFIX . '/'
+        // path prefix for the web URL, i.e. main page URL supposed to be 'http://example.com' . S2_PATH . S2_URL_PREFIX . '/'
         'base_path'          => defined('S2_PATH') ? S2_PATH : null,
 
         // one of '', '/?', '/index.php', '/index.php?'
@@ -132,7 +135,7 @@ try {
     }
 
     $app->container->getParameter('base_url');
-} catch (\S2\Cms\Framework\Exception\ParameterNotFoundException $e) {
+} catch (ParameterNotFoundException $e) {
     // S2 is not installed
     error(sprintf(
         'Cannot read parameters from configuration file "%s".<br />Do you want to <a href="%s_admin/install.php">install S2</a>?',
@@ -147,8 +150,8 @@ if (file_exists(S2_CACHE_DIR . 'cache_config.php')) {
     include S2_CACHE_DIR . 'cache_config.php';
 }
 
-/** @var \S2\Cms\Config\DynamicConfigProvider $dynamicConfigProvider */
-$dynamicConfigProvider = $app->container->get(\S2\Cms\Config\DynamicConfigProvider::class);
+/** @var DynamicConfigProvider $dynamicConfigProvider */
+$dynamicConfigProvider = $app->container->get(DynamicConfigProvider::class);
 if (!defined('S2_CONFIG_LOADED')) {
     $dynamicConfigProvider->regenerate();
     include S2_CACHE_DIR . 'cache_config.php';
@@ -161,7 +164,10 @@ if (defined('S2_ADMIN_MODE')) {
     ini_set('session.cookie_httponly', true);
 }
 
-define('S2_DB_LAST_REVISION', 22);
-if (S2_DB_REVISION < S2_DB_LAST_REVISION) {
-    include __DIR__ . '/../_admin/db_update.php';
+if ($dynamicConfigProvider->get('S2_DB_REVISION') < 22) {
+    /** @var MigrationManager $migrationManager */
+    $migrationManager = $app->container->get(MigrationManager::class);
+    $migrationManager->migrate((int)$dynamicConfigProvider->get('S2_DB_REVISION'), 22);
+
+    $dynamicConfigProvider->regenerate();
 }

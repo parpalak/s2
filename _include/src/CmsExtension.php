@@ -43,6 +43,7 @@ use S2\Cms\Model\Comment\ArticleCommentStrategy;
 use S2\Cms\Model\CommentNotifier;
 use S2\Cms\Model\CommentProvider;
 use S2\Cms\Model\ExtensionCache;
+use S2\Cms\Model\MigrationManager;
 use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Model\User\UserProvider;
@@ -111,6 +112,13 @@ class CmsExtension implements ExtensionInterface
                 'pgsql' => new PDO("pgsql:host=$db_host;dbname=$db_name", $db_username, $db_password),
                 default => throw new \RuntimeException(\sprintf('Unsupported db_type="%s"', $db_type)),
             };
+        });
+
+        $container->set(MigrationManager::class, function (Container $container) {
+            return new MigrationManager(
+                $container->get(DbLayer::class),
+                $container->getParameter('db_type'),
+            );
         });
 
         $container->set(ExtensionCache::class, function (Container $container) {
