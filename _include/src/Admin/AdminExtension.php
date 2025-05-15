@@ -302,6 +302,7 @@ class AdminExtension implements ExtensionInterface
                 $container->getByTag(DashboardBlockProviderInterface::class),
                 $container->get(PermissionChecker::class),
                 $container->get(TemplateRenderer::class),
+                $container->getParameter('version'),
             );
         }, [AdminConfigExtenderInterface::class]);
         $container->set(DashboardEnvironmentProvider::class, function (Container $container) {
