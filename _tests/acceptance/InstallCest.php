@@ -12,6 +12,9 @@ namespace acceptance;
 use AcceptanceTester;
 use Codeception\Example;
 
+/**
+ * @group install
+ */
 class InstallCest
 {
     private const URL_PREFIX = '/index.php?';

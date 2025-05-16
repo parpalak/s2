@@ -145,17 +145,8 @@ try {
 }
 $errorHandler->setDefaultLogger($app->container->get(LoggerInterface::class));
 
-// Load cached config
-if (file_exists(S2_CACHE_DIR . 'cache_config.php')) {
-    include S2_CACHE_DIR . 'cache_config.php';
-}
-
 /** @var DynamicConfigProvider $dynamicConfigProvider */
 $dynamicConfigProvider = $app->container->get(DynamicConfigProvider::class);
-if (!defined('S2_CONFIG_LOADED')) {
-    $dynamicConfigProvider->regenerate();
-    include S2_CACHE_DIR . 'cache_config.php';
-}
 
 if (defined('S2_ADMIN_MODE')) {
     $loginTimeoutSeconds = $dynamicConfigProvider->get('S2_LOGIN_TIMEOUT') * 60;

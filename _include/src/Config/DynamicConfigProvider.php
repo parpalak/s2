@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace S2\Cms\Config;
 
 use Psr\Cache\InvalidArgumentException;
-use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Pdo\DbLayer;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -24,7 +23,6 @@ class DynamicConfigProvider implements StatefulServiceInterface
     public function __construct(
         private readonly DbLayer        $dbLayer,
         private readonly CacheInterface $cache,
-        private readonly string         $cacheDir,
     ) {
 
     }
@@ -44,7 +42,7 @@ class DynamicConfigProvider implements StatefulServiceInterface
         }
 
         if (!isset($this->params[$paramName])) {
-            throw new \LogicException(sprintf('Param "%s" does not exist.', $paramName));
+            throw new \LogicException(\sprintf('Param "%s" does not exist.', $paramName));
         }
 
         return $this->params[$paramName];
@@ -74,21 +72,8 @@ class DynamicConfigProvider implements StatefulServiceInterface
             $statement = $this->dbLayer->buildAndQuery($query);
 
             $result = [];
-
-            $legacyConfigOutput = '';
             while ($row = $this->dbLayer->fetchRow($statement)) {
-                $legacyConfigOutput .= 'define(\'' . $row[0] . '\', \'' . str_replace(array('\\', '\''), array('\\\\', '\\\''), $row[1]) . '\');' . "\n";
-                $result[$row[0]]    = $row[1];
-            }
-
-            // Deprecated. Remove when all values are accessed through this class, not global constants.
-            try {
-                s2_overwrite_file_skip_locked($this->cacheDir . 'cache_config.php', '<?php' . "\n\n" . 'define(\'S2_CONFIG_LOADED\', 1);' . "\n\n" . $legacyConfigOutput . "\n");
-            } catch (\RuntimeException $e) {
-                throw new ConfigurationException(sprintf(
-                    "Unable to write configuration cache file to cache directory. Please make sure PHP has write access to the directory '%s'.",
-                    $this->cacheDir
-                ), null, $e);
+                $result[$row[0]] = $row[1];
             }
 
             return $result;

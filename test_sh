@@ -6,6 +6,8 @@ chmod a+w _tests/_output/email/
 chmod a+w _cache/test/
 rm -f _cache/*.log
 rm -f _cache/test/*.log
+rm -rf _cache/test/config/*
+rm -rf _cache/test/recommendations/*
 
 # clear test databases
 rm -f s2_test

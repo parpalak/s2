@@ -50,9 +50,6 @@ class Integration extends AbstractBrowserModule
     public function _initialize()
     {
         parent::_initialize();
-        if (file_exists(self::ROOT_DIR . '_cache/test/cache_config.php')) {
-            @unlink(self::ROOT_DIR . '_cache/test/cache_config.php');
-        }
         @self::deleteRecursive(self::ROOT_DIR . '_cache/test/config/');
         $this->publicApplication = $this->createApplication();
         $this->pdo               = $this->publicApplication->container->get(\PDO::class);
