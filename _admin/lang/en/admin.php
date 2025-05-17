@@ -1,6 +1,6 @@
 <?php
 
-$lang_admin = [
+return [
 
     // Common admin panel
     'Welcome'               => '👤 %s',
@@ -317,13 +317,3 @@ $lang_admin = [
     'Upload error ' . UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
     'Upload error ' . UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
 ];
-
-$lang_templates = array(
-
-    ''                 => '— inherited —',
-    'site.php'         => 'General page',
-    'mainpage.php'     => 'Main page',
-    'back_forward.php' => 'Page without menu',
-    '+'                => '— other template —',
-
-);
