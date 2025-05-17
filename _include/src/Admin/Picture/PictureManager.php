@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -65,13 +65,19 @@ class PictureManager
         imagecopyresampled($thumbnail, $image, $dst_x, $dst_y, 0, 0, $dst_width, $dst_height, $sx, $sy);
 
         ob_start();
-        imageavif($thumbnail);
+        if (\function_exists('imageavif')) {
+            $contentType = 'image/avif';
+            imageavif($thumbnail);
+        } else {
+            $contentType = 'image/jpeg';
+            imagejpeg($thumbnail);
+        }
         $content = ob_get_clean();
 
         imagedestroy($image);
         imagedestroy($thumbnail);
 
-        return new Response($content, Response::HTTP_OK, ['Content-Type' => 'image/avif']);
+        return new Response($content, Response::HTTP_OK, ['Content-Type' => $contentType]);
     }
 
     public function getDirContentRecursive(string $dir): array
@@ -332,7 +338,7 @@ class PictureManager
             && !str_contains(' ' . $this->allowedExtensions . ' ', ' ' . $extension . ' ')
         ) {
             $errorMessage = $this->translator->trans('Forbidden extension', ['{{ ext }}' => $extension]);
-            $error        = $filename ? sprintf($this->translator->trans('Upload file error'), $filename, $errorMessage) : $errorMessage;
+            $error        = $filename ? \sprintf($this->translator->trans('Upload file error'), $filename, $errorMessage) : $errorMessage;
             throw new \RuntimeException($error);
         }
 
@@ -353,7 +359,7 @@ class PictureManager
 
         if ($createDir && !is_dir($this->imageDir . $path)) {
             if (!mkdir($this->imageDir . $path, 0777, true) && !is_dir($this->imageDir . $path)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->imageDir . $path));
+                throw new \RuntimeException(\sprintf('Directory "%s" was not created', $this->imageDir . $path));
             }
             chmod($this->imageDir . $path, 0777);
         }
