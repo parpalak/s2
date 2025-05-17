@@ -21,6 +21,7 @@ use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\ErrorHandler\Debug;
+use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
@@ -134,15 +135,19 @@ if (!function_exists('version_compare') || version_compare(PHP_VERSION, MIN_PHP_
 }
 
 // Disable error reporting for uninitialized variables
-error_reporting(E_ALL);
+error_reporting(defined('S2_DEBUG') ? E_ALL : E_ALL ^ E_NOTICE);
 
 // Turn off PHP time limit
 @set_time_limit(0);
 
-require S2_ROOT . '_include/setup.php';
+require __DIR__ . '/../_include/setup.php';
 
-$errorHandler = Debug::enable();
-HtmlErrorRenderer::setTemplate(realpath(S2_ROOT . '_include/views/error.php'));
+if (defined('S2_DEBUG')) {
+    $errorHandler = Debug::enable();
+} else {
+    $errorHandler = ErrorHandler::register();
+}
+HtmlErrorRenderer::setTemplate(__DIR__ . '/../_include/views/error.php');
 $errorHandler->setDefaultLogger(new Logger(S2_ROOT . '_cache/install.log', 'install', LogLevel::DEBUG));
 
 //

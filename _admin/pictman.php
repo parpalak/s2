@@ -15,8 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 define('S2_ADMIN_MODE', true);
-define('S2_ROOT', '../');
-require S2_ROOT . '_include/common.php';
+require __DIR__ . '/../_include/common.php';
 
 $request = Request::createFromGlobals();
 

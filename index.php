@@ -2,16 +2,15 @@
 /**
  * Processing all public pages of the site.
  *
- * @copyright 2009-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2009-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
 use S2\Cms\Config\DynamicConfigProvider;
 use Symfony\Component\HttpFoundation\Request;
 
-define('S2_ROOT', './');
-require S2_ROOT . '_include/common.php';
+require __DIR__ . '/_include/common.php';
 
 header('X-Powered-By: S2/' . S2_VERSION);
 

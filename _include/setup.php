@@ -7,21 +7,18 @@
  * @package   S2
  */
 
-if (!defined('S2_ROOT')) {
-    die;
-}
-
 mb_internal_encoding('UTF-8');
 
 // If the cache directory is not specified, we use the default setting
 if (!defined('S2_CACHE_DIR')) {
     define('S2_CACHE_DIR', (static function () {
-        $appEnv = getenv('APP_ENV');
+        $appEnv   = getenv('APP_ENV');
+        $cacheDir = dirname(__DIR__) . '/_cache/';
         if (is_string($appEnv) && $appEnv !== '') {
-            return S2_ROOT . '_cache/' . $appEnv . '/';
+            return $cacheDir . $appEnv . '/';
         }
 
-        return S2_ROOT . '_cache/';
+        return $cacheDir;
     })());
 }
 

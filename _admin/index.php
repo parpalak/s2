@@ -15,8 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 // NOTE: find a more elegant way to boot the application with the AdminExtension
 const S2_ADMIN_MODE = true;
 
-define('S2_ROOT', '../');
-require S2_ROOT . '_include/common.php';
+require __DIR__ . '/../_include/common.php';
 
 $request = Request::createFromGlobals();
 /** @var AdminRequestHandler $handler */

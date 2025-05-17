@@ -3,14 +3,10 @@
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Application;
 
-if (!defined('S2_ROOT')) {
-    die;
-}
-
 if (isset($GLOBALS['app']) && $GLOBALS['app'] instanceof Application) {
     $siteName = $GLOBALS['app']->container->get(DynamicConfigProvider::class)->get('S2_SITE_NAME');
 } else {
-    $siteName = 'S2';
+    return;
 }
 
 ?>

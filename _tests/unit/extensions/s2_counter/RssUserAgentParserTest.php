@@ -11,8 +11,6 @@ namespace unit\extensions\s2_counter;
 
 use Codeception\Test\Unit;
 
-define('S2_ROOT', 1);
-
 if (!defined('S2_COUNTER_FUNCTIONS_LOADED')) {
     include '_extensions/s2_counter/functions.php';
 }

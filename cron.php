@@ -13,8 +13,7 @@ if (PHP_SAPI !== 'cli') {
     return;
 }
 
-define('S2_ROOT', './');
-require S2_ROOT . '_include/common.php';
+require __DIR__ . '/_include/common.php';
 
 /** @var QueueConsumer $consumer */
 $consumer = $app->container->get(QueueConsumer::class);

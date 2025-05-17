@@ -19,9 +19,6 @@ use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
-if (!defined('S2_ROOT'))
-    die;
-
 $s2BootTimestamp = microtime(true);
 
 define('S2_VERSION', '2.0dev');
@@ -46,7 +43,7 @@ if (defined('S2_DEBUG')) {
 } else {
     $errorHandler = ErrorHandler::register();
 }
-HtmlErrorRenderer::setTemplate(dirname(__DIR__) . '/_include/views/error.php');
+HtmlErrorRenderer::setTemplate(__DIR__ . '/views/error.php');
 
 if (!defined('S2_URL_PREFIX')) {
     define('S2_URL_PREFIX', '');
@@ -56,7 +53,6 @@ if (!defined('S2_URL_PREFIX')) {
 if (!defined('S2_IMG_DIR')) {
     define('S2_IMG_DIR', '_pictures');
 }
-define('S2_IMG_PATH', S2_ROOT . S2_IMG_DIR);
 
 if (!defined('S2_ALLOWED_EXTENSIONS')) {
     define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav ogg flac mp4 avi flv mpg mpeg mkv zip 7z rar doc docx ppt pptx odt odt odp ods xlsx xls pdf txt rtf csv');
@@ -67,10 +63,10 @@ function collectParameters(): array
     global $s2BootTimestamp;
     $result = [
         'boot_timestamp'     => $s2BootTimestamp,
-        'root_dir'           => S2_ROOT,
+        'root_dir'           => dirname(__DIR__) . '/',
         'cache_dir'          => S2_CACHE_DIR,
         'allowed_extensions' => S2_ALLOWED_EXTENSIONS,
-        'image_dir'          => S2_ROOT . S2_IMG_DIR, // filesystem; no trailing slash in contrast to root_dir and cache_dir
+        'image_dir'          => dirname(__DIR__) . '/' . S2_IMG_DIR, // filesystem; no trailing slash in contrast to root_dir and cache_dir
         'image_path'         => defined('S2_PATH') ? S2_PATH . '/' . S2_IMG_DIR : null, // web URL prefix
         'disable_cache'      => defined('S2_DISABLE_CACHE'),
         'log_dir'            => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
@@ -137,9 +133,14 @@ try {
     $app->container->getParameter('base_url');
 } catch (ParameterNotFoundException $e) {
     // S2 is not installed
-    $configFilename = s2_get_config_filename();
-    $installationPath = preg_replace('#' . (S2_ROOT === '../' ? '/[a-z_\.]*' : '') . '/[a-z_]*\.php$#', '/', $_SERVER['SCRIPT_NAME']) . '_admin/install.php';
-    require  'installation_required.php';
+    $configFilename   = s2_get_config_filename();
+    $installationPath = substr(
+            dirname(__DIR__),
+            str_ends_with($_SERVER['SCRIPT_FILENAME'], $_SERVER['SCRIPT_NAME'])
+                ? strlen($_SERVER['SCRIPT_FILENAME']) - strlen($_SERVER['SCRIPT_NAME'])
+                : strlen($_SERVER['DOCUMENT_ROOT'] ?? '')
+        ) . '/_admin/install.php';
+    require 'installation_required.php';
 
     exit;
 }
