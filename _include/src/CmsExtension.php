@@ -147,7 +147,8 @@ class CmsExtension implements ExtensionInterface
         $container->set(DynamicConfigProvider::class, function (Container $container) {
             return new DynamicConfigProvider(
                 $container->get(DbLayer::class),
-                $container->get('config_cache'),
+                $container->getParameter('cache_dir') . '/cache_config.php',
+                $container->getParameter('disable_cache'),
             );
         }, [StatefulServiceInterface::class]); // TODO not enough, parameters are set into many other services
 
@@ -221,6 +222,7 @@ class CmsExtension implements ExtensionInterface
                 $container->getParameter('debug_view'),
                 $container->getParameter('root_dir'),
                 $container->getParameter('cache_dir'),
+                $container->getParameter('disable_cache'),
                 $container->getParameter('base_path'),
             );
         });

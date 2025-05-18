@@ -37,6 +37,7 @@ readonly class HtmlTemplateProvider
         private bool                     $debugView,
         private string                   $rootDir,
         private string                   $cacheDir,
+        private bool                     $disableCache,
         private string                   $basePath,
     ) {
         $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
@@ -98,7 +99,7 @@ readonly class HtmlTemplateProvider
 
         $styles  = $assetPack->getStyles(
             $this->basePath . '/_styles/' . $this->styleName . '/',
-            new AssetMerge(
+            $this->disableCache ? null : new AssetMerge(
                 $this->httpClient,
                 $this->cacheDir,
                 '/_cache/',
@@ -109,7 +110,7 @@ readonly class HtmlTemplateProvider
         );
         $scripts = $assetPack->getScripts(
             $this->basePath . '/_styles/' . $this->styleName . '/',
-            new AssetMerge(
+            $this->disableCache ? null : new AssetMerge(
                 $this->httpClient,
                 $this->cacheDir,
                 '/_cache/',
