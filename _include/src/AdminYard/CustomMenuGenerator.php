@@ -19,11 +19,12 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 readonly class CustomMenuGenerator extends MenuGenerator
 {
     public function __construct(
-        private AdminConfig              $config,
+        AdminConfig              $config,
+        TemplateRenderer         $templateRenderer,
         private PermissionChecker        $permissionChecker,
-        private TemplateRenderer         $templateRenderer,
         private EventDispatcherInterface $eventDispatcher,
     ) {
+        parent::__construct($config, $templateRenderer);
     }
 
     public function generateMainMenu(string $baseUrl, ?string $currentEntity = null): string

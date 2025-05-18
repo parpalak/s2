@@ -127,8 +127,8 @@ class AdminExtension implements ExtensionInterface
 
             return new CustomMenuGenerator(
                 $adminConfig,
-                $container->get(PermissionChecker::class),
                 $container->get(TemplateRenderer::class),
+                $container->get(PermissionChecker::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
             );
         });

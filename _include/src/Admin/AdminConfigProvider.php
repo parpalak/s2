@@ -211,7 +211,7 @@ readonly class AdminConfigProvider
                     1  => $this->translator->trans('Considered'),
                 ]
             ))
-            ->setControllerClass(CommentController::class)
+            ->setControllerClassOrFactory(CommentController::class)
             ->setEnabledActions([
                 FieldConfig::ACTION_LIST,
                 ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_COMMENTS) ? [FieldConfig::ACTION_EDIT, FieldConfig::ACTION_DELETE] : [],
