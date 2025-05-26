@@ -102,7 +102,7 @@ readonly class HtmlTemplateProvider
             $this->disableCache ? null : new AssetMerge(
                 $this->httpClient,
                 $this->cacheDir,
-                '/_cache/',
+                $this->basePath . '/_cache/',
                 $this->styleName . '_styles',
                 AssetMerge::TYPE_CSS,
                 $this->debug
@@ -113,7 +113,7 @@ readonly class HtmlTemplateProvider
             $this->disableCache ? null : new AssetMerge(
                 $this->httpClient,
                 $this->cacheDir,
-                '/_cache/',
+                $this->basePath . '/_cache/',
                 $this->styleName . '_scripts',
                 AssetMerge::TYPE_JS,
                 $this->debug
