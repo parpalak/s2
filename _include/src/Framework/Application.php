@@ -89,12 +89,12 @@ class Application
         $attributes      = $this->matchRequest($request);
         $controllerClass = $attributes['_controller'];
         if (!$this->container->has($controllerClass)) {
-            throw new \LogicException(sprintf('Controller "%s" must be defined in container.', $controllerClass));
+            throw new \LogicException(\sprintf('Controller "%s" must be defined in container.', $controllerClass));
         }
 
         $controller = $this->container->get($controllerClass);
         if (!$controller instanceof ControllerInterface) {
-            throw new \LogicException(sprintf('Controller "%s" must implement "%s".', $controllerClass, ControllerInterface::class));
+            throw new \LogicException(\sprintf('Controller "%s" must implement "%s".', $controllerClass, ControllerInterface::class));
         }
 
         /** @var RequestStack $requestStack */
@@ -215,6 +215,9 @@ class Application
                 $compiledUrlMatcherDumper = new CompiledUrlMatcherDumper($this->getRoutes());
                 $this->compiledRoutes     = $compiledUrlMatcherDumper->getCompiledRoutes();
                 s2_overwrite_file_skip_locked($this->cachedRoutesFilename, $compiledUrlMatcherDumper->dump());
+                if (\function_exists('opcache_invalidate')) {
+                    opcache_invalidate($this->cachedRoutesFilename, true);
+                }
             }
         }
 
