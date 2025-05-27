@@ -372,7 +372,7 @@ readonly class HttpClient
             return $this->preferredTransport;
         }
 
-        if (\function_exists('curl_init')) {
+        if (\function_exists('curl_init') && \function_exists('curl_exec')) {
             return self::TRANSPORT_CURL;
         }
 
