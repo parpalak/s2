@@ -11,6 +11,7 @@ namespace S2\Cms;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use S2\Cms\Asset\AssetMergeFactory;
 use S2\Cms\Comment\AkismetProxy;
 use S2\Cms\Comment\SpamDetectorInterface;
 use S2\Cms\Config\DynamicConfigProvider;
@@ -209,23 +210,31 @@ class CmsExtension implements ExtensionInterface
             return new HttpClient();
         });
 
+        $container->set(AssetMergeFactory::class, function (Container $container) {
+            return new AssetMergeFactory(
+                $container->get(HttpClient::class),
+                $container->getParameter('debug'),
+                // Not a cache_dir since it can be overridden via S2_CACHE_DIR, but we need a public available path
+                $container->getParameter('root_dir') . '_cache/',
+                $container->getParameter('base_path') . '/_cache/',
+                $container->getParameter('disable_cache'),
+            );
+        });
+
         $container->set(HtmlTemplateProvider::class, function (Container $container) {
             return new HtmlTemplateProvider(
                 $container->get(RequestStack::class),
                 $container->get(UrlBuilder::class),
                 $container->get('translator'),
                 $container->get(Viewer::class),
-                $container->get(HttpClient::class),
+                $container->get(AssetMergeFactory::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->get(DynamicConfigProvider::class),
-                $container->getParameter('debug'),
                 $container->getParameter('debug_view'),
                 $container->getParameter('root_dir'),
-                $container->getParameter('cache_dir'),
-                $container->getParameter('disable_cache'),
                 $container->getParameter('base_path'),
             );
-        });
+        }, [StatefulServiceInterface::class]);
 
         $container->set(Viewer::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */

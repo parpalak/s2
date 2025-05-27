@@ -4,7 +4,7 @@
  * Replaces styles and scripts placeholders.
  *
  * @copyright 2009-2025 Roman Parpalak
- * @license   MIT
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -13,9 +13,9 @@ declare(strict_types=1);
 namespace S2\Cms\Template;
 
 use S2\Cms\Asset\AssetMerge;
+use S2\Cms\Asset\AssetMergeFactory;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
-use S2\Cms\HttpClient\HttpClient;
 use S2\Cms\Model\UrlBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -30,14 +30,11 @@ readonly class HtmlTemplateProvider
         private UrlBuilder               $urlBuilder,
         private TranslatorInterface      $translator,
         private Viewer                   $viewer,
-        private HttpClient               $httpClient,
+        private AssetMergeFactory        $assetMergeFactory,
         private EventDispatcherInterface $dispatcher,
         private DynamicConfigProvider    $dynamicConfigProvider,
-        private bool                     $debug,
         private bool                     $debugView,
         private string                   $rootDir,
-        private string                   $cacheDir,
-        private bool                     $disableCache,
         private string                   $basePath,
     ) {
         $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
@@ -99,25 +96,11 @@ readonly class HtmlTemplateProvider
 
         $styles  = $assetPack->getStyles(
             $this->basePath . '/_styles/' . $this->styleName . '/',
-            $this->disableCache ? null : new AssetMerge(
-                $this->httpClient,
-                $this->cacheDir,
-                $this->basePath . '/_cache/',
-                $this->styleName . '_styles',
-                AssetMerge::TYPE_CSS,
-                $this->debug
-            )
+            $this->assetMergeFactory->create($this->styleName . '_styles', AssetMerge::TYPE_CSS)
         );
         $scripts = $assetPack->getScripts(
             $this->basePath . '/_styles/' . $this->styleName . '/',
-            $this->disableCache ? null : new AssetMerge(
-                $this->httpClient,
-                $this->cacheDir,
-                $this->basePath . '/_cache/',
-                $this->styleName . '_scripts',
-                AssetMerge::TYPE_JS,
-                $this->debug
-            )
+            $this->assetMergeFactory->create($this->styleName . '_scripts', AssetMerge::TYPE_JS)
         );
 
         $template = str_replace(['<!-- s2_styles -->', '<!-- s2_scripts -->'], [$styles, $scripts], $template);

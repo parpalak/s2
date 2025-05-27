@@ -167,8 +167,11 @@ class AssetPack
             }
         }
 
-        if ($assetMerge !== null && ($mergedPath = $assetMerge->getMergedPath()) !== null) {
-            $result[] = \sprintf('<link rel="stylesheet" href="%s" />', $mergedPath);
+        if ($assetMerge !== null) {
+            $mergedPaths = $assetMerge->getMergedPaths();
+            foreach ($mergedPaths as $mergedPath) {
+                $result[] = \sprintf('<link rel="stylesheet" href="%s" />', $mergedPath);
+            }
         }
 
         foreach ($this->headJs as $jsItem) {
@@ -213,8 +216,10 @@ class AssetPack
             }
         }
 
-        if ($assetMerge !== null && ($mergedPath = $assetMerge->getMergedPath()) !== null) {
-            $result[] = \sprintf('<script src="%s" defer></script>', $mergedPath);
+        if ($assetMerge !== null) {
+            foreach ($assetMerge->getMergedPaths() as $mergedPath) {
+                $result[] = \sprintf('<script src="%s" defer></script>', $mergedPath);
+            }
         }
 
         $result = array_merge($result, $this->inlineJs);

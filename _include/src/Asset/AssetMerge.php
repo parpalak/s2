@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright 2023-2025 Roman Parpalak
- * @license   MIT
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -17,10 +17,14 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class AssetMerge implements AssetMergeInterface
 {
-    public const TYPE_CSS = 'css';
-    public const TYPE_JS  = 'js';
+    public const  TYPE_CSS              = 'css';
+    public const  TYPE_JS               = 'js';
+    private const META_KEY_FAILED_FILES = 'failed_files';
+    private const META_KEY_CONTENT_HASH = 'hash';
 
     private array $filesToMerge = [];
+    private array $failedExternalFiles = [];
+    private string $mergedHash = '';
     private ?Filesystem $filesystem = null;
 
     public function __construct(
@@ -44,28 +48,38 @@ class AssetMerge implements AssetMergeInterface
     /**
      * {@inheritdoc}
      */
-    public function getMergedPath(): string
+    public function getMergedPaths(): array
     {
-        if ($this->needToDump()) {
+        if ($this->needToDump() || !$this->readMetadata()) {
             $this->dumpContent();
         }
 
-        return \sprintf('%s%s?v=%s', $this->publicCachePath, $this->getFilename(), $this->getCacheHash());
+        $result   = $this->failedExternalFiles;
+        $result[] = \sprintf('%s%s?v=%s', $this->publicCachePath, $this->getFilename(), $this->mergedHash);
+        return $result;
     }
 
     private function minifyFiles(Minify $minifier): string
     {
+        $this->failedExternalFiles = [];
+
         foreach ($this->filesToMerge as $fileToMerge) {
             $parsedUrl = parse_url($fileToMerge);
             if (isset($parsedUrl['host'])) {
-                // file is elsewhere
-                $response    = $this->httpClient->fetch($fileToMerge);
-                if (!$response->isSuccessful()) {
-                    throw new \RuntimeException('Failed to fetch ' . $fileToMerge);
+                // file is external
+                try {
+                    $response = $this->httpClient->fetch($fileToMerge);
+                    if (!$response->isSuccessful()) {
+                        throw new \RuntimeException('Failed to fetch ' . $fileToMerge);
+                    }
+                    if ($response->content !== null) {
+                        $minifier->add($response->content);
+                    }
+                } catch (\Exception $e) {
+                    // Store failed file and continue with next one
+                    $this->failedExternalFiles[] = $fileToMerge;
                 }
-                $fileToMerge = $response->content;
-            }
-            if ($fileToMerge !== null) {
+            } else {
                 $minifier->add($fileToMerge);
             }
         }
@@ -96,7 +110,12 @@ class AssetMerge implements AssetMergeInterface
         if (\function_exists('gzencode')) {
             $this->filesystem()->dumpFile($this->getDumpFilename() . '.gz', gzencode($content, 6));
         }
-        $this->filesystem()->dumpFile($this->getHashFilename(), '<?php return "' . md5($content) . '";');
+        $this->filesystem()->remove($this->getDumpTempFilename());
+        $this->mergedHash = md5($content);
+        $this->filesystem()->dumpFile($this->getMetadataFilename(), '<?php return ' . var_export([
+                self::META_KEY_CONTENT_HASH => $this->mergedHash,
+                self::META_KEY_FAILED_FILES => $this->failedExternalFiles,
+            ], true) . ';');
     }
 
     private function needToDump(): bool
@@ -106,12 +125,12 @@ class AssetMerge implements AssetMergeInterface
         }
 
         if ($this->devEnv) {
-            // TODO add images embedding in CSS
+            // TODO add tracking of modified images that are embedded in CSS
             $dumpModifiedAt = filemtime($this->getDumpFilename());
             foreach ($this->filesToMerge as $fileToMerge) {
                 $parsedUrl = parse_url($fileToMerge);
                 if (isset($parsedUrl['host'])) {
-                    // file is elsewhere
+                    // file is external
                     continue;
                 }
                 if (filemtime($fileToMerge) > $dumpModifiedAt) {
@@ -133,9 +152,9 @@ class AssetMerge implements AssetMergeInterface
         return \sprintf('%s%s', realpath($this->publicCacheDir) . '/', $this->getFilename('tmp'));
     }
 
-    private function getHashFilename(): string
+    private function getMetadataFilename(): string
     {
-        return \sprintf('%s%s.hash.php', $this->publicCacheDir, $this->getFilename());
+        return \sprintf('%s%s.meta.php', $this->publicCacheDir, $this->getFilename());
     }
 
     private function getFilename(?string $postfix = null): string
@@ -153,16 +172,27 @@ class AssetMerge implements AssetMergeInterface
         return $this->filesystem ?? $this->filesystem = new Filesystem();
     }
 
-    private function getCacheHash(): string
+    private function readMetadata(): bool
     {
-        $hashFilename = $this->getHashFilename();
-        if (!file_exists($hashFilename)) {
-            return '';
+        $metadataFilename = $this->getMetadataFilename();
+        if (!file_exists($metadataFilename)) {
+            return false;
         }
 
-        $result = @include $hashFilename;
+        $result = @include $metadataFilename;
+        if (!\is_array($result)) {
+            return false;
+        }
+        if (!isset($result[self::META_KEY_CONTENT_HASH])) {
+            return false;
+        }
+        if (!isset($result[self::META_KEY_FAILED_FILES])) {
+            return false;
+        }
+        $this->failedExternalFiles = $result[self::META_KEY_FAILED_FILES];
+        $this->mergedHash          = $result[self::META_KEY_CONTENT_HASH];
 
-        return \is_string($result) ? $result : '';
+        return true;
     }
 
     private function getConcatenatedContent(): string
