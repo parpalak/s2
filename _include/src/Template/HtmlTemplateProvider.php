@@ -16,30 +16,34 @@ use S2\Cms\Asset\AssetMerge;
 use S2\Cms\Asset\AssetMergeFactory;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\UrlBuilder;
+use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class HtmlTemplateProvider
+class HtmlTemplateProvider implements StatefulServiceInterface
 {
-    private string $styleName;
+    private ?string $styleName = null;
 
     public function __construct(
-        private RequestStack             $requestStack,
-        private UrlBuilder               $urlBuilder,
-        private TranslatorInterface      $translator,
-        private Viewer                   $viewer,
-        private AssetMergeFactory        $assetMergeFactory,
-        private EventDispatcherInterface $dispatcher,
-        private DynamicConfigProvider    $dynamicConfigProvider,
-        private bool                     $debugView,
-        private string                   $rootDir,
-        private string                   $basePath,
+        private readonly RequestStack             $requestStack,
+        private readonly UrlBuilder               $urlBuilder,
+        private readonly TranslatorInterface      $translator,
+        private readonly Viewer                   $viewer,
+        private readonly AssetMergeFactory        $assetMergeFactory,
+        private readonly EventDispatcherInterface $dispatcher,
+        private readonly DynamicConfigProvider    $dynamicConfigProvider,
+        private readonly bool                     $debugView,
+        private readonly string                   $rootDir,
+        private readonly string                   $basePath,
     ) {
-        $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function getTemplate(string $templateId, ?string $extraDir = null): HtmlTemplate
     {
         $templateContent = $this->getRawTemplateContent($templateId, $extraDir);
@@ -64,13 +68,14 @@ readonly class HtmlTemplateProvider
 
     /**
      * Searches for a template file (in the style or 'template' directory)
+     * @throws DbLayerException
      */
     public function getRawTemplateContent(string $templateId, ?string $extraDir): string
     {
         $path            = null;
         $cleanTemplateId = preg_replace('#[^0-9a-zA-Z._\-]#', '', $templateId);
 
-        $buildEvent = new TemplateBuildEvent($this->styleName, $cleanTemplateId, $path);
+        $buildEvent = new TemplateBuildEvent($this->getStyleName(), $cleanTemplateId, $path);
         $this->dispatcher->dispatch($buildEvent, TemplateBuildEvent::EVENT_START);
 
         if ($path === null) { // Can be not null via event
@@ -81,13 +86,13 @@ readonly class HtmlTemplateProvider
         include $path;
         $template = ob_get_clean();
 
-        $styleFilename = '_styles/' . $this->styleName . '/' . $this->styleName . '.php';
+        $styleFilename = '_styles/' . $this->getStyleName() . '/' . $this->getStyleName() . '.php';
         $assetPack     = require $this->rootDir . $styleFilename;
 
         if (!($assetPack instanceof AssetPack)) {
             throw new \LogicException(\sprintf(
                 'Style "%s" is broken (file "%s" must return an AssetPack object). Choose another style.',
-                $this->styleName,
+                $this->getStyleName(),
                 $styleFilename
             ));
         }
@@ -95,12 +100,12 @@ readonly class HtmlTemplateProvider
         $this->dispatcher->dispatch(new TemplateAssetEvent($assetPack));
 
         $styles  = $assetPack->getStyles(
-            $this->basePath . '/_styles/' . $this->styleName . '/',
-            $this->assetMergeFactory->create($this->styleName . '_styles', AssetMerge::TYPE_CSS)
+            $this->basePath . '/_styles/' . $this->getStyleName() . '/',
+            $this->assetMergeFactory->create($this->getStyleName() . '_styles', AssetMerge::TYPE_CSS)
         );
         $scripts = $assetPack->getScripts(
-            $this->basePath . '/_styles/' . $this->styleName . '/',
-            $this->assetMergeFactory->create($this->styleName . '_scripts', AssetMerge::TYPE_JS)
+            $this->basePath . '/_styles/' . $this->getStyleName() . '/',
+            $this->assetMergeFactory->create($this->getStyleName() . '_scripts', AssetMerge::TYPE_JS)
         );
 
         $template = str_replace(['<!-- s2_styles -->', '<!-- s2_scripts -->'], [$styles, $scripts], $template);
@@ -108,6 +113,14 @@ readonly class HtmlTemplateProvider
         $this->dispatcher->dispatch($buildEvent, TemplateBuildEvent::EVENT_END);
 
         return $template;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearState(): void
+    {
+        $this->styleName = null;
     }
 
     private function replaceCurrentLinks(string $templateContent): string
@@ -141,9 +154,12 @@ readonly class HtmlTemplateProvider
         return $templateContent;
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function getTemplateFullFilename(?string $extraDir, string $cleanTemplateId): string
     {
-        $pathInStyles = $this->rootDir . '_styles/' . $this->styleName . '/templates/' . $cleanTemplateId;
+        $pathInStyles = $this->rootDir . '_styles/' . $this->getStyleName() . '/templates/' . $cleanTemplateId;
         if (file_exists($pathInStyles)) {
             return $pathInStyles;
         }
@@ -159,5 +175,13 @@ readonly class HtmlTemplateProvider
         }
 
         throw new \RuntimeException(\sprintf($this->translator->trans('Template not found'), $path));
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function getStyleName(): string
+    {
+        return $this->styleName ?? $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
     }
 }

@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -11,9 +11,12 @@ namespace S2\Cms\Framework;
 
 /**
  * Special interface for the services which internal state is dependent on the request
- * and must be cleared between requests.
+ * or other external factors and must be cleared between requests.
  */
 interface StatefulServiceInterface
 {
+    /**
+     * Resets internal state (e.g. in-memory cache).
+     */
     public function clearState(): void;
 }

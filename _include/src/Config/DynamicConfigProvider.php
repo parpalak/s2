@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace S2\Cms\Config;
 
-use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Pdo\DbLayer;
@@ -33,7 +32,6 @@ class DynamicConfigProvider implements StatefulServiceInterface
 
     /**
      * @throws DbLayerException
-     * @throws InvalidArgumentException
      */
     public function get(string $paramName): mixed
     {
@@ -51,7 +49,7 @@ class DynamicConfigProvider implements StatefulServiceInterface
      */
     public function regenerate(): void
     {
-        $config = $this->fetchConfig();
+        $config       = $this->fetchConfig();
         $this->params = $config;
 
         if ($this->disableCache) {
@@ -74,7 +72,6 @@ class DynamicConfigProvider implements StatefulServiceInterface
 
     /**
      * @throws DbLayerException
-     * @throws InvalidArgumentException
      */
     private function ensureParamsAreLoaded(): void
     {
