@@ -392,12 +392,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "fdce4f9ea72eb158cd921917f1d0ced29adf047e"
+                "reference": "953e41d7d7b5e49381ade7b6b8aeee82370ff3f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/fdce4f9ea72eb158cd921917f1d0ced29adf047e",
-                "reference": "fdce4f9ea72eb158cd921917f1d0ced29adf047e",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/953e41d7d7b5e49381ade7b6b8aeee82370ff3f6",
+                "reference": "953e41d7d7b5e49381ade7b6b8aeee82370ff3f6",
                 "shasum": ""
             },
             "require": {
@@ -436,7 +436,7 @@
                 "issues": "https://github.com/parpalak/rose/issues",
                 "source": "https://github.com/parpalak/rose/tree/master"
             },
-            "time": "2024-09-04T20:23:07+00:00"
+            "time": "2025-05-27T12:46:54+00:00"
         },
         {
             "name": "symfony/cache",
@@ -5331,8 +5331,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "s2/rose": 20,
-        "s2/admin-yard": 20
+        "s2/admin-yard": 20,
+        "s2/rose": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
@@ -5342,6 +5342,6 @@
         "ext-dom": "*",
         "ext-gd": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
