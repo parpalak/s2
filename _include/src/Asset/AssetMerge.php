@@ -116,6 +116,9 @@ class AssetMerge implements AssetMergeInterface
                 self::META_KEY_CONTENT_HASH => $this->mergedHash,
                 self::META_KEY_FAILED_FILES => $this->failedExternalFiles,
             ], true) . ';');
+        if (\function_exists('opcache_invalidate')) {
+            opcache_invalidate($this->getMetadataFilename(), true);
+        }
     }
 
     private function needToDump(): bool
