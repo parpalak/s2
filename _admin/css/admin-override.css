@@ -304,11 +304,11 @@ section.large-edit-form {
 }
 
 .toolbar button.big {
-
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' width='16' height='16' viewBox='0 0 512 512'%3E%3Cpath fill='%230089fe' d='M480.233 224 400 96l-80 128h32l48-76.42L448 224Z'/%3E%3Cpath d='M256.046 64.122h-95.993L64.084 448h64.009L152 352h112l24.086 96h63.923zM168 288l40-176.243L248.8 288Z'/%3E%3C/svg%3E");
 }
 
 .toolbar button.small {
-
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' width='16' height='16' viewBox='0 0 512 512'%3E%3Cpath fill='%230089fe' d='M480.233 96 400 224 320 96h32l48 76.42L448 96Z'/%3E%3Cpath d='M245.342 160h-74.68L96 448h48l16-64 95.905.227L272 448h48zm-74.686 176L208 195.2 245.344 336Z'/%3E%3C/svg%3E");
 }
 
 .toolbar button.sup {
