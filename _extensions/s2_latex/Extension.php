@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection HtmlUnknownTarget */
 /**
  * @copyright 2024-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
@@ -51,7 +51,7 @@ class Extension implements ExtensionInterface
 
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
-        $eventDispatcher->addListener(TemplateAssetEvent::class, static function (TemplateAssetEvent $event) use ($container) {
+        $eventDispatcher->addListener(TemplateAssetEvent::class, static function (TemplateAssetEvent $event) {
             $event->assetPack->addJs('//i.upmath.me/latex.js', [AssetPack::OPTION_MERGE, AssetPack::OPTION_DEFER]);
         });
 
@@ -73,7 +73,7 @@ class Extension implements ExtensionInterface
             $src = $event->src;
             if (str_starts_with($src, self::CUSTOM_UPMATH_PROTOCOL)) {
                 $url = 'https://i.upmath.me/svg/' . self::encodeURIComponent(substr($src, \strlen(self::CUSTOM_UPMATH_PROTOCOL)));
-                $event->setResult(sprintf('<img src="%s" style="background: white" alt=""></span>', $url));
+                $event->setResult(\sprintf('<img src="%s" style="background: white" alt=""></span>', $url));
             }
         });
     }
@@ -120,8 +120,9 @@ class Extension implements ExtensionInterface
 
     public static function convertLatexInHtml(string $text): string
     {
+        // NOTE: maybe it would be better to use DOM here
         return preg_replace_callback('#\\$\\$([^<]*?)\\$\\$#S', static function ($matches) {
-            $formula = str_replace(['&nbsp;', '&lt;', '&gt;', '&amp;'], [' ', '<', '>', '&'], $matches[1]);
+            $formula = html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
             return '<img border="0" style="vertical-align: middle;" src="//i.upmath.me/svg/' . s2_htmlencode(self::encodeURIComponent($formula)) . '" alt="' . s2_htmlencode($formula) . '" />';
         }, $text);
     }
