@@ -9,7 +9,7 @@
 				<link><?php echo s2_htmlencode($item->link); ?></link>
 				<description><?php echo s2_htmlencode($item->text); ?></description>
 <?php if (!empty($item->author)) {?>
-				<author><?php echo s2_htmlencode($item->author); ?></author>
+				<dc:creator><?php echo s2_htmlencode($item->author); ?></dc:creator>
 <?php } ?>
 				<guid isPermaLink="true"><?php echo s2_htmlencode($item->link); ?></guid>
 				<pubDate><?php echo gmdate('D, d M Y H:i:s', $item->time) . ' GMT'; ?></pubDate>

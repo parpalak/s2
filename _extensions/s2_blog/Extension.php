@@ -279,6 +279,7 @@ class Extension implements ExtensionInterface
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
                 $container->getParameter('base_path'),
                 $container->getParameter('base_url'),
+                $container->getParameter('version'),
                 $provider->get('S2_WEBMASTER'),
             );
         });

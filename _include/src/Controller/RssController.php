@@ -2,8 +2,8 @@
 /**
  * Creates RSS feeds.
  *
- * @copyright 2009-2024 Roman Parpalak
- * @license   MIT
+ * @copyright 2009-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -31,6 +31,7 @@ readonly class RssController implements ControllerInterface
         private EventDispatcherInterface $eventDispatcher,
         private string                   $basePath,
         private string                   $baseUrl,
+        private string                   $version,
         private string                   $webmaster,
     ) {
     }
@@ -76,7 +77,13 @@ readonly class RssController implements ControllerInterface
 
         $this->eventDispatcher->dispatch(new FeedRenderEvent($feedInfo));
 
-        $output = $this->viewer->render('rss', compact('items', 'maxContentTime', 'feedInfo', 'selfLink') + ['baseUrl' => $this->baseUrl]);
+        $output = $this->viewer->render(
+            'rss',
+            compact('items', 'maxContentTime', 'feedInfo', 'selfLink') + [
+                'baseUrl' => $this->baseUrl,
+                'version' => $this->version,
+            ]
+        );
 
         $response = new Response($output);
         $response->headers->set('Content-Length', (string)\strlen($output));
