@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -421,7 +421,7 @@ readonly class AdminConfigProvider
                 label: $this->translator->trans('Title'),
                 control: 'input',
                 validators: [new Length(max: 255)],
-                // NOTE: do we need a sorting here?
+                sortable: true,
                 actionOnClick: 'edit',
                 viewTemplate: '_admin/templates/article/view-title.php',
             ))
