@@ -14,7 +14,7 @@ use S2\Cms\Pdo\DbLayerException;
 
 class MigrationManager
 {
-    private const S2_DB_LAST_REVISION = 22;
+    private const S2_DB_LAST_REVISION = 23;
 
     public function __construct(
         private readonly DbLayer $dbLayer,
@@ -287,6 +287,10 @@ class MigrationManager
             );
 
             $this->dbLayer->buildAndQuery($query);
+        }
+
+        if ($currentRevision < 23) {
+            $this->dbLayer->dropField('extensions', 'admin_affected');
         }
 
         $this->dbLayer->buildAndQuery([

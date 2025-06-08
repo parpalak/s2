@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -65,11 +65,6 @@ readonly class Installer
                     'datatype'   => 'VARCHAR(50)',
                     'allow_null' => false,
                     'default'    => '\'\''
-                ),
-                'admin_affected' => array(
-                    'datatype'   => 'TINYINT(1) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
                 ),
                 'uninstall_note' => array(
                     'datatype'   => 'TEXT',

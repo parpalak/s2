@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -17,10 +17,6 @@ trait ManifestTrait
     public function getDependencies(): array
     {
         return [];
-    }
-    public function isAdminAffected(): bool
-    {
-        return false;
     }
 
     public function getInstallationNote(): ?string

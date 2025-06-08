@@ -4,8 +4,8 @@
  *
  * Allows to add a blog to your S2 site
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -41,11 +41,6 @@ class Manifest implements ManifestInterface
     public function getVersion(): string
     {
         return '2.0a2';
-    }
-
-    public function isAdminAffected(): bool
-    {
-        return true;
     }
 
     public function getUninstallationNote(): ?string

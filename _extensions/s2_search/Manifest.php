@@ -46,11 +46,6 @@ class Manifest implements ManifestInterface
         return '2.0a1';
     }
 
-    public function isAdminAffected(): bool
-    {
-        return true;
-    }
-
     public function getInstallationNote(): ?string
     {
         return 'Do not forget to create search index after extension installation (Admin → Stats page).';

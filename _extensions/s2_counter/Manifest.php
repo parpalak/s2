@@ -4,9 +4,9 @@
  *
  * Adds a simple hits/hosts and RSS subscribers counter.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package s2_counter
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_counter
  */
 
 declare(strict_types=1);
@@ -38,11 +38,6 @@ class Manifest implements ManifestInterface
     public function getVersion(): string
     {
         return '2.0';
-    }
-
-    public function isAdminAffected(): bool
-    {
-        return true;
     }
 
     public function getInstallationNote(): ?string

@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -108,7 +108,6 @@ readonly class ExtensionManager
                     'description'       => $extensionManifest->getDescription(),
                     'install_notes'     => $installationNotes,
                     'installed_version' => $installedExtensions[$entry]['version'] ?? null,
-                    'admin_affected'    => $extensionManifest->isAdminAffected()
                 ];
                 ++$extensionNum;
             }
@@ -287,7 +286,7 @@ readonly class ExtensionManager
             // Update the existing extension
             $query = [
                 'UPDATE' => 'extensions',
-                'SET'    => 'title = :title, version = :version, description = :description, author = :author, admin_affected = :admin_affected, uninstall_note = :uninstall_note, dependencies = :dependencies',
+                'SET'    => 'title = :title, version = :version, description = :description, author = :author, uninstall_note = :uninstall_note, dependencies = :dependencies',
                 'WHERE'  => 'id=:id',
             ];
         } else {
@@ -296,9 +295,9 @@ readonly class ExtensionManager
 
             // Add the new extension
             $query = [
-                'INSERT' => 'id, title, version, description, author, admin_affected, uninstall_note, dependencies',
+                'INSERT' => 'id, title, version, description, author, uninstall_note, dependencies',
                 'INTO'   => 'extensions',
-                'VALUES' => ':id, :title, :version, :description, :author, :admin_affected, :uninstall_note, :dependencies',
+                'VALUES' => ':id, :title, :version, :description, :author, :uninstall_note, :dependencies',
             ];
         }
         $this->dbLayer->buildAndQuery($query, [
@@ -307,7 +306,6 @@ readonly class ExtensionManager
             'version'        => $extensionManifest->getVersion(),
             'description'    => $extensionManifest->getDescription(),
             'author'         => $extensionManifest->getAuthor(),
-            'admin_affected' => $extensionManifest->isAdminAffected() ? 1 : 0,
             'uninstall_note' => $extensionManifest->getUninstallationNote(),
             'dependencies'   => '|' . implode('|', $extensionManifest->getDependencies()) . '|',
         ]);
