@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
 	'Save comment'             => 'Copy your comment somewhere to prevent its loss.',
 	'Go back'                  => 'Go <a href="javascript:history.back()">back</a> and&nbsp;fix errors.',
@@ -72,4 +72,4 @@ of the comment will receive your answer.',
 	'disabled'                 => 'Sorry, but&nbsp;you cannot send comments&nbsp;to this site at&nbsp;this moment. Try it later.',
 	'no_item'                  => 'The destination page cannot be detected due to an error. Go to the page you have commented and try again (you can copy and paste the comment text).',
 
-);
+];
