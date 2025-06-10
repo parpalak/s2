@@ -43,16 +43,16 @@ readonly class BlogCommentNotifier
         /**
          * Checking if the comment exists.
          * We need post_id for displaying comments.
-         * Also we need the comment if the pre-moderation is turned on.
+         * Also, we need the comment if the pre-moderation is turned on.
          */
-        $query  = [
-            'SELECT' => 'post_id, sent, shown, nick, email, text',
-            'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'id = ' . $commentId
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
-
-        $comment = $this->dbLayer->fetchAssoc($result);
+        $result  = $this->dbLayer
+            ->select('post_id, sent, shown, nick, email, text')
+            ->from('s2_blog_comments')
+            ->where('id = :id')
+            ->setParameter('id', $commentId)
+            ->execute()
+        ;
+        $comment = $result->fetchAssoc();
         if (!$comment) {
             return;
         }
@@ -68,15 +68,16 @@ readonly class BlogCommentNotifier
          */
 
         // Getting some info about the post commented
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'title, create_time, url',
-            'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'id = :post_id AND published = 1 AND commented = 1'
-        ], [
-            'post_id' => $comment['post_id']
-        ]);
-
-        $post = $this->dbLayer->fetchAssoc($result);
+        $result = $this->dbLayer
+            ->select('title, create_time, url')
+            ->from('s2_blog_posts')
+            ->where('id = :id')
+            ->setParameter('id', $comment['post_id'])
+            ->andWhere('published = 1')
+            ->andWhere('commented = 1')
+            ->execute()
+        ;
+        $post   = $result->fetchAssoc();
         if (!$post) {
             return;
         }
@@ -105,12 +106,13 @@ readonly class BlogCommentNotifier
         }
 
         // Toggle sent mark
-        $query = [
-            'UPDATE' => 's2_blog_comments',
-            'SET'    => 'sent = 1',
-            'WHERE'  => 'id = ' . $commentId
-        ];
-        $this->dbLayer->buildAndQuery($query);
+        $this->dbLayer
+            ->update('s2_blog_comments')
+            ->set('sent', '1')
+            ->where('id = :id')
+            ->setParameter('id', $commentId)
+            ->execute()
+        ;
     }
 
     /**
@@ -122,14 +124,15 @@ readonly class BlogCommentNotifier
 
         foreach ($receivers as $receiver) {
             if ($code === $receiver['hash']) {
-                $this->dbLayer->buildAndQuery([
-                    'UPDATE' => 's2_blog_comments',
-                    'SET'    => 'subscribed = 0',
-                    'WHERE'  => 'post_id = :post_id and subscribed = 1 and email = :email'
-                ], [
-                    'post_id' => $postId,
-                    'email'   => $email,
-                ]);
+                $this->dbLayer->update('s2_blog_comments')
+                    ->set('subscribed', '0')
+                    ->where('post_id = :post_id')
+                    ->setParameter('post_id', $postId)
+                    ->andWhere('email = :email')
+                    ->setParameter('email', $email)
+                    ->andWhere('subscribed = 1')
+                    ->execute()
+                ;
 
                 return true;
             }
@@ -144,19 +147,22 @@ readonly class BlogCommentNotifier
     private function getCommentReceivers(int $postId, string $email, string $operation): array
     {
         if (!\in_array($operation, ['=', '<>'], true)) {
-            throw new \InvalidArgumentException(sprintf('Invalid operation "%s".', $operation));
+            throw new \InvalidArgumentException(\sprintf('Invalid operation "%s".', $operation));
         }
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id, nick, email, ip, time',
-            'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'post_id = :post_id AND subscribed = 1 AND shown = 1 AND email ' . $operation . ' :email'
-        ], [
-            'post_id' => $postId,
-            'email'   => $email,
-        ]);
+        $result = $this->dbLayer
+            ->select('id', 'nick', 'email', 'ip', 'time')
+            ->from('s2_blog_comments')
+            ->where('post_id = :post_id')
+            ->setParameter('post_id', $postId)
+            ->andWhere('subscribed = 1')
+            ->andWhere('shown = 1')
+            ->andWhere('email ' . $operation . ' :email')
+            ->setParameter('email', $email)
+            ->execute()
+        ;
 
-        $receivers = $this->dbLayer->fetchAssocAll($result);
+        $receivers = $result->fetchAssocAll();
         foreach ($receivers as &$receiver) {
             $receiver['hash'] = substr(base_convert(md5('s2_blog_comments' . serialize($receiver)), 16, 36), 0, 13);
         }

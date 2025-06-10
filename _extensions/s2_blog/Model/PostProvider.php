@@ -35,40 +35,36 @@ readonly class PostProvider
         }
 
         // Obtaining last posts
-        $raw_query_comment = $this->dbLayer->build([
-            'SELECT' => 'count(*)',
-            'FROM'   => 's2_blog_comments AS c',
-            'WHERE'  => 'c.post_id = p.id AND shown = 1',
-        ]);
+        $rawQueryCount = $this->dbLayer
+            ->select('count(*)')
+            ->from('s2_blog_comments AS c')
+            ->where('c.post_id = p.id')
+            ->andWhere('c.shown = 1')
+            ->getSql()
+        ;
 
-        $raw_query_user = $this->dbLayer->build([
-            'SELECT' => 'u.name',
-            'FROM'   => 'users AS u',
-            'WHERE'  => 'u.id = p.user_id',
-        ]);
+        $rawQueryUser = $this->dbLayer
+            ->select('u.name')
+            ->from('users AS u')
+            ->where('u.id = p.user_id')
+            ->getSql()
+        ;
 
-        $query  = [
-            'SELECT'   => 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.modify_time, p.favorite, (' . $raw_query_comment . ') AS comment_num, (' . $raw_query_user . ') AS author, p.label',
-            'FROM'     => 's2_blog_posts AS p',
-            'WHERE'    => 'published = 1',
-            'ORDER BY' => 'create_time DESC',
-            'LIMIT'    => ':limit OFFSET :skip',
-        ];
-        $result = $this->dbLayer->buildAndQuery(
-            $query,
-            [
-                'limit' => $postsNum,
-                'skip'  => $skip,
-            ],
-            [
-                'limit' => \PDO::PARAM_INT,
-                'skip'  => \PDO::PARAM_INT
-            ]
-        );
+        $result = $this->dbLayer
+            ->select('p.create_time, p.title, p.text, p.url, p.id, p.commented, p.modify_time, p.favorite')
+            ->addSelect('(' . $rawQueryCount . ') AS comment_num')
+            ->addSelect('(' . $rawQueryUser . ') AS author, p.label')
+            ->from('s2_blog_posts AS p')
+            ->where('p.published = 1')
+            ->orderBy('p.create_time DESC')
+            ->limit($postsNum)
+            ->offset($skip)
+            ->execute()
+        ;
 
-        $posts = $mergeLabels = $labels = $ids = array();
+        $posts = $mergeLabels = $labels = $ids = [];
         $i     = 0;
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $i++;
             $posts[$row['id']] = $row;
 
@@ -127,15 +123,16 @@ readonly class PostProvider
     {
         // Processing labels
         if (\count($labels) > 0) {
-            $query  = [
-                'SELECT' => 'p.id, p.label, p.title, p.create_time, p.url',
-                'FROM'   => 's2_blog_posts AS p',
-                'WHERE'  => 'p.label IN (\'' . implode('\', \'', array_keys($labels)) . '\') AND p.published = 1'
-            ];
-            $result = $this->dbLayer->buildAndQuery($query);
+            $result = $this->dbLayer
+                ->select('p.id, p.label, p.title, p.create_time, p.url')
+                ->from('s2_blog_posts AS p')
+                ->where('p.label IN (' . implode(',', array_fill(0, \count($labels), '?')) . ')')
+                ->andWhere('p.published = 1')
+                ->execute(array_keys($labels))
+            ;
 
             $rows = $sortArray = [];
-            while ($row = $this->dbLayer->fetchAssoc($result)) {
+            while ($row = $result->fetchAssoc()) {
                 $rows[]      = $row;
                 $sortArray[] = $row['create_time'];
             }
@@ -151,21 +148,16 @@ readonly class PostProvider
         }
 
         // Obtaining tags
-        $query  = [
-            'SELECT' => 'pt.post_id, t.name, t.url, pt.id AS pt_id',
-            'FROM'   => 'tags AS t',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 's2_blog_post_tag AS pt',
-                    'ON'         => 'pt.tag_id = t.id'
-                ]
-            ],
-            'WHERE'  => 'pt.post_id IN (' . implode(', ', $ids) . ')'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result2 = $this->dbLayer
+            ->select('pt.post_id', 't.name', 't.url', 'pt.id AS pt_id')
+            ->from('tags AS t')
+            ->innerJoin('s2_blog_post_tag AS pt', 'pt.tag_id = t.id')
+            ->where('pt.post_id IN (' . implode(',', array_fill(0, \count($ids), '?')) . ')')
+            ->execute($ids)
+        ;
 
         $rows = $sortArray = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result2->fetchAssoc()) {
             $rows[]      = $row;
             $sortArray[] = $row['pt_id'];
         }
@@ -186,8 +178,6 @@ readonly class PostProvider
      */
     public function checkUrlStatus(int $createTime, string $url): string
     {
-        $s2_db = $this->dbLayer;
-
         if ($url === '') {
             return 'empty';
         }
@@ -195,18 +185,19 @@ readonly class PostProvider
         $startTime = strtotime('midnight', $createTime);
         $endTime   = $startTime + 86400;
 
-        $query  = [
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'url = :url AND create_time < :end_time AND create_time >= :start_time',
-        ];
-        $result = $s2_db->buildAndQuery($query, [
-            'start_time' => $startTime,
-            'end_time'   => $endTime,
-            'url'        => $url
-        ]);
+        $result = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('s2_blog_posts')
+            ->where('url = :url')
+            ->setParameter('url', $url)
+            ->andWhere('create_time < :end_time')
+            ->setParameter('end_time', $endTime)
+            ->andWhere('create_time >= :start_time')
+            ->setParameter('start_time', $startTime)
+            ->execute()
+        ;
 
-        if ($s2_db->result($result) !== 1) {
+        if ($result->result() !== 1) {
             return 'not_unique';
         }
 
@@ -218,15 +209,14 @@ readonly class PostProvider
      */
     public function getAllLabels(): array
     {
-        $query  = [
-            'SELECT'   => 'label',
-            'FROM'     => 's2_blog_posts',
-            'GROUP BY' => 'label',
-            'ORDER BY' => 'count(label) DESC'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
-
-        $labels = $this->dbLayer->fetchColumn($result);
+        $result = $this->dbLayer
+            ->select('label')
+            ->from('s2_blog_posts')
+            ->groupBy('label')
+            ->orderBy('count(label) DESC')
+            ->execute()
+        ;
+        $labels = $result->fetchColumn();
 
         return $labels;
     }
@@ -236,12 +226,17 @@ readonly class PostProvider
      */
     public function getCommentNum(int $postId, bool $includeHidden): int
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'post_id = :post_id' . ($includeHidden ? '' : ' AND shown = 1'),
-        ], ['post_id' => $postId]);
+        $qb = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('s2_blog_comments')
+            ->where('post_id = :post_id')
+            ->setParameter('post_id', $postId)
+        ;
 
-        return (int)$this->dbLayer->result($result);
+        if (!$includeHidden) {
+            $qb->andWhere('shown = 1');
+        }
+
+        return (int)$qb->execute()->result();
     }
 }

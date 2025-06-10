@@ -14,10 +14,8 @@ class TagsSearchEvent
     private ?string $string = null;
     private array $shortStrings = [];
 
-    public function __construct(
-        public readonly array $where,
-        public readonly array $words,
-    ) {
+    public function __construct(public readonly array $words)
+    {
     }
 
     public function addShortLine(string $shortLine): void

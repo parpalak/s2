@@ -50,19 +50,20 @@ readonly class BlogPlaceholderProvider
 
             // Last posts on the blog main page
             $blogNavigation['last'] = [
-                'title' => sprintf($this->translator->trans('Nav last'), $this->maxItems ?: 10),
+                'title' => \sprintf($this->translator->trans('Nav last'), $this->maxItems ?: 10),
                 'link'  => $this->blogUrlBuilder->main(),
             ];
 
             // Check for favorite posts
-            $result = $this->dbLayer->buildAndQuery([
-                'SELECT' => '1',
-                'FROM'   => 's2_blog_posts',
-                'WHERE'  => 'published = 1 AND favorite = 1',
-                'LIMIT'  => '1'
-            ]);
+            $result = $this->dbLayer->select('1')
+                ->from('s2_blog_posts')
+                ->where('published = 1')
+                ->andWhere('favorite = 1')
+                ->limit(1)
+                ->execute()
+            ;
 
-            if ($this->dbLayer->fetchRow($result)) {
+            if ($result->fetchRow()) {
                 $blogNavigation['favorite'] = [
                     'title' => $this->translator->trans('Nav favorite'),
                     'link'  => $this->blogUrlBuilder->favorite(),
@@ -75,26 +76,19 @@ readonly class BlogPlaceholderProvider
                 'link'  => $this->blogUrlBuilder->tags(),
             ];
 
-            $result = $this->dbLayer->buildAndQuery([
-                'SELECT'   => 't.name, t.url, count(t.id)',
-                'FROM'     => 'tags AS t',
-                'JOINS'    => [
-                    [
-                        'INNER JOIN' => 's2_blog_post_tag AS pt',
-                        'ON'         => 't.id = pt.tag_id'
-                    ],
-                    [
-                        'INNER JOIN' => 's2_blog_posts AS p',
-                        'ON'         => 'p.id = pt.post_id'
-                    ]
-                ],
-                'WHERE'    => 't.s2_blog_important = 1 AND p.published = 1',
-                'GROUP BY' => 't.id',
-                'ORDER BY' => '3 DESC',
-            ]);
+            $result = $this->dbLayer->select('t.name, t.url, count(t.id)')
+                ->from('tags AS t')
+                ->innerJoin('s2_blog_post_tag AS pt', 't.id = pt.tag_id')
+                ->innerJoin('s2_blog_posts AS p', 'p.id = pt.post_id')
+                ->where('t.s2_blog_important = 1')
+                ->andWhere('p.published = 1')
+                ->groupBy('t.id')
+                ->orderBy('3 DESC')
+                ->execute()
+            ;
 
             $tags = [];
-            while ($tag = $this->dbLayer->fetchAssoc($result)) {
+            while ($tag = $result->fetchAssoc()) {
                 $tags[] = [
                     'title' => $tag['name'],
                     'link'  => $this->blogUrlBuilder->tag($tag['url']),
@@ -134,29 +128,30 @@ readonly class BlogPlaceholderProvider
             return [];
         }
 
-        $raw_query1 = $this->dbLayer->build([
-            'SELECT' => 'count(*) + 1',
-            'FROM'   => 's2_blog_comments AS c1',
-            'WHERE'  => 'shown = 1 AND c1.post_id = c.post_id AND c1.time < c.time'
-        ]);
+        $raw_query1 = $this->dbLayer
+            ->select('count(*) + 1')
+            ->from('s2_blog_comments AS c1')
+            ->where('shown = 1')
+            ->andWhere('c1.post_id = c.post_id')
+            ->andWhere('c1.time < c.time')
+            ->getSql()
+        ;
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT'   => 'time, url, title, nick, create_time, (' . $raw_query1 . ') AS count',
-            'FROM'     => 's2_blog_comments AS c',
-            'JOINS'    => [
-                [
-                    'INNER JOIN' => 's2_blog_posts AS p',
-                    'ON'         => 'c.post_id = p.id'
-                ]
-            ],
-            'WHERE'    => 'commented = 1 AND published = 1 AND shown = 1',
-            'ORDER BY' => 'time DESC',
-            'LIMIT'    => '5'
-        ]);
+        $result = $this->dbLayer
+            ->select('time, url, title, nick, create_time, (' . $raw_query1 . ') AS count')
+            ->from('s2_blog_comments AS c')
+            ->innerJoin('s2_blog_posts AS p', 'c.post_id = p.id')
+            ->where('commented = 1')
+            ->andWhere('published = 1')
+            ->andWhere('shown = 1')
+            ->orderBy('time DESC')
+            ->limit(5)
+            ->execute()
+        ;
 
         $output      = [];
         $request_uri = $this->urlPrefix . $this->requestStack->getCurrentRequest()?->getPathInfo();
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $cur_url  = $this->blogUrlBuilder->postFromTimestamp($row['create_time'], $row['url']);
             $output[] = [
                 'title'      => $row['title'],
@@ -178,31 +173,32 @@ readonly class BlogPlaceholderProvider
             return [];
         }
 
-        $raw_query1 = $this->dbLayer->build([
-            'SELECT'   => 'c.post_id AS post_id, count(c.post_id) AS comment_num,  max(c.id) AS max_id',
-            'FROM'     => 's2_blog_comments AS c',
-            'WHERE'    => 'c.shown = 1 AND c.time > ' . strtotime('-1 month midnight'),
-            'GROUP BY' => 'c.post_id',
-            'ORDER BY' => 'comment_num DESC',
-        ]);
+        $rawQuery = $this->dbLayer
+            ->select('c.post_id AS post_id, COUNT(c.post_id) AS comment_num,  MAX(c.id) AS max_id')
+            ->from('s2_blog_comments AS c')
+            ->where('c.shown = 1')
+            ->andWhere('c.time > :time')
+            ->setParameter('time', strtotime('-1 month midnight'))
+            ->groupBy('c.post_id')
+            ->orderBy('comment_num DESC')
+            ->getSql()
+        ;
 
-        $query  = [
-            'SELECT' => 'p.create_time, p.url, p.title, c1.comment_num AS comment_num, c2.nick, c2.time',
-            'FROM'   => 's2_blog_posts AS p, (' . $raw_query1 . ') AS c1',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 's2_blog_comments AS c2',
-                    'ON'         => 'c2.id = c1.max_id'
-                ],
-            ],
-            'WHERE'  => 'c1.post_id = p.id AND p.commented = 1 AND p.published = 1',
-            'LIMIT'  => '10',
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('p.create_time, p.url, p.title, c1.comment_num AS comment_num, c2.nick, c2.time')
+            ->from('s2_blog_posts AS p, (' . $rawQuery . ') AS c1')
+            ->innerJoin('s2_blog_comments AS c2', 'c2.id = c1.max_id')
+            ->where('c1.post_id = p.id')
+            ->andWhere('p.commented = 1')
+            ->andWhere('p.published = 1')
+            ->setParameter('time', strtotime('-1 month midnight'))
+            ->limit(10)
+            ->execute()
+        ;
 
         $output      = [];
         $request_uri = $this->urlPrefix . $this->requestStack->getCurrentRequest()?->getPathInfo();
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $cur_url  = $this->blogUrlBuilder->postFromTimestamp($row['create_time'], $row['url']);
             $output[] = array(
                 'title'      => $row['title'],
@@ -220,33 +216,27 @@ readonly class BlogPlaceholderProvider
      */
     public function getBlogTagsForArticle(int $articleId): array
     {
-        $raw_query = $this->dbLayer->build([
-            'SELECT' => 'p.id',
-            'FROM'   => 's2_blog_posts AS p',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 's2_blog_post_tag AS pt',
-                    'ON'         => 'p.id = pt.post_id AND p.published = 1'
-                ]
-            ],
-            'WHERE'  => 'pt.tag_id = atg.tag_id',
-            'LIMIT'  => '1'
-        ]);
+        $rawQuery = $this->dbLayer
+            ->select('p.id')
+            ->from('s2_blog_posts AS p')
+            ->innerJoin('s2_blog_post_tag AS pt', 'p.id = pt.post_id')
+            ->where('p.published = 1')
+            ->andWhere('pt.tag_id = atg.tag_id')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 't.name, t.url as url',
-            'FROM'   => 'tags AS t',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'article_tag AS atg',
-                    'ON'         => 'atg.tag_id = t.id'
-                ]
-            ],
-            'WHERE'  => 'atg.article_id = :id AND (' . $raw_query . ') IS NOT NULL',
-        ], ['id' => $articleId]);
+        $result = $this->dbLayer->select('t.name, t.url as url')
+            ->from('tags AS t')
+            ->innerJoin('article_tag AS atg', 'atg.tag_id = t.id')
+            ->where('atg.article_id = :id')
+            ->setParameter('id', $articleId)
+            ->andWhere('(' . $rawQuery . ') IS NOT NULL')
+            ->execute()
+        ;
 
         $links = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $links[] = [
                 'title' => $row['name'],
                 'link'  => $this->blogUrlBuilder->tag($row['url']),

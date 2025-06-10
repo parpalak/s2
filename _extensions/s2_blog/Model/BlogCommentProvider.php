@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -23,12 +23,12 @@ readonly class BlogCommentProvider
      */
     public function getPendingCommentsCount(): int
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'shown = 0 AND sent = 0',
-        ]);
+        $result = $this->dbLayer->select('COUNT(*)')
+            ->from('s2_blog_comments')
+            ->where('shown = 0 AND sent = 0')
+            ->execute()
+        ;
 
-        return $this->dbLayer->result($result);
+        return $result->result();
     }
 }

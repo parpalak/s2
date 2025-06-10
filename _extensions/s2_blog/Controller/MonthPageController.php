@@ -13,6 +13,8 @@ use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
@@ -56,6 +58,9 @@ class MonthPageController extends BlogController
         );
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $year  = $request->attributes->get('year');
@@ -67,7 +72,7 @@ class MonthPageController extends BlogController
         }
 
         if ($template->hasPlaceholder('<!-- s2_blog_calendar -->')) {
-            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar((int)$year, (int)$month, 0));
+            $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar((int)$year, (int)$month));
         }
 
         $template->putInPlaceholder('title', '');
@@ -95,9 +100,11 @@ class MonthPageController extends BlogController
             $paging = '<p class="s2_blog_pages">' . $paging . '</p>';
         }
 
-        $output = $this->getPosts([
-            'WHERE' => 'p.create_time < ' . $endTime . ' AND p.create_time >= ' . $startTime
-        ]);
+        $output = $this->getPosts(
+            fn (SelectBuilder $qb) => $qb
+                ->andWhere('p.create_time < ' . $endTime)
+                ->andWhere('p.create_time >= ' . $startTime)
+        );
 
         if ($output === '') {
             $template->markAsNotFound();

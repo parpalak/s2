@@ -12,7 +12,14 @@ declare(strict_types=1);
 
 namespace S2\Cms\Pdo;
 
-class DbLayer
+use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
+use S2\Cms\Pdo\QueryBuilder\InsertCommonCompiler;
+use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
+use S2\Cms\Pdo\QueryBuilder\SelectCommonCompiler;
+use S2\Cms\Pdo\QueryBuilder\UpdateBuilder;
+use S2\Cms\Pdo\QueryBuilder\UpdateCommonCompiler;
+
+class DbLayer implements QueryBuilder\QueryExecutorInterface
 {
     protected int $transactionLevel = 0;
     protected const DATATYPE_TRANSFORMATIONS = [
@@ -44,6 +51,9 @@ class DbLayer
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function build(array $query): string
     {
         $sql = '';
@@ -129,6 +139,7 @@ class DbLayer
     }
 
     /**
+     * @deprecated
      * @throws DbLayerException
      */
     public function buildAndQuery(array $query, array $params = [], array $types = []): \PDOStatement
@@ -162,7 +173,7 @@ class DbLayer
             }
 
             throw new DbLayerException(
-                sprintf("%s. Failed query: %s. Error code: %s.", $e->getMessage(), $sql, $e->getCode()),
+                \sprintf("%s. Failed query: %s. Error code: %s.", $e->getMessage(), $sql, $e->getCode()),
                 $e->errorInfo[1] ?? 0,
                 $sql,
                 $e
@@ -225,6 +236,9 @@ class DbLayer
         return true;
     }
 
+    /**
+     * @deprecated Use params instead
+     */
     public function escape($str): string
     {
         /** @noinspection CallableParameterUseCaseInTypeContextInspection TODO remove is_array after adding type hinting */
@@ -531,5 +545,20 @@ class DbLayer
         $query = 'ALTER TABLE ' . $tableNameWithPrefix . ' DROP FOREIGN KEY ' . $tableNameWithPrefix . '_' . $fkName;
 
         $this->query($query);
+    }
+
+    public function select(string ...$expressions): SelectBuilder
+    {
+        return (new SelectBuilder(new SelectCommonCompiler($this->prefix), $this))->select(...$expressions);
+    }
+
+    public function update(string $table): UpdateBuilder
+    {
+        return (new UpdateBuilder(new UpdateCommonCompiler($this->prefix), $this))->update($table);
+    }
+
+    public function insert(string $table): InsertBuilder
+    {
+        return (new InsertBuilder(new InsertCommonCompiler($this->prefix), $this))->insert($table);
     }
 }

@@ -144,37 +144,35 @@ readonly class SearchPageController implements ControllerInterface
         $stemmedWords = array_map(fn($word) => $this->stemmer->stemWord($word), $words);
         $words        = array_unique(array_merge($words, $stemmedWords));
 
-        $sql     = [
-            'SELECT' => '1',
-            'FROM'   => 'article_tag AS at',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'articles AS a',
-                    'ON'         => 'a.id = at.article_id'
-                ]
-            ],
-            'WHERE'  => 'at.tag_id = t.id AND a.published = 1',
-            'LIMIT'  => '1'
-        ];
-        $usedSql = $this->dbLayer->build($sql);
+        $usedSql = $this->dbLayer
+            ->select('1')
+            ->from('article_tag AS at')
+            ->innerJoin('articles AS a', 'a.id = at.article_id')
+            ->where('at.tag_id = t.id')
+            ->andWhere('a.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $where = array_map(fn($word) => 'name LIKE \'' . $this->dbLayer->escape($word) . '%\' OR name LIKE \'% ' . $this->dbLayer->escape($word) . '%\'', $words);
-
-        $sql              = [
-            'SELECT' => 'id AS tag_id, name, url',
-            'FROM'   => 'tags AS t',
-            'WHERE'  => '(' . implode(' OR ', $where) . ') AND (' . $usedSql . ') IS NOT NULL',
-        ];
-        $s2_search_result = $this->dbLayer->buildAndQuery($sql);
+        $s2_search_result = $this->dbLayer
+            ->select('id AS tag_id, name, url')
+            ->from('tags AS t')
+            ->where('(' . $usedSql . ') IS NOT NULL')
+            ->andWhere('(' . implode(' OR ', array_fill(0, 2 * \count($words), 'name LIKE ?')) . ')')
+            ->execute(array_merge(
+                array_map(static fn(string $word) => $word . '%', $words),
+                array_map(static fn(string $word) => '% ' . $word . '%', $words),
+            ))
+        ;
 
         $tags = [];
-        while ($row = $this->dbLayer->fetchAssoc($s2_search_result)) {
+        while ($row = $s2_search_result->fetchAssoc()) {
             if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
                 $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
             }
         }
 
-        $event = new TagsSearchEvent($where, $words);
+        $event = new TagsSearchEvent($words);
         if (\count($tags) > 0) {
             $event->addLine(\sprintf($this->translator->trans('Found tags'), implode(', ', $tags)));
         }

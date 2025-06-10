@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/licenses/MIT MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace S2\Cms\Model;
 
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 
 class TagsProvider
 {
@@ -26,31 +27,27 @@ class TagsProvider
     /**
      * Makes tags list for the tags page and the placeholder
      *
-     * @throws \S2\Cms\Pdo\DbLayerException
+     * @throws DbLayerException
      */
     public function tagsList(): array
     {
         if ($this->cachedTags === null) {
-            $subQuery = [
-                'SELECT' => 'count(*)',
-                'FROM'   => 'article_tag AS at',
-                'JOINS'  => [
-                    [
-                        'INNER JOIN' => 'articles AS a',
-                        'ON'         => 'a.id = at.article_id'
-                    ]
-                ],
-                // Well, it's an inaccuracy because we don't check parents' "published" property
-                'WHERE'  => 'a.published = 1 AND at.tag_id = t.id'
-            ];
-            $query    = [
-                'SELECT'   => 'id AS tag_id, name, url, (' . $this->dbLayer->build($subQuery) . ') AS count',
-                'FROM'     => 'tags AS t',
-                'ORDER BY' => 'count DESC',
-            ];
-            $result   = $this->dbLayer->buildAndQuery($query);
+            $result = $this->dbLayer
+                ->select('id AS tag_id, name, url, (' . $this->dbLayer
+                        ->select('COUNT(*)')
+                        ->from('article_tag AS at')
+                        ->innerJoin('articles AS a', 'a.id = at.article_id')
+                        // Well, it's an inaccuracy because we don't check parents' "published" property
+                        ->where('a.published = 1')
+                        ->andWhere('at.tag_id = t.id')
+                        ->getSql()
+                    . ') AS count')
+                ->from('tags AS t')
+                ->orderBy('count DESC')
+                ->execute()
+            ;
 
-            while ($row = $this->dbLayer->fetchAssoc($result)) {
+            while ($row = $result->fetchAssoc()) {
                 if ($row['count'] > 0) {
                     $this->cachedTags[] = array(
                         'title' => $row['name'],
@@ -64,27 +61,27 @@ class TagsProvider
         return $this->cachedTags;
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function getAllTags(): array
     {
-        $subQuery = [
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 'article_tag AS at',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'articles AS a',
-                    'ON'         => 'a.id = at.article_id'
-                ]
-            ],
-            // NOTE: it's an inaccuracy because we don't check parents' "published" property
-            'WHERE'  => 'a.published = 1 AND at.tag_id = t.id'
-        ];
-        $query    = [
-            'SELECT'   => 'name, (' . $this->dbLayer->build($subQuery) . ') AS count',
-            'FROM'     => 'tags AS t',
-            'ORDER BY' => 'count DESC',
-        ];
-        $result   = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('name, (' . $this->dbLayer
+                    ->select('COUNT(*)')
+                    ->from('article_tag AS at')
+                    ->innerJoin('articles AS a', 'a.id = at.article_id')
+                    // Well, it's an inaccuracy because we don't check parents' "published" property
+                    ->where('a.published = 1')
+                    ->andWhere('at.tag_id = t.id')
+                    ->getSql()
+                . ') AS count'
+            )
+            ->from('tags AS t')
+            ->orderBy('count DESC')
+            ->execute()
+        ;
 
-        return array_column($this->dbLayer->fetchAssocAll($result), 'name');
+        return $result->fetchColumn();
     }
 }

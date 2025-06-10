@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -37,17 +37,22 @@ readonly class BlogCommentStrategy implements CommentStrategyInterface
         $url   = $request->attributes->get('url');
 
         $startTime = mktime(0, 0, 0, $month, $day, $year);
-        $result    = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id, title',
-            'FROM'   => 's2_blog_posts AS p',
-            'WHERE'  => 'create_time < :end_time AND create_time >= :start_time AND url = :url AND published = 1 AND commented = 1',
-        ], [
-            'end_time'   => $startTime + 86400,
-            'start_time' => $startTime,
-            'url'        => $url,
-        ]);
 
-        $post = $this->dbLayer->fetchAssoc($result);
+        $result = $this->dbLayer
+            ->select('id', 'title')
+            ->from('s2_blog_posts AS p')
+            ->where('create_time < :end_time')
+            ->setParameter('end_time', $startTime + 86400)
+            ->andWhere('create_time >= :start_time')
+            ->setParameter('start_time', $startTime)
+            ->andWhere('url = :url')
+            ->setParameter('url', $url)
+            ->andWhere('published = 1')
+            ->andWhere('commented = 1')
+            ->execute()
+        ;
+
+        $post = $result->fetchAssoc();
 
         return \is_array($post) ? new TargetDto($post['id'], $post['title']) : null;
     }
@@ -58,19 +63,16 @@ readonly class BlogCommentStrategy implements CommentStrategyInterface
      */
     public function getTargetById(int $targetId): ?TargetDto
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id, title',
-            'FROM'   => 's2_blog_posts AS p',
-            'WHERE'  => 'id = :id',
-        ], [
-            'id' => $targetId,
-        ]);
+        $post = $this->dbLayer
+            ->select('id', 'title')
+            ->from('s2_blog_posts AS p')
+            ->where('id = :id')
+            ->setParameter('id', $targetId)
+            ->execute()
+            ->fetchAssoc()
+        ;
 
-        $post = $this->dbLayer->fetchAssoc($result);
-        if (\is_array($post)) {
-            return new TargetDto($post['id'], $post['title']);
-        }
-        return null;
+        return \is_array($post) ? new TargetDto($post['id'], $post['title']) : null;
     }
 
     /**
@@ -79,22 +81,21 @@ readonly class BlogCommentStrategy implements CommentStrategyInterface
      */
     public function save(int $targetId, string $name, string $email, bool $showEmail, bool $subscribed, string $text, string $ip): int
     {
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'post_id, time, ip, nick, email, show_email, subscribed, sent, shown, good, text',
-            'INTO'   => 's2_blog_comments',
-            'VALUES' => ':post_id, :time, :ip, :nick, :email, :show_email, :subscribed, :sent, :shown, 0, :text'
-        ], [
-            'post_id'    => $targetId,
-            'time'       => time(),
-            'ip'         => $ip,
-            'nick'       => $name,
-            'email'      => $email,
-            'show_email' => $showEmail ? 1 : 0,
-            'subscribed' => $subscribed ? 1 : 0,
-            'sent'       => 0,
-            'shown'      => 0,
-            'text'       => $text,
-        ]);
+        $this->dbLayer
+            ->insert('s2_blog_comments')
+            ->setValue('post_id', ':post_id')->setParameter('post_id', $targetId)
+            ->setValue('time', ':time')->setParameter('time', time())
+            ->setValue('ip', ':ip')->setParameter('ip', $ip)
+            ->setValue('nick', ':nick')->setParameter('nick', $name)
+            ->setValue('email', ':email')->setParameter('email', $email)
+            ->setValue('show_email', ':show_email')->setParameter('show_email', $showEmail ? 1 : 0)
+            ->setValue('subscribed', ':subscribed')->setParameter('subscribed', $subscribed ? 1 : 0)
+            ->setValue('sent', '0')
+            ->setValue('shown', '0')
+            ->setValue('good', '0')
+            ->setValue('text', ':text')->setParameter('text', $text)
+            ->execute()
+        ;
 
         return (int)$this->dbLayer->insertId();
     }
@@ -114,13 +115,15 @@ readonly class BlogCommentStrategy implements CommentStrategyInterface
      */
     public function getHashForPublishedComment(int $targetId): ?string
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'COUNT(id)',
-            'FROM'   => 's2_blog_comments',
-            'WHERE'  => 'post_id = ' . $targetId . ' AND shown = 1'
-        ]);
+        $result = $this->dbLayer->select('COUNT(id)')
+            ->from('s2_blog_comments')
+            ->where('post_id = :post_id')
+            ->setParameter('post_id', $targetId)
+            ->andWhere('shown = 1')
+            ->execute()
+        ;
 
-        $num = $this->dbLayer->result($result);
+        $num = $result->result();
 
         return $num ? (string)$num : null;
     }
@@ -131,17 +134,19 @@ readonly class BlogCommentStrategy implements CommentStrategyInterface
      */
     public function getRecentComment(string $hash, string $ip): ?CommentDto
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT'   => 'id, post_id AS target_id, email, text, nick AS name',
-            'FROM'     => 's2_blog_comments',
-            'WHERE'    => 'ip = :ip AND shown = 0 AND sent = 0 AND time >= :time',
-            'ORDER BY' => 'time DESC',
-        ], [
-            'ip'   => $ip,
-            'time' => time() - 5 * 60, // 5 minutes
-        ]);
+        $result = $this->dbLayer->select('id, post_id AS target_id, email, text, nick AS name')
+            ->from('s2_blog_comments')
+            ->where('ip = :ip')
+            ->setParameter('ip', $ip)
+            ->andWhere('shown = 0')
+            ->andWhere('sent = 0')
+            ->andWhere('time >= :time')
+            ->setParameter('time', time() - 5 * 60) // 5 minutes
+            ->orderBy('time DESC')
+            ->execute()
+        ;
 
-        foreach ($this->dbLayer->fetchAssocAll($result) as $comment) {
+        foreach ($result->fetchAssocAll() as $comment) {
             if ($hash === CommentController::commentHash($comment['id'], $comment['target_id'], $comment['email'], $ip, \get_class($this))) {
                 return new CommentDto($comment['id'], $comment['target_id'], $comment['name'], $comment['email'], $comment['text']);
             }
@@ -156,11 +161,13 @@ readonly class BlogCommentStrategy implements CommentStrategyInterface
      */
     public function publishComment(int $commentId): void
     {
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 's2_blog_comments',
-            'SET'    => 'shown = 1',
-            'WHERE'  => 'id = :id',
-        ], ['id' => $commentId]);
+        $this->dbLayer
+            ->update('s2_blog_comments')
+            ->set('shown', '1')
+            ->where('id = :id')
+            ->setParameter('id', $commentId)
+            ->execute()
+        ;
     }
 
     /**

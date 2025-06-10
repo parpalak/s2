@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -12,6 +12,7 @@ namespace s2_extensions\s2_blog\Admin;
 use S2\AdminYard\TemplateRenderer;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 
 readonly class DashboardBlogProvider implements DashboardStatProviderInterface
 {
@@ -22,6 +23,10 @@ readonly class DashboardBlogProvider implements DashboardStatProviderInterface
     ) {
     }
 
+    /**
+     * {@inheritdoc}
+     * @throws DbLayerException
+     */
     public function getHtml(): string
     {
         return $this->templateRenderer->render(
@@ -33,31 +38,30 @@ readonly class DashboardBlogProvider implements DashboardStatProviderInterface
         );
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function countPosts(): int
     {
-        $query  = [
-            'SELECT' => 'count(*)',
-            'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'published = 1'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
-        return $this->dbLayer->result($result);
+        return $this->dbLayer->select('count(*)')
+            ->from('s2_blog_posts')
+            ->where('published = 1')
+            ->execute()->result()
+        ;
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function countComments(): int
     {
-        $query  = [
-            'SELECT' => 'count(*)',
-            'FROM'   => 's2_blog_comments AS c',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 's2_blog_posts AS p',
-                    'ON'         => 'p.id = c.post_id'
-                ]
-            ],
-            'WHERE'  => 'c.shown = 1 AND p.published = 1'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
-        return $this->dbLayer->result($result);
+        return $this->dbLayer->select('count(*)')
+            ->from('s2_blog_comments AS c')
+            ->innerJoin('s2_blog_posts AS p', 'p.id = c.post_id')
+            ->where('c.shown = 1')
+            ->andWhere('p.published = 1')
+            ->execute()
+            ->result()
+        ;
     }
 }

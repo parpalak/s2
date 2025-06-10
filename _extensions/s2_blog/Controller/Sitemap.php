@@ -32,15 +32,15 @@ class Sitemap extends \S2\Cms\Controller\Sitemap
     protected function getItems(): array
     {
         // Obtaining posts
-        $query  = [
-            'SELECT' => 'p.create_time AS time, p.modify_time, p.url',
-            'FROM'   => 's2_blog_posts AS p',
-            'WHERE'  => 'p.published = 1',
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('p.create_time AS time, p.modify_time, p.url')
+            ->from('s2_blog_posts AS p')
+            ->where('p.published = 1')
+            ->execute()
+        ;
 
         $posts = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $row['rel_path'] = $this->blogUrlBuilder->postFromTimestamp($row['time'], $row['url']);
             $posts[]         = $row;
         }

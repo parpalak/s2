@@ -70,7 +70,7 @@ class YearPageController extends BlogController
         $start_time = mktime(0, 0, 0, 1, 1, $year);
         $end_time   = mktime(0, 0, 0, 1, 1, $year + 1);
 
-        $title = sprintf($this->translator->trans('Year'), $year);
+        $title = \sprintf($this->translator->trans('Year'), $year);
         $template->putInPlaceholder('head_title', $title);
         $pageTitle = $title;
 
@@ -85,15 +85,17 @@ class YearPageController extends BlogController
         }
         $template->putInPlaceholder('title', $pageTitle);
 
-        $query  = [
-            'SELECT' => 'create_time, url',
-            'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'create_time < ' . $end_time . ' AND create_time >= ' . $start_time . ' AND published = 1'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('create_time, url')
+            ->from('s2_blog_posts')
+            ->where('create_time < :end_time')->setParameter('end_time', $end_time)
+            ->andWhere('create_time >= :start_time')->setParameter('start_time', $start_time)
+            ->andWhere('published = 1')
+            ->execute()
+        ;
 
         $dayUrlsArray = array_fill(1, 12, []);
-        while ($row = $this->dbLayer->fetchRow($result)) {
+        while ($row = $result->fetchRow()) {
             $dayUrlsArray[(int)date('m', $row[0])][(int)date('j', $row[0])][] = $row[1];
         }
 
