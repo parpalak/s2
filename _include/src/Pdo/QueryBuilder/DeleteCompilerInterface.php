@@ -11,10 +11,10 @@ namespace S2\Cms\Pdo\QueryBuilder;
 
 use S2\Cms\Pdo\DbLayerException;
 
-interface UpdateCompilerInterface
+interface DeleteCompilerInterface
 {
     /**
      * @throws DbLayerException
      */
-    public function getSql(UpdateBuilder $builder): string;
+    public function getSql(DeleteBuilder $builder): string;
 }

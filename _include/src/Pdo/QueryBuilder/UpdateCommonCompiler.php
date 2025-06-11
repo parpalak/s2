@@ -23,7 +23,7 @@ readonly class UpdateCommonCompiler implements UpdateCompilerInterface
         }
 
         $sql = \sprintf(
-            "UPDATE %s%s SET %s",
+            'UPDATE %s%s SET %s',
             $this->prefix,
             $builder->getTable(),
             \implode(', ', $set)

@@ -22,13 +22,18 @@ use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
 use S2\Rose\Entity\ExternalId;
 use S2\Rose\Entity\Query;
+use S2\Rose\Exception\ImmutableException;
+use S2\Rose\Exception\RuntimeException;
+use S2\Rose\Exception\UnknownIdException;
 use S2\Rose\Finder;
 use S2\Rose\Helper\ProfileHelper;
 use S2\Rose\Stemmer\StemmerInterface;
 use S2\Rose\Storage\Database\PdoStorage;
 use S2\Rose\Storage\Exception\EmptyIndexException;
+use S2\Rose\Storage\Exception\InvalidEnvironmentException;
 use s2_extensions\s2_search\Event\TagsSearchEvent;
 use s2_extensions\s2_search\Service\SimilarWordsDetector;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -57,6 +62,11 @@ readonly class SearchPageController implements ControllerInterface
 
     /**
      * @throws DbLayerException
+     * @throws ImmutableException
+     * @throws RuntimeException
+     * @throws UnknownIdException
+     * @throws BadRequestException
+     * @throws \JsonException
      */
     public function handle(Request $request): Response
     {
@@ -154,10 +164,10 @@ readonly class SearchPageController implements ControllerInterface
             ->getSql()
         ;
 
-        $s2_search_result = $this->dbLayer
+        $result = $this->dbLayer
             ->select('id AS tag_id, name, url')
             ->from('tags AS t')
-            ->where('(' . $usedSql . ') IS NOT NULL')
+            ->where('EXISTS (' . $usedSql . ')')
             ->andWhere('(' . implode(' OR ', array_fill(0, 2 * \count($words), 'name LIKE ?')) . ')')
             ->execute(array_merge(
                 array_map(static fn(string $word) => $word . '%', $words),
@@ -166,7 +176,7 @@ readonly class SearchPageController implements ControllerInterface
         ;
 
         $tags = [];
-        while ($row = $s2_search_result->fetchAssoc()) {
+        while ($row = $result->fetchAssoc()) {
             if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
                 $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
             }
@@ -185,6 +195,10 @@ readonly class SearchPageController implements ControllerInterface
         return '';
     }
 
+    /**
+     * @throws InvalidEnvironmentException
+     * @throws \JsonException
+     */
     private function searchByTitle(string $titleQuery): Response
     {
         $pdoStorage = $this->pdoStorage;

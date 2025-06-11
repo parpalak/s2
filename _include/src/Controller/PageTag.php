@@ -42,6 +42,7 @@ readonly class PageTag implements ControllerInterface
     /**
      * {@inheritdoc}
      * @throws DbLayerException
+     * @throws NotFoundException
      */
     public function handle(Request $request): Response
     {
@@ -49,103 +50,95 @@ readonly class PageTag implements ControllerInterface
         $hasSlash = (!empty($request->attributes->get('slash')));
 
         // Tag preview
-        $query  = [
-            'SELECT' => 'id AS tag_id, description, name, url',
-            'FROM'   => 'tags',
-            'WHERE'  => 'url = \'' . $this->dbLayer->escape($name) . '\''
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('id AS tag_id, description, name, url')
+            ->from('tags')
+            ->where('url = :url')->setParameter('url', $name)
+            ->execute()
+        ;
 
-        if (!($row = $this->dbLayer->fetchRow($result))) {
+        if (!($row = $result->fetchRow())) {
             throw new NotFoundException();
         }
 
         [$tagId, $tagDescription, $tagName, $tagUrl] = $row;
 
         if (!$hasSlash) {
-            return new RedirectResponse($this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/' . rawurlencode($tagUrl) . '/'), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse(
+                $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/' . rawurlencode($tagUrl) . '/'),
+                Response::HTTP_MOVED_PERMANENTLY
+            );
         }
 
-        $subquery   = [
-            'SELECT' => '1',
-            'FROM'   => 'articles AS a1',
-            'WHERE'  => 'a1.parent_id = a.id AND a1.published = 1',
-            'LIMIT'  => '1'
-        ];
-        $raw_query1 = $this->dbLayer->build($subquery);
+        $rawQuery = $this->dbLayer
+            ->select('1')
+            ->from('articles AS a1')
+            ->where('a1.parent_id = a.id')
+            ->andWhere('a1.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
         $sort_order = SORT_DESC; // SORT_ASC is also possible
-        $query      = [
-            'SELECT' => 'a.title, a.url, (' . $raw_query1 . ') IS NOT NULL AS children_exist, a.id, a.excerpt, a.favorite, a.create_time, a.parent_id',
-            'FROM'   => 'article_tag AS at',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'articles AS a',
-                    'ON'         => 'a.id = at.article_id'
-                ],
-            ],
-            'WHERE'  => 'at.tag_id = ' . $tagId . ' AND a.published = 1'
-        ];
-        $result     = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('a.title, a.url, (' . $rawQuery . ') IS NOT NULL AS children_exist, a.id, a.excerpt, a.favorite, a.create_time, a.parent_id')
+            ->from('article_tag AS at')
+            ->innerJoin('articles AS a', 'a.id = at.article_id')
+            ->where('at.tag_id = :tag_id')->setParameter('tag_id', $tagId)
+            ->andWhere('a.published = 1')
+            // NOTE: leads to "Using temporary; Using filesort"
+            // ->orderBy('a.create_time DESC')
+            ->execute()
+        ;
 
-        $urls = $parent_ids = $rows = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
-            $rows[]       = $row;
-            $urls[]       = rawurlencode($row['url']);
-            $parent_ids[] = $row['parent_id'];
+        $urls = $parentIds = $rows = [];
+        while ($row = $result->fetchAssoc()) {
+            $rows[]      = $row;
+            $urls[]      = rawurlencode($row['url']);
+            $parentIds[] = $row['parent_id'];
         }
 
-        $urls = $this->articleProvider->getFullUrlsForArticles($parent_ids, $urls);
+        $urls = $this->articleProvider->getFullUrlsForArticles($parentIds, $urls);
 
-        $sections = $articles = $articles_sort_array = $sections_sort_array = [];
-        foreach ($urls as $k => $url) {
-            $row = $rows[$k];
-            if ($row['children_exist']) {
-                $item       = [
+        $sections = $articles = $sortingValuesForArticles = $sortingValuesForSections = [];
+        if (\count($urls) > 0) {
+            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/');
+            foreach ($urls as $k => $url) {
+                $row  = $rows[$k];
+                $item = [
                     'id'            => $row['id'],
                     'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy ? '/' : '')),
-                    'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy && $row['children_exist'] ? '/' : '')),
+                    'favorite_link' => $favoriteLink,
                     'date'          => $this->viewer->date($row['create_time']),
                     'excerpt'       => $row['excerpt'],
                     'favorite'      => $row['favorite'],
                 ];
-                $sort_field = $row['create_time'];
-
-                $sections[]            = $item;
-                $sections_sort_array[] = $sort_field;
-            } else {
-                $item       = [
-                    'id'            => $row['id'],
-                    'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url),
-                    'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
-                    'date'          => $this->viewer->date($row['create_time']),
-                    'excerpt'       => $row['excerpt'],
-                    'favorite'      => $row['favorite'],
-                ];
-                $sort_field = $row['create_time'];
-
-                $articles[]            = $item;
-                $articles_sort_array[] = $sort_field;
+                if ($row['children_exist']) {
+                    $sections[]                 = $item;
+                    $sortingValuesForSections[] = $row['create_time'];
+                } else {
+                    $articles[]                 = $item;
+                    $sortingValuesForArticles[] = $row['create_time'];
+                }
             }
         }
 
-        $section_text = '';
+        $sectionText = '';
         if (\count($sections) > 0) {
             // There are sections having the tag
-            array_multisort($sections_sort_array, $sort_order, $sections);
+            array_multisort($sortingValuesForSections, $sort_order, $sections);
             foreach ($sections as $item) {
-                $section_text .= $this->viewer->render('subarticles_item', $item);
+                $sectionText .= $this->viewer->render('subarticles_item', $item);
             }
         }
 
-        $article_text = '';
+        $articleText = '';
         if (\count($articles) > 0) {
-            // There are favorite articles
-            array_multisort($articles_sort_array, $sort_order, $articles);
+            // There are articles having the tag
+            array_multisort($sortingValuesForArticles, $sort_order, $articles);
             foreach ($articles as $item) {
-                $article_text .= $this->viewer->render('subarticles_item', $item);
+                $articleText .= $this->viewer->render('subarticles_item', $item);
             }
         }
 
@@ -159,8 +152,8 @@ readonly class PageTag implements ControllerInterface
             ->putInPlaceholder('date', '')
             ->putInPlaceholder('text', $this->viewer->render('list_text', [
                 'description' => $tagDescription,
-                'articles'    => $article_text,
-                'sections'    => $section_text,
+                'articles'    => $articleText,
+                'sections'    => $sectionText,
             ]))
         ;
 

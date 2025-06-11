@@ -22,6 +22,7 @@ use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -50,6 +51,9 @@ readonly class PageCommon implements ControllerInterface
 
     /**
      * @throws DbLayerException
+     * @throws NotFoundException
+     * @throws ConfigurationException
+     * @throws BadRequestException
      */
     public function handle(Request $request): Response
     {
@@ -75,16 +79,15 @@ readonly class PageCommon implements ControllerInterface
 
         if ($this->useHierarchy) {
             $urls = array_unique($request_array);
-            $urls = array_map([$this->dbLayer, 'escape'], $urls);
 
-            $query  = [
-                'SELECT' => 'id, parent_id, title, template',
-                'FROM'   => 'articles',
-                'WHERE'  => 'url IN (\'' . implode('\', \'', $urls) . '\') AND published=1'
-            ];
-            $result = $this->dbLayer->buildAndQuery($query);
+            $result = $this->dbLayer->select('id, parent_id, title, template')
+                ->from('articles')
+                ->where('url IN (' . implode(',', array_fill(0, \count($urls), '?')) . ')')
+                ->andWhere('published=1')
+                ->execute($urls)
+            ;
 
-            $nodes = $this->dbLayer->fetchAssocAll($result);
+            $nodes = $result->fetchAssocAll();
 
             /**
              * Walking through the page parents
@@ -98,7 +101,7 @@ readonly class PageCommon implements ControllerInterface
                 $cur_node       = [];
                 $found_node_num = 0;
                 foreach ($nodes as $node) {
-                    if ($node['parent_id'] == $parent_id) {
+                    if ($node['parent_id'] === $parent_id) {
                         $cur_node = $node;
                         $found_node_num++;
                     }
@@ -115,7 +118,7 @@ readonly class PageCommon implements ControllerInterface
                 }
 
                 $parent_id = $cur_node['id'];
-                if ($cur_node['template'] != '') {
+                if ($cur_node['template'] !== '') {
                     $template_id = $cur_node['template'];
                 }
 
@@ -131,36 +134,44 @@ readonly class PageCommon implements ControllerInterface
         // Path to the requested page (without trailing slash)
         $current_path = $parent_path . rawurlencode($request_array[$i]);
 
-        $subquery           = [
-            'SELECT' => '1',
-            'FROM'   => 'articles AS a1',
-            'WHERE'  => 'a1.parent_id = a.id AND a1.published = 1',
-            'LIMIT'  => '1'
-        ];
-        $raw_query_children = $this->dbLayer->build($subquery);
+        $raw_query_children = $this->dbLayer
+            ->select('1')
+            ->from('articles AS a1')
+            ->where('a1.parent_id = a.id')
+            ->andWhere('a1.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $subquery         = [
-            'SELECT' => 'u.name',
-            'FROM'   => 'users AS u',
-            'WHERE'  => 'u.id = a.user_id'
-        ];
-        $raw_query_author = $this->dbLayer->build($subquery);
+        $raw_query_author = $this->dbLayer
+            ->select('u.name')
+            ->from('users AS u')
+            ->where('u.id = a.user_id')
+            ->getSql()
+        ;
 
-        $query  = [
-            'SELECT' => 'a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description, a.excerpt as excerpt, a.pagetext as text, a.create_time as date, favorite, commented, template, (' . $raw_query_children . ') IS NOT NULL AS children_exist, (' . $raw_query_author . ') AS author',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => 'url=\'' . $this->dbLayer->escape($request_array[$i]) . '\'' . ($this->useHierarchy ? ' AND parent_id=' . $parent_id : '') . ' AND published=1'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $qb = $this->dbLayer
+            ->select('a.id, a.title, a.meta_keys as meta_keywords, a.meta_desc as meta_description')
+            ->addSelect('a.excerpt as excerpt, a.pagetext as text, a.create_time as date')
+            ->addSelect('favorite, commented, template')
+            ->addSelect('(' . $raw_query_children . ') IS NOT NULL AS children_exist, (' . $raw_query_author . ') AS author')
+            ->from('articles AS a')
+            ->where('url = :url')->setParameter('url', $request_array[$i])
+            ->andWhere('published = 1')
+        ;
+        if ($this->useHierarchy) {
+            $qb->andWhere('parent_id = :parent_id')->setParameter('parent_id', $parent_id);
+        }
 
-        $page = $this->dbLayer->fetchAssoc($result);
+        $result = $qb->execute();
+        $page   = $result->fetchAssoc();
 
         // Error handling
         if (!$page) {
             throw new NotFoundException();
         }
 
-        if ($this->dbLayer->fetchAssoc($result)) {
+        if ($result->fetchAssoc()) {
             throw new ConfigurationException(
                 $this->translator->trans('DB repeat items') . ($this->debug ? ' (parent_id=' . $parent_id . ', url="' . s2_htmlencode($request_array[$i]) . '")' : ''),
                 $this->translator->trans('Error encountered')
@@ -191,7 +202,7 @@ readonly class PageCommon implements ControllerInterface
             );
         }
 
-        if ($this->useHierarchy && $parent_num && $page['children_exist'] != $was_end_slash) {
+        if ($this->useHierarchy && $parent_num && $was_end_slash !== (bool)$page['children_exist']) {
             return new RedirectResponse($this->urlBuilder->link($current_path . (!$was_end_slash ? '/' : '')), Response::HTTP_MOVED_PERMANENTLY);
         }
 
@@ -252,25 +263,28 @@ readonly class PageCommon implements ControllerInterface
             // It's a section. We have to fetch subsections and articles.
 
             // Fetching children
-            $subquery   = [
-                'SELECT' => 'a1.id',
-                'FROM'   => 'articles AS a1',
-                'WHERE'  => 'a1.parent_id = a.id AND a1.published = 1',
-                'LIMIT'  => '1'
-            ];
-            $raw_query1 = $this->dbLayer->build($subquery);
+            $raw_query1 = $this->dbLayer
+                ->select('a1.id')
+                ->from('articles AS a1')
+                ->where('a1.parent_id = a.id')
+                ->andWhere('published = 1')
+                ->limit(1)
+                ->getSql()
+            ;
 
             $sort_order = SORT_DESC;
-            $query      = [
-                'SELECT'   => 'title, url, (' . $raw_query1 . ') IS NOT NULL AS children_exist, id, excerpt, favorite, create_time, parent_id',
-                'FROM'     => 'articles AS a',
-                'WHERE'    => 'parent_id = ' . $articleId . ' AND published = 1',
-                'ORDER BY' => 'priority'
-            ];
-            $result     = $this->dbLayer->buildAndQuery($query);
+
+            $result = $this->dbLayer
+                ->select('title, url, (' . $raw_query1 . ') IS NOT NULL AS children_exist, id, excerpt, favorite, create_time, parent_id')
+                ->from('articles AS a')
+                ->where('parent_id = :parent_id')->setParameter('parent_id', $articleId)
+                ->andWhere('published = 1')
+                ->orderBy('priority')
+                ->execute()
+            ;
 
             $subarticles = $subsections = $sort_array = [];
-            while ($row = $this->dbLayer->fetchAssoc($result)) {
+            while ($row = $result->fetchAssoc()) {
                 if ($row['children_exist']) {
                     // The child is a subsection
                     $item = [
@@ -377,38 +391,42 @@ readonly class PageCommon implements ControllerInterface
             // It's an article. We have to fetch other articles in the parent section
 
             // Fetching "siblings"
-            $subquery            = [
-                'SELECT' => '1',
-                'FROM'   => 'articles AS a2',
-                'WHERE'  => 'a2.parent_id = a.id AND a2.published = 1',
-                'LIMIT'  => '1'
-            ];
-            $raw_query_child_num = $this->dbLayer->build($subquery);
+            $raw_query_child_num = $this->dbLayer
+                ->select('1')
+                ->from('articles AS a2')
+                ->where('a2.parent_id = a.id')
+                ->andWhere('a2.published = 1')
+                ->limit(1)
+                ->getSql()
+            ;
 
-            $query  = [
-                'SELECT'   => 'title, url, id, excerpt, create_time, parent_id',
-                'FROM'     => 'articles AS a',
-                'WHERE'    => 'parent_id = ' . $parent_id . ' AND published=1 AND (' . $raw_query_child_num . ') IS NULL',
-                'ORDER BY' => 'priority'
-            ];
-            $result = $this->dbLayer->buildAndQuery($query);
+            $result = $this->dbLayer
+                ->select('title, url, id, excerpt, create_time, parent_id')
+                ->from('articles AS a')
+                ->where('parent_id = :parent_id')->setParameter('parent_id', $parent_id)
+                ->andWhere('published = 1')
+                ->andWhere('(' . $raw_query_child_num . ') IS NULL')
+                ->orderBy('priority')
+                ->execute()
+            ;
 
             $neighbour_urls = $menu_articles = [];
 
             $i         = 0;
             $curr_item = -1;
-            while ($row = $this->dbLayer->fetchAssoc($result)) {
-                // A neighbour
+            while ($row = $result->fetchAssoc()) {
+                // A neighbor
                 $url = $this->urlBuilder->link($parent_path . rawurlencode($row['url']));
 
                 $menu_articles[] = [
                     'title'      => $row['title'],
                     'link'       => $url,
-                    'is_current' => $articleId == $row['id'],
+                    'is_current' => $articleId === $row['id'],
                 ];
 
-                if ($articleId == $row['id'])
+                if ($articleId === $row['id']) {
                     $curr_item = $i;
+                }
 
                 $neighbour_urls[] = $url;
 
@@ -459,16 +477,17 @@ readonly class PageCommon implements ControllerInterface
 
         // Comments
         if ($page['commented'] && $this->showComments && $template->hasPlaceholder('<!-- s2_comments -->')) {
-            $query  = [
-                'SELECT'   => 'nick, time, email, show_email, good, text',
-                'FROM'     => 'art_comments',
-                'WHERE'    => 'article_id = ' . $articleId . ' AND shown = 1',
-                'ORDER BY' => 'time'
-            ];
-            $result = $this->dbLayer->buildAndQuery($query);
+            $result = $this->dbLayer
+                ->select('nick, time, email, show_email, good, text')
+                ->from('art_comments')
+                ->where('article_id = :article_id')->setParameter('article_id', $articleId)
+                ->andWhere('shown = 1')
+                ->orderBy('time')
+                ->execute()
+            ;
 
             $comments = '';
-            for ($i = 1; $row = $this->dbLayer->fetchAssoc($result); $i++) {
+            for ($i = 1; $row = $result->fetchAssoc(); $i++) {
                 $row['i'] = $i;
                 $comments .= $this->viewer->render('comment', $row);
             }
@@ -488,21 +507,16 @@ readonly class PageCommon implements ControllerInterface
      */
     private function tagged_articles(int $articleId): string
     {
-        $query  = [
-            'SELECT' => 't.id AS tag_id, name, t.url as url',
-            'FROM'   => 'tags AS t',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'article_tag AS atg',
-                    'ON'         => 'atg.tag_id = t.id'
-                ]
-            ],
-            'WHERE'  => 'atg.article_id = ' . $articleId
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('t.id AS tag_id, name, t.url as url')
+            ->from('tags AS t')
+            ->innerJoin('article_tag AS atg', 'atg.tag_id = t.id')
+            ->where('atg.article_id = :article_id')->setParameter('article_id', $articleId)
+            ->execute()
+        ;
 
         $tag_names = $tag_urls = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $tag_names[$row['tag_id']] = $row['name'];
             $tag_urls[$row['tag_id']]  = $row['url'];
         }
@@ -511,35 +525,32 @@ readonly class PageCommon implements ControllerInterface
             return '';
         }
 
-        $subquery   = [
-            'SELECT' => '1',
-            'FROM'   => 'articles AS a1',
-            'WHERE'  => 'a1.parent_id = atg.article_id AND a1.published = 1',
-            'LIMIT'  => '1'
-        ];
-        $raw_query1 = $this->dbLayer->build($subquery);
+        $raw_query1 = $this->dbLayer
+            ->select('1')
+            ->from('articles AS a1')
+            ->where('a1.parent_id = atg.article_id')
+            ->andWhere('a1.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $query  = [
-            'SELECT' => 'title, tag_id, parent_id, url, a.id AS id, (' . $raw_query1 . ') IS NOT NULL AS children_exist',
-            'FROM'   => 'articles AS a',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'article_tag AS atg',
-                    'ON'         => 'a.id = atg.article_id'
-                ],
-            ],
-            'WHERE'  => 'atg.tag_id IN (' . implode(', ', array_keys($tag_names)) . ') AND a.published = 1'
-//		'ORDER BY'	=> 'create_time'  // no temp table is created but order by ID is almost the same
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('title, tag_id, parent_id, url, a.id AS id, (' . $raw_query1 . ') IS NOT NULL AS children_exist')
+            ->from('articles AS a')
+            ->innerJoin('article_tag AS atg', 'atg.article_id = a.id')
+            ->where('atg.tag_id IN (' . implode(', ', array_fill(0, \count($tag_names), '?')) . ')')
+            ->andWhere('a.published = 1')
+            // ->orderBy('create_time') // no temp table is created but order by ID is almost the same
+            ->execute(array_keys($tag_names))
+        ;
 
         // Build article lists that have the same tags as our article
 
         $hasArticlesInList = false;
 
         $titles = $parent_ids = $urls = $tag_ids = $original_ids = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
-            if ($articleId <> $row['id']) {
+        while ($row = $result->fetchAssoc()) {
+            if ($articleId !== $row['id']) {
                 $hasArticlesInList = true;
             }
             $titles[]       = $row['title'];
@@ -564,7 +575,7 @@ readonly class PageCommon implements ControllerInterface
             $art_by_tags[$tag_ids[$k]][] = [
                 'title'      => $titles[$k],
                 'link'       => $url,
-                'is_current' => $original_ids[$k] == $articleId,
+                'is_current' => $original_ids[$k] === $articleId,
             ];
         }
 
@@ -592,21 +603,16 @@ readonly class PageCommon implements ControllerInterface
      */
     private function get_tags(int $articleId): string
     {
-        $query  = [
-            'SELECT' => 'name, url',
-            'FROM'   => 'tags AS t',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'article_tag AS at',
-                    'ON'         => 'at.tag_id = t.id'
-                ]
-            ],
-            'WHERE'  => 'at.article_id = ' . $articleId
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('name, url')
+            ->from('tags AS t')
+            ->innerJoin('article_tag AS at', 'at.tag_id = t.id')
+            ->where('at.article_id = :article_id')->setParameter('article_id', $articleId)
+            ->execute()
+        ;
 
         $tags = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $tags[] = array(
                 'title' => $row['name'],
                 'link'  => $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/'),

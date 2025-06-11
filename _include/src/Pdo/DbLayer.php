@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace S2\Cms\Pdo;
 
+use S2\Cms\Pdo\QueryBuilder\DeleteBuilder;
+use S2\Cms\Pdo\QueryBuilder\DeleteCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
 use S2\Cms\Pdo\QueryBuilder\InsertCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
@@ -181,11 +183,17 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function fetchAssocAll(\PDOStatement $statement): array
     {
         return $statement->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @deprecated
+     */
     public function result(\PDOStatement $statement, $row = 0, $col = 0): mixed
     {
         for ($i = $row; $i--;) {
@@ -204,22 +212,34 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     }
 
 
+    /**
+     * @deprecated
+     */
     public function fetchAssoc(\PDOStatement $statement): array|false
     {
         return $statement->fetch(\PDO::FETCH_ASSOC);
     }
 
 
+    /**
+     * @deprecated
+     */
     public function fetchRow(\PDOStatement $statement): array|false
     {
         return $statement->fetch(\PDO::FETCH_NUM);
     }
 
+    /**
+     * @deprecated
+     */
     public function fetchColumn(\PDOStatement $statement): array
     {
         return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 
+    /**
+     * @deprecated
+     */
     public function affectedRows(\PDOStatement $statement): int
     {
         return $statement->rowCount();
@@ -230,6 +250,9 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         return $this->pdo->lastInsertId();
     }
 
+    /**
+     * @deprecated
+     */
     public function freeResult(\PDOStatement $statement): true
     {
         $statement->closeCursor();
@@ -560,5 +583,10 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     public function insert(string $table): InsertBuilder
     {
         return (new InsertBuilder(new InsertCommonCompiler($this->prefix), $this))->insert($table);
+    }
+
+    public function delete(string $table): DeleteBuilder
+    {
+        return (new DeleteBuilder(new DeleteCommonCompiler($this->prefix), $this))->delete($table);
     }
 }

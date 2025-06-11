@@ -38,10 +38,10 @@ readonly class TagsSearchProvider
             ->getSql()
         ;
 
-        $statement = $this->dbLayer
+        $result = $this->dbLayer
             ->select('id AS tag_id, name, url')
             ->from('tags AS t')
-            ->where('(' . $tagIsUsedSql . ') IS NOT NULL')
+            ->where('EXISTS (' . $tagIsUsedSql . ')')
             ->andWhere('(' . implode(' OR ', array_fill(0, 2 * \count($words), 'name LIKE ?')) . ')')
             ->execute(array_merge(
                 array_map(static fn(string $word) => $word . '%', $words),
@@ -49,13 +49,13 @@ readonly class TagsSearchProvider
             ))
         ;
 
-        $result = [];
-        while ($row = $statement->fetchAssoc()) {
+        $tags = [];
+        while ($row = $result->fetchAssoc()) {
             if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
-                $result[] = '<a href="' . $this->blogUrlBuilder->tag($row['url']) . '">' . $row['name'] . '</a>';
+                $tags[] = '<a href="' . $this->blogUrlBuilder->tag($row['url']) . '">' . $row['name'] . '</a>';
             }
         }
 
-        return $result;
+        return $tags;
     }
 }
