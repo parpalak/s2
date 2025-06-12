@@ -289,7 +289,7 @@ class Manifest implements ManifestInterface
         }
 
         // A field in tags table for important tags displaying
-        $dbLayer->addField('tags', 's2_blog_important', 'INT(1)', false, '0');
+        $dbLayer->addField('tags', 's2_blog_important', 'INT(1)', false, 0);
 
         $dbLayer->addIndex('tags', 's2_blog_important_idx', array('s2_blog_important'));
 

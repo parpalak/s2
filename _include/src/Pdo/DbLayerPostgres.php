@@ -14,7 +14,6 @@ namespace S2\Cms\Pdo;
 use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
 use S2\Cms\Pdo\QueryBuilder\InsertCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\UpsertBuilder;
-use S2\Cms\Pdo\QueryBuilder\UpsertMysqlCompiler;
 use S2\Cms\Pdo\QueryBuilder\UpsertPgsqlCompiler;
 
 class DbLayerPostgres extends DbLayer
@@ -28,98 +27,61 @@ class DbLayerPostgres extends DbLayer
         '/^FLOAT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i'           => 'REAL'
     ];
 
-    public function build(array $query): string
-    {
-        if (isset($query['UPSERT'])) {
-            /**
-             * INSERT INTO table_name (column1, column2, ...)
-             * VALUES (value1, value2, ...)
-             * ON CONFLICT (conflict_target) DO UPDATE
-             * SET column1 = EXCLUDED.column1, column2 = EXCLUDED.column2, ...;
-             * */
-            $sql = 'INSERT INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
-
-            if (!empty($query['UPSERT'])) {
-                $sql .= ' (' . $query['UPSERT'] . ')';
-            }
-
-            $uniqueFields = explode(',', $query['UNIQUE']);
-            $uniqueFields = array_map('trim', $uniqueFields);
-            $uniqueFields = array_flip($uniqueFields);
-
-            $set = '';
-            foreach (explode(',', $query['UPSERT']) as $field) {
-                if (isset($uniqueFields[$field])) {
-                    continue;
-                }
-                $field = trim($field);
-                $set   .= $field . ' = EXCLUDED.' . $field . ',';
-            }
-            $set = rtrim($set, ',');
-
-            $sql .= ' VALUES(' . $query['VALUES'] . ') ON CONFLICT (' . $query['UNIQUE'] . ') DO UPDATE SET ' . $set;
-
-            return $sql;
-        }
-
-        return parent::build($query);
-    }
-
-    public function escape($str): string
-    {
-        return \is_array($str) ? '' : substr($this->pdo->quote($str), 1, -1);
-    }
-
     public function getVersion(): array
     {
-        $sql    = 'SELECT version()';
-        $result = $this->query($sql);
-        [$ver] = $this->fetchRow($result);
+        $result = $this->select('version()')->execute();
 
         return [
             'name'    => 'PostgreSQL',
-            'version' => $ver
+            'version' => $result->result(),
         ];
     }
 
     /**
      * @throws DbLayerException
      */
-    public function tableExists(string $tableName, bool $noPrefix = false): bool
+    public function tableExists(string $tableName): bool
     {
-        $result = $this->query('SELECT 1 FROM pg_class WHERE relname = \'' . ($noPrefix ? '' : $this->prefix) . $this->escape($tableName) . '\'');
-        return (bool)$this->fetchRow($result);
+        $result = $this->query('SELECT 1 FROM pg_class WHERE relname = :name', [
+            'name' => $this->prefix . $tableName
+        ]);
+        return \count($result->fetchAll()) > 0;
     }
 
     /**
      * @throws DbLayerException
      */
-    public function fieldExists(string $tableName, string $fieldName, bool $noPrefix = false): bool
+    public function fieldExists(string $tableName, string $fieldName): bool
     {
-        $result = $this->query('SELECT 1 FROM pg_class c INNER JOIN pg_attribute a ON a.attrelid = c.oid WHERE c.relname = \'' . ($noPrefix ? '' : $this->prefix) . $this->escape($tableName) . '\' AND a.attname = \'' . $this->escape($fieldName) . '\'');
-
-        return (bool)$this->fetchRow($result);
+        $result = $this->query('SELECT 1 FROM pg_class c INNER JOIN pg_attribute a ON a.attrelid = c.oid WHERE c.relname = :table_name AND a.attname = :field_name', [
+            'table_name' => $this->prefix . $tableName,
+            'field_name' => $fieldName,
+        ]);
+        return \count($result->fetchAll()) > 0;
     }
 
     /**
      * @throws DbLayerException
      */
-    public function indexExists(string $table_name, string $index_name, bool $no_prefix = false): bool
+    public function indexExists(string $tableName, string $indexName): bool
     {
-        $result = $this->query('SELECT 1 FROM pg_index i INNER JOIN pg_class c1 ON c1.oid = i.indrelid INNER JOIN pg_class c2 ON c2.oid = i.indexrelid WHERE c1.relname = \'' . ($no_prefix ? '' : $this->prefix) . $this->escape($table_name) . '\' AND c2.relname = \'' . ($no_prefix ? '' : $this->prefix) . $this->escape($table_name) . '_' . $this->escape($index_name) . '\'');
-        return (bool)$this->fetchRow($result);
+        $result = $this->query('SELECT 1 FROM pg_index i INNER JOIN pg_class c1 ON c1.oid = i.indrelid INNER JOIN pg_class c2 ON c2.oid = i.indexrelid WHERE c1.relname = :table_name AND c2.relname = :index_name', [
+            'table_name' => $this->prefix . $tableName,
+            'index_name' => $this->prefix . $tableName . '_' . $indexName,
+        ]);
+        return \count($result->fetchAll()) > 0;
     }
 
     /**
      * @throws DbLayerException
      */
-    public function createTable(string $table_name, array $schema, bool $no_prefix = false): void
+    public function createTable(string $table_name, array $schema): void
     {
-        if ($this->tableExists($table_name, $no_prefix)) {
+        if ($this->tableExists($table_name)) {
             return;
         }
 
-        $query = 'CREATE TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . " (\n";
+        $query = 'CREATE TABLE ' . $this->prefix . $table_name . " (\n";
 
         // Go through every schema element and add it to the query
         foreach ($schema['FIELDS'] as $field_name => $field_data) {
@@ -160,7 +122,7 @@ class DbLayerPostgres extends DbLayer
         // Add indexes
         if (isset($schema['INDEXES'])) {
             foreach ($schema['INDEXES'] as $index_name => $index_fields) {
-                $this->addIndex($table_name, $index_name, $index_fields, false, $no_prefix);
+                $this->addIndex($table_name, $index_name, $index_fields, false);
             }
         }
 
@@ -174,8 +136,7 @@ class DbLayerPostgres extends DbLayer
                     $foreign_key['reference_table'],
                     $foreign_key['reference_columns'],
                     $foreign_key['on_delete'] ?? null,
-                    $foreign_key['on_update'] ?? null,
-                    $no_prefix
+                    $foreign_key['on_update'] ?? null
                 );
             }
         }
@@ -184,22 +145,29 @@ class DbLayerPostgres extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function addField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
-    {
-        if ($this->fieldExists($tableName, $fieldName, $noPrefix)) {
+    public function addField(
+        string                $tableName,
+        string                $fieldName,
+        string                $fieldType,
+        bool                  $allowNull,
+        string|int|float|null $defaultValue = null,
+        ?string               $afterField = null
+    ): void {
+        if ($this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
         $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
 
-        $sql = 'ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ADD ' . $fieldName . ' ' . $fieldType;
+        $sql = 'ALTER TABLE ' . $this->prefix . $tableName . ' ADD ' . $fieldName . ' ' . $fieldType;
         if (!$allowNull) {
             $sql .= ' NOT NULL';
         }
 
         if ($defaultValue !== null) {
             if (!\is_int($defaultValue) && !\is_float($defaultValue)) {
-                $defaultValue = '\'' . $this->escape($defaultValue) . '\'';
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+                $defaultValue = $this->pdo->quote($defaultValue);
             }
 
             $sql .= ' DEFAULT ' . $defaultValue;
@@ -210,29 +178,29 @@ class DbLayerPostgres extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
+    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
     {
-        if (!$this->fieldExists($tableName, $fieldName, $noPrefix)) {
+        if (!$this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
         $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
 
-        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ALTER COLUMN ' . $fieldName . ' TYPE ' . $fieldType);
+        $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' TYPE ' . $fieldType);
 
         if ($defaultValue !== null) {
             if (!\is_int($defaultValue) && !\is_float($defaultValue)) {
-                $defaultValue = '\'' . $this->escape($defaultValue) . '\'';
+                $defaultValue = $this->pdo->quote($defaultValue);
             }
-            $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ALTER COLUMN ' . $fieldName . ' SET DEFAULT ' . $defaultValue);
+            $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' SET DEFAULT ' . $defaultValue);
         } else {
-            $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ALTER COLUMN ' . $fieldName . ' DROP DEFAULT');
+            $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' DROP DEFAULT');
         }
 
         if (!$allowNull) {
-            $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ALTER COLUMN ' . $fieldName . ' SET NOT NULL');
+            $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' SET NOT NULL');
         } else {
-            $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ALTER COLUMN ' . $fieldName . ' DROP NOT NULL');
+            $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' DROP NOT NULL');
         }
     }
 
@@ -240,28 +208,28 @@ class DbLayerPostgres extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function addIndex(string $tableName, string $indexName, array $indexFields, bool $unique = false, bool $noPrefix = false): void
+    public function addIndex(string $tableName, string $indexName, array $indexFields, bool $unique = false): void
     {
-        if ($this->indexExists($tableName, $indexName, $noPrefix)) {
+        if ($this->indexExists($tableName, $indexName)) {
             return;
         }
 
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
         $this->query('CREATE ' . ($unique ? 'UNIQUE ' : '') . 'INDEX ' . $tableNameWithPrefix . '_' . $indexName . ' ON ' . $tableNameWithPrefix . '(' . implode(',', $indexFields) . ')');
     }
 
-    public function dropIndex(string $tableName, string $indexName, bool $noPrefix = false): void
+    public function dropIndex(string $tableName, string $indexName): void
     {
-        if (!$this->indexExists($tableName, $indexName, $noPrefix)) {
+        if (!$this->indexExists($tableName, $indexName)) {
             return;
         }
 
-        $this->query('DROP INDEX ' . ($noPrefix ? '' : $this->prefix) . $tableName . '_' . $indexName);
+        $this->query('DROP INDEX ' . $this->prefix . $tableName . '_' . $indexName);
     }
 
-    public function foreignKeyExists(string $tableName, string $fkName, bool $noPrefix = false): bool
+    public function foreignKeyExists(string $tableName, string $fkName): bool
     {
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
 
         // Query to check if the foreign key exists
         $sql = 'SELECT 1
@@ -283,13 +251,13 @@ class DbLayerPostgres extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function dropForeignKey(string $tableName, string $fkName, bool $noPrefix = false): void
+    public function dropForeignKey(string $tableName, string $fkName): void
     {
-        if (!$this->foreignKeyExists($tableName, $fkName, $noPrefix)) {
+        if (!$this->foreignKeyExists($tableName, $fkName)) {
             return;
         }
 
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
 
         $query = 'ALTER TABLE ' . $tableNameWithPrefix . ' DROP CONSTRAINT ' . $tableNameWithPrefix . '_' . $fkName;
 

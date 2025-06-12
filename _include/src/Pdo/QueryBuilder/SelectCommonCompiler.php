@@ -22,12 +22,11 @@ readonly class SelectCommonCompiler implements SelectCompilerInterface
      */
     public function getSql(SelectBuilder $builder): string
     {
-        $sql = \sprintf(
-            "SELECT %s FROM %s%s",
-            implode(', ', $builder->getSelect()),
-            $this->prefix,
-            $builder->getTable()
-        );
+        $sql = 'SELECT ' . implode(', ', $builder->getSelect());
+
+        if ($builder->getTable() !== null) {
+            $sql .= ' FROM ' . $this->prefix . $builder->getTable();
+        }
 
         $joins = $builder->getJoins();
         foreach ($joins as $join) {

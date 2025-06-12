@@ -68,13 +68,12 @@ class Manifest extends Manifest implements ManifestInterface
             ];
     
             foreach ($config as $confName => $confValue) {
-                $query = [
-                    'INSERT' => 'name, value',
-                    'INTO'   => 'config',
-                    'VALUES' => '\'' . $confName . '\', \'' . $confValue . '\''
-                ];
-    
-                $dbLayer->buildAndQuery($query);
+                $dbLayer->insert('config')
+                    ->setValue('name', ':name')->setParameter('name', $confName)
+                    ->setValue('value', ':value')->setParameter('value', $confValue)
+                    ->onConflictDoNothing('name')
+                    ->execute()
+                ;
             }
         }
     }
@@ -82,10 +81,10 @@ class Manifest extends Manifest implements ManifestInterface
     public function uninstall(DbLayer $dbLayer, Container $container): void
     {
         if ($dbLayer->tableExists('config')) {
-            $dbLayer->buildAndQuery([
-                'DELETE' => 'config',
-                'WHERE'  => 'name in (\'EXTENSION_NAME_PARAM1\')',
-            ]);
+            $dbLayer->delete('config')
+                ->where('name in (\'EXTENSION_NAME_PARAM1\')')
+                ->execute()
+            ;
         }
 
         $dbLayer->dropTable('extension_name_table');

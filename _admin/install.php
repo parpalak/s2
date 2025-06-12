@@ -792,8 +792,6 @@ if ($db_type !== 'mysql') {
     $s2_db->endTransaction();
 }
 
-$s2_db->close();
-
 /** @var ExtensionCache $cache */
 $cache = $app->container->get(ExtensionCache::class);
 $cache->clear();

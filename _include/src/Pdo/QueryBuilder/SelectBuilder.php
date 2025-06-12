@@ -76,14 +76,8 @@ class SelectBuilder
         return $this;
     }
 
-    /**
-     * @throws DbLayerException
-     */
-    public function getTable(): string
+    public function getTable(): ?string
     {
-        if ($this->table === null) {
-            throw new DbLayerException('No table to select from has been specified.');
-        }
         return $this->table;
     }
 

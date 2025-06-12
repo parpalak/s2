@@ -24,53 +24,11 @@ class DbLayerSqlite extends DbLayer
         '/^(TINY|MEDIUM|LONG)?TEXT$/i'                                       => 'TEXT'
     ];
 
-    public function build(array $query): string
-    {
-        if (isset($query['UPSERT'])) {
-            /**
-             * INSERT INTO table_name (column1, column2, ...)
-             * VALUES (value1, value2, ...)
-             * ON CONFLICT (conflict_target) DO UPDATE
-             * SET column1 = excluded.column1, column2 = excluded.column2, ...;
-             * */
-            $sql = 'INSERT INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
-
-            if (!empty($query['UPSERT'])) {
-                $sql .= ' (' . $query['UPSERT'] . ')';
-            }
-
-            $uniqueFields = explode(',', $query['UNIQUE']);
-            $uniqueFields = array_map('trim', $uniqueFields);
-            $uniqueFields = array_flip($uniqueFields);
-
-            $set = '';
-            foreach (explode(',', $query['UPSERT']) as $field) {
-                if (isset($uniqueFields[$field])) {
-                    continue;
-                }
-                $field = trim($field);
-                $set   .= $field . ' = excluded.' . $field . ',';
-            }
-            $set = rtrim($set, ',');
-
-            $sql .= ' VALUES(' . $query['VALUES'] . ') ON CONFLICT (' . $query['UNIQUE'] . ') DO UPDATE SET ' . $set;
-
-            return $sql;
-        }
-
-        return parent::build($query);
-    }
-
-    public function escape($str): string
-    {
-        return \is_array($str) ? '' : substr($this->pdo->quote($str), 1, -1);
-    }
-
     public function getVersion(): array
     {
-        $result  = $this->query('SELECT sqlite_version()');
-        $version = $this->result($result);
-        $this->freeResult($result);
+        $result  = $this->select('sqlite_version()')->execute();
+        $version = $result->result();
+        $result->freeResult();
 
         return [
             'name'    => 'SQLite',
@@ -81,19 +39,17 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function tableExists(string $tableName, bool $noPrefix = false): bool
+    public function tableExists(string $tableName): bool
     {
-        $preparedTableName = ($noPrefix ? '' : $this->prefix) . $tableName;
-        $result            = $this->query('SELECT 1 FROM sqlite_master WHERE name = :name AND type=:type', [
-            'name' => $preparedTableName,
+        $result = $this->query('SELECT 1 FROM sqlite_master WHERE name = :name AND type = :type', [
+            'name' => $this->prefix . $tableName,
             'type' => 'table'
         ]);
-        $return            = (bool)$this->result($result);
+        $return = (bool)$this->result($result);
         $this->freeResult($result);
 
         return $return;
     }
-
 
     /**
      * @throws DbLayerException
@@ -120,15 +76,14 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function indexExists(string $table_name, string $index_name, bool $no_prefix = false): bool
+    public function indexExists(string $tableName, string $indexName, bool $noPrefix = false): bool
     {
-        $table_name_escaped = $this->escape($table_name);
-        $prefix             = $no_prefix ? '' : $this->prefix;
+        $prefix = $noPrefix ? '' : $this->prefix;
 
-        $result = $this->query('PRAGMA index_list(\'' . $prefix . $table_name_escaped . '\')');
+        $result = $this->query('PRAGMA index_list(' . $this->pdo->quote($prefix . $tableName) . ')');
 
         $exists    = false;
-        $indexName = ($no_prefix ? '' : $this->prefix) . $table_name . '_' . $index_name;
+        $indexName = ($noPrefix ? '' : $this->prefix) . $tableName . '_' . $indexName;
         while ($row = $this->fetchAssoc($result)) {
             if ($row['name'] === $indexName) {
                 $exists = true;
@@ -144,13 +99,13 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function createTable(string $table_name, array $schema, bool $no_prefix = false): void
+    public function createTable(string $table_name, array $schema): void
     {
-        if ($this->tableExists($table_name, $no_prefix)) {
+        if ($this->tableExists($table_name)) {
             return;
         }
 
-        $query = 'CREATE TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . " (\n";
+        $query = 'CREATE TABLE ' . $this->prefix . $table_name . " (\n";
 
         // Go through every schema element and add it to the query
         foreach ($schema['FIELDS'] as $field_name => $field_data) {
@@ -190,7 +145,7 @@ class DbLayerSqlite extends DbLayer
         // Add indexes
         if (isset($schema['INDEXES'])) {
             foreach ($schema['INDEXES'] as $index_name => $index_fields) {
-                $this->addIndex($table_name, $index_name, $index_fields, false, $no_prefix);
+                $this->addIndex($table_name, $index_name, $index_fields);
             }
         }
 
@@ -205,7 +160,6 @@ class DbLayerSqlite extends DbLayer
                     $foreign_key['reference_columns'],
                     $foreign_key['on_delete'] ?? null,
                     $foreign_key['on_update'] ?? null,
-                    $no_prefix
                 );
             }
         }
@@ -214,9 +168,11 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    private function getTableInfo(string $table_name, $no_prefix = false): SqliteCreateTableQuery
+    private function getTableInfo(string $tableName): SqliteCreateTableQuery
     {
-        $result = $this->query('SELECT sql, type FROM sqlite_master WHERE tbl_name = \'' . ($no_prefix ? '' : $this->prefix) . $this->escape($table_name) . '\' ORDER BY type DESC');
+        $result = $this->query('SELECT sql, type FROM sqlite_master WHERE tbl_name = :table_name ORDER BY type DESC', [
+            'table_name' => $this->prefix . $tableName,
+        ]);
 
         $sql     = '';
         $indexes = [];
@@ -234,20 +190,19 @@ class DbLayerSqlite extends DbLayer
         return new SqliteCreateTableQuery($sql, $indexes);
     }
 
-
     /**
      * @throws DbLayerException
      */
-    public function addField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
+    public function addField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
     {
-        if ($this->fieldExists($tableName, $fieldName, $noPrefix)) {
+        if ($this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
         $tempTableName         = $tableName . '_t' . time();
-        $preparedTempTableName = ($noPrefix ? '' : $this->prefix) . $tempTableName;
+        $preparedTempTableName = $this->prefix . $tempTableName;
 
-        $createTable    = $this->getTableInfo($tableName, $noPrefix);
+        $createTable    = $this->getTableInfo($tableName);
         $fieldType      = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
         $newCreateTable = $createTable
             ->withNewField($fieldName, $fieldType, $allowNull, $defaultValue, $afterField)
@@ -257,12 +212,12 @@ class DbLayerSqlite extends DbLayer
         $this->changeTableStructure($newCreateTable, $createTable);
     }
 
-    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
+    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
     {
         $tempTableName         = $tableName . '_t' . time();
-        $preparedTempTableName = ($noPrefix ? '' : $this->prefix) . $tempTableName;
+        $preparedTempTableName = $this->prefix . $tempTableName;
 
-        $createTable    = $this->getTableInfo($tableName, $noPrefix);
+        $createTable    = $this->getTableInfo($tableName);
         $fieldType      = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
         $newCreateTable = $createTable
             ->withAlteredField($fieldName, $fieldType, $allowNull, $defaultValue, $afterField)
@@ -272,13 +227,13 @@ class DbLayerSqlite extends DbLayer
         $this->changeTableStructure($newCreateTable, $createTable);
     }
 
-    public function addIndex(string $tableName, string $indexName, array $indexFields, bool $unique = false, bool $noPrefix = false): void
+    public function addIndex(string $tableName, string $indexName, array $indexFields, bool $unique = false): void
     {
-        if ($this->indexExists($tableName, $indexName, $noPrefix)) {
+        if ($this->indexExists($tableName, $indexName)) {
             return;
         }
 
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
         $result              = $this->query(
             'CREATE ' . ($unique ? 'UNIQUE ' : '')
             . 'INDEX ' . $tableNameWithPrefix . '_' . $indexName
@@ -287,22 +242,22 @@ class DbLayerSqlite extends DbLayer
         $this->freeResult($result);
     }
 
-    public function dropIndex(string $tableName, string $indexName, bool $noPrefix = false): void
+    public function dropIndex(string $tableName, string $indexName): void
     {
-        if (!$this->indexExists($tableName, $indexName, $noPrefix)) {
+        if (!$this->indexExists($tableName, $indexName)) {
             return;
         }
 
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
         $this->query('DROP INDEX ' . $tableNameWithPrefix . '_' . $indexName);
     }
 
     /**
      * @throws DbLayerException
      */
-    public function foreignKeyExists(string $tableName, string $fkName, bool $noPrefix = false): bool
+    public function foreignKeyExists(string $tableName, string $fkName): bool
     {
-        $createTable = $this->getTableInfo($tableName, $noPrefix);
+        $createTable = $this->getTableInfo($tableName);
 
         return isset($createTable->getForeignKeys()[$fkName]);
     }
@@ -310,18 +265,18 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function addForeignKey(string $tableName, string $fkName, array $columns, string $referenceTable, array $referenceColumns, ?string $onDelete = null, ?string $onUpdate = null, bool $noPrefix = false): void
+    public function addForeignKey(string $tableName, string $fkName, array $columns, string $referenceTable, array $referenceColumns, ?string $onDelete = null, ?string $onUpdate = null): void
     {
-        if ($this->foreignKeyExists($tableName, $fkName, $noPrefix)) {
+        if ($this->foreignKeyExists($tableName, $fkName)) {
             return;
         }
 
         $tempTableName         = $tableName . '_t' . time();
-        $preparedTempTableName = ($noPrefix ? '' : $this->prefix) . $tempTableName;
+        $preparedTempTableName = $this->prefix . $tempTableName;
 
-        $createTable    = $this->getTableInfo($tableName, $noPrefix);
+        $createTable    = $this->getTableInfo($tableName);
         $newCreateTable = $createTable
-            ->withNewForeignKey($fkName, $columns, ($noPrefix ? '' : $this->prefix) . $referenceTable, $referenceColumns, $onDelete, $onUpdate)
+            ->withNewForeignKey($fkName, $columns, $this->prefix . $referenceTable, $referenceColumns, $onDelete, $onUpdate)
             ->withTableName($preparedTempTableName)
         ;
 
@@ -331,9 +286,9 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function dropForeignKey(string $tableName, string $fkName, bool $noPrefix = false): void
+    public function dropForeignKey(string $tableName, string $fkName): void
     {
-        if (!$this->foreignKeyExists($tableName, $fkName, $noPrefix)) {
+        if (!$this->foreignKeyExists($tableName, $fkName)) {
             return;
         }
 
@@ -341,9 +296,9 @@ class DbLayerSqlite extends DbLayer
         // The table has to be recreated without the foreign key
 
         $tempTableName         = $tableName . '_t' . time();
-        $preparedTempTableName = ($noPrefix ? '' : $this->prefix) . $tempTableName;
+        $preparedTempTableName = $this->prefix . $tempTableName;
 
-        $createTable    = $this->getTableInfo($tableName, $noPrefix);
+        $createTable    = $this->getTableInfo($tableName);
         $newCreateTable = $createTable
             ->withoutForeignKey($fkName)
             ->withTableName($preparedTempTableName)

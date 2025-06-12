@@ -15,7 +15,6 @@ namespace S2\Cms\Pdo;
 use S2\Cms\Pdo\QueryBuilder\DeleteBuilder;
 use S2\Cms\Pdo\QueryBuilder\DeleteCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
-use S2\Cms\Pdo\QueryBuilder\InsertCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\InsertMysqlCompiler;
 use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
 use S2\Cms\Pdo\QueryBuilder\SelectCommonCompiler;
@@ -57,104 +56,6 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     }
 
     /**
-     * @deprecated
-     */
-    protected function build(array $query): string
-    {
-        $sql = '';
-
-        if (isset($query['SELECT'])) {
-            $sql = 'SELECT ' . $query['SELECT'] . ' FROM ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['FROM'];
-
-            foreach ($query['JOINS'] ?? [] as $join) {
-                $sql .= ' ' . key($join) . ' ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . current($join) . ' ON ' . $join['ON'];
-            }
-
-            if (!empty($query['WHERE'])) {
-                $sql .= ' WHERE ' . $query['WHERE'];
-            }
-            if (!empty($query['GROUP BY'])) {
-                $sql .= ' GROUP BY ' . $query['GROUP BY'];
-            }
-            if (!empty($query['HAVING'])) {
-                $sql .= ' HAVING ' . $query['HAVING'];
-            }
-            if (!empty($query['ORDER BY'])) {
-                $sql .= ' ORDER BY ' . $query['ORDER BY'];
-            }
-            if (!empty($query['LIMIT'])) {
-                $sql .= ' LIMIT ' . $query['LIMIT'];
-            }
-        } else if (isset($query['INSERT'])) {
-            $sql = 'INSERT INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
-
-            if (!empty($query['INSERT'])) {
-                $sql .= ' (' . $query['INSERT'] . ')';
-            }
-
-            if (\is_array($query['VALUES'])) {
-                $sql .= ' VALUES(' . implode('),(', $query['VALUES']) . ')';
-            } else {
-                $sql .= ' VALUES(' . $query['VALUES'] . ')';
-            }
-        } else if (isset($query['UPDATE'])) {
-            $query['UPDATE'] = (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['UPDATE'];
-
-            $sql = 'UPDATE ' . $query['UPDATE'] . ' SET ' . $query['SET'];
-
-            if (!empty($query['WHERE'])) {
-                $sql .= ' WHERE ' . $query['WHERE'];
-            }
-        } else if (isset($query['DELETE'])) {
-            $sql = 'DELETE FROM ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['DELETE'];
-
-            if (!empty($query['WHERE'])) {
-                $sql .= ' WHERE ' . $query['WHERE'];
-            }
-        } else if (isset($query['UPSERT'])) {
-            /**
-             * INSERT INTO table_name (column1, column2, ...)
-             * VALUES (value1, value2, ...)
-             * ON DUPLICATE KEY UPDATE column1 = VALUES(column1), column2 = VALUES(column2), ...;
-             */
-            $sql = 'INSERT INTO ' . (isset($query['PARAMS']['NO_PREFIX']) ? '' : $this->prefix) . $query['INTO'];
-
-            if (!empty($query['UPSERT'])) {
-                $sql .= ' (' . $query['UPSERT'] . ')';
-            }
-
-            $uniqueFields = explode(',', $query['UNIQUE']);
-            $uniqueFields = array_map('trim', $uniqueFields);
-            $uniqueFields = array_flip($uniqueFields);
-
-            $set = '';
-            foreach (explode(',', $query['UPSERT']) as $field) {
-                if (isset($uniqueFields[$field])) {
-                    continue;
-                }
-                $field = trim($field);
-                $set   .= $field . ' = VALUES(' . $field . '),';
-            }
-            $set = rtrim($set, ',');
-
-            $sql .= ' VALUES(' . $query['VALUES'] . ') ON DUPLICATE KEY UPDATE ' . $set;
-        }
-
-        return $sql;
-    }
-
-    /**
-     * @deprecated
-     * @throws DbLayerException
-     */
-    public function buildAndQuery(array $query, array $params = [], array $types = []): \PDOStatement
-    {
-        $sql = $this->build($query);
-
-        return $this->query($sql, $params, $types);
-    }
-
-    /**
      * @throws DbLayerException
      */
     public function query($sql, array $params = [], array $types = []): \PDOStatement
@@ -189,14 +90,6 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @deprecated
      */
-    public function fetchAssocAll(\PDOStatement $statement): array
-    {
-        return $statement->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * @deprecated
-     */
     public function result(\PDOStatement $statement, $row = 0, $col = 0): mixed
     {
         for ($i = $row; $i--;) {
@@ -214,38 +107,12 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         return $curRow[$col] ?? false;
     }
 
-
     /**
      * @deprecated
      */
     public function fetchAssoc(\PDOStatement $statement): array|false
     {
         return $statement->fetch(\PDO::FETCH_ASSOC);
-    }
-
-
-    /**
-     * @deprecated
-     */
-    public function fetchRow(\PDOStatement $statement): array|false
-    {
-        return $statement->fetch(\PDO::FETCH_NUM);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function fetchColumn(\PDOStatement $statement): array
-    {
-        return $statement->fetchAll(\PDO::FETCH_COLUMN);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function affectedRows(\PDOStatement $statement): int
-    {
-        return $statement->rowCount();
     }
 
     public function insertId(): false|string
@@ -263,44 +130,15 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     }
 
     /**
-     * @deprecated Use params instead
-     */
-    public function escape($str): string
-    {
-        /** @noinspection CallableParameterUseCaseInTypeContextInspection TODO remove is_array after adding type hinting */
-        // return is_array($str) ? '' : $this->pdo->quote($str);
-        if (\is_array($str)) {
-            return ''; // array_map(__METHOD__, $inp);
-        }
-
-        if (\is_string($str) && $str !== '') {
-            return str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'), $str);
-        }
-
-        return $str;
-    }
-
-
-    public function close(): bool
-    {
-        if ($this->transactionLevel > 0) {
-            $this->pdo->commit();
-        }
-
-        return true;
-    }
-
-
-    /**
      * @throws DbLayerException
      */
     public function getVersion(): array
     {
-        $statement = $this->query('SELECT VERSION()');
+        $result = $this->select('VERSION()')->execute();
 
         return [
             'name'    => 'MySQL',
-            'version' => $this->result($statement),
+            'version' => $result->result(),
         ];
     }
 
@@ -308,9 +146,11 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function tableExists(string $tableName, bool $noPrefix = false): bool
+    public function tableExists(string $tableName): bool
     {
-        $result = $this->query('SHOW TABLES LIKE \'' . ($noPrefix ? '' : $this->prefix) . $this->escape($tableName) . '\'');
+        $result = $this->query('SHOW TABLES LIKE :name', [
+            'name' => $this->prefix . $tableName
+        ]);
         return \count($result->fetchAll()) > 0;
     }
 
@@ -318,9 +158,11 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function fieldExists(string $tableName, string $fieldName, bool $noPrefix = false): bool
+    public function fieldExists(string $tableName, string $fieldName): bool
     {
-        $result = $this->query('SHOW COLUMNS FROM ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' LIKE \'' . $this->escape($fieldName) . '\'');
+        $result = $this->query('SHOW COLUMNS FROM `' . $this->prefix . $tableName . '` LIKE :column', [
+            'column' => $fieldName,
+        ]);
 
         return \count($result->fetchAll()) > 0;
     }
@@ -329,31 +171,28 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function indexExists(string $table_name, string $index_name, bool $no_prefix = false): bool
+    public function indexExists(string $tableName, string $indexName): bool
     {
-        $exists = false;
-
-        $result = $this->query('SHOW INDEX FROM ' . ($no_prefix ? '' : $this->prefix) . $table_name);
-        while ($cur_index = $this->fetchAssoc($result)) {
-            if (strtolower($cur_index['Key_name']) === strtolower(($no_prefix ? '' : $this->prefix) . $table_name . '_' . $index_name)) {
-                $exists = true;
-                break;
+        $result = $this->query('SHOW INDEX FROM ' . $this->prefix . $tableName);
+        while ($currentIndex = $this->fetchAssoc($result)) {
+            if (strtolower($currentIndex['Key_name']) === strtolower($this->prefix . $tableName . '_' . $indexName)) {
+                return true;
             }
         }
 
-        return $exists;
+        return false;
     }
 
     /**
      * @throws DbLayerException
      */
-    public function createTable(string $table_name, array $schema, bool $no_prefix = false): void
+    public function createTable(string $table_name, array $schema): void
     {
-        if ($this->tableExists($table_name, $no_prefix)) {
+        if ($this->tableExists($table_name)) {
             return;
         }
 
-        $query = 'CREATE TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . " (\n";
+        $query = 'CREATE TABLE ' . $this->prefix . $table_name . " (\n";
 
         // Go through every schema element and add it to the query
         foreach ($schema['FIELDS'] as $field_name => $field_data) {
@@ -380,14 +219,14 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         // Add unique keys
         if (isset($schema['UNIQUE KEYS'])) {
             foreach ($schema['UNIQUE KEYS'] as $key_name => $key_fields) {
-                $query .= 'UNIQUE KEY ' . ($no_prefix ? '' : $this->prefix) . $table_name . '_' . $key_name . '(' . implode(',', $key_fields) . '),' . "\n";
+                $query .= 'UNIQUE KEY ' . $this->prefix . $table_name . '_' . $key_name . '(' . implode(',', $key_fields) . '),' . "\n";
             }
         }
 
         // Add indexes
         if (isset($schema['INDEXES'])) {
             foreach ($schema['INDEXES'] as $index_name => $index_fields) {
-                $query .= 'KEY ' . ($no_prefix ? '' : $this->prefix) . $table_name . '_' . $index_name . '(' . implode(',', $index_fields) . '),' . "\n";
+                $query .= 'KEY ' . $this->prefix . $table_name . '_' . $index_name . '(' . implode(',', $index_fields) . '),' . "\n";
             }
         }
 
@@ -407,7 +246,6 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
                     $foreign_key['reference_columns'],
                     $foreign_key['on_delete'] ?? null,
                     $foreign_key['on_update'] ?? null,
-                    $no_prefix
                 );
             }
         }
@@ -417,104 +255,122 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function dropTable(string $table_name, $no_prefix = false): void
+    public function dropTable(string $tableName): void
     {
-        if (!$this->tableExists($table_name, $no_prefix)) {
+        if (!$this->tableExists($tableName)) {
             return;
         }
 
-        $this->query('DROP TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name);
+        $this->query('DROP TABLE ' . $this->prefix . $tableName);
     }
 
     /**
      * @throws DbLayerException
      */
-    public function addField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
-    {
-        if ($this->fieldExists($tableName, $fieldName, $noPrefix)) {
-            return;
-        }
-
-        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
-
-        if ($defaultValue !== null && !\is_int($defaultValue) && !\is_float($defaultValue)) {
-            $defaultValue = '\'' . $this->escape($defaultValue) . '\'';
-        }
-
-        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ADD ' . $fieldName . ' ' . $fieldType . ($allowNull ? ' ' : ' NOT NULL') . ($defaultValue !== null ? ' DEFAULT ' . $defaultValue : ' ') . ($afterField != null ? ' AFTER ' . $afterField : ''));
-    }
-
-    /**
-     * @throws DbLayerException
-     */
-    public function renameField(string $table_name, string $old_field_name, string $new_field_name, bool $no_prefix = false): void
-    {
-        $this->query('ALTER TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' RENAME COLUMN ' . $old_field_name . ' TO ' . $new_field_name);
-    }
-
-    /**
-     * @throws DbLayerException
-     */
-    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null, bool $noPrefix = false): void
-    {
-        if (!$this->fieldExists($tableName, $fieldName, $noPrefix)) {
+    public function addField(
+        string                $tableName,
+        string                $fieldName,
+        string                $fieldType,
+        bool                  $allowNull,
+        string|int|float|null $defaultValue = null,
+        ?string               $afterField = null
+    ): void {
+        if ($this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
         $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
 
-        if ($defaultValue !== null && !\is_int($defaultValue) && !\is_float($defaultValue)) {
-            $defaultValue = '\'' . $this->escape($defaultValue) . '\'';
-        }
-
-        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' MODIFY ' . $fieldName . ' ' . $fieldType . ($allowNull ? ' ' : ' NOT NULL') . ($defaultValue !== null ? ' DEFAULT ' . $defaultValue : ' ') . ($afterField !== null ? ' AFTER ' . $afterField : ''));
+        $this->query(
+            \sprintf("ALTER TABLE %s ADD %s %s%s%s%s",
+                $this->prefix . $tableName,
+                $fieldName,
+                $fieldType,
+                $allowNull ? '' : ' NOT NULL',
+                $defaultValue !== null ? ' DEFAULT :default' : '',
+                $afterField !== null ? ' AFTER ' . $afterField : ''
+            ),
+            $defaultValue !== null ? ['default' => $defaultValue] : []
+        );
     }
-
 
     /**
      * @throws DbLayerException
      */
-    public function dropField(string $table_name, string $field_name, bool $no_prefix = false): void
+    public function renameField(string $tableName, string $oldFieldName, string $newFieldName): void
     {
-        if (!$this->tableExists($table_name) || !$this->fieldExists($table_name, $field_name, $no_prefix)) {
+        $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' RENAME COLUMN ' . $oldFieldName . ' TO ' . $newFieldName);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
+    {
+        if (!$this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
-        $this->query('ALTER TABLE ' . ($no_prefix ? '' : $this->prefix) . $table_name . ' DROP ' . $field_name);
+        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
+
+        $this->query(
+            \sprintf("ALTER TABLE %s MODIFY %s %s%s%s%s",
+                $this->prefix . $tableName,
+                $fieldName,
+                $fieldType,
+                $allowNull ? '' : ' NOT NULL',
+                $defaultValue !== null ? ' DEFAULT :default' : '',
+                $afterField !== null ? ' AFTER ' . $afterField : ''
+            ),
+            $defaultValue !== null ? ['default' => $defaultValue] : []
+        );
     }
 
 
     /**
      * @throws DbLayerException
      */
-    public function addIndex(string $tableName, string $indexName, array $indexFields, bool $unique = false, bool $noPrefix = false): void
+    public function dropField(string $tableName, string $fieldName): void
     {
-        if ($this->indexExists($tableName, $indexName, $noPrefix)) {
+        if (!$this->tableExists($tableName) || !$this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
-        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' ADD ' . ($unique ? 'UNIQUE ' : '') . 'INDEX ' . ($noPrefix ? '' : $this->prefix) . $tableName . '_' . $indexName . ' (' . implode(',', $indexFields) . ')');
+        $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' DROP ' . $fieldName);
     }
 
 
     /**
      * @throws DbLayerException
      */
-    public function dropIndex(string $tableName, string $indexName, bool $noPrefix = false): void
+    public function addIndex(string $tableName, string $indexName, array $indexFields, bool $unique = false): void
     {
-        if (!$this->indexExists($tableName, $indexName, $noPrefix)) {
+        if ($this->indexExists($tableName, $indexName)) {
             return;
         }
 
-        $this->query('ALTER TABLE ' . ($noPrefix ? '' : $this->prefix) . $tableName . ' DROP INDEX ' . ($noPrefix ? '' : $this->prefix) . $tableName . '_' . $indexName);
+        $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ADD ' . ($unique ? 'UNIQUE ' : '') . 'INDEX ' . $this->prefix . $tableName . '_' . $indexName . ' (' . implode(',', $indexFields) . ')');
+    }
+
+
+    /**
+     * @throws DbLayerException
+     */
+    public function dropIndex(string $tableName, string $indexName): void
+    {
+        if (!$this->indexExists($tableName, $indexName)) {
+            return;
+        }
+
+        $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' DROP INDEX ' . $this->prefix . $tableName . '_' . $indexName);
     }
 
     /**
      * @throws DbLayerException
      */
-    public function foreignKeyExists(string $tableName, string $fkName, bool $noPrefix = false): bool
+    public function foreignKeyExists(string $tableName, string $fkName): bool
     {
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
 
         // Query to check if the foreign key exists
         $sql = 'SELECT 1 FROM information_schema.KEY_COLUMN_USAGE
@@ -534,17 +390,17 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function addForeignKey(string $tableName, string $fkName, array $columns, string $referenceTable, array $referenceColumns, ?string $onDelete = null, ?string $onUpdate = null, bool $noPrefix = false): void
+    public function addForeignKey(string $tableName, string $fkName, array $columns, string $referenceTable, array $referenceColumns, ?string $onDelete = null, ?string $onUpdate = null): void
     {
-        if ($this->foreignKeyExists($tableName, $fkName, $noPrefix)) {
+        if ($this->foreignKeyExists($tableName, $fkName)) {
             return;
         }
 
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
 
         $query = 'ALTER TABLE ' . $tableNameWithPrefix . ' ADD CONSTRAINT ' . $tableNameWithPrefix . '_' . $fkName .
             ' FOREIGN KEY (' . implode(',', $columns) . ')' .
-            ' REFERENCES ' . ($noPrefix ? '' : $this->prefix) . $referenceTable . ' (' . implode(',', $referenceColumns) . ')';
+            ' REFERENCES ' . $this->prefix . $referenceTable . ' (' . implode(',', $referenceColumns) . ')';
 
         if ($onDelete !== null) {
             $query .= ' ON DELETE ' . $onDelete;
@@ -560,13 +416,13 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function dropForeignKey(string $tableName, string $fkName, bool $noPrefix = false): void
+    public function dropForeignKey(string $tableName, string $fkName): void
     {
-        if (!$this->foreignKeyExists($tableName, $fkName, $noPrefix)) {
+        if (!$this->foreignKeyExists($tableName, $fkName)) {
             return;
         }
 
-        $tableNameWithPrefix = ($noPrefix ? '' : $this->prefix) . $tableName;
+        $tableNameWithPrefix = $this->prefix . $tableName;
 
         $query = 'ALTER TABLE ' . $tableNameWithPrefix . ' DROP FOREIGN KEY ' . $tableNameWithPrefix . '_' . $fkName;
 
