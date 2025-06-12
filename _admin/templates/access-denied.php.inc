@@ -4,9 +4,6 @@
 /** @var callable $param */
 /** @var string $locale */
 /** @var string $basePath */
-/** @var string $challenge */
-/** @var string $salt */
-/** @var string $errorMessage */
 
 ?>
 <!DOCTYPE html>

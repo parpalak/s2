@@ -11,6 +11,11 @@ declare(strict_types=1);
 
 namespace S2\Cms\Pdo;
 
+use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
+use S2\Cms\Pdo\QueryBuilder\InsertCommonCompiler;
+use S2\Cms\Pdo\QueryBuilder\UpsertBuilder;
+use S2\Cms\Pdo\QueryBuilder\UpsertSqliteCompiler;
+
 class DbLayerSqlite extends DbLayer
 {
     protected const DATATYPE_TRANSFORMATIONS = [
@@ -381,5 +386,15 @@ class DbLayerSqlite extends DbLayer
         }
 
         $this->query('PRAGMA foreign_keys = ON;');
+    }
+
+    public function insert(string $table): InsertBuilder
+    {
+        return (new InsertBuilder(new InsertCommonCompiler($this->prefix), $this))->insert($table);
+    }
+
+    public function upsert(string $table): UpsertBuilder
+    {
+        return (new UpsertBuilder(new UpsertSqliteCompiler($this->prefix), $this))->upsert($table);
     }
 }

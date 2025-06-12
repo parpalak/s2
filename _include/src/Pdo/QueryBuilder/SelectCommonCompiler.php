@@ -26,7 +26,7 @@ readonly class SelectCommonCompiler implements SelectCompilerInterface
             "SELECT %s FROM %s%s",
             implode(', ', $builder->getSelect()),
             $this->prefix,
-            $builder->getFrom()
+            $builder->getTable()
         );
 
         $joins = $builder->getJoins();
@@ -44,7 +44,7 @@ readonly class SelectCommonCompiler implements SelectCompilerInterface
 
         $whereConditions = $builder->getWhere();
         if (\count($whereConditions) > 0) {
-            $sql .= ' WHERE ' . implode(' AND ', $whereConditions);
+            $sql .= ' WHERE (' . implode(') AND (', $whereConditions) . ')';
         }
 
         $groupBy = $builder->getGroupBy();

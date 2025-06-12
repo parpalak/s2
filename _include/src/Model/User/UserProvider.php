@@ -25,31 +25,31 @@ readonly class UserProvider
      */
     public function getModerators(array $includeEmails = [], array $excludeEmails = []): array
     {
-        $query  = [
-            'SELECT' => 'login, email',
-            'FROM'   => 'users',
-            'WHERE'  => 'hide_comments = 1 AND email <> \'\''
-        ];
-        $params = [];
+        $qb = $this->dbLayer
+            ->select('login, email')
+            ->from('users')
+            ->where('hide_comments = 1')
+            ->andWhere('email <> \'\'')
+        ;
 
         if (\count($includeEmails) > 0) {
             $keys = [];
             foreach ($includeEmails as $key => $email) {
-                $keys[]                 = ':email' . $key;
-                $params['email' . $key] = $email;
+                $keys[] = ':email' . $key;
+                $qb->setParameter('email' . $key, $email);
             }
-            $query['WHERE'] .= ' AND email IN (' . implode(',', $keys) . ')';
+            $qb->andWhere('email IN (' . implode(',', $keys) . ')');
         }
 
         foreach ($excludeEmails as $key => $email) {
-            $query['WHERE']            .= ' AND email <> :no_email' . $key;
-            $params['no_email' . $key] = $email;
+            $qb->andWhere('email <> :no_email' . $key);
+            $qb->setParameter('no_email' . $key, $email);
         }
 
-        $result = $this->dbLayer->buildAndQuery($query, $params);
+        $result = $qb->execute();
 
         $moderators = [];
-        while ($moderatorRow = $this->dbLayer->fetchAssoc($result)) {
+        while ($moderatorRow = $result->fetchAssoc()) {
             $moderators[] = new Moderator($moderatorRow['login'], $moderatorRow['email']);
         }
 

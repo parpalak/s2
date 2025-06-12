@@ -71,8 +71,10 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
 
     function decorateForm(statusData) {
         const urlWrapper = eForm.querySelector('.field-url');
+        const urlLabel = eForm.querySelector('label[for="id-url"]');
         urlWrapper.setAttribute('data-url-status', statusData['urlStatus']);
         urlWrapper.title = statusData['urlTitle'];
+        urlLabel.title = statusData['urlTitle'];
         if (statusData['urlStatus'] === 'mainpage') {
             urlWrapper.querySelector('input').setAttribute('disabled', 'disabled');
         }

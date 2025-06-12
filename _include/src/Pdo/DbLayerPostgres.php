@@ -11,6 +11,12 @@ declare(strict_types=1);
 
 namespace S2\Cms\Pdo;
 
+use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
+use S2\Cms\Pdo\QueryBuilder\InsertCommonCompiler;
+use S2\Cms\Pdo\QueryBuilder\UpsertBuilder;
+use S2\Cms\Pdo\QueryBuilder\UpsertMysqlCompiler;
+use S2\Cms\Pdo\QueryBuilder\UpsertPgsqlCompiler;
+
 class DbLayerPostgres extends DbLayer
 {
     protected const DATATYPE_TRANSFORMATIONS = [
@@ -288,5 +294,15 @@ class DbLayerPostgres extends DbLayer
         $query = 'ALTER TABLE ' . $tableNameWithPrefix . ' DROP CONSTRAINT ' . $tableNameWithPrefix . '_' . $fkName;
 
         $this->query($query);
+    }
+
+    public function insert(string $table): InsertBuilder
+    {
+        return (new InsertBuilder(new InsertCommonCompiler($this->prefix), $this))->insert($table);
+    }
+
+    public function upsert(string $table): UpsertBuilder
+    {
+        return (new UpsertBuilder(new UpsertPgsqlCompiler($this->prefix), $this))->upsert($table);
     }
 }

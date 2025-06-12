@@ -18,7 +18,7 @@ class MigrationManager
 
     public function __construct(
         private readonly DbLayer $dbLayer,
-        private readonly string $dbType,
+        private readonly string  $dbType,
     ) {
     }
 
@@ -32,23 +32,19 @@ class MigrationManager
         }
 
         if ($currentRevision < 2) {
-            $query = array(
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'S2_MAX_ITEMS\', \'0\''
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->insert('config')
+                ->values(['name' => "'S2_MAX_ITEMS'", 'value' => "'0'"])
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 3) {
-            $query = array(
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'S2_ADMIN_COLOR\', \'#eeeeee\''
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->insert('config')
+                ->values(['name' => "'S2_ADMIN_COLOR'", 'value' => "'#eeeeee'"])
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 4) {
@@ -62,12 +58,11 @@ class MigrationManager
             $this->dbLayer->addField('articles', 'revision', 'INT(10) UNSIGNED', false, '1', 'modify_time');
             $this->dbLayer->addField('users', 'create_articles', 'INT(10) UNSIGNED', false, '0', 'edit_comments');
 
-            $query = array(
-                'UPDATE' => 'users',
-                'SET'    => 'create_articles = edit_site'
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->update('users')
+                ->set('create_articles', 'edit_site')
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 6) {
@@ -85,25 +80,22 @@ class MigrationManager
         }
 
         if ($currentRevision < 9) {
-            $query = array(
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'S2_ADMIN_NEW_POS\', \'0\''
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->insert('config')
+                ->values(['name' => "'S2_ADMIN_NEW_ARTICLES'", 'value' => "'0'"])
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 10) {
             $check_for_updates = (\function_exists('curl_init') || \function_exists('fsockopen') || \in_array(strtolower(@\ini_get('allow_url_fopen')), array('on', 'true', '1'))) ? '1' : '0';
 
-            $query = array(
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'S2_ADMIN_UPDATES\', \'' . $check_for_updates . '\''
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->insert('config')
+                ->values(['name' => "'S2_ADMIN_UPDATES'", 'value' => ':param'])
+                ->setParameter(':param', $check_for_updates)
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 11) {
@@ -111,13 +103,11 @@ class MigrationManager
         }
 
         if ($currentRevision < 12) {
-            $query = array(
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'S2_ADMIN_CUT\', \'0\''
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->insert('config')
+                ->values(['name' => "'S2_ADMIN_CUT'", 'value' => "'0'"])
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 13) {
@@ -125,13 +115,11 @@ class MigrationManager
         }
 
         if ($currentRevision < 14) {
-            $query = array(
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'S2_USE_HIERARCHY\', \'1\''
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->insert('config')
+                ->values(['name' => "'S2_USE_HIERARCHY'", 'value' => "'1'"])
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 15) {
@@ -183,10 +171,11 @@ class MigrationManager
         }
 
         if ($currentRevision < 17) {
-            $this->dbLayer->buildAndQuery([
-                'DELETE' => 'config',
-                'WHERE'  => 'name = \'S2_ADMIN_UPDATES\'',
-            ]);
+            $this->dbLayer
+                ->delete('config')
+                ->where('name = :name')->setParameter(':name', 'S2_ADMIN_UPDATES')
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 18) {
@@ -196,11 +185,12 @@ class MigrationManager
 
         if ($currentRevision < 19) {
             $this->dbLayer->alterField('articles', 'user_id', 'INT(10) UNSIGNED', true);
-            $this->dbLayer->buildAndQuery([
-                'UPDATE' => 'articles',
-                'SET'    => 'user_id = NULL',
-                'WHERE'  => 'user_id = 0'
-            ]);
+            $this->dbLayer
+                ->update('articles')
+                ->set('user_id', 'NULL')
+                ->where('user_id = 0')
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 20) {
@@ -212,16 +202,18 @@ class MigrationManager
 
             $this->dbLayer->addIndex('articles', 'template_idx', ['template']);
             $this->dbLayer->dropIndex('articles', 'parent_id_idx');
-            $result        = $this->dbLayer->buildAndQuery([
-                'SELECT' => 'id',
-                'FROM'   => 'users',
-            ]);
-            $existingUsers = $this->dbLayer->fetchColumn($result);
-            $this->dbLayer->buildAndQuery([
-                'UPDATE' => 'articles',
-                'SET'    => 'user_id = NULL',
-                'WHERE'  => 'user_id NOT IN (' . implode(',', $existingUsers) . ')',
-            ]);
+            $existingUsers = $this->dbLayer
+                ->select('id')
+                ->from('users')
+                ->execute()
+                ->fetchColumn()
+            ;
+            $this->dbLayer
+                ->update('articles')
+                ->set('user_id', 'NULL')
+                ->where('user_id NOT IN (' . implode(',', array_fill(0, \count($existingUsers), '?')) . ')')
+                ->execute($existingUsers)
+            ;
             $this->dbLayer->addForeignKey('articles', 'fk_user', ['user_id'], 'users', ['id'], 'SET NULL');
 
             $this->dbLayer->dropIndex('art_comments', 'article_id_idx');
@@ -237,15 +229,16 @@ class MigrationManager
             $this->dbLayer->addForeignKey('article_tag', 'fk_article', ['article_id'], 'articles', ['id'], 'CASCADE');
             $this->dbLayer->addForeignKey('article_tag', 'fk_tag', ['tag_id'], 'tags', ['id'], 'CASCADE');
 
-            $result         = $this->dbLayer->buildAndQuery([
-                'SELECT' => 'login',
-                'FROM'   => 'users',
-            ]);
-            $existingLogins = $this->dbLayer->fetchColumn($result);
-            $this->dbLayer->buildAndQuery([
-                'DELETE' => 'users_online',
-                'WHERE'  => 'login NOT IN (' . implode(',', array_fill(0, \count($existingLogins), '?')) . ') AND login IS NOT NULL',
-            ], $existingLogins);
+            $existingLogins = $this->dbLayer->select('login')
+                ->from('users')
+                ->execute()
+                ->fetchColumn()
+            ;
+            $this->dbLayer->delete('users_online')
+                ->where('login NOT IN (' . implode(',', array_fill(0, \count($existingLogins), '?')) . ')')
+                ->andWhere('login IS NOT NULL')
+                ->execute($existingLogins)
+            ;
             $this->dbLayer->addForeignKey('users_online', 'fk_user', ['login'], 'users', ['login'], 'CASCADE');
             $this->dbLayer->dropIndex('users_online', 'challenge_idx');
             $this->dbLayer->addIndex('users_online', 'challenge_idx', ['challenge'], true);
@@ -280,23 +273,21 @@ class MigrationManager
         }
 
         if ($currentRevision < 22) {
-            $query = array(
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'S2_AKISMET_KEY\', \'\'',
-            );
-
-            $this->dbLayer->buildAndQuery($query);
+            $this->dbLayer
+                ->insert('config')
+                ->values(['name' => "'S2_AKISMET_KEY'", 'value' => "''"])
+                ->execute()
+            ;
         }
 
         if ($currentRevision < 23) {
             $this->dbLayer->dropField('extensions', 'admin_affected');
         }
 
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'config',
-            'SET'    => 'value = \'' . self::S2_DB_LAST_REVISION . '\'',
-            'WHERE'  => 'name = \'S2_DB_REVISION\'',
-        ]);
+        $this->dbLayer->update('config')
+            ->set('value', ':revision')->setParameter('revision', self::S2_DB_LAST_REVISION)
+            ->where('name = :name')->setParameter('name', 'S2_DB_REVISION')
+            ->execute()
+        ;
     }
 }

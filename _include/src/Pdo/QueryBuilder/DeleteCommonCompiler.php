@@ -21,7 +21,7 @@ readonly class DeleteCommonCompiler implements DeleteCompilerInterface
 
         $whereConditions = $builder->getWhere();
         if (\count($whereConditions) > 0) {
-            $sql .= ' WHERE ' . implode(' AND ', $whereConditions);
+            $sql .= ' WHERE (' . implode(') AND (', $whereConditions). ')';
         }
 
         return $sql;

@@ -43,14 +43,14 @@ readonly class CommentNotifier
          * We need article_id for displaying comments.
          * Also, we need the comment if the pre-moderation is turned on.
          */
-        $query  = [
-            'SELECT' => 'article_id, sent, shown, nick, email, text',
-            'FROM'   => 'art_comments',
-            'WHERE'  => 'id = ' . $commentId
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
-
-        $comment = $this->dbLayer->fetchAssoc($result);
+        $result  = $this->dbLayer
+            ->select('article_id, sent, shown, nick, email, text')
+            ->from('art_comments')
+            ->where('id = :id')
+            ->setParameter('id', $commentId)
+            ->execute()
+        ;
+        $comment = $result->fetchAssoc();
         if (!$comment) {
             return;
         }
@@ -66,15 +66,16 @@ readonly class CommentNotifier
          */
 
         // Getting some info about the article commented
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'title, parent_id, url',
-            'FROM'   => 'articles',
-            'WHERE'  => 'id = :article_id AND published = 1 AND commented = 1'
-        ], [
-            'article_id' => $comment['article_id'],
-        ]);
-
-        $article = $this->dbLayer->fetchAssoc($result);
+        $result = $this->dbLayer
+            ->select('title, parent_id, url')
+            ->from('articles')
+            ->where('id = :article_id')
+            ->setParameter('article_id', $comment['article_id'])
+            ->andWhere('published = 1')
+            ->andWhere('commented = 1')
+            ->execute()
+        ;
+        $article = $result->fetchAssoc();
         if (!$article) {
             return;
         }
@@ -109,12 +110,12 @@ readonly class CommentNotifier
         }
 
         // Toggle sent mark
-        $query = [
-            'UPDATE' => 'art_comments',
-            'SET'    => 'sent = 1',
-            'WHERE'  => 'id = ' . $commentId
-        ];
-        $this->dbLayer->buildAndQuery($query);
+        $this->dbLayer->update('art_comments')
+            ->set('sent', '1')
+            ->where('id = :id')
+            ->setParameter('id', $commentId)
+            ->execute()
+        ;
     }
 
     /**
@@ -126,14 +127,16 @@ readonly class CommentNotifier
 
         foreach ($receivers as $receiver) {
             if ($code === $receiver['hash']) {
-                $this->dbLayer->buildAndQuery([
-                    'UPDATE' => 'art_comments',
-                    'SET'    => 'subscribed = 0',
-                    'WHERE'  => 'article_id = :article_id and subscribed = 1 and email = :email'
-                ], [
-                    'article_id' => $articleId,
-                    'email'      => $email,
-                ]);
+                $this->dbLayer
+                    ->update('art_comments')
+                    ->set('subscribed', '0')
+                    ->where('article_id = :article_id')
+                    ->setParameter('article_id', $articleId)
+                    ->andWhere('subscribed = 1')
+                    ->andWhere('email = :email')
+                    ->setParameter('email', $email)
+                    ->execute()
+                ;
 
                 return true;
             }
@@ -148,19 +151,22 @@ readonly class CommentNotifier
     private function getCommentReceivers(int $articleId, string $email, string $operation): array
     {
         if (!\in_array($operation, ['=', '<>'], true)) {
-            throw new \InvalidArgumentException(sprintf('Invalid operation "%s".', $operation));
+            throw new \InvalidArgumentException(\sprintf('Invalid operation "%s".', $operation));
         }
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id, nick, email, ip, time',
-            'FROM'   => 'art_comments',
-            'WHERE'  => 'article_id = :article_id AND subscribed = 1 AND shown = 1 AND email ' . $operation . ' :email'
-        ], [
-            'article_id' => $articleId,
-            'email'      => $email,
-        ]);
+        $result = $this->dbLayer
+            ->select('id, nick, email, ip, time')
+            ->from('art_comments')
+            ->where('article_id = :article_id')
+            ->setParameter('article_id', $articleId)
+            ->andWhere('subscribed = 1')
+            ->andWhere('shown = 1')
+            ->andWhere('email ' . $operation . ' :email')
+            ->setParameter('email', $email)
+            ->execute()
+        ;
 
-        $receivers = $this->dbLayer->fetchAssocAll($result);
+        $receivers = $result->fetchAssocAll();
         foreach ($receivers as &$receiver) {
             $receiver['hash'] = substr(base_convert(md5('art_comments' . serialize($receiver)), 16, 36), 0, 13);
         }

@@ -16,10 +16,13 @@ use S2\Cms\Pdo\QueryBuilder\DeleteBuilder;
 use S2\Cms\Pdo\QueryBuilder\DeleteCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
 use S2\Cms\Pdo\QueryBuilder\InsertCommonCompiler;
+use S2\Cms\Pdo\QueryBuilder\InsertMysqlCompiler;
 use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
 use S2\Cms\Pdo\QueryBuilder\SelectCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\UpdateBuilder;
 use S2\Cms\Pdo\QueryBuilder\UpdateCommonCompiler;
+use S2\Cms\Pdo\QueryBuilder\UpsertBuilder;
+use S2\Cms\Pdo\QueryBuilder\UpsertMysqlCompiler;
 
 class DbLayer implements QueryBuilder\QueryExecutorInterface
 {
@@ -56,7 +59,7 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @deprecated
      */
-    public function build(array $query): string
+    protected function build(array $query): string
     {
         $sql = '';
 
@@ -582,11 +585,16 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
 
     public function insert(string $table): InsertBuilder
     {
-        return (new InsertBuilder(new InsertCommonCompiler($this->prefix), $this))->insert($table);
+        return (new InsertBuilder(new InsertMysqlCompiler($this->prefix), $this))->insert($table);
     }
 
     public function delete(string $table): DeleteBuilder
     {
         return (new DeleteBuilder(new DeleteCommonCompiler($this->prefix), $this))->delete($table);
+    }
+
+    public function upsert(string $table): UpsertBuilder
+    {
+        return (new UpsertBuilder(new UpsertMysqlCompiler($this->prefix), $this))->upsert($table);
     }
 }

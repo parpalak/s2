@@ -31,7 +31,7 @@ readonly class UpdateCommonCompiler implements UpdateCompilerInterface
 
         $whereConditions = $builder->getWhere();
         if (\count($whereConditions) > 0) {
-            $sql .= ' WHERE ' . implode(' AND ', $whereConditions);
+            $sql .= ' WHERE (' . implode(') AND (', $whereConditions) . ')';
         }
 
         return $sql;

@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -131,21 +131,16 @@ readonly class AuthManager
      */
     public function getTotalUserSessionsCount(): int
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 'users_online AS u1',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'users_online AS u2',
-                    'ON'         => 'u1.login = u2.login',
-                ]
-            ],
-            'WHERE'  => 'u1.challenge = :challenge'
-        ], [
-            'challenge' => $this->getCurrentChallenge()
-        ]);
+        $result = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('users_online AS u1')
+            ->innerJoin('users_online AS u2', 'u1.login = u2.login')
+            ->where('u1.challenge = :challenge')
+            ->setParameter('challenge', $this->getCurrentChallenge())
+            ->execute()
+        ;
 
-        return $this->dbLayer->result($result);
+        return $result->result();
     }
 
     /**
@@ -153,17 +148,21 @@ readonly class AuthManager
      */
     private function cleanupExpiredSessions(): void
     {
-        $query = [
-            'DELETE' => 'users_online',
-            'WHERE'  => 'time < :time AND login IS NULL'
-        ];
-        $this->dbLayer->buildAndQuery($query, ['time' => time() - self::CHALLENGE_EXPIRE_TIMEOUT]);
+        $this->dbLayer
+            ->delete('users_online')
+            ->where('time < :time')
+            ->andWhere('login IS NULL')
+            ->setParameter('time', time() - self::CHALLENGE_EXPIRE_TIMEOUT)
+            ->execute()
+        ;
 
-        $query = [
-            'DELETE' => 'users_online',
-            'WHERE'  => 'time < :time AND login IS NOT NULL'
-        ];
-        $this->dbLayer->buildAndQuery($query, ['time' => time() - $this->cookieExpireTimeout()]);
+        $this->dbLayer
+            ->delete('users_online')
+            ->where('time < :time')
+            ->andWhere('login IS NOT NULL')
+            ->setParameter('time', time() - $this->cookieExpireTimeout())
+            ->execute()
+        ;
     }
 
 
@@ -176,8 +175,7 @@ readonly class AuthManager
 
         if ($status === self::CHALLENGE_STATUS_OK) {
             if (!$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW)) {
-                return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc', [
-                ]));
+                return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc'));
             }
 
             return null;
@@ -212,13 +210,15 @@ readonly class AuthManager
      */
     private function getUserInfo(string $login): ?array
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '*',
-            'FROM'   => 'users',
-            'WHERE'  => 'login = :login'
-        ], ['login' => $login]);
+        $result = $this->dbLayer
+            ->select('*')
+            ->from('users')
+            ->where('login = :login')
+            ->setParameter('login', $login)
+            ->execute()
+        ;
 
-        return $this->dbLayer->fetchAssoc($result) ?: null;
+        return $result->fetchAssoc() ?: null;
     }
 
     /**
@@ -226,16 +226,17 @@ readonly class AuthManager
      */
     private function touchChallenge(Request $request, string $challenge): void
     {
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'users_online',
-            'SET'    => 'time = :time, ua = :ua, ip = :ip',
-            'WHERE'  => 'challenge = :challenge'
-        ], [
-            'challenge' => $challenge,
-            'ua'        => $request->headers->get('User-Agent'),
-            'ip'        => $request->getClientIp(),
-            'time'      => time(),
-        ]);
+        $this->dbLayer
+            ->update('users_online')
+            ->set('time', ':time')->setParameter('time', time())
+            ->set('ua', ':ua')
+            ->setParameter('ua', $request->headers->get('User-Agent'))
+            ->set('ip', ':ip')
+            ->setParameter('ip', $request->getClientIp())
+            ->where('challenge = :challenge')
+            ->setParameter('challenge', $challenge)
+            ->execute()
+        ;
     }
 
     /**
@@ -282,13 +283,14 @@ readonly class AuthManager
      */
     private function getSalt(string $challenge): ?string
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'salt',
-            'FROM'   => 'users_online',
-            'WHERE'  => 'challenge = :challenge'
-        ], ['challenge' => $challenge]);
+        $result = $this->dbLayer
+            ->select('salt')
+            ->from('users_online')
+            ->where('challenge = :challenge')->setParameter('challenge', $challenge)
+            ->execute()
+        ;
 
-        return ($return = $this->dbLayer->result($result)) ? $return : null;
+        return $result->result() ?: null;
     }
 
     /**
@@ -296,13 +298,15 @@ readonly class AuthManager
      */
     private function getPasswordHash(string $login): ?string
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'password',
-            'FROM'   => 'users',
-            'WHERE'  => 'login = :login'
-        ], ['login' => $login]);
+        $result = $this->dbLayer
+            ->select('password')
+            ->from('users')
+            ->where('login = :login')
+            ->setParameter('login', $login)
+            ->execute()
+        ;
 
-        return ($return = $this->dbLayer->result($result)) ? $return : null;
+        return $result->result() ?: null;
     }
 
     /**
@@ -310,13 +314,13 @@ readonly class AuthManager
      */
     private function deleteChallenge(string $challenge): void
     {
-        $query = [
-            'DELETE' => 'users_online',
-            'WHERE'  => 'challenge = :challenge'
-        ];
-        $this->dbLayer->buildAndQuery($query, ['challenge' => $challenge]);
+        $this->dbLayer
+            ->delete('users_online')
+            ->where('challenge = :challenge')
+            ->setParameter('challenge', $challenge)
+            ->execute()
+        ;
     }
-
 
     /**
      * @throws DbLayerException
@@ -327,18 +331,16 @@ readonly class AuthManager
         $commentCookie = md5(uniqid('comment_cookie', true) . $time);
 
         // Link the challenge to the user
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'users_online',
-            'SET'    => 'login = :login, time = :time, ua = :ua, ip = :ip, comment_cookie = :comment_cookie',
-            'WHERE'  => 'challenge = :challenge'
-        ], [
-            'challenge'      => $challenge,
-            'login'          => $login,
-            'time'           => $time,
-            'ua'             => $request->headers->get('User-Agent'),
-            'ip'             => $request->getClientIp(),
-            'comment_cookie' => $commentCookie
-        ]);
+        $this->dbLayer
+            ->update('users_online')
+            ->set('login', ':login')->setParameter('login', $login)
+            ->set('time', ':time')->setParameter('time', $time)
+            ->set('ua', ':ua')->setParameter('ua', $request->headers->get('User-Agent'))
+            ->set('ip', ':ip')->setParameter('ip', $request->getClientIp())
+            ->set('comment_cookie', ':comment_cookie')->setParameter('comment_cookie', $commentCookie)
+            ->where('challenge = :challenge')->setParameter('challenge', $challenge)
+            ->execute()
+        ;
 
         $response = new JsonResponse(['success' => true]);
 
@@ -389,16 +391,16 @@ readonly class AuthManager
         }
 
         // TODO check unique constraint violation
-        $query = [
-            'INSERT' => 'challenge, salt, time',
-            'INTO'   => 'users_online',
-            'VALUES' => ':challenge, :salt, :time'
-        ];
-        $this->dbLayer->buildAndQuery($query, [
-            'challenge' => $challenge,
-            'salt'      => $salt,
-            'time'      => $time
-        ]);
+        $this->dbLayer
+            ->insert('users_online')
+            ->setValue('challenge', ':challenge')
+            ->setValue('salt', ':salt')
+            ->setValue('time', ':time')
+            ->setParameter('challenge', $challenge)
+            ->setParameter('salt', $salt)
+            ->setParameter('time', $time)
+            ->execute()
+        ;
 
         return [$challenge, $salt];
     }
@@ -443,14 +445,13 @@ readonly class AuthManager
     private function checkAndUpdateCurrentUserChallenge(Request $request, string $challenge): string
     {
         // Check if the challenge exists and isn't expired
-        $query  = [
-            'SELECT' => 'login, time, ip',
-            'FROM'   => 'users_online',
-            'WHERE'  => 'challenge = :challenge'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query, ['challenge' => $challenge]);
-
-        if (!($row = $this->dbLayer->fetchRow($result))) {
+        $result = $this->dbLayer
+            ->select('login, time, ip')
+            ->from('users_online')
+            ->where('challenge = :challenge')->setParameter('challenge', $challenge)
+            ->execute()
+        ;
+        if (!($row = $result->fetchRow())) {
             return self::CHALLENGE_STATUS_LOST;
         }
 

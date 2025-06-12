@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace S2\Cms\Extensions;
 
-use Psr\Cache\InvalidArgumentException;
 use S2\AdminYard\Translator;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Container;
@@ -35,14 +34,13 @@ readonly class ExtensionManager
     public function getExtensionList(): array
     {
         $installedExtensions = [];
-        $query               = [
-            'SELECT'   => 'e.*',
-            'FROM'     => 'extensions AS e',
-            'ORDER BY' => 'e.title'
-        ];
-
-        $result = $this->dbLayer->buildAndQuery($query);
-        while ($currentExtension = $this->dbLayer->fetchAssoc($result)) {
+        $result              = $this->dbLayer
+            ->select('e.*')
+            ->from('extensions AS e')
+            ->orderBy('e.title')
+            ->execute()
+        ;
+        while ($currentExtension = $result->fetchAssoc()) {
             $installedExtensions[$currentExtension['id']] = $currentExtension;
         }
 
@@ -127,13 +125,14 @@ readonly class ExtensionManager
      */
     public function getUpgradableExtensionNum(): int
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'e.*',
-            'FROM'   => 'extensions AS e',
-        ]);
+        $result = $this->dbLayer
+            ->select('e.*')
+            ->from('extensions AS e')
+            ->execute()
+        ;
 
         $extensionNum = 0;
-        while ($currentExtension = $this->dbLayer->fetchAssoc($result)) {
+        while ($currentExtension = $result->fetchAssoc()) {
             $manifestClass = '\\s2_extensions\\' . $currentExtension['id'] . '\\Manifest';
             if (!class_exists($manifestClass)) {
                 continue;
@@ -156,14 +155,8 @@ readonly class ExtensionManager
     public function flipExtension(string $id): ?string
     {
         // Fetch the current status of the extension
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'e.disabled',
-            'FROM'   => 'extensions AS e',
-            'WHERE'  => 'e.id = :id'
-        ], ['id' => $id]);
-
-        $row = $this->dbLayer->fetchAssoc($result);
-        if (!$row) {
+        $row = $this->fetchExtension($id);
+        if ($row === null) {
             return $this->translator->trans('Extension loading error', ['{{ extension }}' => $id]);
         }
 
@@ -172,12 +165,15 @@ readonly class ExtensionManager
 
         // Check dependencies
         if ($disable) {
-            $result        = $this->dbLayer->buildAndQuery([
-                'SELECT' => 'e.id',
-                'FROM'   => 'extensions AS e',
-                'WHERE'  => 'e.disabled = 0 AND e.dependencies LIKE :id'
-            ], ['id' => '%|' . $id . '|%']);
-            $dependencyIds = $this->dbLayer->fetchColumn($result);
+            $result = $this->dbLayer->select('e.id')
+                ->from('extensions AS e')
+                ->where('e.disabled = 0') // enabled!
+                ->andWhere('e.dependencies LIKE :id')
+                ->setParameter('id', '%|' . $id . '|%')
+                ->execute()
+            ;
+
+            $dependencyIds = $result->fetchColumn();
 
             if (!empty($dependencyIds)) {
                 return $this->translator->trans('Disable dependency', [
@@ -186,22 +182,17 @@ readonly class ExtensionManager
                 ]);
             }
         } else {
-            $result = $this->dbLayer->buildAndQuery([
-                'SELECT' => 'e.dependencies',
-                'FROM'   => 'extensions AS e',
-                'WHERE'  => 'e.id = :id'
-            ], ['id' => $id]);
+            $result = $this->dbLayer->select('e.dependencies')
+                ->from('extensions AS e')
+                ->where('e.id = :id')->setParameter('id', $id)
+                ->execute()
+            ;
 
-            $dependencies = $this->dbLayer->result($result);
+            $dependencies = $result->result();
             $dependencies = explode('|', substr($dependencies, 1, -1));
             $dependencies = array_filter($dependencies, '\strlen');
 
-            $result            = $this->dbLayer->buildAndQuery([
-                'SELECT' => 'e.id',
-                'FROM'   => 'extensions AS e',
-                'WHERE'  => 'e.disabled = 0'
-            ]);
-            $enabledExtensions = $this->dbLayer->fetchColumn($result);
+            $enabledExtensions = $this->getEnabledExtensionIds();
 
             $brokenDependencies = array_diff($dependencies, $enabledExtensions);
 
@@ -213,11 +204,12 @@ readonly class ExtensionManager
             }
         }
 
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'extensions',
-            'SET'    => 'disabled = ' . ($disable ? '1' : '0'),
-            'WHERE'  => 'id = :id',
-        ], ['id' => $id]);
+        $this->dbLayer
+            ->update('extensions')
+            ->set('disabled', ':disabled')->setParameter('disabled', $disable ? 1 : 0)
+            ->where('id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
 
         // Regenerate the extension cache
         $this->extensionCache->clear();
@@ -227,7 +219,6 @@ readonly class ExtensionManager
 
     /**
      * @throws DbLayerException
-     * @throws InvalidArgumentException
      */
     public function installExtension(string $id): array
     {
@@ -254,14 +245,7 @@ readonly class ExtensionManager
             ];
         }
 
-        $result            = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'e.id',
-            'FROM'   => 'extensions AS e',
-            'WHERE'  => 'e.disabled=0'
-        ]);
-        $enabledExtensions = $this->dbLayer->fetchColumn($result);
-
-        $missingDependencies = array_diff($extensionManifest->getDependencies(), $enabledExtensions);
+        $missingDependencies = array_diff($extensionManifest->getDependencies(), $this->getEnabledExtensionIds());
 
         if (!empty($missingDependencies)) {
             return [
@@ -273,34 +257,42 @@ readonly class ExtensionManager
         }
 
         // Is this a fresh install or an upgrade?
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'e.version',
-            'FROM'   => 'extensions AS e',
-            'WHERE'  => 'e.id = :id'
-        ], ['id' => $id]);
+        $currentExtension = $this->fetchExtension($id);
 
-        if ($curr_version = $this->dbLayer->result($result)) {
+        if ($currentExtension !== null) {
             // Run the author supplied installation code
-            $extensionManifest->install($this->dbLayer, $this->container, $curr_version);
+            $extensionManifest->install($this->dbLayer, $this->container, $currentExtension['version']);
 
             // Update the existing extension
-            $query = [
-                'UPDATE' => 'extensions',
-                'SET'    => 'title = :title, version = :version, description = :description, author = :author, uninstall_note = :uninstall_note, dependencies = :dependencies',
-                'WHERE'  => 'id=:id',
-            ];
+            $qb = $this->dbLayer
+                ->update('extensions')
+                ->set('title', ':title')
+                ->set('version', ':version')
+                ->set('description', ':description')
+                ->set('author', ':author')
+                ->set('uninstall_note', ':uninstall_note')
+                ->set('dependencies', ':dependencies')
+                ->where('id = :id')
+            ;
         } else {
             // Run the author supplied installation code
             $extensionManifest->install($this->dbLayer, $this->container, null);
 
             // Add the new extension
-            $query = [
-                'INSERT' => 'id, title, version, description, author, uninstall_note, dependencies',
-                'INTO'   => 'extensions',
-                'VALUES' => ':id, :title, :version, :description, :author, :uninstall_note, :dependencies',
-            ];
+            $qb = $this->dbLayer
+                ->insert('extensions')
+                ->values([
+                    'id'             => ':id',
+                    'title'          => ':title',
+                    'version'        => ':version',
+                    'description'    => ':description',
+                    'author'         => ':author',
+                    'uninstall_note' => ':uninstall_note',
+                    'dependencies'   => ':dependencies',
+                ])
+            ;
         }
-        $this->dbLayer->buildAndQuery($query, [
+        $qb->execute([
             'id'             => $id,
             'title'          => $extensionManifest->getTitle(),
             'version'        => $extensionManifest->getVersion(),
@@ -325,25 +317,20 @@ readonly class ExtensionManager
     public function uninstallExtension(string $id): ?string
     {
         // Fetch info about the extension
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '1',
-            'FROM'   => 'extensions AS e',
-            'WHERE'  => 'e.id = :id',
-        ], ['id' => $id]);
-
-        $extensionExists = $this->dbLayer->result($result);
-        if (!$extensionExists) {
+        $currentExtension = $this->fetchExtension($id);
+        if ($currentExtension === null) {
             return $this->translator->trans('Extension loading error', ['{{ extension }}' => $id]);
         }
 
         // Check dependencies
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'e.id',
-            'FROM'   => 'extensions AS e',
-            'WHERE'  => 'e.dependencies LIKE :id'
-        ], ['id' => '%|' . $id . '|%']);
-
-        $dependencies = $this->dbLayer->fetchColumn($result);
+        $result       = $this->dbLayer->select('e.id')
+            ->from('extensions AS e')
+            ->where('e.disabled = 0')
+            ->andWhere('e.dependencies LIKE :id')
+            ->setParameter('id', '%|' . $id . '|%')
+            ->execute()
+        ;
+        $dependencies = $result->fetchColumn();
 
         if (!empty($dependencies)) {
             return $this->translator->trans('Uninstall dependency', [
@@ -358,14 +345,48 @@ readonly class ExtensionManager
         $extensionManifest = new $extensionClass();
         $extensionManifest->uninstall($this->dbLayer, $this->container);
 
-        $this->dbLayer->buildAndQuery([
-            'DELETE' => 'extensions',
-            'WHERE'  => 'id = :id',
-        ], ['id' => $id]);
+        $this->dbLayer
+            ->delete('extensions')
+            ->where('id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
 
         // Regenerate the extension cache
         $this->extensionCache->clear();
 
         return null;
+    }
+
+    /**
+     * @return array
+     * @throws DbLayerException
+     */
+    public function getEnabledExtensionIds(): array
+    {
+        $result            = $this->dbLayer
+            ->select('e.id')
+            ->from('extensions AS e')
+            ->where('e.disabled = 0')
+            ->execute()
+        ;
+        $enabledExtensions = $result->fetchColumn();
+
+        return $enabledExtensions;
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function fetchExtension(string $id): ?array
+    {
+        $result = $this->dbLayer->select('e.*')
+            ->from('extensions AS e')
+            ->where('e.id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
+
+        $row = $result->fetchAssoc() ?: null;
+
+        return $row;
     }
 }

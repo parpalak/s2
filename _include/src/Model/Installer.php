@@ -519,34 +519,35 @@ readonly class Installer
     {
         // Insert config data
         $config = [
-            'S2_SITE_NAME'        => "'" . $siteName . "'",
-            'S2_WEBMASTER'        => "''",
-            'S2_WEBMASTER_EMAIL'  => "'" . $email . "'",
-            'S2_START_YEAR'       => "'" . date('Y') . "'",
-            'S2_USE_HIERARCHY'    => "'1'",
-            'S2_MAX_ITEMS'        => "'0'",
-            'S2_FAVORITE_URL'     => "'favorite'",
-            'S2_TAGS_URL'         => "'tags'",
-            'S2_COMPRESS'         => "'0'",
-            'S2_STYLE'            => "'zeta'",
-            'S2_LANGUAGE'         => "'" . $this->dbLayer->escape($defaultLanguage) . "'",
-            'S2_SHOW_COMMENTS'    => "'1'",
-            'S2_ENABLED_COMMENTS' => "'1'",
-            'S2_PREMODERATION'    => "'0'",
-            'S2_AKISMET_KEY'      => "''",
-            'S2_ADMIN_COLOR'      => "'#eeeeee'",
-            'S2_ADMIN_NEW_POS'    => "'0'",
-            'S2_ADMIN_CUT'        => "'0'",
-            'S2_LOGIN_TIMEOUT'    => "'60'",
-            'S2_DB_REVISION'      => "'" . $dbRevision . "'",
+            'S2_SITE_NAME'        => $siteName,
+            'S2_WEBMASTER'        => '',
+            'S2_WEBMASTER_EMAIL'  => $email,
+            'S2_START_YEAR'       => date('Y'),
+            'S2_USE_HIERARCHY'    => '1',
+            'S2_MAX_ITEMS'        => '0',
+            'S2_FAVORITE_URL'     => 'favorite',
+            'S2_TAGS_URL'         => 'tags',
+            'S2_COMPRESS'         => '0',
+            'S2_STYLE'            => 'zeta',
+            'S2_LANGUAGE'         => $defaultLanguage,
+            'S2_SHOW_COMMENTS'    => '1',
+            'S2_ENABLED_COMMENTS' => '1',
+            'S2_PREMODERATION'    => '0',
+            'S2_AKISMET_KEY'      => '',
+            'S2_ADMIN_COLOR'      => '#eeeeee',
+            'S2_ADMIN_NEW_POS'    => '0',
+            'S2_ADMIN_CUT'        => '0',
+            'S2_LOGIN_TIMEOUT'    => '60',
+            'S2_DB_REVISION'      => (string)$dbRevision,
         ];
 
         foreach ($config as $conf_name => $conf_value) {
-            $this->dbLayer->buildAndQuery([
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'' . $conf_name . '\', ' . $conf_value . ''
-            ]);
+            $this->dbLayer
+                ->insert('config')
+                ->setValue('name', ':name')->setParameter('name', $conf_name)
+                ->setValue('value', ':value')->setParameter('value', $conf_value)
+                ->execute()
+            ;
         }
     }
 
@@ -555,10 +556,15 @@ readonly class Installer
      */
     public function insertMainPage(string $title, int $time): void
     {
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'parent_id, title, create_time, modify_time, published, template',
-            'INTO'   => 'articles',
-            'VALUES' => '0, \'' . $title . '\', 0, ' . $time . ', 1, \'mainpage.php\''
-        ]);
+        $this->dbLayer
+            ->insert('articles')
+            ->setValue('parent_id', ':parent_id')->setParameter('parent_id', ArticleProvider::ROOT_ID)
+            ->setValue('title', ':title')->setParameter('title', $title)
+            ->setValue('create_time', '0')
+            ->setValue('modify_time', ':modify_time')->setParameter('modify_time', $time)
+            ->setValue('published', '1')
+            ->setValue('template', ':template')->setParameter('template', 'mainpage.php')
+            ->execute()
+        ;
     }
 }

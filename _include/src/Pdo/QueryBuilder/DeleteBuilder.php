@@ -36,7 +36,7 @@ class DeleteBuilder
     public function getTable(): string
     {
         if ($this->table === null) {
-            throw new DbLayerException('No table to update has been specified.');
+            throw new DbLayerException('No table to delete from has been specified.');
         }
         return $this->table;
     }

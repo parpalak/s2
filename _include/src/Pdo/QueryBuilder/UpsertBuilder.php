@@ -11,7 +11,7 @@ namespace S2\Cms\Pdo\QueryBuilder;
 
 use S2\Cms\Pdo\DbLayerException;
 
-class InsertBuilder
+class UpsertBuilder
 {
     use ParamsExecutableTrait;
 
@@ -23,12 +23,12 @@ class InsertBuilder
     private array $uniqueColumns = [];
 
     public function __construct(
-        private readonly InsertCompilerInterface $compiler,
+        private readonly UpsertCompilerInterface $compiler,
         private readonly QueryExecutorInterface  $queryExecutor,
     ) {
     }
 
-    public function insert(string $table): static
+    public function upsert(string $table): static
     {
         $this->table = $table;
         return $this;
@@ -45,16 +45,23 @@ class InsertBuilder
         return $this->table;
     }
 
-    public function values(array $columnExpressions): self
-    {
-        $this->columnExpressions = $columnExpressions;
-        return $this;
-    }
-
+    /**
+     * Specifies a column as a usual field, not a part of the unique key.
+     * If there is a row that matches the unique key, the row will be updated.
+     */
     public function setValue(string $column, string $expression): self
     {
         $this->columnExpressions[$column] = $expression;
         return $this;
+    }
+
+    /**
+     * Specifies a column as a part of the unique key.
+     */
+    public function setKey(string $column, string $expression): self
+    {
+        $this->uniqueColumns[] = $column;
+        return $this->setValue($column, $expression);
     }
 
     /**
@@ -68,13 +75,7 @@ class InsertBuilder
         return $this->columnExpressions;
     }
 
-    public function onConflictDoNothing(string ...$uniqueColumns): self
-    {
-        $this->uniqueColumns = $uniqueColumns;
-        return $this;
-    }
-
-    public function getUniqueColumnsForConflictDoNothing(): array
+    public function getUniqueColumns(): array
     {
         return $this->uniqueColumns;
     }

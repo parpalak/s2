@@ -27,21 +27,16 @@ readonly class AuthProvider
      */
     public function isOnline(string $email): bool
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'count(*)',
-            'FROM'   => 'users AS u',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'users_online AS o',
-                    'ON'         => 'o.login = u.login'
-                ],
-            ],
-            'WHERE'  => 'u.email = :email'
-        ], [
-            'email' => $email,
-        ]);
+        $result = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('users AS u')
+            ->innerJoin('users_online AS o', 'o.login = u.login')
+            ->where('u.email = :email')
+            ->setParameter('email', $email)
+            ->execute()
+        ;
 
-        $count = $this->dbLayer->result($result);
+        $count = $result->result();
 
         return $count > 0;
     }
@@ -54,21 +49,17 @@ readonly class AuthProvider
     {
         $cookie = $request->cookies->get($this->cookieName . '_c', '');
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'email',
-            'FROM'   => 'users AS u',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'users_online AS o',
-                    'ON'         => 'o.login = u.login'
-                ],
-            ],
-            'WHERE'  => 'u.edit_comments = 1 AND o.comment_cookie = :cookie'
-        ], [
-            'cookie' => $cookie,
-        ]);
+        $result = $this->dbLayer
+            ->select('email')
+            ->from('users AS u')
+            ->innerJoin('users_online AS o', 'o.login = u.login')
+            ->where('u.edit_comments = 1')
+            ->andWhere('o.comment_cookie = :cookie')
+            ->setParameter('cookie', $cookie)
+            ->execute()
+        ;
 
-        $email = $this->dbLayer->result($result);
+        $email = $result->result();
 
         return \is_string($email) && $email !== '' ? $email : null;
     }

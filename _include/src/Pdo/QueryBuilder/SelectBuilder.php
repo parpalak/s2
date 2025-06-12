@@ -60,7 +60,6 @@ class SelectBuilder
     }
 
     /**
-     * @return (string|self)[]
      * @throws DbLayerException
      */
     public function getSelect(): array
@@ -71,16 +70,16 @@ class SelectBuilder
         return $this->selectExpressions;
     }
 
-    public function from(string $string): self
+    public function from(string $table): self
     {
-        $this->table = $string;
+        $this->table = $table;
         return $this;
     }
 
     /**
      * @throws DbLayerException
      */
-    public function getFrom(): string
+    public function getTable(): string
     {
         if ($this->table === null) {
             throw new DbLayerException('No table to select from has been specified.');

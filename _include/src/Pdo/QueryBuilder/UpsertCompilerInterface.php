@@ -9,7 +9,12 @@ declare(strict_types=1);
 
 namespace S2\Cms\Pdo\QueryBuilder;
 
-class Upsert
-{
+use S2\Cms\Pdo\DbLayerException;
 
+interface UpsertCompilerInterface
+{
+    /**
+     * @throws DbLayerException
+     */
+    public function getSql(UpsertBuilder $builder): string;
 }

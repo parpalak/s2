@@ -50,13 +50,14 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
      */
     public function getTargetById(int $targetId): ?TargetDto
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id, title',
-            'FROM'   => 'articles',
-            'WHERE'  => 'id = :id',
-        ], ['id' => $targetId]);
+        $result = $this->dbLayer
+            ->select('id', 'title')
+            ->from('articles')
+            ->where('id = :id')->setParameter('id', $targetId)
+            ->execute()
+        ;
 
-        $article = $this->dbLayer->fetchAssoc($result);
+        $article = $result->fetchAssoc();
 
         if (!\is_array($article)) {
             return null;
@@ -70,22 +71,21 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
      */
     public function save(int $targetId, string $name, string $email, bool $showEmail, bool $subscribed, string $text, string $ip): int
     {
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'article_id, time, ip, nick, email, show_email, subscribed, sent, shown, good, text',
-            'INTO'   => 'art_comments',
-            'VALUES' => ':article_id, :time, :ip, :nick, :email, :show_email, :subscribed, :sent, :shown, 0, :text'
-        ], [
-            'article_id' => $targetId,
-            'time'       => time(),
-            'ip'         => $ip,
-            'nick'       => $name,
-            'email'      => $email,
-            'show_email' => $showEmail ? 1 : 0,
-            'subscribed' => $subscribed ? 1 : 0,
-            'sent'       => 0,
-            'shown'      => 0,
-            'text'       => $text,
-        ]);
+        $this->dbLayer
+            ->insert('art_comments')
+            ->setValue('article_id', ':article_id')->setParameter('article_id', $targetId)
+            ->setValue('time', ':time')->setParameter('time', time())
+            ->setValue('ip', ':ip')->setParameter('ip', $ip)
+            ->setValue('nick', ':nick')->setParameter('nick', $name)
+            ->setValue('email', ':email')->setParameter('email', $email)
+            ->setValue('show_email', ':show_email')->setParameter('show_email', $showEmail ? 1 : 0)
+            ->setValue('subscribed', ':subscribed')->setParameter('subscribed', $subscribed ? 1 : 0)
+            ->setValue('sent', '0')
+            ->setValue('shown', '0')
+            ->setValue('good', '0')
+            ->setValue('text', ':text')->setParameter('text', $text)
+            ->execute()
+        ;
 
         return (int)$this->dbLayer->insertId();
     }
@@ -116,17 +116,19 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
      */
     public function getRecentComment(string $hash, string $ip): ?CommentDto
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT'   => 'id, article_id AS target_id, email, text, nick AS name',
-            'FROM'     => 'art_comments',
-            'WHERE'    => 'ip = :ip AND shown = 0 AND sent = 0 AND time >= :time',
-            'ORDER BY' => 'time DESC',
-        ], [
-            'ip'   => $ip,
-            'time' => time() - 5 * 60, // 5 minutes
-        ]);
+        $result = $this->dbLayer
+            ->select('id', 'article_id AS target_id', 'email', 'text', 'nick AS name')
+            ->from('art_comments')
+            ->where('ip = :ip')
+            ->setParameter('ip', $ip)
+            ->andWhere('shown = 0')
+            ->andWhere('sent = 0')
+            ->andWhere('time >= :time')
+            ->setParameter('time', time() - 5 * 60) // 5 minutes
+            ->execute()
+        ;
 
-        foreach ($this->dbLayer->fetchAssocAll($result) as $comment) {
+        foreach ($result->fetchAssocAll() as $comment) {
             if ($hash === CommentController::commentHash($comment['id'], $comment['target_id'], $comment['email'], $ip, \get_class($this))) {
                 return new CommentDto($comment['id'], $comment['target_id'], $comment['name'], $comment['email'], $comment['text']);
             }
@@ -141,11 +143,11 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
      */
     public function publishComment(int $commentId): void
     {
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'art_comments',
-            'SET'    => 'shown = 1',
-            'WHERE'  => 'id = :id',
-        ], ['id' => $commentId]);
+        $this->dbLayer->update('art_comments')
+            ->set('shown', '1')
+            ->where('id = :id')->setParameter('id', $commentId)
+            ->execute()
+        ;
     }
 
     /**

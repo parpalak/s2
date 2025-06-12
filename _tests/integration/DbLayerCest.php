@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpUnused */
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -57,58 +57,67 @@ class DbLayerCest
     /**
      * @throws DbLayerException
      */
-    public function testInsertOrUpdate(\IntegrationTester $I): void
+    public function testInsertOnConflictDoNothing(\IntegrationTester $I): void
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '*',
-            'FROM'   => 'config',
-            'WHERE'  => 'name = :name',
-        ], [
-            'name' => 'S2_FAVORITE_URL',
-        ]);
-        $data   = $this->dbLayer->fetchAssocAll($result);
+        $data = $this->getAllConfigByName('S2_FAVORITE_URL');
+
         $I->assertCount(1, $data);
         $I->assertEquals(['name' => 'S2_FAVORITE_URL', 'value' => 'favorite'], $data[0]);
 
-        $this->dbLayer->buildAndQuery([
-            'UPSERT' => 'name, value',
-            'INTO'   => 'config',
-            'UNIQUE' => 'name',
-            'VALUES' => ':name, :value',
-        ], [
-            'name'  => 'S2_FAVORITE_URL',
-            'value' => 'favorite2',
-        ]);
+        // No rows with this name
+        $data = $this->getAllConfigByName('TEST');
+        $I->assertCount(0, $data);
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '*',
-            'FROM'   => 'config',
-            'WHERE'  => 'name = :name',
-        ], [
-            'name' => 'S2_FAVORITE_URL',
-        ]);
-        $data   = $this->dbLayer->fetchAssocAll($result);
+        // Add a new row
+        $this->dbLayer->insert('config')
+            ->values(['name' => "'TEST'", 'value' => "'test'"])
+            ->onConflictDoNothing('name')
+            ->execute()
+        ;
+
+        // There should be one row
+        $data = $this->getAllConfigByName('TEST');
+        $I->assertCount(1, $data);
+
+        // Add a new row that will be ignored
+        $this->dbLayer->insert('config')
+            ->values(['name' => "'TEST'", 'value' => "'test'"])
+            ->onConflictDoNothing('name')
+            ->execute()
+        ;
+
+        // There should be still one row
+        $data = $this->getAllConfigByName('TEST');
+        $I->assertCount(1, $data);
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function testInsertOrUpdate(\IntegrationTester $I): void
+    {
+        $data = $this->getAllConfigByName('S2_FAVORITE_URL');
+        $I->assertCount(1, $data);
+        $I->assertEquals(['name' => 'S2_FAVORITE_URL', 'value' => 'favorite'], $data[0]);
+
+        $this->dbLayer
+            ->upsert('config')
+            ->setKey('name', ':name')->setParameter('name', 'S2_FAVORITE_URL')
+            ->setValue('value', ':value')->setParameter('value', 'favorite2')
+            ->execute()
+        ;
+
+        $data = $this->getAllConfigByName('S2_FAVORITE_URL');
         $I->assertCount(1, $data);
         $I->assertEquals(['name' => 'S2_FAVORITE_URL', 'value' => 'favorite2'], $data[0]);
 
-        $this->dbLayer->buildAndQuery([
-            'UPSERT' => 'name, value',
-            'INTO'   => 'config',
-            'UNIQUE' => 'name',
-            'VALUES' => ':name, :value',
-        ], [
-            'name'  => 'S2_UNKNOWN',
-            'value' => 'unknown',
-        ]);
+        $this->dbLayer->upsert('config')
+            ->setKey('name', ':name')->setParameter('name', 'S2_UNKNOWN')
+            ->setValue('value', ':value')->setParameter('value', 'unknown')
+            ->execute()
+        ;
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '*',
-            'FROM'   => 'config',
-            'WHERE'  => 'name = :name',
-        ], [
-            'name' => 'S2_UNKNOWN',
-        ]);
-        $data   = $this->dbLayer->fetchAssocAll($result);
+        $data = $this->getAllConfigByName('S2_UNKNOWN');
         $I->assertCount(1, $data);
         $I->assertEquals(['name' => 'S2_UNKNOWN', 'value' => 'unknown'], $data[0]);
     }
@@ -122,54 +131,52 @@ class DbLayerCest
         // and to start a new one since we want to test DDL, and it is not transactional in MySQL.
         $this->pdo->rollBack();
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '*',
-            'FROM'   => 'config',
-            'LIMIT'  => 1,
-        ]);
-        $data   = $this->dbLayer->fetchAssocAll($result);
+        $data = $this->dbLayer->select('*')
+            ->from('config')
+            ->limit(1)
+            ->execute()->fetchAssocAll()
+        ;
 
         $I->assertCount(1, $data);
         $I->assertEquals(['name', 'value'], array_keys($data[0]));
 
         $this->dbLayer->addField('config', 'test_field', 'INT(10) UNSIGNED', true);
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'test_field',
-            'FROM'   => 'config',
-            'LIMIT'  => 1,
-        ]);
-        $data   = $this->dbLayer->fetchAssoc($result);
-        $this->dbLayer->freeResult($result); // There are table locks in SQLite without this
+        $result = $this->dbLayer->select('test_field')
+            ->from('config')
+            ->limit(1)
+            ->execute()
+        ;
+        $data   = $result->fetchAssoc();
+        $result->freeResult(); // There are table locks in SQLite without this
         $I->assertEquals(['test_field' => null], $data);
 
         $this->dbLayer->renameField('config', 'test_field', 'test_field2');
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'test_field2',
-            'FROM'   => 'config',
-            'LIMIT'  => 1,
-        ]);
-        $data   = $this->dbLayer->fetchAssoc($result);
-        $this->dbLayer->freeResult($result); // There are table locks in SQLite without this
+        $result = $this->dbLayer->select('test_field2')
+            ->from('config')
+            ->limit(1)
+            ->execute()
+        ;
+        $data   = $result->fetchAssoc();
+        $result->freeResult(); // There are table locks in SQLite without this
         $I->assertEquals(['test_field2' => null], $data);
 
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'name, value, test_field2',
-            'INTO'   => 'config',
-            'VALUES' => ':name, :value, :test_field2',
-        ], [
-            'name'        => 'test_name',
-            'value'       => 'test_value',
-            'test_field2' => 123,
-        ]);
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'test_field2',
-            'FROM'   => 'config',
-            'WHERE'  => 'test_field2 = 123',
-        ]);
-        $data   = $this->dbLayer->result($result);
-        $this->dbLayer->freeResult($result); // There are table locks in SQLite without this
+        $this->dbLayer->insert('config')
+            ->setValue('name', ':name')->setParameter('name', 'test_name')
+            ->setValue('value', ':value')->setParameter('value', 'test_value')
+            ->setValue('test_field2', ':test_field2')->setParameter('test_field2', 123)
+            ->execute()
+        ;
+
+        $result = $this->dbLayer->select('test_field2')
+            ->from('config')
+            ->where('test_field2 = :val')->setParameter(':val', 123)
+            ->limit(1)
+            ->execute()
+        ;
+        $data   = $result->result();
+        $result->freeResult(); // There are table locks in SQLite without this
         $I->assertEquals(123, $data);
 
         if (!$this->dbLayer instanceof DbLayerSqlite) {
@@ -181,29 +188,30 @@ class DbLayerCest
             $I->assertInstanceOf(DbLayerException::class, $e);
         }
 
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'config',
-            'SET'    => 'test_field2 = 0',
-            'WHERE'  => 'test_field2 IS NULL',
-        ]);
+        $this->dbLayer->update('config')
+            ->set('test_field2', '0')
+            ->where('test_field2 IS NULL')
+            ->execute()
+        ;
+
         $this->dbLayer->alterField('config', 'test_field2', 'VARCHAR(255)', false, 'default_test');
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'test_field2',
-            'FROM'   => 'config',
-            'WHERE'  => 'test_field2 = \'123\'',
-        ]);
-        $data   = $this->dbLayer->result($result);
+        $result = $this->dbLayer->select('test_field2')
+            ->from('config')
+            ->where('test_field2 = :val')->setParameter(':val', '123')
+            ->limit(1)
+            ->execute()
+        ;
+        $data   = $result->result();
         $I->assertEquals('123', $data);
 
         $this->dbLayer->dropField('config', 'test_field2');
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '*',
-            'FROM'   => 'config',
-            'LIMIT'  => 1,
-        ]);
-        $data   = $this->dbLayer->fetchAssoc($result);
+        $data = $this->dbLayer->select('*')
+            ->from('config')
+            ->limit(1)
+            ->execute()->fetchAssoc()
+        ;
         $I->assertEquals(['name', 'value'], array_keys($data));
 
         // Start a transaction as if it was an external transaction from tests wrapper
@@ -228,40 +236,26 @@ class DbLayerCest
         $this->dbLayer->addIndex('config', 'value_idx', ['value']);
 
         // Cleaning from other tests
-        $this->dbLayer->buildAndQuery([
-            'DELETE' => 'config',
-            'WHERE'  => 'value = :value',
-        ], [
-            'value' => 'test_value',
-        ]);
+        $this->dbLayer->delete('config')
+            ->where('value = :value')->setParameter('value', 'test_value')
+            ->execute()
+        ;
 
         // Test values are not unique
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'name, value',
-            'INTO'   => 'config',
-            'VALUES' => ':name, :value',
-        ], [
-            'name'  => 'test_name1',
-            'value' => 'test_value',
-        ]);
+        foreach (['test_name1', 'test_name2'] as $name) {
+            $this->dbLayer->insert('config')
+                ->setValue('name', ':name')->setParameter('name', $name)
+                ->setValue('value', ':value')->setParameter('value', 'test_value')
+                ->execute()
+            ;
+        }
 
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'name, value',
-            'INTO'   => 'config',
-            'VALUES' => ':name, :value',
-        ], [
-            'name'  => 'test_name2',
-            'value' => 'test_value',
-        ]);
-
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '*',
-            'FROM'   => 'config',
-            'WHERE'  => 'value = :value',
-        ], [
-            'value' => 'test_value',
-        ]);
-        $data   = $this->dbLayer->fetchAssocAll($result);
+        $data = $this->dbLayer->select('*')
+            ->from('config')
+            ->where('value = :value')->setParameter('value', 'test_value')
+            ->execute()
+            ->fetchAssocAll()
+        ;
         $I->assertCount(2, $data);
 
         $this->dbLayer->dropIndex('config', 'value_idx');
@@ -272,32 +266,24 @@ class DbLayerCest
         }
         $I->assertNotNull($e);
 
-        $this->dbLayer->buildAndQuery([
-            'DELETE' => 'config',
-        ]);
+        $this->dbLayer->delete('config')->execute();
 
         $this->dbLayer->addIndex('config', 'value_idx', ['value'], true);
 
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'name, value',
-            'INTO'   => 'config',
-            'VALUES' => ':name, :value',
-        ], [
-            'name'  => 'test_name1',
-            'value' => 'test_value',
-        ]);
+        $this->dbLayer->insert('config')
+            ->setValue('name', ':name')->setParameter('name', 'test_name1')
+            ->setValue('value', ':value')->setParameter('value', 'test_value')
+            ->execute()
+        ;
 
         $e = null;
 
         try {
-            $this->dbLayer->buildAndQuery([
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => ':name, :value',
-            ], [
-                'name'  => 'test_name2',
-                'value' => 'test_value',
-            ]);
+            $this->dbLayer->insert('config')
+                ->setValue('name', ':name')->setParameter('name', 'test_name2')
+                ->setValue('value', ':value')->setParameter('value', 'test_value')
+                ->execute()
+            ;
         } catch (DbLayerException $e) {
         }
         $I->assertNotNull($e);
@@ -327,5 +313,18 @@ class DbLayerCest
         $I->assertFalse($this->dbLayer->foreignKeyExists('articles', 'fk_user'));
         $this->dbLayer->addForeignKey('articles', 'fk_user', ['user_id'], 'users', ['id'], 'SET NULL');
         $I->assertTrue($this->dbLayer->foreignKeyExists('articles', 'fk_user'));
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function getAllConfigByName(string $name): array
+    {
+        $data = $this->dbLayer->select('*')
+            ->from('config')
+            ->where('name = :name')->setParameter('name', $name)
+            ->execute()->fetchAssocAll()
+        ;
+        return $data;
     }
 }

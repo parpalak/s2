@@ -269,24 +269,18 @@ class Manifest implements ManifestInterface
         }
 
         // Add extension options to the config table
-        $s2_blog_config = [
+        $config = [
             'S2_BLOG_URL'   => '/blog',
             'S2_BLOG_TITLE' => 'My blog',
         ];
 
-        foreach ($s2_blog_config as $conf_name => $conf_value) {
-            if (\defined($conf_name)) {
-                // TODO implement insert ignore
-                continue;
-            }
-
-            $query = [
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'' . $conf_name . '\', \'' . $conf_value . '\''
-            ];
-
-            $dbLayer->buildAndQuery($query);
+        foreach ($config as $confName => $confValue) {
+            $dbLayer->insert('config')
+                ->setValue('name', ':name')->setParameter('name', $confName)
+                ->setValue('value', ':value')->setParameter('value', $confValue)
+                ->onConflictDoNothing('name')
+                ->execute()
+            ;
         }
 
         // User permissions
@@ -301,25 +295,21 @@ class Manifest implements ManifestInterface
 
         if ($currentVersion !== null && version_compare($currentVersion, '2.0a1', '<')) {
             $dbLayer->alterField('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', true);
-            $dbLayer->buildAndQuery([
-                'UPDATE' => 's2_blog_posts',
-                'SET'    => 'user_id = NULL',
-                'WHERE'  => 'user_id = 0'
-            ]);
+            $dbLayer->update('s2_blog_posts')
+                ->set('user_id', 'NULL')
+                ->where('user_id = 0')
+                ->execute()
+            ;
         }
 
         if ($currentVersion !== null && version_compare($currentVersion, '2.0a2', '<')) {
             $dbLayer->dropIndex('s2_blog_posts', 'create_time_idx');
-            $result  = $dbLayer->buildAndQuery([
-                'SELECT' => 'id',
-                'FROM'   => 'users',
-            ]);
-            $existingUsers = $dbLayer->fetchColumn($result);
-            $dbLayer->buildAndQuery([
-                'UPDATE' => 's2_blog_posts',
-                'SET'    => 'user_id = NULL',
-                'WHERE'  => 'user_id NOT IN (' . implode(',', $existingUsers) . ')',
-            ]);
+            $existingUsers = $dbLayer->select('id')->from('users')->execute()->fetchColumn();
+            $dbLayer->update('s2_blog_posts')
+                ->set('user_id', 'NULL')
+                ->where('user_id NOT IN (' . implode(',', array_fill(0, \count($existingUsers), '?')) . ')')
+                ->execute($existingUsers)
+            ;
             $dbLayer->addForeignKey('s2_blog_posts', 'fk_user', ['user_id'], 'users', ['id'], 'SET NULL');
 
             $dbLayer->alterField('s2_blog_comments', 'post_id', 'INT(10) UNSIGNED', false);
@@ -342,10 +332,11 @@ class Manifest implements ManifestInterface
     public function uninstall(DbLayer $dbLayer, Container $container): void
     {
         if ($dbLayer->tableExists('config')) {
-            $dbLayer->buildAndQuery([
-                'DELETE' => 'config',
-                'WHERE'  => 'name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\')',
-            ]);
+            $dbLayer
+                ->delete('config')
+                ->where('name in (\'S2_BLOG_URL\', \'S2_BLOG_TITLE\')')
+                ->execute()
+            ;
         }
 
         $dbLayer->dropTable('s2_blog_post_tag');

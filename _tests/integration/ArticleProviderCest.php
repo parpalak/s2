@@ -36,32 +36,47 @@ class ArticleProviderCest
         // Main page
         $id1 = $this->getChildId($id0);
 
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'parent_id, title, create_time, modify_time, published, template, url',
-            'INTO'   => 'articles',
-            'VALUES' => "$id1, 'level1', 0, 1, 1, '', 'level1'"
-        ]);
+        $qb = $this->dbLayer
+            ->insert('articles')
+            ->setValue('parent_id', ':parent_id')->setParameter('parent_id', $id1)
+            ->setValue('title', ':title')->setParameter('title', 'level1')
+            ->setValue('create_time', '0')
+            ->setValue('modify_time', '1')
+            ->setValue('published', ':published')->setParameter('published', 1)
+            ->setValue('template', ':template')->setParameter('template', '')
+            ->setValue('url', ':url')->setParameter('url', 'level1')
+        ;
+
+        $qb->execute();
+
         $id2 = $this->getChildId($id1);
 
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'parent_id, title, create_time, modify_time, published, template, url',
-            'INTO'   => 'articles',
-            'VALUES' => "$id2, 'level2', 0, 1, 1, '', 'level2'"
-        ]);
+        $qb
+            ->setParameter('parent_id', $id2)
+            ->setParameter('title', 'level2')
+            ->setParameter('url', 'level2')
+            ->setParameter('published', 1)
+            ->execute()
+        ;
+
         $id3 = $this->getChildId($id2);
 
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'parent_id, title, create_time, modify_time, published, template, url',
-            'INTO'   => 'articles',
-            'VALUES' => "$id3, 'level3', 0, 1, 0, '', 'level3'"
-        ]);
+        $qb
+            ->setParameter('parent_id', $id3)
+            ->setParameter('title', 'level3')
+            ->setParameter('url', 'level3')
+            ->setParameter('published', 0)
+            ->execute()
+        ;
         $id4 = $this->getChildId($id3);
 
-        $this->dbLayer->buildAndQuery([
-            'INSERT' => 'parent_id, title, create_time, modify_time, published, template, url',
-            'INTO'   => 'articles',
-            'VALUES' => "$id4, 'level4', 0, 1, 1, '', 'level4'"
-        ]);
+        $qb
+            ->setParameter('parent_id', $id4)
+            ->setParameter('title', 'level4')
+            ->setParameter('url', 'level4')
+            ->setParameter('published', 1)
+            ->execute()
+        ;
         $id5 = $this->getChildId($id4);
 
         $I->assertEquals('', $this->articleProvider->pathFromId($id0));
@@ -84,12 +99,13 @@ class ArticleProviderCest
      */
     private function getChildId(int $parentId): int
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id',
-            'FROM'   => 'articles',
-            'WHERE'  => 'parent_id = :id'
-        ], [':id' => $parentId]);
+        $result = $this->dbLayer
+            ->select('id')
+            ->from('articles')
+            ->where('parent_id = :id')->setParameter('id', $parentId)
+            ->execute()
+        ;
 
-        return $this->dbLayer->result($result);
+        return $result->result();
     }
 }
