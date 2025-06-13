@@ -11,6 +11,7 @@ namespace S2\Cms\Model;
 
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\SchemaBuilderInterface;
 
 class MigrationManager
 {
@@ -123,23 +124,14 @@ class MigrationManager
         }
 
         if ($currentRevision < 15) {
-            $this->dbLayer->createTable('queue', array(
-                'FIELDS'      => array(
-                    'id'      => array(
-                        'datatype'   => 'VARCHAR(80)',
-                        'allow_null' => false,
-                    ),
-                    'code'    => array(
-                        'datatype'   => 'VARCHAR(80)',
-                        'allow_null' => false
-                    ),
-                    'payload' => array(
-                        'datatype'   => 'TEXT',
-                        'allow_null' => false
-                    ),
-                ),
-                'PRIMARY KEY' => array('id', 'code')
-            ));
+            $this->dbLayer->createTable('queue', function (SchemaBuilderInterface $table) {
+                $table
+                    ->addString('id', 80, default: null)
+                    ->addString('code', 80, default: null)
+                    ->addText('payload', nullable: false)
+                    ->setPrimaryKey(['id', 'code'])
+                ;
+            });
         }
 
         if ($currentRevision < 16 && $this->dbType === 'mysql') {
@@ -245,31 +237,21 @@ class MigrationManager
         }
 
         if ($currentRevision < 21) {
-            $this->dbLayer->createTable('user_settings', [
-                'FIELDS'       => [
-                    'user_id' => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false
-                    ],
-                    'name'    => [
-                        'datatype'   => 'VARCHAR(191)',
-                        'allow_null' => false
-                    ],
-                    'value'   => [
-                        'datatype'   => 'TEXT',
-                        'allow_null' => false
-                    ],
-                ],
-                'PRIMARY KEY'  => ['user_id', 'name'],
-                'FOREIGN KEYS' => [
-                    'fk_user' => [
-                        'columns'           => ['user_id'],
-                        'reference_table'   => 'users',
-                        'reference_columns' => ['id'],
-                        'on_delete'         => 'CASCADE',
-                    ],
-                ]
-            ]);
+            $this->dbLayer->createTable('user_settings', function (SchemaBuilderInterface $table) {
+                $table
+                    ->addInteger('user_id', true, default: null)
+                    ->addString('name', 191, default: null)
+                    ->addText('value', false)
+                    ->setPrimaryKey(['user_id', 'name'])
+                    ->addForeignKey(
+                        'fk_user',
+                        ['user_id'],
+                        'users',
+                        ['id'],
+                        'CASCADE',
+                    )
+                ;
+            });
         }
 
         if ($currentRevision < 22) {

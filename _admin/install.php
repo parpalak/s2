@@ -771,6 +771,8 @@ $s2_db->insert('articles')
     ->setValue('published', '1')
     ->setValue('template', "'site.php'")
     ->setValue('url', "'section1'")
+    ->setValue('excerpt', "''")
+    ->setValue('pagetext', "''")
     ->execute()
 ;
 $s2_db

@@ -18,6 +18,7 @@ use S2\Cms\Extensions\ManifestTrait;
 use S2\Cms\Framework\Container;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\SchemaBuilderInterface;
 
 class Manifest implements ManifestInterface
 {
@@ -55,85 +56,34 @@ class Manifest implements ManifestInterface
     {
         // Setup posts table
         if (!$dbLayer->tableExists('s2_blog_posts')) {
-            $schema = [
-                'FIELDS'       => [
-                    'id'          => [
-                        'datatype'   => 'SERIAL',
-                        'allow_null' => false
-                    ],
-                    'create_time' => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'modify_time' => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'revision'    => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                        'default'    => '1'
-                    ],
-                    'title'       => [
-                        'datatype'   => 'VARCHAR(255)',
-                        'allow_null' => false,
-                        'default'    => '\'\''
-                    ],
-                    'text'        => [
-                        'datatype'   => 'LONGTEXT',
-                        'allow_null' => true
-                    ],
-                    'published'   => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'favorite'    => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'commented'   => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '1'
-                    ],
-                    'label'       => [
-                        'datatype'   => 'VARCHAR(255)',
-                        'allow_null' => false,
-                        'default'    => '\'\''
-                    ],
-                    'url'         => [
-                        'datatype'   => 'VARCHAR(255)',
-                        'allow_null' => false,
-                        'default'    => '\'\''
-                    ],
-                    'user_id'     => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => true,
-                    ]
-                ],
-                'PRIMARY KEY'  => ['id'],
-                'FOREIGN KEYS' => array(
-                    'fk_user' => array(
-                        'columns'           => ['user_id'],
-                        'reference_table'   => 'users',
-                        'reference_columns' => ['id'],
-                        'on_delete'         => 'SET NULL',
+            $dbLayer->createTable('s2_blog_posts', function (SchemaBuilderInterface $table) {
+                $table
+                    ->addIdColumn()
+                    ->addInteger('create_time', true)
+                    ->addInteger('modify_time', true)
+                    ->addInteger('revision', true, default: 1)
+                    ->addString('title', 255)
+                    ->addLongText('text', nullable: false)
+                    ->addBoolean('published')
+                    ->addBoolean('favorite')
+                    ->addBoolean('commented', default: true)
+                    ->addString('label', 255)
+                    ->addString('url', 255)
+                    ->addInteger('user_id', true, nullable: true, default: null)
+                    ->addForeignKey(
+                        'fk_user',
+                        ['user_id'],
+                        'users',
+                        ['id'],
+                        'SET NULL',
                     )
-                ),
-                'INDEXES'      => [
-                    'url_idx'                   => ['url'],
-                    'create_time_published_idx' => ['create_time', 'published'],
-                    'id_published_idx'          => ['id', 'published'],
-                    'favorite_idx'              => ['favorite'],
-                    'label_idx'                 => ['label'],
-                ]
-            ];
-
-            $dbLayer->createTable('s2_blog_posts', $schema);
+                    ->addIndex('url_idx', ['url'])
+                    ->addIndex('create_time_published_idx', ['create_time', 'published'])
+                    ->addIndex('id_published_idx', ['id', 'published'])
+                    ->addIndex('favorite_idx', ['favorite'])
+                    ->addIndex('label_idx', ['label'])
+                ;
+            });
         } else {
             $dbLayer->addField('s2_blog_posts', 'revision', 'INT(10) UNSIGNED', false, '1', 'modify_time');
             $dbLayer->addField('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', false, '0', 'url');
@@ -146,82 +96,31 @@ class Manifest implements ManifestInterface
 
         // Setup blog comments table
         if (!$dbLayer->tableExists('s2_blog_comments')) {
-            $schema = [
-                'FIELDS'       => [
-                    'id'         => [
-                        'datatype'   => 'SERIAL',
-                        'allow_null' => false
-                    ],
-                    'post_id'    => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                    ],
-                    'time'       => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'ip'         => [
-                        'datatype'   => 'VARCHAR(39)',
-                        'allow_null' => false,
-                        'default'    => '\'\''
-                    ],
-                    'nick'       => [
-                        'datatype'   => 'VARCHAR(50)',
-                        'allow_null' => false,
-                        'default'    => '\'\''
-                    ],
-                    'email'      => [
-                        'datatype'   => 'VARCHAR(80)',
-                        'allow_null' => false,
-                        'default'    => '\'\''
-                    ],
-                    'show_email' => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'subscribed' => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'shown'      => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '1'
-                    ],
-                    'sent'       => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '1'
-                    ],
-                    'good'       => [
-                        'datatype'   => 'TINYINT(1)',
-                        'allow_null' => false,
-                        'default'    => '0'
-                    ],
-                    'text'       => [
-                        'datatype'   => 'TEXT',
-                        'allow_null' => true
-                    ],
-                ],
-                'PRIMARY KEY'  => ['id'],
-                'FOREIGN KEYS' => array(
-                    'fk_post' => array(
-                        'columns'           => ['post_id'],
-                        'reference_table'   => 's2_blog_posts',
-                        'reference_columns' => ['id'],
-                        'on_delete'         => 'CASCADE',
+            $dbLayer->createTable('s2_blog_comments', function (SchemaBuilderInterface $table) {
+                $table
+                    ->addIdColumn()
+                    ->addInteger('post_id', true, default: null)
+                    ->addInteger('time', true)
+                    ->addString('ip', 39)
+                    ->addString('nick', 50)
+                    ->addString('email', 80)
+                    ->addBoolean('show_email')
+                    ->addBoolean('subscribed')
+                    ->addBoolean('shown', default: true)
+                    ->addBoolean('sent', default: true)
+                    ->addBoolean('good')
+                    ->addText('text', nullable: false)
+                    ->addForeignKey(
+                        'fk_post',
+                        ['post_id'],
+                        's2_blog_posts',
+                        ['id'],
+                        'CASCADE',
                     )
-                ),
-                'INDEXES'      => [
-                    'sort_idx'    => ['post_id', 'time', 'shown'],
-                    'time_idx'    => ['time']
-                ]
-            ];
-
-            $dbLayer->createTable('s2_blog_comments', $schema);
+                    ->addIndex('sort_idx', ['post_id', 'time', 'shown'])
+                    ->addIndex('time_idx', ['time'])
+                ;
+            });
         }
 
         // For old installations
@@ -229,43 +128,29 @@ class Manifest implements ManifestInterface
 
         // Setup table to link posts and tags
         if (!$dbLayer->tableExists('s2_blog_post_tag')) {
-            $schema = [
-                'FIELDS'       => [
-                    'id'      => [
-                        'datatype'   => 'SERIAL',
-                        'allow_null' => false
-                    ],
-                    'post_id' => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                    ],
-                    'tag_id'  => [
-                        'datatype'   => 'INT(10) UNSIGNED',
-                        'allow_null' => false,
-                    ],
-                ],
-                'PRIMARY KEY'  => ['id'],
-                'FOREIGN KEYS' => array(
-                    'fk_post' => array(
-                        'columns'           => ['post_id'],
-                        'reference_table'   => 's2_blog_posts',
-                        'reference_columns' => ['id'],
-                        'on_delete'         => 'CASCADE',
-                    ),
-                    'fk_tag'  => array(
-                        'columns'           => ['tag_id'],
-                        'reference_table'   => 'tags',
-                        'reference_columns' => ['id'],
-                        'on_delete'         => 'CASCADE',
-                    ),
-                ),
-                'INDEXES'      => [
-                    'post_id_idx' => ['post_id'],
-                    'tag_id_idx'  => ['tag_id'],
-                ],
-            ];
-
-            $dbLayer->createTable('s2_blog_post_tag', $schema);
+            $dbLayer->createTable('s2_blog_post_tag', function (SchemaBuilderInterface $table) {
+                $table
+                    ->addIdColumn()
+                    ->addInteger('post_id', true, default: null)
+                    ->addInteger('tag_id', true, default: null)
+                    ->addForeignKey(
+                        'fk_post',
+                        ['post_id'],
+                        's2_blog_posts',
+                        ['id'],
+                        'CASCADE',
+                    )
+                    ->addForeignKey(
+                        'fk_tag',
+                        ['tag_id'],
+                        'tags',
+                        ['id'],
+                        'CASCADE',
+                    )
+                    ->addIndex('post_id_idx', ['post_id'])
+                    ->addIndex('tag_id_idx', ['tag_id'])
+                ;
+            });
         }
 
         // Add extension options to the config table

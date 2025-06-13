@@ -12,6 +12,7 @@ namespace S2\Cms\Model;
 use S2\Cms\AdminYard\UserSettingStorage;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\SchemaBuilderInterface;
 
 readonly class Installer
 {
@@ -25,474 +26,185 @@ readonly class Installer
     public function createTables(): void
     {
         // Create all tables
-        $this->dbLayer->createTable('config', array(
-            'FIELDS'      => array(
-                'name'  => array(
-                    'datatype'   => 'VARCHAR(191)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'value' => array(
-                    'datatype'   => 'TEXT',
-                    'allow_null' => true
+        $this->dbLayer->createTable('config', function (SchemaBuilderInterface $table) {
+            $table
+                ->addString('name', 191)
+                ->addText('value', nullable: false)
+                ->setPrimaryKey(['name'])
+            ;
+        });
+
+        $this->dbLayer->createTable('extensions', function (SchemaBuilderInterface $table) {
+            $table
+                ->addString('id', 150)
+                ->addString('title', 255)
+                ->addString('version', 25)
+                ->addText('description')
+                ->addString('author', 50)
+                ->addText('uninstall_note')
+                ->addBoolean('disabled')
+                ->addString('dependencies', 255)
+                ->setPrimaryKey(['id'])
+            ;
+        });
+
+        $this->dbLayer->createTable('users', function (SchemaBuilderInterface $table) {
+            $table
+                ->addIdColumn()
+                ->addString('login', 191)
+                ->addString('password', 40)
+                ->addString('email', 80)
+                ->addString('name', 80)
+                ->addBoolean('view')
+                ->addBoolean('view_hidden')
+                ->addBoolean('hide_comments')
+                ->addBoolean('edit_comments')
+                ->addBoolean('create_articles')
+                ->addBoolean('edit_site')
+                ->addBoolean('edit_users')
+                ->addUniqueIndex('login_idx', ['login'])
+            ;
+        });
+
+        $this->dbLayer->createTable('articles', function (SchemaBuilderInterface $table) {
+            $table
+                ->addIdColumn()
+                ->addInteger('parent_id', true) // NOTE think about adding a foreign key here. What value must be set in parent_id for root article? Null? Now it is 0.
+                ->addString('meta_keys', 255)
+                ->addString('meta_desc', 255)
+                ->addString('title', 255)
+                ->addText('excerpt', nullable: false)
+                ->addLongText('pagetext', nullable: false)
+                ->addInteger('create_time', true)
+                ->addInteger('modify_time', true)
+                ->addInteger('revision', true, false, 1)
+                ->addInteger('priority', true)
+                ->addBoolean('published')
+                ->addBoolean('favorite')
+                ->addBoolean('commented', false, true)
+                ->addString('url', 255)
+                ->addString('template', 30)
+                ->addInteger('user_id', true, nullable: true, default: null)
+                ->addForeignKey(
+                    'fk_user',
+                    ['user_id'],
+                    'users',
+                    ['id'],
+                    'SET NULL',
                 )
-            ),
-            'PRIMARY KEY' => array('name')
-        ));
+                ->addIndex('url_idx', ['url'])
+                ->addIndex('create_time_idx', ['create_time'])
+                ->addIndex('children_idx', ['parent_id', 'published'])
+                ->addIndex('template_idx', ['template'])
+            ;
+        });
 
-        $this->dbLayer->createTable('extensions', array(
-            'FIELDS'      => array(
-                'id'             => array(
-                    'datatype'   => 'VARCHAR(150)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'title'          => array(
-                    'datatype'   => 'VARCHAR(255)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'version'        => array(
-                    'datatype'   => 'VARCHAR(25)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'description'    => array(
-                    'datatype'   => 'TEXT',
-                    'allow_null' => true
-                ),
-                'author'         => array(
-                    'datatype'   => 'VARCHAR(50)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'uninstall_note' => array(
-                    'datatype'   => 'TEXT',
-                    'allow_null' => true
-                ),
-                'disabled'       => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'dependencies'   => array(
-                    'datatype'   => 'VARCHAR(255)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
+        $this->dbLayer->createTable('art_comments', function (SchemaBuilderInterface $table) {
+            $table
+                ->addIdColumn()
+                ->addInteger('article_id', true, false, null)
+                ->addInteger('time', true)
+                ->addString('ip', 39)
+                ->addString('nick', 50)
+                ->addString('email', 80)
+                ->addBoolean('show_email')
+                ->addBoolean('subscribed')
+                ->addBoolean('shown', false, true)
+                ->addBoolean('sent', false, true)
+                ->addBoolean('good')
+                ->addText('text', nullable: false)
+                ->addForeignKey(
+                    'fk_article',
+                    ['article_id'],
+                    'articles',
+                    ['id'],
+                    'CASCADE'
                 )
-            ),
-            'PRIMARY KEY' => array('id')
-        ));
+                ->addIndex('sort_idx', ['article_id', 'time', 'shown'])
+                ->addIndex('time_idx', ['time'])
+            ;
+        });
 
-        $this->dbLayer->createTable('users', array(
-            'FIELDS'      => array(
-                'id'              => array(
-                    'datatype'   => 'SERIAL',
-                    'allow_null' => false
-                ),
-                'login'           => array(
-                    'datatype'   => 'VARCHAR(191)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'password'        => array(
-                    'datatype'   => 'VARCHAR(40)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'email'           => array(
-                    'datatype'   => 'VARCHAR(80)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'name'            => array(
-                    'datatype'   => 'VARCHAR(80)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'view'            => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'view_hidden'     => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'hide_comments'   => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'edit_comments'   => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'create_articles' => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'edit_site'       => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'edit_users'      => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-            ),
-            'PRIMARY KEY' => array('id'),
-            'UNIQUE KEYS' => array(
-                'login_idx' => array('login'),
-            )
-        ));
+        $this->dbLayer->createTable('tags', function (SchemaBuilderInterface $table) {
+            $table
+                ->addIdColumn()
+                ->addString('name', 191)
+                ->addText('description', nullable: false)
+                ->addInteger('modify_time', true)
+                ->addString('url', 191)
+                ->addUniqueIndex('name_idx', ['name'])
+                ->addUniqueIndex('url_idx', ['url'])
+            ;
+        });
 
-        $this->dbLayer->createTable('articles', array(
-            'FIELDS'       => array(
-                'id'          => array(
-                    'datatype'   => 'SERIAL',
-                    'allow_null' => false
-                ),
-                'parent_id'   => array( // NOTE think about adding a foreign key here. What value must be set in parent_id for root article? Null? Now it is 0.
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'meta_keys'   => array(
-                    'datatype'   => 'VARCHAR(255)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'meta_desc'   => array(
-                    'datatype'   => 'VARCHAR(255)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'title'       => array(
-                    'datatype'   => 'VARCHAR(255)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'excerpt'     => array(
-                    'datatype'   => 'TEXT',
-                    'allow_null' => true
-                ),
-                'pagetext'    => array(
-                    'datatype'   => 'LONGTEXT',
-                    'allow_null' => true
-                ),
-                'create_time' => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'modify_time' => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'revision'    => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '1'
-                ),
-                'priority'    => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'published'   => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'favorite'    => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'commented'   => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '1'
-                ),
-                'url'         => array(
-                    'datatype'   => 'VARCHAR(255)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'template'    => array(
-                    'datatype'   => 'VARCHAR(30)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'user_id'     => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => true,
+        $this->dbLayer->createTable('article_tag', function (SchemaBuilderInterface $table) {
+            $table
+                ->addIdColumn()
+                ->addInteger('article_id', true, false, null)
+                ->addInteger('tag_id', true, false, null)
+                ->addForeignKey(
+                    'fk_article',
+                    ['article_id'],
+                    'articles',
+                    ['id'],
+                    'CASCADE',
                 )
-            ),
-            'PRIMARY KEY'  => array('id'),
-            'FOREIGN KEYS' => array(
-                'fk_user' => array(
-                    'columns'           => ['user_id'],
-                    'reference_table'   => 'users',
-                    'reference_columns' => ['id'],
-                    'on_delete'         => 'SET NULL',
+                ->addForeignKey(
+                    'fk_tag',
+                    ['tag_id'],
+                    'tags',
+                    ['id'],
+                    'CASCADE',
                 )
-            ),
-            'INDEXES'      => array(
-                'url_idx'         => array('url'),
-                'create_time_idx' => array('create_time'),
-                'children_idx'    => array('parent_id', 'published'),
-                'template_idx'    => array('template')
-            )
-        ));
+                ->addIndex('article_id_idx', ['article_id'])
+                ->addIndex('tag_id_idx', ['tag_id'])
+            ;
+        });
 
-        $this->dbLayer->createTable('art_comments', array(
-            'FIELDS'       => array(
-                'id'         => array(
-                    'datatype'   => 'SERIAL',
-                    'allow_null' => false
-                ),
-                'article_id' => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                ),
-                'time'       => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'ip'         => array(
-                    'datatype'   => 'VARCHAR(39)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'nick'       => array(
-                    'datatype'   => 'VARCHAR(50)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'email'      => array(
-                    'datatype'   => 'VARCHAR(80)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'show_email' => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'subscribed' => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'shown'      => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '1'
-                ),
-                'sent'       => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '1'
-                ),
-                'good'       => array(
-                    'datatype'   => 'TINYINT(1)',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'text'       => array(
-                    'datatype'   => 'TEXT',
-                    'allow_null' => true
-                ),
-            ),
-            'PRIMARY KEY'  => array('id'),
-            'FOREIGN KEYS' => array(
-                'fk_article' => array(
-                    'columns'           => ['article_id'],
-                    'reference_table'   => 'articles',
-                    'reference_columns' => ['id'],
-                    'on_delete'         => 'CASCADE',
+        $this->dbLayer->createTable('users_online', function (SchemaBuilderInterface $table) {
+            $table->addString('challenge', 32)
+                ->addString('salt', 32)
+                ->addInteger('time', true)
+                ->addString('login', 191, true, null)
+                ->addString('ip', 39)
+                ->addString('ua', 200)
+                ->addString('comment_cookie', 32)
+                ->addForeignKey(
+                    'fk_user',
+                    ['login'],
+                    'users',
+                    ['login'],
+                    'CASCADE',
                 )
-            ),
-            'INDEXES'      => array(
-                'sort_idx' => array('article_id', 'time', 'shown'),
-                'time_idx' => array('time')
-            )
-        ));
+                ->addIndex('login_idx', ['login'])
+                ->addUniqueIndex('challenge_idx', ['challenge'])
+            ;
+        });
 
-        $this->dbLayer->createTable('tags', array(
-            'FIELDS'      => array(
-                'id'          => array(
-                    'datatype'   => 'SERIAL',
-                    'allow_null' => false
-                ),
-                'name'        => array(
-                    'datatype'   => 'VARCHAR(191)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'description' => array(
-                    'datatype'   => 'TEXT',
-                    'allow_null' => true
-                ),
-                'modify_time' => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'url'         => array(
-                    'datatype'   => 'VARCHAR(191)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-            ),
-            'PRIMARY KEY' => array('id'),
-            'UNIQUE KEYS' => array(
-                'name_idx' => array('name'),
-                'url_idx'  => array('url')
-            )
-        ));
-
-        $this->dbLayer->createTable('article_tag', array(
-            'FIELDS'       => array(
-                'id'         => array(
-                    'datatype'   => 'SERIAL',
-                    'allow_null' => false
-                ),
-                'article_id' => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                ),
-                'tag_id'     => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                ),
-            ),
-            'PRIMARY KEY'  => array('id'),
-            'FOREIGN KEYS' => array(
-                'fk_article' => array(
-                    'columns'           => ['article_id'],
-                    'reference_table'   => 'articles',
-                    'reference_columns' => ['id'],
-                    'on_delete'         => 'CASCADE',
-                ),
-                'fk_tag'     => array(
-                    'columns'           => ['tag_id'],
-                    'reference_table'   => 'tags',
-                    'reference_columns' => ['id'],
-                    'on_delete'         => 'CASCADE',
-                ),
-            ),
-            'INDEXES'      => array(
-                'article_id_idx' => array('article_id'),
-                'tag_id_idx'     => array('tag_id'),
-            ),
-        ));
-
-        $this->dbLayer->createTable('users_online', array(
-            'FIELDS'       => array(
-                'challenge'      => array(
-                    'datatype'   => 'VARCHAR(32)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'salt'           => array(
-                    'datatype'   => 'VARCHAR(32)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'time'           => array(
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false,
-                    'default'    => '0'
-                ),
-                'login'          => array(
-                    'datatype'   => 'VARCHAR(191)',
-                    'allow_null' => true
-                ),
-                'ip'             => array(
-                    'datatype'   => 'VARCHAR(39)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'ua'             => array(
-                    'datatype'   => 'VARCHAR(200)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-                'comment_cookie' => array(
-                    'datatype'   => 'VARCHAR(32)',
-                    'allow_null' => false,
-                    'default'    => '\'\''
-                ),
-            ),
-            'FOREIGN KEYS' => array(
-                'fk_user' => array(
-                    'columns'           => ['login'],
-                    'reference_table'   => 'users',
-                    'reference_columns' => ['login'],
-                    'on_delete'         => 'CASCADE',
+        $this->dbLayer->createTable(UserSettingStorage::TABLE_NAME, function (SchemaBuilderInterface $table) {
+            $table
+                ->addInteger('user_id', true, default: null)
+                ->addString('name', 191, default: null)
+                ->addText('value', nullable: false)
+                ->setPrimaryKey(['user_id', 'name'])
+                ->addForeignKey(
+                    'fk_user',
+                    ['user_id'],
+                    'users',
+                    ['id'],
+                    'CASCADE',
                 )
-            ),
-            'INDEXES'      => array(
-                'login_idx' => array('login'),
-            ),
-            'UNIQUE KEYS'  => array(
-                'challenge_idx' => array('challenge'),
-            )
-        ));
+            ;
+        });
 
-        $this->dbLayer->createTable(UserSettingStorage::TABLE_NAME, [
-            'FIELDS'       => [
-                'user_id' => [
-                    'datatype'   => 'INT(10) UNSIGNED',
-                    'allow_null' => false
-                ],
-                'name'    => [
-                    'datatype'   => 'VARCHAR(191)',
-                    'allow_null' => false
-                ],
-                'value'   => [
-                    'datatype'   => 'TEXT',
-                    'allow_null' => false
-                ],
-            ],
-            'PRIMARY KEY'  => ['user_id', 'name'],
-            'FOREIGN KEYS' => [
-                'fk_user' => [
-                    'columns'           => ['user_id'],
-                    'reference_table'   => 'users',
-                    'reference_columns' => ['id'],
-                    'on_delete'         => 'CASCADE',
-                ],
-            ]
-        ]);
-
-        $this->dbLayer->createTable('queue', array(
-            'FIELDS'      => array(
-                'id'      => array(
-                    'datatype'   => 'VARCHAR(80)',
-                    'allow_null' => false,
-                ),
-                'code'    => array(
-                    'datatype'   => 'VARCHAR(80)',
-                    'allow_null' => false
-                ),
-                'payload' => array(
-                    'datatype'   => 'TEXT',
-                    'allow_null' => false
-                ),
-            ),
-            'PRIMARY KEY' => array('id', 'code')
-        ));
+        $this->dbLayer->createTable('queue', function (SchemaBuilderInterface $table) {
+            $table
+                ->addString('id', 80, default: null)
+                ->addString('code', 80, default: null)
+                ->addText('payload', nullable: false)
+                ->setPrimaryKey(['id', 'code'])
+            ;
+        });
     }
 
     /**
@@ -564,6 +276,8 @@ readonly class Installer
             ->setValue('modify_time', ':modify_time')->setParameter('modify_time', $time)
             ->setValue('published', '1')
             ->setValue('template', ':template')->setParameter('template', 'mainpage.php')
+            ->setValue('excerpt', "''")
+            ->setValue('pagetext', "''")
             ->execute()
         ;
     }
