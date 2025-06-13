@@ -1,11 +1,11 @@
-<?php
+<?php /** @noinspection SqlDialectInspection */
 /**
  * A database abstract layer class.
  * Contains default implementation for MySQL database.
  *
- * @copyright (C) 2009-2023 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
- * @license       http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package       S2
+ * @copyright 2009-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 declare(strict_types=1);
@@ -26,9 +26,6 @@ use S2\Cms\Pdo\QueryBuilder\UpsertMysqlCompiler;
 class DbLayer implements QueryBuilder\QueryExecutorInterface
 {
     protected int $transactionLevel = 0;
-    protected const DATATYPE_TRANSFORMATIONS = [
-        '/^SERIAL$/' => 'INT(10) UNSIGNED AUTO_INCREMENT'
-    ];
 
     public function __construct(
         protected \PDO   $pdo,
@@ -274,6 +271,7 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         string                $tableName,
         string                $fieldName,
         string                $fieldType,
+        ?int                  $fieldLength,
         bool                  $allowNull,
         string|int|float|null $defaultValue = null,
         ?string               $afterField = null
@@ -282,7 +280,7 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
             return;
         }
 
-        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
+        $fieldType = self::convertType($fieldType, $fieldLength);
 
         $this->query(
             \sprintf("ALTER TABLE %s ADD %s %s%s%s%s",
@@ -308,13 +306,20 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
-    {
+    public function alterField(
+        string                $tableName,
+        string                $fieldName,
+        string                $fieldType,
+        ?int                  $fieldLength,
+        bool                  $allowNull,
+        string|int|float|null $defaultValue = null,
+        ?string               $afterField = null
+    ): void {
         if (!$this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
-        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
+        $fieldType = self::convertType($fieldType, $fieldLength);
 
         $this->query(
             \sprintf("ALTER TABLE %s MODIFY %s %s%s%s%s",
@@ -460,9 +465,9 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     protected static function convertType(string $type, ?int $length): string
     {
         return match ($type) {
-            SchemaBuilderInterface::TYPE_SERIAL => 'INT(11) UNSIGNED AUTO_INCREMENT',
-            SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER => 'INT(11) UNSIGNED',
-            SchemaBuilderInterface::TYPE_INTEGER => 'INT(10)',
+            SchemaBuilderInterface::TYPE_SERIAL => 'INT(10) UNSIGNED AUTO_INCREMENT',
+            SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER => 'INT(10) UNSIGNED',
+            SchemaBuilderInterface::TYPE_INTEGER => 'INT(11)',
             SchemaBuilderInterface::TYPE_BOOLEAN => 'TINYINT(1)',
             SchemaBuilderInterface::TYPE_LONGTEXT => 'LONGTEXT',
             SchemaBuilderInterface::TYPE_TEXT => 'TEXT',

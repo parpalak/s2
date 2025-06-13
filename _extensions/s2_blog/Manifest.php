@@ -85,8 +85,8 @@ class Manifest implements ManifestInterface
                 ;
             });
         } else {
-            $dbLayer->addField('s2_blog_posts', 'revision', 'INT(10) UNSIGNED', false, '1', 'modify_time');
-            $dbLayer->addField('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', false, '0', 'url');
+            $dbLayer->addField('s2_blog_posts', 'revision', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false, '1', 'modify_time');
+            $dbLayer->addField('s2_blog_posts', 'user_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false, '0', 'url');
         }
 
         // For old installations
@@ -174,12 +174,12 @@ class Manifest implements ManifestInterface
         }
 
         // A field in tags table for important tags displaying
-        $dbLayer->addField('tags', 's2_blog_important', 'INT(1)', false, 0);
+        $dbLayer->addField('tags', 's2_blog_important', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, 0);
 
         $dbLayer->addIndex('tags', 's2_blog_important_idx', array('s2_blog_important'));
 
         if ($currentVersion !== null && version_compare($currentVersion, '2.0a1', '<')) {
-            $dbLayer->alterField('s2_blog_posts', 'user_id', 'INT(10) UNSIGNED', true);
+            $dbLayer->alterField('s2_blog_posts', 'user_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, true);
             $dbLayer->update('s2_blog_posts')
                 ->set('user_id', 'NULL')
                 ->where('user_id = 0')
@@ -197,15 +197,15 @@ class Manifest implements ManifestInterface
             ;
             $dbLayer->addForeignKey('s2_blog_posts', 'fk_user', ['user_id'], 'users', ['id'], 'SET NULL');
 
-            $dbLayer->alterField('s2_blog_comments', 'post_id', 'INT(10) UNSIGNED', false);
+            $dbLayer->alterField('s2_blog_comments', 'post_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false);
             $dbLayer->addForeignKey('s2_blog_comments', 'fk_post', ['post_id'], 's2_blog_posts', ['id'], 'CASCADE');
             $dbLayer->dropIndex('s2_blog_comments', 'post_id_idx');
 
             $dbLayer->query('DELETE FROM ' . $dbLayer->getPrefix() . 's2_blog_post_tag WHERE post_id NOT IN (SELECT id FROM ' . $dbLayer->getPrefix() . 's2_blog_posts)');
             $dbLayer->query('DELETE FROM ' . $dbLayer->getPrefix() . 's2_blog_post_tag WHERE tag_id NOT IN (SELECT id FROM ' . $dbLayer->getPrefix() . 'tags)');
 
-            $dbLayer->alterField('s2_blog_post_tag', 'post_id', 'INT(10) UNSIGNED', false);
-            $dbLayer->alterField('s2_blog_post_tag', 'tag_id', 'INT(10) UNSIGNED', false);
+            $dbLayer->alterField('s2_blog_post_tag', 'post_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false);
+            $dbLayer->alterField('s2_blog_post_tag', 'tag_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false);
             $dbLayer->addForeignKey('s2_blog_post_tag', 'fk_post', ['post_id'], 's2_blog_posts', ['id'], 'CASCADE');
             $dbLayer->addForeignKey('s2_blog_post_tag', 'fk_tag', ['tag_id'], 'tags', ['id'], 'CASCADE');
         }

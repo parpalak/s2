@@ -3,7 +3,7 @@
  * SQLite database layer class.
  *
  * @copyright 2011-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -18,12 +18,6 @@ use S2\Cms\Pdo\QueryBuilder\UpsertSqliteCompiler;
 
 class DbLayerSqlite extends DbLayer
 {
-    protected const DATATYPE_TRANSFORMATIONS = [
-        '/^SERIAL$/'                                                         => 'INTEGER',
-        '/^(TINY|SMALL|MEDIUM|BIG)?INT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i' => 'INTEGER',
-        '/^(TINY|MEDIUM|LONG)?TEXT$/i'                                       => 'TEXT'
-    ];
-
     public function getVersion(): array
     {
         $result  = $this->select('sqlite_version()')->execute();
@@ -196,17 +190,25 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function addField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
-    {
+    public function addField(
+        string                $tableName,
+        string                $fieldName,
+        string                $fieldType,
+        ?int                  $fieldLength,
+        bool                  $allowNull,
+        string|int|float|null $defaultValue = null,
+        ?string               $afterField = null
+    ): void {
         if ($this->fieldExists($tableName, $fieldName)) {
             return;
         }
+
+        $fieldType = self::convertType($fieldType, $fieldLength);
 
         $tempTableName         = $tableName . '_t' . time();
         $preparedTempTableName = $this->prefix . $tempTableName;
 
         $createTable    = $this->getTableInfo($tableName);
-        $fieldType      = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
         $newCreateTable = $createTable
             ->withNewField($fieldName, $fieldType, $allowNull, $defaultValue, $afterField)
             ->withTableName($preparedTempTableName)
@@ -215,13 +217,28 @@ class DbLayerSqlite extends DbLayer
         $this->changeTableStructure($newCreateTable, $createTable);
     }
 
-    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
-    {
+    /**
+     * @throws DbLayerException
+     */
+    public function alterField(
+        string                $tableName,
+        string                $fieldName,
+        string                $fieldType,
+        ?int                  $fieldLength,
+        bool                  $allowNull,
+        string|int|float|null $defaultValue = null,
+        ?string               $afterField = null
+    ): void {
+        if (!$this->fieldExists($tableName, $fieldName)) {
+            return;
+        }
+
+        $fieldType = self::convertType($fieldType, $fieldLength);
+
         $tempTableName         = $tableName . '_t' . time();
         $preparedTempTableName = $this->prefix . $tempTableName;
 
         $createTable    = $this->getTableInfo($tableName);
-        $fieldType      = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
         $newCreateTable = $createTable
             ->withAlteredField($fieldName, $fieldType, $allowNull, $defaultValue, $afterField)
             ->withTableName($preparedTempTableName)

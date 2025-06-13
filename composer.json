@@ -9,7 +9,7 @@
     "name": "s2/cms",
     "description": "Small and fast CMS",
     "minimum-stability": "stable",
-    "license": "GPL",
+    "license": "MIT",
     "authors": [
         {
             "name": "Roman Parpalak",

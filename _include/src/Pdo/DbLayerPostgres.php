@@ -2,8 +2,8 @@
 /**
  * PostgreSQL database layer class.
  *
- * @copyright 2009-2024 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
- * @license   http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @copyright 2009-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -18,15 +18,6 @@ use S2\Cms\Pdo\QueryBuilder\UpsertPgsqlCompiler;
 
 class DbLayerPostgres extends DbLayer
 {
-    protected const DATATYPE_TRANSFORMATIONS = [
-        '/^(TINY|SMALL)INT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i' => 'SMALLINT',
-        '/^(MEDIUM)?INT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i'    => 'INTEGER',
-        '/^BIGINT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i'          => 'BIGINT',
-        '/^(TINY|MEDIUM|LONG)?TEXT$/i'                           => 'TEXT',
-        '/^DOUBLE( )?(\\([0-9,]+\\))?( )?(UNSIGNED)?$/i'         => 'DOUBLE PRECISION',
-        '/^FLOAT( )?(\\([0-9]+\\))?( )?(UNSIGNED)?$/i'           => 'REAL'
-    ];
-
     public function getVersion(): array
     {
         $result = $this->select('version()')->execute();
@@ -155,6 +146,7 @@ class DbLayerPostgres extends DbLayer
         string                $tableName,
         string                $fieldName,
         string                $fieldType,
+        ?int                  $fieldLength,
         bool                  $allowNull,
         string|int|float|null $defaultValue = null,
         ?string               $afterField = null
@@ -163,7 +155,7 @@ class DbLayerPostgres extends DbLayer
             return;
         }
 
-        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
+        $fieldType = self::convertType($fieldType, $fieldLength);
 
         $sql = 'ALTER TABLE ' . $this->prefix . $tableName . ' ADD ' . $fieldName . ' ' . $fieldType;
         if (!$allowNull) {
@@ -184,18 +176,26 @@ class DbLayerPostgres extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function alterField(string $tableName, string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
-    {
+    public function alterField(
+        string                $tableName,
+        string                $fieldName,
+        string                $fieldType,
+        ?int                  $fieldLength,
+        bool                  $allowNull,
+        string|int|float|null $defaultValue = null,
+        ?string               $afterField = null
+    ): void {
         if (!$this->fieldExists($tableName, $fieldName)) {
             return;
         }
 
-        $fieldType = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $fieldType);
+        $fieldType = self::convertType($fieldType, $fieldLength);
 
         $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' TYPE ' . $fieldType);
 
         if ($defaultValue !== null) {
             if (!\is_int($defaultValue) && !\is_float($defaultValue)) {
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 $defaultValue = $this->pdo->quote($defaultValue);
             }
             $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' SET DEFAULT ' . $defaultValue);

@@ -55,9 +55,9 @@ class MigrationManager
         }
 
         if ($currentRevision < 5) {
-            $this->dbLayer->addField('articles', 'user_id', 'INT(10) UNSIGNED', false, '0', 'template');
-            $this->dbLayer->addField('articles', 'revision', 'INT(10) UNSIGNED', false, '1', 'modify_time');
-            $this->dbLayer->addField('users', 'create_articles', 'INT(10) UNSIGNED', false, '0', 'edit_comments');
+            $this->dbLayer->addField('articles', 'user_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false, '0', 'template');
+            $this->dbLayer->addField('articles', 'revision', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false, '1', 'modify_time');
+            $this->dbLayer->addField('users', 'create_articles', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false, '0', 'edit_comments');
 
             $this->dbLayer
                 ->update('users')
@@ -67,7 +67,7 @@ class MigrationManager
         }
 
         if ($currentRevision < 6) {
-            $this->dbLayer->addField('users', 'name', 'VARCHAR(80)', false, '', 'password');
+            $this->dbLayer->addField('users', 'name', SchemaBuilderInterface::TYPE_STRING, 80, false, '', 'password');
         }
 
         if ($currentRevision < 7) {
@@ -75,8 +75,8 @@ class MigrationManager
         }
 
         if ($currentRevision < 8) {
-            $this->dbLayer->addField('users_online', 'ua', 'VARCHAR(200)', false, '', 'login');
-            $this->dbLayer->addField('users_online', 'ip', 'VARCHAR(39)', false, '', 'login');
+            $this->dbLayer->addField('users_online', 'ua', SchemaBuilderInterface::TYPE_STRING, 200, false, '', 'login');
+            $this->dbLayer->addField('users_online', 'ip', SchemaBuilderInterface::TYPE_STRING, 39, false, '', 'login');
             $this->dbLayer->addIndex('users_online', 'login_idx', array('login'));
         }
 
@@ -100,7 +100,7 @@ class MigrationManager
         }
 
         if ($currentRevision < 11) {
-            $this->dbLayer->addField('extensions', 'admin_affected', 'TINYINT(1) UNSIGNED', false, '0', 'author');
+            $this->dbLayer->addField('extensions', 'admin_affected', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, '0', 'author');
         }
 
         if ($currentRevision < 12) {
@@ -112,7 +112,7 @@ class MigrationManager
         }
 
         if ($currentRevision < 13) {
-            $this->dbLayer->addField('users_online', 'comment_cookie', 'VARCHAR(32)', false, '', 'ua');
+            $this->dbLayer->addField('users_online', 'comment_cookie', SchemaBuilderInterface::TYPE_STRING, 32, false, '', 'ua');
         }
 
         if ($currentRevision < 14) {
@@ -176,7 +176,7 @@ class MigrationManager
         }
 
         if ($currentRevision < 19) {
-            $this->dbLayer->alterField('articles', 'user_id', 'INT(10) UNSIGNED', true);
+            $this->dbLayer->alterField('articles', 'user_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, true);
             $this->dbLayer
                 ->update('articles')
                 ->set('user_id', 'NULL')
@@ -209,15 +209,15 @@ class MigrationManager
             $this->dbLayer->addForeignKey('articles', 'fk_user', ['user_id'], 'users', ['id'], 'SET NULL');
 
             $this->dbLayer->dropIndex('art_comments', 'article_id_idx');
-            $this->dbLayer->alterField('art_comments', 'article_id', 'INT(10) UNSIGNED', false);
+            $this->dbLayer->alterField('art_comments', 'article_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false);
             $this->dbLayer->query('DELETE FROM ' . $this->dbLayer->getPrefix() . 'art_comments WHERE article_id NOT IN (SELECT id FROM ' . $this->dbLayer->getPrefix() . 'articles)');
             $this->dbLayer->addForeignKey('art_comments', 'fk_article', ['article_id'], 'articles', ['id'], 'CASCADE');
 
             $this->dbLayer->query('DELETE FROM ' . $this->dbLayer->getPrefix() . 'article_tag WHERE article_id NOT IN (SELECT id FROM ' . $this->dbLayer->getPrefix() . 'articles)');
             $this->dbLayer->query('DELETE FROM ' . $this->dbLayer->getPrefix() . 'article_tag WHERE tag_id NOT IN (SELECT id FROM ' . $this->dbLayer->getPrefix() . 'tags)');
 
-            $this->dbLayer->alterField('article_tag', 'article_id', 'INT(10) UNSIGNED', false);
-            $this->dbLayer->alterField('article_tag', 'tag_id', 'INT(10) UNSIGNED', false);
+            $this->dbLayer->alterField('article_tag', 'article_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false);
+            $this->dbLayer->alterField('article_tag', 'tag_id', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false);
             $this->dbLayer->addForeignKey('article_tag', 'fk_article', ['article_id'], 'articles', ['id'], 'CASCADE');
             $this->dbLayer->addForeignKey('article_tag', 'fk_tag', ['tag_id'], 'tags', ['id'], 'CASCADE');
 

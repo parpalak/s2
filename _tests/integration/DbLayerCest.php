@@ -12,6 +12,7 @@ namespace integration;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Pdo\DbLayerSqlite;
+use S2\Cms\Pdo\SchemaBuilderInterface;
 
 /**
  * @group db
@@ -140,7 +141,7 @@ class DbLayerCest
         $I->assertCount(1, $data);
         $I->assertEquals(['name', 'value'], array_keys($data[0]));
 
-        $this->dbLayer->addField('config', 'test_field', 'INT(10) UNSIGNED', true);
+        $this->dbLayer->addField('config', 'test_field', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, true);
 
         $result = $this->dbLayer->select('test_field')
             ->from('config')
@@ -182,7 +183,7 @@ class DbLayerCest
         if (!$this->dbLayer instanceof DbLayerSqlite) {
             $e = null;
             try {
-                $this->dbLayer->alterField('config', 'test_field2', 'VARCHAR(255)', false, 'default_test');
+                $this->dbLayer->alterField('config', 'test_field2', SchemaBuilderInterface::TYPE_STRING, 255, false, 'default_test');
             } catch (DbLayerException $e) {
             }
             $I->assertInstanceOf(DbLayerException::class, $e);
@@ -194,7 +195,7 @@ class DbLayerCest
             ->execute()
         ;
 
-        $this->dbLayer->alterField('config', 'test_field2', 'VARCHAR(255)', false, 'default_test');
+        $this->dbLayer->alterField('config', 'test_field2', SchemaBuilderInterface::TYPE_STRING, 255, false, 'default_test');
 
         $result = $this->dbLayer->select('test_field2')
             ->from('config')
@@ -230,7 +231,7 @@ class DbLayerCest
         // Otherwise MySQL gives error:
         // SQLSTATE[42000]: Syntax error or access violation: 1170 BLOB/TEXT column 'value' used in key specification without a key length.
         // Failed query: ALTER TABLE config ADD INDEX config_value_idx (value). Error code: 42000.
-        $this->dbLayer->alterField('config', 'value', 'VARCHAR(191)', false, '');
+        $this->dbLayer->alterField('config', 'value', SchemaBuilderInterface::TYPE_STRING, 191, false, '');
 
         $I->assertFalse($this->dbLayer->indexExists('config', 'value_idx'));
         $this->dbLayer->addIndex('config', 'value_idx', ['value']);
@@ -290,14 +291,14 @@ class DbLayerCest
 
         // Test that creating new field does not break indexes. Useful for SQLite where tables are recreated on field creation
         $I->assertTrue($this->dbLayer->indexExists('config', 'value_idx'));
-        $this->dbLayer->addField('config', 'new_field', 'VARCHAR(255)', true);
+        $this->dbLayer->addField('config', 'new_field', SchemaBuilderInterface::TYPE_STRING, 255, true);
         $I->assertTrue($this->dbLayer->indexExists('config', 'value_idx'));
         $this->dbLayer->dropField('config', 'new_field');
         $I->assertTrue($this->dbLayer->indexExists('config', 'value_idx'));
 
         $this->dbLayer->dropIndex('config', 'value_idx');
 
-        $this->dbLayer->alterField('config', 'value', 'TEXT', false);
+        $this->dbLayer->alterField('config', 'value', SchemaBuilderInterface::TYPE_TEXT, null, false);
 
         // Start a transaction as if it was an external transaction from tests wrapper
         $this->pdo->beginTransaction();
