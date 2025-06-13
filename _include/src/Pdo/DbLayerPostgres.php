@@ -88,8 +88,7 @@ class DbLayerPostgres extends DbLayer
 
         // Go through every schema element and add it to the query
         foreach ($schemaBuilder->columns as $fieldName => $fieldData) {
-            $type                  = static::convertType($fieldData[SchemaBuilder::COLUMN_PROPERTY_TYPE], $fieldData[SchemaBuilder::COLUMN_PROPERTY_LENGTH]);
-            $fieldData['datatype'] = $type;
+            $type = static::convertType($fieldData[SchemaBuilder::COLUMN_PROPERTY_TYPE], $fieldData[SchemaBuilder::COLUMN_PROPERTY_LENGTH]);
 
             $query .= $fieldName . ' ' . $type;
 
@@ -130,8 +129,8 @@ class DbLayerPostgres extends DbLayer
         $this->freeResult($result);
 
         // Add indexes
-        foreach ($schemaBuilder->indexes as $index_name => $index_fields) {
-            $this->addIndex($tableName, $index_name, $index_fields, false);
+        foreach ($schemaBuilder->indexes as $indexName => $indexFields) {
+            $this->addIndex($tableName, $indexName, $indexFields);
         }
 
         // Add foreign keys

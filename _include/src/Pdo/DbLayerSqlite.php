@@ -99,41 +99,48 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function createTable(string $tableName, array $schema): void
+    public function createTable(string $tableName, callable $tableDefinition): void
     {
         if ($this->tableExists($tableName)) {
             return;
         }
 
+        $schemaBuilder = new SchemaBuilder();
+        $tableDefinition($schemaBuilder);
+
         $query = 'CREATE TABLE ' . $this->prefix . $tableName . " (\n";
 
         // Go through every schema element and add it to the query
-        foreach ($schema['FIELDS'] as $field_name => $field_data) {
-            $field_data['datatype'] = preg_replace(array_keys(self::DATATYPE_TRANSFORMATIONS), array_values(self::DATATYPE_TRANSFORMATIONS), $field_data['datatype']);
+        foreach ($schemaBuilder->columns as $fieldName => $fieldData) {
+            $type = static::convertType($fieldData[SchemaBuilder::COLUMN_PROPERTY_TYPE], $fieldData[SchemaBuilder::COLUMN_PROPERTY_LENGTH]);
 
-            $query .= $field_name . ' ' . $field_data['datatype'];
+            $query .= $fieldName . ' ' . $type;
 
-            if (!$field_data['allow_null']) {
+            if (!$fieldData[SchemaBuilder::COLUMN_PROPERTY_NULLABLE]) {
                 $query .= ' NOT NULL';
+            } elseif (!isset($fieldData[SchemaBuilder::COLUMN_PROPERTY_DEFAULT])) {
+                $query .= ' DEFAULT NULL';
             }
 
-            if (isset($field_data['default'])) {
-                $query .= ' DEFAULT ' . $field_data['default'];
+            if (isset($fieldData[SchemaBuilder::COLUMN_PROPERTY_DEFAULT])) {
+                $defaultValue = self::convertDefaultValue($fieldData[SchemaBuilder::COLUMN_PROPERTY_DEFAULT], $fieldData[SchemaBuilder::COLUMN_PROPERTY_TYPE]);
+                if (\is_string($defaultValue)) {
+                    $defaultValue = $this->pdo->quote($defaultValue);
+                }
+                $query .= ' DEFAULT ' . $defaultValue;
             }
 
             $query .= ",\n";
         }
 
         // If we have a primary key, add it
-        if (isset($schema['PRIMARY KEY'])) {
-            $query .= 'PRIMARY KEY (' . implode(',', $schema['PRIMARY KEY']) . '),' . "\n";
+        if (\count($schemaBuilder->primaryKey) > 0) {
+            $query .= 'PRIMARY KEY (' . implode(',', $schemaBuilder->primaryKey) . '),' . "\n";
         }
 
         // Add unique keys
-        if (isset($schema['UNIQUE KEYS'])) {
-            foreach ($schema['UNIQUE KEYS'] as $key_name => $key_fields) {
-                $query .= 'UNIQUE (' . implode(',', $key_fields) . '),' . "\n";
-            }
+        foreach ($schemaBuilder->uniqueIndexes as $keyName => $keyFields) {
+            $query .= 'UNIQUE (' . implode(',', $keyFields) . '),' . "\n";
         }
 
         // We remove the last two characters (a newline and a comma) and add on the ending
@@ -143,25 +150,21 @@ class DbLayerSqlite extends DbLayer
         $this->freeResult($result);
 
         // Add indexes
-        if (isset($schema['INDEXES'])) {
-            foreach ($schema['INDEXES'] as $index_name => $index_fields) {
-                $this->addIndex($tableName, $index_name, $index_fields);
-            }
+        foreach ($schemaBuilder->indexes as $indexName => $indexFields) {
+            $this->addIndex($tableName, $indexName, $indexFields);
         }
 
         // Add foreign keys
-        if (isset($schema['FOREIGN KEYS'])) {
-            foreach ($schema['FOREIGN KEYS'] as $key_name => $foreign_key) {
-                $this->addForeignKey(
-                    $tableName,
-                    $key_name,
-                    $foreign_key['columns'],
-                    $foreign_key['reference_table'],
-                    $foreign_key['reference_columns'],
-                    $foreign_key['on_delete'] ?? null,
-                    $foreign_key['on_update'] ?? null,
-                );
-            }
+        foreach ($schemaBuilder->foreignKeys as $keyName => $foreignKey) {
+            $this->addForeignKey(
+                $tableName,
+                $keyName,
+                $foreignKey[SchemaBuilder::FK_PROPERTY_COLUMNS],
+                $foreignKey[SchemaBuilder::FK_PROPERTY_FOREIGN_TABLE],
+                $foreignKey[SchemaBuilder::FK_PROPERTY_FOREIGN_COLUMNS],
+                $foreignKey[SchemaBuilder::FK_PROPERTY_ON_DELETE] ?? null,
+                $foreignKey[SchemaBuilder::FK_PROPERTY_ON_UPDATE] ?? null,
+            );
         }
     }
 
@@ -351,5 +354,19 @@ class DbLayerSqlite extends DbLayer
     public function upsert(string $table): UpsertBuilder
     {
         return (new UpsertBuilder(new UpsertSqliteCompiler($this->prefix), $this))->upsert($table);
+    }
+
+    protected static function convertType(string $type, ?int $length): string
+    {
+        return match ($type) {
+            SchemaBuilderInterface::TYPE_SERIAL,
+            SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER,
+            SchemaBuilderInterface::TYPE_INTEGER,
+            SchemaBuilderInterface::TYPE_BOOLEAN => 'INTEGER',
+            SchemaBuilderInterface::TYPE_LONGTEXT,
+            SchemaBuilderInterface::TYPE_TEXT => 'TEXT',
+            SchemaBuilderInterface::TYPE_STRING => 'VARCHAR(' . $length . ')', // Anyway, internally will be stored as TEXT
+            default => $type
+        };
     }
 }
