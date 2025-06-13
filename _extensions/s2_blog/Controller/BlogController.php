@@ -46,10 +46,14 @@ abstract class BlogController implements ControllerInterface
 
     abstract public function body(Request $request, HtmlTemplate $template): ?Response;
 
+    /**
+     * @throws DbLayerException
+     */
     public function handle(Request $request): Response
     {
         $template = $this->templateProvider->getTemplate($this->template_id, 's2_blog');
 
+        /** @noinspection HtmlUnknownTarget */
         $template
             ->putInPlaceholder('commented', 0)
             ->putInPlaceholder('class', 's2_blog')
@@ -74,40 +78,35 @@ abstract class BlogController implements ControllerInterface
     /**
      * @throws DbLayerException
      */
-    public function getPosts(array $additionalQueryParts, bool $sortAsc = true, string $sortField = 'create_time'): string
+    public function getPosts(callable $queryModifier, bool $sortAsc = true, string $sortField = 'create_time'): string
     {
         // Obtaining posts
-        $sub_query         = [
-            'SELECT' => 'count(*)',
-            'FROM'   => 's2_blog_comments AS c',
-            'WHERE'  => 'c.post_id = p.id AND shown = 1',
-        ];
-        $raw_query_comment = $this->dbLayer->build($sub_query);
+        $qb = $this->dbLayer
+            ->select(
+                'p.create_time', 'p.title', 'p.text', 'p.url', 'p.id', 'p.commented', 'p.favorite',
+                '(' . $this->dbLayer
+                    ->select('count(*)')
+                    ->from('s2_blog_comments AS c')
+                    ->where('c.post_id = p.id')
+                    ->andWhere('c.shown = 1')
+                    ->getSql() . ') AS comment_num',
+                '(' . $this->dbLayer
+                    ->select('u.name')
+                    ->from('users AS u')
+                    ->where('u.id = p.user_id')
+                    ->getSql() . ') AS author',
+                'p.label'
+            )
+            ->from('s2_blog_posts AS p')
+            ->where('p.published = 1')
+        ;
 
-        $sub_query      = [
-            'SELECT' => 'u.name',
-            'FROM'   => 'users AS u',
-            'WHERE'  => 'u.id = p.user_id',
-        ];
-        $raw_query_user = $this->dbLayer->build($sub_query);
+        $queryModifier($qb);
 
-        $query = [
-            'SELECT' => 'p.create_time, p.title, p.text, p.url, p.id, p.commented, p.favorite, (' . $raw_query_comment . ') AS comment_num, (' . $raw_query_user . ') AS author, p.label',
-            'FROM'   => 's2_blog_posts AS p',
-            'WHERE'  => 'p.published = 1' . (isset($additionalQueryParts['WHERE']) ? ' AND ' . $additionalQueryParts['WHERE'] : '')
-        ];
-        if (isset($additionalQueryParts['JOINS'])) {
-            $query['JOINS'] = $additionalQueryParts['JOINS'];
-        }
-
-        if (isset($additionalQueryParts['SELECT'])) {
-            $query['SELECT'] .= ', ' . $additionalQueryParts['SELECT'];
-        }
-
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $qb->execute();
 
         $posts = $merge_labels = $labels = $ids = $sort_array = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $posts[$row['id']]  = $row;
             $ids[]              = $row['id'];
             $sort_array[]       = $row[$sortField];

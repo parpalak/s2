@@ -51,26 +51,25 @@ class Manifest implements ManifestInterface
         return 'Do not forget to create search index after extension installation (Admin → Stats page).';
     }
 
+    /**
+     * @throws DbLayerException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function install(DbLayer $dbLayer, Container $container, ?string $currentVersion): void
     {
-        $s2_search_config = [
+        $config = [
             'S2_SEARCH_QUICK'                 => '0',
             'S2_SEARCH_RECOMMENDATIONS_LIMIT' => '0',
         ];
-
-        foreach ($s2_search_config as $conf_name => $conf_value) {
-            if (\defined($conf_name)) {
-                // TODO implement insert ignore
-                continue;
-            }
-
-            $query = [
-                'INSERT' => 'name, value',
-                'INTO'   => 'config',
-                'VALUES' => '\'' . $conf_name . '\', \'' . $conf_value . '\''
-            ];
-
-            $dbLayer->buildAndQuery($query);
+        foreach ($config as $confName => $confValue) {
+            $dbLayer
+                ->insert('config')
+                ->setValue('name', ':name')->setParameter('name', $confName)
+                ->setValue('value', ':value')->setParameter('value', $confValue)
+                ->onConflictDoNothing('name')
+                ->execute()
+            ;
         }
 
         // The extension is not installed yet, so we can't take the storage from the container directly
@@ -86,10 +85,10 @@ class Manifest implements ManifestInterface
     public function uninstall(DbLayer $dbLayer, Container $container): void
     {
         if ($dbLayer->tableExists('config')) {
-            $dbLayer->buildAndQuery([
-                'DELETE' => 'config',
-                'WHERE'  => 'name in (\'S2_SEARCH_QUICK\', \'S2_SEARCH_RECOMMENDATIONS_LIMIT\')',
-            ]);
+            $dbLayer->delete('config')
+                ->where('name in (\'S2_SEARCH_QUICK\', \'S2_SEARCH_RECOMMENDATIONS_LIMIT\')')
+                ->execute()
+            ;
         }
 
         /** @var PdoStorage $pdoStorage */

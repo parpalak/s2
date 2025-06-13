@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
- * @package   S2
+ * @copyright 2024-2025  Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_blog
  */
 
 declare(strict_types=1);
@@ -39,17 +39,16 @@ readonly class PathToAdminEntityConverter
         $start_time = mktime(0, 0, 0, (int)$pathArray[2], (int)$pathArray[3], (int)$pathArray[1]);
         $end_time   = mktime(0, 0, 0, (int)$pathArray[2], (int)$pathArray[3] + 1, (int)$pathArray[1]);
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id',
-            'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'create_time < :end_time AND create_time >= :start_time AND url=:url'
-        ], [
-            'start_time' => $start_time,
-            'end_time'   => $end_time,
-            'url'        => $pathArray[4]
-        ]);
+        $result = $this->dbLayer
+            ->select('id')
+            ->from('s2_blog_posts')
+            ->where('create_time < :end_time')->setParameter('end_time', $end_time)
+            ->andWhere('create_time >= :start_time')->setParameter('start_time', $start_time)
+            ->andWhere('url = :url')->setParameter('url', $pathArray[4])
+            ->execute()
+        ;
 
-        if ($row = $this->dbLayer->fetchAssoc($result)) {
+        if ($row = $result->fetchAssoc()) {
             return ['entity' => 'BlogPost', 'action' => FieldConfig::ACTION_EDIT, 'id' => $row['id']];
         }
 

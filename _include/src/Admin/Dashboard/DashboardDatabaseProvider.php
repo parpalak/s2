@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -11,6 +11,7 @@ namespace S2\Cms\Admin\Dashboard;
 
 use S2\AdminYard\TemplateRenderer;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 
 readonly class DashboardDatabaseProvider implements DashboardStatProviderInterface
 {
@@ -23,6 +24,10 @@ readonly class DashboardDatabaseProvider implements DashboardStatProviderInterfa
     ) {
     }
 
+    /**
+     * {@inheritdoc}
+     * @throws DbLayerException
+     */
     public function getHtml(): string
     {
         $totalSize = $totalRecords = null;
@@ -34,7 +39,7 @@ readonly class DashboardDatabaseProvider implements DashboardStatProviderInterfa
             $result = $this->dbLayer->query('SHOW TABLE STATUS FROM `' . $this->dbName . '` WHERE NAME LIKE \'' . $this->dbPrefix . '%\' AND NAME NOT LIKE \'' . $this->dbPrefix . 's2_search_idx_%\'');
 
             $totalRecords = $totalSize = 0;
-            while ($status = $this->dbLayer->fetchAssoc($result)) {
+            while ($status = $result->fetchAssoc()) {
                 $totalRecords += $status['Rows'];
                 $totalSize    += $status['Data_length'] + $status['Index_length'];
             }

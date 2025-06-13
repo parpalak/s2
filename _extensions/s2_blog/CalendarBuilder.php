@@ -55,13 +55,17 @@ readonly class CalendarBuilder
         // Flags for the days when posts have been written
         if ($dayUrls === null) {
             $dayUrls = [];
-            $query   = [
-                'SELECT' => 'create_time, url',
-                'FROM'   => 's2_blog_posts',
-                'WHERE'  => 'create_time < ' . $endTime . ' AND create_time >= ' . $startTime . ' AND published = 1'
-            ];
-            $result  = $this->dbLayer->buildAndQuery($query);
-            while ($row = $this->dbLayer->fetchRow($result)) {
+            $result  = $this->dbLayer
+                ->select('create_time, url')
+                ->from('s2_blog_posts')
+                ->where('create_time < :end_time')
+                ->setParameter('end_time', $endTime)
+                ->andWhere('create_time >= :start_time')
+                ->setParameter('start_time', $startTime)
+                ->andWhere('published = 1')
+                ->execute()
+            ;
+            while ($row = $result->fetchRow()) {
                 $dayUrls[1 + (int)(($row[0] - $startTime) / 86400)][] = $row[1];
             }
         }

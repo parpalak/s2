@@ -1,7 +1,7 @@
 # S2 — Simple and Fast CMS
 
 S2 is a simple and fast website engine (or CMS — Content Management System) written in PHP.
-It is distributed for free under both GPL and MIT licenses.
+It is distributed for free under the MIT license.
 It is best suited for small to medium-sized content websites.
 S2’s undeniable advantages include a convenient
 [administrative interface](https://github.com/parpalak/s2/wiki/Control-Panel)
@@ -14,7 +14,7 @@ while additional functionality can be implemented via
 - **User-friendly**: Intuitive [control panel](https://github.com/parpalak/s2/wiki/Control-Panel) for easy content management and comment moderation.
 - **Reliable**: Auto-recovery after browser crashes or power outages.
 - **Fast**: Optimized for high performance.
-- **Free & open-source**: Licensed under GPL and MIT, allowing unrestricted use for any project.
+- **Free & open-source**: Licensed under the MIT license, allowing unrestricted use for any project.
 - **Low system requirements**: PHP + MySQL/PostgreSQL/SQLite.
 - **Team collaboration**: Role-based access (authors, moderators, editors, admins).
 - **Extensible**: Plugins for added functionality (search, blog, etc.).

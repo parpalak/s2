@@ -3,8 +3,8 @@
  * 1. Updates search index when a visible post has been changed.
  * 2. Provides blog posts data for bulk indexing.
  *
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -68,13 +68,14 @@ readonly class PostIndexer implements QueueHandlerInterface, BulkIndexingProvide
      */
     public function getIndexables(): \Generator
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id, title, text, create_time, url',
-            'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'published = 1'
-        ]);
+        $result = $this->dbLayer
+            ->select('id, title, text, create_time, url')
+            ->from('s2_blog_posts')
+            ->where('published = 1')
+            ->execute()
+        ;
 
-        while ($post = $this->dbLayer->fetchAssoc($result)) {
+        while ($post = $result->fetchAssoc()) {
             $indexable = $this->getIndexableFromDbRow($post);
             yield $indexable;
         }
@@ -87,13 +88,16 @@ readonly class PostIndexer implements QueueHandlerInterface, BulkIndexingProvide
      */
     private function getIndexable(int $id): ?Indexable
     {
-        $query  = [
-            'SELECT' => 'id, title, text, create_time, url',
-            'FROM'   => 's2_blog_posts',
-            'WHERE'  => 'published = 1 AND id = :id',
-        ];
-        $result = $this->dbLayer->buildAndQuery($query, ['id' => $id]);
-        $post   = $this->dbLayer->fetchAssoc($result);
+        $result = $this->dbLayer
+            ->select('id, title, text, create_time, url')
+            ->from('s2_blog_posts')
+            ->where('published = 1')
+            ->andWhere('id = :id')
+            ->setParameter('id', $id)
+            ->execute()
+        ;
+
+        $post = $result->fetchAssoc();
         if (!$post) {
             return null;
         }

@@ -47,7 +47,7 @@ class QueueCest
 
         /** @var DbLayer $publisherDbLayer */
         $publisherDbLayer = $I->grabService(DbLayer::class);
-        $publisherDbLayer->buildAndQuery(['DELETE' => 'queue']);
+        $publisherDbLayer->delete('queue');
 
         /** @var QueuePublisher $queuePublisher */
         $queuePublisher = $I->grabService(QueuePublisher::class);

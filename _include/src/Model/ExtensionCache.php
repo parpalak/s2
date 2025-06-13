@@ -53,14 +53,15 @@ class ExtensionCache
      */
     public function generateEnabledExtensionClassNames(): array
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id',
-            'FROM'   => 'extensions',
-            'WHERE'  => 'disabled = 0',
-        ]);
+        $result = $this->dbLayer
+            ->select('id')
+            ->from('extensions')
+            ->where('disabled = 0')
+            ->execute()
+        ;
 
         $extensionClassNames = ['cms' => [], 'admin' => []];
-        while ($extension = $this->dbLayer->fetchAssoc($result)) {
+        while ($extension = $result->fetchAssoc()) {
             $className = \sprintf('\s2_extensions\%s\Extension', $extension['id']);
             if (class_exists($className)) {
                 $extensionClassNames['cms'][] = $className;

@@ -9,9 +9,11 @@
 
 namespace s2_extensions\s2_blog\Controller;
 
+use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
@@ -57,6 +59,10 @@ class PostPageController extends BlogController
         );
     }
 
+    /**
+     * @throws DbLayerException
+     * @throws InvalidArgumentException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $year  = (int)($textYear = $request->attributes->get('year'));
@@ -87,28 +93,36 @@ class PostPageController extends BlogController
         return null;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws DbLayerException
+     */
     private function get_post(Request $request, HtmlTemplate $template, int $year, int $month, int $day, string $url): ?Response
     {
-        $start_time = mktime(0, 0, 0, $month, $day, $year);
-        $end_time   = $start_time + 86400;
+        $startTime = mktime(0, 0, 0, $month, $day, $year);
+        $endTime   = $startTime + 86400;
 
         $template->setLink('up', $this->blogUrlBuilder->day($year, $month, $day));
 
-        $sub_query      = [
-            'SELECT' => 'u.name',
-            'FROM'   => 'users AS u',
-            'WHERE'  => 'u.id = p.user_id',
-        ];
-        $raw_query_user = $this->dbLayer->build($sub_query);
+        $result = $this->dbLayer
+            ->select(
+                'create_time, title, text, id, commented, label, favorite',
+                '(' . $this->dbLayer
+                    ->select('u.name')
+                    ->from('users AS u')
+                    ->where('u.id = p.user_id')
+                    ->getSql() . ') AS author',
+                'url'
+            )
+            ->from('s2_blog_posts AS p')
+            ->where('create_time < :end_time')->setParameter('end_time', $endTime)
+            ->andWhere('create_time >= :start_time')->setParameter('start_time', $startTime)
+            ->andWhere('url = :url')->setParameter('url', $url)
+            ->andWhere('published = 1')
+            ->execute()
+        ;
 
-        $query  = [
-            'SELECT' => 'create_time, title, text, id, commented, label, favorite, (' . $raw_query_user . ') AS author, url',
-            'FROM'   => 's2_blog_posts AS p',
-            'WHERE'  => 'create_time < ' . $end_time . ' AND create_time >= ' . $start_time . ' AND url = \'' . $this->dbLayer->escape($url) . '\' AND published = 1',
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
-
-        if (!$row = $this->dbLayer->fetchAssoc($result)) {
+        if (!$row = $result->fetchAssoc()) {
             $template
                 ->putInPlaceholder('head_title', $this->translator->trans('Not found'))
                 ->putInPlaceholder('text', '<p>' . $this->translator->trans('Not found') . '</p>')
@@ -124,42 +138,50 @@ class PostPageController extends BlogController
 
         $is_back_forward = $template->hasPlaceholder('<!-- s2_blog_back_forward -->');
 
-        $queries = [];
+        $queries = $params = [];
         if ($label) {
             // Getting posts that have the same label
-            $query     = [
-                'SELECT'   => 'title, create_time, url, "label" AS type',
-                'FROM'     => 's2_blog_posts',
-                'WHERE'    => 'label = \'' . $this->dbLayer->escape($label) . '\' AND id <> ' . $post_id . ' AND published = 1',
-                'ORDER BY' => 'create_time DESC',
-            ];
-            $queries[] = $this->dbLayer->build($query);
+            $queries[]         = $this->dbLayer->select('title, create_time, url, "label" AS type')
+                ->from('s2_blog_posts')
+                ->where('label = :label')
+                ->andWhere('id <> :post_id')
+                ->andWhere('published = 1')
+                ->orderBy('create_time DESC')
+                ->getSql()
+            ;
+            $params['label']   = $label;
+            $params['post_id'] = $post_id;
         }
 
         if ($is_back_forward) {
-            $query     = [
-                'SELECT'   => 'title, create_time, url, "next" AS type',
-                'FROM'     => 's2_blog_posts',
-                'WHERE'    => ' create_time > ' . (int)$row['create_time'] . ' AND published = 1',
-                'ORDER BY' => 'create_time ASC',
-                'LIMIT'    => '1',
-            ];
-            $queries[] = $this->dbLayer->build($query);
+            $queries[] = $this->dbLayer->select('title, create_time, url, "next" AS type')
+                ->from('s2_blog_posts')
+                ->where('create_time > :time_next')
+                ->andWhere('published = 1')
+                ->orderBy('create_time ASC')
+                ->limit(1)
+                ->getSql()
+            ;
 
-            $query     = [
-                'SELECT'   => 'title, create_time, url, "prev" AS type',
-                'FROM'     => 's2_blog_posts',
-                'WHERE'    => ' create_time < ' . (int)$row['create_time'] . ' AND published = 1',
-                'ORDER BY' => 'create_time DESC',
-                'LIMIT'    => '1',
-            ];
-            $queries[] = $this->dbLayer->build($query);
+            $params['time_next'] = (int)$row['create_time'];
+
+            $queries[] = $this->dbLayer->select('title, create_time, url, "prev" AS type')
+                ->from('s2_blog_posts')
+                ->where('create_time < :time_prev')
+                ->setParameter('time_prev', (int)$row['create_time'], \PDO::PARAM_INT)
+                ->andWhere('published = 1')
+                ->orderBy('create_time DESC')
+                ->limit(1)
+                ->getSql()
+            ;
+
+            $params['time_prev'] = (int)$row['create_time'];
         }
 
-        $result = !empty($queries) ? $this->dbLayer->query('(' . implode(') UNION (', $queries) . ')') : null;
+        $result = !empty($queries) ? $this->dbLayer->query('(' . implode(') UNION (', $queries) . ')', $params) : null;
 
         $back_forward = [];
-        while ($result && $row1 = $this->dbLayer->fetchAssoc($result)) {
+        while ($result !== null && $row1 = $result->fetchAssoc()) {
             $post_info = [
                 'title' => $row1['title'],
                 'link'  => $this->blogUrlBuilder->postFromTimestamp((int)$row1['create_time'], $row1['url']),
@@ -181,22 +203,18 @@ class PostPageController extends BlogController
         }
 
         // Getting tags
-        $query  = [
-            'SELECT'   => 'name, url',
-            'FROM'     => 'tags AS t',
-            'JOINS'    => [
-                [
-                    'INNER JOIN' => 's2_blog_post_tag AS pt',
-                    'ON'         => 'pt.tag_id = t.id',
-                ],
-            ],
-            'WHERE'    => 'post_id = ' . $post_id,
-            'ORDER BY' => 'pt.id',
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('name, url')
+            ->from('tags AS t')
+            ->innerJoin('s2_blog_post_tag AS pt', 'pt.tag_id = t.id')
+            ->where('post_id = :post_id')
+            ->setParameter('post_id', $post_id)
+            ->orderBy('pt.id')
+            ->execute()
+        ;
 
         $tags = [];
-        while ($tag = $this->dbLayer->fetchAssoc($result)) {
+        while ($tag = $result->fetchAssoc()) {
             $tags[] = [
                 'title' => $tag['name'],
                 'link'  => $this->blogUrlBuilder->tag($tag['url']),
@@ -205,7 +223,7 @@ class PostPageController extends BlogController
 
         $template->putInPlaceholder('commented', $row['commented']);
         if ($row['commented'] && $this->showComments && $template->hasPlaceholder('<!-- s2_comments -->')) {
-            $template->putInPlaceholder('comments', $this->get_comments($post_id));
+            $template->putInPlaceholder('comments', $this->getComments($post_id));
         }
 
         $row['time']             = $this->viewer->dateAndTime($row['create_time']);
@@ -235,19 +253,24 @@ class PostPageController extends BlogController
         return null;
     }
 
-    private function get_comments(int $id): string
+    /**
+     * @throws DbLayerException
+     */
+    private function getComments(int $id): string
     {
         $comments = '';
 
-        $query  = [
-            'SELECT'   => 'nick, time, email, show_email, good, text',
-            'FROM'     => 's2_blog_comments',
-            'WHERE'    => 'post_id = ' . $id . ' AND shown = 1',
-            'ORDER BY' => 'time',
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $statement = $this->dbLayer
+            ->select('nick, time, email, show_email, good, text')
+            ->from('s2_blog_comments')
+            ->where('post_id = :post_id')
+            ->setParameter('post_id', $id)
+            ->andWhere('shown = 1')
+            ->orderBy('time')
+            ->execute()
+        ;
 
-        for ($i = 1; $row = $this->dbLayer->fetchAssoc($result); $i++) {
+        for ($i = 1; $row = $statement->fetchAssoc(); $i++) {
             $row['i'] = $i;
             $comments .= $this->viewer->render('comment', $row);
         }

@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -37,63 +37,64 @@ readonly class ArticleManager
     {
         // TODO add published=1 if there is no view_hidden permission
 
-        $subquery        = [
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 'art_comments AS c',
-            'WHERE'  => 'a.id = c.article_id'
-        ];
-        $commentNumQuery = $this->dbLayer->build($subquery);
+        $commentNumQuery = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('art_comments AS c')
+            ->where('a.id = c.article_id')
+            ->getSql()
+        ;
 
-        $query = [
-            'SELECT'   => 'title, id, create_time, priority, published, (' . $commentNumQuery . ') as comment_num, parent_id',
-            'FROM'     => 'articles AS a',
-            'WHERE'    => 'parent_id = ' . $id,
-            'ORDER BY' => 'priority'
-        ];
+        $qb = $this->dbLayer
+            ->select('title, id, create_time, priority, published, (' . $commentNumQuery . ') as comment_num, parent_id')
+            ->from('articles AS a')
+            ->where('parent_id = :id')->setParameter('id', $id)
+            ->orderBy('priority')
+        ;
+
         if ($search !== null) {
             // This function also can search through the site :)
-            $condition = [];
+            $condition  = [];
+            $paramIndex = 0;
             foreach (explode(' ', $search) as $word) {
-                if ($word !== '') {
-                    if ($word[0] === ':' && \strlen($word) > 1) {
-                        $subquery    = [
-                            'SELECT' => 'count(*)',
-                            'FROM'   => 'article_tag AS at',
-                            'JOINS'  => [
-                                [
-                                    'INNER JOIN' => 'tags AS t',
-                                    'ON'         => 't.id = at.tag_id'
-                                ]
-                            ],
-                            // TODO do not use escaping, use parameters instead
-                            'WHERE'  => 'a.id = at.article_id AND t.name LIKE \'%' . $this->dbLayer->escape(substr($word, 1)) . '%\'',
-                            'LIMIT'  => '1'
-                        ];
-                        $tagQuery    = $this->dbLayer->build($subquery);
-                        $condition[] = '(' . $tagQuery . ')';
-                    } else {
-                        $condition[] = '(title LIKE \'%' . $this->dbLayer->escape($word) . '%\' OR pagetext LIKE \'%' . $this->dbLayer->escape($word) . '%\')';
-                    }
+                if ($word === '') {
+                    continue;
+                }
+                if ($word[0] === ':' && \strlen($word) > 1) {
+                    $condition[] = '(' . $this->dbLayer
+                            ->select('COUNT(*)')
+                            ->from('article_tag AS at')
+                            ->innerJoin('tags AS t', 't.id = at.tag_id')
+                            ->where('a.id = at.article_id')
+                            ->andWhere('t.name LIKE :param' . $paramIndex)
+                            ->getSql()
+                        . ')';
+                    $qb->setParameter('param' . $paramIndex, '%' . substr($word, 1) . '%');
+                    $paramIndex++;
+                } else {
+                    $condition[] = \sprintf("(title LIKE :param%s OR pagetext LIKE :param%s)", $paramIndex, $paramIndex + 1);
+                    $qb->setParameter('param' . $paramIndex, '%' . $word . '%');
+                    $paramIndex++;
+                    $qb->setParameter('param' . $paramIndex, '%' . $word . '%');
+                    $paramIndex++;
                 }
             }
 
             if (\count($condition) > 0) {
-                $query['SELECT'] .= ', (' . implode(' AND ', $condition) . ') AS found';
-
-                $subquery        = [
-                    'SELECT' => 'COUNT(*)',
-                    'FROM'   => 'articles AS a2',
-                    'WHERE'  => 'a2.parent_id = a.id'
-                ];
-                $child_num_query = $this->dbLayer->build($subquery);
-
-                $query['SELECT'] .= ', (' . $child_num_query . ') as child_num';
+                $qb
+                    ->addSelect('(' . implode(' AND ', $condition) . ') AS found')
+                    ->addSelect('(' . $this->dbLayer
+                            ->select('COUNT(*)')
+                            ->from('articles AS a2')
+                            ->where('a2.parent_id = a.id')
+                            ->getSql()
+                        . ') AS child_num')
+                ;
             }
         }
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $qb->execute();
 
         $output = [];
-        while ($article = $this->dbLayer->fetchAssoc($result)) {
+        while ($article = $result->fetchAssoc()) {
             $children = (!$search || $article['child_num']) ? $this->getChildBranches($article['id'], $search) : '';
 
             if ($search && (!$children && !$article['found'])) {
@@ -143,58 +144,66 @@ readonly class ArticleManager
 
     /**
      * @throws DbLayerException
+     * @throws NotFoundException
      */
     public function createArticle(int $parentId, string $title): int
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => '1',
-            'FROM'   => 'articles',
-            'WHERE'  => 'id = :id'
-        ], ['id' => $parentId]);
+        $result = $this->dbLayer
+            ->select('1')
+            ->from('articles')
+            ->where('id = :id')->setParameter('id', $parentId)
+            ->execute()
+        ;
 
-        if (!$this->dbLayer->fetchAssoc($result)) {
+        if (!$result->fetchAssoc()) {
             // parent_id must be an existing article. E.g. it's impossible to create another root with parent_id = 0.
             throw new NotFoundException('Item not found!');
         }
 
+        $this->dbLayer->startTransaction();
+
         if ($this->newPositionOnTop) {
-            $this->dbLayer->buildAndQuery([
-                'UPDATE' => 'articles',
-                'SET'    => 'priority = priority + 1',
-                'WHERE'  => 'parent_id = :id'
-            ], ['id' => $parentId]);
+            $this->dbLayer
+                ->update('articles')
+                ->set('priority', 'priority + 1')
+                ->where('parent_id = :id')->setParameter('id', $parentId)
+                ->execute()
+            ;
             $newPriority = 0;
 
         } else {
-            $result      = $this->dbLayer->buildAndQuery([
-                'SELECT' => 'MAX(priority + 1)',
-                'FROM'   => 'articles',
-                'WHERE'  => 'parent_id = :id'
-            ], ['id' => $parentId]);
-            $newPriority = (int)$this->dbLayer->result($result);
+            $result      = $this->dbLayer
+                ->select('MAX(priority + 1)')
+                ->from('articles')
+                ->where('parent_id = :id')->setParameter('id', $parentId)
+                ->execute()
+            ;
+            $newPriority = (int)$result->result();
         }
 
-        $query = [
-            'INSERT' => 'parent_id, title, priority, url, user_id, template, excerpt, pagetext',
-            'INTO'   => 'articles',
-            'VALUES' => ':parent_id, :title, :priority, :url, :user_id, :template, :excerpt, :pagetext'
-        ];
-        $this->dbLayer->buildAndQuery($query, [
-            'parent_id' => $parentId,
-            'title'     => $title,
-            'priority'  => $newPriority,
-            'url'       => 'new',
-            'user_id'   => $this->permissionChecker->getUserId(),
-            'template'  => $this->useHierarchy ? '' : 'site.php',
-            'excerpt'   => '',
-            'pagetext'  => '',
-        ]);
+        $this->dbLayer
+            ->insert('articles')
+            ->setValue('parent_id', ':parent_id')->setParameter('parent_id', $parentId)
+            ->setValue('title', ':title')->setParameter('title', $title)
+            ->setValue('priority', ':priority')->setParameter('priority', $newPriority)
+            ->setValue('url', ':url')->setParameter('url', 'new')
+            ->setValue('user_id', ':user_id')->setParameter('user_id', $this->permissionChecker->getUserId())
+            ->setValue('template', ':template')->setParameter('template', $this->useHierarchy ? '' : 'site.php')
+            ->setValue('excerpt', ':excerpt')->setParameter('excerpt', '')
+            ->setValue('pagetext', ':pagetext')->setParameter('pagetext', '')
+            ->execute()
+        ;
+        $insertId = (int)$this->dbLayer->insertId();
 
-        return (int)$this->dbLayer->insertId();
+        $this->dbLayer->endTransaction();
+
+        return $insertId;
     }
 
     /**
      * @throws DbLayerException
+     * @throws AccessDeniedException
+     * @throws NotFoundException
      */
     public function renameArticle(int $id, string $title, string $csrfToken): void
     {
@@ -206,13 +215,14 @@ readonly class ArticleManager
             throw new AccessDeniedException('Invalid CSRF token!');
         }
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'user_id',
-            'FROM'   => 'articles',
-            'WHERE'  => 'id = :id',
-        ], ['id' => $id]);
+        $result = $this->dbLayer
+            ->select('user_id')
+            ->from('articles')
+            ->where('id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
 
-        if ($row = $this->dbLayer->fetchRow($result)) {
+        if ($row = $result->fetchRow()) {
             [$userId] = $row;
         } else {
             throw new NotFoundException('Item not found!');
@@ -222,15 +232,18 @@ readonly class ArticleManager
             throw new AccessDeniedException('You do not have permission to edit this article!');
         }
 
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'articles',
-            'SET'    => 'title = :title',
-            'WHERE'  => 'id = :id',
-        ], ['id' => $id, 'title' => $title]);
+        $this->dbLayer
+            ->update('articles')
+            ->set('title', ':title')->setParameter('title', $title)
+            ->where('id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
     }
 
     /**
      * @throws DbLayerException
+     * @throws AccessDeniedException
+     * @throws NotFoundException
      */
     public function moveBranch(int $sourceId, int $destinationId, int $position, string $csrfToken): void
     {
@@ -242,13 +255,16 @@ readonly class ArticleManager
             throw new AccessDeniedException('Invalid CSRF token!');
         }
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'priority, parent_id, user_id, id',
-            'FROM'   => 'articles',
-            'WHERE'  => 'id IN (:source_id, :destination_id)',
-        ], ['source_id' => $sourceId, 'destination_id' => $destinationId]);
+        $result = $this->dbLayer
+            ->select('priority, parent_id, user_id, id')
+            ->from('articles')
+            ->where('id IN (:source_id, :destination_id)')
+            ->setParameter('source_id', $sourceId)
+            ->setParameter('destination_id', $destinationId)
+            ->execute()
+        ;
 
-        $rows = $this->dbLayer->fetchAssocAll($result);
+        $rows = $result->fetchAssocAll();
         if (\count($rows) !== 2) {
             throw new NotFoundException('Item not found!');
         }
@@ -266,35 +282,39 @@ readonly class ArticleManager
             throw new AccessDeniedException('You don\'t have permissions to move this article!');
         }
 
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'articles',
-            'SET'    => 'priority = priority + 1',
-            'WHERE'  => 'priority >= :priority AND parent_id = :parent_id'
-        ], ['priority' => $position, 'parent_id' => $destinationId]);
+        $this->dbLayer->startTransaction();
 
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'articles',
-            'SET'    => 'priority = :priority, parent_id = :parent_id',
-            'WHERE'  => 'id = :id'
-        ], [
-            'priority'  => $position,
-            'parent_id' => $destinationId,
-            'id'        => $sourceId
-        ]);
+        $this->dbLayer
+            ->update('articles')
+            ->set('priority', 'priority + 1')
+            ->where('priority >= :priority')->setParameter('priority', $position)
+            ->andWhere('parent_id = :parent_id')->setParameter('parent_id', $destinationId)
+            ->execute()
+        ;
 
-        $query = [
-            'UPDATE' => 'articles',
-            'SET'    => 'priority = priority - 1',
-            'WHERE'  => 'parent_id = :parent_id AND priority > :priority'
-        ];
-        $this->dbLayer->buildAndQuery($query, [
-            'priority'  => $sourcePriority,
-            'parent_id' => $sourceParentId
-        ]);
+        $this->dbLayer
+            ->update('articles')
+            ->set('priority', ':priority')->setParameter('priority', $position)
+            ->set('parent_id', ':parent_id')->setParameter('parent_id', $destinationId)
+            ->where('id = :id')->setParameter('id', $sourceId)
+            ->execute()
+        ;
+
+        $this->dbLayer
+            ->update('articles')
+            ->set('priority', 'priority - 1')
+            ->where('parent_id = :parent_id')->setParameter('parent_id', $sourceParentId)
+            ->andWhere('priority > :priority')->setParameter('priority', $sourcePriority)
+            ->execute()
+        ;
+
+        $this->dbLayer->endTransaction();
     }
 
     /**
      * @throws DbLayerException
+     * @throws AccessDeniedException
+     * @throws NotFoundException
      */
     public function deleteBranch(int $id, string $csrfToken): void
     {
@@ -309,13 +329,14 @@ readonly class ArticleManager
             throw new AccessDeniedException('Invalid CSRF token!');
         }
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'priority, parent_id, user_id',
-            'FROM'   => 'articles',
-            'WHERE'  => 'id = :id',
-        ], ['id' => $id]);
+        $result = $this->dbLayer
+            ->select('priority, parent_id, user_id')
+            ->from('articles')
+            ->where('id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
 
-        if ($row = $this->dbLayer->fetchRow($result)) {
+        if ($row = $result->fetchRow()) {
             [$priority, $parentId, $userId] = $row;
         } else {
             throw new NotFoundException('Item not found!');
@@ -329,16 +350,19 @@ readonly class ArticleManager
             throw new AccessDeniedException('You don\'t have permissions to delete this article!');
         }
 
-        $this->dbLayer->buildAndQuery([
-            'UPDATE' => 'articles',
-            'SET'    => 'priority = priority - 1',
-            'WHERE'  => 'parent_id = :parent_id AND  priority > :priority',
-        ], [
-            'priority'  => $priority,
-            'parent_id' => $parentId
-        ]);
+        $this->dbLayer->startTransaction();
+
+        $this->dbLayer
+            ->update('articles')
+            ->set('priority', 'priority - 1')
+            ->where('parent_id = :parent_id')->setParameter('parent_id', $parentId)
+            ->andWhere('priority > :priority')->setParameter('priority', $priority)
+            ->execute()
+        ;
 
         $this->deleteItemAndChildren($id);
+
+        $this->dbLayer->endTransaction();
     }
 
     public function getCsrfToken(int $id): string
@@ -355,29 +379,33 @@ readonly class ArticleManager
      */
     private function deleteItemAndChildren(int $id): void
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id',
-            'FROM'   => 'articles',
-            'WHERE'  => 'parent_id = :id'
-        ], ['id' => $id]);
+        $result = $this->dbLayer
+            ->select('id')
+            ->from('articles')
+            ->where('parent_id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
 
-        while ($row = $this->dbLayer->fetchRow($result)) {
+        while ($row = $result->fetchRow()) {
             $this->deleteItemAndChildren($row[0]);
         }
 
-        $this->dbLayer->buildAndQuery([
-            'DELETE' => 'articles',
-            'WHERE'  => 'id = :id'
-        ], ['id' => $id]);
+        $this->dbLayer
+            ->delete('articles')
+            ->where('id  = :id')->setParameter('id', $id)
+            ->execute()
+        ;
 
-        $this->dbLayer->buildAndQuery([
-            'DELETE' => 'article_tag',
-            'WHERE'  => 'article_id = :id',
-        ], ['id' => $id]);
+        $this->dbLayer
+            ->delete('article_tag')
+            ->where('article_id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
 
-        $this->dbLayer->buildAndQuery([
-            'DELETE' => 'art_comments',
-            'WHERE'  => 'article_id = :id',
-        ], ['id' => $id]);
+        $this->dbLayer
+            ->delete('art_comments')
+            ->where('article_id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
     }
 }

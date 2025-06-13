@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -26,34 +26,36 @@ readonly class TagsSearchProvider
     /**
      * @throws DbLayerException
      */
-    public function findBlogTags(array $where, array $words): array
+    public function findBlogTags(array $words): array
     {
-        $tagIsUsedSql = $this->dbLayer->build([
-            'SELECT' => '1',
-            'FROM'   => 's2_blog_post_tag AS pt',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 's2_blog_posts AS p',
-                    'ON'         => 'p.id = pt.post_id'
-                ]
-            ],
-            'WHERE'  => 'pt.tag_id = t.id AND p.published = 1',
-            'LIMIT'  => '1'
-        ]);
+        $tagIsUsedSql = $this->dbLayer
+            ->select('1')
+            ->from('s2_blog_post_tag AS pt')
+            ->innerJoin('s2_blog_posts AS p', 'p.id = pt.post_id')
+            ->where('pt.tag_id = t.id')
+            ->andWhere('p.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $statement = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'id AS tag_id, name, url, (' . $tagIsUsedSql . ') AS used',
-            'FROM'   => 'tags AS t',
-            'WHERE'  => implode(' OR ', $where),
-        ]);
+        $result = $this->dbLayer
+            ->select('id AS tag_id, name, url')
+            ->from('tags AS t')
+            ->where('EXISTS (' . $tagIsUsedSql . ')')
+            ->andWhere('(' . implode(' OR ', array_fill(0, 2 * \count($words), 'name LIKE ?')) . ')')
+            ->execute(array_merge(
+                array_map(static fn(string $word) => $word . '%', $words),
+                array_map(static fn(string $word) => '% ' . $word . '%', $words),
+            ))
+        ;
 
-        $result = [];
-        while ($row = $this->dbLayer->fetchAssoc($statement)) {
-            if ($row['used'] && $this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
-                $result[] = '<a href="' . $this->blogUrlBuilder->tag($row['url']) . '">' . $row['name'] . '</a>';
+        $tags = [];
+        while ($row = $result->fetchAssoc()) {
+            if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
+                $tags[] = '<a href="' . $this->blogUrlBuilder->tag($row['url']) . '">' . $row['name'] . '</a>';
             }
         }
 
-        return $result;
+        return $tags;
     }
 }

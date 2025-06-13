@@ -704,14 +704,9 @@ if (count($validationErrors) === 0) {
 
 if (count($validationErrors) === 0) {
     // Make sure S2 isn't already installed
-    $query = array(
-        'SELECT' => 'count(id)',
-        'FROM'   => 'users'
-    );
-
     try {
-        $result = $s2_db->buildAndQuery($query);
-        if ($s2_db->fetchRow($result)) {
+        $result = $s2_db->select('count(id)')->from('users')->execute();
+        if ($result->fetchRow()) {
             $validationErrors['db_is_used'] = sprintf($lang_install['S2 already installed'], $db_prefix, $db_name);
         }
     } catch (DbLayerException|PDOException $e) {
@@ -748,39 +743,56 @@ $installer->createTables();
 $now = time();
 
 // Admin user
-$query = array(
-    'INSERT' => 'login, password, email, view, view_hidden, hide_comments, edit_comments, create_articles, edit_site, edit_users',
-    'INTO'   => 'users',
-    'VALUES' => '\'' . $s2_db->escape($username) . '\', \'' . md5($password . 'Life is not so easy :-)') . '\', \'' . $s2_db->escape($email) . '\', 1, 1, 1, 1, 1, 1, 1'
-);
-
-$s2_db->buildAndQuery($query);
+$s2_db
+    ->insert('users')
+    ->setValue('login', ':login')->setParameter('login', $username)
+    ->setValue('password', ':password')->setParameter('password', md5($password . 'Life is not so easy :-)'))
+    ->setValue('email', ':email')->setParameter('email', $email)
+    ->setValue('view', '1')
+    ->setValue('view_hidden', '1')
+    ->setValue('hide_comments', '1')
+    ->setValue('edit_comments', '1')
+    ->setValue('create_articles', '1')
+    ->setValue('edit_site', '1')
+    ->setValue('edit_users', '1')
+    ->execute()
+;
 $admin_uid = $s2_db->insertId();
 
 $installer->insertConfigData($lang_install['Site name'], $email, $default_lang, S2_DB_REVISION);
 
 // Insert some other default data
 $installer->insertMainPage($lang_install['Main Page'], $now);
-$query = array(
-    'INSERT' => 'parent_id, title, create_time, modify_time, published, template, url',
-    'INTO'   => 'articles',
-    'VALUES' => '1, \'' . $lang_install['Section example'] . '\', ' . $now . ', ' . $now . ', 1, \'site.php\', \'section1\''
-);
-$s2_db->buildAndQuery($query);
-
-$query = array(
-    'INSERT' => 'parent_id, title, create_time, modify_time, published, template, url, pagetext, excerpt, user_id',
-    'INTO'   => 'articles',
-    'VALUES' => '2, \'' . $lang_install['Page example'] . '\', ' . $now . ', ' . $now . ', 1, \'\', \'page1\', \'' . $s2_db->escape($lang_install['Page text']) . '\', \'' . $s2_db->escape($lang_install['Page text']) . '\', ' . $admin_uid
-);
-
-$s2_db->buildAndQuery($query);
+$s2_db->insert('articles')
+    ->setValue('parent_id', '1')
+    ->setValue('title', ':title')->setParameter('title', $lang_install['Section example'])
+    ->setValue('create_time', ':create_time')->setParameter('create_time', $now)
+    ->setValue('modify_time', ':modify_time')->setParameter('modify_time', $now)
+    ->setValue('published', '1')
+    ->setValue('template', "'site.php'")
+    ->setValue('url', "'section1'")
+    ->setValue('excerpt', "''")
+    ->setValue('pagetext', "''")
+    ->execute()
+;
+$s2_db
+    ->insert('articles')
+    ->setValue('parent_id', '2')
+    ->setValue('title', ':title')->setParameter('title', $lang_install['Page example'])
+    ->setValue('create_time', ':create_time')->setParameter('create_time', $now)
+    ->setValue('modify_time', ':modify_time')->setParameter('modify_time', $now)
+    ->setValue('published', '1')
+    ->setValue('template', "''")
+    ->setValue('url', "'page1'")
+    ->setValue('pagetext', ':pagetext')->setParameter('pagetext', $lang_install['Page text'])
+    ->setValue('excerpt', ':excerpt')->setParameter('excerpt', $lang_install['Page text'])
+    ->setValue('user_id', ':user_id')->setParameter('user_id', $admin_uid)
+    ->execute()
+;
 
 if ($db_type !== 'mysql') {
     $s2_db->endTransaction();
 }
-
-$s2_db->close();
 
 /** @var ExtensionCache $cache */
 $cache = $app->container->get(ExtensionCache::class);

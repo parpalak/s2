@@ -43,27 +43,35 @@ readonly class PageFavorite implements ControllerInterface
     public function handle(Request $request): Response
     {
         if ($request->attributes->get('slash') !== '/') {
-            return new RedirectResponse($this->urlBuilder->link($request->getPathInfo() . '/'), Response::HTTP_MOVED_PERMANENTLY);
+            return new RedirectResponse(
+                $this->urlBuilder->link($request->getPathInfo() . '/'),
+                Response::HTTP_MOVED_PERMANENTLY
+            );
         }
 
-        $subquery   = [
-            'SELECT' => '1',
-            'FROM'   => 'articles AS a1',
-            'WHERE'  => 'a1.parent_id = a.id AND a1.published = 1',
-            'LIMIT'  => '1'
-        ];
-        $raw_query1 = $this->dbLayer->build($subquery);
+        $rawQuery = $this->dbLayer
+            ->select('1')
+            ->from('articles AS a1')
+            ->where('a1.parent_id = a.id')
+            ->andWhere('a1.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
         $sort_order = SORT_DESC; // SORT_ASC is also possible
-        $query      = [
-            'SELECT' => 'a.title, a.url, (' . $raw_query1 . ') IS NOT NULL AS children_exist, a.id, a.excerpt, a.create_time, a.parent_id',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => 'a.favorite = 1 AND a.published = 1'
-        ];
-        $result     = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('a.title, a.url, (' . $rawQuery . ') IS NOT NULL AS children_exist, a.id, a.excerpt, 2 AS favorite, a.create_time, a.parent_id')
+            ->from('articles AS a')
+            ->where('a.favorite = 1')
+            ->andWhere('a.published = 1')
+            // NOTE: leads to "Using filesort". Maybe it's not bad, but in tags there is also "Using temporary".
+            // Let's sort in PHP for a common approach.
+            // ->orderBy('a.create_time DESC')
+            ->execute()
+        ;
 
         $urls = $parentIds = $rows = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $rows[]      = $row;
             $urls[]      = rawurlencode($row['url']);
             $parentIds[] = $row['parent_id'];
@@ -71,56 +79,45 @@ readonly class PageFavorite implements ControllerInterface
 
         $urls = $this->articleProvider->getFullUrlsForArticles($parentIds, $urls);
 
-        $sections = $articles = $articles_sort_array = $sections_sort_array = [];
-        foreach ($urls as $k => $url) {
-            $row = $rows[$k];
-            if ($row['children_exist']) {
-                $item       = [
+        $sections = $articles = $sortingValuesForArticles = $sortingValuesForSections = [];
+        if (\count($urls) > 0) {
+            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/');
+            foreach ($urls as $k => $url) {
+                $row  = $rows[$k];
+                $item = [
                     'id'            => $row['id'],
                     'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy ? '/' : '')),
-                    'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy && $row['children_exist'] ? '/' : '')),
+                    'favorite_link' => $favoriteLink,
                     'date'          => $this->viewer->date($row['create_time']),
                     'excerpt'       => $row['excerpt'],
-                    'favorite'      => 2,
+                    'favorite'      => $row['favorite'],
                 ];
-                $sort_field = $row['create_time'];
-
-                $sections[]            = $item;
-                $sections_sort_array[] = $sort_field;
-            } else {
-                $item       = [
-                    'id'            => $row['id'],
-                    'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url),
-                    'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
-                    'date'          => $this->viewer->date($row['create_time']),
-                    'excerpt'       => $row['excerpt'],
-                    'favorite'      => 2,
-                ];
-                $sort_field = $row['create_time'];
-
-                $articles[]            = $item;
-                $articles_sort_array[] = $sort_field;
+                if ($row['children_exist']) {
+                    $sections[]                 = $item;
+                    $sortingValuesForSections[] = $row['create_time'];
+                } else {
+                    $articles[]                 = $item;
+                    $sortingValuesForArticles[] = $row['create_time'];
+                }
             }
         }
 
-        // There are favorite sections
-        $section_text = '';
+        $sectionText = '';
         if (\count($sections) > 0) {
-            // There are sections having the tag
-            array_multisort($sections_sort_array, $sort_order, $sections);
+            // There are favorite sections
+            array_multisort($sortingValuesForSections, $sort_order, $sections);
             foreach ($sections as $item) {
-                $section_text .= $this->viewer->render('subarticles_item', $item);
+                $sectionText .= $this->viewer->render('subarticles_item', $item);
             }
         }
 
-        $article_text = '';
+        $articleText = '';
         if (\count($articles) > 0) {
             // There are favorite articles
-            array_multisort($articles_sort_array, $sort_order, $articles);
+            array_multisort($sortingValuesForArticles, $sort_order, $articles);
             foreach ($articles as $item) {
-                $article_text .= $this->viewer->render('subarticles_item', $item);
+                $articleText .= $this->viewer->render('subarticles_item', $item);
             }
         }
 
@@ -132,8 +129,8 @@ readonly class PageFavorite implements ControllerInterface
             ->putInPlaceholder('title', $this->translator->trans('Favorite'))
             ->putInPlaceholder('date', '')
             ->putInPlaceholder('text', $this->viewer->render('list_text', [
-                'articles' => $article_text,
-                'sections' => $section_text,
+                'articles' => $articleText,
+                'sections' => $sectionText,
             ]))
         ;
 

@@ -2,8 +2,8 @@
 /**
  * Blog posts for a day.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -11,12 +11,17 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Controller;
 
+use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
 use S2\Cms\Template\HtmlTemplate;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class DayPageController extends BlogController
 {
+    /**
+     * @throws DbLayerException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $year  = (int)($textYear = $request->attributes->get('year'));
@@ -32,9 +37,11 @@ class DayPageController extends BlogController
         $startTime = mktime(0, 0, 0, $month, $day, $year);
         $endTime   = $startTime + 60 * 60 * 24;
 
-        $output = $this->getPosts([
-            'WHERE' => 'p.create_time < ' . $endTime . ' AND p.create_time >= ' . $startTime
-        ]);
+        $output = $this->getPosts(
+            fn (SelectBuilder $qb) => $qb
+                ->andWhere('p.create_time < ' . $endTime)
+                ->andWhere('p.create_time >= ' . $startTime)
+        );
 
         if ($output === '') {
             $template->markAsNotFound();

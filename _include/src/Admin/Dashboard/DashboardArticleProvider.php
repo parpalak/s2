@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -12,6 +12,7 @@ namespace S2\Cms\Admin\Dashboard;
 use S2\AdminYard\TemplateRenderer;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
 
 readonly class DashboardArticleProvider implements DashboardStatProviderInterface
 {
@@ -22,6 +23,10 @@ readonly class DashboardArticleProvider implements DashboardStatProviderInterfac
     ) {
     }
 
+    /**
+     * {@inheritdoc}
+     * @throws DbLayerException
+     */
     public function getHtml(): string
     {
         return $this->templateRenderer->render(
@@ -30,6 +35,9 @@ readonly class DashboardArticleProvider implements DashboardStatProviderInterfac
         );
     }
 
+    /**
+     * @throws DbLayerException
+     */
     private function countArticles(): array
     {
         $tablePrefix = $this->dbLayer->getPrefix();
@@ -54,7 +62,7 @@ SELECT
 SQL;
 
         $result = $this->dbLayer->query($sql);
-        $data   = $this->dbLayer->fetchAssoc($result);
+        $data   = $result->fetchAssoc();
         return $data;
     }
 }

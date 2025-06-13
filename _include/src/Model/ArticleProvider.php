@@ -2,8 +2,8 @@
 /**
  * Updates search index when a visible article has been changed.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -37,7 +37,7 @@ readonly class ArticleProvider
      *
      * Actually it's one of the best things in S2! :)
      *
-     * @throws \S2\Cms\Pdo\DbLayerException
+     * @throws DbLayerException
      */
     public function getFullUrlsForArticles(array $parentIds, array $urls): array
     {
@@ -61,14 +61,16 @@ readonly class ArticleProvider
             $parentsAreFound = array_combine(array_keys($parentIds), array_fill(0, \count($parentIds), false));
 
             // Step to fetch parent articles
-            $query  = [
-                'SELECT' => 'id, parent_id, url',
-                'FROM'   => 'articles',
-                'WHERE'  => 'id IN (' . implode(', ', array_unique($parentIds)) . ') AND published = 1'
-            ];
-            $result = $this->dbLayer->buildAndQuery($query);
+            $idsToSelect = array_unique($parentIds);
+            $result      = $this->dbLayer
+                ->select('id, parent_id, url')
+                ->from('articles')
+                ->where('id IN (' . implode(', ', array_fill(0, \count($idsToSelect), '?')) . ')')
+                ->andWhere('published = 1')
+                ->execute($idsToSelect)
+            ;
 
-            while ($row = $this->dbLayer->fetchAssoc($result)) {
+            while ($row = $result->fetchAssoc()) {
                 // Well, the loop may seem not pretty much.
                 // But $parent_ids values don't have to be unique, we have to process all duplicates.
                 foreach ($parentIds as $k => $parentId) {
@@ -99,61 +101,63 @@ readonly class ArticleProvider
     /**
      * Returns the title of the main page.
      *
-     * @throws \S2\Cms\Pdo\DbLayerException
+     * @throws DbLayerException
      */
     public function mainPageTitle(): string
     {
         // TODO cache?
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'title',
-            'FROM'   => 'articles',
-            'WHERE'  => 'parent_id = ' . self::ROOT_ID,
-        ]);
+        $result = $this->dbLayer
+            ->select('title')
+            ->from('articles')
+            ->where('parent_id = ' . self::ROOT_ID)
+            ->execute()
+        ;
 
-        return $this->dbLayer->result($result);
+        return $result->result();
     }
 
     /**
      * Fetching last articles info (for template placeholders and RSS)
      *
-     * @throws \S2\Cms\Pdo\DbLayerException
+     * @throws DbLayerException
      */
     public function lastArticlesList(?int $limit = 5): array
     {
-        $raw_query_child_num = $this->dbLayer->build([
-            'SELECT' => '1',
-            'FROM'   => 'articles AS a2',
-            'WHERE'  => 'a2.parent_id = a.id AND a2.published = 1',
-            'LIMIT'  => '1'
-        ]);
+        $raw_query_child_num = $this->dbLayer
+            ->select('1')
+            ->from('articles AS a2')
+            ->where('a2.parent_id = a.id')
+            ->andWhere('a2.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $raw_query_user = $this->dbLayer->build([
-            'SELECT' => 'u.name',
-            'FROM'   => 'users AS u',
-            'WHERE'  => 'u.id = a.user_id'
-        ]);
+        $raw_query_user = $this->dbLayer
+            ->select('u.name')
+            ->from('users AS u')
+            ->where('u.id = a.user_id')
+            ->getSql()
+        ;
 
-        $query = [
-            'SELECT'   => 'a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url, a.parent_id, a1.title AS parent_title, a1.url AS p_url, (' . $raw_query_user . ') AS author',
-            'FROM'     => 'articles AS a',
-            'JOINS'    => [
-                [
-                    'INNER JOIN' => 'articles AS a1',
-                    'ON'         => 'a1.id = a.parent_id'
-                ]
-            ],
-            'ORDER BY' => 'a.create_time DESC',
-            'WHERE'    => '(' . $raw_query_child_num . ') IS NULL AND (a.create_time <> 0 OR a.modify_time <> 0) AND a.published = 1',
-        ];
+        $qb = $this->dbLayer
+            ->select('a.id, a.title, a.create_time, a.modify_time, a.excerpt, a.favorite, a.url')
+            ->addSelect('a.parent_id, a1.title AS parent_title, a1.url AS p_url, (' . $raw_query_user . ') AS author')
+            ->from('articles AS a')
+            ->innerJoin('articles AS a1', 'a1.id = a.parent_id')
+            ->where('(' . $raw_query_child_num . ') IS NULL')
+            ->andWhere('a.create_time <> 0 OR a.modify_time <> 0')
+            ->andWhere('a.published = 1')
+            ->orderBy('a.create_time DESC')
+        ;
 
         if ($limit !== null) {
-            $query['LIMIT'] = (string)$limit;
+            $qb->limit($limit);
         }
 
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $qb->execute();
 
         $last = $urls = $parentIds = [];
-        for ($i = 0; $row = $this->dbLayer->fetchAssoc($result); $i++) {
+        for ($i = 0; $row = $result->fetchAssoc(); $i++) {
             $urls[$i]      = rawurlencode($row['url']);
             $parentIds[$i] = $row['parent_id'];
 
@@ -183,7 +187,7 @@ readonly class ArticleProvider
     /**
      * Formatting last articles (for template placeholders)
      *
-     * @throws \S2\Cms\Pdo\DbLayerException
+     * @throws DbLayerException
      */
     public function lastArticlesPlaceholder(int $limit): string
     {
@@ -207,15 +211,17 @@ readonly class ArticleProvider
         return $output;
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function getTemplateList(): array
     {
-        $query  = [
-            'SELECT' => 'DISTINCT a.template',
-            'FROM'   => 'articles AS a'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
-
-        $usedTemplates = $this->dbLayer->fetchColumn($result);
+        $result        = $this->dbLayer
+            ->select('DISTINCT a.template')
+            ->from('articles AS a')
+            ->execute()
+        ;
+        $usedTemplates = $result->fetchColumn();
 
         return array_values(array_unique(array_merge([
             '',
@@ -240,29 +246,29 @@ readonly class ArticleProvider
 
         $tablePrefix = $this->dbLayer->getPrefix();
 
-        $query = "
-        WITH RECURSIVE path_cte AS (
-            SELECT id, url, parent_id, 1 AS level
-            FROM {$tablePrefix}articles
-            WHERE id = :id" . ($visibleForAll ? " AND published = 1" : "") . "
+        $sql = "
+            WITH RECURSIVE path_cte AS (
+                SELECT id, url, parent_id, 1 AS level
+                FROM {$tablePrefix}articles
+                WHERE id = :id" . ($visibleForAll ? " AND published = 1" : "") . "
 
-            UNION ALL
+                UNION ALL
 
-            SELECT a.id, a.url, a.parent_id, p.level + 1
-            FROM {$tablePrefix}articles a
-            INNER JOIN path_cte p ON a.id = p.parent_id " . ($visibleForAll ? " AND a.published = 1" : "") . "
-        )
-        SELECT url, parent_id FROM path_cte ORDER BY level DESC
-    ";
+                SELECT a.id, a.url, a.parent_id, p.level + 1
+                FROM {$tablePrefix}articles a
+                INNER JOIN path_cte p ON a.id = p.parent_id " . ($visibleForAll ? " AND a.published = 1" : "") . "
+            )
+            SELECT url, parent_id FROM path_cte ORDER BY level DESC
+        ";
 
-        $result = $this->dbLayer->query($query, [
+        $result = $this->dbLayer->query($sql, [
             ':id' => $id,
         ]);
 
         $urls = [];
 
         $rootIsFound = false;
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $urls[] = rawurlencode($row['url']);
             if ($row['parent_id'] === self::ROOT_ID) {
                 $rootIsFound = true;
@@ -300,17 +306,21 @@ readonly class ArticleProvider
 
         // Walking through page parents
         foreach ($pathArray as $pathItem) {
-            $query  = [
-                'SELECT' => 'a.id, a.title, a.commented',
-                'FROM'   => 'articles AS a',
-                'WHERE'  => 'url = :url' . ($this->useHierarchy ? ' AND parent_id = :id' : '') . ($publishedOnly ? ' AND published = 1' : '')
-            ];
-            $result = $this->dbLayer->buildAndQuery($query, [
-                'url' => $pathItem,
-                ...$this->useHierarchy ? ['id' => $id] : []
-            ]);
+            $qb = $this->dbLayer
+                ->select('a.id, a.title, a.commented')
+                ->from('articles AS a')
+                ->where('url = :url')->setParameter('url', $pathItem)
+            ;
 
-            $row = $this->dbLayer->fetchRow($result);
+            if ($this->useHierarchy) {
+                $qb->andWhere('parent_id = :id')->setParameter('id', $id);
+            }
+
+            if ($publishedOnly) {
+                $qb->andWhere('published = 1');
+            }
+
+            $row = $qb->execute()->fetchRow();
             if (!\is_array($row)) {
                 return null;
             }
@@ -326,13 +336,14 @@ readonly class ArticleProvider
      */
     public function checkUrlAndTemplateStatus(int $id): array
     {
-        $query  = [
-            'SELECT' => 'parent_id, url, template',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => 'a.id = :id'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query, ['id' => $id]);
-        [$parentId, $url, $template] = $this->dbLayer->fetchRow($result);
+        $result = $this->dbLayer
+            ->select('parent_id, url, template')
+            ->from('articles')
+            ->where('id = :id')->setParameter('id', $id)
+            ->execute()
+        ;
+
+        [$parentId, $url, $template] = $result->fetchRow();
 
         $templateStatus = (!$this->useHierarchy || $template !== '') ? 'ok' : 'empty';
 
@@ -344,16 +355,19 @@ readonly class ArticleProvider
             return ['empty', $templateStatus];
         }
 
-        // NOTE: seems that this condition must be checked also for root items with ($parentId === self::ROOT_ID).
-        // However, somewhere must be a more strict constraint that allows only one root item.
-        $query  = [
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => 'a.url = :url' . ($this->useHierarchy ? ' AND a.parent_id = ' . $parentId : '')
-        ];
-        $result = $this->dbLayer->buildAndQuery($query, ['url' => $url]);
+        $qb = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('articles AS a')
+            ->where('a.url = :url')->setParameter('url', $url)
+        ;
 
-        if ($this->dbLayer->result($result) !== 1) {
+        if ($this->useHierarchy) {
+            $qb->andWhere('a.parent_id = :id')->setParameter('id', $parentId);
+        }
+
+        if ($qb->execute()->result() !== 1) {
+            // NOTE: seems that this condition must be also checked above in if ($parentId === self::ROOT_ID) {} for root items.
+            // However, somewhere must be a more strict constraint that allows only one root item.
             return ['not_unique', $templateStatus];
         }
 
@@ -365,12 +379,16 @@ readonly class ArticleProvider
      */
     public function getCommentNum(int $id, bool $includeHidden): int
     {
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 'art_comments',
-            'WHERE'  => 'article_id = :article_id' . ($includeHidden ? '' : ' AND shown = 1'),
-        ], ['article_id' => $id]);
+        $qb = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('art_comments')
+            ->where('article_id = :article_id')->setParameter('article_id', $id)
+        ;
 
-        return (int)$this->dbLayer->result($result);
+        if (!$includeHidden) {
+            $qb->andWhere('shown = 1');
+        }
+
+        return (int)$qb->execute()->result();
     }
 }

@@ -32,33 +32,28 @@ class TagsPageController extends BlogController
             $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar());
         }
 
-        $query  = [
-            'SELECT' => 'id AS tag_id, name, url',
-            'FROM'   => 'tags'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('id AS tag_id, name, url')
+            ->from('tags')
+            ->execute()
+        ;
 
         $tag_name = $tag_url = $tag_count = [];
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $tag_name[$row['tag_id']]  = $row['name'];
             $tag_url[$row['tag_id']]   = $row['url'];
             $tag_count[$row['tag_id']] = 0;
         }
 
-        $query  = [
-            'SELECT' => 'pt.tag_id',
-            'FROM'   => 's2_blog_post_tag AS pt',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 's2_blog_posts AS p',
-                    'ON'         => 'p.id = pt.post_id'
-                ]
-            ],
-            'WHERE'  => 'p.published = 1'
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('pt.tag_id')
+            ->from('s2_blog_post_tag AS pt')
+            ->innerJoin('s2_blog_posts AS p', 'p.id = pt.post_id')
+            ->where('p.published = 1')
+            ->execute()
+        ;
 
-        while ($row = $this->dbLayer->fetchRow($result)) {
+        while ($row = $result->fetchRow()) {
             $tag_count[$row[0]] = 1 + ($tag_count[$row[0]] ?? 0);
         }
 

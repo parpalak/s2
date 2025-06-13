@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -29,11 +29,11 @@ class UserSettingStorage implements SettingStorageInterface, StatefulServiceInte
     /**
      * @throws DbLayerException
      */
-    public function has(string $string): bool
+    public function has(string $key): bool
     {
         $this->ensureParamsAreLoaded();
 
-        return isset($this->params[$this->permissionChecker->getUserId()][$string]);
+        return isset($this->params[$this->permissionChecker->getUserId()][$key]);
     }
 
     /**
@@ -64,16 +64,13 @@ class UserSettingStorage implements SettingStorageInterface, StatefulServiceInte
         $this->params[$userId][$key] = $data;
 
         try {
-            $this->dbLayer->buildAndQuery([
-                'UPSERT' => 'user_id, name, value',
-                'INTO'   => self::TABLE_NAME,
-                'UNIQUE' => 'user_id, name',
-                'VALUES' => ':user_id, :name, :value',
-            ], [
-                'user_id' => $userId,
-                'name'    => $key,
-                'value'   => json_encode($data, JSON_THROW_ON_ERROR),
-            ]);
+            $this->dbLayer
+                ->upsert(self::TABLE_NAME)
+                ->setKey('user_id', ':user_id')->setParameter('user_id', $userId)
+                ->setKey('name', ':name')->setParameter('name', $key)
+                ->setValue('value', ':value')->setParameter('value', json_encode($data, JSON_THROW_ON_ERROR))
+                ->execute()
+            ;
         } catch (\JsonException $e) {
             throw new \LogicException('Failed to encode user settings.', 0, $e);
         }
@@ -89,13 +86,14 @@ class UserSettingStorage implements SettingStorageInterface, StatefulServiceInte
             throw new \RuntimeException('No authenticated user found.');
         }
 
-        $this->dbLayer->buildAndQuery([
-            'DELETE' => self::TABLE_NAME,
-            'WHERE'  => 'user_id = :user_id AND name = :name',
-        ], [
-            'user_id' => $userId,
-            'name'    => $key,
-        ]);
+        $this->dbLayer
+            ->delete(self::TABLE_NAME)
+            ->where('user_id = :user_id')
+            ->setParameter('user_id', $userId)
+            ->andWhere('name = :name')
+            ->setParameter('name', $key)
+            ->execute()
+        ;
     }
 
     /**
@@ -112,15 +110,15 @@ class UserSettingStorage implements SettingStorageInterface, StatefulServiceInte
             return;
         }
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'name, value',
-            'FROM'   => self::TABLE_NAME,
-            'WHERE'  => 'user_id = :user_id',
-        ], [
-            'user_id' => $userId
-        ]);
+        $result = $this->dbLayer
+            ->select('name, value')
+            ->from(self::TABLE_NAME)
+            ->where('user_id = :user_id')
+            ->setParameter('user_id', $userId)
+            ->execute()
+        ;
 
-        $this->params[$userId] = $result->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $this->params[$userId] = $result->fetchKeyPair();
         foreach ($this->params[$userId] as $key => $value) {
             try {
                 $this->params[$userId][$key] = json_decode($value, true, 512, JSON_THROW_ON_ERROR);

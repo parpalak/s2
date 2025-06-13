@@ -2,14 +2,15 @@
 /**
  * Favorite blog posts.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
 namespace s2_extensions\s2_blog\Controller;
 
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
 use S2\Cms\Template\HtmlTemplate;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,10 +31,12 @@ class FavoritePageController extends BlogController
             $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar());
         }
 
-        $output = $this->getPosts([
-            'SELECT' => '2 AS favorite',
-            'WHERE'  => 'favorite = 1',
-        ], false);
+        $output = $this->getPosts(
+            fn(SelectBuilder $qb) => $qb
+                ->addSelect('2 AS favorite')
+                ->andWhere('p.favorite = 1'),
+            false
+        );
 
         if ($output === '') {
             // TODO Why 404 in favorite? Where is the message?

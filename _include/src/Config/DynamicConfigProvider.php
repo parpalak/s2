@@ -98,17 +98,10 @@ class DynamicConfigProvider implements StatefulServiceInterface
      */
     private function fetchConfig(): array
     {
-        $query = [
-            'SELECT' => 'c.*',
-            'FROM'   => 'config AS c'
-        ];
-
-        $statement = $this->dbLayer->buildAndQuery($query);
-
-        $result = [];
-        while ($row = $this->dbLayer->fetchRow($statement)) {
-            $result[$row[0]] = $row[1];
-        }
-        return $result;
+        return $this->dbLayer->select('name, value')
+            ->from('config')
+            ->execute()
+            ->fetchKeyPair()
+        ;
     }
 }

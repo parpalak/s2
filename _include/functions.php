@@ -2,18 +2,15 @@
 /**
  * Loads common functions used throughout the site.
  *
- * @copyright (C) 2009-2014 Roman Parpalak, partially based on code (C) 2008-2009 PunBB
- * @license http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
- * @package S2
+ * @copyright 2009-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
-
-use S2\Cms\Pdo\DbLayerException;
-
-//
-// Encodes the contents of $str so that they are safe to output on an (X)HTML page
-//
-function s2_htmlencode($str)
+/**
+ * Encodes the contents of $str so that they are safe to output on an HTML page
+ */
+function s2_htmlencode($str): string
 {
     return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }

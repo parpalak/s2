@@ -2,8 +2,8 @@
 /**
  * Provides data for building the search index
  *
- * @copyright 2010-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2010-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_search
  */
 
@@ -25,21 +25,26 @@ readonly class ArticleBulkIndexingProvider implements BulkIndexingProviderInterf
      */
     private function crawl($parent_id, $url): \Generator
     {
-        $childrenNumSubquery = $this->dbLayer->build([
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 'articles AS a2',
-            'WHERE'  => 'a2.parent_id = a.id',
-            'LIMIT'  => '1'
-        ]);
+        $childrenNumSubquery = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('articles AS a2')
+            ->where('a2.parent_id = a.id')
+            ->andWhere('a2.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'title, id, create_time, url, (' . $childrenNumSubquery . ') as has_children, parent_id, meta_keys, meta_desc, pagetext',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => 'parent_id = :parent_id AND published = 1',
-        ], ['parent_id' => $parent_id]);
+        $result = $this->dbLayer
+            ->select('title, id, create_time, url, (' . $childrenNumSubquery . ') as has_children, parent_id, meta_keys, meta_desc, pagetext')
+            ->from('articles AS a')
+            ->where('parent_id = :parent_id')
+            ->setParameter('parent_id', $parent_id)
+            ->andWhere('published = 1')
+            ->execute()
+        ;
 
-        while ($article = $this->dbLayer->fetchAssoc($result)) {
-            $dateTime  = null;
+        while ($article = $result->fetchAssoc()) {
+            $dateTime = null;
             if ($article['create_time'] > 0) {
                 $dateTime = (new \DateTime('@' . $article['create_time']))->setTimezone((new \DateTime())->getTimezone());
             }
@@ -61,6 +66,9 @@ readonly class ArticleBulkIndexingProvider implements BulkIndexingProviderInterf
 
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function getIndexables(): \Generator
     {
         yield from $this->crawl(ArticleProvider::ROOT_ID, '');

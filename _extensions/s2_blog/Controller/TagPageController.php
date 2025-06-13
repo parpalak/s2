@@ -13,6 +13,8 @@ use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
 use S2\Cms\Template\HtmlTemplate;
 use S2\Cms\Template\HtmlTemplateProvider;
 use S2\Cms\Template\Viewer;
@@ -58,6 +60,9 @@ class TagPageController extends BlogController
         );
     }
 
+    /**
+     * @throws DbLayerException
+     */
     public function body(Request $request, HtmlTemplate $template): ?Response
     {
         $params = $request->attributes->all();
@@ -68,14 +73,15 @@ class TagPageController extends BlogController
 
         $tag = $params['tag'];
 
-        $query  = [
-            'SELECT' => 'id AS tag_id, description, name, url',
-            'FROM'   => 'tags',
-            'WHERE'  => 'url = \'' . $this->dbLayer->escape($tag) . '\''
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('id AS tag_id, description, name, url')
+            ->from('tags')
+            ->where('url = :url')
+            ->setParameter('url', $tag)
+            ->execute()
+        ;
 
-        if (!($row = $this->dbLayer->fetchRow($result))) {
+        if (!($row = $result->fetchRow())) {
             throw new NotFoundException();
         }
 
@@ -94,15 +100,13 @@ class TagPageController extends BlogController
             $tagDescription .= '<hr />';
         }
 
-        $output = $this->getPosts([
-            'JOINS' => [
-                [
-                    'INNER JOIN' => 's2_blog_post_tag AS pt',
-                    'ON'         => 'pt.post_id = p.id'
-                ]
-            ],
-            'WHERE' => 'pt.tag_id = ' . $tagId
-        ], false);
+        $output = $this->getPosts(
+            fn(SelectBuilder $qb) => $qb
+                ->innerJoin('s2_blog_post_tag AS pt', 'p.id = pt.post_id')
+                ->andWhere('pt.tag_id = :tag_id')
+                ->setParameter('tag_id', $tagId),
+            false
+        );
 
         if ($output === '') {
             throw new NotFoundException();
@@ -126,36 +130,35 @@ class TagPageController extends BlogController
         return null;
     }
 
-
     /**
      * Returns the array of links to the articles with the tag specified
+     * @throws DbLayerException
      */
     private function articles_by_tag(int $tag_id): array
     {
-        $subquery   = [
-            'SELECT' => '1',
-            'FROM'   => 'articles AS a1',
-            'WHERE'  => 'a1.parent_id = a.id AND a1.published = 1',
-            'LIMIT'  => '1'
-        ];
-        $raw_query1 = $this->dbLayer->build($subquery);
+        $rawQuery = $this->dbLayer
+            ->select('1')
+            ->from('articles AS a1')
+            ->where('a1.parent_id = a.id')
+            ->andWhere('a1.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $query  = [
-            'SELECT' => 'a.id, a.url, a.title, a.parent_id, (' . $raw_query1 . ') IS NOT NULL AS children_exist',
-            'FROM'   => 'articles AS a',
-            'JOINS'  => [
-                [
-                    'INNER JOIN' => 'article_tag AS atg',
-                    'ON'         => 'atg.article_id = a.id'
-                ],
-            ],
-            'WHERE'  => 'atg.tag_id = ' . $tag_id . ' AND a.published = 1',
-        ];
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('a.id, a.url, a.title, a.parent_id')
+            ->addSelect('(' . $rawQuery . ') IS NOT NULL AS children_exist')
+            ->from('articles AS a')
+            ->innerJoin('article_tag AS atg', 'atg.article_id = a.id')
+            ->where('atg.tag_id = :tag_id')
+            ->setParameter('tag_id', $tag_id)
+            ->andWhere('a.published = 1')
+            ->execute()
+        ;
 
         $title = $urls = $parentIds = [];
 
-        while ($row = $this->dbLayer->fetchAssoc($result)) {
+        while ($row = $result->fetchAssoc()) {
             $urls[]      = urlencode($row['url']) . ($this->useHierarchy && $row['children_exist'] ? '/' : '');
             $parentIds[] = $row['parent_id'];
             $title[]     = $row['title'];

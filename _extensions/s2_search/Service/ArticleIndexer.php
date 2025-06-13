@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_search
  */
 
@@ -17,7 +17,10 @@ use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Rose\Entity\Indexable;
+use S2\Rose\Exception\RuntimeException;
+use S2\Rose\Exception\UnknownException;
 use S2\Rose\Indexer;
+use S2\Rose\Storage\Exception\InvalidEnvironmentException;
 
 readonly class ArticleIndexer implements QueueHandlerInterface
 {
@@ -33,6 +36,10 @@ readonly class ArticleIndexer implements QueueHandlerInterface
     /**
      * @throws DbLayerException
      * @throws InvalidArgumentException
+     * @throws \PDOException
+     * @throws RuntimeException
+     * @throws UnknownException
+     * @throws InvalidEnvironmentException
      */
     public function handle(string $id, string $code, array $payload): bool
     {
@@ -58,20 +65,24 @@ readonly class ArticleIndexer implements QueueHandlerInterface
      */
     private function getIndexable(int $id): ?Indexable
     {
-        $childrenNumSubquery = $this->dbLayer->build([
-            'SELECT' => 'COUNT(*)',
-            'FROM'   => 'articles AS a2',
-            'WHERE'  => 'a2.parent_id = a.id',
-            'LIMIT'  => '1'
-        ]);
+        $childrenNumSubquery = $this->dbLayer
+            ->select('COUNT(*)')
+            ->from('articles AS a2')
+            ->where('a2.parent_id = a.id')
+            ->andWhere('a2.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $result = $this->dbLayer->buildAndQuery([
-            'SELECT' => 'title, id, create_time, url, (' . $childrenNumSubquery . ') as has_children, parent_id, meta_keys, meta_desc, pagetext',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => 'id = :id AND published = 1',
-        ], ['id' => $id]);
+        $result = $this->dbLayer
+            ->select('title, id, create_time, url, (' . $childrenNumSubquery . ') as has_children, parent_id, meta_keys, meta_desc, pagetext')
+            ->from('articles AS a')
+            ->where('id = :id')->setParameter('id', $id)
+            ->andWhere('published = 1')
+            ->execute()
+        ;
 
-        $article = $this->dbLayer->fetchAssoc($result);
+        $article = $result->fetchAssoc();
         if (!$article) {
             return null;
         }
@@ -81,7 +92,7 @@ readonly class ArticleIndexer implements QueueHandlerInterface
             return null;
         }
 
-        $dateTime  = null;
+        $dateTime = null;
         if ($article['create_time'] > 0) {
             $dateTime = (new \DateTime('@' . $article['create_time']))->setTimezone((new \DateTime())->getTimezone());
         }

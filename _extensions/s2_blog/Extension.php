@@ -442,7 +442,7 @@ class Extension implements ExtensionInterface
         $eventDispatcher->addListener(TagsSearchEvent::class, static function (TagsSearchEvent $event) use ($container) {
             /** @var TagsSearchProvider $tagsSearchProvider */
             $tagsSearchProvider = $container->get(TagsSearchProvider::class);
-            $blogTagLinks       = $tagsSearchProvider->findBlogTags($event->where, $event->words);
+            $blogTagLinks       = $tagsSearchProvider->findBlogTags($event->words);
 
             if (\count($blogTagLinks) > 0) {
                 /** @var TranslatorInterface $translator */

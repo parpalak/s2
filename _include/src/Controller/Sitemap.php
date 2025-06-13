@@ -66,24 +66,25 @@ class Sitemap implements ControllerInterface
      */
     protected function getItems(): array
     {
-        $subquery            = [
-            'SELECT' => '1',
-            'FROM'   => 'articles AS a2',
-            'WHERE'  => 'a2.parent_id = a.id AND a2.published = 1',
-            'LIMIT'  => '1'
-        ];
-        $raw_query_child_num = $this->dbLayer->build($subquery);
+        $rawQuery = $this->dbLayer
+            ->select('1')
+            ->from('articles AS a2')
+            ->where('a2.parent_id = a.id')
+            ->andWhere('a2.published = 1')
+            ->limit(1)
+            ->getSql()
+        ;
 
-        $query = [
-            'SELECT' => 'a.id, a.title, a.create_time, a.modify_time, a.url, a.parent_id, (' . $raw_query_child_num . ') IS NOT NULL AS children_exist',
-            'FROM'   => 'articles AS a',
-            'WHERE'  => '(a.create_time <> 0 OR a.modify_time <> 0) AND a.published = 1',
-        ];
-
-        $result = $this->dbLayer->buildAndQuery($query);
+        $result = $this->dbLayer
+            ->select('a.id, a.title, a.create_time, a.modify_time, a.url, a.parent_id, (' . $rawQuery . ') IS NOT NULL AS children_exist')
+            ->from('articles AS a')
+            ->where('(a.create_time <> 0 OR a.modify_time <> 0)')
+            ->andWhere('a.published = 1')
+            ->execute()
+        ;
 
         $articles = $urls = $parentIds = [];
-        for ($i = 0; $row = $this->dbLayer->fetchAssoc($result); $i++) {
+        for ($i = 0; $row = $result->fetchAssoc(); $i++) {
             $urls[$i] = rawurlencode($row['url']) . ($this->useHierarchy && $row['children_exist'] ? '/' : '');
 
             $parentIds[$i] = $row['parent_id'];
