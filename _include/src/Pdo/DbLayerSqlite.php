@@ -99,13 +99,13 @@ class DbLayerSqlite extends DbLayer
     /**
      * @throws DbLayerException
      */
-    public function createTable(string $table_name, array $schema): void
+    public function createTable(string $tableName, array $schema): void
     {
-        if ($this->tableExists($table_name)) {
+        if ($this->tableExists($tableName)) {
             return;
         }
 
-        $query = 'CREATE TABLE ' . $this->prefix . $table_name . " (\n";
+        $query = 'CREATE TABLE ' . $this->prefix . $tableName . " (\n";
 
         // Go through every schema element and add it to the query
         foreach ($schema['FIELDS'] as $field_name => $field_data) {
@@ -145,7 +145,7 @@ class DbLayerSqlite extends DbLayer
         // Add indexes
         if (isset($schema['INDEXES'])) {
             foreach ($schema['INDEXES'] as $index_name => $index_fields) {
-                $this->addIndex($table_name, $index_name, $index_fields);
+                $this->addIndex($tableName, $index_name, $index_fields);
             }
         }
 
@@ -153,7 +153,7 @@ class DbLayerSqlite extends DbLayer
         if (isset($schema['FOREIGN KEYS'])) {
             foreach ($schema['FOREIGN KEYS'] as $key_name => $foreign_key) {
                 $this->addForeignKey(
-                    $table_name,
+                    $tableName,
                     $key_name,
                     $foreign_key['columns'],
                     $foreign_key['reference_table'],

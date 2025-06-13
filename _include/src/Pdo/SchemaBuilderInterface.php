@@ -18,6 +18,8 @@ interface SchemaBuilderInterface
     public const TYPE_INTEGER          = 'INTEGER';
     public const TYPE_UNSIGNED_INTEGER = 'UNSIGNED INTEGER';
     public const TYPE_BOOLEAN          = 'BOOLEAN';
+    public const TYPE_FLOAT            = 'FLOAT';
+    public const TYPE_DOUBLE           = 'DOUBLE';
 
     public function addColumn(
         string               $name,

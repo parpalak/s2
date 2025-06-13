@@ -186,26 +186,26 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     /**
      * @throws DbLayerException
      */
-    public function createTable(string $table_name, callable $tableDefinition): void
+    public function createTable(string $tableName, callable $tableDefinition): void
     {
-        if ($this->tableExists($table_name)) {
+        if ($this->tableExists($tableName)) {
             return;
         }
 
         $schemaBuilder = new SchemaBuilder();
         $tableDefinition($schemaBuilder);
 
-        $query = 'CREATE TABLE ' . $this->prefix . $table_name . " (\n";
+        $query = 'CREATE TABLE ' . $this->prefix . $tableName . " (\n";
 
         // Go through every schema element and add it to the query
         foreach ($schemaBuilder->columns as $fieldName => $fieldData) {
-            $type = self::convertType($fieldData[SchemaBuilder::COLUMN_PROPERTY_TYPE], $fieldData[SchemaBuilder::COLUMN_PROPERTY_LENGTH]);
+            $type = static::convertType($fieldData[SchemaBuilder::COLUMN_PROPERTY_TYPE], $fieldData[SchemaBuilder::COLUMN_PROPERTY_LENGTH]);
 
             $query .= $fieldName . ' ' . $type;
 
             if (!$fieldData[SchemaBuilder::COLUMN_PROPERTY_NULLABLE]) {
                 $query .= ' NOT NULL';
-            } elseif (!isset($fieldData[SchemaBuilder::COLUMN_PROPERTY_DEFAULT]))  {
+            } elseif (!isset($fieldData[SchemaBuilder::COLUMN_PROPERTY_DEFAULT])) {
                 $query .= ' DEFAULT NULL';
             }
 
@@ -226,13 +226,13 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         }
 
         // Add unique keys
-        foreach ($schemaBuilder->uniqueIndexes as $key_name => $key_fields) {
-            $query .= 'UNIQUE KEY ' . $this->prefix . $table_name . '_' . $key_name . '(' . implode(',', $key_fields) . '),' . "\n";
+        foreach ($schemaBuilder->uniqueIndexes as $keyName => $keyFields) {
+            $query .= 'UNIQUE KEY ' . $this->prefix . $tableName . '_' . $keyName . '(' . implode(',', $keyFields) . '),' . "\n";
         }
 
         // Add indexes
         foreach ($schemaBuilder->indexes as $index_name => $index_fields) {
-            $query .= 'KEY ' . $this->prefix . $table_name . '_' . $index_name . '(' . implode(',', $index_fields) . '),' . "\n";
+            $query .= 'KEY ' . $this->prefix . $tableName . '_' . $index_name . '(' . implode(',', $index_fields) . '),' . "\n";
         }
 
         // We remove the last two characters (a newline and a comma) and add on the ending
@@ -241,15 +241,15 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         $this->query($query);
 
         // Add foreign keys
-        foreach ($schemaBuilder->foreignKeys as $key_name => $foreign_key) {
+        foreach ($schemaBuilder->foreignKeys as $keyName => $foreignKey) {
             $this->addForeignKey(
-                $table_name,
-                $key_name,
-                $foreign_key[SchemaBuilder::FK_PROPERTY_COLUMNS],
-                $foreign_key[SchemaBuilder::FK_PROPERTY_FOREIGN_TABLE],
-                $foreign_key[SchemaBuilder::FK_PROPERTY_FOREIGN_COLUMNS],
-                $foreign_key[SchemaBuilder::FK_PROPERTY_ON_DELETE] ?? null,
-                $foreign_key[SchemaBuilder::FK_PROPERTY_ON_UPDATE] ?? null,
+                $tableName,
+                $keyName,
+                $foreignKey[SchemaBuilder::FK_PROPERTY_COLUMNS],
+                $foreignKey[SchemaBuilder::FK_PROPERTY_FOREIGN_TABLE],
+                $foreignKey[SchemaBuilder::FK_PROPERTY_FOREIGN_COLUMNS],
+                $foreignKey[SchemaBuilder::FK_PROPERTY_ON_DELETE] ?? null,
+                $foreignKey[SchemaBuilder::FK_PROPERTY_ON_UPDATE] ?? null,
             );
         }
     }
@@ -471,7 +471,7 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
         };
     }
 
-    private static function convertDefaultValue(string|int|bool $value, string $type): string|int
+    protected static function convertDefaultValue(string|int|bool $value, string $type): string|int
     {
         return match ($type) {
             SchemaBuilderInterface::TYPE_SERIAL => throw new \InvalidArgumentException('SERIAL type cannot have a default value'),

@@ -45,6 +45,8 @@ class ArticleProviderCest
             ->setValue('published', ':published')->setParameter('published', 1)
             ->setValue('template', ':template')->setParameter('template', '')
             ->setValue('url', ':url')->setParameter('url', 'level1')
+            ->setValue('excerpt', '\'\'')
+            ->setValue('pagetext', '\'\'')
         ;
 
         $qb->execute();
