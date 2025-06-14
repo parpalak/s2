@@ -92,6 +92,8 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
     async function saveForm(event) {
         event.preventDefault();
 
+        document.dispatchEvent(new Event('save_article_start.s2'));
+
         function successHandler(statusData) {
             PopupMessages.hide(sLowerEntityName + '-save');
             document.dispatchEvent(new Event('save_article_end.s2'));

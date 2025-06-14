@@ -299,4 +299,5 @@ const s2_codemirror = (function () {
 }());
 
 document.addEventListener('check_changes_start.s2', s2_codemirror.flip);
+document.addEventListener('save_article_start.s2', s2_codemirror.flip);
 document.addEventListener('changes_present.s2', s2_codemirror.flip);
