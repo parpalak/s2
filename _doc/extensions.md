@@ -1,8 +1,9 @@
 # Developing Extensions for S2
 
 Extensions are pluggable components that enhance the functionality of the S2 CMS.
-Each extension resides in its own directory under the `_extensions/` folder and must include a single mandatory file,
-with several optional files that are automatically recognized and used by the system.
+Each extension resides in its own directory under the `_extensions/` folder and must include
+a single mandatory file, `Manifest.php`, with several optional files
+that are automatically recognized and used by the system.
 
 ## Required File: `Manifest.php`
 
@@ -40,25 +41,19 @@ class Manifest extends Manifest implements ManifestInterface
     
     public function install(DbLayer $dbLayer, Container $container, ?string $currentVersion): void
     {
-        // Setup posts table
+        // Setup a table
         if (!$dbLayer->tableExists('extension_name_table')) {
-            $schema = [
-                'FIELDS'       => [
-                    'id'          => [
-                        'datatype'   => 'SERIAL',
-                        'allow_null' => false
-                    ],
-                    'name'       => [
-                        'datatype'   => 'VARCHAR(255)',
-                        'allow_null' => false,
-                        'default'    => '\'\''
-                    ],
-                ],
-                'PRIMARY KEY'  => ['id'],
-                'INDEXES'      => [
-                    'name_idx' => ['name'],
-                ],
-            ];
+            $dbLayer->createTable('extension_name_table', function (SchemaBuilderInterface $table) {
+                $table
+                    ->addIdColumn()
+                    ->addString('name', 255)
+                    ->addInteger('revision', unsigned: true, default: 1)
+                    ->addBoolean('published')
+                    ->addInteger('user_id', unsigned: true, nullable: true, default: null)
+                    ->addIndex('name_idx', ['name'])
+                    ->addForeignKey('fk_user', ['user_id'], 'users', ['id'], 'SET NULL')
+                ;
+            });
         }
 
         // Add extension options to the config table
@@ -160,6 +155,7 @@ class Extension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(RequestStack::class),
                 $container->get('config_cache'),
+                $provider->get('EXTENSION_NAME_PARAM1'),
                 $provider->get('S2_SHOW_COMMENTS') === '1', // bool parameter
                 (int)$provider->get('S2_MAX_ITEMS'),
                 $container->getParameter('url_prefix'),

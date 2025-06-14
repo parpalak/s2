@@ -59,5 +59,6 @@ See [details in the documentation](https://github.com/parpalak/s2/wiki/Installat
 
 ### For developers
 
+- [Architecture Overview](_doc/architecture.md)
 - [Comments](_doc/comments.md)
 - [Extensions](_doc/extensions.md)
