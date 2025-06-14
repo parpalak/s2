@@ -3,9 +3,9 @@
  *
  * Drag & drop, event handlers for the admin panel
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license http://opensource.org/licenses/MIT MIT
- * @package S2
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 const Search = (function () {
     let sSearch = '',
@@ -25,7 +25,8 @@ const Search = (function () {
     });
 
     $(function () {
-        let iTimer;
+        var iTimer;
+
         eInput = document.getElementById('search_field');
 
         function NewSearch() {
@@ -42,7 +43,14 @@ const Search = (function () {
             }, 0);
         }
 
-        $(eInput).on('input', NewSearch)
+        $(eInput)
+            .on('input', NewSearch)
+            .on('focus', function () {
+                $('#tree').jstree('disable_hotkeys');
+            })
+            .on('blur', function () {
+                $('#tree').jstree('enable_hotkeys');
+            })
             .keydown(function (e) {
                 if (e.which === 13) {
                     // Immediate search on enter press
