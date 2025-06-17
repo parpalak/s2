@@ -283,6 +283,47 @@ readonly class ArticleProvider
         return $path === '' ? '/' : $path;
     }
 
+
+    /**
+     * @throws DbLayerException
+     */
+    public function findInheritedTemplate(int $id, bool $visibleForAll = false): string
+    {
+        if ($id <= 0) {
+            return '';
+        }
+
+        $tablePrefix = $this->dbLayer->getPrefix();
+
+        $sql = "
+            WITH RECURSIVE parent_cte AS (
+                SELECT id, template, parent_id, 1 AS level
+                FROM {$tablePrefix}articles
+                WHERE id = :id" . ($visibleForAll ? " AND published = 1" : "") . "
+
+                UNION ALL
+
+                SELECT a.id, a.template, a.parent_id, p.level + 1
+                FROM {$tablePrefix}articles a
+                INNER JOIN parent_cte p ON a.id = p.parent_id" . ($visibleForAll ? " AND a.published = 1" : "") . "
+            )
+            SELECT template
+            FROM parent_cte
+            WHERE template != '' AND id != :skip_id
+            ORDER BY level ASC
+            LIMIT 1
+        ";
+
+        $result = $this->dbLayer->query($sql, [
+            ':id'      => $id,
+            ':skip_id' => $id,
+        ]);
+
+        $row = $result->fetchAssoc();
+
+        return $row ? $row['template'] : '';
+    }
+
     /**
      * @throws DbLayerException
      */

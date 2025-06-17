@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -20,11 +20,12 @@ use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\ArticleManager;
+use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthManager;
-use S2\Cms\Model\ExtensionCache;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Model\PermissionChecker as P;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse as Json;
 use Symfony\Component\HttpFoundation\Request;
@@ -559,6 +560,36 @@ class AdminAjaxRequestHandler
                     'file_path' => $c->getParameter('image_path') . $lastFileName,
                     ...$r->request->has('return_image_info') && $lastFileName !== null ? ['image_info' => $pictureManager->getImageInfo($lastFileName)] : [],
                 ]);
+            },
+
+            // article helpers
+            'load_template' => static function (P $p, R $r, C $c, T $t) {
+                if (!$p->isGranted(P::PERMISSION_CREATE_ARTICLES)) {
+                    return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
+                }
+                if (!$r->query->has('article_id') && !$r->query->has('template_id')) {
+                    return new Json(['success' => false, 'message' => 'One of parameters "article_id" or "template_id" is required.'], Response::HTTP_BAD_REQUEST);
+                }
+                $templateId = $r->query->getString('template_id');
+                if ($templateId === '') {
+                    $articleId = $r->query->getInt('article_id');
+                    /** @var ArticleProvider $articleProvider */
+                    $articleProvider = $c->get(ArticleProvider::class);
+                    $templateId      = $articleProvider->findInheritedTemplate($articleId, false);
+                }
+
+                if ($templateId === '') {
+                    $templateId = 'site.php';
+                }
+
+                /** @var HtmlTemplateProvider $htmlTemplateProvider */
+                $htmlTemplateProvider = $c->get(HtmlTemplateProvider::class);
+                $template             = $htmlTemplateProvider->getRawTemplateContent($templateId, null);
+
+                if ($template === '') {
+                    return new Json(['success' => false, 'message' => 'Template not found.'], Response::HTTP_NOT_FOUND);
+                }
+                return new Json(['success' => true, 'template' => $template]);
             },
         ];
 

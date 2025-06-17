@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 /** @var string $basePath */
-/** @var string $templateContent */
 /** @var array $tagsList */
 /** @var array $labelList */
 /** @var array $statusData Info about URL status */
@@ -176,10 +175,9 @@ $jsvarencode = static function ($var) {
 <script src="<?php echo $basePath; ?>/_admin/js/conversion.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/optipng-setup.js"></script>
 <script>
-    const template = '<?php echo $jsvarencode($templateContent); ?>';
     document.forms['article-form'].elements['label'].setAttribute('list', 'post-labels-datalist');
     document.addEventListener('DOMContentLoaded', () => {
-        initArticleEditForm(document.forms['article-form'], <?= json_encode($statusData) ?>, 'BlogPost', 'text');
+        initArticleEditForm(document.forms['article-form'], <?= json_encode($statusData) ?>, 'BlogPost', 'text', 'blog.php');
     })
 
     function ReturnImage(s, w, h) {
@@ -192,5 +190,6 @@ $jsvarencode = static function ($var) {
 </script>
 <script src="<?php echo $basePath; ?>/_admin/js/autoComplete.min.js"></script>
 <script>
+    let sUrl = '<?php echo $basePath; ?>/_admin/ajax.php?';
     initTagsAutocomplete('id-tags', <?= json_encode($tagsList) ?>);
 </script>

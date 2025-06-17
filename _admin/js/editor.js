@@ -1,9 +1,9 @@
 /**
  * Form for editing pages in S2.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
 
 function initHtmlTextarea(eTextarea) {
@@ -66,7 +66,7 @@ function initHtmlTextarea(eTextarea) {
     });
 }
 
-function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
+function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName, sTemplateId) {
     const sLowerEntityName = sEntityName.toLowerCase();
 
     function decorateForm(statusData) {
@@ -190,7 +190,9 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
             const currentText = eForm.elements[sTextareaName].value;
 
             if (previousText !== currentText) {
-                Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value);
+                const absoluteUrl = new URL(window.location.href);
+                const id = absoluteUrl.searchParams.get('id');
+                Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
                 previousText = currentText;
 
                 if (savedText !== currentText) {
@@ -244,7 +246,9 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName) {
             savedText = eForm.elements[sTextareaName].value;
         }
 
-        Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value);
+        const absoluteUrl = new URL(window.location.href);
+        const id = absoluteUrl.searchParams.get('id');
+        Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
         handleChanges();
         document.addEventListener('save_article_end.s2', handleChanges);
 
@@ -317,43 +321,59 @@ function initTagsAutocomplete(sInputId, aTagsList) {
     )
 }
 
-function Preview(sTitle, sHtmlContent) {
-    const d = window.frames['preview_frame'].document;
-    let eHeader = d.getElementById('preview-header-wrapper');
-    if (!eHeader) {
-        const s = template
-            .replaceAll('<!-- s2_text -->', '<div id="preview-text-wrapper"><script>\n' +
-                'let observer = new MutationObserver(mutationRecords => {\n' +
-                '  window.S2Latex && window.S2Latex.processTree(document.body);\n' +
-                '});\n' +
-                '\n' +
-                'observer.observe(document.body, {\n' +
-                '  childList: true,\n' +
-                '  subtree: true\n' +
-                '});\n' +
-                '</script>')
-            .replaceAll('<!-- s2_title -->', '<h1 id="preview-header-wrapper"></h1>')
-        ;
+const Preview = (function () {
+    let lastTemplateId = null;
+    let template = '';
 
-        d.open();
-        d.write(s);
-        d.close();
-    }
+    return async function (sTitle, sHtmlContent, iArticleId, sTemplateId) {
+        const d = window.frames['preview_frame'].document;
+        let eHeader, eText;
 
-    let try_num = 30;
-    var repeater = function () {
-        const eText = d.getElementById('preview-text-wrapper');
-        const eHeader = d.getElementById('preview-header-wrapper');
-
-        if (try_num-- > 0 && !eText) {
-            setTimeout(repeater, 30);
+        if (sTemplateId !== lastTemplateId) {
+            let data = await fetch(sUrl + 'action=load_template&template_id=' + encodeURIComponent(sTemplateId) + '&article_id=' + encodeURIComponent(iArticleId));
+            data = await data.json();
+            template = data.template;
+            lastTemplateId = sTemplateId;
         } else {
-            eHeader.textContent = sTitle;
-            eText.innerHTML = sHtmlContent;
+            eHeader = d.getElementById('preview-header-wrapper');
+            eText = d.getElementById('preview-text-wrapper');
         }
-    };
-    repeater();
-}
+
+        if (!eHeader && !eText) {
+            const s = template
+                .replaceAll('<!-- s2_text -->', '<div id="preview-text-wrapper" data-template-name=""><script>\n' +
+                    'let observer = new MutationObserver(mutationRecords => {\n' +
+                    '  window.S2Latex && window.S2Latex.processTree(document.body);\n' +
+                    '});\n' +
+                    '\n' +
+                    'observer.observe(document.body, {\n' +
+                    '  childList: true,\n' +
+                    '  subtree: true\n' +
+                    '});\n' +
+                    '</script>')
+                .replaceAll('<!-- s2_title -->', '<h1 id="preview-header-wrapper"></h1>')
+            ;
+
+            d.open();
+            d.write(s);
+            d.close();
+        }
+
+        let try_num = 30;
+        let repeater = function () {
+            const eText = d.getElementById('preview-text-wrapper');
+            const eHeader = d.getElementById('preview-header-wrapper');
+
+            if (try_num-- > 0 && !eText && !eHeader) {
+                setTimeout(repeater, 30);
+            } else {
+                eHeader && (eHeader.textContent = sTitle);
+                eText && (eText.innerHTML = sHtmlContent);
+            }
+        };
+        repeater();
+    }
+})();
 
 function htmlEncode(str) {
     const map = {

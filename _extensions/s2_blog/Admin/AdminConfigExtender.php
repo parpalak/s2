@@ -364,7 +364,6 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
                 }
             })
             ->addListener(EntityConfig::EVENT_BEFORE_EDIT_RENDER, function (BeforeRenderEvent $event) {
-                $event->data['templateContent'] = $this->templateProvider->getRawTemplateContent('site.php', null);
                 $event->data['tagsList']        = $this->tagsProvider->getAllTags();
                 $event->data['labelList']       = $this->postProvider->getAllLabels();
 
