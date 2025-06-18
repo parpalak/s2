@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace integration;
 
+use S2\Cms\Admin\Dashboard\DashboardArticleProvider;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
@@ -20,11 +21,13 @@ class ArticleProviderCest
 {
     private ?ArticleProvider $articleProvider;
     private ?DbLayer $dbLayer;
+    private ?DashboardArticleProvider $dashboardArticleProvider;
 
     public function _before(\IntegrationTester $I)
     {
-        $this->articleProvider = $I->grabService(ArticleProvider::class);
-        $this->dbLayer         = $I->grabService(DbLayer::class);
+        $this->articleProvider          = $I->grabService(ArticleProvider::class);
+        $this->dbLayer                  = $I->grabService(DbLayer::class);
+        $this->dashboardArticleProvider = $I->grabAdminService(DashboardArticleProvider::class);
     }
 
     /**
@@ -43,7 +46,7 @@ class ArticleProviderCest
             ->setValue('create_time', '0')
             ->setValue('modify_time', '1')
             ->setValue('published', ':published')->setParameter('published', 1)
-            ->setValue('template', ':template')->setParameter('template', '')
+            ->setValue('template', ':template')->setParameter('template', 'site.php')
             ->setValue('url', ':url')->setParameter('url', 'level1')
             ->setValue('excerpt', '\'\'')
             ->setValue('pagetext', '\'\'')
@@ -58,6 +61,7 @@ class ArticleProviderCest
             ->setParameter('title', 'level2')
             ->setParameter('url', 'level2')
             ->setParameter('published', 1)
+            ->setParameter('template', '')
             ->execute()
         ;
 
@@ -94,6 +98,15 @@ class ArticleProviderCest
         $I->assertEquals(null, $this->articleProvider->pathFromId($id4, true));
         $I->assertEquals(null, $this->articleProvider->pathFromId($id5, true));
         $I->assertEquals(null, $this->articleProvider->pathFromId(100000));
+
+        $I->assertEquals('', $this->articleProvider->findInheritedTemplate($id0));
+        $I->assertEquals('', $this->articleProvider->findInheritedTemplate($id1));
+        $I->assertEquals('mainpage.php', $this->articleProvider->findInheritedTemplate($id2));
+        $I->assertEquals('site.php', $this->articleProvider->findInheritedTemplate($id3));
+        $I->assertEquals('site.php', $this->articleProvider->findInheritedTemplate($id4));
+        $I->assertEquals('site.php', $this->articleProvider->findInheritedTemplate($id5));
+
+        $I->assertEquals(1, $this->dashboardArticleProvider->countArticles()['articles_num']);
     }
 
     /**

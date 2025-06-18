@@ -13,6 +13,7 @@ use S2\AdminYard\TemplateRenderer;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\QueryBuilder\UnionAll;
 
 readonly class DashboardArticleProvider implements DashboardStatProviderInterface
 {
@@ -38,31 +39,42 @@ readonly class DashboardArticleProvider implements DashboardStatProviderInterfac
     /**
      * @throws DbLayerException
      */
-    private function countArticles(): array
+    public function countArticles(): array
     {
-        $tablePrefix = $this->dbLayer->getPrefix();
-        $parentId    = ArticleProvider::ROOT_ID;
+        $baseQuery      = $this->dbLayer
+            ->select('id')
+            ->from('articles')
+            ->where('parent_id = :parent_id')
+            ->andWhere('published = 1')
+        ;
+        $recursiveQuery = $this->dbLayer
+            ->select('a.id')
+            ->from('articles AS a')
+            ->innerJoin('article_tree AS at', 'a.parent_id = at.id')
+            ->where('a.published = 1')
+        ;
+        $result         = $this->dbLayer
+            ->withRecursive('article_tree', new UnionAll($baseQuery, $recursiveQuery))
+            ->select('SUM(CASE (' .
+                $this->dbLayer->select('COUNT(*)')
+                    ->from('articles')
+                    ->where('parent_id = at.id')
+                    ->andWhere('published = 1')
+                    ->getSql()
+                . ') WHEN 0 THEN 1 ELSE 0 END) AS articles_num')
+            ->addSelect('SUM((' .
+                $this->dbLayer->select('COUNT(*)')
+                    ->from('art_comments')
+                    ->where('article_id = at.id')
+                    ->andWhere('shown = 1')
+                    ->getSql()
+                . ')) AS comments_num')
+            ->from('article_tree AS at')
+            ->setParameter('parent_id', ArticleProvider::ROOT_ID)
+            ->execute()
+        ;
 
-        $sql = <<<SQL
-WITH RECURSIVE article_tree AS (
-    SELECT id
-    FROM {$tablePrefix}articles
-    WHERE published = 1 AND parent_id = {$parentId}
-    UNION ALL
-    SELECT a.id
-    FROM {$tablePrefix}articles a
-    INNER JOIN article_tree at ON a.parent_id = at.id
-    WHERE a.published = 1
-)
-SELECT
-    SUM(CASE (SELECT COUNT(*) FROM {$tablePrefix}articles WHERE parent_id = at.id AND published = 1) WHEN 0 THEN 1 ELSE 0 END) AS articles_num,
-    SUM((SELECT COUNT(*) FROM {$tablePrefix}art_comments WHERE article_id = at.id AND shown = 1)) AS comments_num
-    FROM article_tree AS at
-
-SQL;
-
-        $result = $this->dbLayer->query($sql);
-        $data   = $result->fetchAssoc();
+        $data = $result->fetchAssoc();
         return $data;
     }
 }

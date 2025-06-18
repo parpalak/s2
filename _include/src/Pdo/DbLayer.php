@@ -18,6 +18,7 @@ use S2\Cms\Pdo\QueryBuilder\InsertBuilder;
 use S2\Cms\Pdo\QueryBuilder\InsertMysqlCompiler;
 use S2\Cms\Pdo\QueryBuilder\SelectBuilder;
 use S2\Cms\Pdo\QueryBuilder\SelectCommonCompiler;
+use S2\Cms\Pdo\QueryBuilder\UnionAll;
 use S2\Cms\Pdo\QueryBuilder\UpdateBuilder;
 use S2\Cms\Pdo\QueryBuilder\UpdateCommonCompiler;
 use S2\Cms\Pdo\QueryBuilder\UpsertBuilder;
@@ -407,6 +408,11 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
     public function select(string ...$expressions): SelectBuilder
     {
         return (new SelectBuilder(new SelectCommonCompiler($this->prefix), $this))->select(...$expressions);
+    }
+
+    public function withRecursive(string $name, UnionAll|SelectBuilder $param): SelectBuilder
+    {
+        return (new SelectBuilder(new SelectCommonCompiler($this->prefix), $this))->withRecursive($name, $param);
     }
 
     public function update(string $table): UpdateBuilder

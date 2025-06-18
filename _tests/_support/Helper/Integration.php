@@ -125,6 +125,11 @@ class Integration extends AbstractBrowserModule
         return $this->publicApplication->container->get($serviceName);
     }
 
+    public function grabAdminService(string $serviceName): mixed
+    {
+        return $this->adminApplication->container->get($serviceName);
+    }
+
     protected function collectParameters(): array
     {
         $imgDir = '_tests/_output/images';

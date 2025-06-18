@@ -22,7 +22,8 @@ readonly class SelectCommonCompiler implements SelectCompilerInterface
      */
     public function getSql(SelectBuilder $builder): string
     {
-        $sql = 'SELECT ' . implode(', ', $builder->getSelect());
+        $sql = $this->compileWith($builder);
+        $sql .= 'SELECT ' . implode(', ', $builder->getSelect());
 
         if ($builder->getTable() !== null) {
             $sql .= ' FROM ' . $this->prefix . $builder->getTable();
@@ -72,5 +73,37 @@ readonly class SelectCommonCompiler implements SelectCompilerInterface
         }
 
         return $sql;
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function compileWith(SelectBuilder $builder): string
+    {
+        $result = '';
+        foreach ($builder->getWithRecursive() as $name => $param) {
+            $result .= 'WITH RECURSIVE ' . $name . ' AS (' . "\n";
+            $result .= $this->walkWith($param);
+            $result .= "\n" . ')' . "\n";
+        }
+
+        return $result;
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function walkWith(SelectBuilder|UnionAll $param): string
+    {
+        if ($param instanceof UnionAll) {
+            $result = [];
+            foreach ($param->selects as $select) {
+                $result[] = $this->walkWith($select);
+            }
+
+            return implode("\nUNION ALL\n", $result);
+        }
+
+        return $this->getSql($param);
     }
 }

@@ -41,6 +41,11 @@ class SelectBuilder
     private ?int $limit = null;
     private ?int $offset = null;
 
+    /**
+     * @var (SelectBuilder|UnionAll)[]
+     */
+    private array $withRecursive = [];
+
     public function __construct(
         private readonly SelectCompilerInterface $compiler,
         private readonly QueryExecutorInterface  $queryExecutor,
@@ -152,5 +157,19 @@ class SelectBuilder
     public function getOffset(): ?int
     {
         return $this->offset;
+    }
+
+    public function withRecursive(string $name, SelectBuilder|UnionAll $param): self
+    {
+        $this->withRecursive[$name] = $param;
+        return $this;
+    }
+
+    /**
+     * @return (SelectBuilder|UnionAll)[]
+     */
+    public function getWithRecursive(): array
+    {
+        return $this->withRecursive;
     }
 }

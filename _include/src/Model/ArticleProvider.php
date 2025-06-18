@@ -13,6 +13,7 @@ namespace S2\Cms\Model;
 
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
+use S2\Cms\Pdo\QueryBuilder\UnionAll;
 use S2\Cms\Template\Viewer;
 
 readonly class ArticleProvider
@@ -244,26 +245,28 @@ readonly class ArticleProvider
             return '';
         }
 
-        $tablePrefix = $this->dbLayer->getPrefix();
-
-        $sql = "
-            WITH RECURSIVE path_cte AS (
-                SELECT id, url, parent_id, 1 AS level
-                FROM {$tablePrefix}articles
-                WHERE id = :id" . ($visibleForAll ? " AND published = 1" : "") . "
-
-                UNION ALL
-
-                SELECT a.id, a.url, a.parent_id, p.level + 1
-                FROM {$tablePrefix}articles a
-                INNER JOIN path_cte p ON a.id = p.parent_id " . ($visibleForAll ? " AND a.published = 1" : "") . "
-            )
-            SELECT url, parent_id FROM path_cte ORDER BY level DESC
-        ";
-
-        $result = $this->dbLayer->query($sql, [
-            ':id' => $id,
-        ]);
+        $baseQuery      = $this->dbLayer
+            ->select('id, url, parent_id, 1 AS level')
+            ->from('articles')
+            ->where('id = :id')
+        ;
+        $recursiveQuery = $this->dbLayer
+            ->select('a.id, a.url, a.parent_id, p.level + 1')
+            ->from('articles AS a')
+            ->innerJoin('path_cte AS p', 'a.id = p.parent_id')
+        ;
+        if ($visibleForAll) {
+            $baseQuery->andWhere('published = 1');
+            $recursiveQuery->andWhere('a.published = 1');
+        }
+        $result = $this->dbLayer
+            ->withRecursive('path_cte', new UnionAll($baseQuery, $recursiveQuery))
+            ->select('url, parent_id')
+            ->from('path_cte')
+            ->orderBy('level DESC')
+            ->setParameter('id', $id)
+            ->execute()
+        ;
 
         $urls = [];
 
@@ -293,31 +296,32 @@ readonly class ArticleProvider
             return '';
         }
 
-        $tablePrefix = $this->dbLayer->getPrefix();
-
-        $sql = "
-            WITH RECURSIVE parent_cte AS (
-                SELECT id, template, parent_id, 1 AS level
-                FROM {$tablePrefix}articles
-                WHERE id = :id" . ($visibleForAll ? " AND published = 1" : "") . "
-
-                UNION ALL
-
-                SELECT a.id, a.template, a.parent_id, p.level + 1
-                FROM {$tablePrefix}articles a
-                INNER JOIN parent_cte p ON a.id = p.parent_id" . ($visibleForAll ? " AND a.published = 1" : "") . "
-            )
-            SELECT template
-            FROM parent_cte
-            WHERE template != '' AND id != :skip_id
-            ORDER BY level ASC
-            LIMIT 1
-        ";
-
-        $result = $this->dbLayer->query($sql, [
-            ':id'      => $id,
-            ':skip_id' => $id,
-        ]);
+        $baseQuery      = $this->dbLayer
+            ->select('id, template, parent_id, 1 AS level')
+            ->from('articles')
+            ->where('id = :id')
+        ;
+        $recursiveQuery = $this->dbLayer
+            ->select('a.id, a.template, a.parent_id, p.level + 1')
+            ->from('articles AS a')
+            ->innerJoin('parent_cte AS p', 'a.id = p.parent_id')
+        ;
+        if ($visibleForAll) {
+            $baseQuery->andWhere('published = 1');
+            $recursiveQuery->andWhere('a.published = 1');
+        }
+        $result = $this->dbLayer
+            ->withRecursive('parent_cte', new UnionAll($baseQuery, $recursiveQuery))
+            ->select('template')
+            ->from('parent_cte')
+            ->where('template != \'\'')
+            ->andWhere('id != :skip_id')
+            ->orderBy('level ASC')
+            ->limit(1)
+            ->setParameter('id', $id)
+            ->setParameter('skip_id', $id)
+            ->execute()
+        ;
 
         $row = $result->fetchAssoc();
 
