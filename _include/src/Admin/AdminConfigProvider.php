@@ -903,7 +903,7 @@ readonly class AdminConfigProvider
                         name: 'payload',
                     ))
                     ->setEnabledActions([FieldConfig::ACTION_LIST])
-                , 70
+                , 90
             );
         }
 
