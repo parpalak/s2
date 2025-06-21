@@ -190,7 +190,7 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName, sTem
             const currentText = eForm.elements[sTextareaName].value;
 
             if (previousText !== currentText) {
-                const absoluteUrl = new URL(window.location.href);
+                const absoluteUrl = new URL(eForm.action);
                 const id = absoluteUrl.searchParams.get('id');
                 Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
                 previousText = currentText;
@@ -246,7 +246,7 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName, sTem
             savedText = eForm.elements[sTextareaName].value;
         }
 
-        const absoluteUrl = new URL(window.location.href);
+        const absoluteUrl = new URL(eForm.action);
         const id = absoluteUrl.searchParams.get('id');
         Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
         handleChanges();
