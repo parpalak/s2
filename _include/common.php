@@ -149,7 +149,7 @@ $errorHandler->setDefaultLogger($app->container->get(LoggerInterface::class));
 /** @var DynamicConfigProvider $dynamicConfigProvider */
 $dynamicConfigProvider = $app->container->get(DynamicConfigProvider::class);
 
-if (defined('S2_ADMIN_MODE')) {
+if (defined('S2_ADMIN_MODE') && session_status() !== PHP_SESSION_ACTIVE) {
     $loginTimeoutSeconds = $dynamicConfigProvider->get('S2_LOGIN_TIMEOUT') * 60;
     ini_set('session.cookie_lifetime', $loginTimeoutSeconds);
     ini_set('session.gc_maxlifetime', $loginTimeoutSeconds);
