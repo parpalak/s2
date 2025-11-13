@@ -4,6 +4,9 @@
         "preferred-install": {
             "s2/rose": "source",
             "s2/admin-yard": "source"
+        },
+        "platform": {
+            "php": "8.2.0"
         }
     },
     "name": "s2/cms",
