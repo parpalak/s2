@@ -233,6 +233,7 @@ class CmsExtension implements ExtensionInterface
                 $container->getParameter('debug_view'),
                 $container->getParameter('root_dir'),
                 $container->getParameter('base_path'),
+                $container->getParameter('base_url'),
                 $container->getNullableParameter('canonical_url'),
             );
         }, [StatefulServiceInterface::class]);

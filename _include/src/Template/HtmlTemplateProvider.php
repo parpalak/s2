@@ -27,6 +27,7 @@ class HtmlTemplateProvider implements StatefulServiceInterface
 {
     private ?string $styleName = null;
 
+    /** @noinspection PhpPropertyOnlyWrittenInspection */
     public function __construct(
         private readonly RequestStack             $requestStack,
         private readonly UrlBuilder               $urlBuilder,
@@ -38,6 +39,7 @@ class HtmlTemplateProvider implements StatefulServiceInterface
         private readonly bool                     $debugView,
         private readonly string                   $rootDir,
         private readonly string                   $basePath,
+        private readonly string                   $baseUrl, // to be used in templates
         private readonly ?string                  $canonicalUrl,
     ) {
     }
