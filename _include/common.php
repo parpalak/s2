@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use S2\Cms\Admin\AdminExtension;
 use S2\Cms\CmsExtension;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Config\StaticConfigLoader;
 use S2\Cms\Framework\Application;
 use S2\Cms\Framework\Exception\ParameterNotFoundException;
 use S2\Cms\Model\ExtensionCache;
@@ -29,71 +30,108 @@ define('S2_VERSION', '2.0dev');
 
 require __DIR__ . '/../_vendor/autoload.php';
 
-// Attempt to load the configuration file config.php
-if (file_exists(__DIR__ . '/../' . s2_get_config_filename())) {
-    include __DIR__ . '/../' . s2_get_config_filename();
-}
+$staticConfigLoader = new StaticConfigLoader();
+$s2StaticConfig     = $staticConfigLoader->load(__DIR__ . '/../' . s2_get_config_filename());
 
-error_reporting(defined('S2_DEBUG') ? E_ALL : E_ALL ^ E_NOTICE);
+$debugEnabled = defined('S2_DEBUG') || !empty($s2StaticConfig['options']['debug']);
+error_reporting($debugEnabled ? E_ALL : E_ALL ^ E_NOTICE);
 
 require __DIR__ . '/../_include/setup.php';
 
-if (defined('S2_DEBUG')) {
+if ($debugEnabled) {
     $errorHandler = Debug::enable();
 } else {
     $errorHandler = ErrorHandler::register();
 }
 HtmlErrorRenderer::setTemplate(__DIR__ . '/views/error.php');
 
-if (!defined('S2_URL_PREFIX')) {
-    define('S2_URL_PREFIX', '');
-}
+$s2BaseStaticParameters = s2_build_base_static_parameters($s2StaticConfig);
 
-// If the image directory is not specified, we use the default setting
-if (!defined('S2_IMG_DIR')) {
-    define('S2_IMG_DIR', '_pictures');
-}
+function s2_build_base_static_parameters(array $config): array
+{
+    $rootDir = dirname(__DIR__) . '/';
 
-if (!defined('S2_ALLOWED_EXTENSIONS')) {
-    define('S2_ALLOWED_EXTENSIONS', 'gif bmp jpg jpeg png ico svg mp3 wav ogg flac mp4 avi flv mpg mpeg mkv zip 7z rar doc docx ppt pptx odt odt odp ods xlsx xls pdf txt rtf csv');
+    $cacheDir = isset($config['files']['cache_dir'])
+        ? rtrim($config['files']['cache_dir'], '/') . '/'
+        : s2_get_default_cache_dir();
+
+    $logDir = isset($config['files']['log_dir']) ? rtrim($config['files']['log_dir'], '/') : $cacheDir;
+
+    $imageDirRelative = '';
+    if (isset($config['files']['image_dir']) && is_string($config['files']['image_dir'])) {
+        $imageDirRelative = trim($config['files']['image_dir'], '/');
+    }
+    if ($imageDirRelative === '') {
+        $imageDirRelative = StaticConfigLoader::DEFAULT_IMAGE_DIR;
+    }
+    $imageDir = $rootDir . $imageDirRelative;
+
+    $basePath = $config['http']['base_path'] ?? null;
+    $imagePath = null;
+    if ($basePath !== null) {
+        $imagePath = $basePath . '/' . $imageDirRelative;
+    }
+
+    $baseUrl   = $config['http']['base_url'] ?? null;
+    $urlPrefix = $config['http']['url_prefix'] ?? '';
+
+    $debug           = !empty($config['options']['debug']);
+    $debugView       = !empty($config['options']['debug_view']);
+    $showQueries     = !empty($config['options']['show_queries']);
+    $disableCache    = !empty($config['options']['disable_cache']);
+    $forceAdminHttps = !empty($config['options']['force_admin_https']);
+    $canonicalUrl    = $config['options']['canonical_url'] ?? null;
+
+    return [
+        'root_dir'           => $rootDir,
+        'cache_dir'          => $cacheDir,
+        'allowed_extensions' => $config['files']['allowed_extensions'] ?? StaticConfigLoader::DEFAULT_ALLOWED_EXTENSIONS,
+        'image_dir'          => $imageDir, // no trailing '/' for Filesystem component
+        'image_path'         => $imagePath,
+        'disable_cache'      => $disableCache,
+        'log_dir'            => $logDir,
+
+        // full prefix for absolute web URLs, i.e. main page URL supposed to be BASE_URL . URL_PREFIX . '/'
+        'base_url'           => $baseUrl,
+
+        // path prefix for the web URL, i.e. main page URL supposed to be 'http://example.com' . BASE_PATH . URL_PREFIX . '/'
+        'base_path'          => $basePath,
+
+        // one of '', '/?', '/index.php', '/index.php?'
+        'url_prefix'         => $urlPrefix,
+        'debug'              => $debug,
+        'debug_view'         => $debugView,
+        'show_queries'       => $showQueries,
+        'force_admin_https'  => $forceAdminHttps,
+        'canonical_url'      => $canonicalUrl,
+        'version'            => S2_VERSION,
+        'redirect_map'       => $config['redirects'] ?? [],
+        'cookie_name'        => $config['cookies']['name'] ?? StaticConfigLoader::DEFAULT_COOKIE_NAME,
+        'db_type'            => $config['database']['type'] ?? null,
+        'db_host'            => $config['database']['host'] ?? null,
+        'db_name'            => $config['database']['name'] ?? null,
+        'db_username'        => $config['database']['user'] ?? null,
+        'db_password'        => $config['database']['password'] ?? null,
+        'db_prefix'          => $config['database']['prefix'] ?? null,
+        'p_connect'          => $config['database']['p_connect'] ?? false,
+    ];
 }
 
 function collectParameters(): array
 {
-    global $s2BootTimestamp;
-    $result = [
-        'boot_timestamp'     => $s2BootTimestamp,
-        'root_dir'           => dirname(__DIR__) . '/',
-        'cache_dir'          => S2_CACHE_DIR,
-        'allowed_extensions' => S2_ALLOWED_EXTENSIONS,
-        'image_dir'          => dirname(__DIR__) . '/' . S2_IMG_DIR, // filesystem; no trailing slash in contrast to root_dir and cache_dir
-        'image_path'         => defined('S2_PATH') ? S2_PATH . '/' . S2_IMG_DIR : null, // web URL prefix
-        'disable_cache'      => defined('S2_DISABLE_CACHE'),
-        'log_dir'            => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
+    global $s2BootTimestamp, $s2BaseStaticParameters;
 
-        // full prefix for absolute web URLs, i.e. main page URL supposed to be S2_BASE_URL . S2_URL_PREFIX '/'
-        'base_url'           => defined('S2_BASE_URL') ? S2_BASE_URL : null,
-
-        // path prefix for the web URL, i.e. main page URL supposed to be 'http://example.com' . S2_PATH . S2_URL_PREFIX . '/'
-        'base_path'          => defined('S2_PATH') ? S2_PATH : null,
-
-        // one of '', '/?', '/index.php', '/index.php?'
-        'url_prefix'         => defined('S2_URL_PREFIX') ? S2_URL_PREFIX : null,
-
-        'debug'             => defined('S2_DEBUG'),
-        'debug_view'        => defined('S2_DEBUG_VIEW'),
-        'show_queries'      => defined('S2_SHOW_QUERIES'),
-        'force_admin_https' => defined('S2_FORCE_ADMIN_HTTPS'),
-        'version'           => S2_VERSION,
-        'redirect_map'      => $GLOBALS['s2_redirect'] ?? [],
-        'cookie_name'       => $GLOBALS['s2_cookie_name'] ?? 's2_cookie_6094033457',
-    ];
-
-    foreach (['db_type', 'db_host', 'db_name', 'db_username', 'db_password', 'db_prefix', 'p_connect'] as $globalVarName) {
-        $result[$globalVarName] = $GLOBALS[$globalVarName] ?? null;
-    }
+    $result                   = $s2BaseStaticParameters;
+    $result['boot_timestamp'] = $s2BootTimestamp;
 
     return $result;
+}
+
+function s2_get_static_parameter(string $name): mixed
+{
+    global $s2BaseStaticParameters;
+
+    return $s2BaseStaticParameters[$name] ?? null;
 }
 
 $app = new Application();
@@ -103,8 +141,10 @@ if (defined('S2_ADMIN_MODE')) {
 }
 
 $enabledExtensions = null;
-if (!defined('S2_DISABLE_CACHE') && file_exists(S2_CACHE_DIR . ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
-    $enabledExtensions = include S2_CACHE_DIR . ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME;
+$cacheDir          = $s2BaseStaticParameters['cache_dir'];
+$disableCache      = $s2BaseStaticParameters['disable_cache'];
+if (!$disableCache && file_exists($cacheDir . ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME)) {
+    $enabledExtensions = include $cacheDir . ExtensionCache::CACHE_ENABLED_EXTENSIONS_FILENAME;
 }
 
 try {
@@ -126,7 +166,7 @@ try {
     $app->boot(collectParameters());
     /** @var ExtensionCache $appCache */
     $appCache = $app->container->get(ExtensionCache::class);
-    if (!defined('S2_DISABLE_CACHE')) {
+    if (!$disableCache) {
         $app->setCachedRoutesFilename($appCache->getCachedRoutesFilename());
     }
 

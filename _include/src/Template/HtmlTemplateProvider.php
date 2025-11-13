@@ -38,6 +38,7 @@ class HtmlTemplateProvider implements StatefulServiceInterface
         private readonly bool                     $debugView,
         private readonly string                   $rootDir,
         private readonly string                   $basePath,
+        private readonly ?string                  $canonicalUrl,
     ) {
     }
 
@@ -58,6 +59,7 @@ class HtmlTemplateProvider implements StatefulServiceInterface
             $this->dispatcher,
             $this->dynamicConfigProvider,
             $this->debugView,
+            $this->canonicalUrl,
         );
 
         $this->dispatcher->dispatch(new TemplateEvent($htmlTemplate), TemplateEvent::EVENT_CREATED);

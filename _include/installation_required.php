@@ -154,19 +154,32 @@ declare(strict_types=1);
         <div class="config-example" id="configExample">
             <pre><code>&lt;?php
 
-$db_type = 'mysql';
-$db_host = '127.0.0.1';
-$db_name = 's2_test';
-$db_username = 'root';
-$db_password = '';
-$db_prefix = '';
-$p_connect = false;
-
-define('S2_BASE_URL', 'https://example.com/my_site');
-define('S2_PATH', '/my_site');
-define('S2_URL_PREFIX', ''); // or '/?', '/index.php', '/index.php?'
-
-$s2_cookie_name = 's2_cookie_82378103978'; // some random string
+return [
+    'database' => [
+        'type'      => 'mysql',
+        'host'      => '127.0.0.1',
+        'name'      => 's2_test',
+        'user'      => 'root',
+        'password'  => '',
+        'prefix'    => '',
+        'p_connect' => false,
+    ],
+    'http' => [
+        'base_url'   => 'https://example.com/my_site',
+        'base_path'  => '/my_site',
+        'url_prefix' => '', // or '/?', '/index.php', '/index.php?'
+    ],
+    'options' => [
+        'force_admin_https' => 0,
+        'canonical_url'     => null,
+        'debug'             => 0,
+        'debug_view'        => 0,
+        'show_queries'      => 0,
+    ],
+    'cookies' => [
+        'name' => 's2_cookie_82378103978', // some random string
+    ],
+];
 </code></pre>
         </div>
     </div>

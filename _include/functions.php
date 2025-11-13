@@ -56,3 +56,14 @@ function s2_get_config_filename(): string
 
     return 'config.php';
 }
+
+function s2_get_default_cache_dir(): string
+{
+    $appEnv   = getenv('APP_ENV');
+    $cacheDir = dirname(__DIR__) . '/_cache/';
+    if (is_string($appEnv) && $appEnv !== '') {
+        return $cacheDir . $appEnv . '/';
+    }
+
+    return $cacheDir;
+}

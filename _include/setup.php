@@ -9,19 +9,6 @@
 
 mb_internal_encoding('UTF-8');
 
-// If the cache directory is not specified, we use the default setting
-if (!defined('S2_CACHE_DIR')) {
-    define('S2_CACHE_DIR', (static function () {
-        $appEnv   = getenv('APP_ENV');
-        $cacheDir = dirname(__DIR__) . '/_cache/';
-        if (is_string($appEnv) && $appEnv !== '') {
-            return $cacheDir . $appEnv . '/';
-        }
-
-        return $cacheDir;
-    })());
-}
-
 /**
  * Removes known problematic, invisible, or non-printable UTF-8 characters
  * from global input arrays ($_GET, $_POST, $_COOKIE, $_REQUEST).

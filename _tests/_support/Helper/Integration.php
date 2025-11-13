@@ -152,6 +152,7 @@ class Integration extends AbstractBrowserModule
                 '#^/redirect$#' => '/redirected',
             ],
             'version'            => '2.0dev',
+            'canonical_url'      => null,
 
             'cookie_name'       => 's2_cookie_904732485',
             'force_admin_https' => true,

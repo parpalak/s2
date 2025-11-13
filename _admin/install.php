@@ -150,9 +150,28 @@ if (defined('S2_DEBUG')) {
 HtmlErrorRenderer::setTemplate(__DIR__ . '/../_include/views/error.php');
 $errorHandler->setDefaultLogger(new Logger(S2_ROOT . '_cache/install.log', 'install', LogLevel::DEBUG));
 
-//
-// Generate output to be used for config.php
-//
+function render_install_config_array(array $config, int $indentLevel = 0): string
+{
+    $indent      = str_repeat('    ', $indentLevel);
+    $nextIndent  = $indent . '    ';
+    $resultLines = ['['];
+
+    foreach ($config as $key => $value) {
+        $formattedKey = is_int($key) ? $key : "'" . str_replace("'", "\\'", $key) . "'";
+
+        if (is_array($value)) {
+            $renderedValue = render_install_config_array($value, $indentLevel + 1);
+            $resultLines[] = $nextIndent . $formattedKey . ' => ' . $renderedValue . ',';
+        } else {
+            $resultLines[] = $nextIndent . $formattedKey . ' => ' . var_export($value, true) . ',';
+        }
+    }
+
+    $resultLines[] = $indent . ']';
+
+    return implode("\n", $resultLines);
+}
+
 function generate_config_file(HttpClient $httpClient)
 {
     global $db_type, $db_host, $db_name, $db_username, $db_password, $db_prefix, $base_url, $s2_cookie_name;
@@ -185,18 +204,34 @@ function generate_config_file(HttpClient $httpClient)
         }
     }
 
-    return '<?php' . "\n\n" . '$db_type = \'' . $db_type . "';\n" .
-        '$db_host = \'' . $db_host . "';\n" .
-        '$db_name = \'' . addslashes($db_name) . "';\n" .
-        '$db_username = \'' . addslashes($db_username) . "';\n" .
-        '$db_password = \'' . addslashes($db_password) . "';\n" .
-        '$db_prefix = \'' . addslashes($db_prefix) . "';\n" .
-        '$p_connect = false;' . "\n\n" .
-        'define(\'S2_BASE_URL\', \'' . $base_url . '\');' . "\n" .
-        'define(\'S2_PATH\', \'' . $path . '\');' . "\n" .
-        'define(\'S2_URL_PREFIX\', \'' . $url_prefix . '\');' . "\n\n" .
-        ($use_https ? 'define(\'S2_FORCE_ADMIN_HTTPS\', \'1\');' . "\n\n" : '') .
-        '$s2_cookie_name = ' . "'" . $s2_cookie_name . "';\n";
+    $config = [
+        'database' => [
+            'type'      => $db_type,
+            'host'      => $db_host,
+            'name'      => $db_name,
+            'user'      => $db_username,
+            'password'  => $db_password,
+            'prefix'    => $db_prefix,
+            'p_connect' => false,
+        ],
+        'http'     => [
+            'base_url'   => $base_url,
+            'base_path'  => $path,
+            'url_prefix' => $url_prefix,
+        ],
+        'options'  => [
+            'force_admin_https' => $use_https,
+            'canonical_url'     => null,
+            'debug'             => 0,
+            'debug_view'        => 0,
+            'show_queries'      => 0,
+        ],
+        'cookies'  => [
+            'name' => $s2_cookie_name,
+        ],
+    ];
+
+    return "<?php\n\nreturn " . render_install_config_array($config) . ";\n";
 }
 
 function get_preferred_lang($languages)
@@ -239,11 +274,11 @@ $emptyApp->addExtension(new InstallExtension());
 $emptyApp->boot((static function (): array {
     $result = [
         'root_dir'      => S2_ROOT,
-        'cache_dir'     => S2_CACHE_DIR,
+        'cache_dir'     => s2_get_default_cache_dir(),
         'disable_cache' => false,
-        'log_dir'       => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
-        'base_url'      => defined('S2_BASE_URL') ? S2_BASE_URL : null,
-        'base_path'     => defined('S2_PATH') ? S2_PATH : null,
+        'log_dir'       => s2_get_default_cache_dir(),
+        'base_url'      => null,
+        'base_path'     => null,
         'debug'         => defined('S2_DEBUG'),
         'debug_view'    => defined('S2_DEBUG_VIEW'),
         'redirect_map'  => [],
@@ -676,11 +711,11 @@ if (count($validationErrors) === 0) {
     $app->boot((static function (): array {
         $result = [
             'root_dir'      => S2_ROOT,
-            'cache_dir'     => S2_CACHE_DIR,
+            'cache_dir'     => s2_get_default_cache_dir(),
             'disable_cache' => false,
-            'log_dir'       => defined('S2_LOG_DIR') ? S2_LOG_DIR : S2_CACHE_DIR,
-            'base_url'      => defined('S2_BASE_URL') ? S2_BASE_URL : null,
-            'base_path'     => defined('S2_PATH') ? S2_PATH : null,
+            'log_dir'       => s2_get_default_cache_dir(),
+            'base_url'      => null,
+            'base_path'     => null,
             'debug'         => defined('S2_DEBUG'),
             'debug_view'    => defined('S2_DEBUG_VIEW'),
             'redirect_map'  => [],
@@ -800,7 +835,7 @@ $cache->clear();
 
 $alerts = array();
 // Check if the cache directory is writable
-if (!is_writable(S2_CACHE_DIR)) {
+if (!is_writable(s2_get_default_cache_dir())) {
     $alerts[] = '<li><span>' . $lang_install['No cache write'] . '</span></li>';
 }
 

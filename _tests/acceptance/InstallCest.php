@@ -48,12 +48,16 @@ class InstallCest
 
     private static function getCookieName(): string
     {
-        static $s2_cookie_name = null;
-        if ($s2_cookie_name === null) {
-            include __DIR__ . '/../../config.test.php';
+        static $cookieName = null;
+        if ($cookieName === null) {
+            $config = include __DIR__ . '/../../config.test.php';
+            if (!\is_array($config) || !isset($config['cookies']['name'])) {
+                throw new \RuntimeException('Unable to determine cookie name from config.test.php');
+            }
+            $cookieName = (string)$config['cookies']['name'];
         }
 
-        return $s2_cookie_name;
+        return $cookieName;
     }
 
     /**

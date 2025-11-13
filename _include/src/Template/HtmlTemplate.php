@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace S2\Cms\Template;
 
-use Psr\Cache\InvalidArgumentException;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Helper\StringHelper;
 use S2\Cms\Model\UrlBuilder;
+use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -35,6 +35,7 @@ class HtmlTemplate
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly DynamicConfigProvider    $dynamicConfigProvider,
         private readonly bool                     $debugView,
+        private readonly ?string                  $canonicalUrlPrefix,
     ) {
     }
 
@@ -79,8 +80,8 @@ class HtmlTemplate
         if (!empty($this->page['meta_description'])) {
             $meta_tags[] = '<meta name="description" content="' . s2_htmlencode($this->page['meta_description']) . '" />';
         }
-        if (!empty($this->page['canonical_path']) && \defined('S2_CANONICAL_URL')) {
-            $meta_tags[] = '<link rel="canonical" href="' . S2_CANONICAL_URL . s2_htmlencode($this->page['canonical_path']) . '" />';
+        if (!empty($this->page['canonical_path']) && $this->canonicalUrlPrefix !== null) {
+            $meta_tags[] = '<link rel="canonical" href="' . $this->canonicalUrlPrefix . s2_htmlencode($this->page['canonical_path']) . '" />';
         }
 
         $replace['<!-- s2_meta -->'] = implode("\n", $meta_tags);
@@ -228,7 +229,7 @@ class HtmlTemplate
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws DbLayerException
      */
     private function s2_build_copyright(): string
     {

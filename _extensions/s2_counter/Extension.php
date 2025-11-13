@@ -25,7 +25,8 @@ class Extension implements ExtensionInterface
     public function registerListeners(EventDispatcherInterface $eventDispatcher, Container $container): void
     {
         $eventDispatcher->addListener(TemplateEvent::EVENT_PRE_REPLACE, function (TemplateEvent $event) use ($container) {
-            $event->htmlTemplate->registerPlaceholder('<!-- s2_counter_img -->', '<img class="s2_counter" src="' . S2_PATH . '/_extensions/s2_counter/counter.php" width="88" height="31" />');
+            $basePath = $container->getParameter('base_path');
+            $event->htmlTemplate->registerPlaceholder('<!-- s2_counter_img -->', '<img class="s2_counter" src="' . $basePath . '/_extensions/s2_counter/counter.php" width="88" height="31" />');
 
             if ($event->htmlTemplate->isNotFound()) {
                 return;

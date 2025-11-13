@@ -73,7 +73,7 @@ if (isset($GLOBALS['app']) && $GLOBALS['app'] instanceof Application) {
     <p>
         <strong>Note:</strong> For detailed error information (necessary for troubleshooting), enable "DEBUG mode".
         To enable "DEBUG mode", open up the file config.php in a text editor, add a line that looks like
-        <code>define('S2_DEBUG', 1);</code> and re-upload the file.
+        <code>define('S2_DEBUG', 1);</code> before "return" statement and re-upload the file.
         Once you've solved the problem, it is recommended that "DEBUG mode" be turned off again
         (just remove the line from the file and re-upload it).
     </p>

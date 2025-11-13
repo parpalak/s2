@@ -137,4 +137,13 @@ class Container implements ContainerInterface
 
         return $this->parameters[$name];
     }
+
+    public function getNullableParameter(string $name): mixed
+    {
+        if (!\array_key_exists($name, $this->parameters)) {
+            throw new ParameterNotFoundException(\sprintf('Unknown parameter "%s" has been requested from container. Either define one or fix its name.', $name));
+        }
+
+        return $this->parameters[$name];
+    }
 }

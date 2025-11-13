@@ -14,15 +14,19 @@ require __DIR__ . '/_include/common.php';
 
 header('X-Powered-By: S2/' . S2_VERSION);
 
+$urlPrefix = (string)(s2_get_static_parameter('url_prefix') ?? '');
+$basePath  = s2_get_static_parameter('base_path');
+$basePath  = $basePath === null ? '' : (string)$basePath;
+
 // We create our own request URI with the path removed and only the parts to rewrite included
-if (isset($_SERVER['PATH_INFO']) && S2_URL_PREFIX != '')
+if (isset($_SERVER['PATH_INFO']) && $urlPrefix !== '') {
     $request_uri = $_SERVER['PATH_INFO'];
-else {
-    $request_uri = substr(($_SERVER['REQUEST_URI']), strlen(S2_URL_PREFIX));
+} else {
+    $request_uri = substr(($_SERVER['REQUEST_URI']), strlen($urlPrefix));
     if (!str_starts_with($request_uri, '/')) {
         // Fix for usual URLS (e.g. '/?search=1&q=text' in case of prefix === '/?')
         $request_uri = '/';
-    } elseif (($delimiter = strpos($request_uri, S2_URL_PREFIX != '' ? '&' : '?')) !== false) {
+    } elseif (($delimiter = strpos($request_uri, $urlPrefix !== '' ? '&' : '?')) !== false) {
         $request_uri = substr($request_uri, 0, $delimiter);
     }
     // Hack for symfony router in case of /? and /index.php? prefix.
@@ -33,7 +37,7 @@ else {
 // Redirect to the admin page
 //
 if (str_ends_with($request_uri, '---')) {
-    header('Location: ' . S2_PATH . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
+    header('Location: ' . $basePath . '/_admin/index.php?path=' . urlencode(substr($request_uri, 0, -3)));
     die;
 }
 
