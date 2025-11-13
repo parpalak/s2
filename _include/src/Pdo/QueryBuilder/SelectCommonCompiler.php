@@ -82,7 +82,8 @@ readonly class SelectCommonCompiler implements SelectCompilerInterface
     {
         $result = '';
         foreach ($builder->getWithRecursive() as $name => $param) {
-            $result .= 'WITH RECURSIVE ' . $name . ' AS (' . "\n";
+            // NOTE: added prefix here since it will be added to the CTE name in usual FROM or JOIN clauses
+            $result .= 'WITH RECURSIVE ' . $this->prefix . $name . ' AS (' . "\n";
             $result .= $this->walkWith($param);
             $result .= "\n" . ')' . "\n";
         }
