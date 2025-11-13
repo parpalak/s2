@@ -55,7 +55,7 @@ function s2_build_base_static_parameters(array $config): array
         ? rtrim($config['files']['cache_dir'], '/') . '/'
         : s2_get_default_cache_dir();
 
-    $logDir = isset($config['files']['log_dir']) ? rtrim($config['files']['log_dir'], '/') : $cacheDir;
+    $logDir = isset($config['files']['log_dir']) ? rtrim($config['files']['log_dir'], '/') . '/' : $cacheDir;
 
     $imageDirRelative = '';
     if (isset($config['files']['image_dir']) && is_string($config['files']['image_dir'])) {
