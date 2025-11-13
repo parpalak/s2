@@ -39,6 +39,10 @@ jobs:
             operating_system: 'ubuntu-24.04'
             php_versions: 8.4
             mysql_versions: 'mariadb-11.7'
+#          -
+#            operating_system: 'ubuntu-24.04'
+#            php_versions: 8.5
+#            mysql_versions: 'mariadb-11.7'
 
     runs-on: '${{ matrix.operating_system }}'
 
