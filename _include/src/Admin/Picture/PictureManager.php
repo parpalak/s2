@@ -9,8 +9,12 @@ declare(strict_types=1);
 
 namespace S2\Cms\Admin\Picture;
 
+use S2\AdminYard\Config\FieldConfig;
+use S2\AdminYard\Form\FormParams;
+use S2\AdminYard\SettingStorage\SettingStorageInterface;
 use S2\AdminYard\Translator;
 use S2\Cms\AdminYard\CustomTemplateRenderer;
+use S2\Cms\Framework\Exception\AccessDeniedException;
 use S2\Cms\Image\ThumbnailGenerator;
 use S2\Cms\Model\PermissionChecker;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -21,13 +25,13 @@ class PictureManager
     private const EXTENSIONS_FOR_PREVIEW = ['gif', 'bmp', 'jpg', 'jpeg', 'png'];
 
     public function __construct(
-        public Translator             $translator,
-        public CustomTemplateRenderer $customTemplateRenderer,
-        public PermissionChecker      $permissionChecker,
-        public string                 $basePath,
-        public string                 $imageDir, // filesystem
-        public string                 $imagePath, // web server URL prefix
-        public string                 $allowedExtensions,
+        private readonly Translator              $translator,
+        private readonly CustomTemplateRenderer  $customTemplateRenderer,
+        private readonly PermissionChecker       $permissionChecker,
+        private readonly SettingStorageInterface $settingStorage,
+        private readonly string                  $basePath,
+        private string                           $imageDir, // filesystem
+        private readonly string                  $allowedExtensions,
     ) {
         $this->imageDir = rtrim($imageDir, '/');
     }
@@ -105,7 +109,10 @@ class PictureManager
         foreach ($dirs as $item) {
             $output[] = [
                 'data'     => $item,
-                'attr'     => ['data-path' => $dir . '/' . $item],
+                'attr'     => [
+                    'data-path'       => $dir . '/' . $item,
+                    'data-csrf-token' => $this->getFolderCsrfToken($dir . '/' . $item),
+                ],
                 'children' => $this->getDirContentRecursive($dir . '/' . $item)
             ];
         }
@@ -113,7 +120,11 @@ class PictureManager
         if ($dir === '') {
             $output = [
                 'data'     => $this->translator->trans('Pictures'),
-                'attr'     => ['id' => 'node_1', 'data-path' => ''],
+                'attr'     => [
+                    'id'              => 'node_1',
+                    'data-path'       => '',
+                    'data-csrf-token' => $this->getFolderCsrfToken(''),
+                ],
                 'children' => $output,
             ];
         }
@@ -373,6 +384,49 @@ class PictureManager
     public function getImageInfo(string $fileName): array
     {
         return \function_exists('getimagesize') ? (getimagesize($this->imageDir . $fileName) ?: []) : [];
+    }
+
+    public function getFolderCsrfToken(string $path): string
+    {
+        $formParams = new FormParams(
+            'PictureManager',
+            [],
+            $this->settingStorage,
+            FieldConfig::ACTION_DELETE,
+            ['scope' => 'folder', 'path' => $this->getFolderTokenKey($path)],
+        );
+
+        return $formParams->getCsrfToken();
+    }
+
+    public function assertFolderCsrfToken(string $path, string $csrfToken): void
+    {
+        if ($csrfToken === '' || !hash_equals($this->getFolderCsrfToken($path), $csrfToken)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
+    }
+
+    public function assertFileCsrfToken(string $filePath, string $csrfToken): void
+    {
+        $this->assertFolderCsrfToken(self::s2_dirname($filePath), $csrfToken);
+    }
+
+    private function getFolderTokenKey(string $path): string
+    {
+        $fullPath = $this->imageDir . $path;
+        clearstatcache(false, $fullPath);
+
+        $realPath = realpath($fullPath);
+        if ($realPath === false) {
+            $realPath = $fullPath;
+        }
+
+        $inode = @fileinode($fullPath);
+        if ($inode === false) {
+            return $realPath;
+        }
+
+        return 'inode:' . $inode;
     }
 
     private static function s2_basename($dir)

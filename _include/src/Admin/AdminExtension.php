@@ -341,9 +341,9 @@ class AdminExtension implements ExtensionInterface
                 $container->get(Translator::class),
                 $container->get(TemplateRenderer::class),
                 $container->get(PermissionChecker::class),
+                $container->get(SettingStorageInterface::class),
                 $container->getParameter('base_path'),
                 $container->getParameter('image_dir'),
-                $container->getParameter('image_path'),
                 $container->getParameter('allowed_extensions'),
             );
         });

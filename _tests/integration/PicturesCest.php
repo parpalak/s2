@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -52,33 +52,33 @@ class PicturesCest
         $I->see('ftypavif');
 
         // Author cannot rename files
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php', dirname('/test1.png'));
         $I->seeResponseCodeIs(403);
         $I->assertJsonSubResponseEquals('You do not have enough permissions to perform this action.', ['message']);
 
         // Author cannot delete files
-        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test1.png');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test1.png', '/');
         $I->seeResponseCodeIs(403);
         $I->assertJsonSubResponseEquals('You do not have enough permissions to perform this action.', ['message']);
 
         // Editor can rename files, but only if extension is allowed
         $I->logout();
         $I->login('editor', 'editor');
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=test1.php', dirname('/test1.png'));
         $I->seeResponseCodeIs(403);
         $I->assertJsonSubResponseEquals('You are not allowed to create “php” files here. Contact administrators or developers if you really need this.', ['message']);
 
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=cest1.png');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png&name=cest1.png', dirname('/test1.png'));
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('cest1.png', ['new_name']);
 
         // Check on renaming if file with same name already exists
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test2.png&name=cest1.png');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=rename_file&path=/test2.png&name=cest1.png', dirname('/test2.png'));
         $I->seeResponseCodeIs(409);
         $I->assertJsonSubResponseEquals('Rename failed: file or folder “cest1.png” already exists.', ['message']);
 
         // Editor can delete files
-        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test2.png');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=delete_files&path=/&fname[]=test2.png', '/');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals(true, ['success']);
 
@@ -90,7 +90,7 @@ class PicturesCest
         // Admin can rename files, even if extension is not allowed
         $I->logout();
         $I->login('admin', 'admin');
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/cest1.png&name=test1.php');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=rename_file&path=/cest1.png&name=test1.php', dirname('/cest1.png'));
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('test1.php', ['new_name']);
     }
@@ -100,15 +100,15 @@ class PicturesCest
         $I->login('author', 'author');
 
         // creat folder1/folder11, folder1/folder12
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1', '');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('folder1', ['name']);
 
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11', '/folder1');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('folder11', ['name']);
 
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12', '/folder1');
         $I->seeResponseCodeIs(200);
         $I->assertJsonSubResponseEquals('folder12', ['name']);
 
@@ -117,16 +117,16 @@ class PicturesCest
         $this->uploadSimplePngFile($I, '/folder1', 'test3.png');
 
         // move files
-        $I->sendPost('https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png');
+        $this->sendMoveRequestWithTokens($I, 'https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png', '/folder1', '/folder1/folder12');
         $I->seeResponseCodeIs(403);
 
         $I->logout();
         $I->login('editor', 'editor');
-        $I->sendPost('https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png');
+        $this->sendMoveRequestWithTokens($I, 'https://localhost/_admin/ajax.php?action=move_files&spath=/folder1&dpath=/folder1/folder12&fname[]=test1.png&fname[]=test2.png', '/folder1', '/folder1/folder12');
         $I->seeResponseCodeIs(200);
 
         // move folder with files
-        $I->sendPost('https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder12&dpath=/folder1/folder11');
+        $this->sendMoveRequestWithTokens($I, 'https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder12&dpath=/folder1/folder11', '/folder1/folder12', '/folder1/folder11');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_files&path=/folder1/folder11/folder12');
@@ -159,19 +159,19 @@ class PicturesCest
         $I->seeResponseCodeIs(200);
 
         // folder1/folder11, folder1/folder12
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder1', '');
         $I->seeResponseCodeIs(200);
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder11', '/folder1');
         $I->seeResponseCodeIs(200);
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder1&name=folder12', '/folder1');
         $I->seeResponseCodeIs(200);
 
         // folder2/folder21, folder2/folder22
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2', '');
         $I->seeResponseCodeIs(200);
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder21');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder21', '/folder2');
         $I->seeResponseCodeIs(200);
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder22');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=/folder2&name=folder22', '/folder2');
         $I->seeResponseCodeIs(200);
 
 
@@ -184,7 +184,7 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('folder12', ['children', 0, 'children', 1, 'data']);
 
         // folder1/folder11 -> folder2
-        $I->sendPost('https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder11&dpath=/folder2');
+        $this->sendMoveRequestWithTokens($I, 'https://localhost/_admin/ajax.php?action=move_folder&spath=/folder1/folder11&dpath=/folder2', '/folder1/folder11', '/folder2');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders&path=/folder1');
@@ -198,10 +198,10 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('folder22', [2, 'data']);
 
         // folder2 exists, creating folder21
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2', '');
         $I->seeResponseCodeIs(200);
         // folder2 exists, creating folder22
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=create_subfolder&path=&name=folder2', '');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders');
@@ -213,7 +213,7 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('folder22', ['children', 3, 'data']);
 
         // renaming
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_folder&path=/folder21&name=somenewname');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=rename_folder&path=/folder21&name=somenewname', '/folder21');
         $I->seeResponseCodeIs(200);
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders');
         $I->seeResponseCodeIs(200);
@@ -221,13 +221,13 @@ class PicturesCest
         $I->assertJsonSubResponseEquals('somenewname', ['children', 3, 'data']);
 
         // Remove all
-        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder1');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=delete_folder&path=/folder1', '/folder1');
         $I->seeResponseCodeIs(200);
-        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder2');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=delete_folder&path=/folder2', '/folder2');
         $I->seeResponseCodeIs(200);
-        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/somenewname');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=delete_folder&path=/somenewname', '/somenewname');
         $I->seeResponseCodeIs(200);
-        $I->sendPost('https://localhost/_admin/ajax.php?action=delete_folder&path=/folder22');
+        $this->sendRequestWithFolderToken($I, 'https://localhost/_admin/ajax.php?action=delete_folder&path=/folder22', '/folder22');
         $I->seeResponseCodeIs(200);
 
         $I->amOnPage('https://localhost/_admin/ajax.php?action=load_folders');
@@ -241,7 +241,7 @@ class PicturesCest
         $I->login('author', 'author');
         $I->seeResponseCodeIs(200);
 
-        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=create_subfolder', ['csrf_token' => $this->getFolderCsrfToken($I, '')]);
         $I->seeResponseCodeIs(400);
         $I->assertJsonSubResponseContains('Parameters "path" and "name" are required.', ['message']);
     }
@@ -255,15 +255,15 @@ class PicturesCest
         $I->seeResponseCodeIs(405);
         $I->assertJsonSubResponseEquals('Only POST requests are allowed.', ['message']);
 
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1.png', ['csrf_token' => 'dummy']);
         $I->seeResponseCodeIs(400);
         $I->assertJsonSubResponseEquals('Parameters "path" and "name" are required.', ['message']);
 
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=..&name=test1.php');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=..&name=test1.php', ['csrf_token' => 'dummy']);
         $I->seeResponseCodeIs(400);
         $I->assertJsonSubResponseEquals('Invalid path.', ['message']);
 
-        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1&name=./test1.php');
+        $I->sendPost('https://localhost/_admin/ajax.php?action=rename_file&path=/test1&name=./test1.php', ['csrf_token' => 'dummy']);
         $I->seeResponseCodeIs(400);
         $I->assertJsonSubResponseEquals('Invalid name.', ['message']);
     }
@@ -292,10 +292,38 @@ class PicturesCest
 
         $I->sendPost(
             'https://localhost/_admin/ajax.php?action=upload',
-            ['dir' => $path],
+            [
+                'dir'        => $path,
+                'csrf_token' => $this->getFolderCsrfToken($I, $path),
+            ],
             ['pictures' => [
                 new UploadedFile($tempFilename, $fileName, 'image/png', null, true),
             ]]
         );
+    }
+
+    private function sendRequestWithFolderToken(\IntegrationTester $I, string $url, string $pathForToken, array $data = [], array $files = []): void
+    {
+        $data['csrf_token'] = $this->getFolderCsrfToken($I, $pathForToken);
+        $I->sendPost($url, $data, $files);
+    }
+
+    private function sendMoveRequestWithTokens(\IntegrationTester $I, string $url, string $sourcePath, string $destinationPath, array $data = []): void
+    {
+        $data['csrf_token'] = $this->getFolderCsrfToken($I, $sourcePath);
+        $data['destination_csrf_token'] = $this->getFolderCsrfToken($I, $destinationPath);
+        $I->sendPost($url, $data);
+    }
+
+    private function getFolderCsrfToken(\IntegrationTester $I, string $path): string
+    {
+        $I->sendPost('https://localhost/_admin/ajax.php?action=picture_csrf_token', ['path' => $path]);
+        $I->seeResponseCodeIs(200);
+        $response = $I->grabJson();
+        if (!isset($response['csrf_token'])) {
+            $I->fail('CSRF token was not returned.');
+        }
+
+        return $response['csrf_token'];
     }
 }

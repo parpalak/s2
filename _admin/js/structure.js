@@ -205,7 +205,11 @@ $(function () {
         .bind('create.jstree', function (e, data) {
             $.ajax({
                 url: sUrl + 'action=create&id=' + data.rslt.parent.attr('id').replace('node_', ''),
-                data: {title: data.rslt.name},
+                type: 'POST',
+                data: {
+                    title: data.rslt.name,
+                    csrf_token: data.rslt.parent.attr('data-csrf-token')
+                },
                 success: function (d) {
                     if (!d.success)
                         rollback(data.rlbk);

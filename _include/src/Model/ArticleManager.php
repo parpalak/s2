@@ -145,9 +145,14 @@ readonly class ArticleManager
     /**
      * @throws DbLayerException
      * @throws NotFoundException
+     * @throws AccessDeniedException
      */
-    public function createArticle(int $parentId, string $title): int
+    public function createArticle(int $parentId, string $title, string $csrfToken): int
     {
+        if ($csrfToken !== $this->getCsrfToken($parentId)) {
+            throw new AccessDeniedException('Invalid CSRF token!');
+        }
+
         $result = $this->dbLayer
             ->select('1')
             ->from('articles')

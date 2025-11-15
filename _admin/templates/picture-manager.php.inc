@@ -79,6 +79,7 @@ $maxFileSize = $bytesFromString(ini_get('upload_max_filesize'))
                     <?php printf($trans('Upload limit'), $friendlyFilesize($maxFileSize), $friendlyFilesize($bytesFromString(ini_get('post_max_size')))) ?>
                     <br/>
                     <input type="hidden" name="dir" value=""/>
+                    <input type="hidden" name="csrf_token" value=""/>
                 </form>
                 <?php
             }

@@ -71,6 +71,9 @@ class AdminAjaxRequestHandler
         $controllerMap = [
             // Articles tree
             'move'                => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
                 if (!$r->request->has('source_id') || !$r->request->has('new_parent_id') || !$r->request->has('new_pos')) {
                     return new Json(['success' => false, 'message' => 'Parameters "source_id", "new_parent_id" and "new_pos" are required.'], Response::HTTP_BAD_REQUEST);
                 }
@@ -86,6 +89,9 @@ class AdminAjaxRequestHandler
                 return new Json(['success' => true]);
             },
             'delete'              => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
                 if (!$r->query->has('id')) {
                     return new Json(['success' => false, 'message' => 'Parameter "id" is required.'], Response::HTTP_BAD_REQUEST);
                 }
@@ -96,19 +102,26 @@ class AdminAjaxRequestHandler
                 return new Json(['success' => true]);
             },
             'create'              => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
                 if (!$p->isGrantedAny(P::PERMISSION_CREATE_ARTICLES)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
-                if (!$r->query->has('id') || !$r->query->has('title')) {
+                if (!$r->query->has('id') || !$r->request->has('title')) {
                     return new Json(['success' => false, 'message' => 'Parameters "id" and "title" are required.'], Response::HTTP_BAD_REQUEST);
                 }
                 /** @var ArticleManager $am */
-                $am    = $c->get(ArticleManager::class);
-                $newId = $am->createArticle((int)$r->query->get('id'), $r->query->get('title'));
+                $am        = $c->get(ArticleManager::class);
+                $parentId  = (int)$r->query->get('id');
+                $newId     = $am->createArticle($parentId, (string)$r->request->get('title'), (string)$r->request->get('csrf_token', ''));
 
                 return new Json(['success' => true, 'id' => $newId, 'csrfToken' => $am->getCsrfToken($newId)]);
             },
             'rename'              => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
                 if (!$r->query->has('id') || !$r->request->has('title')) {
                     return new Json(['success' => false, 'message' => 'Parameters "id" and "title" are required.'], Response::HTTP_BAD_REQUEST);
                 }
@@ -134,6 +147,9 @@ class AdminAjaxRequestHandler
 
             // Extensions
             'flip_extension'      => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
                 if (!$p->isGranted(P::PERMISSION_EDIT_USERS)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -147,6 +163,9 @@ class AdminAjaxRequestHandler
                 return new Json(['success' => $error === null, 'message' => $error]);
             },
             'install_extension'   => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
                 if (!$p->isGranted(P::PERMISSION_EDIT_USERS)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -160,6 +179,9 @@ class AdminAjaxRequestHandler
                 return new Json(['success' => $errors === [], 'message' => implode("\n", $errors)]);
             },
             'uninstall_extension' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
                 if (!$p->isGranted(P::PERMISSION_EDIT_USERS)) {
                     return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
                 }
@@ -229,6 +251,30 @@ class AdminAjaxRequestHandler
                 }
             },
 
+            'picture_csrf_token' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
+                if (!$p->isGranted(P::PERMISSION_VIEW)) {
+                    return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
+                }
+
+                if (!$r->request->has('path')) {
+                    return new Json(['success' => false, 'message' => 'Parameter "path" is required.'], Response::HTTP_BAD_REQUEST);
+                }
+
+                $path = $r->request->getString('path');
+                if (str_contains($path, '..')) {
+                    return new Json(['success' => false, 'message' => 'Invalid path.'], Response::HTTP_BAD_REQUEST);
+                }
+
+                /** @var PictureManager $pictureManager */
+                $pictureManager = $c->get(PictureManager::class);
+
+                return new Json(['success' => true, 'csrf_token' => $pictureManager->getFolderCsrfToken($path)]);
+            },
+
             'create_subfolder' => static function (P $p, R $r, C $c, T $t) {
                 if ($r->getRealMethod() !== 'POST') {
                     return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
@@ -255,8 +301,15 @@ class AdminAjaxRequestHandler
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
                 try {
+                    $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
                     $newName = $pictureManager->createSubfolder($path, $name);
-                    return new Json(['success' => true, 'name' => $newName, 'path' => $path . '/' . $newName]);
+                    $newPath = $path . '/' . $newName;
+                    return new Json([
+                        'success'    => true,
+                        'name'       => $newName,
+                        'path'       => $newPath,
+                        'csrf_token' => $pictureManager->getFolderCsrfToken($newPath),
+                    ]);
                 } catch (\RuntimeException $e) {
                     return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
@@ -280,9 +333,11 @@ class AdminAjaxRequestHandler
                     return new Json(['success' => false, 'message' => 'Invalid path.'], Response::HTTP_BAD_REQUEST);
                 }
 
+                /** @var PictureManager $pictureManager */
+                $pictureManager = $c->get(PictureManager::class);
+                $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
+
                 if ($path !== '') {
-                    /** @var PictureManager $pictureManager */
-                    $pictureManager = $c->get(PictureManager::class);
                     $pictureManager->deleteFolder($path);
                 }
 
@@ -315,6 +370,7 @@ class AdminAjaxRequestHandler
 
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
+                $pictureManager->assertFolderCsrfToken($dir, (string)$r->request->get('csrf_token', ''));
 
                 foreach ($fileNames as $fileName) {
                     $path = $dir . '/' . ((string)$fileName);
@@ -354,8 +410,13 @@ class AdminAjaxRequestHandler
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
                 try {
+                    $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
                     $newName = $pictureManager->renameFolder($path, $name);
-                    return new Json(['success' => true, 'new_path' => $newName]);
+                    return new Json([
+                        'success'    => true,
+                        'new_path'   => $newName,
+                        'csrf_token' => $pictureManager->getFolderCsrfToken($newName),
+                    ]);
                 } catch (\RuntimeException $e) {
                     return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
@@ -402,6 +463,7 @@ class AdminAjaxRequestHandler
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
                 try {
+                    $pictureManager->assertFileCsrfToken($path, (string)$r->request->get('csrf_token', ''));
                     $newName = $pictureManager->renameFile($path, $filename);
                     return new Json(['success' => true, 'new_name' => $newName]);
                 } catch (\RuntimeException $e) {
@@ -435,8 +497,14 @@ class AdminAjaxRequestHandler
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
                 try {
+                    $pictureManager->assertFolderCsrfToken($sourcePath, (string)$r->request->get('csrf_token', ''));
+                    $pictureManager->assertFolderCsrfToken($destinationPath, (string)$r->request->get('destination_csrf_token', ''));
                     $newPath = $pictureManager->moveFolder($sourcePath, $destinationPath);
-                    return new Json(['success' => true, 'new_path' => $newPath]);
+                    return new Json([
+                        'success'    => true,
+                        'new_path'   => $newPath,
+                        'csrf_token' => $pictureManager->getFolderCsrfToken($newPath),
+                    ]);
                 } catch (\RuntimeException $e) {
                     return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
@@ -484,6 +552,8 @@ class AdminAjaxRequestHandler
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
                 try {
+                    $pictureManager->assertFolderCsrfToken($sourcePath, (string)$r->request->get('csrf_token', ''));
+                    $pictureManager->assertFolderCsrfToken($destinationPath, (string)$r->request->get('destination_csrf_token', ''));
                     $pictureManager->moveFiles($sourcePath, $destinationPath, $fileNames);
                     return new Json(['success' => true]);
                 } catch (\RuntimeException $e) {
@@ -536,11 +606,11 @@ class AdminAjaxRequestHandler
                     return new Json(['success' => false, 'message' => $t->trans('Empty files')], Response::HTTP_UNPROCESSABLE_ENTITY);
                 }
 
-                $errors = [];
-
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
+                $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
 
+                $errors = [];
 
                 $lastFileName = null;
                 foreach ($uploadedFiles as $uploadedFile) {

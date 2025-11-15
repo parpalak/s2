@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2023-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2023-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
 
@@ -195,8 +195,13 @@ class InstallCest
 
     private function testAdminAddArticles(AcceptanceTester $I): void
     {
+        $parentCsrfToken = $this->getArticleCsrfToken($I, 2);
+
         foreach ([4, 5] as $newId) {
-            $I->sendAjaxGetRequest('/_admin/ajax.php?action=create&id=2&title=New+page+' . $newId);
+            $I->sendAjaxPostRequest('/_admin/ajax.php?action=create&id=2', [
+                'title'      => 'New page ' . $newId,
+                'csrf_token' => $parentCsrfToken,
+            ]);
             $data = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
             $I->assertArrayHasKey('success', $data);
             $I->assertTrue($data['success']);
@@ -815,5 +820,38 @@ class InstallCest
         $I->amOnPage($publicUrl);
         $I->dontSee('Moderator3 wrote:');
         $I->dontSee('This is a comment from a moderator3.');
+    }
+
+    private function getArticleCsrfToken(AcceptanceTester $I, int $articleId): string
+    {
+        $I->sendAjaxGetRequest('/_admin/ajax.php?action=load_tree&id=0');
+        $I->seeResponseCodeIsSuccessful();
+        $tree  = json_decode($I->grabPageSource(), true, 512, JSON_THROW_ON_ERROR);
+        $token = $this->extractArticleToken($tree, $articleId);
+
+        if ($token === null) {
+            $I->fail(\sprintf('CSRF token for article %d not found in load_tree output.', $articleId));
+        }
+
+        return $token;
+    }
+
+    private function extractArticleToken(array $tree, int $articleId): ?string
+    {
+        foreach ($tree as $node) {
+            $nodeId = (int)($node['attr']['data-id'] ?? 0);
+            if ($nodeId === $articleId) {
+                return $node['attr']['data-csrf-token'] ?? null;
+            }
+
+            if (!empty($node['children']) && is_array($node['children'])) {
+                $found = $this->extractArticleToken($node['children'], $articleId);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
     }
 }

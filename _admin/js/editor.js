@@ -644,6 +644,30 @@ var loadPictureManager = (function () {
 var isAltPressed = function () {
 };
 
+var pictureFolderCsrfTokens = {};
+
+function requestPictureCsrfToken(path) {
+    if (pictureFolderCsrfTokens[path]) {
+        return Promise.resolve(pictureFolderCsrfTokens[path]);
+    }
+
+    const params = new URLSearchParams();
+    params.append('path', path);
+
+    return fetch('ajax.php?action=picture_csrf_token', {
+        method: 'POST',
+        body: params
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (!data || !data.success) {
+                throw new Error((data && data.message) ? data.message : 'Unable to fetch CSRF token.');
+            }
+            pictureFolderCsrfTokens[path] = data.csrf_token;
+            return data.csrf_token;
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     var altPressed = false;
 
@@ -670,8 +694,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function uploadBlobToPictureDir(blob, name, extension, successCallback) {
-    var formData = new FormData();
-
     var d = new Date();
 
     if (typeof name !== 'string') {
@@ -679,20 +701,29 @@ function uploadBlobToPictureDir(blob, name, extension, successCallback) {
             + "_" + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + '.' + extension;
     }
 
-    formData.append('pictures[]', blob, name);
-    formData.append('dir', '/' + d.getFullYear() + '/' + ('0' + (d.getMonth() + 1)).slice(-2));
-    formData.append('ajax', '1');
-    formData.append('create_dir', '1');
-    formData.append('return_image_info', '1');
+    var dir = '/' + d.getFullYear() + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
 
-    fetch('ajax.php?action=upload', {
-        method: 'POST',
-        body: formData
-    })
+    requestPictureCsrfToken(dir)
+        .then(function (csrfToken) {
+            var formData = new FormData();
+            formData.append('pictures[]', blob, name);
+            formData.append('dir', dir);
+            formData.append('ajax', '1');
+            formData.append('create_dir', '1');
+            formData.append('return_image_info', '1');
+            formData.append('csrf_token', csrfToken);
+
+            return fetch('ajax.php?action=upload', {
+                method: 'POST',
+                body: formData
+            });
+        })
         .then(response => response.json())
         .then(res => {
-            if (res.success === true && typeof successCallback !== "undefined") {
+            if (res.success === true && typeof successCallback !== "undefined" && res.image_info) {
                 successCallback(res, res.image_info[0], res.image_info[1]);
+            } else if (res.success !== true && res.message) {
+                console.warn('Upload error:', res.message);
             }
         })
         .catch(error => console.warn('Error:', error));

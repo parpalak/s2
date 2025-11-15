@@ -20,6 +20,11 @@ function s2_htmlencode($str): string
  */
 function s2_overwrite_file_skip_locked(string $filename, string $content): void
 {
+    $dir = dirname($filename);
+    if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir)) {
+        throw new RuntimeException(sprintf('Cannot create directory "%s".', $dir));
+    }
+
     $fh = @fopen($filename, 'a+b');
 
     if ($fh === false) {

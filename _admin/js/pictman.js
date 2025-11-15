@@ -3,8 +3,8 @@
  *
  * Drag & drop, event handlers for the picture manager
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package S2
  */
 
@@ -77,10 +77,15 @@ $(function () {
     });
 
     var path = '',
+        pathCsrfToken = '',
         isRenaming = false;
 
     getCurDir = function () {
         return path;
+    };
+
+    getCurDirCsrfToken = function () {
+        return pathCsrfToken;
     };
 
     function createFolder() {
@@ -133,6 +138,7 @@ $(function () {
             }
 
             var newPath = d.rslt.obj.attr('data-path');
+            pathCsrfToken = d.rslt.obj.attr('data-csrf-token') || '';
 
             if (path !== newPath) {
                 path = newPath;
@@ -151,7 +157,9 @@ $(function () {
 
             const endpointUrl = sUrl + 'action=rename_folder&name=' + encodeURIComponent(data.rslt.new_name)
                 + '&path=' + encodeURIComponent(data.rslt.obj.attr('data-path'));
-            fetch(endpointUrl, {method: 'POST'})
+            const renameParams = new URLSearchParams();
+            renameParams.append('csrf_token', data.rslt.obj.attr('data-csrf-token'));
+            fetch(endpointUrl, {method: 'POST', body: renameParams})
                 .then(response => response.json())
                 .then(d => {
                     if (!d || !d.success) {
@@ -166,6 +174,9 @@ $(function () {
                     data.rslt.obj.attr('data-path', d.new_path).find('li').each(function () {
                         $(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len));
                     });
+                    if (d.csrf_token) {
+                        data.rslt.obj.attr('data-csrf-token', d.csrf_token);
+                    }
 
                     var eSelected = folderTree.jstree('get_selected');
                     path = eSelected.attr('data-path');
@@ -178,7 +189,9 @@ $(function () {
         .bind('remove.jstree', function (e, data) {
             const endpointUrl = sUrl + 'action=delete_folder&path=' + encodeURIComponent(data.rslt.obj.attr('data-path'));
 
-            fetch(endpointUrl, {method: 'POST'})
+            const deleteParams = new URLSearchParams();
+            deleteParams.append('csrf_token', data.rslt.obj.attr('data-csrf-token'));
+            fetch(endpointUrl, {method: 'POST', body: deleteParams})
                 .then(response => response.json())
                 .then(d => {
                     if (!d || !d.success) {
@@ -195,7 +208,9 @@ $(function () {
         .bind('create.jstree', function (e, data) {
             const endpointUrl = sUrl + 'action=create_subfolder&name=' + encodeURIComponent(data.rslt.name)
                 + '&path=' + encodeURIComponent(data.rslt.parent.attr('data-path'));
-            fetch(endpointUrl, {method: 'POST'})
+            const createParams = new URLSearchParams();
+            createParams.append('csrf_token', data.rslt.parent.attr('data-csrf-token'));
+            fetch(endpointUrl, {method: 'POST', body: createParams})
                 .then(response => response.json())
                 .then(d => {
                     if (!d.success) {
@@ -205,6 +220,9 @@ $(function () {
                         }
                     } else {
                         data.rslt.obj.attr('data-path', d.path);
+                        if (d.csrf_token) {
+                            data.rslt.obj.attr('data-csrf-token', d.csrf_token);
+                        }
                         folderTree.jstree('rename_node', data.rslt.obj, d.name);
                     }
                 })
@@ -216,7 +234,10 @@ $(function () {
             if (typeof (data.rslt.o.attr('data-path')) != 'undefined') {
                 const endpointUrl = sUrl + 'action=move_folder&spath=' + encodeURIComponent(data.rslt.o.attr('data-path'))
                     + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path'));
-                fetch(endpointUrl, {method: 'POST'})
+                const moveParams = new URLSearchParams();
+                moveParams.append('csrf_token', data.rslt.o.attr('data-csrf-token'));
+                moveParams.append('destination_csrf_token', data.rslt.np.attr('data-csrf-token'));
+                fetch(endpointUrl, {method: 'POST', body: moveParams})
                     .then(response => response.json())
                     .then(d => {
                         if (!d || !d.success) {
@@ -229,6 +250,9 @@ $(function () {
                             data.rslt.o.attr('data-path', d.new_path).find('li').each(function () {
                                 $(this).attr('data-path', d.new_path + $(this).attr('data-path').substring(len));
                             });
+                            if (d.csrf_token) {
+                                data.rslt.o.attr('data-csrf-token', d.csrf_token);
+                            }
                             path = folderTree.jstree('get_selected').attr('data-path');
                         }
                     })
@@ -244,7 +268,10 @@ $(function () {
                 const endpointUrl = sUrl + 'action=move_files&spath=' + encodeURIComponent(path)
                     + '&dpath=' + encodeURIComponent(data.rslt.np.attr('data-path'))
                     + '&' + fileNames.join('&');
-                fetch(endpointUrl, {method: 'POST'})
+                const fileMoveParams = new URLSearchParams();
+                fileMoveParams.append('csrf_token', pathCsrfToken);
+                fileMoveParams.append('destination_csrf_token', data.rslt.np.attr('data-csrf-token'));
+                fetch(endpointUrl, {method: 'POST', body: fileMoveParams})
                     .then(response => response.json())
                     .then(d => {
                         folderRollback(data.rlbk);
@@ -383,7 +410,9 @@ $(function () {
 
             const endpointUrl = sUrl + 'action=rename_file&name=' + encodeURIComponent(data.rslt.new_name)
                 + '&path=' + encodeURIComponent(path + '/' + data.rslt.obj.attr('data-fname'));
-            fetch(endpointUrl, {method: 'POST'})
+            const renameFileParams = new URLSearchParams();
+            renameFileParams.append('csrf_token', pathCsrfToken);
+            fetch(endpointUrl, {method: 'POST', body: renameFileParams})
                 .then(response => response.json())
                 .then(d => {
                     fileTree.jstree('deselect_all');
@@ -409,7 +438,9 @@ $(function () {
             const endpointUrl = sUrl + 'action=delete_files&path=' + encodeURIComponent(path)
                 + '&' + fileNames.join('&');
 
-            fetch(endpointUrl, {method: 'POST'})
+            const deleteFilesParams = new URLSearchParams();
+            deleteFilesParams.append('csrf_token', pathCsrfToken);
+            fetch(endpointUrl, {method: 'POST', body: deleteFilesParams})
                 .then(response => response.json())
                 .then(d => {
                     if (!d || !d.success) {
@@ -570,6 +601,7 @@ function SendDroppedFile(file) {
     data.append('pictures[]', file);
     data.append('dir', getCurDir());
     data.append('ajax', '1');
+    data.append('csrf_token', getCurDirCsrfToken());
 
     handleFileUpload(data);
 }
@@ -612,6 +644,7 @@ function handleFileUpload(data, callback) {
 
 function UploadSubmit(eForm) {
     eForm.dir.value = getCurDir();
+    eForm.csrf_token.value = getCurDirCsrfToken();
     const data = new FormData(eForm);
 
     FileCounter(0, 0);
