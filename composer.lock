@@ -337,12 +337,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/admin-yard.git",
-                "reference": "05a73b95ba3fb6cfe8f19c7cb7c3d50b6f5d5567"
+                "reference": "2fa3638abe6924aff47bbe070906c628d7d3d5e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/admin-yard/zipball/05a73b95ba3fb6cfe8f19c7cb7c3d50b6f5d5567",
-                "reference": "05a73b95ba3fb6cfe8f19c7cb7c3d50b6f5d5567",
+                "url": "https://api.github.com/repos/parpalak/admin-yard/zipball/2fa3638abe6924aff47bbe070906c628d7d3d5e3",
+                "reference": "2fa3638abe6924aff47bbe070906c628d7d3d5e3",
                 "shasum": ""
             },
             "require": {
@@ -383,7 +383,7 @@
                 "issues": "https://github.com/parpalak/admin-yard/issues",
                 "source": "https://github.com/parpalak/admin-yard/tree/master"
             },
-            "time": "2025-09-21T21:09:55+00:00"
+            "time": "2025-11-15T10:22:54+00:00"
         },
         {
             "name": "s2/rose",
@@ -391,12 +391,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/parpalak/rose.git",
-                "reference": "79961a8dc8af5e2c0e762339f1f57a9e8fb3fa87"
+                "reference": "e8a09341b581f53e8de00b8b8dc937b33a2400ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/parpalak/rose/zipball/79961a8dc8af5e2c0e762339f1f57a9e8fb3fa87",
-                "reference": "79961a8dc8af5e2c0e762339f1f57a9e8fb3fa87",
+                "url": "https://api.github.com/repos/parpalak/rose/zipball/e8a09341b581f53e8de00b8b8dc937b33a2400ff",
+                "reference": "e8a09341b581f53e8de00b8b8dc937b33a2400ff",
                 "shasum": ""
             },
             "require": {
@@ -435,7 +435,7 @@
                 "issues": "https://github.com/parpalak/rose/issues",
                 "source": "https://github.com/parpalak/rose/tree/master"
             },
-            "time": "2025-11-14T21:39:52+00:00"
+            "time": "2025-11-15T09:02:28+00:00"
         },
         {
             "name": "symfony/cache",
