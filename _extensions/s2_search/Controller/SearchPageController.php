@@ -178,7 +178,7 @@ readonly class SearchPageController implements ControllerInterface
         $tags = [];
         while ($row = $result->fetchAssoc()) {
             if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
-                $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . $row['name'] . '</a>';
+                $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . s2_htmlencode($row['name']) . '</a>';
             }
         }
 
