@@ -15,7 +15,7 @@ use S2\Cms\Pdo\SchemaBuilderInterface;
 
 class MigrationManager
 {
-    private const S2_DB_LAST_REVISION = 23;
+    private const S2_DB_LAST_REVISION = 24;
 
     public function __construct(
         private readonly DbLayer $dbLayer,
@@ -264,6 +264,18 @@ class MigrationManager
 
         if ($currentRevision < 23) {
             $this->dbLayer->dropField('extensions', 'admin_affected');
+        }
+
+        if ($currentRevision < 24) {
+            $this->dbLayer->alterField(
+                'users',
+                'password',
+                SchemaBuilderInterface::TYPE_STRING,
+                255,
+                false
+            );
+
+            $this->dbLayer->dropField('users_online', 'salt');
         }
 
         $this->dbLayer->update('config')

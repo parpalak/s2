@@ -346,7 +346,7 @@ readonly class AdminConfigProvider
                 [EntityConfig::EVENT_BEFORE_PATCH, EntityConfig::EVENT_BEFORE_CREATE],
                 function (BeforeSaveEvent $event) {
                     if (isset($event->data['password'])) {
-                        $event->data['password'] = md5($event->data['password'] . 'Life is not so easy :-)');
+                        $event->data['password'] = password_hash($event->data['password'], PASSWORD_DEFAULT);
                     }
                 }
             )

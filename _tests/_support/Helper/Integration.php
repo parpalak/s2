@@ -207,7 +207,7 @@ class Integration extends AbstractBrowserModule
         foreach ($roleMapping as $role => $enabledPermission) {
             $fields = [
                 'login'           => $role,
-                'password'        => md5($role . 'Life is not so easy :-)'),
+                'password'        => password_hash($role, PASSWORD_DEFAULT),
                 'email'           => $role . '@example.com',
                 'view'            => $enabledPermission !== '' ? 1 : 0,
                 'view_hidden'     => $role === 'admin' || $enabledPermission === PermissionChecker::PERMISSION_VIEW_HIDDEN ? 1 : 0,

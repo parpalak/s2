@@ -1,7 +1,7 @@
 /**
  * Helper functions
  *
- * @copyright 2007-2024 Roman Parpalak
+ * @copyright 2007-2025 Roman Parpalak
  * @license MIT
  * @package S2
  */
@@ -428,14 +428,17 @@ function hex_md5(string) {
 let shakeTimerId = null;
 
 async function SendLoginData(eForm, fOk, fFail) {
-    const key = hex_md5(hex_md5(eForm.pass.value + 'Life is not so easy :-)') + ';-)' + eForm.getAttribute('data-salt'));
     try {
         let response = await originalFetch('?action=login', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
             },
-            body: new URLSearchParams('login=' + eForm.login.value + '&key=' + key + '&challenge=' + eForm.challenge.value)
+            body: new URLSearchParams({
+                login: eForm.login.value,
+                pass: eForm.pass.value,
+                challenge: eForm.challenge.value,
+            })
         });
 
         let result = await response.json();
@@ -443,7 +446,6 @@ async function SendLoginData(eForm, fOk, fFail) {
             fOk();
 
         } else if (result.status === 'NEW_SALT') {
-            eForm.setAttribute('data-salt', result.salt);
             eForm.challenge.value = result.challenge;
             setTimeout(() => {
                 SendLoginData(eForm, fOk, fFail);

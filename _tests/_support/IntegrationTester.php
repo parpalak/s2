@@ -33,7 +33,7 @@ class IntegrationTester extends \Codeception\Actor
         $I->sendPost('https://localhost/_admin/index.php?action=login', [
             'login'     => $username,
             'challenge' => $challenge,
-            'key'       => md5(md5($userpass . 'Life is not so easy :-)') . ';-)' . $I->grabAttributeFrom('.loginform', 'data-salt')),
+            'pass'      => $userpass,
         ]);
     }
 

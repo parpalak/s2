@@ -5,7 +5,6 @@
 /** @var string $locale */
 /** @var string $basePath */
 /** @var string $challenge */
-/** @var string $salt */
 /** @var string $errorMessage */
 
 ?>
@@ -22,7 +21,7 @@
 <body class="login_page" onload="LoginInit();">
 <div id="login_wrap">
     <noscript><p><?php echo $trans('Noscript'); ?></p></noscript>
-    <form name="loginform" class="loginform" method="post" action="" data-salt="<?php echo $salt ?>"
+    <form name="loginform" class="loginform" method="post" action=""
           onsubmit="SendLoginForm(); return false;">
         <p>
             <label>
@@ -36,7 +35,6 @@
         </p>
         <p>
             <input type="submit" name="button" value="<?php echo $trans('Log in'); ?>"/>
-            <input type="hidden" name="key" value=""/>
             <input type="hidden" name="challenge" value="<?php echo $challenge ?>"/>
         </p>
     </form>

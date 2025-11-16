@@ -105,7 +105,7 @@ class AcceptanceTester extends Actor
         $I->sendAjaxPostRequest('/_admin/index.php?action=login', [
             'login'     => $username,
             'challenge' => $challenge,
-            'key'       => md5(md5($userpass . 'Life is not so easy :-)') . ';-)' . $I->grabAttributeFrom('.loginform', 'data-salt')),
+            'pass'      => $userpass,
         ]);
     }
 

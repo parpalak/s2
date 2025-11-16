@@ -25,7 +25,7 @@ use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 22);
+define('S2_DB_REVISION', 24);
 define('MIN_PHP_VERSION', '8.2.0');
 
 define('S2_ROOT', '../');
@@ -781,7 +781,7 @@ $now = time();
 $s2_db
     ->insert('users')
     ->setValue('login', ':login')->setParameter('login', $username)
-    ->setValue('password', ':password')->setParameter('password', md5($password . 'Life is not so easy :-)'))
+    ->setValue('password', ':password')->setParameter('password', password_hash($password, PASSWORD_DEFAULT))
     ->setValue('email', ':email')->setParameter('email', $email)
     ->setValue('view', '1')
     ->setValue('view_hidden', '1')

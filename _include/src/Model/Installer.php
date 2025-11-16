@@ -52,7 +52,7 @@ readonly class Installer
             $table
                 ->addIdColumn()
                 ->addString('login', 191)
-                ->addString('password', 40)
+                ->addString('password', 255)
                 ->addString('email', 80)
                 ->addString('name', 80)
                 ->addBoolean('view')
@@ -163,7 +163,6 @@ readonly class Installer
 
         $this->dbLayer->createTable('users_online', function (SchemaBuilderInterface $table) {
             $table->addString('challenge', 32)
-                ->addString('salt', 32)
                 ->addInteger('time', true)
                 ->addString('login', 191, true, null)
                 ->addString('ip', 39)

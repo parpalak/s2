@@ -196,10 +196,10 @@ if (defined('S2_ADMIN_MODE') && session_status() !== PHP_SESSION_ACTIVE) {
     ini_set('session.cookie_httponly', true);
 }
 
-if ($dynamicConfigProvider->get('S2_DB_REVISION') < 23) {
+if ($dynamicConfigProvider->get('S2_DB_REVISION') < 24) {
     /** @var MigrationManager $migrationManager */
     $migrationManager = $app->container->get(MigrationManager::class);
-    $migrationManager->migrate((int)$dynamicConfigProvider->get('S2_DB_REVISION'), 23);
+    $migrationManager->migrate((int)$dynamicConfigProvider->get('S2_DB_REVISION'), 24);
 
     $dynamicConfigProvider->regenerate();
 }

@@ -30,6 +30,7 @@ readonly class AuthManager
     private const CHALLENGE_STATUS_OK       = 'Ok';
     private const CHALLENGE_STATUS_EXPIRED  = 'Expired';
     private const CHALLENGE_STATUS_WRONG_IP = 'Wrong_IP';
+    private const LEGACY_PASSWORD_PEPPER    = 'Life is not so easy :-)';
 
     public function __construct(
         private DbLayer           $dbLayer,
@@ -245,17 +246,16 @@ readonly class AuthManager
     private function processLoginForm(Request $request): Response
     {
         $login     = $request->request->get('login', '');
+        $password  = $request->request->get('pass', '');
         $challenge = $request->request->get('challenge', '');
-        $key       = $request->request->get('key', '');
 
-        if (!$salt = $this->getSalt($challenge)) {
-            [$challenge, $salt] = $this->generateNewChallenge();
+        if (!$this->challengeExists($challenge)) {
+            $challenge = $this->generateNewChallenge();
 
             return new JsonResponse([
                 'success'   => false,
                 'status'    => 'NEW_SALT',
                 'challenge' => $challenge,
-                'salt'      => $salt,
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -263,15 +263,29 @@ readonly class AuthManager
             return $this->createAjaxErrorLoginPasswordResponse();
         }
 
-        // Getting user password
-        $pass = $this->getPasswordHash($login);
-        if ($pass === null) {
+        if ($password === '') {
             return $this->createAjaxErrorLoginPasswordResponse();
         }
 
-        // Verifying password
-        if ($key !== md5($pass . ';-)' . $salt)) {
+        // Getting user password
+        $userRow = $this->getUserRow($login);
+        if ($userRow === null) {
             return $this->createAjaxErrorLoginPasswordResponse();
+        }
+        $pass = $userRow['password'];
+
+        // Verifying password
+        $isValid = password_verify($password, $pass);
+        $legacyHash = md5($password . self::LEGACY_PASSWORD_PEPPER);
+        if (!$isValid && !hash_equals($pass, $legacyHash)) {
+            return $this->createAjaxErrorLoginPasswordResponse();
+        }
+
+        if (!$isValid) {
+            // Legacy password matched, migrate to modern hash
+            $this->updatePasswordHash($login, $password);
+        } elseif (password_needs_rehash($pass, PASSWORD_DEFAULT)) {
+            $this->updatePasswordHash($login, $password);
         }
 
         // Everything is Ok.
@@ -281,32 +295,49 @@ readonly class AuthManager
     /**
      * @throws DbLayerException
      */
-    private function getSalt(string $challenge): ?string
+    private function challengeExists(string $challenge): bool
     {
         $result = $this->dbLayer
-            ->select('salt')
+            ->select('challenge')
             ->from('users_online')
             ->where('challenge = :challenge')->setParameter('challenge', $challenge)
             ->execute()
         ;
 
-        return $result->result() ?: null;
+        return $result->result() !== null;
     }
 
     /**
      * @throws DbLayerException
      */
-    private function getPasswordHash(string $login): ?string
+    private function getUserRow(string $login): ?array
     {
         $result = $this->dbLayer
-            ->select('password')
+            ->select('id, password')
             ->from('users')
             ->where('login = :login')
             ->setParameter('login', $login)
             ->execute()
         ;
 
-        return $result->result() ?: null;
+        $row = $result->fetchAssoc();
+
+        return $row ?: null;
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function updatePasswordHash(string $login, string $password): void
+    {
+        $newHash = password_hash($password, PASSWORD_DEFAULT);
+
+        $this->dbLayer
+            ->update('users')
+            ->set('password', ':password')->setParameter('password', $newHash)
+            ->where('login = :login')->setParameter('login', $login)
+            ->execute()
+        ;
     }
 
     /**
@@ -374,7 +405,7 @@ readonly class AuthManager
     /**
      * @throws DbLayerException
      */
-    private function generateNewChallenge(): array
+    private function generateNewChallenge(): string
     {
         $time = time();
 
@@ -384,25 +415,17 @@ readonly class AuthManager
             $challenge = md5(uniqid((string)mt_rand(), true) . microtime(true));
         }
 
-        try {
-            $salt = bin2hex(random_bytes(16));
-        } catch (RandomException) {
-            $salt = md5(uniqid((string)mt_rand(), true) . microtime(true));
-        }
-
         // TODO check unique constraint violation
         $this->dbLayer
             ->insert('users_online')
             ->setValue('challenge', ':challenge')
-            ->setValue('salt', ':salt')
             ->setValue('time', ':time')
             ->setParameter('challenge', $challenge)
-            ->setParameter('salt', $salt)
             ->setParameter('time', $time)
             ->execute()
         ;
 
-        return [$challenge, $salt];
+        return $challenge;
     }
 
     private function createAjaxErrorLoginPasswordResponse(): JsonResponse
@@ -418,11 +441,10 @@ readonly class AuthManager
      */
     private function createLoginFormResponse(string $errorMessage = ''): Response
     {
-        [$challenge, $salt] = $this->generateNewChallenge();
+        $challenge = $this->generateNewChallenge();
 
         $content = $this->templateRenderer->render('_admin/templates/login.php.inc', [
             'challenge'    => $challenge,
-            'salt'         => $salt,
             'errorMessage' => $errorMessage,
         ]);
 
