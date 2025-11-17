@@ -29,10 +29,8 @@ class IntegrationTester extends \Codeception\Actor
         $I->canSee('Username');
         $I->canSee('Password');
 
-        $challenge = $I->grabValueFrom('input[name=challenge]');
         $I->sendPost('https://localhost/_admin/index.php?action=login', [
             'login'     => $username,
-            'challenge' => $challenge,
             'pass'      => $userpass,
         ]);
     }

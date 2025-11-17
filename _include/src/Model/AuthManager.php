@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
-use Random\RandomException;
+use S2\AdminYard\Helper\RandomHelper;
 use S2\AdminYard\TemplateRenderer;
 use S2\AdminYard\Translator;
 use S2\Cms\Pdo\DbLayer;
@@ -25,12 +25,11 @@ readonly class AuthManager
 {
     public const FORCE_AJAX_RESPONSE = '_force_ajax_response';
 
-    private const CHALLENGE_EXPIRE_TIMEOUT  = 24 * 60 * 60;
-    private const CHALLENGE_STATUS_LOST     = 'Lost';
-    private const CHALLENGE_STATUS_OK       = 'Ok';
-    private const CHALLENGE_STATUS_EXPIRED  = 'Expired';
-    private const CHALLENGE_STATUS_WRONG_IP = 'Wrong_IP';
-    private const LEGACY_PASSWORD_PEPPER    = 'Life is not so easy :-)';
+    private const SESSION_STATUS_LOST      = 'Lost';
+    private const SESSION_STATUS_OK        = 'Ok';
+    private const SESSION_STATUS_EXPIRED   = 'Expired';
+    private const SESSION_STATUS_WRONG_IP  = 'Wrong_IP';
+    private const LEGACY_PASSWORD_PEPPER   = 'Life is not so easy :-)';
 
     public function __construct(
         private DbLayer           $dbLayer,
@@ -65,10 +64,10 @@ readonly class AuthManager
 
         $this->cleanupExpiredSessions();
 
-        $challenge = $request->cookies->get($this->cookieName, '');
+        $sessionId = $request->cookies->get($this->cookieName, '');
 
         if ($request->query->get('action') === 'logout') {
-            $this->deleteChallenge($challenge);
+            $this->deleteSession($sessionId);
             $response = new RedirectResponse($request->getSchemeAndHttpHost() . $request->getBaseUrl());
             $response->headers->setCookie(Cookie::create(
                 name: $this->cookieName,
@@ -80,7 +79,7 @@ readonly class AuthManager
             return $response;
         }
 
-        if ($challenge === '') {
+        if ($sessionId === '') {
             if ($request->query->get('action') === 'login') {
                 return $this->processLoginForm($request);
             }
@@ -90,7 +89,7 @@ readonly class AuthManager
         }
 
         // Existed session
-        return $this->authenticateUser($request, $challenge);
+        return $this->authenticateUser($request, $sessionId);
     }
 
     /**
@@ -109,20 +108,20 @@ readonly class AuthManager
             return new RedirectResponse($secureUri);
         }
 
-        $challenge = $request->cookies->get($this->cookieName, '');
-        if ($challenge === '') {
+        $sessionId = $request->cookies->get($this->cookieName, '');
+        if ($sessionId === '') {
             return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc'));
         }
 
-        $status = $this->checkAndUpdateCurrentUserChallenge($request, $challenge);
-        if ($status !== self::CHALLENGE_STATUS_OK || !$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW)) {
+        $status = $this->checkAndUpdateCurrentUserSession($request, $sessionId);
+        if ($status !== self::SESSION_STATUS_OK || !$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW)) {
             return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc'));
         }
 
         return null;
     }
 
-    public function getCurrentChallenge(): string
+    public function getCurrentSessionId(): string
     {
         return $this->requestStack->getMainRequest()->cookies->get($this->cookieName, '');
     }
@@ -137,7 +136,7 @@ readonly class AuthManager
             ->from('users_online AS u1')
             ->innerJoin('users_online AS u2', 'u1.login = u2.login')
             ->where('u1.challenge = :challenge')
-            ->setParameter('challenge', $this->getCurrentChallenge())
+            ->setParameter('challenge', $this->getCurrentSessionId())
             ->execute()
         ;
 
@@ -152,29 +151,20 @@ readonly class AuthManager
         $this->dbLayer
             ->delete('users_online')
             ->where('time < :time')
-            ->andWhere('login IS NULL')
-            ->setParameter('time', time() - self::CHALLENGE_EXPIRE_TIMEOUT)
-            ->execute()
-        ;
-
-        $this->dbLayer
-            ->delete('users_online')
-            ->where('time < :time')
             ->andWhere('login IS NOT NULL')
             ->setParameter('time', time() - $this->cookieExpireTimeout())
             ->execute()
         ;
     }
 
-
     /**
      * @throws DbLayerException
      */
-    private function authenticateUser(Request $request, string $challenge): ?Response
+    private function authenticateUser(Request $request, string $sessionId): ?Response
     {
-        $status = $this->checkAndUpdateCurrentUserChallenge($request, $challenge);
+        $status = $this->checkAndUpdateCurrentUserSession($request, $sessionId);
 
-        if ($status === self::CHALLENGE_STATUS_OK) {
+        if ($status === self::SESSION_STATUS_OK) {
             if (!$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_VIEW)) {
                 return new Response($this->templateRenderer->render('_admin/templates/access-denied.php.inc'));
             }
@@ -183,7 +173,7 @@ readonly class AuthManager
         }
 
         // Some error detected
-        $this->deleteChallenge($challenge);
+        $this->deleteSession($sessionId);
 
         if ($request->isXmlHttpRequest() || $request->attributes->get(self::FORCE_AJAX_RESPONSE)) {
             $response = new JsonResponse([
@@ -225,7 +215,7 @@ readonly class AuthManager
     /**
      * @throws DbLayerException
      */
-    private function touchChallenge(Request $request, string $challenge): void
+    private function touchSession(Request $request, string $sessionId): void
     {
         $this->dbLayer
             ->update('users_online')
@@ -235,7 +225,7 @@ readonly class AuthManager
             ->set('ip', ':ip')
             ->setParameter('ip', $request->getClientIp())
             ->where('challenge = :challenge')
-            ->setParameter('challenge', $challenge)
+            ->setParameter('challenge', $sessionId)
             ->execute()
         ;
     }
@@ -245,19 +235,8 @@ readonly class AuthManager
      */
     private function processLoginForm(Request $request): Response
     {
-        $login     = $request->request->get('login', '');
-        $password  = $request->request->get('pass', '');
-        $challenge = $request->request->get('challenge', '');
-
-        if (!$this->challengeExists($challenge)) {
-            $challenge = $this->generateNewChallenge();
-
-            return new JsonResponse([
-                'success'   => false,
-                'status'    => 'NEW_SALT',
-                'challenge' => $challenge,
-            ], Response::HTTP_UNAUTHORIZED);
-        }
+        $login    = $request->request->get('login', '');
+        $password = $request->request->get('pass', '');
 
         if ($login === '') {
             return $this->createAjaxErrorLoginPasswordResponse();
@@ -267,62 +246,43 @@ readonly class AuthManager
             return $this->createAjaxErrorLoginPasswordResponse();
         }
 
-        // Getting user password
-        $userRow = $this->getUserRow($login);
-        if ($userRow === null) {
+        // Getting user password hash
+        $passwordHash = $this->getPasswordHash($login);
+        if ($passwordHash === null) {
             return $this->createAjaxErrorLoginPasswordResponse();
         }
-        $pass = $userRow['password'];
 
         // Verifying password
-        $isValid = password_verify($password, $pass);
-        $legacyHash = md5($password . self::LEGACY_PASSWORD_PEPPER);
-        if (!$isValid && !hash_equals($pass, $legacyHash)) {
+        $hashMatches    = password_verify($password, $passwordHash);
+        $oldHashMatches = hash_equals($passwordHash, md5($password . self::LEGACY_PASSWORD_PEPPER));
+        if (!$hashMatches && !$oldHashMatches) {
             return $this->createAjaxErrorLoginPasswordResponse();
         }
 
-        if (!$isValid) {
-            // Legacy password matched, migrate to modern hash
-            $this->updatePasswordHash($login, $password);
-        } elseif (password_needs_rehash($pass, PASSWORD_DEFAULT)) {
+        if (!$hashMatches || password_needs_rehash($passwordHash, PASSWORD_DEFAULT)) {
             $this->updatePasswordHash($login, $password);
         }
 
         // Everything is Ok.
-        return $this->successLogin($request, $login, $challenge);
+        return $this->successLogin($request, $login);
     }
 
     /**
      * @throws DbLayerException
      */
-    private function challengeExists(string $challenge): bool
+    private function getPasswordHash(string $login): ?string
     {
         $result = $this->dbLayer
-            ->select('challenge')
-            ->from('users_online')
-            ->where('challenge = :challenge')->setParameter('challenge', $challenge)
-            ->execute()
-        ;
-
-        return $result->result() !== null;
-    }
-
-    /**
-     * @throws DbLayerException
-     */
-    private function getUserRow(string $login): ?array
-    {
-        $result = $this->dbLayer
-            ->select('id, password')
+            ->select('password')
             ->from('users')
             ->where('login = :login')
             ->setParameter('login', $login)
             ->execute()
         ;
 
-        $row = $result->fetchAssoc();
+        $row = $result->fetchRow();
 
-        return $row ?: null;
+        return $row === false ? null : (string)$row[0];
     }
 
     /**
@@ -343,12 +303,12 @@ readonly class AuthManager
     /**
      * @throws DbLayerException
      */
-    private function deleteChallenge(string $challenge): void
+    private function deleteSession(string $sessionId): void
     {
         $this->dbLayer
             ->delete('users_online')
             ->where('challenge = :challenge')
-            ->setParameter('challenge', $challenge)
+            ->setParameter('challenge', $sessionId)
             ->execute()
         ;
     }
@@ -356,20 +316,22 @@ readonly class AuthManager
     /**
      * @throws DbLayerException
      */
-    private function successLogin(Request $request, $login, $challenge): JsonResponse
+    private function successLogin(Request $request, string $login): JsonResponse
     {
         $time          = time();
-        $commentCookie = md5(uniqid('comment_cookie', true) . $time);
+        $sessionId     = RandomHelper::getRandomHexString32();
+        $commentCookie = RandomHelper::getRandomHexString32();
 
-        // Link the challenge to the user
+        // Create user session
+        // TODO check unique constraint violation
         $this->dbLayer
-            ->update('users_online')
-            ->set('login', ':login')->setParameter('login', $login)
-            ->set('time', ':time')->setParameter('time', $time)
-            ->set('ua', ':ua')->setParameter('ua', $request->headers->get('User-Agent'))
-            ->set('ip', ':ip')->setParameter('ip', $request->getClientIp())
-            ->set('comment_cookie', ':comment_cookie')->setParameter('comment_cookie', $commentCookie)
-            ->where('challenge = :challenge')->setParameter('challenge', $challenge)
+            ->insert('users_online')
+            ->setValue('login', ':login')->setParameter('login', $login)
+            ->setValue('challenge', ':challenge')->setParameter('challenge', $sessionId)
+            ->setValue('time', ':time')->setParameter('time', $time)
+            ->setValue('ua', ':ua')->setParameter('ua', $request->headers->get('User-Agent'))
+            ->setValue('ip', ':ip')->setParameter('ip', $request->getClientIp())
+            ->setValue('comment_cookie', ':comment_cookie')->setParameter('comment_cookie', $commentCookie)
             ->execute()
         ;
 
@@ -377,7 +339,7 @@ readonly class AuthManager
 
         $response->headers->setCookie(Cookie::create(
             name: $this->cookieName,
-            value: $challenge,
+            value: $sessionId,
             expire: $time + $this->cookieExpireTimeout(),
             path: $this->basePath . '/_admin/',
             secure: $this->forceAdminHttps,
@@ -387,9 +349,6 @@ readonly class AuthManager
         return $response;
     }
 
-    /**
-     * @throws DbLayerException
-     */
     private function createUnauthorizedResponse(Request $request): Response
     {
         if ($request->isXmlHttpRequest() || $request->attributes->get(self::FORCE_AJAX_RESPONSE)) {
@@ -402,32 +361,6 @@ readonly class AuthManager
         return $this->createLoginFormResponse();
     }
 
-    /**
-     * @throws DbLayerException
-     */
-    private function generateNewChallenge(): string
-    {
-        $time = time();
-
-        try {
-            $challenge = bin2hex(random_bytes(16));
-        } catch (RandomException) {
-            $challenge = md5(uniqid((string)mt_rand(), true) . microtime(true));
-        }
-
-        // TODO check unique constraint violation
-        $this->dbLayer
-            ->insert('users_online')
-            ->setValue('challenge', ':challenge')
-            ->setValue('time', ':time')
-            ->setParameter('challenge', $challenge)
-            ->setParameter('time', $time)
-            ->execute()
-        ;
-
-        return $challenge;
-    }
-
     private function createAjaxErrorLoginPasswordResponse(): JsonResponse
     {
         return new JsonResponse([
@@ -436,15 +369,9 @@ readonly class AuthManager
         ], Response::HTTP_UNAUTHORIZED);
     }
 
-    /**
-     * @throws DbLayerException
-     */
     private function createLoginFormResponse(string $errorMessage = ''): Response
     {
-        $challenge = $this->generateNewChallenge();
-
         $content = $this->templateRenderer->render('_admin/templates/login.php.inc', [
-            'challenge'    => $challenge,
             'errorMessage' => $errorMessage,
         ]);
 
@@ -464,17 +391,17 @@ readonly class AuthManager
     /**
      * @throws DbLayerException
      */
-    private function checkAndUpdateCurrentUserChallenge(Request $request, string $challenge): string
+    private function checkAndUpdateCurrentUserSession(Request $request, string $sessionId): string
     {
-        // Check if the challenge exists and isn't expired
+        // Check if the session exists and isn't expired
         $result = $this->dbLayer
             ->select('login, time, ip')
             ->from('users_online')
-            ->where('challenge = :challenge')->setParameter('challenge', $challenge)
+            ->where('challenge = :challenge')->setParameter('challenge', $sessionId)
             ->execute()
         ;
         if (!($row = $result->fetchRow())) {
-            return self::CHALLENGE_STATUS_LOST;
+            return self::SESSION_STATUS_LOST;
         }
 
         [$login, $time, $ip] = $row;
@@ -482,20 +409,20 @@ readonly class AuthManager
         $now = time();
 
         if ($now > $time + $this->loginExpireTimeout()) {
-            return self::CHALLENGE_STATUS_EXPIRED;
+            return self::SESSION_STATUS_EXPIRED;
         }
 
         if ($ip !== $request->getClientIp()) {
-            return self::CHALLENGE_STATUS_WRONG_IP;
+            return self::SESSION_STATUS_WRONG_IP;
         }
 
         // Ok, we keep it fresh every 5 seconds.
         if ($now > $time + 5) {
-            $this->touchChallenge($request, $challenge);
+            $this->touchSession($request, $sessionId);
         }
         $this->permissionChecker->setUser($this->getUserInfo($login));
 
-        return self::CHALLENGE_STATUS_OK;
+        return self::SESSION_STATUS_OK;
     }
 
     /**

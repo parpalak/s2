@@ -96,15 +96,13 @@ class AcceptanceTester extends Actor
     public function login(string $username = 'admin', string $userpass = ''): void
     {
         $I = $this;
-        // $I->amOnPage('/---');
+
         $I->amOnPage('/_admin/index.php');
         $I->canSee('Username');
         $I->canSee('Password');
 
-        $challenge = $I->grabValueFrom('input[name=challenge]');
         $I->sendAjaxPostRequest('/_admin/index.php?action=login', [
             'login'     => $username,
-            'challenge' => $challenge,
             'pass'      => $userpass,
         ]);
     }

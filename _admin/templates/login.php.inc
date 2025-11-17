@@ -4,7 +4,6 @@
 /** @var callable $param */
 /** @var string $locale */
 /** @var string $basePath */
-/** @var string $challenge */
 /** @var string $errorMessage */
 
 ?>
@@ -35,7 +34,6 @@
         </p>
         <p>
             <input type="submit" name="button" value="<?php echo $trans('Log in'); ?>"/>
-            <input type="hidden" name="challenge" value="<?php echo $challenge ?>"/>
         </p>
     </form>
     <p id="message" class="message"><?= htmlentities($errorMessage, ENT_QUOTES, 'UTF-8') ?></p>

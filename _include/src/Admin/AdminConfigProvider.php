@@ -878,7 +878,7 @@ readonly class AdminConfigProvider
                         ))
                         ->addField(new FieldConfig(
                             name: 'current',
-                            type: new VirtualFieldType('(CASE WHEN challenge = \'' . $this->authManager->getCurrentChallenge() . '\' THEN \'1\' ELSE \'\' END)'),
+                            type: new VirtualFieldType('(CASE WHEN challenge = \'' . $this->authManager->getCurrentSessionId() . '\' THEN \'1\' ELSE \'\' END)'),
                         ))
                         ->setEnabledActions([FieldConfig::ACTION_LIST, FieldConfig::ACTION_DELETE])
                         ->setReadAccessControl($this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS) ? null : new LogicalExpression('login', $this->permissionChecker->getUserLogin()))

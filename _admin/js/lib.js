@@ -437,20 +437,12 @@ async function SendLoginData(eForm, fOk, fFail) {
             body: new URLSearchParams({
                 login: eForm.login.value,
                 pass: eForm.pass.value,
-                challenge: eForm.challenge.value,
             })
         });
 
         let result = await response.json();
         if (result.success) {
             fOk();
-
-        } else if (result.status === 'NEW_SALT') {
-            eForm.challenge.value = result.challenge;
-            setTimeout(() => {
-                SendLoginData(eForm, fOk, fFail);
-            }, 0);
-
         } else {
             fFail(result.message);
         }
