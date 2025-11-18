@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection SqlDialectInspection */
 /**
  * PostgreSQL database layer class.
  *
@@ -143,13 +143,13 @@ class DbLayerPostgres extends DbLayer
      * @throws DbLayerException
      */
     public function addField(
-        string                $tableName,
-        string                $fieldName,
-        string                $fieldType,
-        ?int                  $fieldLength,
-        bool                  $allowNull,
-        string|int|float|null $defaultValue = null,
-        ?string               $afterField = null
+        string                     $tableName,
+        string                     $fieldName,
+        string                     $fieldType,
+        ?int                       $fieldLength,
+        bool                       $allowNull,
+        string|int|float|bool|null $defaultValue = null,
+        ?string                    $afterField = null
     ): void {
         if ($this->fieldExists($tableName, $fieldName)) {
             return;
@@ -163,12 +163,7 @@ class DbLayerPostgres extends DbLayer
         }
 
         if ($defaultValue !== null) {
-            if (!\is_int($defaultValue) && !\is_float($defaultValue)) {
-                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
-                $defaultValue = $this->pdo->quote($defaultValue);
-            }
-
-            $sql .= ' DEFAULT ' . $defaultValue;
+            $sql .= ' DEFAULT ' . $this->formatDefaultValue($defaultValue);
         }
         $this->query($sql);
     }
@@ -177,13 +172,13 @@ class DbLayerPostgres extends DbLayer
      * @throws DbLayerException
      */
     public function alterField(
-        string                $tableName,
-        string                $fieldName,
-        string                $fieldType,
-        ?int                  $fieldLength,
-        bool                  $allowNull,
-        string|int|float|null $defaultValue = null,
-        ?string               $afterField = null
+        string                     $tableName,
+        string                     $fieldName,
+        string                     $fieldType,
+        ?int                       $fieldLength,
+        bool                       $allowNull,
+        string|int|float|bool|null $defaultValue = null,
+        ?string                    $afterField = null
     ): void {
         if (!$this->fieldExists($tableName, $fieldName)) {
             return;
@@ -194,10 +189,7 @@ class DbLayerPostgres extends DbLayer
         $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' TYPE ' . $fieldType);
 
         if ($defaultValue !== null) {
-            if (!\is_int($defaultValue) && !\is_float($defaultValue)) {
-                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
-                $defaultValue = $this->pdo->quote($defaultValue);
-            }
+            $defaultValue = $this->formatDefaultValue($defaultValue);
             $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' SET DEFAULT ' . $defaultValue);
         } else {
             $this->query('ALTER TABLE ' . $this->prefix . $tableName . ' ALTER COLUMN ' . $fieldName . ' DROP DEFAULT');
@@ -291,7 +283,7 @@ class DbLayerPostgres extends DbLayer
             SchemaBuilderInterface::TYPE_BOOLEAN => 'SMALLINT',
             SchemaBuilderInterface::TYPE_LONGTEXT,
             SchemaBuilderInterface::TYPE_TEXT => 'TEXT',
-            SchemaBuilderInterface::TYPE_STRING => 'VARCHAR(' . $length . ')',
+            SchemaBuilderInterface::TYPE_STRING => 'VARCHAR(' . ($length ?? 255) . ')',
             default => $type
         };
     }

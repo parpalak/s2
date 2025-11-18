@@ -307,6 +307,76 @@ class DbLayerCest
     /**
      * @throws DbLayerException
      */
+    public function testAddFieldWithDefaultValueFailsWithPlaceholder(\IntegrationTester $I): void
+    {
+//        if ($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) !== 'mysql') {
+//            $I->markTestSkipped('Specific for MySQL server-side prepares');
+//        }
+
+        // Tests are wrapped in a transaction, so we need to stop it
+        // and to start a new one since we want to test DDL, and it is not transactional in MySQL.
+        $this->pdo->rollBack();
+
+        if ($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) !== 'sqlite') {
+            $initialEmulate = $this->pdo->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
+            $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        }
+
+        $this->dbLayer->dropField('config', 'with_str_default'); // in case it already exists
+        $this->dbLayer->dropField('config', 'with_bool_default'); // in case it already exists
+
+        $exception = null;
+        try {
+            $this->dbLayer->addField('config', 'with_str_default', SchemaBuilderInterface::TYPE_STRING, 10, false, 'foo');
+            $this->dbLayer->addField('config', 'with_bool_default', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, true);
+        } catch (DbLayerException $exception) {
+        }
+        $I->assertNull($exception, 'addField should not fail on default value');
+
+        $exception = null;
+        try {
+            $this->dbLayer->alterField('config', 'with_str_default', SchemaBuilderInterface::TYPE_STRING, 10, false, 'bar');
+            $this->dbLayer->alterField('config', 'with_bool_default', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, true);
+        } catch (DbLayerException $exception) {
+        }
+        $I->assertNull($exception, 'alterField should not fail on default value');
+
+        $this->dbLayer->dropField('config', 'with_default');
+        if ($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) !== 'sqlite') {
+            $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $initialEmulate);
+        }
+        $this->pdo->beginTransaction();
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    public function testCreateTableStringWithoutLength(\IntegrationTester $I): void
+    {
+        // Tests are wrapped in a transaction, so we need to stop it
+        // and to start a new one since we want to test DDL, and it is not transactional in MySQL.
+        $this->pdo->rollBack();
+
+        $tableName = 'tmp_without_length';
+        $this->dbLayer->dropTable($tableName);
+
+        $exception = null;
+        try {
+            $this->dbLayer->createTable($tableName, static function (SchemaBuilderInterface $table) {
+                $table->addColumn('name', SchemaBuilderInterface::TYPE_STRING, false, '', null);
+            });
+        } catch (DbLayerException $exception) {
+        }
+
+        $I->assertNull($exception, 'createTable with TYPE_STRING and null length should be supported');
+
+        $this->dbLayer->dropTable($tableName);
+        $this->pdo->beginTransaction();
+    }
+
+    /**
+     * @throws DbLayerException
+     */
     public function testForeignKeyManagement(\IntegrationTester $I): void
     {
         $I->assertTrue($this->dbLayer->foreignKeyExists('articles', 'fk_user'));

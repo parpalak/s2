@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2025 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
  * @package   S2
  */
@@ -62,7 +62,7 @@ class SqliteCreateTableQuery
         return $instance;
     }
 
-    public function withAlteredField(string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): self
+    public function withAlteredField(string $fieldName, string $fieldType, bool $allowNull, string|int|float|bool|null $defaultValue = null, ?string $afterField = null): self
     {
         $instance = clone $this;
         $instance->alterField($fieldName, $fieldType, $allowNull, $defaultValue, $afterField);
@@ -122,14 +122,14 @@ class SqliteCreateTableQuery
         return rtrim($newTable, ',') . "\n);";
     }
 
-    private function addField(string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
+    private function addField(string $fieldName, string $fieldType, bool $allowNull, string|int|float|bool|null $defaultValue = null, ?string $afterField = null): void
     {
         $fieldDefinition = $this->getFieldDefinition($fieldType, $allowNull, $defaultValue);
 
         $this->columns = self::arrayInsert($this->columns, [$fieldName => $fieldDefinition], $afterField);
     }
 
-    private function alterField(string $fieldName, string $fieldType, bool $allowNull, $defaultValue = null, ?string $afterField = null): void
+    private function alterField(string $fieldName, string $fieldType, bool $allowNull, string|int|float|bool|null $defaultValue = null, ?string $afterField = null): void
     {
         $fieldDefinition = $this->getFieldDefinition($fieldType, $allowNull, $defaultValue);
         if ($afterField === null) {
@@ -171,18 +171,19 @@ class SqliteCreateTableQuery
         return array_merge(\array_slice($input, 0, $offset), $replacement, \array_slice($input, $offset));
     }
 
-    private function getFieldDefinition(string $fieldType, bool $allowNull, mixed $defaultValue): string
+    private function getFieldDefinition(string $fieldType, bool $allowNull, string|int|float|bool|null $defaultValue): string
     {
         $fieldDefinition = $fieldType;
         if (!$allowNull) {
             $fieldDefinition .= ' NOT NULL';
         }
 
-        if ($defaultValue !== null && !\is_int($defaultValue) && !\is_float($defaultValue)) {
-            $defaultValue = '\'' . addslashes($defaultValue) . '\'';
-        }
-
         if ($defaultValue !== null) {
+            if (\is_bool($defaultValue)) {
+                $defaultValue = $defaultValue ? '1' : '0';
+            } elseif (\is_string($defaultValue)) {
+                $defaultValue = '\'' . addslashes($defaultValue) . '\'';
+            }
             $fieldDefinition .= ' DEFAULT ' . $defaultValue;
         }
 

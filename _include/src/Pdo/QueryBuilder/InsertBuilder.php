@@ -63,7 +63,7 @@ class InsertBuilder
     public function getColumnExpressions(): array
     {
         if (\count($this->columnExpressions) === 0) {
-            throw new DbLayerException('No fields to update have been specified.');
+            throw new DbLayerException('No fields to insert have been specified.');
         }
         return $this->columnExpressions;
     }

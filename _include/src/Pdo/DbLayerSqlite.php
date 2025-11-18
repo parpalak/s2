@@ -1,8 +1,8 @@
-<?php
+<?php /** @noinspection SqlDialectInspection */
 /**
  * SQLite database layer class.
  *
- * @copyright 2011-2024 Roman Parpalak
+ * @copyright 2011-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -191,13 +191,13 @@ class DbLayerSqlite extends DbLayer
      * @throws DbLayerException
      */
     public function addField(
-        string                $tableName,
-        string                $fieldName,
-        string                $fieldType,
-        ?int                  $fieldLength,
-        bool                  $allowNull,
-        string|int|float|null $defaultValue = null,
-        ?string               $afterField = null
+        string                     $tableName,
+        string                     $fieldName,
+        string                     $fieldType,
+        ?int                       $fieldLength,
+        bool                       $allowNull,
+        string|int|float|bool|null $defaultValue = null,
+        ?string                    $afterField = null
     ): void {
         if ($this->fieldExists($tableName, $fieldName)) {
             return;
@@ -221,13 +221,13 @@ class DbLayerSqlite extends DbLayer
      * @throws DbLayerException
      */
     public function alterField(
-        string                $tableName,
-        string                $fieldName,
-        string                $fieldType,
-        ?int                  $fieldLength,
-        bool                  $allowNull,
-        string|int|float|null $defaultValue = null,
-        ?string               $afterField = null
+        string                     $tableName,
+        string                     $fieldName,
+        string                     $fieldType,
+        ?int                       $fieldLength,
+        bool                       $allowNull,
+        string|int|float|bool|null $defaultValue = null,
+        ?string                    $afterField = null
     ): void {
         if (!$this->fieldExists($tableName, $fieldName)) {
             return;
@@ -382,7 +382,7 @@ class DbLayerSqlite extends DbLayer
             SchemaBuilderInterface::TYPE_BOOLEAN => 'INTEGER',
             SchemaBuilderInterface::TYPE_LONGTEXT,
             SchemaBuilderInterface::TYPE_TEXT => 'TEXT',
-            SchemaBuilderInterface::TYPE_STRING => 'VARCHAR(' . $length . ')', // Anyway, internally will be stored as TEXT
+            SchemaBuilderInterface::TYPE_STRING => 'VARCHAR(' . ($length ?? 255) . ')', // Anyway, internally will be stored as TEXT
             default => $type
         };
     }

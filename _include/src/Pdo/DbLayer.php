@@ -75,7 +75,7 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
                 try {
                     $this->pdo->rollBack();
                 } catch (\PDOException $e) {
-                    throw new DbLayerException('An exception occured on rollback: ' . $e->getMessage(), 0, $sql, $e->getPrevious());
+                    throw new DbLayerException('An exception occurred on rollback: ' . $e->getMessage(), 0, $sql, $e->getPrevious());
                 }
                 --$this->transactionLevel;
             }
@@ -112,21 +112,18 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
      */
     public function tableExists(string $tableName): bool
     {
-        $result = $this->query('SHOW TABLES LIKE :name', [
-            'name' => $this->prefix . $tableName
-        ]);
+        $sql    = 'SHOW TABLES LIKE ' . $this->pdo->quote($this->prefix . $tableName);
+        $result = $this->query($sql);
         return \count($result->fetchAssocAll()) > 0;
     }
-
 
     /**
      * @throws DbLayerException
      */
     public function fieldExists(string $tableName, string $fieldName): bool
     {
-        $result = $this->query('SHOW COLUMNS FROM `' . $this->prefix . $tableName . '` LIKE :column', [
-            'column' => $fieldName,
-        ]);
+        $sql    = 'SHOW COLUMNS FROM `' . $this->prefix . $tableName . '` LIKE ' . $this->pdo->quote($fieldName);
+        $result = $this->query($sql);
 
         return \count($result->fetchAssocAll()) > 0;
     }
@@ -236,13 +233,13 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
      * @throws DbLayerException
      */
     public function addField(
-        string                $tableName,
-        string                $fieldName,
-        string                $fieldType,
-        ?int                  $fieldLength,
-        bool                  $allowNull,
-        string|int|float|null $defaultValue = null,
-        ?string               $afterField = null
+        string                     $tableName,
+        string                     $fieldName,
+        string                     $fieldType,
+        ?int                       $fieldLength,
+        bool                       $allowNull,
+        string|int|float|bool|null $defaultValue = null,
+        ?string                    $afterField = null
     ): void {
         if ($this->fieldExists($tableName, $fieldName)) {
             return;
@@ -250,17 +247,20 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
 
         $fieldType = self::convertType($fieldType, $fieldLength);
 
-        $this->query(
-            \sprintf("ALTER TABLE %s ADD %s %s%s%s%s",
-                $this->prefix . $tableName,
-                $fieldName,
-                $fieldType,
-                $allowNull ? '' : ' NOT NULL',
-                $defaultValue !== null ? ' DEFAULT :default' : '',
-                $afterField !== null ? ' AFTER ' . $afterField : ''
-            ),
-            $defaultValue !== null ? ['default' => $defaultValue] : []
-        );
+        $defaultClause = '';
+        if ($defaultValue !== null) {
+            $defaultClause = ' DEFAULT ' . $this->formatDefaultValue($defaultValue);
+        }
+
+        $this->query(\sprintf(
+            'ALTER TABLE %s ADD %s %s%s%s%s',
+            $this->prefix . $tableName,
+            $fieldName,
+            $fieldType,
+            $allowNull ? '' : ' NOT NULL',
+            $defaultClause,
+            $afterField !== null ? ' AFTER ' . $afterField : ''
+        ));
     }
 
     /**
@@ -275,13 +275,13 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
      * @throws DbLayerException
      */
     public function alterField(
-        string                $tableName,
-        string                $fieldName,
-        string                $fieldType,
-        ?int                  $fieldLength,
-        bool                  $allowNull,
-        string|int|float|null $defaultValue = null,
-        ?string               $afterField = null
+        string                     $tableName,
+        string                     $fieldName,
+        string                     $fieldType,
+        ?int                       $fieldLength,
+        bool                       $allowNull,
+        string|int|float|bool|null $defaultValue = null,
+        ?string                    $afterField = null
     ): void {
         if (!$this->fieldExists($tableName, $fieldName)) {
             return;
@@ -289,17 +289,20 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
 
         $fieldType = self::convertType($fieldType, $fieldLength);
 
-        $this->query(
-            \sprintf("ALTER TABLE %s MODIFY %s %s%s%s%s",
-                $this->prefix . $tableName,
-                $fieldName,
-                $fieldType,
-                $allowNull ? '' : ' NOT NULL',
-                $defaultValue !== null ? ' DEFAULT :default' : '',
-                $afterField !== null ? ' AFTER ' . $afterField : ''
-            ),
-            $defaultValue !== null ? ['default' => $defaultValue] : []
-        );
+        $defaultClause = '';
+        if ($defaultValue !== null) {
+            $defaultClause = ' DEFAULT ' . $this->formatDefaultValue($defaultValue);
+        }
+
+        $this->query(\sprintf(
+            'ALTER TABLE %s MODIFY %s %s%s%s%s',
+            $this->prefix . $tableName,
+            $fieldName,
+            $fieldType,
+            $allowNull ? '' : ' NOT NULL',
+            $defaultClause,
+            $afterField !== null ? ' AFTER ' . $afterField : ''
+        ));
     }
 
 
@@ -444,7 +447,7 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
             SchemaBuilderInterface::TYPE_BOOLEAN => 'TINYINT(1)',
             SchemaBuilderInterface::TYPE_LONGTEXT => 'LONGTEXT',
             SchemaBuilderInterface::TYPE_TEXT => 'TEXT',
-            SchemaBuilderInterface::TYPE_STRING => 'VARCHAR(' . $length . ')',
+            SchemaBuilderInterface::TYPE_STRING => 'VARCHAR(' . ($length ?? 255) . ')',
             default => $type
         };
     }
@@ -458,5 +461,18 @@ class DbLayer implements QueryBuilder\QueryExecutorInterface
             SchemaBuilderInterface::TYPE_INTEGER => (int)$value,
             default => (string)$value
         };
+    }
+
+    protected function formatDefaultValue(string|int|float|bool $value): string
+    {
+        if (\is_int($value) || \is_float($value)) {
+            return (string)$value;
+        }
+
+        if (\is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        return $this->pdo->quote((string)$value);
     }
 }
