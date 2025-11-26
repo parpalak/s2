@@ -67,6 +67,7 @@ readonly class CommentController implements ControllerInterface
         if (!preg_match('#^[0-9a-f]{32}$#', $id)) {
             $id = '';
         }
+        $path = $request->getPathInfo();
 
         /**
          * Input validation
@@ -131,7 +132,17 @@ readonly class CommentController implements ControllerInterface
 
         $spamReport = SpamDetectorReport::disabled();
         if (\count($errors) === 0) {
-            $spamReport = $this->spamDetector->getReport(new SpamDetectorComment($name, $email, $text), (string)$request->getClientIp());
+            $spamReport = $this->spamDetector->getReport(
+                new SpamDetectorComment(
+                    $name,
+                    $email,
+                    $text,
+                    $request->headers->get('User-Agent'),
+                    $request->headers->get('Referer'),
+                    $this->urlBuilder->absLink($path)
+                ),
+                (string)$request->getClientIp()
+            );
             // Convert spam detection report to some validation errors
             if (self::linkCount($text) > 0 && !$spamReport->isHam()) {
                 $errors[] = $this->translator->trans('links_in_text');
@@ -142,7 +153,6 @@ readonly class CommentController implements ControllerInterface
 
         // What are we going to comment?
         $target = $this->commentStrategy->getTargetByRequest($request);
-        $path   = $request->getPathInfo();
 
         if ($target === null && \count($errors) === 0) {
             $errors[] = $this->translator->trans('no_item');

@@ -37,14 +37,20 @@ readonly class AkismetProxy implements SpamDetectorInterface
             'api_key'              => $this->apiKey,
             'blog'                 => $this->urlBuilder->rawAbsLink('/'),
             'user_ip'              => $clientIp,
-            // NOTE: try to add this in case of mistakes
-            // 'user_agent'           => $request->headers->get('User-Agent'),
-            // 'referrer'             => $request->headers->get('Referer'),
             'comment_type'         => self::TYPE_COMMENT,
             'comment_author'       => $comment->name,
             'comment_author_email' => $comment->email,
             'comment_content'      => $comment->text,
         ];
+        if ($comment->userAgent !== null) {
+            $data['user_agent'] = $comment->userAgent;
+        }
+        if ($comment->referrer !== null) {
+            $data['referrer'] = $comment->referrer;
+        }
+        if ($comment->permalink !== null) {
+            $data['permalink'] = $comment->permalink;
+        }
 
         $this->logger->info('Sending comment to Akismet', $comment->toArray());
         try {

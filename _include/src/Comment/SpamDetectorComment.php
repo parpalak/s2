@@ -12,9 +12,12 @@ namespace S2\Cms\Comment;
 class SpamDetectorComment
 {
     public function __construct(
-        public string $name,
-        public string $email,
-        public string $text,
+        public string  $name,
+        public string  $email,
+        public string  $text,
+        public ?string $userAgent = null,
+        public ?string $referrer = null,
+        public ?string $permalink = null,
     ) {
     }
 
