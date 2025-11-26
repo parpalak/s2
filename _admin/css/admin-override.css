@@ -423,6 +423,8 @@ section.large-edit-form {
     max-width: none;
     overflow: visible;
     white-space: normal;
+    padding: 4px 0;
+    line-height: 20px;
 }
 
 .admin-content .list-content td.field-Config-value form.inline-form:not(.success) input,

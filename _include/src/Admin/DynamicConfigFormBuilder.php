@@ -44,8 +44,8 @@ class DynamicConfigFormBuilder
         'Comments config'     => 'title',
         'S2_SHOW_COMMENTS'    => 'boolean',
         'S2_ENABLED_COMMENTS' => 'boolean',
-        'S2_PREMODERATION'    => 'boolean',
         'S2_AKISMET_KEY'      => 'string',
+        'S2_PREMODERATION'    => 'boolean',
 
         'Navigation config' => 'title',
         'S2_USE_HIERARCHY'  => 'boolean',
