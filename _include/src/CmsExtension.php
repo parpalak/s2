@@ -14,6 +14,8 @@ use Psr\Log\LogLevel;
 use S2\Cms\Asset\AssetMergeFactory;
 use S2\Cms\Comment\AkismetProxy;
 use S2\Cms\Comment\SpamDetectorInterface;
+use S2\Cms\Comment\SpamDecisionProvider;
+use S2\Cms\Comment\SpamDecisionProviderInterface;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Controller\CommentController;
@@ -430,6 +432,12 @@ class CmsExtension implements ExtensionInterface
                 $container->get(LoggerInterface::class),
                 $provider->get('S2_AKISMET_KEY'),
             );
+        }, ['dynamic_config_dependent']);
+
+        $container->set(SpamDecisionProviderInterface::class, function (Container $container) {
+            return new SpamDecisionProvider(
+                $container->get(SpamDetectorInterface::class),
+            );
         });
 
         $container->set(CommentController::class, function (Container $container) {
@@ -445,11 +453,11 @@ class CmsExtension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
-                $container->get(SpamDetectorInterface::class),
+                $container->get(SpamDecisionProviderInterface::class),
                 $provider->get('S2_ENABLED_COMMENTS') === '1',
                 $provider->get('S2_PREMODERATION') === '1',
             );
-        });
+        }, ['dynamic_config_dependent']);
 
         $container->set(CommentSentController::class, function (Container $container) {
             return new CommentSentController(
@@ -461,7 +469,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(CommentMailer::class),
                 ...$container->getByTag(CommentStrategyInterface::class)
             );
-        });
+        }, ['dynamic_config_dependent']);
 
         $container->set(CommentUnsubscribeController::class, function (Container $container) {
             return new CommentUnsubscribeController(

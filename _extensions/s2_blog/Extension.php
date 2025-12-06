@@ -13,7 +13,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use S2\Cms\Asset\AssetPack;
-use S2\Cms\Comment\SpamDetectorInterface;
+use S2\Cms\Comment\SpamDecisionProviderInterface;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Controller\CommentController;
@@ -311,11 +311,11 @@ class Extension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
-                $container->get(SpamDetectorInterface::class),
+                $container->get(SpamDecisionProviderInterface::class),
                 $provider->get('S2_ENABLED_COMMENTS') === '1',
                 $provider->get('S2_PREMODERATION') === '1',
             );
-        });
+        }, ['dynamic_config_dependent']);
 
         $container->set(PostProvider::class, static function (Container $container) {
             return new PostProvider(

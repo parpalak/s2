@@ -70,13 +70,4 @@ class SpamDetectorReport
     {
         return $this->status === self::STATUS_SPAM;
     }
-
-    public function shouldGoToModeration(bool $moderationEnabled): bool
-    {
-        return match ($this->status) {
-            self::STATUS_FAILED, self::STATUS_DISABLED => $moderationEnabled,
-            self::STATUS_HAM => false,
-            default => true,
-        };
-    }
 }

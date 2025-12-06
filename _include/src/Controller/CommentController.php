@@ -11,8 +11,8 @@ namespace S2\Cms\Controller;
 
 use Psr\Log\LoggerInterface;
 use S2\Cms\Comment\SpamDetectorComment;
-use S2\Cms\Comment\SpamDetectorInterface;
-use S2\Cms\Comment\SpamDetectorReport;
+use S2\Cms\Comment\SpamDecision;
+use S2\Cms\Comment\SpamDecisionProviderInterface;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Helper\StringHelper;
@@ -33,18 +33,18 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 readonly class CommentController implements ControllerInterface
 {
     public function __construct(
-        private AuthProvider             $authProvider,
-        private UserProvider             $userProvider,
-        private CommentStrategyInterface $commentStrategy,
-        private TranslatorInterface      $translator,
-        private UrlBuilder               $urlBuilder,
-        private HtmlTemplateProvider     $templateProvider,
-        private Viewer                   $viewer,
-        private LoggerInterface          $logger,
-        private CommentMailer            $commentMailer,
-        private SpamDetectorInterface    $spamDetector,
-        private bool                     $commentsEnabled,
-        private bool                     $premoderationEnabled,
+        private AuthProvider                  $authProvider,
+        private UserProvider                  $userProvider,
+        private CommentStrategyInterface      $commentStrategy,
+        private TranslatorInterface           $translator,
+        private UrlBuilder                    $urlBuilder,
+        private HtmlTemplateProvider          $templateProvider,
+        private Viewer                        $viewer,
+        private LoggerInterface               $logger,
+        private CommentMailer                 $commentMailer,
+        private SpamDecisionProviderInterface $spamDecisionProvider,
+        private bool                          $commentsEnabled,
+        private bool                          $premoderationEnabled,
     ) {
     }
 
@@ -130,9 +130,9 @@ readonly class CommentController implements ControllerInterface
             return $template->toHttpResponse();
         }
 
-        $spamReport = SpamDetectorReport::disabled();
+        $spamDecision = SpamDecision::empty();
         if (\count($errors) === 0) {
-            $spamReport = $this->spamDetector->getReport(
+            $spamDecision = $this->spamDecisionProvider->getVerdict(
                 new SpamDetectorComment(
                     $name,
                     $email,
@@ -144,9 +144,9 @@ readonly class CommentController implements ControllerInterface
                 (string)$request->getClientIp()
             );
             // Convert spam detection report to some validation errors
-            if (self::linkCount($text) > 0 && !$spamReport->isHam()) {
+            if ($spamDecision->shouldRejectLinks()) {
                 $errors[] = $this->translator->trans('links_in_text');
-            } elseif ($spamReport->isBlatant()) {
+            } elseif ($spamDecision->shouldRejectAsSpam()) {
                 $errors[] = $this->translator->trans('spam_message_rejected');
             }
         }
@@ -192,7 +192,7 @@ readonly class CommentController implements ControllerInterface
         // Detect if there is a user logged in
         $isOnline = $this->authProvider->isOnline($email);
 
-        $moderationRequired = $spamReport->shouldGoToModeration($this->premoderationEnabled);
+        $moderationRequired = $spamDecision->shouldModerate($this->premoderationEnabled);
 
         // Save the comment
         $commentId = $this->commentStrategy->save($target->id, $name, $email, $showEmail, $subscribed, $text, (string)$request->getClientIp());
@@ -218,7 +218,7 @@ readonly class CommentController implements ControllerInterface
                 $name,
                 $email,
                 !$moderationRequired,
-                $spamReport->status
+                $spamDecision->getStatus()
             );
         }
 
@@ -243,12 +243,6 @@ readonly class CommentController implements ControllerInterface
 
         return $response;
     }
-
-    private static function linkCount(string $text): int
-    {
-        return preg_match_all('#(https?://\S{2,}?)(?=[\s),\'><\]]|&lt;|&gt;|[.;:](?:\s|$)|$)#u', $text) ?: 0;
-    }
-
 
     private static function checkCommentQuestion(string $key, string $answer): bool
     {

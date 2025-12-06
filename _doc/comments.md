@@ -11,7 +11,7 @@ S2 includes a flexible and secure comment system designed to handle validation, 
    If the comment is submitted with the preview flag, it is formatted and returned without being stored or processed further.
 
 3. **Spam Detection**
-   If the comment is valid, it is passed to the `SpamDetectorInterface`. S2 includes a single implementation of this interface, which uses the Akismet service for spam detection.
+   If the comment is valid, it is passed to the `SpamDetectorInterface`. S2 includes a single implementation of this interface, which uses the Akismet service for spam detection. A `SpamDecisionProvider` wraps the detector and applies local heuristics.
 
    `SpamDetectorInterface` may return one of the following statuses:
     - `disabled`: The spam detection service is not enabled (API key not configured in the [control panel](https://github.com/parpalak/s2/wiki/Control-Panel#configuration)).
@@ -20,19 +20,20 @@ S2 includes a flexible and secure comment system designed to handle validation, 
     - `spam`: The comment is considered spam.
     - `blatant`: The comment is blatant spam and can be safely ignored.
 
-   If the comment is not marked as `ham`, an additional validation step checks for the presence of links
-   in the comment text. If links are found, an error is returned.
-   If no links are found and the comment is marked as `blatant`, another validation error about spam is returned.
+   The decision logic combines the detector status and local heuristics:
+   - If the comment is not marked as `ham` and contains links, an error about links is returned.
+   - If the comment is marked as `blatant`, an error about spam is returned.
+   - Even when Akismet returns `ham`, comments that contain links or HTML tags are sent to manual moderation (not auto-published).
 
 4. **Moderation Logic**
    The engine supports optional manual moderation, controlled via the `S2_PREMODERATION` parameter,
    which can be enabled in the [control panel](https://github.com/parpalak/s2/wiki/Control-Panel#configuration).
 
-   The moderation decision in `SpamDetectorReport::shouldGoToModeration()` is based on both
-   the spam detection result and the moderation setting:
+   The moderation decision is made by the `SpamDecision`:
 
-    - If the comment is `ham`, it is published immediately.
+    - If the comment is `ham` and contains no links or HTML tags, it is published immediately.
     - Comments classified as `spam` or `blatant` are never published directly.
+    - Comments marked as `ham` but containing links or HTML tags are always sent for manual review.
     - If moderation is **enabled**, comments with spam check statuses `disabled` or `failed`
       are sent for manual review.
 

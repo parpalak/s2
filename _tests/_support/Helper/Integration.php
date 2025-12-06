@@ -10,15 +10,20 @@ declare(strict_types=1);
 namespace Helper;
 
 use Codeception\TestInterface;
-use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use S2\Cms\Admin\AdminAjaxRequestHandler;
 use S2\Cms\Admin\AdminExtension;
 use S2\Cms\Admin\AdminRequestHandler;
 use S2\Cms\CmsExtension;
+use S2\Cms\Comment\SpamDetectorComment;
+use S2\Cms\Comment\SpamDetectorInterface;
+use S2\Cms\Comment\SpamDetectorReport;
+use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Extensions\ExtensionManager;
 use S2\Cms\Framework\Application;
+use S2\Cms\Framework\Container;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\Installer;
 use S2\Cms\Model\PermissionChecker;
 use S2\Cms\Pdo\DbLayer;
@@ -40,17 +45,20 @@ class Integration extends AbstractBrowserModule
     protected ?Application $adminApplication = null;
     protected ?Session $session;
     protected ?\PDO $pdo;
+    private bool $spamDetectorDecorated = false;
+    private bool $commentMailerDecorated = false;
+    private array $spamResponses = [];
+    private array $moderatorMails = [];
 
     /**
      * @throws ContainerExceptionInterface
      * @throws DbLayerException
      * @throws NotFoundExceptionInterface
-     * @throws InvalidArgumentException
      */
     public function _initialize()
     {
         parent::_initialize();
-        @self::deleteRecursive(self::ROOT_DIR . '_cache/test/config/');
+        $this->clearConfigCache();
         $this->publicApplication = $this->createApplication();
         $this->pdo               = $this->publicApplication->container->get(\PDO::class);
 
@@ -58,6 +66,8 @@ class Integration extends AbstractBrowserModule
         $this->adminApplication->container->decorate(\PDO::class, function () {
             return $this->pdo;
         });
+        $this->decorateSpamDetector();
+        $this->decorateCommentMailer();
 
         $adminDbLayer = $this->adminApplication->container->get(DbLayer::class);
         (new Manifest())->uninstall($adminDbLayer, $this->adminApplication->container);
@@ -79,13 +89,16 @@ class Integration extends AbstractBrowserModule
         $extensionManager = $this->adminApplication->container->get(ExtensionManager::class);
         $extensionManager->installExtension('s2_blog');
         $extensionManager->installExtension('s2_search');
-        @self::deleteRecursive(self::ROOT_DIR . '_cache/test/config/');
+        $this->clearConfigCache();
     }
 
     public function _before(TestInterface $test)
     {
+        $this->clearConfigCache();
         $this->pdo->beginTransaction();
         $this->session->clear();
+        $this->spamResponses  = [];
+        $this->moderatorMails = [];
     }
 
     public function _after(TestInterface $test)
@@ -128,6 +141,43 @@ class Integration extends AbstractBrowserModule
     public function grabAdminService(string $serviceName): mixed
     {
         return $this->adminApplication->container->get($serviceName);
+    }
+
+    public function setSpamResponses(array $statuses): void
+    {
+        $this->spamResponses = $statuses;
+    }
+
+    public function grabModeratorMails(): array
+    {
+        return $this->moderatorMails;
+    }
+
+    public function shiftSpamResponse(): string
+    {
+        return array_shift($this->spamResponses) ?? SpamDetectorReport::STATUS_HAM;
+    }
+
+    public function recordModeratorMail(array $mail): void
+    {
+        $this->moderatorMails[] = $mail;
+    }
+
+    /**
+     * Set config value and regenerate config cache for both applications.
+     */
+    public function setConfigValue(string $name, string $value): void
+    {
+        $statement = $this->pdo->prepare('UPDATE config SET value = :value WHERE name = :name');
+        $statement->execute([':value' => $value, ':name' => $name]);
+
+        $this->publicApplication->container->get(DynamicConfigProvider::class)->regenerate();
+        $this->adminApplication->container->get(DynamicConfigProvider::class)->regenerate();
+
+        $this->publicApplication->container->clearByTag(StatefulServiceInterface::class);
+        $this->adminApplication->container->clearByTag(StatefulServiceInterface::class);
+        $this->publicApplication->container->clearByTag('dynamic_config_dependent');
+        $this->adminApplication->container->clearByTag('dynamic_config_dependent');
     }
 
     protected function collectParameters(): array
@@ -239,5 +289,115 @@ class Integration extends AbstractBrowserModule
         }
 
         return rmdir($dir);
+    }
+
+    private function clearConfigCache(): void
+    {
+        @self::deleteRecursive(self::ROOT_DIR . '_cache/test/config/');
+        @unlink(self::ROOT_DIR . '_cache/test/cache_config.php');
+    }
+
+    private function decorateSpamDetector(): void
+    {
+        if ($this->spamDetectorDecorated) {
+            return;
+        }
+
+        $decorator = function (Container $container, callable $factory) {
+            return new class($this) implements SpamDetectorInterface {
+                public function __construct(private Integration $helper)
+                {
+                }
+
+                public function getReport(SpamDetectorComment $comment, string $clientIp): SpamDetectorReport
+                {
+                    $status = $this->helper->shiftSpamResponse();
+                    return match ($status) {
+                        SpamDetectorReport::STATUS_SPAM => SpamDetectorReport::spam(),
+                        SpamDetectorReport::STATUS_BLATANT => SpamDetectorReport::blatant(),
+                        SpamDetectorReport::STATUS_FAILED => SpamDetectorReport::failed(),
+                        SpamDetectorReport::STATUS_DISABLED => SpamDetectorReport::disabled(),
+                        default => SpamDetectorReport::ham(),
+                    };
+                }
+            };
+        };
+
+        $this->publicApplication->container->decorate(SpamDetectorInterface::class, $decorator);
+        $this->adminApplication->container->decorate(SpamDetectorInterface::class, $decorator);
+        $this->spamDetectorDecorated = true;
+    }
+
+    private function decorateCommentMailer(): void
+    {
+        if ($this->commentMailerDecorated) {
+            return;
+        }
+
+        $decorator = function (Container $container, callable $factory) {
+            $mailer     = $factory($container);
+            $reflection = new \ReflectionClass($mailer);
+            $translator = $reflection->getProperty('translator');
+            $translator->setAccessible(true);
+            $dynamicConfig = $reflection->getProperty('dynamicConfigProvider');
+            $dynamicConfig->setAccessible(true);
+
+            return new IntegrationCommentMailer(
+                $translator->getValue($mailer),
+                $dynamicConfig->getValue($mailer),
+                $this
+            );
+        };
+
+        $this->publicApplication->container->decorate(\S2\Cms\Mail\CommentMailer::class, $decorator);
+        $this->commentMailerDecorated = true;
+    }
+}
+
+readonly class IntegrationCommentMailer extends \S2\Cms\Mail\CommentMailer
+{
+    public function __construct(
+        \Symfony\Contracts\Translation\TranslatorInterface $translator,
+        \S2\Cms\Config\DynamicConfigProvider               $dynamicConfigProvider,
+        private Integration                                $helper
+    ) {
+        parent::__construct($translator, $dynamicConfigProvider);
+    }
+
+    public function mailToModerator(
+        string $moderatorName,
+        string $moderatorEmail,
+        string $text,
+        string $title,
+        string $url,
+        string $authorName,
+        string $authorEmail,
+        bool   $isPublished,
+        string $spamReportStatus,
+    ): bool {
+        $this->helper->recordModeratorMail(compact(
+            'moderatorName',
+            'moderatorEmail',
+            'text',
+            'title',
+            'url',
+            'authorName',
+            'authorEmail',
+            'isPublished',
+            'spamReportStatus'
+        ));
+        return true;
+    }
+
+    public function mailToSubscriber(
+        string $subscriberName,
+        string $subscriberEmail,
+        string $text,
+        string $title,
+        string $url,
+        string $authorName,
+        string $unsubscribeLink
+    ): bool {
+        return true;
     }
 }

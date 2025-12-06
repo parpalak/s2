@@ -21,11 +21,31 @@ class DbLayerCest
 {
     private ?\Pdo $pdo;
     private ?DbLayer $dbLayer;
+    private string $tableName = 'config_dl_test';
 
-    public function _before(\IntegrationTester $I)
+    /**
+     * @throws DbLayerException
+     */
+    public function _before(\IntegrationTester $I): void
     {
         $this->pdo     = $I->grabService(\PDO::class);
         $this->dbLayer = $I->grabService(DbLayer::class);
+
+        /**
+         * DDL causes implicit commits in MySQL, so isolate copy creation outside the shared test transaction
+         * @see \Helper\Integration::_before
+         */
+        $this->pdo->rollBack();
+        $this->recreateConfigCopy();
+        $this->pdo->beginTransaction();
+    }
+
+    public function _after(\IntegrationTester $I): void
+    {
+        try {
+            $this->dbLayer?->dropTable($this->tableName);
+        } catch (\Throwable) {
+        }
     }
 
     /**
@@ -33,7 +53,7 @@ class DbLayerCest
      */
     public function testTableExists(\IntegrationTester $I): void
     {
-        $I->assertTrue($this->dbLayer->tableExists('config'));
+        $I->assertTrue($this->dbLayer->tableExists($this->tableName));
         $I->assertFalse($this->dbLayer->tableExists('not_a_config'));
     }
 
@@ -42,8 +62,8 @@ class DbLayerCest
      */
     public function testFieldExists(\IntegrationTester $I): void
     {
-        $I->assertTrue($this->dbLayer->fieldExists('config', 'name'));
-        $I->assertFalse($this->dbLayer->fieldExists('config', 'not_a_field'));
+        $I->assertTrue($this->dbLayer->fieldExists($this->tableName, 'name'));
+        $I->assertFalse($this->dbLayer->fieldExists($this->tableName, 'not_a_field'));
     }
 
     /**
@@ -70,7 +90,7 @@ class DbLayerCest
         $I->assertCount(0, $data);
 
         // Add a new row
-        $this->dbLayer->insert('config')
+        $this->dbLayer->insert($this->tableName)
             ->values(['name' => "'TEST'", 'value' => "'test'"])
             ->onConflictDoNothing('name')
             ->execute()
@@ -81,7 +101,7 @@ class DbLayerCest
         $I->assertCount(1, $data);
 
         // Add a new row that will be ignored
-        $this->dbLayer->insert('config')
+        $this->dbLayer->insert($this->tableName)
             ->values(['name' => "'TEST'", 'value' => "'test'"])
             ->onConflictDoNothing('name')
             ->execute()
@@ -102,7 +122,7 @@ class DbLayerCest
         $I->assertEquals(['name' => 'S2_FAVORITE_URL', 'value' => 'favorite'], $data[0]);
 
         $this->dbLayer
-            ->upsert('config')
+            ->upsert($this->tableName)
             ->setKey('name', ':name')->setParameter('name', 'S2_FAVORITE_URL')
             ->setValue('value', ':value')->setParameter('value', 'favorite2')
             ->execute()
@@ -112,7 +132,7 @@ class DbLayerCest
         $I->assertCount(1, $data);
         $I->assertEquals(['name' => 'S2_FAVORITE_URL', 'value' => 'favorite2'], $data[0]);
 
-        $this->dbLayer->upsert('config')
+        $this->dbLayer->upsert($this->tableName)
             ->setKey('name', ':name')->setParameter('name', 'S2_UNKNOWN')
             ->setValue('value', ':value')->setParameter('value', 'unknown')
             ->execute()
@@ -133,7 +153,7 @@ class DbLayerCest
         $this->pdo->rollBack();
 
         $data = $this->dbLayer->select('*')
-            ->from('config')
+            ->from($this->tableName)
             ->limit(1)
             ->execute()->fetchAssocAll()
         ;
@@ -141,10 +161,10 @@ class DbLayerCest
         $I->assertCount(1, $data);
         $I->assertEquals(['name', 'value'], array_keys($data[0]));
 
-        $this->dbLayer->addField('config', 'test_field', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, true);
+        $this->dbLayer->addField($this->tableName, 'test_field', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, true);
 
         $result = $this->dbLayer->select('test_field')
-            ->from('config')
+            ->from($this->tableName)
             ->limit(1)
             ->execute()
         ;
@@ -152,10 +172,10 @@ class DbLayerCest
         $result->freeResult(); // There are table locks in SQLite without this
         $I->assertEquals(['test_field' => null], $data);
 
-        $this->dbLayer->renameField('config', 'test_field', 'test_field2');
+        $this->dbLayer->renameField($this->tableName, 'test_field', 'test_field2');
 
         $result = $this->dbLayer->select('test_field2')
-            ->from('config')
+            ->from($this->tableName)
             ->limit(1)
             ->execute()
         ;
@@ -163,7 +183,7 @@ class DbLayerCest
         $result->freeResult(); // There are table locks in SQLite without this
         $I->assertEquals(['test_field2' => null], $data);
 
-        $this->dbLayer->insert('config')
+        $this->dbLayer->insert($this->tableName)
             ->setValue('name', ':name')->setParameter('name', 'test_name')
             ->setValue('value', ':value')->setParameter('value', 'test_value')
             ->setValue('test_field2', ':test_field2')->setParameter('test_field2', 123)
@@ -171,7 +191,7 @@ class DbLayerCest
         ;
 
         $result = $this->dbLayer->select('test_field2')
-            ->from('config')
+            ->from($this->tableName)
             ->where('test_field2 = :val')->setParameter(':val', 123)
             ->limit(1)
             ->execute()
@@ -183,22 +203,22 @@ class DbLayerCest
         if (!$this->dbLayer instanceof DbLayerSqlite) {
             $e = null;
             try {
-                $this->dbLayer->alterField('config', 'test_field2', SchemaBuilderInterface::TYPE_STRING, 255, false, 'default_test');
+                $this->dbLayer->alterField($this->tableName, 'test_field2', SchemaBuilderInterface::TYPE_STRING, 255, false, 'default_test');
             } catch (DbLayerException $e) {
             }
             $I->assertInstanceOf(DbLayerException::class, $e);
         }
 
-        $this->dbLayer->update('config')
+        $this->dbLayer->update($this->tableName)
             ->set('test_field2', '0')
             ->where('test_field2 IS NULL')
             ->execute()
         ;
 
-        $this->dbLayer->alterField('config', 'test_field2', SchemaBuilderInterface::TYPE_STRING, 255, false, 'default_test');
+        $this->dbLayer->alterField($this->tableName, 'test_field2', SchemaBuilderInterface::TYPE_STRING, 255, false, 'default_test');
 
         $result = $this->dbLayer->select('test_field2')
-            ->from('config')
+            ->from($this->tableName)
             ->where('test_field2 = :val')->setParameter(':val', '123')
             ->limit(1)
             ->execute()
@@ -206,10 +226,10 @@ class DbLayerCest
         $data   = $result->result();
         $I->assertEquals('123', $data);
 
-        $this->dbLayer->dropField('config', 'test_field2');
+        $this->dbLayer->dropField($this->tableName, 'test_field2');
 
         $data = $this->dbLayer->select('*')
-            ->from('config')
+            ->from($this->tableName)
             ->limit(1)
             ->execute()->fetchAssoc()
         ;
@@ -231,20 +251,20 @@ class DbLayerCest
         // Otherwise MySQL gives error:
         // SQLSTATE[42000]: Syntax error or access violation: 1170 BLOB/TEXT column 'value' used in key specification without a key length.
         // Failed query: ALTER TABLE config ADD INDEX config_value_idx (value). Error code: 42000.
-        $this->dbLayer->alterField('config', 'value', SchemaBuilderInterface::TYPE_STRING, 191, false, '');
+        $this->dbLayer->alterField($this->tableName, 'value', SchemaBuilderInterface::TYPE_STRING, 191, false, '');
 
-        $I->assertFalse($this->dbLayer->indexExists('config', 'value_idx'));
-        $this->dbLayer->addIndex('config', 'value_idx', ['value']);
+        $I->assertFalse($this->dbLayer->indexExists($this->tableName, 'value_idx'));
+        $this->dbLayer->addIndex($this->tableName, 'value_idx', ['value']);
 
         // Cleaning from other tests
-        $this->dbLayer->delete('config')
+        $this->dbLayer->delete($this->tableName)
             ->where('value = :value')->setParameter('value', 'test_value')
             ->execute()
         ;
 
         // Test values are not unique
         foreach (['test_name1', 'test_name2'] as $name) {
-            $this->dbLayer->insert('config')
+            $this->dbLayer->insert($this->tableName)
                 ->setValue('name', ':name')->setParameter('name', $name)
                 ->setValue('value', ':value')->setParameter('value', 'test_value')
                 ->execute()
@@ -252,26 +272,26 @@ class DbLayerCest
         }
 
         $data = $this->dbLayer->select('*')
-            ->from('config')
+            ->from($this->tableName)
             ->where('value = :value')->setParameter('value', 'test_value')
             ->execute()
             ->fetchAssocAll()
         ;
         $I->assertCount(2, $data);
 
-        $this->dbLayer->dropIndex('config', 'value_idx');
+        $this->dbLayer->dropIndex($this->tableName, 'value_idx');
         $e = null;
         try {
-            $this->dbLayer->addIndex('config', 'value_idx', ['value'], true);
+            $this->dbLayer->addIndex($this->tableName, 'value_idx', ['value'], true);
         } catch (DbLayerException $e) {
         }
         $I->assertNotNull($e);
 
-        $this->dbLayer->delete('config')->execute();
+        $this->dbLayer->delete($this->tableName)->execute();
 
-        $this->dbLayer->addIndex('config', 'value_idx', ['value'], true);
+        $this->dbLayer->addIndex($this->tableName, 'value_idx', ['value'], true);
 
-        $this->dbLayer->insert('config')
+        $this->dbLayer->insert($this->tableName)
             ->setValue('name', ':name')->setParameter('name', 'test_name1')
             ->setValue('value', ':value')->setParameter('value', 'test_value')
             ->execute()
@@ -280,7 +300,7 @@ class DbLayerCest
         $e = null;
 
         try {
-            $this->dbLayer->insert('config')
+            $this->dbLayer->insert($this->tableName)
                 ->setValue('name', ':name')->setParameter('name', 'test_name2')
                 ->setValue('value', ':value')->setParameter('value', 'test_value')
                 ->execute()
@@ -290,15 +310,15 @@ class DbLayerCest
         $I->assertNotNull($e);
 
         // Test that creating new field does not break indexes. Useful for SQLite where tables are recreated on field creation
-        $I->assertTrue($this->dbLayer->indexExists('config', 'value_idx'));
-        $this->dbLayer->addField('config', 'new_field', SchemaBuilderInterface::TYPE_STRING, 255, true);
-        $I->assertTrue($this->dbLayer->indexExists('config', 'value_idx'));
-        $this->dbLayer->dropField('config', 'new_field');
-        $I->assertTrue($this->dbLayer->indexExists('config', 'value_idx'));
+        $I->assertTrue($this->dbLayer->indexExists($this->tableName, 'value_idx'));
+        $this->dbLayer->addField($this->tableName, 'new_field', SchemaBuilderInterface::TYPE_STRING, 255, true);
+        $I->assertTrue($this->dbLayer->indexExists($this->tableName, 'value_idx'));
+        $this->dbLayer->dropField($this->tableName, 'new_field');
+        $I->assertTrue($this->dbLayer->indexExists($this->tableName, 'value_idx'));
 
-        $this->dbLayer->dropIndex('config', 'value_idx');
+        $this->dbLayer->dropIndex($this->tableName, 'value_idx');
 
-        $this->dbLayer->alterField('config', 'value', SchemaBuilderInterface::TYPE_TEXT, null, false);
+        $this->dbLayer->alterField($this->tableName, 'value', SchemaBuilderInterface::TYPE_TEXT, null, false);
 
         // Start a transaction as if it was an external transaction from tests wrapper
         $this->pdo->beginTransaction();
@@ -322,30 +342,34 @@ class DbLayerCest
             $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
         }
 
-        $this->dbLayer->dropField('config', 'with_str_default'); // in case it already exists
-        $this->dbLayer->dropField('config', 'with_bool_default'); // in case it already exists
+        $this->dbLayer->dropField($this->tableName, 'with_str_default'); // in case it already exists
+        $this->dbLayer->dropField($this->tableName, 'with_bool_default'); // in case it already exists
 
-        $exception = null;
         try {
-            $this->dbLayer->addField('config', 'with_str_default', SchemaBuilderInterface::TYPE_STRING, 10, false, 'foo');
-            $this->dbLayer->addField('config', 'with_bool_default', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, true);
-        } catch (DbLayerException $exception) {
-        }
-        $I->assertNull($exception, 'addField should not fail on default value');
+            $exception = null;
+            try {
+                $this->dbLayer->addField($this->tableName, 'with_str_default', SchemaBuilderInterface::TYPE_STRING, 10, false, 'foo');
+                $this->dbLayer->addField($this->tableName, 'with_bool_default', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, true);
+            } catch (DbLayerException $exception) {
+            }
+            $I->assertNull($exception, 'addField should not fail on default value');
 
-        $exception = null;
-        try {
-            $this->dbLayer->alterField('config', 'with_str_default', SchemaBuilderInterface::TYPE_STRING, 10, false, 'bar');
-            $this->dbLayer->alterField('config', 'with_bool_default', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, true);
-        } catch (DbLayerException $exception) {
+            $exception = null;
+            try {
+                $this->dbLayer->alterField($this->tableName, 'with_str_default', SchemaBuilderInterface::TYPE_STRING, 10, false, 'bar');
+                $this->dbLayer->alterField($this->tableName, 'with_bool_default', SchemaBuilderInterface::TYPE_BOOLEAN, null, false, true);
+            } catch (DbLayerException $exception) {
+            }
+            $I->assertNull($exception, 'alterField should not fail on default value');
+        } finally {
+            $this->dbLayer->dropField($this->tableName, 'with_str_default');
+            $this->dbLayer->dropField($this->tableName, 'with_bool_default');
+            $this->dbLayer->dropField($this->tableName, 'with_default');
+            if ($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) !== 'sqlite') {
+                $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $initialEmulate);
+            }
+            $this->pdo->beginTransaction();
         }
-        $I->assertNull($exception, 'alterField should not fail on default value');
-
-        $this->dbLayer->dropField('config', 'with_default');
-        if ($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) !== 'sqlite') {
-            $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $initialEmulate);
-        }
-        $this->pdo->beginTransaction();
     }
 
     /**
@@ -391,11 +415,38 @@ class DbLayerCest
      */
     private function getAllConfigByName(string $name): array
     {
-        $data = $this->dbLayer->select('*')
-            ->from('config')
+        return $this->dbLayer->select('*')
+            ->from($this->tableName)
             ->where('name = :name')->setParameter('name', $name)
             ->execute()->fetchAssocAll()
         ;
-        return $data;
+    }
+
+    /**
+     * @throws DbLayerException
+     */
+    private function recreateConfigCopy(): void
+    {
+        try {
+            $this->dbLayer->dropTable($this->tableName);
+        } catch (DbLayerException) {
+        }
+
+        $this->dbLayer->createTable($this->tableName, function (SchemaBuilderInterface $table) {
+            $table
+                ->addString('name', 191)
+                ->addText('value', nullable: false)
+                ->setPrimaryKey(['name'])
+            ;
+        });
+
+        $rows = $this->dbLayer->select('*')->from('config')->execute()->fetchAssocAll();
+        foreach ($rows as $row) {
+            $this->dbLayer->insert($this->tableName)
+                ->setValue('name', ':name')->setParameter('name', $row['name'])
+                ->setValue('value', ':value')->setParameter('value', $row['value'])
+                ->execute()
+            ;
+        }
     }
 }
