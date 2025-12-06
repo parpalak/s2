@@ -9,10 +9,11 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 
-class TagsProvider
+class TagsProvider implements StatefulServiceInterface
 {
     // Note: Add cache invalidation in case of daemon mode
     private ?array $cachedTags = null;
@@ -83,5 +84,10 @@ class TagsProvider
         ;
 
         return $result->fetchColumn();
+    }
+
+    public function clearState(): void
+    {
+        $this->cachedTags = null;
     }
 }

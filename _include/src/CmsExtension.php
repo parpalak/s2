@@ -115,7 +115,7 @@ class CmsExtension implements ExtensionInterface
                 'pgsql' => new PDO("pgsql:host=$db_host;dbname=$db_name", $db_username, $db_password),
                 default => throw new \RuntimeException(\sprintf('Unsupported db_type="%s"', $db_type)),
             };
-        });
+        }, [StatefulServiceInterface::class]);
 
         $container->set(MigrationManager::class, function (Container $container) {
             return new MigrationManager(
@@ -284,7 +284,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(UrlBuilder::class),
                 $provider->get('S2_TAGS_URL'),
             );
-        });
+        }, [StatefulServiceInterface::class]);
 
         $container->set(CommentProvider::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */

@@ -11,7 +11,6 @@ namespace S2\Cms\Admin;
 
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use S2\AdminYard\AdminPanel;
 use S2\Cms\Admin\Event\RedirectFromPublicEvent;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\StatefulServiceInterface;
@@ -55,9 +54,10 @@ readonly class AdminRequestHandler
                 $this->eventDispatcher->dispatch(new RedirectFromPublicEvent($request, $request->query->get('path')));
             }
             // NOTE: Initialization of the AdminPanel is delayed since its factory is relied on the RequestStack to be populated
-            /** @var AdminPanel $adminPanel */
-            $adminPanel = $this->container->get(AdminPanel::class);
-            $response   = $adminPanel->handleRequest($request);
+            /** @var AdminPanelFactory $adminPanelFactory */
+            $adminPanelFactory = $this->container->get(AdminPanelFactory::class);
+            $adminPanel        = $adminPanelFactory->create();
+            $response          = $adminPanel->handleRequest($request);
         }
 
         $this->requestStack->pop();

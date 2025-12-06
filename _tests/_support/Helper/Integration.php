@@ -174,10 +174,18 @@ class Integration extends AbstractBrowserModule
         $this->publicApplication->container->get(DynamicConfigProvider::class)->regenerate();
         $this->adminApplication->container->get(DynamicConfigProvider::class)->regenerate();
 
-        $this->publicApplication->container->clearByTag(StatefulServiceInterface::class);
-        $this->adminApplication->container->clearByTag(StatefulServiceInterface::class);
+        $this->clearStatefulServices($this->publicApplication->container);
+        $this->clearStatefulServices($this->adminApplication->container);
         $this->publicApplication->container->clearByTag('dynamic_config_dependent');
         $this->adminApplication->container->clearByTag('dynamic_config_dependent');
+    }
+
+    private function clearStatefulServices(Container $container): void
+    {
+        foreach ($container->getByTagIfInstantiated(StatefulServiceInterface::class) as $service) {
+            /** @var StatefulServiceInterface $service */
+            $service->clearState();
+        }
     }
 
     protected function collectParameters(): array

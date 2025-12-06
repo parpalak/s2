@@ -11,11 +11,12 @@ namespace S2\Cms\AdminYard;
 
 use S2\AdminYard\TemplateRenderer;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\PermissionChecker;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class CustomTemplateRenderer extends TemplateRenderer
+class CustomTemplateRenderer extends TemplateRenderer implements StatefulServiceInterface
 {
     private ?array $extraAssets = null;
 
@@ -93,5 +94,10 @@ class CustomTemplateRenderer extends TemplateRenderer
         $this->eventDispatcher->dispatch($event);
 
         return $this->extraAssets = [$event->extraStyles, $event->extraScripts];
+    }
+
+    public function clearState(): void
+    {
+        $this->extraAssets = null;
     }
 }

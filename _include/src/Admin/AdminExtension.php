@@ -9,16 +9,12 @@ declare(strict_types=1);
 
 namespace S2\Cms\Admin;
 
-use Psr\Log\LoggerInterface;
-use S2\AdminYard\AdminPanel;
 use S2\AdminYard\Database\PdoDataProvider;
 use S2\AdminYard\Database\TypeTransformer;
 use S2\AdminYard\Form\FormControlFactoryInterface;
 use S2\AdminYard\Form\FormFactory;
-use S2\AdminYard\MenuGenerator;
 use S2\AdminYard\SettingStorage\SettingStorageInterface;
 use S2\AdminYard\TemplateRenderer;
-use S2\AdminYard\Transformer\ViewTransformer;
 use S2\AdminYard\Translator;
 use S2\Cms\Admin\Dashboard\DashboardArticleProvider;
 use S2\Cms\Admin\Dashboard\DashboardBlockProviderInterface;
@@ -28,7 +24,6 @@ use S2\Cms\Admin\Dashboard\DashboardEnvironmentProvider;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
 use S2\Cms\Admin\Event\RedirectFromPublicEvent;
 use S2\Cms\Admin\Picture\PictureManager;
-use S2\Cms\AdminYard\CustomMenuGenerator;
 use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\CustomTemplateRenderer;
 use S2\Cms\AdminYard\Form\CustomFormControlFactory;
@@ -51,7 +46,6 @@ use S2\Cms\Model\TagsProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Template\HtmlTemplateProvider;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouteCollection;
@@ -118,20 +112,7 @@ class AdminExtension implements ExtensionInterface
                 $container->getParameter('base_path'),
                 $container->getParameter('root_dir'),
             );
-        });
-
-        $container->set(MenuGenerator::class, function (Container $container) {
-            /** @var AdminConfigProvider $adminConfigProvider */
-            $adminConfigProvider = $container->get(AdminConfigProvider::class);
-            $adminConfig         = $adminConfigProvider->getAdminConfig(); // TODO: cleanup after request processing
-
-            return new CustomMenuGenerator(
-                $adminConfig,
-                $container->get(TemplateRenderer::class),
-                $container->get(PermissionChecker::class),
-                $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
-            );
-        });
+        }, [StatefulServiceInterface::class]);
 
         $container->set(SettingStorageInterface::class, function (Container $container) {
             return new UserSettingStorage(
@@ -180,35 +161,10 @@ class AdminExtension implements ExtensionInterface
                 $dbPrefix,
                 ...$container->getByTag(AdminConfigExtenderInterface::class)
             );
-        });
+        }, [StatefulServiceInterface::class]);
 
-        $container->set(AdminPanel::class, function (Container $container) {
-            /** @var AdminConfigProvider $adminConfigProvider */
-            $adminConfigProvider = $container->get(AdminConfigProvider::class);
-            $adminConfig         = $adminConfigProvider->getAdminConfig(); // TODO: cleanup after request processing
-
-            $eventDispatcher = new EventDispatcher();
-            foreach ($adminConfig->getEntities() as $entityConfig) {
-                foreach ($entityConfig->getListeners() as $eventName => $listeners) {
-                    foreach ($listeners as $listener) {
-                        $eventDispatcher->addListener('adminyard.' . $eventName, $listener);
-                    }
-                }
-            }
-
-            $adminPanel = new AdminPanel(
-                $adminConfig,
-                $eventDispatcher,
-                $container->get(PdoDataProvider::class),
-                new ViewTransformer(),
-                $container->get(MenuGenerator::class),
-                $container->get(Translator::class),
-                $container->get(TemplateRenderer::class),
-                $container->get(FormFactory::class),
-                $container->get(SettingStorageInterface::class),
-            );
-            $adminPanel->setLogger($container->get(LoggerInterface::class));
-            return $adminPanel;
+        $container->set(AdminPanelFactory::class, function (Container $container) {
+            return new AdminPanelFactory($container);
         });
 
         $container->set(PermissionChecker::class, function (Container $container) {

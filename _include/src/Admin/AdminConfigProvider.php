@@ -34,6 +34,7 @@ use S2\AdminYard\Validator\Regex;
 use S2\Cms\Admin\Controller\CommentController;
 use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
 use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthManager;
 use S2\Cms\Model\CommentNotifier;
@@ -45,29 +46,30 @@ use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\HtmlTemplateProvider;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-readonly class AdminConfigProvider
+class AdminConfigProvider implements StatefulServiceInterface
 {
     /**
      * @var AdminConfigExtenderInterface[]
      */
-    private array $adminConfigExtenders;
+    private readonly array $adminConfigExtenders;
+    private ?AdminConfig $cachedConfig = null;
 
     public function __construct(
-        private PermissionChecker        $permissionChecker,
-        private AuthManager              $authManager,
-        private HtmlTemplateProvider     $templateProvider,
-        private DynamicConfigFormBuilder $dynamicConfigFormBuilder,
-        private DynamicConfigProvider    $dynamicConfigProvider,
-        private Translator               $translator,
-        private ArticleProvider          $articleProvider,
-        private TagsProvider             $tagsProvider,
-        private UrlBuilder               $urlBuilder,
-        private CommentNotifier          $commentNotifier,
-        private ExtensionCache           $extensionCache,
-        private EventDispatcherInterface $eventDispatcher,
-        private string                   $dbType,
-        private string                   $dbPrefix,
-        AdminConfigExtenderInterface     ...$adminConfigExtenders
+        private readonly PermissionChecker        $permissionChecker,
+        private readonly AuthManager              $authManager,
+        private readonly HtmlTemplateProvider     $templateProvider,
+        private readonly DynamicConfigFormBuilder $dynamicConfigFormBuilder,
+        private readonly DynamicConfigProvider    $dynamicConfigProvider,
+        private readonly Translator               $translator,
+        private readonly ArticleProvider          $articleProvider,
+        private readonly TagsProvider             $tagsProvider,
+        private readonly UrlBuilder               $urlBuilder,
+        private readonly CommentNotifier          $commentNotifier,
+        private readonly ExtensionCache           $extensionCache,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly string                   $dbType,
+        private readonly string                   $dbPrefix,
+        AdminConfigExtenderInterface              ...$adminConfigExtenders
     ) {
         if (!\in_array($dbType, ['mysql', 'pgsql', 'sqlite'])) {
             throw new \InvalidArgumentException('Unsupported database type: ' . $dbType);
@@ -77,6 +79,10 @@ readonly class AdminConfigProvider
 
     public function getAdminConfig(): AdminConfig
     {
+        if ($this->cachedConfig !== null) {
+            return $this->cachedConfig;
+        }
+
         $adminConfig = new AdminConfig();
         $adminConfig->setMenuTemplate('_admin/templates/menu.php.inc');
 
@@ -586,7 +592,7 @@ readonly class AdminConfigProvider
                 }
             })
             ->addListener(EntityConfig::EVENT_BEFORE_EDIT_RENDER, function (BeforeRenderEvent $event) {
-                $event->data['tagsList']        = $this->tagsProvider->getAllTags();
+                $event->data['tagsList'] = $this->tagsProvider->getAllTags();
 
                 $id = (int)$event->data['primaryKey']['id'];
 
@@ -913,7 +919,12 @@ readonly class AdminConfigProvider
 
         $adminConfig->setLayoutTemplate('_admin/templates/layout.php.inc');
 
-        return $adminConfig;
+        return $this->cachedConfig = $adminConfig;
+    }
+
+    public function clearState(): void
+    {
+        $this->cachedConfig = null;
     }
 
     /**

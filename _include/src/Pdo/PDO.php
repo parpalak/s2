@@ -17,8 +17,9 @@ declare(strict_types=1);
 namespace S2\Cms\Pdo;
 
 use PDO as NativePdo;
+use S2\Cms\Framework\StatefulServiceInterface;
 
-class PDO extends NativePdo
+class PDO extends NativePdo implements StatefulServiceInterface
 {
     protected array $log = [];
     private array $connectionParams;
@@ -133,6 +134,11 @@ class PDO extends NativePdo
     public function getQueryCount(): int
     {
         return \count($this->log);
+    }
+
+    public function clearState(): void
+    {
+        $this->log = [];
     }
 
     /**
