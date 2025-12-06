@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog;
 
+use S2\Cms\Config\IntProxy;
 use S2\Cms\Pdo\DbLayer;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -18,7 +19,7 @@ readonly class CalendarBuilder
         private DbLayer             $dbLayer,
         private BlogUrlBuilder      $blogUrlBuilder,
         private TranslatorInterface $translator,
-        private int                 $startYear,
+        private IntProxy            $startYear,
     ) {
     }
 
@@ -87,7 +88,7 @@ readonly class CalendarBuilder
             $next_month = $endTime < time() ? '<a class="nav_mon" href="' . $this->blogUrlBuilder->monthFromTimestamp($endTime) . '" title="' . $this->month((int)date('m', $endTime)) . date(', Y', $endTime) . '">&rarr;</a>' : '&rarr;';
 
             $prevTime  = mktime(0, 0, 0, $month - 1, 1, $year);
-            $prevMonth = $prevTime >= mktime(0, 0, 0, 1, 1, $this->startYear) ? '<a class="nav_mon" href="' . $this->blogUrlBuilder->monthFromTimestamp($prevTime) . '" title="' . $this->month((int)date('m', $prevTime)) . date(', Y', $prevTime) . '">&larr;</a>' : '&larr;';
+            $prevMonth = $prevTime >= mktime(0, 0, 0, 1, 1, $this->startYear->get()) ? '<a class="nav_mon" href="' . $this->blogUrlBuilder->monthFromTimestamp($prevTime) . '" title="' . $this->month((int)date('m', $prevTime)) . date(', Y', $prevTime) . '">&larr;</a>' : '&larr;';
 
             $header = '<tr class="nav"><th>' . $prevMonth . '</th><th align="center" colspan="5">'
                 . $monthName . ', <a href="' . $this->blogUrlBuilder->year($year) . '">' . $year . '</a></th><th>' . $next_month . '</th></tr>';

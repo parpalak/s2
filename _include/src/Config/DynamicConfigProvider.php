@@ -17,6 +17,9 @@ use S2\Cms\Pdo\DbLayerException;
 class DynamicConfigProvider implements StatefulServiceInterface
 {
     private ?array $params = null;
+    private array $boolProxies = [];
+    private array $intProxies = [];
+    private array $stringProxies = [];
 
     public function __construct(
         private readonly DbLayer $dbLayer,
@@ -42,6 +45,21 @@ class DynamicConfigProvider implements StatefulServiceInterface
         }
 
         return $this->params[$paramName];
+    }
+
+    public function getBoolProxy(string $paramName): BoolProxy
+    {
+        return $this->boolProxies[$paramName] ??= new BoolProxy($this, $paramName);
+    }
+
+    public function getIntProxy(string $paramName): IntProxy
+    {
+        return $this->intProxies[$paramName] ??= new IntProxy($this, $paramName);
+    }
+
+    public function getStringProxy(string $paramName): StringProxy
+    {
+        return $this->stringProxies[$paramName] ??= new StringProxy($this, $paramName);
     }
 
     /**

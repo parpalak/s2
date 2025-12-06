@@ -9,6 +9,9 @@
 
 namespace s2_extensions\s2_blog\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -36,10 +39,10 @@ class MainPageController extends BlogController
         TranslatorInterface  $translator,
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
-        string               $blogTitle,
-        bool                 $showComments,
-        bool                 $enabledComments,
-        private readonly int $itemsPerPage,
+        StringProxy          $blogTitle,
+        BoolProxy            $showComments,
+        BoolProxy            $enabledComments,
+        private readonly IntProxy $itemsPerPage,
     ) {
         parent::__construct(
             $dbLayer,
@@ -83,7 +86,8 @@ class MainPageController extends BlogController
             $template->registerPlaceholder('<!-- s2_blog_calendar -->', $this->calendarBuilder->calendar());
         }
 
-        $postsPerPage = $this->itemsPerPage ?: 10;
+        $itemsPerPage = $this->itemsPerPage->get();
+        $postsPerPage = $itemsPerPage ?: 10;
         $posts        = $this->postProvider->lastPostsArray($postsPerPage, $skipLastPostsNum, true);
 
         $output = '';
@@ -95,8 +99,8 @@ class MainPageController extends BlogController
             }
 
             $post['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
-            $post['showComments']     = $this->showComments;
-            $post['enabledComments']  = $this->enabledComments;
+            $post['showComments']     = $this->showComments->get();
+            $post['enabledComments']  = $this->enabledComments->get();
             $output                   .= $this->viewer->render('post', $post, 's2_blog');
         }
 

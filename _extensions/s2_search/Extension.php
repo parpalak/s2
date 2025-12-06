@@ -139,8 +139,8 @@ class Extension implements ExtensionInterface
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
                 $container->getParameter('debug_view'),
-                $provider->get('S2_TAGS_URL'),
-                (int)$provider->get('S2_MAX_ITEMS'),
+                $provider->getStringProxy('S2_TAGS_URL'),
+                $provider->getIntProxy('S2_MAX_ITEMS'),
             );
         });
 
@@ -155,7 +155,7 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new LayoutMatcherFactory(
                 $container->get('recommendations_logger'),
-                (int)$provider->get('S2_SEARCH_RECOMMENDATIONS_LIMIT'),
+                $provider->getIntProxy('S2_SEARCH_RECOMMENDATIONS_LIMIT'),
             );
         });
         $container->set(RecommendationProvider::class, function (Container $container) {
@@ -167,7 +167,7 @@ class Extension implements ExtensionInterface
                 $container->get('recommendations_cache'),
                 $container->get(QueuePublisher::class),
                 $container->getParameter('db_type'),
-                (int)$provider->get('S2_SEARCH_RECOMMENDATIONS_LIMIT') > 0,
+                $provider->getIntProxy('S2_SEARCH_RECOMMENDATIONS_LIMIT'),
             );
         }, [QueueHandlerInterface::class]);
     }
@@ -192,7 +192,7 @@ class Extension implements ExtensionInterface
             $event->assetPack->addCss('../../_extensions/s2_search/style.css', [AssetPack::OPTION_MERGE]);
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
-            if ($provider->get('S2_SEARCH_QUICK') === '1') {
+            if ($provider->getBoolProxy('S2_SEARCH_QUICK')->get()) {
                 /** @var UrlBuilder $urlBuilder */
                 $urlBuilder = $container->get(UrlBuilder::class);
                 $event->assetPack

@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Pdo\QueryBuilder\UnionAll;
@@ -21,11 +23,11 @@ readonly class ArticleProvider
     public const ROOT_ID = 0;
 
     public function __construct(
-        private DbLayer    $dbLayer,
-        private UrlBuilder $urlBuilder,
-        private Viewer     $viewer,
-        private string     $favoriteUrl,
-        private bool       $useHierarchy,
+        private DbLayer     $dbLayer,
+        private UrlBuilder  $urlBuilder,
+        private Viewer      $viewer,
+        private StringProxy $favoriteUrl,
+        private BoolProxy   $useHierarchy,
     ) {
     }
 
@@ -42,7 +44,7 @@ readonly class ArticleProvider
      */
     public function getFullUrlsForArticles(array $parentIds, array $urls): array
     {
-        if (!$this->useHierarchy) {
+        if (!$this->useHierarchy->get()) {
             // Flat urls
             foreach ($urls as $k => $url) {
                 $urls[$k] = '/' . $url;
@@ -196,9 +198,10 @@ readonly class ArticleProvider
 
         $output = '';
         if (\count($articles) > 0) {
-            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/');
+            $useHierarchy = $this->useHierarchy->get();
+            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl->get()) . '/');
             foreach ($articles as &$item) {
-                $parentPath            = $this->useHierarchy ? preg_replace('#/\\K[^/]*$#', '', $item['rel_path']) : '/' . $item['p_url'];
+                $parentPath            = $useHierarchy ? preg_replace('#/\\K[^/]*$#', '', $item['rel_path']) : '/' . $item['p_url'];
                 $item['date']          = $this->viewer->date($item['time']);
                 $item['link']          = $this->urlBuilder->link($item['rel_path']);
                 $item['parent_link']   = $this->urlBuilder->link($parentPath);

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
@@ -19,9 +20,9 @@ class TagsProvider implements StatefulServiceInterface
     private ?array $cachedTags = null;
 
     public function __construct(
-        private readonly DbLayer    $dbLayer,
-        private readonly UrlBuilder $urlBuilder,
-        private readonly string     $tagsUrl
+        private readonly DbLayer     $dbLayer,
+        private readonly UrlBuilder  $urlBuilder,
+        private readonly StringProxy $tagsUrl
     ) {
     }
 
@@ -52,7 +53,7 @@ class TagsProvider implements StatefulServiceInterface
                 if ($row['count'] > 0) {
                     $this->cachedTags[] = array(
                         'title' => $row['name'],
-                        'link'  => $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/'),
+                        'link'  => $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl->get()) . '/' . rawurlencode($row['url']) . '/'),
                         'num'   => $row['count'],
                     );
                 }

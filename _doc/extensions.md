@@ -155,9 +155,9 @@ class Extension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(RequestStack::class),
                 $container->get('config_cache'),
-                $provider->get('EXTENSION_NAME_PARAM1'),
-                $provider->get('S2_SHOW_COMMENTS') === '1', // bool parameter
-                (int)$provider->get('S2_MAX_ITEMS'),
+                $provider->getStringProxy('EXTENSION_NAME_PARAM1'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getIntProxy('S2_MAX_ITEMS'),
                 $container->getParameter('url_prefix'),
             );
         });

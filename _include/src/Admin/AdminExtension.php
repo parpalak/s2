@@ -79,7 +79,7 @@ class AdminExtension implements ExtensionInterface
         $container->set(Translator::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
-            $language = $provider->get('S2_LANGUAGE');
+            $language = $provider->getStringProxy('S2_LANGUAGE')->get();
 
             // TODO move mapping somewhere
             $locale       = match ($language) {
@@ -144,12 +144,15 @@ class AdminExtension implements ExtensionInterface
         $container->set(AdminConfigProvider::class, function (Container $container) {
             $dbType   = $container->getParameter('db_type');
             $dbPrefix = $container->getParameter('db_prefix');
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new AdminConfigProvider(
                 $container->get(PermissionChecker::class),
                 $container->get(AuthManager::class),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(DynamicConfigFormBuilder::class),
-                $container->get(DynamicConfigProvider::class),
+                $provider,
+                $provider->getBoolProxy('S2_ADMIN_CUT'),
                 $container->get(Translator::class),
                 $container->get(ArticleProvider::class),
                 $container->get(TagsProvider::class),
@@ -185,7 +188,7 @@ class AdminExtension implements ExtensionInterface
                 $container->getParameter('url_prefix'),
                 $container->getParameter('cookie_name'),
                 $container->getParameter('force_admin_https'),
-                (int)$provider->get('S2_LOGIN_TIMEOUT'),
+                $provider->getIntProxy('S2_LOGIN_TIMEOUT'),
             );
         });
 
@@ -218,8 +221,8 @@ class AdminExtension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(SettingStorageInterface::class),
                 $container->get(PermissionChecker::class),
-                $provider->get('S2_ADMIN_NEW_POS') === '1',
-                $provider->get('S2_USE_HIERARCHY') === '1',
+                $provider->getBoolProxy('S2_ADMIN_NEW_POS'),
+                $provider->getBoolProxy('S2_USE_HIERARCHY'),
             );
         });
 

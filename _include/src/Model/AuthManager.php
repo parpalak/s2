@@ -12,6 +12,7 @@ namespace S2\Cms\Model;
 use S2\AdminYard\Helper\RandomHelper;
 use S2\AdminYard\TemplateRenderer;
 use S2\AdminYard\Translator;
+use S2\Cms\Config\IntProxy;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -25,11 +26,11 @@ readonly class AuthManager
 {
     public const FORCE_AJAX_RESPONSE = '_force_ajax_response';
 
-    private const SESSION_STATUS_LOST      = 'Lost';
-    private const SESSION_STATUS_OK        = 'Ok';
-    private const SESSION_STATUS_EXPIRED   = 'Expired';
-    private const SESSION_STATUS_WRONG_IP  = 'Wrong_IP';
-    private const LEGACY_PASSWORD_PEPPER   = 'Life is not so easy :-)';
+    private const SESSION_STATUS_LOST     = 'Lost';
+    private const SESSION_STATUS_OK       = 'Ok';
+    private const SESSION_STATUS_EXPIRED  = 'Expired';
+    private const SESSION_STATUS_WRONG_IP = 'Wrong_IP';
+    private const LEGACY_PASSWORD_PEPPER  = 'Life is not so easy :-)';
 
     public function __construct(
         private DbLayer           $dbLayer,
@@ -41,7 +42,7 @@ readonly class AuthManager
         private string            $urlPrefix,
         private string            $cookieName,
         private bool              $forceAdminHttps,
-        private int               $loginTimeoutMinutes,
+        private IntProxy          $loginTimeoutMinutes,
     ) {
     }
 
@@ -385,7 +386,7 @@ readonly class AuthManager
 
     private function loginExpireTimeout(): int
     {
-        return (max($this->loginTimeoutMinutes, 1)) * 60;
+        return (max($this->loginTimeoutMinutes->get(), 1)) * 60;
     }
 
     /**

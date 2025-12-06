@@ -10,18 +10,19 @@ declare(strict_types=1);
 namespace s2_extensions\s2_search\Layout;
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Config\IntProxy;
 
 readonly class LayoutMatcherFactory
 {
     public function __construct(
         private LoggerInterface $logger,
-        private int             $recommendationsLimit
+        private IntProxy        $recommendationsLimit
     ) {
     }
 
     public function createLayoutMatcher(): LayoutMatcher
     {
-        $layoutMatcher = new LayoutMatcher($this->logger, $this->recommendationsLimit);
+        $layoutMatcher = new LayoutMatcher($this->logger, $this->recommendationsLimit->get());
         self::fillFourColumns($layoutMatcher);
 
         return $layoutMatcher;

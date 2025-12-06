@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
@@ -33,9 +35,9 @@ readonly class PageTag implements ControllerInterface
         private TranslatorInterface  $translator,
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer,
-        private string               $tagsUrlFragment,
-        private string               $favoriteUrl,
-        private bool                 $useHierarchy,
+        private StringProxy          $tagsUrlFragment,
+        private StringProxy          $favoriteUrl,
+        private BoolProxy            $useHierarchy,
     ) {
     }
 
@@ -65,7 +67,7 @@ readonly class PageTag implements ControllerInterface
 
         if (!$hasSlash) {
             return new RedirectResponse(
-                $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/' . rawurlencode($tagUrl) . '/'),
+                $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment->get()) . '/' . rawurlencode($tagUrl) . '/'),
                 Response::HTTP_MOVED_PERMANENTLY
             );
         }
@@ -102,13 +104,14 @@ readonly class PageTag implements ControllerInterface
 
         $sections = $articles = $sortingValuesForArticles = $sortingValuesForSections = [];
         if (\count($urls) > 0) {
-            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/');
+            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl->get()) . '/');
+            $useHierarchy = $this->useHierarchy->get();
             foreach ($urls as $k => $url) {
                 $row  = $rows[$k];
                 $item = [
                     'id'            => $row['id'],
                     'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy && $row['children_exist'] ? '/' : '')),
+                    'link'          => $this->urlBuilder->link($url . ($useHierarchy && $row['children_exist'] ? '/' : '')),
                     'favorite_link' => $favoriteLink,
                     'date'          => $this->viewer->date($row['create_time']),
                     'excerpt'       => $row['excerpt'],
@@ -146,7 +149,7 @@ readonly class PageTag implements ControllerInterface
 
         $template
             ->addBreadCrumb($this->articleProvider->mainPageTitle(), $this->urlBuilder->link('/'))
-            ->addBreadCrumb($this->translator->trans('Tags'), $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment) . '/'))
+            ->addBreadCrumb($this->translator->trans('Tags'), $this->urlBuilder->link('/' . rawurlencode($this->tagsUrlFragment->get()) . '/'))
             ->addBreadCrumb($tagName)
             ->putInPlaceholder('title', $this->viewer->render('tag_title', ['title' => $tagName]))
             ->putInPlaceholder('date', '')

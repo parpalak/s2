@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Translation;
 
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\StatefulServiceInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Contracts\Translation\TranslatorTrait;
@@ -27,7 +28,7 @@ class ExtensibleTranslator implements TranslatorInterface, StatefulServiceInterf
     private array $translations = [];
     private ?array $loadingQueue = null;
 
-    public function __construct(private readonly string $language)
+    public function __construct(private readonly StringProxy $language)
     {
     }
 
@@ -77,10 +78,11 @@ class ExtensibleTranslator implements TranslatorInterface, StatefulServiceInterf
     private function processQueueIfRequired(): void
     {
         if ($this->loadingQueue !== null) {
+            $language = $this->language->get();
             foreach ($this->loadingQueue as $namespace => $required) {
                 if (isset($this->loaders[$namespace])) {
                     /** @noinspection SlowArrayOperationsInLoopInspection */
-                    $this->translations = array_merge($this->loaders[$namespace]($this->language, $this), $this->translations);
+                    $this->translations = array_merge($this->loaders[$namespace]($language, $this), $this->translations);
                 }
             }
             $this->loadingQueue = null;

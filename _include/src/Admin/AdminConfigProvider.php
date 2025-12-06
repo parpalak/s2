@@ -35,6 +35,7 @@ use S2\Cms\Admin\Controller\CommentController;
 use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\StatefulServiceInterface;
+use S2\Cms\Config\BoolProxy;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthManager;
 use S2\Cms\Model\CommentNotifier;
@@ -60,6 +61,7 @@ class AdminConfigProvider implements StatefulServiceInterface
         private readonly HtmlTemplateProvider     $templateProvider,
         private readonly DynamicConfigFormBuilder $dynamicConfigFormBuilder,
         private readonly DynamicConfigProvider    $dynamicConfigProvider,
+        private readonly BoolProxy                $adminCut,
         private readonly Translator               $translator,
         private readonly ArticleProvider          $articleProvider,
         private readonly TagsProvider             $tagsProvider,
@@ -616,7 +618,7 @@ class AdminConfigProvider implements StatefulServiceInterface
                     return;
                 }
 
-                if ($this->dynamicConfigProvider->get('S2_ADMIN_CUT')) {
+                if ($this->adminCut->get()) {
                     $textParts = preg_split('#(<cut\\s*/?>|<p><cut /></p>)#', $event->data['pagetext'], 2);
 
                     $event->data['excerpt'] = \count($textParts) > 1 ? $textParts[0] : '';

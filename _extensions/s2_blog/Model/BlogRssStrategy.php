@@ -2,8 +2,8 @@
 /**
  * RSS feed for blog.
  *
- * @copyright 2007-2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2007-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_blog\Model;
 
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Controller\Rss\FeedDto;
 use S2\Cms\Controller\Rss\FeedItemDto;
 use S2\Cms\Controller\Rss\RssStrategyInterface;
@@ -26,7 +27,7 @@ readonly class BlogRssStrategy implements RssStrategyInterface
         private BlogUrlBuilder      $blogUrlBuilder,
         private TranslatorInterface $translator,
         private Viewer              $viewer,
-        private string              $blogTitle,
+        private StringProxy         $blogTitle,
     ) {
     }
 
@@ -35,9 +36,11 @@ readonly class BlogRssStrategy implements RssStrategyInterface
      */
     public function getFeedInfo(): FeedDto
     {
+        $blogTitle = $this->blogTitle->get();
+
         return new FeedDto(
-            $this->blogTitle,
-            sprintf($this->translator->trans('RSS blog description'), $this->blogTitle),
+            $blogTitle,
+            \sprintf($this->translator->trans('RSS blog description'), $blogTitle),
             $this->blogUrlBuilder->absMain(),
         );
     }

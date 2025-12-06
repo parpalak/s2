@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Controller\Rss\FeedItemRenderEvent;
 use S2\Cms\Controller\Rss\FeedRenderEvent;
 use S2\Cms\Controller\Rss\RssHitEvent;
@@ -32,7 +33,7 @@ readonly class RssController implements ControllerInterface
         private string                   $basePath,
         private string                   $baseUrl,
         private string                   $version,
-        private string                   $webmaster,
+        private StringProxy              $webmaster,
     ) {
     }
 
@@ -59,8 +60,8 @@ readonly class RssController implements ControllerInterface
             $item->text = str_replace('href="' . $this->basePath . '/', 'href="' . $this->baseUrl . '/', $item->text);
             $item->text = str_replace('src="' . $this->basePath . '/', 'src="' . $this->baseUrl . '/', $item->text);
 
-            if (empty($item->author) && $this->webmaster) {
-                $item->author = $this->webmaster;
+            if (empty($item->author) && $this->webmaster->get()) {
+                $item->author = $this->webmaster->get();
             }
 
             $this->eventDispatcher->dispatch(new FeedItemRenderEvent($item));

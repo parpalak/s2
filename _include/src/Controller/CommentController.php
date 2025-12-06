@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace S2\Cms\Controller;
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Config\BoolProxy;
 use S2\Cms\Comment\SpamDetectorComment;
 use S2\Cms\Comment\SpamDecision;
 use S2\Cms\Comment\SpamDecisionProviderInterface;
@@ -43,8 +44,8 @@ readonly class CommentController implements ControllerInterface
         private LoggerInterface               $logger,
         private CommentMailer                 $commentMailer,
         private SpamDecisionProviderInterface $spamDecisionProvider,
-        private bool                          $commentsEnabled,
-        private bool                          $premoderationEnabled,
+        private BoolProxy                     $commentsEnabled,
+        private BoolProxy                     $premoderationEnabled,
     ) {
     }
 
@@ -74,7 +75,7 @@ readonly class CommentController implements ControllerInterface
          */
         $errors = [];
 
-        if (!$this->commentsEnabled) {
+        if (!$this->commentsEnabled->get()) {
             $errors[] = $this->translator->trans('disabled');
         }
 
@@ -192,7 +193,7 @@ readonly class CommentController implements ControllerInterface
         // Detect if there is a user logged in
         $isOnline = $this->authProvider->isOnline($email);
 
-        $moderationRequired = $spamDecision->shouldModerate($this->premoderationEnabled);
+        $moderationRequired = $spamDecision->shouldModerate($this->premoderationEnabled->get());
 
         // Save the comment
         $commentId = $this->commentStrategy->save($target->id, $name, $email, $showEmail, $subscribed, $text, (string)$request->getClientIp());

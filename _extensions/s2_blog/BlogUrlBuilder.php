@@ -1,27 +1,29 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   MIT
- * @package   S2
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   s2_blog
  */
 
 declare(strict_types=1);
 
 namespace s2_extensions\s2_blog;
 
+use S2\Cms\Config\StringProxy;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\UrlBuilder;
 
-class BlogUrlBuilder
+class BlogUrlBuilder implements StatefulServiceInterface
 {
     private ?string $blogPath = null;
     private ?string $absBlogPath = null;
     private ?string $blogTagsPath = null;
 
     public function __construct(
-        private readonly UrlBuilder $urlBuilder,
-        private readonly string     $tagsUrl,
-        private readonly string     $favoriteUrl,
-        private readonly string     $blogUrl,
+        private readonly UrlBuilder  $urlBuilder,
+        private readonly StringProxy $tagsUrl,
+        private readonly StringProxy $favoriteUrl,
+        private readonly StringProxy $blogUrl,
     ) {
     }
 
@@ -37,12 +39,12 @@ class BlogUrlBuilder
 
     public function favorite(): string
     {
-        return $this->main() . rawurlencode($this->favoriteUrl) . '/';
+        return $this->main() . rawurlencode($this->favoriteUrl->get()) . '/';
     }
 
     public function tags(): string
     {
-        return $this->blogTagsPath ?? $this->blogTagsPath = $this->main() . rawurlencode($this->tagsUrl) . '/';
+        return $this->blogTagsPath ?? $this->blogTagsPath = $this->main() . rawurlencode($this->tagsUrl->get()) . '/';
     }
 
     public function tag(string $tagUrl): string
@@ -92,7 +94,14 @@ class BlogUrlBuilder
 
     public function blogIsOnTheSiteRoot(): bool
     {
-        return $this->blogUrl === '';
+        return $this->blogUrl->get() === '';
+    }
+
+    public function clearState(): void
+    {
+        $this->blogPath = null;
+        $this->absBlogPath = null;
+        $this->blogTagsPath = null;
     }
 
     private static function extendNumber(int $month): string
@@ -102,6 +111,6 @@ class BlogUrlBuilder
 
     private function encodedBlogUrl(): string
     {
-        return str_replace(rawurlencode('/'), '/', rawurlencode($this->blogUrl));
+        return str_replace(rawurlencode('/'), '/', rawurlencode($this->blogUrl->get()));
     }
 }

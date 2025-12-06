@@ -190,16 +190,16 @@ $errorHandler->setDefaultLogger($app->container->get(LoggerInterface::class));
 $dynamicConfigProvider = $app->container->get(DynamicConfigProvider::class);
 
 if (defined('S2_ADMIN_MODE') && session_status() !== PHP_SESSION_ACTIVE) {
-    $loginTimeoutSeconds = $dynamicConfigProvider->get('S2_LOGIN_TIMEOUT') * 60;
+    $loginTimeoutSeconds = $dynamicConfigProvider->getIntProxy('S2_LOGIN_TIMEOUT')->get() * 60;
     ini_set('session.cookie_lifetime', $loginTimeoutSeconds);
     ini_set('session.gc_maxlifetime', $loginTimeoutSeconds);
     ini_set('session.cookie_httponly', true);
 }
 
-if ($dynamicConfigProvider->get('S2_DB_REVISION') < 24) {
+if ($dynamicConfigProvider->getIntProxy('S2_DB_REVISION')->get() < 24) {
     /** @var MigrationManager $migrationManager */
     $migrationManager = $app->container->get(MigrationManager::class);
-    $migrationManager->migrate((int)$dynamicConfigProvider->get('S2_DB_REVISION'), 24);
+    $migrationManager->migrate($dynamicConfigProvider->getIntProxy('S2_DB_REVISION')->get(), 24);
 
     $dynamicConfigProvider->regenerate();
 }

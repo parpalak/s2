@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
+use S2\Cms\Config\BoolProxy;
 use S2\AdminYard\Config\FieldConfig;
 use S2\AdminYard\Form\FormParams;
 use S2\AdminYard\SettingStorage\SettingStorageInterface;
@@ -23,8 +24,8 @@ readonly class ArticleManager
         private DbLayer                 $dbLayer,
         private SettingStorageInterface $settingStorage,
         private PermissionChecker       $permissionChecker,
-        private bool                    $newPositionOnTop,
-        private bool                    $useHierarchy,
+        private BoolProxy               $newPositionOnTop,
+        private BoolProxy               $useHierarchy,
     ) {
     }
 
@@ -167,7 +168,7 @@ readonly class ArticleManager
 
         $this->dbLayer->startTransaction();
 
-        if ($this->newPositionOnTop) {
+        if ($this->newPositionOnTop->get()) {
             $this->dbLayer
                 ->update('articles')
                 ->set('priority', 'priority + 1')
@@ -193,7 +194,7 @@ readonly class ArticleManager
             ->setValue('priority', ':priority')->setParameter('priority', $newPriority)
             ->setValue('url', ':url')->setParameter('url', 'new')
             ->setValue('user_id', ':user_id')->setParameter('user_id', $this->permissionChecker->getUserId())
-            ->setValue('template', ':template')->setParameter('template', $this->useHierarchy ? '' : 'site.php')
+            ->setValue('template', ':template')->setParameter('template', $this->useHierarchy->get() ? '' : 'site.php')
             ->setValue('excerpt', ':excerpt')->setParameter('excerpt', '')
             ->setValue('pagetext', ':pagetext')->setParameter('pagetext', '')
             ->execute()

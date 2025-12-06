@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace S2\Cms\Comment;
 
 use Psr\Log\LoggerInterface;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\HttpClient\HttpClient;
 use S2\Cms\HttpClient\HttpClientException;
 use S2\Cms\Model\UrlBuilder;
@@ -23,18 +24,19 @@ readonly class AkismetProxy implements SpamDetectorInterface
         private HttpClient      $httpClient,
         private UrlBuilder      $urlBuilder,
         private LoggerInterface $logger,
-        private string          $apiKey,
+        private StringProxy     $apiKey,
     ) {
     }
 
     public function getReport(SpamDetectorComment $comment, string $clientIp): SpamDetectorReport
     {
-        if ($this->apiKey === '') {
+        $apiKey = $this->apiKey->get();
+        if ($apiKey === '') {
             return SpamDetectorReport::disabled();
         }
 
         $data = [
-            'api_key'              => $this->apiKey,
+            'api_key'              => $apiKey,
             'blog'                 => $this->urlBuilder->rawAbsLink('/'),
             'user_ip'              => $clientIp,
             'comment_type'         => self::TYPE_COMMENT,

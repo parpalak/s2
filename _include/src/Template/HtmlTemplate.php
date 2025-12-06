@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace S2\Cms\Template;
 
-use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Helper\StringHelper;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayerException;
@@ -33,7 +35,11 @@ class HtmlTemplate
         private readonly TranslatorInterface      $translator,
         private readonly Viewer                   $viewer,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly DynamicConfigProvider    $dynamicConfigProvider,
+        private readonly StringProxy              $siteName,
+        private readonly BoolProxy                $enabledComments,
+        private readonly StringProxy              $webmaster,
+        private readonly StringProxy              $webmasterEmail,
+        private readonly IntProxy                 $startYear,
         private readonly bool                     $debugView,
         private readonly ?string                  $canonicalUrlPrefix,
     ) {
@@ -66,7 +72,7 @@ class HtmlTemplate
 
         // HTML head
         $replace['<!-- s2_head_title -->'] = empty($this->page['head_title']) ?
-            (!empty($this->page['title']) ? $this->page['title'] . ' &mdash; ' : '') . $this->dynamicConfigProvider->get('S2_SITE_NAME') :
+            (!empty($this->page['title']) ? $this->page['title'] . ' &mdash; ' : '') . $this->siteName->get() :
             $this->page['head_title'];
 
         // Meta tags processing
@@ -92,7 +98,7 @@ class HtmlTemplate
         $replace['<!-- s2_rss_link -->'] = implode("\n", $this->page['rss_link']);
 
         // Content
-        $replace['<!-- s2_site_title -->'] = $this->dynamicConfigProvider->get('S2_SITE_NAME');
+        $replace['<!-- s2_site_title -->'] = $this->siteName->get();
 
         $link_navigation = [];
         foreach ($this->navLinks as $link_rel => $link_href) {
@@ -114,7 +120,7 @@ class HtmlTemplate
             $replace['<!-- s2_' . $placeholderName . ' -->'] = $this->page[$placeholderName] ?? '';
         }
 
-        if (!empty($this->page['commented']) && $this->dynamicConfigProvider->get('S2_ENABLED_COMMENTS') === '1') {
+        if (!empty($this->page['commented']) && $this->enabledComments->get()) {
             $comment_array = [
                 'id' => $this->page['id'],
             ];
@@ -235,14 +241,14 @@ class HtmlTemplate
     {
         $requestUri = $this->requestStack->getCurrentRequest()?->getPathInfo();
 
-        $webmaster = $this->dynamicConfigProvider->get('S2_WEBMASTER');
-        $email     = $this->dynamicConfigProvider->get('S2_WEBMASTER_EMAIL');
-        $startYear = $this->dynamicConfigProvider->get('S2_START_YEAR');
+        $webmaster = $this->webmaster->get();
+        $email     = $this->webmasterEmail->get();
+        $startYear = $this->startYear->get();
 
-        $author    = $webmaster ?: $this->dynamicConfigProvider->get('S2_SITE_NAME');
+        $author    = $webmaster ?: $this->siteName->get();
         $copyright = $webmaster && $email ? StringHelper::jsMailTo($author, $email) : ($requestUri !== '/' ? '<a href="' . $this->urlBuilder->link('/') . '">' . $author . '</a>' : $author);
 
-        return ($startYear !== date('Y') ?
+        return ((int)$startYear !== (int)date('Y') ?
                 \sprintf($this->translator->trans('Copyright 2'), $copyright, $startYear, date('Y')) :
                 \sprintf($this->translator->trans('Copyright 1'), $copyright, date('Y'))) . ' ' .
             \sprintf($this->translator->trans('Powered by'), '<a href="http://s2cms.ru/">S2</a>');

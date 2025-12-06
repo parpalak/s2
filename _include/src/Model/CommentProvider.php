@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model;
 
+use S2\Cms\Config\BoolProxy;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\Viewer;
@@ -20,7 +21,7 @@ readonly class CommentProvider
         private ArticleProvider $articleProvider,
         private UrlBuilder      $urlBuilder,
         private Viewer          $viewer,
-        private bool            $showComments
+        private BoolProxy       $showComments
     ) {
     }
 
@@ -31,7 +32,7 @@ readonly class CommentProvider
      */
     public function lastArticleComments(): array
     {
-        if (!$this->showComments) {
+        if (!$this->showComments->get()) {
             return [];
         }
 
@@ -90,7 +91,7 @@ readonly class CommentProvider
      */
     public function lastDiscussions(): array
     {
-        if (!$this->showComments) {
+        if (!$this->showComments->get()) {
             return [];
         }
 

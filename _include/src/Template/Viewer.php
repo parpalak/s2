@@ -9,25 +9,19 @@
 
 namespace S2\Cms\Template;
 
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Model\UrlBuilder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Viewer
 {
-    private string $styleViewDir;
-    private string $extensionDirPattern;
-    private string $systemViewDir;
-
     public function __construct(
         private readonly TranslatorInterface $translator,
         private readonly UrlBuilder          $urlBuilder,
-        string                               $rootDir,
-        string                               $style,
+        private readonly string              $rootDir,
+        private readonly StringProxy         $style,
         private readonly bool                $debug
     ) {
-        $this->styleViewDir        = $rootDir . '_styles/' . $style . '/views/';
-        $this->extensionDirPattern = $rootDir . '_extensions/%s/views/';
-        $this->systemViewDir       = $rootDir . '_include/views/';
     }
 
     public function render(string $name, array $vars, string ...$extraDirs): string
@@ -35,11 +29,16 @@ class Viewer
         $name     = preg_replace('#[^0-9a-zA-Z._\-]#', '', $name);
         $filename = $name . '.php';
 
+        $style                = $this->style->get();
+        $styleViewDir         = $this->rootDir . '_styles/' . $style . '/views/';
+        $extensionDirPattern  = $this->rootDir . '_extensions/%s/views/';
+        $systemViewDir        = $this->rootDir . '_include/views/';
+
         $foundFile = null;
         $dirs      = [
-            $this->styleViewDir,
-            ...array_map(fn(string $dir) => \sprintf($this->extensionDirPattern, $dir), $extraDirs),
-            $this->systemViewDir
+            $styleViewDir,
+            ...array_map(static fn(string $dir) => \sprintf($extensionDirPattern, $dir), $extraDirs),
+            $systemViewDir
         ];
         foreach ($dirs as $dir) {
             if (file_exists($dir . $filename)) {

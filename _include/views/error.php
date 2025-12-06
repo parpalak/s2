@@ -4,7 +4,7 @@ use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\Application;
 
 if (isset($GLOBALS['app']) && $GLOBALS['app'] instanceof Application) {
-    $siteName = $GLOBALS['app']->container->get(DynamicConfigProvider::class)->get('S2_SITE_NAME');
+    $siteName = $GLOBALS['app']->container->get(DynamicConfigProvider::class)->getStringProxy('S2_SITE_NAME')->get();
 } else {
     return;
 }

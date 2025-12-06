@@ -9,6 +9,9 @@
 
 namespace s2_extensions\s2_blog\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -37,10 +40,10 @@ class MonthPageController extends BlogController
         TranslatorInterface  $translator,
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
-        string               $blogTitle,
-        bool                 $showComments,
-        bool                 $enabledComments,
-        private readonly int $startYear,
+        StringProxy          $blogTitle,
+        BoolProxy            $showComments,
+        BoolProxy            $enabledComments,
+        private readonly IntProxy $startYear,
     ) {
         parent::__construct(
             $dbLayer,
@@ -84,7 +87,8 @@ class MonthPageController extends BlogController
         $template->setLink('up', $this->blogUrlBuilder->year((int)$year));
 
         $paging = '';
-        if ($prevTime >= mktime(0, 0, 0, 1, 1, $this->startYear)) {
+        $startYear = $this->startYear->get();
+        if ($prevTime >= mktime(0, 0, 0, 1, 1, $startYear)) {
             $prevLink = $this->blogUrlBuilder->monthFromTimestamp($prevTime);
             $template->setLink('prev', $prevLink);
             $paging = '<a href="' . $prevLink . '">' . $this->translator->trans('Here') . '</a> ';

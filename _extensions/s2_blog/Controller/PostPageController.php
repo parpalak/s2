@@ -10,6 +10,8 @@
 namespace s2_extensions\s2_blog\Controller;
 
 use Psr\Cache\InvalidArgumentException;
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -39,9 +41,9 @@ class PostPageController extends BlogController
         TranslatorInterface                      $translator,
         HtmlTemplateProvider                     $templateProvider,
         Viewer                                   $viewer,
-        string                                   $blogTitle,
-        bool                                     $showComments,
-        bool                                     $enabledComments,
+        StringProxy                              $blogTitle,
+        BoolProxy                                $showComments,
+        BoolProxy                                $enabledComments,
     ) {
         parent::__construct(
             $dbLayer,

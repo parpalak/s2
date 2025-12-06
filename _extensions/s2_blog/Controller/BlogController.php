@@ -9,6 +9,8 @@
 
 namespace s2_extensions\s2_blog\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -38,9 +40,9 @@ abstract class BlogController implements ControllerInterface
         protected TranslatorInterface  $translator,
         protected HtmlTemplateProvider $templateProvider,
         protected Viewer               $viewer,
-        protected string               $blogTitle,
-        protected bool                 $showComments,
-        protected bool                 $enabledComments,
+        protected StringProxy          $blogTitle,
+        protected BoolProxy            $showComments,
+        protected BoolProxy            $enabledComments,
     ) {
     }
 
@@ -70,7 +72,8 @@ abstract class BlogController implements ControllerInterface
         }
 
         $headTitle = $template->getFromPlaceholder('head_title');
-        $template->putInPlaceholder('head_title', $headTitle === null ? $this->blogTitle : $headTitle . ' &mdash; ' . $this->blogTitle);
+        $blogTitle = $this->blogTitle->get();
+        $template->putInPlaceholder('head_title', $headTitle === null ? $blogTitle : $headTitle . ' &mdash; ' . $blogTitle);
 
         return $template->toHttpResponse();
     }
@@ -124,6 +127,8 @@ abstract class BlogController implements ControllerInterface
 
         array_multisort($sort_array, $sortAsc ? SORT_ASC : SORT_DESC, $ids);
 
+        $showComments    = $this->showComments->get();
+        $enabledComments = $this->enabledComments->get();
         $output = '';
         foreach ($ids as $id) {
             $post               = &$posts[$id];
@@ -142,8 +147,8 @@ abstract class BlogController implements ControllerInterface
                 $post['see_also'] = $label_copy;
             }
             $post['favoritePostsUrl'] = $this->blogUrlBuilder->favorite();
-            $post['showComments']     = $this->showComments;
-            $post['enabledComments']  = $this->enabledComments;
+            $post['showComments']     = $showComments;
+            $post['enabledComments']  = $enabledComments;
 
             $output .= $this->viewer->render('post', $post, 's2_blog');
         }

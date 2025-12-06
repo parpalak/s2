@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2009-2024 Roman Parpalak
+ * @copyright 2009-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -9,14 +9,15 @@ declare(strict_types=1);
 
 namespace S2\Cms\Mail;
 
-use S2\Cms\Config\DynamicConfigProvider;
+use S2\Cms\Config\StringProxy;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CommentMailer
 {
     public function __construct(
-        private TranslatorInterface   $translator,
-        private DynamicConfigProvider $dynamicConfigProvider
+        private TranslatorInterface $translator,
+        private StringProxy         $webmasterName,
+        private StringProxy         $webmasterEmail,
     ) {
     }
 
@@ -39,7 +40,7 @@ readonly class CommentMailer
         // Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
         $message = str_replace(["\n", "\0"], ["\r\n", ''], $message);
 
-        $subject = sprintf($this->translator->trans('Email subject'), $url);
+        $subject = \sprintf($this->translator->trans('Email subject'), $url);
         $subject = "=?UTF-8?B?" . base64_encode($subject) . "?=";
 
         // Our email
@@ -82,7 +83,7 @@ readonly class CommentMailer
         // Make sure all linebreaks are CRLF in message (and strip out any NULL bytes)
         $message = str_replace(["\n", "\0"], ["\r\n", ''], $message);
 
-        $subject = sprintf($this->translator->trans('Email subject'), $url);
+        $subject = \sprintf($this->translator->trans('Email subject'), $url);
         $subject = "=?UTF-8?B?" . base64_encode($subject) . "?=";
 
         // Our email
@@ -109,7 +110,7 @@ readonly class CommentMailer
     {
         $headersFormatted = $this->formatHeaders($headers);
 
-        if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 80000) {
+        if (!\defined('PHP_VERSION_ID') || PHP_VERSION_ID < 80000) {
             // Old hack for PHP < 8.0
             // Change the linebreaks used in the headers according to OS
             $os = strtoupper(substr(PHP_OS, 0, 3));
@@ -134,8 +135,8 @@ readonly class CommentMailer
 
     private function getWebmasterNameAndEmail(): string
     {
-        $email = $this->dynamicConfigProvider->get('S2_WEBMASTER_EMAIL') ?: 'example@example.com';
-        $name  = $this->dynamicConfigProvider->get('S2_WEBMASTER');
+        $email = $this->webmasterEmail->get() ?: 'example@example.com';
+        $name  = $this->webmasterName->get();
 
         if ($name) {
             return "=?UTF-8?B?" . base64_encode($name) . "?=" . ' <' . $email . '>';

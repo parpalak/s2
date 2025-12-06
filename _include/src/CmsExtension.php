@@ -158,7 +158,7 @@ class CmsExtension implements ExtensionInterface
         $container->set('translator', function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
-            $language = $provider->get('S2_LANGUAGE');
+            $language = $provider->getStringProxy('S2_LANGUAGE');
 
             $translator = new ExtensibleTranslator($language);
 
@@ -224,6 +224,8 @@ class CmsExtension implements ExtensionInterface
         });
 
         $container->set(HtmlTemplateProvider::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new HtmlTemplateProvider(
                 $container->get(RequestStack::class),
                 $container->get(UrlBuilder::class),
@@ -231,14 +233,19 @@ class CmsExtension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(AssetMergeFactory::class),
                 $container->get(\Symfony\Contracts\EventDispatcher\EventDispatcherInterface::class),
-                $container->get(DynamicConfigProvider::class),
+                $provider->getStringProxy('S2_STYLE'),
+                $provider->getStringProxy('S2_SITE_NAME'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
+                $provider->getStringProxy('S2_WEBMASTER'),
+                $provider->getStringProxy('S2_WEBMASTER_EMAIL'),
+                $provider->getIntProxy('S2_START_YEAR'),
                 $container->getParameter('debug_view'),
                 $container->getParameter('root_dir'),
                 $container->getParameter('base_path'),
                 $container->getParameter('base_url'),
                 $container->getNullableParameter('canonical_url'),
             );
-        }, [StatefulServiceInterface::class]);
+        });
 
         $container->set(Viewer::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
@@ -247,7 +254,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get('translator'),
                 $container->get(UrlBuilder::class),
                 $container->getParameter('root_dir'),
-                $provider->get('S2_STYLE'),
+                $provider->getStringProxy('S2_STYLE'),
                 $container->getParameter('debug_view')
             );
         });
@@ -259,7 +266,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get('translator'),
                 $container->get(UrlBuilder::class),
                 $container->getParameter('root_dir'),
-                $provider->get('S2_STYLE'),
+                $provider->getStringProxy('S2_STYLE'),
                 false // no HTML debug info for XML and other non-HTML content
             );
         });
@@ -271,8 +278,8 @@ class CmsExtension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(UrlBuilder::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_FAVORITE_URL'),
-                $provider->get('S2_USE_HIERARCHY') === '1',
+                $provider->getStringProxy('S2_FAVORITE_URL'),
+                $provider->getBoolProxy('S2_USE_HIERARCHY'),
             );
         });
 
@@ -282,7 +289,7 @@ class CmsExtension implements ExtensionInterface
             return new TagsProvider(
                 $container->get(DbLayer::class),
                 $container->get(UrlBuilder::class),
-                $provider->get('S2_TAGS_URL'),
+                $provider->getStringProxy('S2_TAGS_URL'),
             );
         }, [StatefulServiceInterface::class]);
 
@@ -294,7 +301,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
             );
         });
 
@@ -324,8 +331,8 @@ class CmsExtension implements ExtensionInterface
                 $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_FAVORITE_URL'),
-                $provider->get('S2_USE_HIERARCHY') === '1',
+                $provider->getStringProxy('S2_FAVORITE_URL'),
+                $provider->getBoolProxy('S2_USE_HIERARCHY'),
             );
         });
 
@@ -350,9 +357,9 @@ class CmsExtension implements ExtensionInterface
                 $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_FAVORITE_URL'),
-                $provider->get('S2_USE_HIERARCHY') === '1',
+                $provider->getStringProxy('S2_TAGS_URL'),
+                $provider->getStringProxy('S2_FAVORITE_URL'),
+                $provider->getBoolProxy('S2_USE_HIERARCHY'),
             );
         });
 
@@ -367,19 +374,22 @@ class CmsExtension implements ExtensionInterface
                 $container->get('translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_USE_HIERARCHY') === '1',
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_FAVORITE_URL'),
-                (int)$provider->get('S2_MAX_ITEMS'),
+                $provider->getBoolProxy('S2_USE_HIERARCHY'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getStringProxy('S2_TAGS_URL'),
+                $provider->getStringProxy('S2_FAVORITE_URL'),
+                $provider->getIntProxy('S2_MAX_ITEMS'),
                 $container->getParameter('debug'),
             );
         });
 
         $container->set(CommentMailer::class, function (Container $container) {
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
             return new CommentMailer(
                 $container->get('comments_translator'),
-                $container->get(DynamicConfigProvider::class)
+                $provider->getStringProxy('S2_WEBMASTER'),
+                $provider->getStringProxy('S2_WEBMASTER_EMAIL'),
             );
         });
 
@@ -430,7 +440,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(HttpClient::class),
                 $container->get(UrlBuilder::class),
                 $container->get(LoggerInterface::class),
-                $provider->get('S2_AKISMET_KEY'),
+                $provider->getStringProxy('S2_AKISMET_KEY'),
             );
         }, ['dynamic_config_dependent']);
 
@@ -454,8 +464,8 @@ class CmsExtension implements ExtensionInterface
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
                 $container->get(SpamDecisionProviderInterface::class),
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
-                $provider->get('S2_PREMODERATION') === '1',
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
+                $provider->getBoolProxy('S2_PREMODERATION'),
             );
         }, ['dynamic_config_dependent']);
 
@@ -486,7 +496,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get('translator'),
-                $provider->get('S2_SITE_NAME'),
+                $provider->getStringProxy('S2_SITE_NAME'),
             );
         });
 
@@ -501,7 +511,7 @@ class CmsExtension implements ExtensionInterface
                 $container->getParameter('base_path'),
                 $container->getParameter('base_url'),
                 $container->getParameter('version'),
-                $provider->get('S2_WEBMASTER'),
+                $provider->getStringProxy('S2_WEBMASTER'),
             );
         });
 
@@ -513,7 +523,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(ArticleProvider::class),
                 $container->get(UrlBuilder::class),
                 $container->get('strict_viewer'),
-                $provider->get('S2_USE_HIERARCHY') === '1',
+                $provider->getBoolProxy('S2_USE_HIERARCHY'),
             );
         });
     }
@@ -637,8 +647,8 @@ class CmsExtension implements ExtensionInterface
     public function registerRoutes(RouteCollection $routes, Container $container): void
     {
         $configProvider = $container->get(DynamicConfigProvider::class);
-        $favoriteUrl    = $configProvider->get('S2_FAVORITE_URL');
-        $tagsUrl        = $configProvider->get('S2_TAGS_URL');
+        $favoriteUrl    = $configProvider->getStringProxy('S2_FAVORITE_URL')->get();
+        $tagsUrl        = $configProvider->getStringProxy('S2_TAGS_URL')->get();
 
         $routes->add('rss', new Route(
             '/rss.xml',

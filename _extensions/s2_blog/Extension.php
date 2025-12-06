@@ -20,6 +20,7 @@ use S2\Cms\Controller\CommentController;
 use S2\Cms\Controller\RssController;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\ExtensionInterface;
+use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Mail\CommentMailer;
 use S2\Cms\Model\Article\ArticleRenderedEvent;
 use S2\Cms\Model\ArticleProvider;
@@ -70,11 +71,11 @@ class Extension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new BlogUrlBuilder(
                 $container->get(UrlBuilder::class),
-                $provider->get('S2_TAGS_URL'),
-                $provider->get('S2_FAVORITE_URL'),
-                $provider->get('S2_BLOG_URL'),
+                $provider->getStringProxy('S2_TAGS_URL'),
+                $provider->getStringProxy('S2_FAVORITE_URL'),
+                $provider->getStringProxy('S2_BLOG_URL'),
             );
-        });
+        }, [StatefulServiceInterface::class]);
         $container->set('s2_blog_translator', static function (Container $container) {
             /** @var ExtensibleTranslator $translator */
             $translator = $container->get('translator');
@@ -91,7 +92,7 @@ class Extension implements ExtensionInterface
                 $container->get(DbLayer::class),
                 $container->get(BlogUrlBuilder::class),
                 $container->get('s2_blog_translator'),
-                (int)$provider->get('S2_START_YEAR'),
+                $provider->getIntProxy('S2_START_YEAR'),
             );
         });
         $container->set(BlogPlaceholderProvider::class, static function (Container $container) {
@@ -104,8 +105,8 @@ class Extension implements ExtensionInterface
                 $container->get(Viewer::class),
                 $container->get(RequestStack::class),
                 $container->get('config_cache'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                (int)$provider->get('S2_MAX_ITEMS'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getIntProxy('S2_MAX_ITEMS'),
                 $container->getParameter('url_prefix'),
             );
         });
@@ -122,10 +123,10 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
-                (int)$provider->get('S2_MAX_ITEMS')
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
+                $provider->getIntProxy('S2_MAX_ITEMS')
             );
         });
         $container->set(DayPageController::class, static function (Container $container) {
@@ -141,9 +142,9 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
             );
         });
         $container->set(MonthPageController::class, static function (Container $container) {
@@ -159,10 +160,10 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
-                (int)$provider->get('S2_START_YEAR'),
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
+                $provider->getIntProxy('S2_START_YEAR'),
             );
         });
         $container->set(YearPageController::class, static function (Container $container) {
@@ -178,10 +179,10 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
-                (int)$provider->get('S2_START_YEAR'),
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
+                $provider->getIntProxy('S2_START_YEAR'),
             );
         });
         $container->set(PostPageController::class, static function (Container $container) {
@@ -198,9 +199,9 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
             );
         });
         $container->set(TagsPageController::class, static function (Container $container) {
@@ -216,9 +217,9 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
             );
         });
         $container->set(TagPageController::class, static function (Container $container) {
@@ -234,10 +235,10 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
-                $provider->get('S2_USE_HIERARCHY') === '1',
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
+                $provider->getBoolProxy('S2_USE_HIERARCHY'),
             );
         });
         $container->set(FavoritePageController::class, static function (Container $container) {
@@ -253,9 +254,9 @@ class Extension implements ExtensionInterface
                 $container->get('s2_blog_translator'),
                 $container->get(HtmlTemplateProvider::class),
                 $container->get(Viewer::class),
-                $provider->get('S2_BLOG_TITLE'),
-                $provider->get('S2_SHOW_COMMENTS') === '1',
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
+                $provider->getStringProxy('S2_BLOG_TITLE'),
+                $provider->getBoolProxy('S2_SHOW_COMMENTS'),
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
             );
         });
         $container->set(BlogRssStrategy::class, static function (Container $container) {
@@ -266,7 +267,7 @@ class Extension implements ExtensionInterface
                 $container->get(BlogUrlBuilder::class),
                 $container->get('s2_blog_translator'),
                 $container->get('strict_viewer'),
-                $provider->get('S2_BLOG_TITLE'),
+                $provider->getStringProxy('S2_BLOG_TITLE'),
             );
         });
         $container->set('s2_blog.rss_controller', static function (Container $container) {
@@ -280,7 +281,7 @@ class Extension implements ExtensionInterface
                 $container->getParameter('base_path'),
                 $container->getParameter('base_url'),
                 $container->getParameter('version'),
-                $provider->get('S2_WEBMASTER'),
+                $provider->getStringProxy('S2_WEBMASTER'),
             );
         });
         $container->set(Sitemap::class, static function (Container $container) {
@@ -312,8 +313,8 @@ class Extension implements ExtensionInterface
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
                 $container->get(SpamDecisionProviderInterface::class),
-                $provider->get('S2_ENABLED_COMMENTS') === '1',
-                $provider->get('S2_PREMODERATION') === '1',
+                $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
+                $provider->getBoolProxy('S2_PREMODERATION'),
             );
         }, ['dynamic_config_dependent']);
 
@@ -468,9 +469,9 @@ class Extension implements ExtensionInterface
     public function registerRoutes(RouteCollection $routes, Container $container): void
     {
         $configProvider = $container->get(DynamicConfigProvider::class);
-        $s2BlogUrl      = $configProvider->get('S2_BLOG_URL');
-        $favoriteUrl    = $configProvider->get('S2_FAVORITE_URL');
-        $tagsUrl        = $configProvider->get('S2_TAGS_URL');
+        $s2BlogUrl      = $configProvider->getStringProxy('S2_BLOG_URL')->get();
+        $favoriteUrl    = $configProvider->getStringProxy('S2_FAVORITE_URL')->get();
+        $tagsUrl        = $configProvider->getStringProxy('S2_TAGS_URL')->get();
         $priority       = 1;
 
         if ($s2BlogUrl !== '') {

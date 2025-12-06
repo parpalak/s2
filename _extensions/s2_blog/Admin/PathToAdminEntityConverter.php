@@ -10,14 +10,15 @@ declare(strict_types=1);
 namespace s2_extensions\s2_blog\Admin;
 
 use S2\AdminYard\Config\FieldConfig;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 
 readonly class PathToAdminEntityConverter
 {
     public function __construct(
-        private DbLayer $dbLayer,
-        private string  $blogUrl,
+        private DbLayer    $dbLayer,
+        private StringProxy $blogUrl,
     ) {
     }
 
@@ -26,11 +27,12 @@ readonly class PathToAdminEntityConverter
      */
     public function getQueryParams(string $path): ?array
     {
-        if (!str_starts_with($path, $this->blogUrl)) {
+        $blogUrl = $this->blogUrl->get();
+        if (!str_starts_with($path, $blogUrl)) {
             return null;
         }
 
-        $path      = substr($path, \strlen($this->blogUrl));
+        $path      = substr($path, \strlen($blogUrl));
         $pathArray = explode('/', $path);   //   []/[2006]/[12]/[31]/[newyear]
         if (\count($pathArray) < 5) {
             return ['entity' => 'BlogPost', 'action' => FieldConfig::ACTION_LIST];

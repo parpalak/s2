@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -32,8 +34,8 @@ readonly class PageFavorite implements ControllerInterface
         private TranslatorInterface  $translator,
         private HtmlTemplateProvider $htmlTemplateProvider,
         private Viewer               $viewer,
-        private string               $favoriteUrl,
-        private bool                 $useHierarchy,
+        private StringProxy          $favoriteUrl,
+        private BoolProxy            $useHierarchy,
     ) {
     }
 
@@ -81,13 +83,14 @@ readonly class PageFavorite implements ControllerInterface
 
         $sections = $articles = $sortingValuesForArticles = $sortingValuesForSections = [];
         if (\count($urls) > 0) {
-            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/');
+            $favoriteLink = $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl->get()) . '/');
+            $useHierarchy = $this->useHierarchy->get();
             foreach ($urls as $k => $url) {
                 $row  = $rows[$k];
                 $item = [
                     'id'            => $row['id'],
                     'title'         => $row['title'],
-                    'link'          => $this->urlBuilder->link($url . ($this->useHierarchy && $row['children_exist'] ? '/' : '')),
+                    'link'          => $this->urlBuilder->link($url . ($useHierarchy && $row['children_exist'] ? '/' : '')),
                     'favorite_link' => $favoriteLink,
                     'date'          => $this->viewer->date($row['create_time']),
                     'excerpt'       => $row['excerpt'],

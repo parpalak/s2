@@ -12,21 +12,20 @@ declare(strict_types=1);
 
 namespace S2\Cms\Template;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Asset\AssetMerge;
 use S2\Cms\Asset\AssetMergeFactory;
 use S2\Cms\Asset\AssetPack;
-use S2\Cms\Config\DynamicConfigProvider;
-use S2\Cms\Framework\StatefulServiceInterface;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayerException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class HtmlTemplateProvider implements StatefulServiceInterface
+class HtmlTemplateProvider
 {
-    private ?string $styleName = null;
-
     /** @noinspection PhpPropertyOnlyWrittenInspection */
     public function __construct(
         private readonly RequestStack             $requestStack,
@@ -35,7 +34,12 @@ class HtmlTemplateProvider implements StatefulServiceInterface
         private readonly Viewer                   $viewer,
         private readonly AssetMergeFactory        $assetMergeFactory,
         private readonly EventDispatcherInterface $dispatcher,
-        private readonly DynamicConfigProvider    $dynamicConfigProvider,
+        private readonly StringProxy              $styleName,
+        private readonly StringProxy              $siteName,
+        private readonly BoolProxy                $enabledComments,
+        private readonly StringProxy              $webmaster,
+        private readonly StringProxy              $webmasterEmail,
+        private readonly IntProxy                 $startYear,
         private readonly bool                     $debugView,
         private readonly string                   $rootDir,
         private readonly string                   $basePath,
@@ -59,7 +63,11 @@ class HtmlTemplateProvider implements StatefulServiceInterface
             $this->translator,
             $this->viewer,
             $this->dispatcher,
-            $this->dynamicConfigProvider,
+            $this->siteName,
+            $this->enabledComments,
+            $this->webmaster,
+            $this->webmasterEmail,
+            $this->startYear,
             $this->debugView,
             $this->canonicalUrl,
         );
@@ -68,7 +76,6 @@ class HtmlTemplateProvider implements StatefulServiceInterface
 
         return $htmlTemplate;
     }
-
 
     /**
      * Searches for a template file (in the style or 'template' directory)
@@ -117,14 +124,6 @@ class HtmlTemplateProvider implements StatefulServiceInterface
         $this->dispatcher->dispatch($buildEvent, TemplateBuildEvent::EVENT_END);
 
         return $template;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function clearState(): void
-    {
-        $this->styleName = null;
     }
 
     private function replaceCurrentLinks(string $templateContent): string
@@ -186,6 +185,6 @@ class HtmlTemplateProvider implements StatefulServiceInterface
      */
     private function getStyleName(): string
     {
-        return $this->styleName ?? $this->styleName = $this->dynamicConfigProvider->get('S2_STYLE');
+        return $this->styleName->get();
     }
 }

@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_search
  */
 
@@ -80,7 +80,7 @@ class AdminExtension implements ExtensionInterface
             $provider = $container->get(DynamicConfigProvider::class);
             return new PathToAdminEntityConverter(
                 $container->get(DbLayer::class),
-                $provider->get('S2_BLOG_URL'),
+                $provider->getStringProxy('S2_BLOG_URL'),
             );
         });
     }

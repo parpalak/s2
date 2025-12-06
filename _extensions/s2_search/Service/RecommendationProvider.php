@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace s2_extensions\s2_search\Service;
 
 use Psr\Cache\InvalidArgumentException;
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Queue\QueueHandlerInterface;
 use S2\Cms\Queue\QueuePublisher;
 use S2\Rose\Entity\ExternalId;
@@ -32,16 +34,17 @@ readonly class RecommendationProvider implements QueueHandlerInterface
         private CacheInterface       $cache,
         private QueuePublisher       $queuePublisher,
         private string               $dbType,
-        private bool                 $recommendationsEnabled,
+        private IntProxy             $recommendationsLimit,
     ) {
     }
 
     /**
      * @throws InvalidArgumentException
+     * @throws DbLayerException
      */
     public function getRecommendations(string $page, ExternalId $externalId): array
     {
-        if (!$this->recommendationsEnabled || $this->dbType === 'sqlite') {
+        if ($this->recommendationsLimit->get() <= 0 || $this->dbType === 'sqlite') {
             return [[], [], []];
         }
         [$recommendations, $generatedAt] = ($this->cache->get(

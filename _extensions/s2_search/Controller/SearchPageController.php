@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace s2_extensions\s2_search\Controller;
 
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Helper\StringHelper;
 use S2\Cms\Image\ThumbnailGenerator;
@@ -55,8 +57,8 @@ readonly class SearchPageController implements ControllerInterface
         private HtmlTemplateProvider     $templateProvider,
         private Viewer                   $viewer,
         private bool                     $debugView,
-        private string                   $tagsUrl,
-        private int                      $maxItems,
+        private StringProxy              $tagsUrl,
+        private IntProxy                 $maxItems,
     ) {
     }
 
@@ -81,7 +83,7 @@ readonly class SearchPageController implements ControllerInterface
         $template = $this->templateProvider->getTemplate('service.php');
 
         if ($query !== '') {
-            $items_per_page = $this->maxItems ?: 10.0;
+            $items_per_page = $this->maxItems->get() ?: 10.0;
             $queryObj       = new Query($query);
             $queryObj
                 ->setLimit($items_per_page)
@@ -178,7 +180,7 @@ readonly class SearchPageController implements ControllerInterface
         $tags = [];
         while ($row = $result->fetchAssoc()) {
             if ($this->similarWordsDetector->wordIsSimilarToOtherWords($row['name'], $words)) {
-                $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/') . '">' . s2_htmlencode($row['name']) . '</a>';
+                $tags[] = '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl->get()) . '/' . rawurlencode($row['url']) . '/') . '">' . s2_htmlencode($row['name']) . '</a>';
             }
         }
 

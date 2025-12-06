@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2025 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Model\Article;
 
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Controller\Rss\FeedDto;
 use S2\Cms\Controller\Rss\FeedItemDto;
 use S2\Cms\Controller\Rss\RssStrategyInterface;
@@ -23,7 +24,7 @@ readonly class ArticleRssStrategy implements RssStrategyInterface
         private ArticleProvider     $articleProvider,
         private UrlBuilder          $urlBuilder,
         private TranslatorInterface $translator,
-        private string              $siteName
+        private StringProxy         $siteName
     ) {
     }
 
@@ -32,9 +33,10 @@ readonly class ArticleRssStrategy implements RssStrategyInterface
      */
     public function getFeedInfo(): FeedDto
     {
+        $siteName = $this->siteName->get();
         return new FeedDto(
-            $this->siteName,
-            sprintf($this->translator->trans('RSS description'), $this->siteName),
+            $siteName,
+            \sprintf($this->translator->trans('RSS description'), $siteName),
             $this->urlBuilder->absLink('/')
         );
     }

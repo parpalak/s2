@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Framework\Exception\ConfigurationException;
 use S2\Cms\Framework\Exception\NotFoundException;
@@ -40,11 +43,11 @@ readonly class PageCommon implements ControllerInterface
         private TranslatorInterface      $translator,
         private HtmlTemplateProvider     $htmlTemplateProvider,
         private Viewer                   $viewer,
-        private bool                     $useHierarchy,
-        private bool                     $showComments,
-        private string                   $tagsUrl,
-        private string                   $favoriteUrl,
-        private int                      $maxItems,
+        private BoolProxy                $useHierarchy,
+        private BoolProxy                $showComments,
+        private StringProxy              $tagsUrl,
+        private StringProxy              $favoriteUrl,
+        private IntProxy                 $maxItems,
         private bool                     $debug,
     ) {
     }
@@ -61,9 +64,13 @@ readonly class PageCommon implements ControllerInterface
 
         $request_array = explode('/', $request_uri);   //   []/[dir1]/[dir2]/[dir3]/[file1]
         $request_array = array_map('rawurldecode', $request_array);
+        $useHierarchy = $this->useHierarchy->get();
+        $showComments = $this->showComments->get();
+        $favoriteUrl  = $this->favoriteUrl->get();
+        $maxItems     = $this->maxItems->get();
 
         // Correcting trailing slash and the rest of URL
-        if (!$this->useHierarchy && \count($request_array) > 2) {
+        if (!$useHierarchy && \count($request_array) > 2) {
             return new RedirectResponse($this->urlBuilder->link('/' . $request_array[1]), Response::HTTP_MOVED_PERMANENTLY);
         }
 
@@ -77,7 +84,7 @@ readonly class PageCommon implements ControllerInterface
 
         $template_id = '';
 
-        if ($this->useHierarchy) {
+        if ($useHierarchy) {
             $urls = array_unique($request_array);
 
             $result = $this->dbLayer->select('id, parent_id, title, template')
@@ -159,7 +166,7 @@ readonly class PageCommon implements ControllerInterface
             ->where('url = :url')->setParameter('url', $request_array[$i])
             ->andWhere('published = 1')
         ;
-        if ($this->useHierarchy) {
+        if ($useHierarchy) {
             $qb->andWhere('parent_id = :parent_id')->setParameter('parent_id', $parent_id);
         }
 
@@ -183,7 +190,7 @@ readonly class PageCommon implements ControllerInterface
         }
 
         if ($template_id === '') {
-            if ($this->useHierarchy) {
+            if ($useHierarchy) {
                 $bread_crumbs[] = [
                     'link'  => $this->urlBuilder->link($parent_path),
                     'title' => $page['title'],
@@ -202,7 +209,7 @@ readonly class PageCommon implements ControllerInterface
             );
         }
 
-        if ($this->useHierarchy && $parent_num && $was_end_slash !== (bool)$page['children_exist']) {
+        if ($useHierarchy && $parent_num && $was_end_slash !== (bool)$page['children_exist']) {
             return new RedirectResponse($this->urlBuilder->link($current_path . (!$was_end_slash ? '/' : '')), Response::HTTP_MOVED_PERMANENTLY);
         }
 
@@ -222,7 +229,7 @@ readonly class PageCommon implements ControllerInterface
         ;
 
         if ($page['favorite'] === 1) {
-            $template->putInPlaceholder('favorite_link', $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'));
+            $template->putInPlaceholder('favorite_link', $this->urlBuilder->link('/' . rawurlencode($favoriteUrl) . '/'));
         }
 
         $bread_crumbs[] = [
@@ -234,7 +241,7 @@ readonly class PageCommon implements ControllerInterface
             $template->putInPlaceholder('author', s2_htmlencode($page['author']));
         }
 
-        if ($this->useHierarchy) {
+        if ($useHierarchy) {
             foreach ($bread_crumbs as $crumb) {
                 $template->addBreadCrumb($crumb['title'], $crumb['link'] ?? null);
             }
@@ -251,7 +258,7 @@ readonly class PageCommon implements ControllerInterface
 
         // Dealing with sections, subsections, neighbours
         if (
-            $this->useHierarchy
+            $useHierarchy
             && $page['children_exist']
             && (
                 $template->hasPlaceholder('<!-- s2_subarticles -->')
@@ -291,7 +298,7 @@ readonly class PageCommon implements ControllerInterface
                         'id'            => $row['id'],
                         'title'         => $row['title'],
                         'link'          => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url']) . '/'),
-                        'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                        'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($favoriteUrl) . '/'),
                         'date'          => $this->viewer->date($row['create_time']),
                         'excerpt'       => $row['excerpt'],
                         'favorite'      => $row['favorite'],
@@ -304,7 +311,7 @@ readonly class PageCommon implements ControllerInterface
                         'id'            => $row['id'],
                         'title'         => $row['title'],
                         'link'          => $this->urlBuilder->link($current_path . '/' . rawurlencode($row['url'])),
-                        'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($this->favoriteUrl) . '/'),
+                        'favorite_link' => $this->urlBuilder->link('/' . rawurlencode($favoriteUrl) . '/'),
                         'date'          => $this->viewer->date($row['create_time']),
                         'excerpt'       => $row['excerpt'],
                         'favorite'      => $row['favorite'],
@@ -341,19 +348,19 @@ readonly class PageCommon implements ControllerInterface
 
                 ($sort_order == SORT_DESC) ? arsort($sort_array) : asort($sort_array);
 
-                if ($this->maxItems > 0) {
+                if ($maxItems > 0) {
                     // Paging navigation
                     $page_num = $request->query->get('p', 1) - 1;
                     if ($page_num < 0) {
                         $page_num = 0;
                     }
 
-                    $start = $page_num * $this->maxItems;
+                    $start = $page_num * $maxItems;
                     if ($start >= \count($subarticles)) {
                         $page_num = $start = 0;
                     }
 
-                    $total_pages = (int)ceil(1.0 * \count($subarticles) / $this->maxItems);
+                    $total_pages = (int)ceil(1.0 * \count($subarticles) / $maxItems);
 
                     $link_nav = [];
                     $paging   = StringHelper::paging($page_num + 1, $total_pages, $this->urlBuilder->link(str_replace('%', '%%', $current_path . '/'), ['p=%d']), $link_nav) . "\n";
@@ -361,14 +368,14 @@ readonly class PageCommon implements ControllerInterface
                         $template->setLink($rel, $href);
                     }
 
-                    $sort_array = \array_slice($sort_array, $start, $this->maxItems, true);
+                    $sort_array = \array_slice($sort_array, $start, $maxItems, true);
                 }
 
                 foreach ($sort_array as $index => $value) {
                     $articles_text .= $this->viewer->render('subarticles_item', $subarticles[$index]);
                 }
 
-                if ($this->maxItems) {
+                if ($maxItems) {
                     $articles_text .= $paging;
                 }
             }
@@ -476,7 +483,7 @@ readonly class PageCommon implements ControllerInterface
         }
 
         // Comments
-        if ($page['commented'] && $this->showComments && $template->hasPlaceholder('<!-- s2_comments -->')) {
+        if ($page['commented'] && $showComments && $template->hasPlaceholder('<!-- s2_comments -->')) {
             $result = $this->dbLayer
                 ->select('nick, time, email, show_email, good, text')
                 ->from('art_comments')
@@ -589,7 +596,7 @@ readonly class PageCommon implements ControllerInterface
         $output = [];
         foreach ($art_by_tags as $tag_id => $articles) {
             $output[] = $this->viewer->render('menu_block', array(
-                'title' => \sprintf($this->translator->trans('With this tag'), '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
+                'title' => \sprintf($this->translator->trans('With this tag'), '<a href="' . $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl->get()) . '/' . rawurlencode($tag_urls[$tag_id]) . '/') . '">' . $tag_names[$tag_id] . '</a>'),
                 'menu'  => $articles,
                 'class' => 'article_tags',
             ));
@@ -603,6 +610,8 @@ readonly class PageCommon implements ControllerInterface
      */
     private function get_tags(int $articleId): string
     {
+        $tagsUrl = $this->tagsUrl->get();
+
         $result = $this->dbLayer
             ->select('name, url')
             ->from('tags AS t')
@@ -615,7 +624,7 @@ readonly class PageCommon implements ControllerInterface
         while ($row = $result->fetchAssoc()) {
             $tags[] = array(
                 'title' => $row['name'],
-                'link'  => $this->urlBuilder->link('/' . rawurlencode($this->tagsUrl) . '/' . rawurlencode($row['url']) . '/'),
+                'link'  => $this->urlBuilder->link('/' . rawurlencode($tagsUrl) . '/' . rawurlencode($row['url']) . '/'),
             );
         }
 

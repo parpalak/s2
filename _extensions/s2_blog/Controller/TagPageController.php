@@ -9,6 +9,8 @@
 
 namespace s2_extensions\s2_blog\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Framework\Exception\NotFoundException;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -39,10 +41,10 @@ class TagPageController extends BlogController
         TranslatorInterface   $translator,
         HtmlTemplateProvider  $templateProvider,
         Viewer                $viewer,
-        string                $blogTitle,
-        bool                  $showComments,
-        bool                  $enabledComments,
-        private readonly bool $useHierarchy
+        StringProxy           $blogTitle,
+        BoolProxy             $showComments,
+        BoolProxy             $enabledComments,
+        private readonly BoolProxy $useHierarchy
     ) {
         parent::__construct(
             $dbLayer,
@@ -157,9 +159,10 @@ class TagPageController extends BlogController
         ;
 
         $title = $urls = $parentIds = [];
+        $useHierarchy = $this->useHierarchy->get();
 
         while ($row = $result->fetchAssoc()) {
-            $urls[]      = urlencode($row['url']) . ($this->useHierarchy && $row['children_exist'] ? '/' : '');
+            $urls[]      = urlencode($row['url']) . ($useHierarchy && $row['children_exist'] ? '/' : '');
             $parentIds[] = $row['parent_id'];
             $title[]     = $row['title'];
         }

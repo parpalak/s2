@@ -9,6 +9,9 @@
 
 namespace s2_extensions\s2_blog\Controller;
 
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\IntProxy;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
 use S2\Cms\Pdo\DbLayer;
@@ -35,10 +38,10 @@ class YearPageController extends BlogController
         TranslatorInterface  $translator,
         HtmlTemplateProvider $templateProvider,
         Viewer               $viewer,
-        string               $blogTitle,
-        bool                 $showComments,
-        bool                 $enabledComments,
-        private readonly int $startYear,
+        StringProxy          $blogTitle,
+        BoolProxy            $showComments,
+        BoolProxy            $enabledComments,
+        private readonly IntProxy $startYear,
     ) {
         parent::__construct(
             $dbLayer,
@@ -75,7 +78,8 @@ class YearPageController extends BlogController
         $pageTitle = $title;
 
         $template->setLink('up', $this->blogUrlBuilder->main());
-        if ($year > $this->startYear) {
+        $startYear = $this->startYear->get();
+        if ($year > $startYear) {
             $pageTitle = '<a href="' . $this->blogUrlBuilder->year($year - 1) . '">&larr;</a> ' . $pageTitle;
             $template->setLink('prev', $this->blogUrlBuilder->year($year - 1));
         }

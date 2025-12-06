@@ -19,6 +19,7 @@ use S2\Cms\CmsExtension;
 use S2\Cms\Comment\SpamDetectorComment;
 use S2\Cms\Comment\SpamDetectorInterface;
 use S2\Cms\Comment\SpamDetectorReport;
+use S2\Cms\Config\StringProxy;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Extensions\ExtensionManager;
 use S2\Cms\Framework\Application;
@@ -343,16 +344,13 @@ class Integration extends AbstractBrowserModule
         }
 
         $decorator = function (Container $container, callable $factory) {
-            $mailer     = $factory($container);
-            $reflection = new \ReflectionClass($mailer);
-            $translator = $reflection->getProperty('translator');
-            $translator->setAccessible(true);
-            $dynamicConfig = $reflection->getProperty('dynamicConfigProvider');
-            $dynamicConfig->setAccessible(true);
+            /** @var DynamicConfigProvider $provider */
+            $provider = $container->get(DynamicConfigProvider::class);
 
             return new IntegrationCommentMailer(
-                $translator->getValue($mailer),
-                $dynamicConfig->getValue($mailer),
+                $container->get('comments_translator'),
+                $provider->getStringProxy('S2_WEBMASTER'),
+                $provider->getStringProxy('S2_WEBMASTER_EMAIL'),
                 $this
             );
         };
@@ -366,10 +364,11 @@ readonly class IntegrationCommentMailer extends \S2\Cms\Mail\CommentMailer
 {
     public function __construct(
         \Symfony\Contracts\Translation\TranslatorInterface $translator,
-        \S2\Cms\Config\DynamicConfigProvider               $dynamicConfigProvider,
+        StringProxy                                        $webmasterName,
+        StringProxy                                        $webmasterEmail,
         private Integration                                $helper
     ) {
-        parent::__construct($translator, $dynamicConfigProvider);
+        parent::__construct($translator, $webmasterName, $webmasterEmail);
     }
 
     public function mailToModerator(

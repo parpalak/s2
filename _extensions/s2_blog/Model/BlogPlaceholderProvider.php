@@ -10,6 +10,8 @@
 namespace s2_extensions\s2_blog\Model;
 
 use Psr\Cache\InvalidArgumentException;
+use S2\Cms\Config\BoolProxy;
+use S2\Cms\Config\IntProxy;
 use S2\Cms\Pdo\DbLayer;
 use S2\Cms\Pdo\DbLayerException;
 use S2\Cms\Template\Viewer;
@@ -30,8 +32,8 @@ readonly class BlogPlaceholderProvider
         private Viewer              $viewer,
         private RequestStack        $requestStack,
         private CacheInterface      $cache,
-        private bool                $showComments,
-        private int                 $maxItems,
+        private BoolProxy           $showComments,
+        private IntProxy            $maxItems,
         private string              $urlPrefix,
     ) {
     }
@@ -50,7 +52,7 @@ readonly class BlogPlaceholderProvider
 
             // Last posts on the blog main page
             $blogNavigation['last'] = [
-                'title' => \sprintf($this->translator->trans('Nav last'), $this->maxItems ?: 10),
+                'title' => \sprintf($this->translator->trans('Nav last'), $this->maxItems->get() ?: 10),
                 'link'  => $this->blogUrlBuilder->main(),
             ];
 
@@ -124,7 +126,7 @@ readonly class BlogPlaceholderProvider
      */
     public function getRecentComments(): array
     {
-        if (!$this->showComments) {
+        if (!$this->showComments->get()) {
             return [];
         }
 
@@ -169,7 +171,7 @@ readonly class BlogPlaceholderProvider
      */
     public function getRecentDiscussions(): array
     {
-        if (!$this->showComments) {
+        if (!$this->showComments->get()) {
             return [];
         }
 

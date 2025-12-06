@@ -57,7 +57,7 @@ if ($response->isInformational() || $response->isEmpty() || $response->getConten
     // Custom response sending to set Content-Length properly and to enable compression
     ob_start();
 
-    $useCompression = $app->container->get(DynamicConfigProvider::class)->get('S2_COMPRESS');
+    $useCompression = $app->container->get(DynamicConfigProvider::class)->getBoolProxy('S2_COMPRESS')->get();
     if ($useCompression) {
         ob_start('ob_gzhandler');
     }

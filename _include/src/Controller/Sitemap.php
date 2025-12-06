@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Config\BoolProxy;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\UrlBuilder;
@@ -27,7 +28,7 @@ class Sitemap implements ControllerInterface
         protected ArticleProvider $articleProvider,
         protected UrlBuilder      $urlBuilder,
         protected Viewer          $viewer,
-        protected bool            $useHierarchy,
+        protected BoolProxy       $useHierarchy,
     ) {
     }
 
@@ -84,8 +85,9 @@ class Sitemap implements ControllerInterface
         ;
 
         $articles = $urls = $parentIds = [];
+        $useHierarchy = $this->useHierarchy->get();
         for ($i = 0; $row = $result->fetchAssoc(); $i++) {
-            $urls[$i] = rawurlencode($row['url']) . ($this->useHierarchy && $row['children_exist'] ? '/' : '');
+            $urls[$i] = rawurlencode($row['url']) . ($useHierarchy && $row['children_exist'] ? '/' : '');
 
             $parentIds[$i] = $row['parent_id'];
 
