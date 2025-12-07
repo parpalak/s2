@@ -1,7 +1,7 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
- * @license   http://opensource.org/licenses/MIT MIT
+ * @copyright 2024-2025 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
 
@@ -64,6 +64,8 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
 
         $commentEntity
             ->setPluralName($this->translator->trans('Blog comments'))
+            ->setSingularName($this->translator->trans('Comment'))
+            ->setEntityDisplayNameBuilder(fn(array $row) => $this->buildCommentDetails($row))
             ->setEditTitle($this->translator->trans('Edit comment'))
             ->addField(new FieldConfig(
                 name: 'id',
@@ -208,6 +210,7 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
 
         $postEntity
             ->setPluralName($this->translator->trans('Posts'))
+            ->setEntityDisplayNameBuilder(fn(array $row) => (string)($row['column_title'] ?? $this->translator->trans('Post')))
             ->setNewTitle($this->translator->trans('New post'))
             ->addField(new FieldConfig(
                 name: 'id',
@@ -558,6 +561,32 @@ readonly class AdminConfigExtender implements AdminConfigExtenderInterface
             ->addEntity($postEntity, 11)
             ->addEntity($commentEntity, 12)
         ;
+    }
+
+    private function buildCommentDetails(array $row): string
+    {
+        $author = \trim((string)($row['column_nick'] ?? ''));
+        $text   = $this->buildTextPreview($row['column_text'] ?? null);
+
+        $parts = array_filter([$author, $text], static fn(string $value) => $value !== '');
+
+        return implode(' — ', $parts);
+    }
+
+    private function buildTextPreview(?string $text): string
+    {
+        $text = \trim((string)$text);
+        if ($text === '') {
+            return '';
+        }
+
+        $text = (string)\preg_replace('/\\s+/u', ' ', $text);
+        $limit = 80;
+        if (\mb_strlen($text) > $limit) {
+            $text = \mb_substr($text, 0, $limit - 1) . '…';
+        }
+
+        return $text;
     }
 
     /**

@@ -33,9 +33,9 @@ use S2\AdminYard\Validator\NotBlank;
 use S2\AdminYard\Validator\Regex;
 use S2\Cms\Admin\Controller\CommentController;
 use S2\Cms\Admin\Event\VisibleEntityChangedEvent;
+use S2\Cms\Config\BoolProxy;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Framework\StatefulServiceInterface;
-use S2\Cms\Config\BoolProxy;
 use S2\Cms\Model\ArticleProvider;
 use S2\Cms\Model\AuthManager;
 use S2\Cms\Model\CommentNotifier;
@@ -94,7 +94,9 @@ class AdminConfigProvider implements StatefulServiceInterface
         $commentEntity = new EntityConfig('Comment', $this->dbPrefix . 'art_comments');
         $commentEntity
             ->setPluralName($this->translator->trans('Comments'))
+            ->setSingularName($this->translator->trans('Comment'))
             ->setEditTitle($this->translator->trans('Edit comment'))
+            ->setEntityDisplayNameBuilder(fn(array $row) => $this->buildCommentDetails($row))
             ->addField(new FieldConfig(
                 name: 'id',
                 type: new DbColumnFieldType(FieldConfig::DATA_TYPE_INT, true),
@@ -241,6 +243,7 @@ class AdminConfigProvider implements StatefulServiceInterface
         $userEntity
             ->setPluralName($this->translator->trans('Users'))
             ->setNewTitle($this->translator->trans('New user'))
+            ->setEntityDisplayNameBuilder(fn(array $row) => $this->buildUserDisplayName($row))
             ->setEnabledActions(
                 [
                     ...$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_VIEW_HIDDEN, PermissionChecker::PERMISSION_EDIT_USERS) ? [FieldConfig::ACTION_LIST] : [],
@@ -795,13 +798,13 @@ class AdminConfigProvider implements StatefulServiceInterface
                     sortable: true,
                     useOnActions: [FieldConfig::ACTION_LIST, FieldConfig::ACTION_SHOW]
                 ))
-                ->addField(new FieldConfig(
-                    name: 'description',
-                    label: $this->translator->trans('Tag description'),
-                    hint: $this->translator->trans('Tag description info'),
-                    control: 'textarea',
-                    useOnActions: [FieldConfig::ACTION_SHOW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_NEW]
-                ))
+            ->addField(new FieldConfig(
+                name: 'description',
+                label: $this->translator->trans('Tag description'),
+                hint: $this->translator->trans('Tag description info'),
+                control: 'textarea',
+                useOnActions: [FieldConfig::ACTION_SHOW, FieldConfig::ACTION_EDIT, FieldConfig::ACTION_NEW]
+            ))
                 ->addField(new FieldConfig(
                     name: 'modify_time',
                     label: $this->translator->trans('Modify time'),
@@ -823,11 +826,12 @@ class AdminConfigProvider implements StatefulServiceInterface
                     'name LIKE %1$s OR description LIKE %1$s OR url LIKE %1$s',
                     fn(string $value) => $value !== '' ? '%' . $value . '%' : null
                 ))
-                ->setEnabledActions([
-                    FieldConfig::ACTION_LIST,
-                    ...$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_CREATE_ARTICLES, PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT] : [],
-                    ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_DELETE] : [],
-                ]),
+            ->setEnabledActions([
+                FieldConfig::ACTION_LIST,
+                ...$this->permissionChecker->isGrantedAny(PermissionChecker::PERMISSION_CREATE_ARTICLES, PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_NEW, FieldConfig::ACTION_EDIT] : [],
+                ...$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_SITE) ? [FieldConfig::ACTION_DELETE] : [],
+            ])
+            ->setEntityDisplayNameBuilder(fn(array $row) => $this->buildTagDisplayName($row)),
                 20
             )
         ;
@@ -855,45 +859,47 @@ class AdminConfigProvider implements StatefulServiceInterface
                         })
                         ->setListTemplate('_admin/templates/config/list.php.inc')
                     , 40
-                )
-                ->addEntity(
-                    (new EntityConfig('Session', $this->dbPrefix . 'users_online'))
-                        ->setPluralName($this->translator->trans('Sessions'))
-                        ->addField(new FieldConfig(
-                            name: 'challenge',
-                            type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
-                            useOnActions: [],
-                        ))
-                        ->addField(new FieldConfig(
-                            name: 'time',
-                            label: $this->translator->trans('Last action time'),
-                            type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
-                            sortable: true,
-                        ))
-                        ->addField(new FieldConfig(
-                            name: 'login',
-                            label: $this->translator->trans('Login'),
-                            sortable: true,
-                        ))
-                        ->addField(new FieldConfig(
-                            name: 'ip',
-                            label: $this->translator->trans('IP address'),
-                        ))
-                        ->addField(new FieldConfig(
-                            name: 'ua',
-                            label: $this->translator->trans('Browser'),
-                            viewTemplate: '_admin/templates/session/view-user-agent.php',
-                        ))
-                        ->addField(new FieldConfig(
-                            name: 'current',
-                            type: new VirtualFieldType('(CASE WHEN challenge = \'' . $this->authManager->getCurrentSessionId() . '\' THEN \'1\' ELSE \'\' END)'),
-                        ))
-                        ->setEnabledActions([FieldConfig::ACTION_LIST, FieldConfig::ACTION_DELETE])
-                        ->setReadAccessControl($this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS) ? null : new LogicalExpression('login', $this->permissionChecker->getUserLogin()))
-                        ->setListActionsTemplate('_admin/templates/session/list-actions.php.inc')
-                    , 80
-                )
-            ;
+                );
+
+            $sessionEntity = new EntityConfig('Session', $this->dbPrefix . 'users_online');
+            $sessionEntity
+                ->setPluralName($this->translator->trans('Sessions'))
+                ->setSingularName($this->translator->trans('Session'))
+                ->setEntityDisplayNameBuilder(fn(array $row) => $this->buildSessionDetails($row))
+                ->addField(new FieldConfig(
+                    name: 'challenge',
+                    type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
+                    useOnActions: [],
+                ))
+                ->addField(new FieldConfig(
+                    name: 'time',
+                    label: $this->translator->trans('Last action time'),
+                    type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
+                    sortable: true,
+                ))
+                ->addField(new FieldConfig(
+                    name: 'login',
+                    label: $this->translator->trans('Login'),
+                    sortable: true,
+                ))
+                ->addField(new FieldConfig(
+                    name: 'ip',
+                    label: $this->translator->trans('IP address'),
+                ))
+                ->addField(new FieldConfig(
+                    name: 'ua',
+                    label: $this->translator->trans('Browser'),
+                    viewTemplate: '_admin/templates/session/view-user-agent.php',
+                ))
+                ->addField(new FieldConfig(
+                    name: 'current',
+                    type: new VirtualFieldType('(CASE WHEN challenge = \'' . $this->authManager->getCurrentSessionId() . '\' THEN \'1\' ELSE \'\' END)'),
+                ))
+                ->setEnabledActions([FieldConfig::ACTION_LIST, FieldConfig::ACTION_DELETE])
+                ->setReadAccessControl($this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS) ? null : new LogicalExpression('login', $this->permissionChecker->getUserLogin()))
+                ->setListActionsTemplate('_admin/templates/session/list-actions.php.inc');
+
+            $adminConfig->addEntity($sessionEntity, 80);
         }
 
         if ($this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS)) {
@@ -922,6 +928,54 @@ class AdminConfigProvider implements StatefulServiceInterface
         $adminConfig->setLayoutTemplate('_admin/templates/layout.php.inc');
 
         return $this->cachedConfig = $adminConfig;
+    }
+
+    private function buildCommentDetails(array $row): string
+    {
+        $author = \trim((string)($row['column_nick'] ?? ''));
+        $text   = $this->buildTextPreview($row['column_text'] ?? null);
+
+        $parts = array_filter([$author, $text], static fn(string $value) => $value !== '');
+
+        return implode(' — ', $parts);
+    }
+
+    private function buildSessionDetails(array $row): string
+    {
+        $login  = \trim((string)($row['column_login'] ?? ''));
+        $ip     = \trim((string)($row['column_ip'] ?? ''));
+        $pieces = array_filter([$login, $ip], static fn(string $value) => $value !== '');
+
+        return implode(', ', $pieces);
+    }
+
+    private function buildTextPreview(?string $text): string
+    {
+        $text = \trim((string)$text);
+        if ($text === '') {
+            return '';
+        }
+
+        $text = (string)\preg_replace('/\\s+/u', ' ', $text);
+        $limit = 80;
+        if (\mb_strlen($text) > $limit) {
+            $text = \mb_substr($text, 0, $limit - 1) . '…';
+        }
+
+        return $text;
+    }
+
+    private function buildUserDisplayName(array $row): string
+    {
+        $login = \trim((string)($row['column_login'] ?? ''));
+        $name  = \trim((string)($row['column_name'] ?? ''));
+
+        return $name !== '' ? $name . ' (' . $login . ')' : $login;
+    }
+
+    private function buildTagDisplayName(array $row): string
+    {
+        return \trim((string)($row['column_name'] ?? ''));
     }
 
     public function clearState(): void

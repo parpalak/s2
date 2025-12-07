@@ -24,6 +24,7 @@ return [
     'Edit'                  => 'Edit',
 
     // Session tab
+    'Session'               => 'Session',
     'Other sessions'        => 'You have logged in from different browsers. Check your sessions and delete unnecessary ones.',
     'Last action time'      => 'Last action time',
     'Browser'               => 'Browser',
