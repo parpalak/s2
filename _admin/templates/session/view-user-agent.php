@@ -2,13 +2,30 @@
 
 /** @var string $value */
 
-$browser_aliases = ['MSIE' => 'Internet Explorer'];
+$browserChecks = [
+    'Edge' => ['Edg/', 'EdgA/', 'EdgiOS/', 'Edge/'],
+    'Opera' => ['OPR/', 'Opera/'],
+    'Vivaldi' => ['Vivaldi/'],
+    'Brave' => ['Brave/'],
+    'Yandex' => ['YaBrowser/'],
+    'Samsung Internet' => ['SamsungBrowser/'],
+    'UC Browser' => ['UCBrowser/'],
+    'QQ Browser' => ['QQBrowser/'],
+    'MIUI Browser' => ['MiuiBrowser/'],
+    'Firefox' => ['Firefox/', 'FxiOS/'],
+    'Internet Explorer' => ['MSIE ', 'Trident/'],
+    'Chromium' => ['Chromium/'],
+    'Chrome' => ['Chrome/', 'CriOS/'],
+    'Safari' => ['Safari/'],
+];
 
 $detectedUserAgent = $value;
-foreach (['Opera', 'Firefox', 'Chrome', 'Safari', 'MSIE', 'Mozilla'] as $browser) {
-    if (str_contains($value, $browser)) {
-        $detectedUserAgent = '<span title="' . $value . '">' . ($browser_aliases[$browser] ?? $browser) . '</span>';
-        break;
+foreach ($browserChecks as $browser => $needles) {
+    foreach ($needles as $needle) {
+        if (stripos($value, $needle) !== false) {
+            $detectedUserAgent = '<span title="' . $value . '">' . $browser . '</span>';
+            break 2;
+        }
     }
 }
 
