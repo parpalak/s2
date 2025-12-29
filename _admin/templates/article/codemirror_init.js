@@ -58,6 +58,8 @@ const s2_codemirror = (function () {
                 lineWrapping: true,
                 spellcheck: true,
                 inputStyle: "contenteditable",
+                // Render all lines to keep accurate height mapping for sync scroll.
+                viewportMargin: Infinity,
                 foldGutter: true,
                 gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
                 selectionPointer: true
@@ -117,6 +119,8 @@ const s2_codemirror = (function () {
             });
 
             api.restore_scroll();
+
+            return instance;
         },
 
         close: function () {
@@ -143,6 +147,9 @@ const s2_codemirror = (function () {
         restore_scroll: function () {
             if (instance && scrollTop)
                 instance.getScrollerElement().scrollTop = scrollTop;
+        },
+        get_current: function () {
+            return instance;
         },
 
         flip: function () {

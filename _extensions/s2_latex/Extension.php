@@ -73,7 +73,7 @@ class Extension implements ExtensionInterface
             $src = $event->src;
             if (str_starts_with($src, self::CUSTOM_UPMATH_PROTOCOL)) {
                 $url = 'https://i.upmath.me/svg/' . self::encodeURIComponent(substr($src, \strlen(self::CUSTOM_UPMATH_PROTOCOL)));
-                $event->setResult(\sprintf('<img src="%s" style="background: white" alt=""></span>', $url));
+                $event->setResult(\sprintf('<img src="%s" style="background: white" alt="">', $url));
             }
         });
     }
