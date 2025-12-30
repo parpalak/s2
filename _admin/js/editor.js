@@ -378,16 +378,60 @@ function countNewlines(str) {
 }
 
 function collectBlockLineNumbers(html) {
-    const tagRe = /<\s*(p|h[1-6]|blockquote|pre|ul|ol|li|table|tr|td|th|div|section|article|header|footer)(\s|>)/gi;
+    const blockTags = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'div', 'section', 'article', 'header', 'footer']);
+    const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
     const lines = [];
     let line = 0;
-    let lastIndex = 0;
-    let match;
+    let pos = 0;
+    let depth = 0;
 
-    while ((match = tagRe.exec(html)) !== null) {
-        line += countNewlines(html.slice(lastIndex, match.index));
-        lines.push(line);
-        lastIndex = match.index;
+    while (pos < html.length) {
+        const lt = html.indexOf('<', pos);
+        if (lt === -1) {
+            line += countNewlines(html.slice(pos));
+            break;
+        }
+
+        line += countNewlines(html.slice(pos, lt));
+
+        if (html.startsWith('<!--', lt)) {
+            const endComment = html.indexOf('-->', lt + 4);
+            if (endComment === -1) {
+                break;
+            }
+            line += countNewlines(html.slice(lt, endComment + 3));
+            pos = endComment + 3;
+            continue;
+        }
+
+        const gt = html.indexOf('>', lt + 1);
+        if (gt === -1) {
+            break;
+        }
+
+        const raw = html.slice(lt + 1, gt).trim();
+        if (!raw) {
+            pos = gt + 1;
+            continue;
+        }
+
+        const isClosing = raw[0] === '/';
+        const nameToken = isClosing ? raw.slice(1) : raw;
+        const tagName = nameToken.split(/\s+/)[0].toLowerCase();
+        const isSelfClosing = !isClosing && (raw.endsWith('/') || voidTags.has(tagName));
+
+        if (!isClosing) {
+            if (depth === 0 && blockTags.has(tagName)) {
+                lines.push(line);
+            }
+            if (!isSelfClosing) {
+                depth++;
+            }
+        } else if (depth > 0) {
+            depth--;
+        }
+
+        pos = gt + 1;
     }
 
     return lines;
