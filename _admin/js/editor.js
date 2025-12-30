@@ -465,6 +465,32 @@ function applyLineMarkers(doc, wrapper, html) {
     }
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function renderPreviewError(doc, message) {
+    if (!doc) {
+        return;
+    }
+    const html = '<!doctype html>' +
+        '<html><head><meta charset="utf-8">' +
+        '<style>' +
+        'body{margin:0 0 0 1em;padding:0;color:#000;font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;}' +
+        '.s2-preview-error{border:1px solid #aaa; border-radius: 1px; background:#fffffb;padding:12px 16px;}' +
+        '</style></head><body>' +
+        '<div class="s2-preview-error">' + escapeHtml(message) + '</div>' +
+        '</body></html>';
+    doc.open();
+    doc.write(html);
+    doc.close();
+}
+
 const Preview = (function () {
     let lastTemplateId = null;
     let template = '';
@@ -474,8 +500,25 @@ const Preview = (function () {
         let eHeader, eText;
 
         if (sTemplateId !== lastTemplateId) {
-            let data = await fetch(sUrl + 'action=load_template&template_id=' + encodeURIComponent(sTemplateId) + '&article_id=' + encodeURIComponent(iArticleId));
-            data = await data.json();
+            let response;
+            try {
+                response = await fetch(sUrl + 'action=load_template&template_id=' + encodeURIComponent(sTemplateId) + '&article_id=' + encodeURIComponent(iArticleId));
+            } catch (error) {
+                console.warn('Failed to load template preview:', error);
+                renderPreviewError(d, s2_lang.unknown_error);
+                return;
+            }
+            if (!response.ok) {
+                console.warn('Failed to load template preview:', response.status);
+                renderPreviewError(d, s2_lang.unknown_error);
+                return;
+            }
+            const data = await response.json();
+            if (!data || data.success !== true || !data.template) {
+                console.warn('Template preview is unavailable:', data && data.preview_message ? data.preview_message : 'Unknown error');
+                renderPreviewError(d, (data && data.preview_message) ? data.preview_message : s2_lang.unknown_error);
+                return;
+            }
             template = data.template;
             lastTemplateId = sTemplateId;
         } else {

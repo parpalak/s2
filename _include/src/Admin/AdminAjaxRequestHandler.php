@@ -654,11 +654,22 @@ class AdminAjaxRequestHandler
 
                 /** @var HtmlTemplateProvider $htmlTemplateProvider */
                 $htmlTemplateProvider = $c->get(HtmlTemplateProvider::class);
-                $template             = $htmlTemplateProvider->getRawTemplateContent($templateId, null);
+
+                $template = '';
+                try {
+                    $template = $htmlTemplateProvider->getRawTemplateContent($templateId, null);
+                } catch (\RuntimeException $e) {
+                }
 
                 if ($template === '') {
-                    return new Json(['success' => false, 'message' => 'Template not found.'], Response::HTTP_NOT_FOUND);
+                    $errorMessage = $t->trans('Preview template not found', ['{{ template }}' => $templateId]);
+                    return new Json([
+                        'success'         => false,
+                        'preview_message' => $errorMessage,
+                        'template_id'     => $templateId,
+                    ]);
                 }
+
                 return new Json(['success' => true, 'template' => $template]);
             },
         ];
