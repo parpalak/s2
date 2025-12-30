@@ -1047,8 +1047,10 @@ function SyncScroll(scrollMap, animatorSrc, animatorResult, eSrc, eResult, previ
     }
 
     this.scrollToBottomIfRequired = function () {
-        if (eSrc.scrollHeight >= eSrc.offsetHeight && eSrc.scrollHeight - eSrc.offsetHeight - eSrc.scrollTop < 5) {
-            animatorResult.setPos(eResult.scrollHeight - eResult.offsetHeight);
+        const srcViewport = eSrc.clientHeight || eSrc.offsetHeight || 0;
+        if (eSrc.scrollHeight >= srcViewport && eSrc.scrollHeight - srcViewport - eSrc.scrollTop < 5) {
+            const resultViewport = eResult.clientHeight || eResult.offsetHeight || 0;
+            animatorResult.setPos(Math.max(0, eResult.scrollHeight - resultViewport));
         }
     };
 
