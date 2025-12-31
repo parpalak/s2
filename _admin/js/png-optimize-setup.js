@@ -4,6 +4,11 @@ var runOptipng = (function () {
     var workerFailed = false;
     var workerUrls = ["js/oxipng-worker.js", "js/optipng-worker.js"];
     var workerUrlIndex = 0;
+    var quantWorker = null;
+    var quantWorkerLoaded = false;
+    var quantWorkerFailed = false;
+    var quantWorkerUrl = "js/png-quant-worker.js";
+    var QUANT_MIN_PSNR = 40;
 
     function printConsole(text) {
         console.log(text);
@@ -35,7 +40,15 @@ var runOptipng = (function () {
         });
     }
 
+    function makePngFile(original, data) {
+        if (typeof File === 'function' && original && original.name) {
+            return new File([data], original.name, {type: 'image/png'});
+        }
+        return new Blob([data], {type: 'image/png'});
+    }
+
     var loadingCallbackQueue = [];
+    var quantLoadingQueue = [];
 
     function runWhenWorkerIsLoaded(loadedCallback, fallbackCallback) {
         if (workerLoaded) {
@@ -55,6 +68,33 @@ var runOptipng = (function () {
         }
 
         startWorker(workerUrls[workerUrlIndex]);
+    }
+
+    function runWhenQuantWorkerIsLoaded(loadedCallback, fallbackCallback) {
+        if (quantWorkerLoaded) {
+            printConsole('Quant worker already loaded');
+            loadedCallback(quantWorker);
+            return;
+        }
+
+        if (quantWorkerFailed) {
+            printConsole('Quant worker failed earlier');
+            fallbackCallback();
+            return;
+        }
+
+        quantLoadingQueue.push({
+            loaded: loadedCallback,
+            fallback: fallbackCallback
+        });
+
+        if (quantWorker !== null) {
+            printConsole('Quant worker initialization in progress');
+            return;
+        }
+
+        printConsole('Start quant worker...');
+        startQuantWorker();
     }
 
     function startWorker(url) {
@@ -92,6 +132,7 @@ var runOptipng = (function () {
                 }
                 tasks[message.id] = null;
             } else if (message.type === "error") {
+                printConsole('Worker error id ' + message.id);
                 var failedTask = tasks[message.id];
                 if (failedTask) {
                     failedTask.callback(failedTask.file);
@@ -102,6 +143,81 @@ var runOptipng = (function () {
                 fallbackToNextWorker();
             }
         };
+    }
+
+    function startQuantWorker() {
+        quantWorker = new Worker(quantWorkerUrl);
+
+        quantWorker.onerror = function () {
+            printConsole('Quant worker error event');
+            handleQuantWorkerFailure();
+        };
+
+        quantWorker.onmessage = function (event) {
+            var message = event.data || {};
+
+            if (message.type === "ready") {
+                printConsole("Ready quant worker (" + quantWorkerUrl + ")");
+                quantWorkerLoaded = true;
+                for (var i = quantLoadingQueue.length; i--;) {
+                    (quantLoadingQueue[i].loaded)(quantWorker);
+                }
+                quantLoadingQueue = [];
+            } else if (message.type === "stdout") {
+                printConsole(message.message || message.data);
+            } else if (message.type === "done") {
+                var task = quantTasks[message.id];
+                if (task) {
+                    printConsole('Quant worker done id ' + message.id + (message.accepted ? ' (accepted)' : ' (rejected)'));
+                    if (message.accepted && message.data) {
+                        task.resolve({
+                            data: message.data,
+                            psnr: message.psnr,
+                            paletteSize: message.paletteSize,
+                            originalColors: message.originalColors,
+                            encodedSize: message.encodedSize,
+                            originalSize: message.originalSize,
+                            accepted: true
+                        });
+                    } else {
+                        task.resolve({
+                            psnr: message.psnr,
+                            paletteSize: message.paletteSize,
+                            originalColors: message.originalColors,
+                            encodedSize: message.encodedSize,
+                            originalSize: message.originalSize,
+                            accepted: false
+                        });
+                    }
+                    quantTasks[message.id] = null;
+                }
+            } else if (message.type === "error" || message.type === "init-error") {
+                var failedTask = quantTasks[message.id];
+                if (failedTask) {
+                    failedTask.resolve(null);
+                    quantTasks[message.id] = null;
+                }
+                printConsole('Quant worker error: ' + (message.message || 'unknown'));
+                handleQuantWorkerFailure();
+            }
+        };
+    }
+
+    function handleQuantWorkerFailure() {
+        printConsole('Quant worker failure fallback');
+        quantWorkerFailed = true;
+        for (var j = quantLoadingQueue.length; j--;) {
+            if (quantLoadingQueue[j] && typeof quantLoadingQueue[j].fallback === 'function') {
+                quantLoadingQueue[j].fallback();
+            }
+        }
+        quantLoadingQueue = [];
+        for (var k = quantTasks.length; k--;) {
+            if (quantTasks[k]) {
+                quantTasks[k].resolve(null);
+                quantTasks[k] = null;
+            }
+        }
     }
 
     function fallbackToNextWorker() {
@@ -132,21 +248,88 @@ var runOptipng = (function () {
     }
 
     var tasks = [];
+    var quantTasks = [];
+
+    function quantizePng(file) {
+        return new Promise(function (resolve) {
+            if (quantWorkerFailed) {
+                printConsole('Quant worker is disabled, skip quantization');
+                resolve(null);
+                return;
+            }
+
+            var id = quantTasks.length;
+            quantTasks[id] = {resolve: resolve};
+
+            runWhenQuantWorkerIsLoaded(function (worker) {
+                readFileAsUint8Array(file).then(function (data) {
+                    printConsole('Quant worker post message id ' + id + ', size ' + fileSize(data.byteLength));
+                    worker.postMessage({
+                        type: 'command',
+                        id: id,
+                        options: {
+                            minPsnr: QUANT_MIN_PSNR
+                        },
+                        file: {
+                            data: data
+                        }
+                    }, [data.buffer]);
+                }).catch(function () {
+                    printConsole('Quant worker read file failed');
+                    var task = quantTasks[id];
+                    if (task) {
+                        task.resolve(null);
+                        quantTasks[id] = null;
+                    }
+                });
+            }, function () {
+                var task = quantTasks[id];
+                if (task) {
+                    task.resolve(null);
+                    quantTasks[id] = null;
+                }
+            });
+        });
+    }
 
     return function progressFile(file, callback) {
         var id = tasks.length;
         tasks[id] = {callback: callback, file: file};
 
         runWhenWorkerIsLoaded(function (worker) {
-            readFileAsUint8Array(file).then(function (data) {
-                worker.postMessage({
-                    type: 'command',
-                    id: id,
-                    arguments: ['-o2'],
-                    file: {
-                        'data': data
+            quantizePng(file).then(function (quantResult) {
+                var optimizedFile = file;
+                if (quantResult && quantResult.accepted && quantResult.data) {
+                    optimizedFile = makePngFile(file, quantResult.data);
+                    if (typeof quantResult.originalSize === 'number' && typeof quantResult.encodedSize === 'number') {
+                        printConsole('pngquant psnr ' + (quantResult.psnr === Infinity ? 'inf' : quantResult.psnr.toFixed(2)) + ', palette ' + quantResult.paletteSize + ', colors ' + quantResult.originalColors + ', size ' + fileSize(quantResult.originalSize) + ' -> ' + fileSize(quantResult.encodedSize));
+                    } else {
+                        printConsole('pngquant psnr ' + (quantResult.psnr === Infinity ? 'inf' : quantResult.psnr.toFixed(2)) + ', palette ' + quantResult.paletteSize + ', colors ' + quantResult.originalColors);
                     }
-                }, [data.buffer]);
+                } else if (quantResult) {
+                    if (typeof quantResult.originalSize === 'number' && typeof quantResult.encodedSize === 'number') {
+                        printConsole('pngquant rejected (psnr ' + (quantResult.psnr === Infinity ? 'inf' : quantResult.psnr.toFixed(2)) + ', size ' + fileSize(quantResult.originalSize) + ' -> ' + fileSize(quantResult.encodedSize) + ')');
+                    } else {
+                        printConsole('pngquant rejected');
+                    }
+                }
+
+                readFileAsUint8Array(optimizedFile).then(function (data) {
+                    worker.postMessage({
+                        type: 'command',
+                        id: id,
+                        arguments: ['-o2'],
+                        file: {
+                            'data': data
+                        }
+                    }, [data.buffer]);
+                }).catch(function () {
+                    var task = tasks[id];
+                    tasks[id] = null;
+                    if (task) {
+                        task.callback(task.file);
+                    }
+                });
             }).catch(function () {
                 var task = tasks[id];
                 tasks[id] = null;
