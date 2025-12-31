@@ -23,7 +23,9 @@ use S2\Cms\Admin\Dashboard\DashboardDatabaseProvider;
 use S2\Cms\Admin\Dashboard\DashboardEnvironmentProvider;
 use S2\Cms\Admin\Dashboard\DashboardStatProviderInterface;
 use S2\Cms\Admin\Event\RedirectFromPublicEvent;
+use S2\Cms\Admin\Picture\PictureFileNameHelper;
 use S2\Cms\Admin\Picture\PictureManager;
+use S2\Cms\Admin\Picture\PictureReserveManager;
 use S2\Cms\AdminYard\CustomMenuGeneratorEvent;
 use S2\Cms\AdminYard\CustomTemplateRenderer;
 use S2\Cms\AdminYard\Form\CustomFormControlFactory;
@@ -295,16 +297,30 @@ class AdminExtension implements ExtensionInterface
             );
         });
 
+        $container->set(PictureFileNameHelper::class, function (Container $container) {
+            return new PictureFileNameHelper(
+                $container->get(Translator::class),
+                $container->get(PermissionChecker::class),
+                $container->getParameter('allowed_extensions'),
+            );
+        });
+
+        $container->set(PictureReserveManager::class, function (Container $container) {
+            return new PictureReserveManager(
+                $container->get(PictureFileNameHelper::class),
+                $container->getParameter('image_dir'),
+                $container->getParameter('cache_dir'),
+            );
+        });
+
         $container->set(PictureManager::class, function (Container $container) {
             return new PictureManager(
                 $container->get(Translator::class),
                 $container->get(TemplateRenderer::class),
-                $container->get(PermissionChecker::class),
                 $container->get(SettingStorageInterface::class),
+                $container->get(PictureFileNameHelper::class),
                 $container->getParameter('base_path'),
                 $container->getParameter('image_dir'),
-                $container->getParameter('cache_dir'),
-                $container->getParameter('allowed_extensions'),
             );
         });
     }

@@ -13,6 +13,7 @@ use S2\AdminYard\Translator;
 use S2\AdminYard\Translator as T;
 use S2\Cms\Admin\Event\AdminAjaxControllerMapEvent;
 use S2\Cms\Admin\Picture\PictureManager;
+use S2\Cms\Admin\Picture\PictureReserveManager;
 use S2\Cms\Extensions\ExtensionManagerAdapter;
 use S2\Cms\Framework\Container;
 use S2\Cms\Framework\Container as C;
@@ -265,7 +266,7 @@ class AdminAjaxRequestHandler
                 }
 
                 $path = $r->request->getString('path');
-                if (str_contains($path, '..')) {
+                if (str_contains($path, '..') || str_contains($path, "\0")) {
                     return new Json(['success' => false, 'message' => 'Invalid path.'], Response::HTTP_BAD_REQUEST);
                 }
 
@@ -608,8 +609,11 @@ class AdminAjaxRequestHandler
                 $pictureManager = $c->get(PictureManager::class);
                 $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
 
+                /** @var PictureReserveManager $reserveManager */
+                $reserveManager = $c->get(PictureReserveManager::class);
+
                 try {
-                    $reserve = $pictureManager->reserveFileName($path, $name);
+                    $reserve = $reserveManager->reserveFileName($path, $name);
                 } catch (\RuntimeException $e) {
                     return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
@@ -654,6 +658,9 @@ class AdminAjaxRequestHandler
                 $pictureManager = $c->get(PictureManager::class);
                 $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
 
+                /** @var PictureReserveManager $reserveManager */
+                $reserveManager = $c->get(PictureReserveManager::class);
+
                 if ($r->request->has('token') && $r->request->has('name')) {
                     if (\count($uploadedFiles) !== 1) {
                         return new Json(['success' => false, 'message' => 'Only one file can be uploaded with a reserved name.'], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -665,7 +672,7 @@ class AdminAjaxRequestHandler
                         return new Json(['success' => false, 'message' => 'Invalid reserve token or name.'], Response::HTTP_UNPROCESSABLE_ENTITY);
                     }
 
-                    if (!$pictureManager->validateReserveToken($path, $name, $token)) {
+                    if (!$reserveManager->validateReserveToken($path, $name, $token)) {
                         return new Json(['success' => false, 'message' => 'Reserve token mismatch.'], Response::HTTP_UNPROCESSABLE_ENTITY);
                     }
 
@@ -676,10 +683,10 @@ class AdminAjaxRequestHandler
                             $name,
                             (bool)$r->request->get('create_dir')
                         );
-                        $pictureManager->clearReserve($path, $name);
+                        $reserveManager->clearReserve($path, $name);
                     } catch (\RuntimeException $e) {
                         if ($e->getCode() === Response::HTTP_CONFLICT) {
-                            $pictureManager->clearReserve($path, $name);
+                            $reserveManager->clearReserve($path, $name);
                         }
 
                         return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
