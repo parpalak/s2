@@ -31,10 +31,14 @@ class PictureManager
         private readonly SettingStorageInterface $settingStorage,
         private readonly string                  $basePath,
         private string                           $imageDir, // filesystem
+        private readonly string                  $cacheDir,
         private readonly string                  $allowedExtensions,
     ) {
         $this->imageDir = rtrim($imageDir, '/');
     }
+
+    private const RESERVE_TTL_SECONDS = 900;
+    private const RESERVE_CACHE_SUBDIR = 'picture_reserve';
 
     public function getThumbnailResponse(string $file, $maxSize = 100, $maxZoom = 2.0): Response
     {
@@ -331,53 +335,125 @@ class PictureManager
             throw new \RuntimeException($errors);
         }
 
-        $filename = mb_strtolower(self::s2_basename($filename));
-        $filename = str_replace("\0", '', $filename);
-        while (str_contains($filename, '..')) {
-            $filename = str_replace('..', '', $filename);
-        }
-
-        $extension = '';
-        if (($ext_pos = strrpos($filename, '.')) !== false) {
-            $extension = substr($filename, $ext_pos + 1);
-        }
-
-        if (
-            $this->allowedExtensions !== ''
-            && $extension !== ''
-            && !$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS)
-            && !str_contains(' ' . $this->allowedExtensions . ' ', ' ' . $extension . ' ')
-        ) {
-            $errorMessage = $this->translator->trans('Forbidden extension', ['{{ ext }}' => $extension]);
-            $error        = $filename ? \sprintf($this->translator->trans('Upload file error'), $filename, $errorMessage) : $errorMessage;
-            throw new \RuntimeException($error);
-        }
+        $filename = $this->normalizeFileName($filename);
+        $this->assertAllowedExtension($filename);
 
         // Processing name collisions
         while (is_file($this->imageDir . $path . '/' . $filename)) {
-            $filename = preg_replace_callback('#(?:|_copy|_copy\((\d+)\))(?=(?:\.[^\.]*)?$)#', static function ($match) {
-                if ($match[0] === '') {
-                    return '_copy';
-                }
-
-                if ($match[0] === '_copy') {
-                    return '_copy(2)';
-                }
-
-                return '_copy(' . ($match[1] + 1) . ')';
-            }, $filename, 1);
+            $filename = self::incrementCopySuffix($filename);
         }
 
-        if ($createDir && !is_dir($this->imageDir . $path)) {
-            if (!mkdir($this->imageDir . $path, 0777, true) && !is_dir($this->imageDir . $path)) {
-                throw new \RuntimeException(\sprintf('Directory "%s" was not created', $this->imageDir . $path));
-            }
-            chmod($this->imageDir . $path, 0777);
+        if ($createDir) {
+            $this->ensureDirExists($this->imageDir . $path);
         }
         $uploadedFile->move($this->imageDir . $path, $filename);
         chmod($this->imageDir . $path . '/' . $filename, 0644);
 
         return $path . '/' . $filename;
+    }
+
+    public function processUploadedFileWithReservedName(UploadedFile $uploadedFile, string $path, string $filename, bool $createDir): string
+    {
+        $originalName = $uploadedFile->getClientOriginalName();
+        if ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
+            $errorMessage = $this->translator->trans('Upload error ' . $uploadedFile->getError());
+            $error        = $originalName ? sprintf($this->translator->trans('Upload file error'), $originalName, $errorMessage) : $errorMessage;
+            throw new \RuntimeException($error);
+        }
+
+        if (!$uploadedFile->isValid()) {
+            $errorMessage = $this->translator->trans('Is upload file error');
+            $errors       = $originalName ? sprintf($this->translator->trans('Upload file error'), $originalName, $errorMessage) : $errorMessage;
+            throw new \RuntimeException($errors);
+        }
+
+        $normalized = $this->normalizeFileName($filename);
+        if ($normalized !== $filename) {
+            throw new \RuntimeException('Invalid reserved file name.', Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $this->assertAllowedExtension($filename);
+
+        if ($createDir) {
+            $this->ensureDirExists($this->imageDir . $path);
+        }
+
+        if (is_file($this->imageDir . $path . '/' . $filename)) {
+            throw new \RuntimeException('File already exists.', Response::HTTP_CONFLICT);
+        }
+
+        $uploadedFile->move($this->imageDir . $path, $filename);
+        chmod($this->imageDir . $path . '/' . $filename, 0644);
+
+        return $path . '/' . $filename;
+    }
+
+    public function reserveFileName(string $path, string $suggestedName): array
+    {
+        $normalized = $this->normalizeFileName($suggestedName);
+        if ($normalized === '') {
+            throw new \RuntimeException('Empty file name.', Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $this->assertAllowedExtension($normalized);
+        $this->ensureDirExists($this->imageDir . $path);
+
+        $token     = bin2hex(random_bytes(16));
+        $candidate = $normalized;
+        $attempts  = 0;
+
+        while ($attempts++ < 100) {
+            if (is_file($this->imageDir . $path . '/' . $candidate)) {
+                $candidate = self::incrementCopySuffix($candidate);
+                continue;
+            }
+
+            $reserveFile = $this->getReserveFilePath($path, $candidate);
+            if ($this->tryCreateReserve($reserveFile, $token, $path, $candidate)) {
+                return [
+                    'name'  => $candidate,
+                    'token' => $token,
+                ];
+            }
+
+            $candidate = self::incrementCopySuffix($candidate);
+        }
+
+        throw new \RuntimeException('Unable to reserve file name.', Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function validateReserveToken(string $path, string $filename, string $token): bool
+    {
+        $reserveFile = $this->getReserveFilePath($path, $filename);
+        if (!is_file($reserveFile)) {
+            return false;
+        }
+
+        $payload = @file_get_contents($reserveFile);
+        if ($payload === false) {
+            return false;
+        }
+
+        $data = json_decode($payload, true);
+        if (!is_array($data)) {
+            return false;
+        }
+
+        $expiresAt = (int)($data['expires_at'] ?? 0);
+        if ($expiresAt < time()) {
+            @unlink($reserveFile);
+            return false;
+        }
+
+        return hash_equals((string)($data['token'] ?? ''), $token)
+            && (string)($data['path'] ?? '') === $path
+            && (string)($data['name'] ?? '') === $filename;
+    }
+
+    public function clearReserve(string $path, string $filename): void
+    {
+        $reserveFile = $this->getReserveFilePath($path, $filename);
+        if (is_file($reserveFile)) {
+            @unlink($reserveFile);
+        }
     }
 
 
@@ -437,5 +513,128 @@ class PictureManager
     private static function s2_dirname(string $dir): string
     {
         return preg_replace('#/[^/]*$#', '', $dir);
+    }
+
+    private function normalizeFileName(string $filename): string
+    {
+        $filename = mb_strtolower(self::s2_basename($filename));
+        $filename = str_replace("\0", '', $filename);
+        while (str_contains($filename, '..')) {
+            $filename = str_replace('..', '', $filename);
+        }
+
+        return $filename;
+    }
+
+    private function assertAllowedExtension(string $filename): void
+    {
+        $extension = '';
+        if (($ext_pos = strrpos($filename, '.')) !== false) {
+            $extension = substr($filename, $ext_pos + 1);
+        }
+
+        if (
+            $this->allowedExtensions !== ''
+            && $extension !== ''
+            && !$this->permissionChecker->isGranted(PermissionChecker::PERMISSION_EDIT_USERS)
+            && !str_contains(' ' . $this->allowedExtensions . ' ', ' ' . $extension . ' ')
+        ) {
+            $errorMessage = $this->translator->trans('Forbidden extension', ['{{ ext }}' => $extension]);
+            $error        = $filename ? \sprintf($this->translator->trans('Upload file error'), $filename, $errorMessage) : $errorMessage;
+            throw new \RuntimeException($error);
+        }
+    }
+
+    private static function incrementCopySuffix(string $filename): string
+    {
+        return preg_replace_callback('#(?:|_copy|_copy\((\d+)\))(?=(?:\.[^\.]*)?$)#', static function ($match) {
+            if ($match[0] === '') {
+                return '_copy';
+            }
+
+            if ($match[0] === '_copy') {
+                return '_copy(2)';
+            }
+
+            return '_copy(' . ($match[1] + 1) . ')';
+        }, $filename, 1);
+    }
+
+    private function getReserveFilePath(string $path, string $filename): string
+    {
+        $reserveRoot = rtrim($this->cacheDir, '/') . '/' . self::RESERVE_CACHE_SUBDIR;
+        $safePath    = ltrim($path, '/');
+
+        return $reserveRoot . ($safePath !== '' ? '/' . $safePath : '') . '/' . $filename . '.json';
+    }
+
+    private function tryCreateReserve(string $reserveFile, string $token, string $path, string $name): bool
+    {
+        if (is_file($reserveFile)) {
+            if (!$this->isReserveExpired($reserveFile)) {
+                return false;
+            }
+            @unlink($reserveFile);
+        }
+
+        $dir = dirname($reserveFile);
+        $this->ensureDirExists($dir);
+
+        $fh = @fopen($reserveFile, 'x');
+        if ($fh === false) {
+            if ($this->isReserveExpired($reserveFile)) {
+                @unlink($reserveFile);
+            }
+            return false;
+        }
+
+        $payload = json_encode([
+            'token'      => $token,
+            'path'       => $path,
+            'name'       => $name,
+            'expires_at' => time() + self::RESERVE_TTL_SECONDS,
+        ], JSON_THROW_ON_ERROR);
+
+        fwrite($fh, $payload);
+        fclose($fh);
+
+        return true;
+    }
+
+    private function isReserveExpired(string $reserveFile): bool
+    {
+        $payload = @file_get_contents($reserveFile);
+        if ($payload === false) {
+            return true;
+        }
+
+        $data = json_decode($payload, true);
+        if (!is_array($data)) {
+            return true;
+        }
+
+        $expiresAt = (int)($data['expires_at'] ?? 0);
+
+        return $expiresAt < time();
+    }
+
+    private function ensureDirExists(string $dir): void
+    {
+        if (is_dir($dir)) {
+            return;
+        }
+
+        $warning = null;
+        set_error_handler(function ($errno, $errstr) use (&$warning) {
+            $warning = $errstr;
+        });
+        $created = mkdir($dir, 0777, true);
+        restore_error_handler();
+
+        if (!$created && !is_dir($dir)) {
+            throw new \RuntimeException(\sprintf('Directory "%s" was not created', $dir) . ($warning ? ' (' . $warning . ')' : ''));
+        }
+
+        chmod($dir, 0777);
     }
 }

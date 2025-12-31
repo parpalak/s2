@@ -1424,6 +1424,9 @@ var isAltPressed = function () {
 };
 
 var pictureFolderCsrfTokens = {};
+var pendingImageMap = new Map();
+var lastPreviewWrapper = null;
+var activeImageOperations = 0;
 
 function requestPictureCsrfToken(path) {
     if (pictureFolderCsrfTokens[path]) {
@@ -1446,6 +1449,163 @@ function requestPictureCsrfToken(path) {
             return data.csrf_token;
         });
 }
+
+function reservePictureName(dir, name, csrfToken) {
+    const params = new URLSearchParams();
+    params.append('dir', dir);
+    params.append('name', name);
+    params.append('csrf_token', csrfToken);
+
+    return fetch('ajax.php?action=reserve_image', {
+        method: 'POST',
+        body: params
+    })
+        .then(response => response.json())
+        .then(function (data) {
+            syncImageLoadingIndicator();
+            return data;
+        });
+}
+
+function getImageDimensions(file) {
+    return new Promise(function (resolve) {
+        if (!file) {
+            resolve({width: 'auto', height: 'auto'});
+            return;
+        }
+
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = function () {
+            URL.revokeObjectURL(url);
+            resolve({width: img.naturalWidth || 'auto', height: img.naturalHeight || 'auto'});
+        };
+        img.onerror = function () {
+            URL.revokeObjectURL(url);
+            resolve({width: 'auto', height: 'auto'});
+        };
+        img.src = url;
+    });
+}
+
+function sanitizeImageSrc(src) {
+    return encodeURI(src)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/'/g, '&#039;')
+        .replace(/"/g, '&quot;');
+}
+
+function insertImageTag(src, width, height, altPressed) {
+    let w = width;
+    let h = height;
+
+    if (altPressed) {
+        if (!isNaN(parseInt(w))) {
+            w = parseInt(w) / 2;
+        }
+        if (!isNaN(parseInt(h))) {
+            h = parseInt(h) / 2;
+        }
+    }
+
+    const safeSrc = sanitizeImageSrc(src);
+    const sOpenTag = '<img src="' + safeSrc + '" width="' + (w || 'auto') + '" height="' + (h || 'auto') + '" ' + 'loading="lazy" alt="',
+        sCloseTag = '" />';
+    document.dispatchEvent(new CustomEvent('insert_tag.s2', {detail: {sStart: sOpenTag, sEnd: sCloseTag}}));
+}
+
+function replaceImageSrcInEditor(oldSrc, newSrc) {
+    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
+    if (!cm || !cm.getSearchCursor) {
+        return;
+    }
+
+    cm.operation(function () {
+        const safeOld = sanitizeImageSrc(oldSrc);
+        const safeNew = sanitizeImageSrc(newSrc);
+        const cursor = cm.getSearchCursor(safeOld, {line: 0, ch: 0});
+        while (cursor.findNext()) {
+            cursor.replace(safeNew);
+        }
+    });
+}
+
+function applyPendingImages(wrapper) {
+    if (!wrapper || pendingImageMap.size === 0) {
+        return;
+    }
+
+    const images = wrapper.querySelectorAll('img[src]');
+    images.forEach(function (img) {
+        const src = img.getAttribute('src');
+        if (pendingImageMap.has(src)) {
+            img.setAttribute('data-pending-src', src);
+            img.setAttribute('src', pendingImageMap.get(src));
+            img.style.filter = 'blur(2px)';
+            img.style.opacity = '0.75';
+        }
+    });
+}
+
+function updatePendingImageKey(oldSrc, newSrc) {
+    if (!pendingImageMap.has(oldSrc)) {
+        return;
+    }
+
+    const blobUrl = pendingImageMap.get(oldSrc);
+    pendingImageMap.delete(oldSrc);
+    pendingImageMap.set(newSrc, blobUrl);
+
+    if (lastPreviewWrapper) {
+        const images = lastPreviewWrapper.querySelectorAll('img[data-pending-src="' + oldSrc + '"]');
+        images.forEach(function (img) {
+            img.setAttribute('data-pending-src', newSrc);
+            img.setAttribute('src', blobUrl);
+        });
+    }
+}
+
+function finalizePendingImage(filePath, blobUrl) {
+    if (pendingImageMap.has(filePath)) {
+        pendingImageMap.delete(filePath);
+    }
+
+    if (lastPreviewWrapper) {
+        const images = lastPreviewWrapper.querySelectorAll('img');
+        images.forEach(function (img) {
+            if (img.getAttribute('data-pending-src') === filePath || img.getAttribute('src') === blobUrl) {
+                img.setAttribute('src', filePath);
+                img.removeAttribute('data-pending-src');
+                img.style.filter = '';
+                img.style.opacity = '';
+            }
+        });
+    }
+
+    if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+    }
+}
+
+function markImageOperation(delta) {
+    activeImageOperations = Math.max(0, activeImageOperations + delta);
+    syncImageLoadingIndicator();
+}
+
+function syncImageLoadingIndicator() {
+    loadingIndicator(activeImageOperations > 0);
+}
+
+document.addEventListener('preview_updated.s2', function (event) {
+    if (!event.detail || !event.detail.wrapper) {
+        return;
+    }
+
+    lastPreviewWrapper = event.detail.wrapper;
+    applyPendingImages(lastPreviewWrapper);
+});
 
 document.addEventListener('DOMContentLoaded', function () {
     var altPressed = false;
@@ -1472,15 +1632,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function uploadBlobToPictureDir(blob, name, extension, successCallback) {
+function uploadBlobToPictureDir(blob, name, extension, successCallback, options) {
     var d = new Date();
+    var opts = options || {};
+    var dir = opts.dir || ('/' + d.getFullYear() + '/' + ('0' + (d.getMonth() + 1)).slice(-2));
 
     if (typeof name !== 'string') {
         name = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + "-" + ('0' + d.getDate()).slice(-2)
             + "_" + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + '.' + extension;
     }
-
-    var dir = '/' + d.getFullYear() + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
 
     requestPictureCsrfToken(dir)
         .then(function (csrfToken) {
@@ -1491,6 +1651,10 @@ function uploadBlobToPictureDir(blob, name, extension, successCallback) {
             formData.append('create_dir', '1');
             formData.append('return_image_info', '1');
             formData.append('csrf_token', csrfToken);
+            if (opts.token) {
+                formData.append('token', opts.token);
+                formData.append('name', name);
+            }
 
             return fetch('ajax.php?action=upload', {
                 method: 'POST',
@@ -1499,19 +1663,43 @@ function uploadBlobToPictureDir(blob, name, extension, successCallback) {
         })
         .then(response => response.json())
         .then(res => {
-            if (res.success === true && typeof successCallback !== "undefined" && res.image_info) {
+            if (res.success === true && typeof successCallback === 'function' && res.image_info) {
                 successCallback(res, res.image_info[0], res.image_info[1]);
             } else if (res.success !== true && res.message) {
+                if (typeof opts.onError === 'function') {
+                    opts.onError(res);
+                }
                 console.warn('Upload error:', res.message);
             }
+            if (typeof opts.onFinally === 'function') {
+                opts.onFinally(res);
+            }
+            syncImageLoadingIndicator();
         })
-        .catch(error => console.warn('Error:', error));
+        .catch(error => {
+            if (typeof opts.onError === 'function') {
+                opts.onError({message: error});
+            }
+            if (typeof opts.onFinally === 'function') {
+                opts.onFinally();
+            }
+            console.warn('Error:', error);
+            syncImageLoadingIndicator();
+        });
 }
 
-function optimizeAndUploadFile(file) {
+function optimizeAndUploadFile(file, altPressed) {
     var blobs = {};
+    var uploadStarted = false;
+    var reserveInfo = null;
+    var reserveFailed = false;
+    var blobUrl = URL.createObjectURL(file);
+    var now = new Date();
+    var dir = '/' + now.getFullYear() + '/' + ('0' + (now.getMonth() + 1)).slice(-2);
+    var suggestedName = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + "-" + ('0' + now.getDate()).slice(-2)
+        + "_" + ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + '.png';
 
-    loadingIndicator(true);
+    markImageOperation(1);
 
     /**
      * Experiments show that now in Chrome file.type is 'image/png' no matter how the image is pasted.
@@ -1523,10 +1711,7 @@ function optimizeAndUploadFile(file) {
             compareBlobs();
         });
     } else {
-        imageConversion.compress(file, {
-            quality: 0.9,
-            type: 'image/png'
-        }).then(function (pngBlob) {
+        imageUtils.compressToPng(file, true).then(function (pngBlob) {
             // TODO OptiPNG is also required here. But as I pointed above, for now it's a dead brunch. Let's do it later.
             blobs.png = pngBlob;
             compareBlobs();
@@ -1536,29 +1721,114 @@ function optimizeAndUploadFile(file) {
     if (file.type === 'image/jpg' || file.type === 'image/jpeg') {
         blobs.jpeg = file;
     } else {
-        imageConversion.compress(file, {
-            quality: 0.9,
-            type: 'image/jpeg'
-        }).then(function (jpegBlob) {
+        imageUtils.compressToJpeg(file, 0.9, '#ffffff', true).then(function (jpegBlob) {
             blobs.jpeg = jpegBlob;
             compareBlobs();
         });
     }
 
+    Promise.all([
+        requestPictureCsrfToken(dir).then(function (csrfToken) {
+            return reservePictureName(dir, suggestedName, csrfToken);
+        }),
+        getImageDimensions(file)
+    ])
+        .then(function (results) {
+            reserveInfo = results[0];
+            var dimensions = results[1];
+
+            if (!reserveInfo || reserveInfo.success === false || !reserveInfo.file_path) {
+                throw new Error((reserveInfo && reserveInfo.message) ? reserveInfo.message : 'Unable to reserve image name.');
+            }
+
+            pendingImageMap.set(reserveInfo.file_path, blobUrl);
+            applyPendingImages(lastPreviewWrapper);
+            insertImageTag(reserveInfo.file_path, dimensions.width || 'auto', dimensions.height || 'auto', altPressed);
+            maybeStartUpload();
+        })
+        .catch(function (error) {
+            console.warn('Reserve error:', error);
+            URL.revokeObjectURL(blobUrl);
+            reserveFailed = true;
+            maybeStartUpload();
+        });
+
     function compareBlobs() {
         if (blobs.png && blobs.jpeg) {
-            var successCallback = function (res, w, h) {
-                ReturnImage(res.file_path, w || 'auto', h || 'auto');
-                loadingIndicator(false);
-            };
+            maybeStartUpload();
+        }
+    }
+
+    function maybeStartUpload() {
+        if (!blobs.png || !blobs.jpeg || uploadStarted) {
+            return;
+        }
+        if (reserveInfo) {
+            uploadStarted = true;
+
+
             if (blobs.png.size > blobs.jpeg.size) {
                 // JPEG is smaller, nevertheless we keep the PNG as a losless copy but suggest to use JPEG
-                uploadBlobToPictureDir(blobs.png, null, 'png');
-                uploadBlobToPictureDir(blobs.jpeg, null, 'jpg', successCallback);
+                uploadBlobToPictureDir(blobs.png, reserveInfo.name, null, null, {
+                    dir: reserveInfo.dir,
+                    token: reserveInfo.token
+                });
+
+                var jpgName = reserveInfo.name.replace(/\.png$/i, '.jpg');
+                uploadBlobToPictureDir(blobs.jpeg, jpgName, null, function (res) {
+                    var newPath = res.file_path;
+                    replaceImageSrcInEditor(reserveInfo.file_path, newPath);
+                    updatePendingImageKey(reserveInfo.file_path, newPath);
+                    finalizePendingImage(newPath, blobUrl);
+                    markImageOperation(-1);
+                }, {
+                    dir: reserveInfo.dir,
+                    onError: function () {
+                        finalizePendingImage(reserveInfo.file_path, blobUrl);
+                        markImageOperation(-1);
+                    }
+                });
             } else {
                 // JPEG is larger, just forget about it
-                uploadBlobToPictureDir(blobs.png, null, 'png', successCallback);
+                uploadBlobToPictureDir(blobs.png, reserveInfo.name, null, function (res) {
+                    finalizePendingImage(res.file_path, blobUrl);
+                    markImageOperation(-1);
+                }, {
+                    dir: reserveInfo.dir,
+                    token: reserveInfo.token,
+                    onError: function () {
+                        finalizePendingImage(reserveInfo.file_path, blobUrl);
+                        markImageOperation(-1);
+                    }
+                });
             }
+            return;
+        }
+
+        if (!reserveFailed) {
+            return;
+        }
+
+        uploadStarted = true;
+
+
+        var fallbackSuccess = function (res, w, h) {
+            ReturnImage(res.file_path, w || 'auto', h || 'auto');
+            markImageOperation(-1);
+        };
+        var fallbackError = function () {
+            markImageOperation(-1);
+        };
+
+        if (blobs.png.size > blobs.jpeg.size) {
+            uploadBlobToPictureDir(blobs.png, null, 'png');
+            uploadBlobToPictureDir(blobs.jpeg, null, 'jpg', fallbackSuccess, {
+                onError: fallbackError
+            });
+        } else {
+            uploadBlobToPictureDir(blobs.png, null, 'png', fallbackSuccess, {
+                onError: fallbackError
+            });
         }
     }
 }

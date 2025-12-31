@@ -303,6 +303,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(SettingStorageInterface::class),
                 $container->getParameter('base_path'),
                 $container->getParameter('image_dir'),
+                $container->getParameter('cache_dir'),
                 $container->getParameter('allowed_extensions'),
             );
         });

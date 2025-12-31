@@ -581,6 +581,50 @@ class AdminAjaxRequestHandler
                 return new Json($files);
             },
 
+            'reserve_image' => static function (P $p, R $r, C $c, T $t) {
+                if ($r->getRealMethod() !== 'POST') {
+                    return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
+                }
+
+                if (!$p->isGranted(P::PERMISSION_CREATE_ARTICLES)) {
+                    return new Json(['success' => false, 'message' => $t->trans('No permission')], Response::HTTP_FORBIDDEN);
+                }
+
+                if (!$r->request->has('dir') || !$r->request->has('name')) {
+                    return new Json(['success' => false, 'message' => 'Parameters "dir" and "name" are required.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+
+                $path = $r->request->get('dir');
+                if (str_contains($path, '..') || str_contains($path, "\0")) {
+                    return new Json(['success' => false, 'message' => 'Invalid dir.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+
+                $name = (string)$r->request->get('name');
+                if ($name === '') {
+                    return new Json(['success' => false, 'message' => 'Invalid file name.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+
+                /** @var PictureManager $pictureManager */
+                $pictureManager = $c->get(PictureManager::class);
+                $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
+
+                try {
+                    $reserve = $pictureManager->reserveFileName($path, $name);
+                } catch (\RuntimeException $e) {
+                    return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
+
+                $filePath = $path . '/' . $reserve['name'];
+
+                return new Json([
+                    'success'   => true,
+                    'file_path' => $c->getParameter('image_path') . $filePath,
+                    'dir'       => $path,
+                    'name'      => $reserve['name'],
+                    'token'     => $reserve['token'],
+                ]);
+            },
+
             'upload' => static function (P $p, R $r, C $c, T $t) {
                 if ($r->getRealMethod() !== 'POST') {
                     return new Json(['success' => false, 'message' => 'Only POST requests are allowed.'], Response::HTTP_METHOD_NOT_ALLOWED);
@@ -609,6 +653,44 @@ class AdminAjaxRequestHandler
                 /** @var PictureManager $pictureManager */
                 $pictureManager = $c->get(PictureManager::class);
                 $pictureManager->assertFolderCsrfToken($path, (string)$r->request->get('csrf_token', ''));
+
+                if ($r->request->has('token') && $r->request->has('name')) {
+                    if (\count($uploadedFiles) !== 1) {
+                        return new Json(['success' => false, 'message' => 'Only one file can be uploaded with a reserved name.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                    }
+
+                    $token = (string)$r->request->get('token');
+                    $name  = (string)$r->request->get('name');
+                    if ($token === '' || $name === '') {
+                        return new Json(['success' => false, 'message' => 'Invalid reserve token or name.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                    }
+
+                    if (!$pictureManager->validateReserveToken($path, $name, $token)) {
+                        return new Json(['success' => false, 'message' => 'Reserve token mismatch.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                    }
+
+                    try {
+                        $storedName = $pictureManager->processUploadedFileWithReservedName(
+                            $uploadedFiles[0],
+                            $path,
+                            $name,
+                            (bool)$r->request->get('create_dir')
+                        );
+                        $pictureManager->clearReserve($path, $name);
+                    } catch (\RuntimeException $e) {
+                        if ($e->getCode() === Response::HTTP_CONFLICT) {
+                            $pictureManager->clearReserve($path, $name);
+                        }
+
+                        return new Json(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+                    }
+
+                    return new Json([
+                        'success'   => true,
+                        'file_path' => $c->getParameter('image_path') . $storedName,
+                        ...$r->request->has('return_image_info') ? ['image_info' => $pictureManager->getImageInfo($storedName)] : [],
+                    ]);
+                }
 
                 $errors = [];
 
