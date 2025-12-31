@@ -174,7 +174,7 @@ $jsvarencode = static function ($var) {
     <button class="picture-dialog-close" onclick="this.parentNode.close()">&times;</button>
     <iframe src="" frameborder="0" id="picture_frame" name="picture_frame"></iframe>
 </dialog>
-<script src="<?php echo $basePath; ?>/_admin/js/optipng-setup.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/js/png-optimize-setup.js"></script>
 <script>
     document.forms['article-form'].elements['label'].setAttribute('list', 'post-labels-datalist');
     document.addEventListener('DOMContentLoaded', () => {
