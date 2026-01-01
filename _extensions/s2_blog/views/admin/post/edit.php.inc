@@ -82,6 +82,7 @@ $jsvarencode = static function ($var) {
 <script src="<?php echo $basePath; ?>/_admin/templates/article/codemirror_init.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/lib/morphdom-umd.min.js"></script>
 
+<script src="<?php echo $basePath; ?>/_admin/js/image-q.min.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/image_utils.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/editor.js"></script>
 

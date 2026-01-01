@@ -1688,8 +1688,118 @@ function uploadBlobToPictureDir(blob, name, extension, successCallback, options)
         });
 }
 
+var imageFormatSelection = {
+    compareMaxSize: 512,
+    jpegQuality: 0.9,
+    jpegMinSsim: 0.96,
+    png8MinSsim: 0.98,
+    ssimTileSize: 64,
+    ssimTileWeight: 0.3,
+    png8MinPsnr: 40,
+    png24OptLevel: 2,
+    png8OptLevel: 2
+};
+
+function selectBestImageCandidate(hasAlpha, candidates, policy) {
+    // Selection policy: png24 is lossless; jpeg/png8 only pass when SSIM meets the threshold, then pick the smallest.
+    if (!candidates) {
+        return null;
+    }
+
+    if (hasAlpha) {
+        if (candidates.png8 && candidates.png8.ssim >= policy.png8MinSsim && (!candidates.png24 || candidates.png8.size < candidates.png24.size)) {
+            return {type: 'png8', candidate: candidates.png8};
+        }
+        return candidates.png24 ? {type: 'png24', candidate: candidates.png24} : null;
+    }
+
+    var allowed = [];
+    if (candidates.png24) {
+        allowed.push({type: 'png24', candidate: candidates.png24});
+    }
+    if (candidates.png8 && candidates.png8.ssim >= policy.png8MinSsim) {
+        allowed.push({type: 'png8', candidate: candidates.png8});
+    }
+    if (candidates.jpeg && candidates.jpeg.ssim >= policy.jpegMinSsim) {
+        allowed.push({type: 'jpeg', candidate: candidates.jpeg});
+    }
+
+    if (allowed.length === 0) {
+        return null;
+    }
+
+    var best = allowed[0];
+    for (var i = 1; i < allowed.length; i++) {
+        if (allowed[i].candidate.size < best.candidate.size) {
+            best = allowed[i];
+        }
+    }
+
+    return best;
+}
+
+function logImageCandidateDecision(choice, candidates, hasAlpha, policy) {
+    var summary = {
+        alpha: !!hasAlpha,
+        choice: choice ? choice.type : 'none',
+        png24: candidates.png24 ? {size: candidates.png24.size} : null,
+        png8: candidates.png8 ? {size: candidates.png8.size, ssim: candidates.png8.ssim, ssimDownscale: candidates.png8.ssimDownscale, ssimTiles: candidates.png8.ssimTiles} : null,
+        jpeg: candidates.jpeg ? {size: candidates.jpeg.size, ssim: candidates.jpeg.ssim, ssimDownscale: candidates.jpeg.ssimDownscale, ssimTiles: candidates.jpeg.ssimTiles} : null,
+        thresholds: {
+            jpegMinSsim: policy.jpegMinSsim,
+            png8MinSsim: policy.png8MinSsim,
+            ssimTileWeight: policy.ssimTileWeight
+        }
+    };
+    console.log('Image optimization choice', summary);
+}
+
+function computeCandidateSsimScore(blob, analysisInfo, policy) {
+    if (!analysisInfo || !analysisInfo.data) {
+        return Promise.resolve({score: 0, downscale: 0, tiles: []});
+    }
+
+    return imageUtils.fileToImage(blob)
+        .then(function (img) {
+            var ssimLabel = 'SSIM score ' + (blob && blob.type ? blob.type : 'blob');
+            console.time(ssimLabel);
+            var downscale = imageUtils.getImageDataFromImage(img, {
+                width: analysisInfo.width,
+                height: analysisInfo.height
+            });
+            var downscaleScore = imageUtils.calculateSsim(analysisInfo.data, downscale.data, analysisInfo.width, analysisInfo.height);
+            var tileScores = [];
+
+            if (analysisInfo.tileData && analysisInfo.tileData.length) {
+                for (var i = 0; i < analysisInfo.tileData.length; i++) {
+                    var tile = analysisInfo.tiles[i];
+                    var refTile = analysisInfo.tileData[i];
+                    var candTile = imageUtils.getImageDataFromImage(img, {
+                        sx: tile.sourceX,
+                        sy: tile.sourceY,
+                        sw: tile.sourceW,
+                        sh: tile.sourceH,
+                        width: refTile.width,
+                        height: refTile.height
+                    });
+                    tileScores.push(imageUtils.calculateSsim(refTile.data, candTile.data, refTile.width, refTile.height));
+                }
+            }
+
+            console.timeEnd(ssimLabel);
+            return {
+                score: imageUtils.aggregateSsimScore(downscaleScore, tileScores, policy.ssimTileWeight),
+                downscale: downscaleScore,
+                tiles: tileScores
+            };
+        })
+        .catch(function () {
+            return {score: 0, downscale: 0, tiles: []};
+        });
+}
+
 function optimizeAndUploadFile(file, altPressed) {
-    var blobs = {};
+    console.time('optimizeAndUploadFile');
     var uploadStarted = false;
     var reserveInfo = null;
     var reserveFailed = false;
@@ -1698,6 +1808,52 @@ function optimizeAndUploadFile(file, altPressed) {
     var dir = '/' + now.getFullYear() + '/' + ('0' + (now.getMonth() + 1)).slice(-2);
     var suggestedName = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + "-" + ('0' + now.getDate()).slice(-2)
         + "_" + ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + '.png';
+    var candidates = {
+        png24: null,
+        png8: null,
+        jpeg: null
+    };
+    var candidateReady = {
+        png24: false,
+        png8: false,
+        jpeg: false
+    };
+    var analysisInfo = null;
+    var reserveDone = false;
+    console.time('image analysis');
+    var analysisPromise = imageUtils.getImageData(file, imageFormatSelection.compareMaxSize)
+        .then(function (info) {
+            analysisInfo = info;
+            analysisInfo.tiles = imageUtils.selectSsimTiles(info, imageFormatSelection.ssimTileSize);
+            analysisInfo.tileData = analysisInfo.tiles.map(function (tile) {
+                var tileData = imageUtils.getImageDataFromImage(info.image, {
+                    sx: tile.sourceX,
+                    sy: tile.sourceY,
+                    sw: tile.sourceW,
+                    sh: tile.sourceH,
+                    width: tile.width,
+                    height: tile.height
+                });
+                return {
+                    data: tileData.data,
+                    width: tileData.width,
+                    height: tileData.height
+                };
+            });
+            console.timeEnd('image analysis');
+            maybeStartUpload();
+            return info;
+        })
+        .catch(function () {
+            // TODO: Analysis failures force hasAlpha=false and can allow JPEG selection for PNGs; decide on a safer fallback.
+            analysisInfo = {hasAlpha: false, width: 0, height: 0, data: null, tiles: [], tileData: []};
+            console.timeEnd('image analysis');
+            maybeStartUpload();
+            return analysisInfo;
+        });
+    var pngSourcePromise = (file.type === 'image/png')
+        ? Promise.resolve(file)
+        : imageUtils.compressToPng(file, true);
 
     markImageOperation(1);
 
@@ -1705,27 +1861,123 @@ function optimizeAndUploadFile(file, altPressed) {
      * Experiments show that now in Chrome file.type is 'image/png' no matter how the image is pasted.
      * However, I prefer to write a general algorithm.
      */
-    if (file.type === 'image/png') {
-        runOptipng(file, function (optimizedBlob) {
-            blobs.png = optimizedBlob;
-            compareBlobs();
+    pngSourcePromise.then(function (pngFile) {
+        console.time('png24 optipng');
+        runOptipng(pngFile, function (optimizedBlob) {
+            var candidate = optimizedBlob || pngFile;
+            candidates.png24 = {
+                blob: candidate,
+                size: candidate.size
+            };
+            console.timeEnd('png24 optipng');
+            candidateReady.png24 = true;
+            maybeStartUpload();
+        }, {
+            quantize: false,
+            optLevel: imageFormatSelection.png24OptLevel
         });
-    } else {
-        imageUtils.compressToPng(file, true).then(function (pngBlob) {
-            // TODO OptiPNG is also required here. But as I pointed above, for now it's a dead brunch. Let's do it later.
-            blobs.png = pngBlob;
-            compareBlobs();
-        });
-    }
 
-    if (file.type === 'image/jpg' || file.type === 'image/jpeg') {
-        blobs.jpeg = file;
-    } else {
-        imageUtils.compressToJpeg(file, 0.9, '#ffffff', true).then(function (jpegBlob) {
-            blobs.jpeg = jpegBlob;
-            compareBlobs();
+        console.time('png8 optipng');
+        runOptipng(pngFile, function (optimizedBlob, meta) {
+            var quantResult = meta && meta.quantResult ? meta.quantResult : null;
+            if (optimizedBlob && quantResult && quantResult.accepted) {
+                analysisPromise.then(function (info) {
+                    return computeCandidateSsimScore(optimizedBlob, info, imageFormatSelection);
+                }).then(function (score) {
+                    candidates.png8 = {
+                        blob: optimizedBlob,
+                        size: optimizedBlob.size,
+                        ssim: score.score,
+                        ssimDownscale: score.downscale,
+                        ssimTiles: score.tiles
+                    };
+                    console.timeEnd('png8 optipng');
+                    candidateReady.png8 = true;
+                    maybeStartUpload();
+                }).catch(function () {
+                    candidates.png8 = {
+                        blob: optimizedBlob,
+                        size: optimizedBlob.size,
+                        ssim: 0,
+                        ssimDownscale: 0,
+                        ssimTiles: []
+                    };
+                    console.timeEnd('png8 optipng');
+                    candidateReady.png8 = true;
+                    maybeStartUpload();
+                });
+                return;
+            }
+            console.timeEnd('png8 optipng');
+            candidateReady.png8 = true;
+            maybeStartUpload();
+        }, {
+            quantize: true,
+            minPsnr: imageFormatSelection.png8MinPsnr,
+            optLevel: imageFormatSelection.png8OptLevel,
+            requireQuantized: true
         });
-    }
+    }).catch(function () {
+        console.timeEnd('png24 optipng');
+        console.timeEnd('png8 optipng');
+        if (file.type === 'image/png') {
+            candidates.png24 = {
+                blob: file,
+                size: file.size
+            };
+        }
+        candidateReady.png24 = true;
+        candidateReady.png8 = true;
+        maybeStartUpload();
+    });
+
+    console.time('jpeg encode');
+    imageUtils.compressToJpeg(file, imageFormatSelection.jpegQuality, '#ffffff', true)
+        .then(function (jpegBlob) {
+            analysisPromise
+                .then(function (info) {
+                    if (!info || !info.data || info.hasAlpha) {
+                        console.timeEnd('jpeg encode');
+                        candidateReady.jpeg = true;
+                        maybeStartUpload();
+                        return;
+                    }
+
+                    computeCandidateSsimScore(jpegBlob, info, imageFormatSelection).then(function (score) {
+                        candidates.jpeg = {
+                            blob: jpegBlob,
+                            size: jpegBlob.size,
+                            ssim: score.score,
+                            ssimDownscale: score.downscale,
+                            ssimTiles: score.tiles
+                        };
+                        console.timeEnd('jpeg encode');
+                        candidateReady.jpeg = true;
+                        maybeStartUpload();
+                    }).catch(function () {
+                        candidates.jpeg = {
+                            blob: jpegBlob,
+                            size: jpegBlob.size,
+                            ssim: 0,
+                            ssimDownscale: 0,
+                            ssimTiles: []
+                        };
+                        console.timeEnd('jpeg encode');
+                        candidateReady.jpeg = true;
+                        maybeStartUpload();
+                    });
+                })
+                .catch(function () {
+                    console.timeEnd('jpeg encode');
+                    candidateReady.jpeg = true;
+                    maybeStartUpload();
+                });
+        })
+        .catch(function () {
+            console.timeEnd('jpeg encode');
+            candidateReady.jpeg = true;
+            maybeStartUpload();
+        });
 
     Promise.all([
         requestPictureCsrfToken(dir).then(function (csrfToken) {
@@ -1744,61 +1996,105 @@ function optimizeAndUploadFile(file, altPressed) {
             pendingImageMap.set(reserveInfo.file_path, blobUrl);
             applyPendingImages(lastPreviewWrapper);
             insertImageTag(reserveInfo.file_path, dimensions.width || 'auto', dimensions.height || 'auto', altPressed);
+            reserveDone = true;
             maybeStartUpload();
         })
         .catch(function (error) {
             console.warn('Reserve error:', error);
             URL.revokeObjectURL(blobUrl);
             reserveFailed = true;
+            reserveDone = true;
             maybeStartUpload();
         });
 
-    function compareBlobs() {
-        if (blobs.png && blobs.jpeg) {
-            maybeStartUpload();
-        }
-    }
-
     function maybeStartUpload() {
-        if (!blobs.png || !blobs.jpeg || uploadStarted) {
+        if (uploadStarted || !reserveDone || !analysisInfo) {
             return;
         }
+        if (!candidateReady.png24 || !candidateReady.png8 || !candidateReady.jpeg) {
+            return;
+        }
+
+        var choice = selectBestImageCandidate(analysisInfo.hasAlpha, candidates, imageFormatSelection);
+        if (!choice || !choice.candidate || !choice.candidate.blob) {
+            if (!analysisInfo.hasAlpha && candidates.jpeg) {
+                choice = {type: 'jpeg', candidate: candidates.jpeg};
+            } else if (candidates.png8) {
+                choice = {type: 'png8', candidate: candidates.png8};
+            } else if (candidates.png24) {
+                choice = {type: 'png24', candidate: candidates.png24};
+            } else {
+                markImageOperation(-1);
+                console.timeEnd('optimizeAndUploadFile');
+                return;
+            }
+        }
+
+        logImageCandidateDecision(choice, candidates, analysisInfo.hasAlpha, imageFormatSelection);
+
+        uploadStarted = true;
+
         if (reserveInfo) {
-            uploadStarted = true;
+            var uploadPng24Backup = function () {
+                if (candidates.png24 && candidates.png24.blob) {
+                    uploadBlobToPictureDir(candidates.png24.blob, reserveInfo.name, null, null, {
+                        dir: reserveInfo.dir,
+                        token: reserveInfo.token
+                    });
+                }
+            };
 
-
-            if (blobs.png.size > blobs.jpeg.size) {
-                // JPEG is smaller, nevertheless we keep the PNG as a losless copy but suggest to use JPEG
-                uploadBlobToPictureDir(blobs.png, reserveInfo.name, null, null, {
-                    dir: reserveInfo.dir,
-                    token: reserveInfo.token
-                });
-
+            if (choice.type === 'jpeg') {
+                uploadPng24Backup();
                 var jpgName = reserveInfo.name.replace(/\.png$/i, '.jpg');
-                uploadBlobToPictureDir(blobs.jpeg, jpgName, null, function (res) {
+                uploadBlobToPictureDir(choice.candidate.blob, jpgName, null, function (res) {
                     var newPath = res.file_path;
                     replaceImageSrcInEditor(reserveInfo.file_path, newPath);
                     updatePendingImageKey(reserveInfo.file_path, newPath);
                     finalizePendingImage(newPath, blobUrl);
                     markImageOperation(-1);
+                    console.timeEnd('optimizeAndUploadFile');
                 }, {
                     dir: reserveInfo.dir,
                     onError: function () {
                         finalizePendingImage(reserveInfo.file_path, blobUrl);
                         markImageOperation(-1);
+                        console.timeEnd('optimizeAndUploadFile');
+                    }
+                });
+            } else if (choice.type === 'png8') {
+                uploadPng24Backup();
+                var png8Name = reserveInfo.name.replace(/\.png$/i, '-8.png');
+                if (png8Name === reserveInfo.name) {
+                    png8Name = reserveInfo.name + '-8.png';
+                }
+                uploadBlobToPictureDir(choice.candidate.blob, png8Name, null, function (res) {
+                    var newPath = res.file_path;
+                    replaceImageSrcInEditor(reserveInfo.file_path, newPath);
+                    updatePendingImageKey(reserveInfo.file_path, newPath);
+                    finalizePendingImage(newPath, blobUrl);
+                    markImageOperation(-1);
+                    console.timeEnd('optimizeAndUploadFile');
+                }, {
+                    dir: reserveInfo.dir,
+                    onError: function () {
+                        finalizePendingImage(reserveInfo.file_path, blobUrl);
+                        markImageOperation(-1);
+                        console.timeEnd('optimizeAndUploadFile');
                     }
                 });
             } else {
-                // JPEG is larger, just forget about it
-                uploadBlobToPictureDir(blobs.png, reserveInfo.name, null, function (res) {
+                uploadBlobToPictureDir(choice.candidate.blob, reserveInfo.name, null, function (res) {
                     finalizePendingImage(res.file_path, blobUrl);
                     markImageOperation(-1);
+                    console.timeEnd('optimizeAndUploadFile');
                 }, {
                     dir: reserveInfo.dir,
                     token: reserveInfo.token,
                     onError: function () {
                         finalizePendingImage(reserveInfo.file_path, blobUrl);
                         markImageOperation(-1);
+                        console.timeEnd('optimizeAndUploadFile');
                     }
                 });
             }
@@ -1809,26 +2105,19 @@ function optimizeAndUploadFile(file, altPressed) {
             return;
         }
 
-        uploadStarted = true;
-
-
         var fallbackSuccess = function (res, w, h) {
             ReturnImage(res.file_path, w || 'auto', h || 'auto');
             markImageOperation(-1);
+            console.timeEnd('optimizeAndUploadFile');
         };
         var fallbackError = function () {
             markImageOperation(-1);
+            console.timeEnd('optimizeAndUploadFile');
         };
 
-        if (blobs.png.size > blobs.jpeg.size) {
-            uploadBlobToPictureDir(blobs.png, null, 'png');
-            uploadBlobToPictureDir(blobs.jpeg, null, 'jpg', fallbackSuccess, {
-                onError: fallbackError
-            });
-        } else {
-            uploadBlobToPictureDir(blobs.png, null, 'png', fallbackSuccess, {
-                onError: fallbackError
-            });
-        }
+        var fallbackExtension = choice.type === 'jpeg' ? 'jpg' : 'png';
+        uploadBlobToPictureDir(choice.candidate.blob, null, fallbackExtension, fallbackSuccess, {
+            onError: fallbackError
+        });
     }
 }

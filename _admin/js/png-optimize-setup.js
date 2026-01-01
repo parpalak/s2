@@ -126,7 +126,7 @@ var runOptipng = (function () {
 
                 if (task && buffers && buffers.length) {
                     buffers.forEach(function (file) {
-                        task.callback(new Blob([file.data]));
+                        task.callback(new Blob([file.data]), task.meta);
                         printConsole('size ' + fileSize(file.data.byteLength));
                     });
                 }
@@ -135,7 +135,7 @@ var runOptipng = (function () {
                 printConsole('Worker error id ' + message.id);
                 var failedTask = tasks[message.id];
                 if (failedTask) {
-                    failedTask.callback(failedTask.file);
+                    failedTask.callback(failedTask.fallbackFile || failedTask.file, failedTask.meta);
                     tasks[message.id] = null;
                 }
             } else if (message.type === "init-error") {
@@ -169,6 +169,10 @@ var runOptipng = (function () {
                 var task = quantTasks[message.id];
                 if (task) {
                     printConsole('Quant worker done id ' + message.id + (message.accepted ? ' (accepted)' : ' (rejected)'));
+                    if (task.start) {
+                        var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+                        printConsole('Quant worker time id ' + message.id + ': ' + (now - task.start).toFixed(0) + 'ms');
+                    }
                     if (message.accepted && message.data) {
                         task.resolve({
                             data: message.data,
@@ -233,7 +237,7 @@ var runOptipng = (function () {
             workerFailed = true;
             for (var i = tasks.length; i--;) {
                 if (tasks[i]) {
-                    tasks[i].callback(tasks[i].file);
+                    tasks[i].callback(tasks[i].fallbackFile || tasks[i].file, tasks[i].meta);
                     tasks[i] = null;
                 }
             }
@@ -250,7 +254,7 @@ var runOptipng = (function () {
     var tasks = [];
     var quantTasks = [];
 
-    function quantizePng(file) {
+    function quantizePng(file, minPsnr) {
         return new Promise(function (resolve) {
             if (quantWorkerFailed) {
                 printConsole('Quant worker is disabled, skip quantization');
@@ -259,16 +263,17 @@ var runOptipng = (function () {
             }
 
             var id = quantTasks.length;
-            quantTasks[id] = {resolve: resolve};
+            quantTasks[id] = {resolve: resolve, start: 0};
 
             runWhenQuantWorkerIsLoaded(function (worker) {
                 readFileAsUint8Array(file).then(function (data) {
                     printConsole('Quant worker post message id ' + id + ', size ' + fileSize(data.byteLength));
+                    quantTasks[id].start = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
                     worker.postMessage({
                         type: 'command',
                         id: id,
                         options: {
-                            minPsnr: QUANT_MIN_PSNR
+                            minPsnr: typeof minPsnr === 'number' ? minPsnr : QUANT_MIN_PSNR
                         },
                         file: {
                             data: data
@@ -292,12 +297,19 @@ var runOptipng = (function () {
         });
     }
 
-    return function progressFile(file, callback) {
+    return function progressFile(file, callback, options) {
+        var opts = options || {};
+        var quantize = opts.quantize !== false;
+        var requireQuantized = opts.requireQuantized === true;
+        var minPsnr = typeof opts.minPsnr === 'number' ? opts.minPsnr : QUANT_MIN_PSNR;
+        var optLevel = typeof opts.optLevel === 'number' ? opts.optLevel : 2;
+
         var id = tasks.length;
-        tasks[id] = {callback: callback, file: file};
+        tasks[id] = {callback: callback, file: file, meta: {quantResult: null}, fallbackFile: file};
 
         runWhenWorkerIsLoaded(function (worker) {
-            quantizePng(file).then(function (quantResult) {
+            var quantPromise = quantize ? quantizePng(file, minPsnr) : Promise.resolve(null);
+            quantPromise.then(function (quantResult) {
                 var optimizedFile = file;
                 if (quantResult && quantResult.accepted && quantResult.data) {
                     optimizedFile = makePngFile(file, quantResult.data);
@@ -314,11 +326,23 @@ var runOptipng = (function () {
                     }
                 }
 
+                tasks[id].meta.quantResult = quantResult;
+                tasks[id].fallbackFile = optimizedFile;
+
+                if (requireQuantized && (!quantResult || !quantResult.accepted || !quantResult.data)) {
+                    var task = tasks[id];
+                    tasks[id] = null;
+                    if (task) {
+                        task.callback(null, task.meta);
+                    }
+                    return;
+                }
+
                 readFileAsUint8Array(optimizedFile).then(function (data) {
                     worker.postMessage({
                         type: 'command',
                         id: id,
-                        arguments: ['-o2'],
+                        arguments: ['-o' + optLevel],
                         file: {
                             'data': data
                         }
@@ -334,14 +358,14 @@ var runOptipng = (function () {
                 var task = tasks[id];
                 tasks[id] = null;
                 if (task) {
-                    task.callback(task.file);
+                    task.callback(requireQuantized ? null : task.file, task.meta);
                 }
             });
         }, function () {
             var task = tasks[id];
             tasks[id] = null;
             if (task) {
-                task.callback(task.file);
+                task.callback(requireQuantized ? null : task.file, task.meta);
             }
         });
     }

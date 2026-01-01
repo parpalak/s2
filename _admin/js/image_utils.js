@@ -70,6 +70,258 @@
         });
     }
 
+    function getImageDataFromImage(img, options) {
+        var opts = options || {};
+        var sx = typeof opts.sx === 'number' ? opts.sx : 0;
+        var sy = typeof opts.sy === 'number' ? opts.sy : 0;
+        var sw = typeof opts.sw === 'number' ? opts.sw : (img.naturalWidth || img.width);
+        var sh = typeof opts.sh === 'number' ? opts.sh : (img.naturalHeight || img.height);
+        var width = typeof opts.width === 'number' ? opts.width : sw;
+        var height = typeof opts.height === 'number' ? opts.height : sh;
+
+        var canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, width, height);
+        return ctx.getImageData(0, 0, width, height);
+    }
+
+    function toLumaRgba(data) {
+        var out = new Uint8ClampedArray(data.length);
+        for (var i = 0; i < data.length; i += 4) {
+            var y = Math.round(0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]);
+            out[i] = y;
+            out[i + 1] = y;
+            out[i + 2] = y;
+            out[i + 3] = 255;
+        }
+        return out;
+    }
+
+    function calculateSsim(referenceData, candidateData, width, height) {
+        if (!referenceData || !candidateData || referenceData.length !== candidateData.length) {
+            return 0;
+        }
+
+        var imageQ = root['image-q'];
+        if (!imageQ || !imageQ.quality || typeof imageQ.quality.ssim !== 'function') {
+            return 0;
+        }
+
+        var refLuma = toLumaRgba(referenceData);
+        var candLuma = toLumaRgba(candidateData);
+        var refContainer = imageQ.utils.PointContainer.fromUint8Array(refLuma, width, height);
+        var candContainer = imageQ.utils.PointContainer.fromUint8Array(candLuma, width, height);
+        return imageQ.quality.ssim(refContainer, candContainer);
+    }
+
+    function aggregateSsimScore(downscaleScore, tileScores, tileWeight) {
+        if (!tileScores || tileScores.length === 0) {
+            return downscaleScore;
+        }
+
+        var minTile = tileScores[0];
+        for (var i = 1; i < tileScores.length; i++) {
+            if (tileScores[i] < minTile) {
+                minTile = tileScores[i];
+            }
+        }
+
+        var weight = typeof tileWeight === 'number' ? tileWeight : 0.3;
+        return downscaleScore * (1 - weight) + minTile * weight;
+    }
+
+    function selectSsimTiles(info, tileSize) {
+        if (!info || !info.data || !info.width || !info.height) {
+            return [];
+        }
+
+        var width = info.width;
+        var height = info.height;
+        var size = Math.max(16, Math.min(tileSize || 64, width, height));
+
+        if (width <= size || height <= size) {
+            return [{
+                x: 0,
+                y: 0,
+                width: width,
+                height: height,
+                sourceX: 0,
+                sourceY: 0,
+                sourceW: info.originalWidth || width,
+                sourceH: info.originalHeight || height
+            }];
+        }
+
+        var luma = toLumaRgba(info.data);
+        var step = size;
+        var maxX = width - size;
+        var maxY = height - size;
+        var bestEdge = null;
+        var bestSmooth = null;
+        var bestText = null;
+
+        function updateCandidate(candidate, value, mode) {
+            if (!candidate) {
+                return {value: value};
+            }
+            if (mode === 'max') {
+                return value > candidate.value ? {value: value} : candidate;
+            }
+            return value < candidate.value ? {value: value} : candidate;
+        }
+
+        for (var y = 0; y <= maxY; y += step) {
+            for (var x = 0; x <= maxX; x += step) {
+                var edgeSum = 0;
+                var edgeCount = 0;
+                var pixels = 0;
+
+                for (var yy = 0; yy < size - 1; yy++) {
+                    for (var xx = 0; xx < size - 1; xx++) {
+                        var idx = ((y + yy) * width + (x + xx)) * 4;
+                        var y0 = luma[idx];
+                        var y1 = luma[idx + 4];
+                        var y2 = luma[idx + width * 4];
+                        var grad = Math.abs(y1 - y0) + Math.abs(y2 - y0);
+                        edgeSum += grad;
+                        if (grad > 20) {
+                            edgeCount += 1;
+                        }
+                        pixels += 1;
+                    }
+                }
+
+                var edgeEnergy = edgeSum / Math.max(1, pixels);
+                var edgeRatio = edgeCount / Math.max(1, pixels);
+
+                var edgeCandidate = updateCandidate(bestEdge, edgeEnergy, 'max');
+                if (edgeCandidate !== bestEdge) {
+                    bestEdge = edgeCandidate;
+                    bestEdge.x = x;
+                    bestEdge.y = y;
+                }
+
+                var smoothCandidate = updateCandidate(bestSmooth, edgeEnergy, 'min');
+                if (smoothCandidate !== bestSmooth) {
+                    bestSmooth = smoothCandidate;
+                    bestSmooth.x = x;
+                    bestSmooth.y = y;
+                }
+
+                var textCandidate = updateCandidate(bestText, edgeRatio, 'max');
+                if (textCandidate !== bestText) {
+                    bestText = textCandidate;
+                    bestText.x = x;
+                    bestText.y = y;
+                }
+            }
+        }
+
+        var tiles = [];
+        function pushTile(candidate) {
+            if (!candidate) {
+                return;
+            }
+            for (var i = 0; i < tiles.length; i++) {
+                if (tiles[i].x === candidate.x && tiles[i].y === candidate.y) {
+                    return;
+                }
+            }
+            tiles.push({
+                x: candidate.x,
+                y: candidate.y,
+                width: size,
+                height: size
+            });
+        }
+
+        pushTile(bestEdge);
+        pushTile(bestSmooth);
+        pushTile(bestText);
+
+        var scaleX = (info.originalWidth || width) / width;
+        var scaleY = (info.originalHeight || height) / height;
+
+        tiles.forEach(function (tile) {
+            tile.sourceX = Math.round(tile.x * scaleX);
+            tile.sourceY = Math.round(tile.y * scaleY);
+            tile.sourceW = Math.round(tile.width * scaleX);
+            tile.sourceH = Math.round(tile.height * scaleY);
+        });
+
+        return tiles;
+    }
+
+    function getImageData(file, maxSize) {
+        return fileToImage(file).then(function (img) {
+            var width = img.naturalWidth || img.width;
+            var height = img.naturalHeight || img.height;
+            var scale = 1;
+
+            if (typeof maxSize === 'number' && maxSize > 0) {
+                var maxDim = Math.max(width, height);
+                if (maxDim > maxSize) {
+                    scale = maxSize / maxDim;
+                }
+            }
+
+            var targetWidth = Math.max(1, Math.round(width * scale));
+            var targetHeight = Math.max(1, Math.round(height * scale));
+            var imageData = getImageDataFromImage(img, {width: targetWidth, height: targetHeight});
+            var hasAlpha = false;
+            for (var i = 3; i < imageData.data.length; i += 4) {
+                if (imageData.data[i] < 255) {
+                    hasAlpha = true;
+                    break;
+                }
+            }
+
+            return {
+                data: imageData.data,
+                width: imageData.width,
+                height: imageData.height,
+                hasAlpha: hasAlpha,
+                originalWidth: width,
+                originalHeight: height,
+                image: img
+            };
+        });
+    }
+
+    function getImageDataForSize(file, width, height) {
+        return fileToImage(file).then(function (img) {
+            var imageData = getImageDataFromImage(img, {width: width, height: height});
+            return {
+                data: imageData.data,
+                width: imageData.width,
+                height: imageData.height
+            };
+        });
+    }
+
+    function calculatePsnr(originalData, candidateData) {
+        if (!originalData || !candidateData || originalData.length !== candidateData.length) {
+            return 0;
+        }
+
+        var sum = 0;
+        for (var i = 0; i < originalData.length; i += 4) {
+            var dr = originalData[i] - candidateData[i];
+            var dg = originalData[i + 1] - candidateData[i + 1];
+            var db = originalData[i + 2] - candidateData[i + 2];
+            sum += dr * dr + dg * dg + db * db;
+        }
+
+        if (sum === 0) {
+            return Infinity;
+        }
+
+        var mse = sum / (originalData.length / 4 * 3);
+        return 10 * Math.log(255 * 255 / mse) / Math.LN10;
+    }
+
     function compressToPng(file, keepSmaller) {
         var applyKeepSmaller = keepSmaller !== false;
 
@@ -111,6 +363,14 @@
     root.imageUtils.fileToImage = fileToImage;
     root.imageUtils.imageToCanvas = imageToCanvas;
     root.imageUtils.canvasToBlob = canvasToBlob;
+    root.imageUtils.getImageDataFromImage = getImageDataFromImage;
+    root.imageUtils.toLumaRgba = toLumaRgba;
+    root.imageUtils.calculateSsim = calculateSsim;
+    root.imageUtils.aggregateSsimScore = aggregateSsimScore;
+    root.imageUtils.selectSsimTiles = selectSsimTiles;
+    root.imageUtils.getImageData = getImageData;
+    root.imageUtils.getImageDataForSize = getImageDataForSize;
+    root.imageUtils.calculatePsnr = calculatePsnr;
     root.imageUtils.compressToPng = compressToPng;
     root.imageUtils.compressToJpeg = compressToJpeg;
 })(window);

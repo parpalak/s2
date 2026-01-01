@@ -44,6 +44,7 @@ function calculatePsnr(original, quantized) {
 }
 
 function quantizePng(inputData, options) {
+    var t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var minPsnr = options && typeof options.minPsnr === 'number' ? options.minPsnr : 40;
     if (typeof UPNG === 'undefined') {
         throw new Error('UPNG is not available');
@@ -52,27 +53,38 @@ function quantizePng(inputData, options) {
         throw new Error('image-q is not available');
     }
     var originalSize = inputData.byteLength || inputData.length || 0;
+    var tDecodeStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var decoded = UPNG.decode(inputData.buffer ? inputData.buffer : inputData);
     var rgbaBuffer = UPNG.toRGBA8(decoded)[0];
     var rgba = new Uint8Array(rgbaBuffer);
     var width = decoded.width;
     var height = decoded.height;
+    var tDecodeEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 
+    var tPaletteStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var pointContainer = imageQ.utils.PointContainer.fromUint8Array(rgba, width, height);
     var palette = imageQ.buildPaletteSync([pointContainer], {
         colors: 256,
         paletteQuantization: 'wuquant',
         colorDistanceFormula: 'pngquant'
     });
+    var tPaletteEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    var tApplyStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var quantized = imageQ.applyPaletteSync(pointContainer, palette, {
         imageQuantization: 'nearest',
         colorDistanceFormula: 'pngquant'
     });
+    var tApplyEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 
     var quantRgba = quantized.toUint8Array();
+    var tPsnrStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var psnr = calculatePsnr(rgba, quantRgba);
+    var tPsnrEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    var tEncodeStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var encoded = UPNG.encode([quantRgba.buffer], width, height, 0);
+    var tEncodeEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var encodedSize = encoded.byteLength || 0;
+    var tDone = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 
     return {
         accepted: psnr >= minPsnr && encodedSize < originalSize,
@@ -81,7 +93,15 @@ function quantizePng(inputData, options) {
         encodedSize: encodedSize,
         originalSize: originalSize,
         paletteSize: palette.getPointContainer().getPointArray().length,
-        originalColors: countUniqueColors(rgba, 256)
+        originalColors: countUniqueColors(rgba, 256),
+        timings: {
+            decode: tDecodeEnd - tDecodeStart,
+            palette: tPaletteEnd - tPaletteStart,
+            apply: tApplyEnd - tApplyStart,
+            psnr: tPsnrEnd - tPsnrStart,
+            encode: tEncodeEnd - tEncodeStart,
+            total: tDone - t0
+        }
     };
 }
 
@@ -96,6 +116,18 @@ self.onmessage = function (event) {
     try {
         var result = quantizePng(message.file.data, message.options || {});
         postMessage({type: 'stdout', message: 'Quant finished id ' + message.id + ' accepted=' + result.accepted});
+        if (result.timings) {
+            postMessage({
+                type: 'stdout',
+                message: 'Quant timings ms: decode ' + result.timings.decode.toFixed(0)
+                    + ', palette ' + result.timings.palette.toFixed(0)
+                    + ', apply ' + result.timings.apply.toFixed(0)
+                    + ', psnr ' + result.timings.psnr.toFixed(0)
+                    + ', encode ' + result.timings.encode.toFixed(0)
+                    + ', total ' + result.timings.total.toFixed(0)
+            });
+        }
+
         if (result.accepted) {
             postMessage({
                 type: 'done',
