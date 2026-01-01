@@ -166,7 +166,7 @@
             choice: choice ? choice.type : 'none',
             png24: candidates.png24 ? {size: candidates.png24.size} : null,
             png8: candidates.png8 ? {size: candidates.png8.size, ssim: candidates.png8.ssim, ssimDownscale: candidates.png8.ssimDownscale, ssimTiles: candidates.png8.ssimTiles} : null,
-            jpeg: candidates.jpeg ? {size: candidates.jpeg.size, ssim: candidates.jpeg.ssim, ssimDownscale: candidates.jpeg.ssimDownscale, ssimTiles: candidates.jpeg.ssimTiles} : null,
+            jpeg: candidates.jpeg ? {size: candidates.jpeg.size, ssim: candidates.jpeg.ssim, ssimDownscale: candidates.jpeg.ssimDownscale, ssimTiles: candidates.jpeg.ssimTiles, quality: candidates.jpeg.quality} : null,
             thresholds: {
                 jpegMinSsim: policy.jpegMinSsim,
                 png8MinSsim: policy.png8MinSsim,
@@ -199,8 +199,6 @@
 
         return fileToImage(blob)
             .then(function (img) {
-                var ssimLabel = 'SSIM score ' + (blob && blob.type ? blob.type : 'blob');
-                console.time(ssimLabel);
                 var downscale = getImageDataFromImage(img, {
                     width: analysisInfo.width,
                     height: analysisInfo.height
@@ -224,7 +222,6 @@
                     }
                 }
 
-                console.timeEnd(ssimLabel);
                 return {
                     score: aggregateSsimScore(downscaleScore, tileScores, policy.ssimTileWeight),
                     downscale: downscaleScore,
@@ -485,6 +482,91 @@
             });
     }
 
+    function normalizeQuality(value, fallback) {
+        var q = typeof value === 'number' ? value : fallback;
+        if (!isFinite(q)) {
+            q = fallback;
+        }
+        return Math.max(0.1, Math.min(1, q));
+    }
+
+    function findJpegCandidateForSsim(file, analysisInfo, policy, backgroundColor, keepSmaller) {
+        if (!analysisInfo || !analysisInfo.data) {
+            return Promise.resolve(null);
+        }
+
+        var maxQuality = normalizeQuality(policy && policy.jpegQuality, 0.95);
+        var minQuality = normalizeQuality(policy && policy.jpegMinQuality, 0.4);
+        var target = policy && typeof policy.jpegMinSsim === 'number' ? policy.jpegMinSsim : 0;
+        var maxSteps = policy && typeof policy.jpegQualitySearchSteps === 'number' ? policy.jpegQualitySearchSteps : 6;
+        var debugLabel = 'jpeg q-search';
+
+        if (minQuality > maxQuality) {
+            var swap = minQuality;
+            minQuality = maxQuality;
+            maxQuality = swap;
+        }
+
+        function evaluate(q) {
+            return compressToJpeg(file, q, backgroundColor, keepSmaller)
+                .then(function (blob) {
+                    return computeCandidateSsimScore(blob, analysisInfo, policy).then(function (score) {
+                        console.log(debugLabel, 'try', q.toFixed(4), 'size', blob.size, 'ssim', score.score);
+                        return {
+                            blob: blob,
+                            size: blob.size,
+                            ssim: score.score,
+                            ssimDownscale: score.downscale,
+                            ssimTiles: score.tiles,
+                            quality: q
+                        };
+                    });
+                });
+        }
+
+        return evaluate(maxQuality).then(function (maxCandidate) {
+            console.log(debugLabel, 'bounds', minQuality.toFixed(4), maxQuality.toFixed(4), 'target', target, 'max', maxCandidate ? maxCandidate.ssim : null);
+            if (!maxCandidate || maxCandidate.ssim < target || maxQuality === minQuality || maxSteps <= 0) {
+                return maxCandidate;
+            }
+
+            return evaluate(minQuality).then(function (minCandidate) {
+                console.log(debugLabel, 'min', minQuality.toFixed(4), minCandidate ? minCandidate.ssim : null);
+                if (minCandidate.ssim >= target) {
+                    return minCandidate;
+                }
+
+                var low = minQuality;
+                var high = maxQuality;
+                var best = maxCandidate;
+                var steps = 0;
+
+                function next() {
+                    if (steps >= maxSteps) {
+                        console.log(debugLabel, 'done', steps, 'q', best.quality.toFixed(4), 'ssim', best.ssim);
+                        return Promise.resolve(best);
+                    }
+
+                    var mid = (low + high) / 2;
+                    steps += 1;
+                    return evaluate(mid).then(function (candidate) {
+                        if (candidate.ssim >= target) {
+                            best = candidate;
+                            high = mid;
+                            console.log(debugLabel, 'step', steps, 'ok', 'q', mid.toFixed(4), 'ssim', candidate.ssim);
+                        } else {
+                            low = mid;
+                            console.log(debugLabel, 'step', steps, 'low', 'q', mid.toFixed(4), 'ssim', candidate.ssim);
+                        }
+                        return next();
+                    });
+                }
+
+                return next();
+            });
+        });
+    }
+
     root.imageUtils = root.imageUtils || {};
     root.imageUtils.fileToImage = fileToImage;
     root.imageUtils.imageToCanvas = imageToCanvas;
@@ -503,4 +585,5 @@
     root.imageUtils.calculatePsnr = calculatePsnr;
     root.imageUtils.compressToPng = compressToPng;
     root.imageUtils.compressToJpeg = compressToJpeg;
+    root.imageUtils.findJpegCandidateForSsim = findJpegCandidateForSsim;
 })(window);

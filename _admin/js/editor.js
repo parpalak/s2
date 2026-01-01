@@ -1677,8 +1677,10 @@ function uploadBlobToPictureDir(blob, name, extension, dir, token) {
 
 var imageFormatSelection = {
     compareMaxSize: 512,
-    jpegQuality: 0.9,
-    jpegMinSsim: 0.96,
+    jpegQuality: 0.95,
+    jpegMinQuality: 0.6,
+    jpegQualitySearchSteps: 6,
+    jpegMinSsim: 0.985,
     png8MinSsim: 0.98,
     ssimTileSize: 64,
     ssimTileWeight: 0.3,
@@ -1805,40 +1807,23 @@ function optimizeAndUploadFile(file, altPressed) {
     });
 
     console.time('jpeg encode');
-    imageUtils.compressToJpeg(file, imageFormatSelection.jpegQuality, '#ffffff', true)
-        .then(function (jpegBlob) {
-            analysisPromise
-                .then(function (info) {
-                    if (!info || !info.data || info.hasAlpha) {
-                        console.timeEnd('jpeg encode');
-                        candidateReady.jpeg = true;
-                        maybeStartUpload();
-                        return;
-                    }
+    analysisPromise
+        .then(function (info) {
+            if (!info || !info.data || info.hasAlpha) {
+                console.timeEnd('jpeg encode');
+                candidateReady.jpeg = true;
+                maybeStartUpload();
+                return;
+            }
 
-                    imageUtils.computeCandidateSsimScore(jpegBlob, info, imageFormatSelection).then(function (score) {
-                        candidates.jpeg = {
-                            blob: jpegBlob,
-                            size: jpegBlob.size,
-                            ssim: score.score,
-                            ssimDownscale: score.downscale,
-                            ssimTiles: score.tiles
-                        };
-                        console.timeEnd('jpeg encode');
-                        candidateReady.jpeg = true;
-                        maybeStartUpload();
-                    }).catch(function () {
-                        candidates.jpeg = {
-                            blob: jpegBlob,
-                            size: jpegBlob.size,
-                            ssim: 0,
-                            ssimDownscale: 0,
-                            ssimTiles: []
-                        };
-                        console.timeEnd('jpeg encode');
-                        candidateReady.jpeg = true;
-                        maybeStartUpload();
-                    });
+            return imageUtils.findJpegCandidateForSsim(file, info, imageFormatSelection, '#ffffff', true)
+                .then(function (candidate) {
+                    if (candidate) {
+                        candidates.jpeg = candidate;
+                    }
+                    console.timeEnd('jpeg encode');
+                    candidateReady.jpeg = true;
+                    maybeStartUpload();
                 })
                 .catch(function () {
                     console.timeEnd('jpeg encode');
