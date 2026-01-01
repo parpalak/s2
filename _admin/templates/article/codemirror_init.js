@@ -97,14 +97,17 @@ const s2_codemirror = (function () {
                         || files[i].type === 'image/png'
                     ) {
                         processed = true;
-                        uploadBlobToPictureDir(files[i], files[i].name, null, function (res, w, h) {
+                        uploadBlobToPictureDir(files[i], files[i].name)
+                            .then(function (result) {
                             document.dispatchEvent(new CustomEvent('return_image.s2', {
                                 detail: {
-                                    file_path: res.file_path,
-                                    width: w || 'auto',
-                                    height: h || 'auto'
+                                    file_path: result.res.file_path,
+                                    width: result.width || 'auto',
+                                    height: result.height || 'auto'
                                 }
                             }));
+                        }).catch(function (error) {
+                            console.warn('Upload error:', error);
                         });
                     }
                 }

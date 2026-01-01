@@ -1,3 +1,9 @@
+/**
+ * @copyright 2026 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
+ */
+
 (function (root) {
     'use strict';
 
@@ -116,6 +122,60 @@
         return imageQ.quality.ssim(refContainer, candContainer);
     }
 
+    function selectBestImageCandidate(hasAlpha, candidates, policy) {
+        // Selection policy: png24 is lossless; jpeg/png8 only pass when SSIM meets the threshold, then pick the smallest.
+        if (!candidates) {
+            return null;
+        }
+
+        if (hasAlpha) {
+            if (candidates.png8 && candidates.png8.ssim >= policy.png8MinSsim && (!candidates.png24 || candidates.png8.size < candidates.png24.size)) {
+                return {type: 'png8', candidate: candidates.png8};
+            }
+            return candidates.png24 ? {type: 'png24', candidate: candidates.png24} : null;
+        }
+
+        var allowed = [];
+        if (candidates.png24) {
+            allowed.push({type: 'png24', candidate: candidates.png24});
+        }
+        if (candidates.png8 && candidates.png8.ssim >= policy.png8MinSsim) {
+            allowed.push({type: 'png8', candidate: candidates.png8});
+        }
+        if (candidates.jpeg && candidates.jpeg.ssim >= policy.jpegMinSsim) {
+            allowed.push({type: 'jpeg', candidate: candidates.jpeg});
+        }
+
+        if (allowed.length === 0) {
+            return null;
+        }
+
+        var best = allowed[0];
+        for (var i = 1; i < allowed.length; i++) {
+            if (allowed[i].candidate.size < best.candidate.size) {
+                best = allowed[i];
+            }
+        }
+
+        return best;
+    }
+
+    function logImageCandidateDecision(choice, candidates, hasAlpha, policy) {
+        var summary = {
+            alpha: !!hasAlpha,
+            choice: choice ? choice.type : 'none',
+            png24: candidates.png24 ? {size: candidates.png24.size} : null,
+            png8: candidates.png8 ? {size: candidates.png8.size, ssim: candidates.png8.ssim, ssimDownscale: candidates.png8.ssimDownscale, ssimTiles: candidates.png8.ssimTiles} : null,
+            jpeg: candidates.jpeg ? {size: candidates.jpeg.size, ssim: candidates.jpeg.ssim, ssimDownscale: candidates.jpeg.ssimDownscale, ssimTiles: candidates.jpeg.ssimTiles} : null,
+            thresholds: {
+                jpegMinSsim: policy.jpegMinSsim,
+                png8MinSsim: policy.png8MinSsim,
+                ssimTileWeight: policy.ssimTileWeight
+            }
+        };
+        console.log('Image optimization choice', summary);
+    }
+
     function aggregateSsimScore(downscaleScore, tileScores, tileWeight) {
         if (!tileScores || tileScores.length === 0) {
             return downscaleScore;
@@ -130,6 +190,50 @@
 
         var weight = typeof tileWeight === 'number' ? tileWeight : 0.3;
         return downscaleScore * (1 - weight) + minTile * weight;
+    }
+
+    function computeCandidateSsimScore(blob, analysisInfo, policy) {
+        if (!analysisInfo || !analysisInfo.data) {
+            return Promise.resolve({score: 0, downscale: 0, tiles: []});
+        }
+
+        return fileToImage(blob)
+            .then(function (img) {
+                var ssimLabel = 'SSIM score ' + (blob && blob.type ? blob.type : 'blob');
+                console.time(ssimLabel);
+                var downscale = getImageDataFromImage(img, {
+                    width: analysisInfo.width,
+                    height: analysisInfo.height
+                });
+                var downscaleScore = calculateSsim(analysisInfo.data, downscale.data, analysisInfo.width, analysisInfo.height);
+                var tileScores = [];
+
+                if (analysisInfo.tileData && analysisInfo.tileData.length) {
+                    for (var i = 0; i < analysisInfo.tileData.length; i++) {
+                        var tile = analysisInfo.tiles[i];
+                        var refTile = analysisInfo.tileData[i];
+                        var candTile = getImageDataFromImage(img, {
+                            sx: tile.sourceX,
+                            sy: tile.sourceY,
+                            sw: tile.sourceW,
+                            sh: tile.sourceH,
+                            width: refTile.width,
+                            height: refTile.height
+                        });
+                        tileScores.push(calculateSsim(refTile.data, candTile.data, refTile.width, refTile.height));
+                    }
+                }
+
+                console.timeEnd(ssimLabel);
+                return {
+                    score: aggregateSsimScore(downscaleScore, tileScores, policy.ssimTileWeight),
+                    downscale: downscaleScore,
+                    tiles: tileScores
+                };
+            })
+            .catch(function () {
+                return {score: 0, downscale: 0, tiles: []};
+            });
     }
 
     function selectSsimTiles(info, tileSize) {
@@ -254,6 +358,28 @@
         return tiles;
     }
 
+    function analyzeImage(file, policy) {
+        return getImageData(file, policy.compareMaxSize).then(function (info) {
+            info.tiles = selectSsimTiles(info, policy.ssimTileSize);
+            info.tileData = info.tiles.map(function (tile) {
+                var tileData = getImageDataFromImage(info.image, {
+                    sx: tile.sourceX,
+                    sy: tile.sourceY,
+                    sw: tile.sourceW,
+                    sh: tile.sourceH,
+                    width: tile.width,
+                    height: tile.height
+                });
+                return {
+                    data: tileData.data,
+                    width: tileData.width,
+                    height: tileData.height
+                };
+            });
+            return info;
+        });
+    }
+
     function getImageData(file, maxSize) {
         return fileToImage(file).then(function (img) {
             var width = img.naturalWidth || img.width;
@@ -366,8 +492,12 @@
     root.imageUtils.getImageDataFromImage = getImageDataFromImage;
     root.imageUtils.toLumaRgba = toLumaRgba;
     root.imageUtils.calculateSsim = calculateSsim;
+    root.imageUtils.selectBestImageCandidate = selectBestImageCandidate;
+    root.imageUtils.logImageCandidateDecision = logImageCandidateDecision;
     root.imageUtils.aggregateSsimScore = aggregateSsimScore;
+    root.imageUtils.computeCandidateSsimScore = computeCandidateSsimScore;
     root.imageUtils.selectSsimTiles = selectSsimTiles;
+    root.imageUtils.analyzeImage = analyzeImage;
     root.imageUtils.getImageData = getImageData;
     root.imageUtils.getImageDataForSize = getImageDataForSize;
     root.imageUtils.calculatePsnr = calculatePsnr;

@@ -1632,17 +1632,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function uploadBlobToPictureDir(blob, name, extension, successCallback, options) {
+function uploadBlobToPictureDir(blob, name, extension, dir, token) {
     var d = new Date();
-    var opts = options || {};
-    var dir = opts.dir || ('/' + d.getFullYear() + '/' + ('0' + (d.getMonth() + 1)).slice(-2));
+    dir = dir || ('/' + d.getFullYear() + '/' + ('0' + (d.getMonth() + 1)).slice(-2));
 
     if (typeof name !== 'string') {
         name = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + "-" + ('0' + d.getDate()).slice(-2)
             + "_" + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + '.' + extension;
     }
 
-    requestPictureCsrfToken(dir)
+    return requestPictureCsrfToken(dir)
         .then(function (csrfToken) {
             var formData = new FormData();
             formData.append('pictures[]', blob, name);
@@ -1651,8 +1650,8 @@ function uploadBlobToPictureDir(blob, name, extension, successCallback, options)
             formData.append('create_dir', '1');
             formData.append('return_image_info', '1');
             formData.append('csrf_token', csrfToken);
-            if (opts.token) {
-                formData.append('token', opts.token);
+            if (token) {
+                formData.append('token', token);
                 formData.append('name', name);
             }
 
@@ -1663,29 +1662,17 @@ function uploadBlobToPictureDir(blob, name, extension, successCallback, options)
         })
         .then(response => response.json())
         .then(res => {
-            if (res.success === true && typeof successCallback === 'function' && res.image_info) {
-                successCallback(res, res.image_info[0], res.image_info[1]);
-            } else if (res.success !== true && res.message) {
-                if (typeof opts.onError === 'function') {
-                    opts.onError(res);
-                }
+            if (res.success === true && res.image_info) {
+                return {res: res, width: res.image_info[0], height: res.image_info[1]};
+            }
+            if (res.success !== true && res.message) {
                 console.warn('Upload error:', res.message);
             }
-            if (typeof opts.onFinally === 'function') {
-                opts.onFinally(res);
-            }
-            syncImageLoadingIndicator();
+            var err = new Error((res && res.message) ? res.message : 'Upload error');
+            err.res = res;
+            throw err;
         })
-        .catch(error => {
-            if (typeof opts.onError === 'function') {
-                opts.onError({message: error});
-            }
-            if (typeof opts.onFinally === 'function') {
-                opts.onFinally();
-            }
-            console.warn('Error:', error);
-            syncImageLoadingIndicator();
-        });
+        .finally(syncImageLoadingIndicator);
 }
 
 var imageFormatSelection = {
@@ -1699,104 +1686,6 @@ var imageFormatSelection = {
     png24OptLevel: 2,
     png8OptLevel: 2
 };
-
-function selectBestImageCandidate(hasAlpha, candidates, policy) {
-    // Selection policy: png24 is lossless; jpeg/png8 only pass when SSIM meets the threshold, then pick the smallest.
-    if (!candidates) {
-        return null;
-    }
-
-    if (hasAlpha) {
-        if (candidates.png8 && candidates.png8.ssim >= policy.png8MinSsim && (!candidates.png24 || candidates.png8.size < candidates.png24.size)) {
-            return {type: 'png8', candidate: candidates.png8};
-        }
-        return candidates.png24 ? {type: 'png24', candidate: candidates.png24} : null;
-    }
-
-    var allowed = [];
-    if (candidates.png24) {
-        allowed.push({type: 'png24', candidate: candidates.png24});
-    }
-    if (candidates.png8 && candidates.png8.ssim >= policy.png8MinSsim) {
-        allowed.push({type: 'png8', candidate: candidates.png8});
-    }
-    if (candidates.jpeg && candidates.jpeg.ssim >= policy.jpegMinSsim) {
-        allowed.push({type: 'jpeg', candidate: candidates.jpeg});
-    }
-
-    if (allowed.length === 0) {
-        return null;
-    }
-
-    var best = allowed[0];
-    for (var i = 1; i < allowed.length; i++) {
-        if (allowed[i].candidate.size < best.candidate.size) {
-            best = allowed[i];
-        }
-    }
-
-    return best;
-}
-
-function logImageCandidateDecision(choice, candidates, hasAlpha, policy) {
-    var summary = {
-        alpha: !!hasAlpha,
-        choice: choice ? choice.type : 'none',
-        png24: candidates.png24 ? {size: candidates.png24.size} : null,
-        png8: candidates.png8 ? {size: candidates.png8.size, ssim: candidates.png8.ssim, ssimDownscale: candidates.png8.ssimDownscale, ssimTiles: candidates.png8.ssimTiles} : null,
-        jpeg: candidates.jpeg ? {size: candidates.jpeg.size, ssim: candidates.jpeg.ssim, ssimDownscale: candidates.jpeg.ssimDownscale, ssimTiles: candidates.jpeg.ssimTiles} : null,
-        thresholds: {
-            jpegMinSsim: policy.jpegMinSsim,
-            png8MinSsim: policy.png8MinSsim,
-            ssimTileWeight: policy.ssimTileWeight
-        }
-    };
-    console.log('Image optimization choice', summary);
-}
-
-function computeCandidateSsimScore(blob, analysisInfo, policy) {
-    if (!analysisInfo || !analysisInfo.data) {
-        return Promise.resolve({score: 0, downscale: 0, tiles: []});
-    }
-
-    return imageUtils.fileToImage(blob)
-        .then(function (img) {
-            var ssimLabel = 'SSIM score ' + (blob && blob.type ? blob.type : 'blob');
-            console.time(ssimLabel);
-            var downscale = imageUtils.getImageDataFromImage(img, {
-                width: analysisInfo.width,
-                height: analysisInfo.height
-            });
-            var downscaleScore = imageUtils.calculateSsim(analysisInfo.data, downscale.data, analysisInfo.width, analysisInfo.height);
-            var tileScores = [];
-
-            if (analysisInfo.tileData && analysisInfo.tileData.length) {
-                for (var i = 0; i < analysisInfo.tileData.length; i++) {
-                    var tile = analysisInfo.tiles[i];
-                    var refTile = analysisInfo.tileData[i];
-                    var candTile = imageUtils.getImageDataFromImage(img, {
-                        sx: tile.sourceX,
-                        sy: tile.sourceY,
-                        sw: tile.sourceW,
-                        sh: tile.sourceH,
-                        width: refTile.width,
-                        height: refTile.height
-                    });
-                    tileScores.push(imageUtils.calculateSsim(refTile.data, candTile.data, refTile.width, refTile.height));
-                }
-            }
-
-            console.timeEnd(ssimLabel);
-            return {
-                score: imageUtils.aggregateSsimScore(downscaleScore, tileScores, policy.ssimTileWeight),
-                downscale: downscaleScore,
-                tiles: tileScores
-            };
-        })
-        .catch(function () {
-            return {score: 0, downscale: 0, tiles: []};
-        });
-}
 
 function optimizeAndUploadFile(file, altPressed) {
     console.time('optimizeAndUploadFile');
@@ -1821,25 +1710,9 @@ function optimizeAndUploadFile(file, altPressed) {
     var analysisInfo = null;
     var reserveDone = false;
     console.time('image analysis');
-    var analysisPromise = imageUtils.getImageData(file, imageFormatSelection.compareMaxSize)
+    var analysisPromise = imageUtils.analyzeImage(file, imageFormatSelection)
         .then(function (info) {
             analysisInfo = info;
-            analysisInfo.tiles = imageUtils.selectSsimTiles(info, imageFormatSelection.ssimTileSize);
-            analysisInfo.tileData = analysisInfo.tiles.map(function (tile) {
-                var tileData = imageUtils.getImageDataFromImage(info.image, {
-                    sx: tile.sourceX,
-                    sy: tile.sourceY,
-                    sw: tile.sourceW,
-                    sh: tile.sourceH,
-                    width: tile.width,
-                    height: tile.height
-                });
-                return {
-                    data: tileData.data,
-                    width: tileData.width,
-                    height: tileData.height
-                };
-            });
             console.timeEnd('image analysis');
             maybeStartUpload();
             return info;
@@ -1882,7 +1755,7 @@ function optimizeAndUploadFile(file, altPressed) {
             var quantResult = meta && meta.quantResult ? meta.quantResult : null;
             if (optimizedBlob && quantResult && quantResult.accepted) {
                 analysisPromise.then(function (info) {
-                    return computeCandidateSsimScore(optimizedBlob, info, imageFormatSelection);
+                    return imageUtils.computeCandidateSsimScore(optimizedBlob, info, imageFormatSelection);
                 }).then(function (score) {
                     candidates.png8 = {
                         blob: optimizedBlob,
@@ -1943,7 +1816,7 @@ function optimizeAndUploadFile(file, altPressed) {
                         return;
                     }
 
-                    computeCandidateSsimScore(jpegBlob, info, imageFormatSelection).then(function (score) {
+                    imageUtils.computeCandidateSsimScore(jpegBlob, info, imageFormatSelection).then(function (score) {
                         candidates.jpeg = {
                             blob: jpegBlob,
                             size: jpegBlob.size,
@@ -2015,7 +1888,7 @@ function optimizeAndUploadFile(file, altPressed) {
             return;
         }
 
-        var choice = selectBestImageCandidate(analysisInfo.hasAlpha, candidates, imageFormatSelection);
+        var choice = imageUtils.selectBestImageCandidate(analysisInfo.hasAlpha, candidates, imageFormatSelection);
         if (!choice || !choice.candidate || !choice.candidate.blob) {
             if (!analysisInfo.hasAlpha && candidates.jpeg) {
                 choice = {type: 'jpeg', candidate: candidates.jpeg};
@@ -2030,16 +1903,21 @@ function optimizeAndUploadFile(file, altPressed) {
             }
         }
 
-        logImageCandidateDecision(choice, candidates, analysisInfo.hasAlpha, imageFormatSelection);
+        imageUtils.logImageCandidateDecision(choice, candidates, analysisInfo.hasAlpha, imageFormatSelection);
 
         uploadStarted = true;
 
         if (reserveInfo) {
             var uploadPng24Backup = function () {
                 if (candidates.png24 && candidates.png24.blob) {
-                    uploadBlobToPictureDir(candidates.png24.blob, reserveInfo.name, null, null, {
-                        dir: reserveInfo.dir,
-                        token: reserveInfo.token
+                    uploadBlobToPictureDir(
+                        candidates.png24.blob,
+                        reserveInfo.name,
+                        null,
+                        reserveInfo.dir,
+                        reserveInfo.token
+                    ).catch(function (error) {
+                        console.warn('Backup upload error:', error);
                     });
                 }
             };
@@ -2047,20 +1925,18 @@ function optimizeAndUploadFile(file, altPressed) {
             if (choice.type === 'jpeg') {
                 uploadPng24Backup();
                 var jpgName = reserveInfo.name.replace(/\.png$/i, '.jpg');
-                uploadBlobToPictureDir(choice.candidate.blob, jpgName, null, function (res) {
-                    var newPath = res.file_path;
+                uploadBlobToPictureDir(choice.candidate.blob, jpgName, null, reserveInfo.dir)
+                    .then(function (result) {
+                    var newPath = result.res.file_path;
                     replaceImageSrcInEditor(reserveInfo.file_path, newPath);
                     updatePendingImageKey(reserveInfo.file_path, newPath);
                     finalizePendingImage(newPath, blobUrl);
                     markImageOperation(-1);
                     console.timeEnd('optimizeAndUploadFile');
-                }, {
-                    dir: reserveInfo.dir,
-                    onError: function () {
-                        finalizePendingImage(reserveInfo.file_path, blobUrl);
-                        markImageOperation(-1);
-                        console.timeEnd('optimizeAndUploadFile');
-                    }
+                }).catch(function () {
+                    finalizePendingImage(reserveInfo.file_path, blobUrl);
+                    markImageOperation(-1);
+                    console.timeEnd('optimizeAndUploadFile');
                 });
             } else if (choice.type === 'png8') {
                 uploadPng24Backup();
@@ -2068,34 +1944,34 @@ function optimizeAndUploadFile(file, altPressed) {
                 if (png8Name === reserveInfo.name) {
                     png8Name = reserveInfo.name + '-8.png';
                 }
-                uploadBlobToPictureDir(choice.candidate.blob, png8Name, null, function (res) {
-                    var newPath = res.file_path;
+                uploadBlobToPictureDir(choice.candidate.blob, png8Name, null, reserveInfo.dir)
+                    .then(function (result) {
+                    var newPath = result.res.file_path;
                     replaceImageSrcInEditor(reserveInfo.file_path, newPath);
                     updatePendingImageKey(reserveInfo.file_path, newPath);
                     finalizePendingImage(newPath, blobUrl);
                     markImageOperation(-1);
                     console.timeEnd('optimizeAndUploadFile');
-                }, {
-                    dir: reserveInfo.dir,
-                    onError: function () {
-                        finalizePendingImage(reserveInfo.file_path, blobUrl);
-                        markImageOperation(-1);
-                        console.timeEnd('optimizeAndUploadFile');
-                    }
-                });
-            } else {
-                uploadBlobToPictureDir(choice.candidate.blob, reserveInfo.name, null, function (res) {
-                    finalizePendingImage(res.file_path, blobUrl);
+                }).catch(function () {
+                    finalizePendingImage(reserveInfo.file_path, blobUrl);
                     markImageOperation(-1);
                     console.timeEnd('optimizeAndUploadFile');
-                }, {
-                    dir: reserveInfo.dir,
-                    token: reserveInfo.token,
-                    onError: function () {
-                        finalizePendingImage(reserveInfo.file_path, blobUrl);
-                        markImageOperation(-1);
-                        console.timeEnd('optimizeAndUploadFile');
-                    }
+                });
+            } else {
+                uploadBlobToPictureDir(
+                    choice.candidate.blob,
+                    reserveInfo.name,
+                    null,
+                    reserveInfo.dir,
+                    reserveInfo.token
+                ).then(function (result) {
+                    finalizePendingImage(result.res.file_path, blobUrl);
+                    markImageOperation(-1);
+                    console.timeEnd('optimizeAndUploadFile');
+                }).catch(function () {
+                    finalizePendingImage(reserveInfo.file_path, blobUrl);
+                    markImageOperation(-1);
+                    console.timeEnd('optimizeAndUploadFile');
                 });
             }
             return;
@@ -2105,19 +1981,15 @@ function optimizeAndUploadFile(file, altPressed) {
             return;
         }
 
-        var fallbackSuccess = function (res, w, h) {
-            ReturnImage(res.file_path, w || 'auto', h || 'auto');
-            markImageOperation(-1);
-            console.timeEnd('optimizeAndUploadFile');
-        };
-        var fallbackError = function () {
-            markImageOperation(-1);
-            console.timeEnd('optimizeAndUploadFile');
-        };
-
         var fallbackExtension = choice.type === 'jpeg' ? 'jpg' : 'png';
-        uploadBlobToPictureDir(choice.candidate.blob, null, fallbackExtension, fallbackSuccess, {
-            onError: fallbackError
+        uploadBlobToPictureDir(choice.candidate.blob, null, fallbackExtension)
+            .then(function (result) {
+            ReturnImage(result.res.file_path, result.width || 'auto', result.height || 'auto');
+            markImageOperation(-1);
+            console.timeEnd('optimizeAndUploadFile');
+        }).catch(function () {
+            markImageOperation(-1);
+            console.timeEnd('optimizeAndUploadFile');
         });
     }
 }
