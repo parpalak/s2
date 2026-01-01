@@ -303,6 +303,7 @@ var runOptipng = (function () {
         var requireQuantized = opts.requireQuantized === true;
         var minPsnr = typeof opts.minPsnr === 'number' ? opts.minPsnr : QUANT_MIN_PSNR;
         var optLevel = typeof opts.optLevel === 'number' ? opts.optLevel : 2;
+        var onProgress = typeof opts.onProgress === 'function' ? opts.onProgress : null;
 
         var id = tasks.length;
         tasks[id] = {callback: callback, file: file, meta: {quantResult: null}, fallbackFile: file};
@@ -313,21 +314,17 @@ var runOptipng = (function () {
                 var optimizedFile = file;
                 if (quantResult && quantResult.accepted && quantResult.data) {
                     optimizedFile = makePngFile(file, quantResult.data);
-                    if (typeof quantResult.originalSize === 'number' && typeof quantResult.encodedSize === 'number') {
-                        printConsole('pngquant psnr ' + (quantResult.psnr === Infinity ? 'inf' : quantResult.psnr.toFixed(2)) + ', palette ' + quantResult.paletteSize + ', colors ' + quantResult.originalColors + ', size ' + fileSize(quantResult.originalSize) + ' -> ' + fileSize(quantResult.encodedSize));
-                    } else {
-                        printConsole('pngquant psnr ' + (quantResult.psnr === Infinity ? 'inf' : quantResult.psnr.toFixed(2)) + ', palette ' + quantResult.paletteSize + ', colors ' + quantResult.originalColors);
-                    }
-                } else if (quantResult) {
-                    if (typeof quantResult.originalSize === 'number' && typeof quantResult.encodedSize === 'number') {
-                        printConsole('pngquant rejected (psnr ' + (quantResult.psnr === Infinity ? 'inf' : quantResult.psnr.toFixed(2)) + ', size ' + fileSize(quantResult.originalSize) + ' -> ' + fileSize(quantResult.encodedSize) + ')');
-                    } else {
-                        printConsole('pngquant rejected');
-                    }
                 }
 
                 tasks[id].meta.quantResult = quantResult;
                 tasks[id].fallbackFile = optimizedFile;
+                if (onProgress) {
+                    onProgress({
+                        stage: 'quant',
+                        quantResult: quantResult,
+                        size: quantResult && typeof quantResult.encodedSize === 'number' ? quantResult.encodedSize : (optimizedFile && optimizedFile.size) || null
+                    });
+                }
 
                 if (requireQuantized && (!quantResult || !quantResult.accepted || !quantResult.data)) {
                     var task = tasks[id];

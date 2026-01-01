@@ -608,7 +608,6 @@ function SendDroppedFile(file) {
 
 function handleFileUpload(data, callback) {
     const fileCounter = FileCounter(1);
-    console.log('handleFileUpload start', fileCounter);
     SetWait(true);
     fetch(sUrl + 'action=upload', {
         method: 'POST',
@@ -634,7 +633,6 @@ function handleFileUpload(data, callback) {
         })
         .finally(() => {
             const fileCounter = FileCounter(-1);
-            console.log('handleFileUpload finally', fileCounter);
             if (0 === fileCounter) {
                 SetWait(false);
                 refreshFiles();

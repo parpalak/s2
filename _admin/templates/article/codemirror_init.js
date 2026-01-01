@@ -72,8 +72,7 @@ const s2_codemirror = (function () {
                 for (var i = 0; i < items.length; i++) {
                     var item = items[i];
                     if (item.type.indexOf("image") !== -1) {
-                        var altPressed = typeof isAltPressed === 'function' ? isAltPressed() : false;
-                        optimizeAndUploadFile(item.getAsFile(), altPressed);
+                        optimizeAndUploadFile(item.getAsFile());
                         hasImage = true;
                     }
                 }

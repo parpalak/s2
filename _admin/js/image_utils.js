@@ -161,7 +161,7 @@
     }
 
     function logImageCandidateDecision(choice, candidates, hasAlpha, policy) {
-        var summary = {
+        return {
             alpha: !!hasAlpha,
             choice: choice ? choice.type : 'none',
             png24: candidates.png24 ? {size: candidates.png24.size} : null,
@@ -173,7 +173,6 @@
                 ssimTileWeight: policy.ssimTileWeight
             }
         };
-        console.log('Image optimization choice', summary);
     }
 
     function aggregateSsimScore(downscaleScore, tileScores, tileWeight) {
@@ -204,28 +203,11 @@
                     height: analysisInfo.height
                 });
                 var downscaleScore = calculateSsim(analysisInfo.data, downscale.data, analysisInfo.width, analysisInfo.height);
-                var tileScores = [];
-
-                if (analysisInfo.tileData && analysisInfo.tileData.length) {
-                    for (var i = 0; i < analysisInfo.tileData.length; i++) {
-                        var tile = analysisInfo.tiles[i];
-                        var refTile = analysisInfo.tileData[i];
-                        var candTile = getImageDataFromImage(img, {
-                            sx: tile.sourceX,
-                            sy: tile.sourceY,
-                            sw: tile.sourceW,
-                            sh: tile.sourceH,
-                            width: refTile.width,
-                            height: refTile.height
-                        });
-                        tileScores.push(calculateSsim(refTile.data, candTile.data, refTile.width, refTile.height));
-                    }
-                }
-
+                // Temporarily skip tile-based SSIM and rely on full-resolution score.
                 return {
-                    score: aggregateSsimScore(downscaleScore, tileScores, policy.ssimTileWeight),
+                    score: downscaleScore,
                     downscale: downscaleScore,
-                    tiles: tileScores
+                    tiles: []
                 };
             })
             .catch(function () {
@@ -356,23 +338,24 @@
     }
 
     function analyzeImage(file, policy) {
-        return getImageData(file, policy.compareMaxSize).then(function (info) {
-            info.tiles = selectSsimTiles(info, policy.ssimTileSize);
-            info.tileData = info.tiles.map(function (tile) {
-                var tileData = getImageDataFromImage(info.image, {
-                    sx: tile.sourceX,
-                    sy: tile.sourceY,
-                    sw: tile.sourceW,
-                    sh: tile.sourceH,
-                    width: tile.width,
-                    height: tile.height
-                });
-                return {
-                    data: tileData.data,
-                    width: tileData.width,
-                    height: tileData.height
-                };
-            });
+        return getImageData(file).then(function (info) {
+            // Temporarily skip downscaling and tile selection.
+            // info.tiles = selectSsimTiles(info, policy.ssimTileSize);
+            // info.tileData = info.tiles.map(function (tile) {
+            //     var tileData = getImageDataFromImage(info.image, {
+            //         sx: tile.sourceX,
+            //         sy: tile.sourceY,
+            //         sw: tile.sourceW,
+            //         sh: tile.sourceH,
+            //         width: tile.width,
+            //         height: tile.height
+            //     });
+            //     return {
+            //         data: tileData.data,
+            //         width: tileData.width,
+            //         height: tileData.height
+            //     };
+            // });
             return info;
         });
     }
@@ -482,6 +465,120 @@
             });
     }
 
+    function resizeImageFile(file, maxEdge, backgroundColor, options) {
+        var opts = options;
+        if (backgroundColor && typeof backgroundColor === 'object') {
+            opts = backgroundColor;
+            backgroundColor = null;
+        }
+        opts = opts || {};
+        var evenDimensions = !!opts.evenDimensions;
+        var evenIfNoResize = !!opts.evenIfNoResize;
+        var baseEdge = typeof opts.baseEdge === 'number' && opts.baseEdge > 0 ? opts.baseEdge : null;
+
+        if (!file || typeof maxEdge !== 'number' || maxEdge <= 0) {
+            return Promise.resolve({
+                file: file,
+                width: null,
+                height: null,
+                resized: false,
+                cropped: false,
+                originalWidth: null,
+                originalHeight: null
+            });
+        }
+
+        return fileToImage(file)
+            .then(function (img) {
+                var width = img.naturalWidth || img.width;
+                var height = img.naturalHeight || img.height;
+                var maxDim = Math.max(width, height);
+                var targetWidth = width;
+                var targetHeight = height;
+                var resized = false;
+                var cropped = false;
+
+                if (maxDim && maxDim > maxEdge) {
+                    resized = true;
+                    if (baseEdge) {
+                        var scaleBase = baseEdge / maxDim;
+                        targetWidth = Math.max(1, Math.round(width * scaleBase) * 2);
+                        targetHeight = Math.max(1, Math.round(height * scaleBase) * 2);
+                    } else {
+                        var scale = maxEdge / maxDim;
+                        targetWidth = Math.max(1, Math.round(width * scale));
+                        targetHeight = Math.max(1, Math.round(height * scale));
+                        if (evenDimensions) {
+                            if (targetWidth % 2 !== 0) {
+                                targetWidth = Math.max(1, targetWidth - 1);
+                            }
+                            if (targetHeight % 2 !== 0) {
+                                targetHeight = Math.max(1, targetHeight - 1);
+                            }
+                        }
+                    }
+                } else if (evenDimensions || evenIfNoResize) {
+                    if (targetWidth % 2 !== 0) {
+                        targetWidth = Math.max(1, targetWidth - 1);
+                        cropped = true;
+                    }
+                    if (targetHeight % 2 !== 0) {
+                        targetHeight = Math.max(1, targetHeight - 1);
+                        cropped = true;
+                    }
+                }
+
+                if (targetWidth === width && targetHeight === height && !cropped) {
+                    return {
+                        file: file,
+                        width: width,
+                        height: height,
+                        resized: false,
+                        cropped: false,
+                        originalWidth: width,
+                        originalHeight: height
+                    };
+                }
+
+                var canvas;
+                if (!resized && cropped) {
+                    canvas = document.createElement('canvas');
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+                    var ctx = canvas.getContext('2d');
+                    if (backgroundColor) {
+                        ctx.fillStyle = backgroundColor;
+                        ctx.fillRect(0, 0, targetWidth, targetHeight);
+                    }
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight, 0, 0, targetWidth, targetHeight);
+                } else {
+                    canvas = imageToCanvas(img, {width: targetWidth, height: targetHeight, backgroundColor: backgroundColor});
+                }
+                return canvasToBlob(canvas, 'image/png').then(function (blob) {
+                    return {
+                        file: blob,
+                        width: canvas.width,
+                        height: canvas.height,
+                        resized: resized,
+                        cropped: cropped,
+                        originalWidth: width,
+                        originalHeight: height
+                    };
+                });
+            })
+            .catch(function () {
+                return {
+                    file: file,
+                    width: null,
+                    height: null,
+                    resized: false,
+                    cropped: false,
+                    originalWidth: null,
+                    originalHeight: null
+                };
+            });
+    }
+
     function normalizeQuality(value, fallback) {
         var q = typeof value === 'number' ? value : fallback;
         if (!isFinite(q)) {
@@ -490,7 +587,7 @@
         return Math.max(0.1, Math.min(1, q));
     }
 
-    function findJpegCandidateForSsim(file, analysisInfo, policy, backgroundColor, keepSmaller) {
+    function findJpegCandidateForSsim(file, analysisInfo, policy, backgroundColor, keepSmaller, progress) {
         if (!analysisInfo || !analysisInfo.data) {
             return Promise.resolve(null);
         }
@@ -499,8 +596,6 @@
         var minQuality = normalizeQuality(policy && policy.jpegMinQuality, 0.4);
         var target = policy && typeof policy.jpegMinSsim === 'number' ? policy.jpegMinSsim : 0;
         var maxSteps = policy && typeof policy.jpegQualitySearchSteps === 'number' ? policy.jpegQualitySearchSteps : 6;
-        var debugLabel = 'jpeg q-search';
-
         if (minQuality > maxQuality) {
             var swap = minQuality;
             minQuality = maxQuality;
@@ -511,8 +606,7 @@
             return compressToJpeg(file, q, backgroundColor, keepSmaller)
                 .then(function (blob) {
                     return computeCandidateSsimScore(blob, analysisInfo, policy).then(function (score) {
-                        console.log(debugLabel, 'try', q.toFixed(4), 'size', blob.size, 'ssim', score.score);
-                        return {
+                        var candidate = {
                             blob: blob,
                             size: blob.size,
                             ssim: score.score,
@@ -520,18 +614,27 @@
                             ssimTiles: score.tiles,
                             quality: q
                         };
+                        if (typeof progress === 'function') {
+                            progress({
+                                stage: 'candidate',
+                                quality: q,
+                                size: blob.size,
+                                ssim: score.score,
+                                ssimDownscale: score.downscale,
+                                ssimTiles: score.tiles
+                            });
+                        }
+                        return candidate;
                     });
                 });
         }
 
         return evaluate(maxQuality).then(function (maxCandidate) {
-            console.log(debugLabel, 'bounds', minQuality.toFixed(4), maxQuality.toFixed(4), 'target', target, 'max', maxCandidate ? maxCandidate.ssim : null);
             if (!maxCandidate || maxCandidate.ssim < target || maxQuality === minQuality || maxSteps <= 0) {
                 return maxCandidate;
             }
 
             return evaluate(minQuality).then(function (minCandidate) {
-                console.log(debugLabel, 'min', minQuality.toFixed(4), minCandidate ? minCandidate.ssim : null);
                 if (minCandidate.ssim >= target) {
                     return minCandidate;
                 }
@@ -543,7 +646,6 @@
 
                 function next() {
                     if (steps >= maxSteps) {
-                        console.log(debugLabel, 'done', steps, 'q', best.quality.toFixed(4), 'ssim', best.ssim);
                         return Promise.resolve(best);
                     }
 
@@ -553,10 +655,8 @@
                         if (candidate.ssim >= target) {
                             best = candidate;
                             high = mid;
-                            console.log(debugLabel, 'step', steps, 'ok', 'q', mid.toFixed(4), 'ssim', candidate.ssim);
                         } else {
                             low = mid;
-                            console.log(debugLabel, 'step', steps, 'low', 'q', mid.toFixed(4), 'ssim', candidate.ssim);
                         }
                         return next();
                     });
@@ -585,5 +685,6 @@
     root.imageUtils.calculatePsnr = calculatePsnr;
     root.imageUtils.compressToPng = compressToPng;
     root.imageUtils.compressToJpeg = compressToJpeg;
+    root.imageUtils.resizeImageFile = resizeImageFile;
     root.imageUtils.findJpegCandidateForSsim = findJpegCandidateForSsim;
 })(window);

@@ -162,16 +162,6 @@ function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName, sTem
         let w = e.detail.width;
         let h = e.detail.height;
         let s = e.detail.file_path;
-
-        if (isAltPressed()) {
-            // For retina
-            if (!isNaN(parseInt(w))) {
-                w = parseInt(w) / 2;
-            }
-            if (!isNaN(parseInt(h))) {
-                h = parseInt(h) / 2;
-            }
-        }
         s = encodeURI(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#039;').replace(/"/g, '&quot;');
 
         const sOpenTag = '<img src="' + s + '" width="' + w + '" height="' + h + '" ' + 'loading="lazy" alt="',
@@ -1218,7 +1208,7 @@ function initHtmlToolbar(eToolbar) {
                 'fullscreen': function () {
                     if (!document.fullscreenElement) {
                         document.getElementById('id-article-editor-block').requestFullscreen().catch((err) => {
-                            console.log(
+                            console.warn(
                                 `Error attempting to enable fullscreen mode: ${err.message} (${err.name})`,
                             );
                         });
@@ -1420,13 +1410,280 @@ var loadPictureManager = (function () {
     };
 }());
 
-var isAltPressed = function () {
-};
-
 var pictureFolderCsrfTokens = {};
 var pendingImageMap = new Map();
 var lastPreviewWrapper = null;
 var activeImageOperations = 0;
+var pasteImageJobs = new Map();
+var pasteImageBySrc = new Map();
+var pasteImageCounter = 0;
+var previewOverlayStylesId = 's2-image-overlay-styles';
+var sizeOptions = [1024, 1200, 1600, Infinity];
+var imagePolicyConfig = {
+    base: {
+        compareMaxSize: 512,
+        maxUploadEdge: 1600,
+        jpegQuality: 0.95,
+        jpegMinQuality: 0.75,
+        jpegQualitySearchSteps: 6,
+        png8MinSsim: 0.98,
+        ssimTileSize: 64,
+        ssimTileWeight: 0.3,
+        png8MinPsnr: 40,
+        png24OptLevel: 2,
+        png8OptLevel: 2
+    },
+    modes: {
+        '1x': {
+            physicalPixelScale: 1,
+            policy: {
+                jpegMinSsim: 0.985
+            }
+        },
+        '2x': {
+            physicalPixelScale: 2,
+            policy: {
+                jpegMinSsim: 0.97
+            },
+            resizeOptions: {
+                evenDimensions: true,
+                evenIfNoResize: true
+            }
+        }
+    }
+};
+
+function humanFileSize(bytes) {
+    if (typeof bytes !== 'number' || !isFinite(bytes)) {
+        return '-';
+    }
+    if (bytes < 1024) {
+        return bytes + ' B';
+    }
+    var exp = Math.floor(Math.log(bytes) / Math.log(1024));
+    var value = bytes / Math.pow(1024, exp);
+    var unit = 'KMGTPEZY'[exp - 1] + 'B';
+    return value.toFixed(value >= 10 || exp === 1 ? 1 : 2) + ' ' + unit;
+}
+
+function formatDimensionValue(value) {
+    if (typeof value !== 'number' || !isFinite(value)) {
+        return 'auto';
+    }
+    return String(Math.round(value));
+}
+
+function formatDimensions(width, height) {
+    return formatDimensionValue(width) + 'x' + formatDimensionValue(height);
+}
+
+function getModeConfig(mode) {
+    return imagePolicyConfig.modes[mode] || imagePolicyConfig.modes['1x'];
+}
+
+function getModePolicy(mode, sizeChoice) {
+    var modeConfig = getModeConfig(mode);
+    var policy = Object.assign({}, imagePolicyConfig.base, modeConfig.policy || {});
+    var maxEdge = (typeof sizeChoice === 'number' && isFinite(sizeChoice))
+        ? sizeChoice
+        : imagePolicyConfig.base.maxUploadEdge;
+    if (sizeChoice === Infinity) {
+        policy.maxUploadEdge = Infinity;
+    } else {
+    policy.maxUploadEdge = maxEdge * modeConfig.physicalPixelScale;
+    }
+    return policy;
+}
+
+function getResizeOptionsForMode(mode, sizeChoice) {
+    var modeConfig = getModeConfig(mode);
+    if (modeConfig.resizeOptions) {
+        var options = Object.assign({}, modeConfig.resizeOptions);
+        var baseEdge = (typeof sizeChoice === 'number' && isFinite(sizeChoice))
+            ? sizeChoice
+            : imagePolicyConfig.base.maxUploadEdge;
+        options.baseEdge = baseEdge;
+        return options;
+    }
+    return {};
+}
+
+function getDisplayDimensionsForMode(mode, info) {
+    if (!info || typeof info.width !== 'number' || typeof info.height !== 'number') {
+        return {width: 'auto', height: 'auto'};
+    }
+    var modeConfig = getModeConfig(mode);
+    var scale = modeConfig.physicalPixelScale;
+    if (typeof scale === 'number' && isFinite(scale) && scale !== 1) {
+        return {width: Math.round(info.width / scale), height: Math.round(info.height / scale)};
+    }
+    return {width: info.width, height: info.height};
+}
+
+function shouldPreferJpegOnly(width, height) {
+    var maxDim = Math.max(width || 0, height || 0);
+    return maxDim > 1600;
+}
+
+function setJobSrc(job, newSrc) {
+    if (job.src && pasteImageBySrc.get(job.src) === job) {
+        pasteImageBySrc.delete(job.src);
+    }
+    job.src = newSrc;
+    if (newSrc) {
+        pasteImageBySrc.set(newSrc, job);
+    }
+}
+
+function findImageJobForPreview(img) {
+    if (!img) {
+        return null;
+    }
+    var key = img.getAttribute('data-pending-src') || img.getAttribute('src');
+    if (!key) {
+        return null;
+    }
+    return pasteImageBySrc.get(key) || null;
+}
+
+function findJobOverlayContainer(job) {
+    if (!job || !job.overlay || !job.overlay.overlay) {
+        return null;
+    }
+    var overlay = job.overlay.overlay;
+    return overlay.closest('.s2-image-overlay-wrap');
+}
+
+function detachJobOverlay(job) {
+    var container = findJobOverlayContainer(job);
+    if (!container) {
+        return;
+    }
+    var img = container.querySelector('img');
+    if (img && container.parentNode) {
+        container.parentNode.insertBefore(img, container);
+    }
+    container.remove();
+}
+
+function releaseBlobUrl(blobUrl) {
+    if (!blobUrl) {
+        return;
+    }
+    if (isActiveBlobUrl(blobUrl)) {
+        return;
+    }
+    var stillUsed = false;
+    pendingImageMap.forEach(function (value) {
+        if (value === blobUrl) {
+            stillUsed = true;
+        }
+    });
+    if (!stillUsed) {
+        URL.revokeObjectURL(blobUrl);
+    }
+}
+
+function closeImageJob(job) {
+    if (!job || job.closed) {
+        return;
+    }
+    job.closed = true;
+    detachJobOverlay(job);
+
+    if (job.src) {
+        finalizePendingImage(job.src, job.blobUrl);
+    } else {
+        releaseBlobUrl(job.blobUrl);
+    }
+
+    if (job.src && pasteImageBySrc.get(job.src) === job) {
+        pasteImageBySrc.delete(job.src);
+    }
+    pasteImageJobs.delete(job.id);
+
+    Object.keys(job.modes).forEach(function (mode) {
+        var state = job.modes[mode];
+        if (!state) {
+            return;
+        }
+        if (state.activeRun) {
+            state.activeRun = false;
+            markImageOperation(-1);
+        }
+        state.runId += 1;
+        state.candidates = {jpeg: null, png8: null, png24: null};
+        state.candidateReady = {jpeg: true, png8: true, png24: true};
+        state.started = {jpeg: false, png8: false, png24: false};
+        state.selectedType = null;
+        state.status = 'idle';
+        state.statusLabel = 'Idle';
+        state.reserveInfo = null;
+        state.reservePromise = null;
+        state.reserveDone = false;
+        state.reserveFailed = false;
+        state.sourceInfo = null;
+        state.sourcePromise = null;
+        state.analysisInfo = null;
+        state.analysisPromise = null;
+        state.pngSourcePromise = null;
+        state.displayWidth = null;
+        state.displayHeight = null;
+        state.cache = null;
+        state.sizeCaches = {};
+        state.uploaded = {jpeg: null, png8: null, png24: null};
+        state.uploadInProgress = false;
+    });
+}
+
+function findPreviewImageForJob(job) {
+    if (!job || !lastPreviewWrapper) {
+        return null;
+    }
+    var images = lastPreviewWrapper.querySelectorAll('img');
+    for (var i = 0; i < images.length; i += 1) {
+        var img = images[i];
+        var key = img.getAttribute('data-pending-src') || img.getAttribute('src');
+        if (!key) {
+            continue;
+        }
+        if (job.src && key === job.src) {
+            return img;
+        }
+        if (job.blobUrl && key === job.blobUrl) {
+            return img;
+        }
+    }
+    return null;
+}
+
+function ensurePreviewOverlayStyles(doc) {
+    if (!doc || doc.getElementById(previewOverlayStylesId)) {
+        return;
+    }
+    var style = doc.createElement('style');
+    style.id = previewOverlayStylesId;
+    style.textContent = '' +
+        '.s2-image-overlay-wrap{position:relative;display:inline-block;max-width:100%;}' +
+        '.s2-image-overlay-wrap>img{display:block;max-width:100%;height:auto;}' +
+        '.s2-image-overlay{position:absolute;left:8px;top:8px;max-width:92%;min-width:210px;background:rgba(20,22,28,0.9);color:#f5f5f5;font:12px/1.35 \"Trebuchet MS\",Verdana,sans-serif;padding:8px 10px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.25);}' +
+        '.s2-image-overlay[data-status=\"done\"]{background:rgba(16,28,18,0.88);}' +
+        '.s2-image-overlay[data-status=\"uploading\"]{background:rgba(32,24,12,0.9);}' +
+        '.s2-image-overlay-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;flex-wrap:wrap;}' +
+        '.s2-image-overlay-group{display:flex;gap:4px;}' +
+        '.s2-image-overlay-controls button{border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;cursor:pointer;}' +
+        '.s2-image-overlay-controls button.is-active{background:#f5d66c;color:#1e1e1e;border-color:#f5d66c;}' +
+        '.s2-image-overlay-line{margin:2px 0;white-space:nowrap;}' +
+        '.s2-image-overlay-formats{display:grid;row-gap:4px;}' +
+        '.s2-image-format{display:grid;grid-template-columns:16px 44px max-content 1fr;align-items:center;column-gap:6px;font-size:11px;}' +
+        '.s2-image-format input{margin:0 2px 0 0;}' +
+        '.s2-image-format .s2-format-name{width:44px;text-transform:uppercase;letter-spacing:0.04em;}' +
+        '.s2-image-format .s2-format-size{text-align:right;}' +
+        '.s2-image-format .s2-format-info{opacity:0.75;}' +
+        '.s2-image-format.is-best{color:#f5d66c;}' +
+        '.s2-image-overlay-close{position:absolute;right:6px;top:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;padding:0 5px;line-height:16px;border-radius:3px;cursor:pointer;}';
+    doc.head.appendChild(style);
+}
 
 function requestPictureCsrfToken(path) {
     if (pictureFolderCsrfTokens[path]) {
@@ -1497,19 +1754,9 @@ function sanitizeImageSrc(src) {
         .replace(/"/g, '&quot;');
 }
 
-function insertImageTag(src, width, height, altPressed) {
-    let w = width;
-    let h = height;
-
-    if (altPressed) {
-        if (!isNaN(parseInt(w))) {
-            w = parseInt(w) / 2;
-        }
-        if (!isNaN(parseInt(h))) {
-            h = parseInt(h) / 2;
-        }
-    }
-
+function insertImageTag(src, width, height) {
+    var w = width;
+    var h = height;
     const safeSrc = sanitizeImageSrc(src);
     const sOpenTag = '<img src="' + safeSrc + '" width="' + (w || 'auto') + '" height="' + (h || 'auto') + '" ' + 'loading="lazy" alt="',
         sCloseTag = '" />';
@@ -1530,6 +1777,46 @@ function replaceImageSrcInEditor(oldSrc, newSrc) {
             cursor.replace(safeNew);
         }
     });
+}
+
+function replaceImageTagInEditor(oldSrc, newSrc, width, height) {
+    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
+    if (!cm || !cm.getSearchCursor || !oldSrc) {
+        return;
+    }
+
+    const doc = cm.getDoc();
+    const safeOld = sanitizeImageSrc(oldSrc);
+    const content = doc.getValue();
+    const index = content.indexOf(safeOld);
+    if (index === -1) {
+        return;
+    }
+
+    const start = content.lastIndexOf('<img', index);
+    const end = content.indexOf('>', index);
+    if (start === -1 || end === -1) {
+        return;
+    }
+
+    const tag = content.slice(start, end + 1);
+    const safeNew = sanitizeImageSrc(newSrc || oldSrc);
+    var updated = tag.replace(/src=\"[^\"]*\"/i, 'src="' + safeNew + '"');
+    var widthValue = formatDimensionValue(width);
+    var heightValue = formatDimensionValue(height);
+
+    function ensureAttr(markup, name, value) {
+        var re = new RegExp(name + '=\"[^\"]*\"', 'i');
+        if (re.test(markup)) {
+            return markup.replace(re, name + '="' + value + '"');
+        }
+        return markup.replace(/<img\s*/i, '<img ' + name + '="' + value + '" ');
+    }
+
+    updated = ensureAttr(updated, 'width', widthValue);
+    updated = ensureAttr(updated, 'height', heightValue);
+
+    doc.replaceRange(updated, doc.posFromIndex(start), doc.posFromIndex(end + 1));
 }
 
 function applyPendingImages(wrapper) {
@@ -1557,6 +1844,10 @@ function updatePendingImageKey(oldSrc, newSrc) {
     const blobUrl = pendingImageMap.get(oldSrc);
     pendingImageMap.delete(oldSrc);
     pendingImageMap.set(newSrc, blobUrl);
+    var job = pasteImageBySrc.get(oldSrc);
+    if (job) {
+        setJobSrc(job, newSrc);
+    }
 
     if (lastPreviewWrapper) {
         const images = lastPreviewWrapper.querySelectorAll('img[data-pending-src="' + oldSrc + '"]');
@@ -1565,6 +1856,19 @@ function updatePendingImageKey(oldSrc, newSrc) {
             img.setAttribute('src', blobUrl);
         });
     }
+}
+
+function isActiveBlobUrl(blobUrl) {
+    if (!blobUrl) {
+        return false;
+    }
+    var active = false;
+    pasteImageJobs.forEach(function (job) {
+        if (!active && job && !job.closed && job.blobUrl === blobUrl) {
+            active = true;
+        }
+    });
+    return active;
 }
 
 function finalizePendingImage(filePath, blobUrl) {
@@ -1585,7 +1889,15 @@ function finalizePendingImage(filePath, blobUrl) {
     }
 
     if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
+        var stillUsed = false;
+        pendingImageMap.forEach(function (value) {
+            if (value === blobUrl) {
+                stillUsed = true;
+            }
+        });
+        if (!stillUsed && !isActiveBlobUrl(blobUrl)) {
+            URL.revokeObjectURL(blobUrl);
+        }
     }
 }
 
@@ -1598,6 +1910,211 @@ function syncImageLoadingIndicator() {
     loadingIndicator(activeImageOperations > 0);
 }
 
+function renderImageOverlay(img, job, wrapper) {
+    if (!img || !job || job.closed) {
+        return;
+    }
+
+    var doc = img.ownerDocument;
+    ensurePreviewOverlayStyles(doc);
+    var container = img.closest('.s2-image-overlay-wrap');
+    if (!container || container.getAttribute('data-job-id') !== String(job.id)) {
+        container = doc.createElement('span');
+        container.className = 's2-image-overlay-wrap';
+        container.setAttribute('data-job-id', String(job.id));
+        img.parentNode.insertBefore(container, img);
+        container.appendChild(img);
+    }
+
+    var overlay = container.querySelector('.s2-image-overlay');
+    if (!overlay) {
+        overlay = doc.createElement('div');
+        overlay.className = 's2-image-overlay';
+        overlay.innerHTML =
+            '<div class="s2-image-overlay-line s2-image-overlay-dims">-</div>' +
+            '<div class="s2-image-overlay-line s2-image-overlay-sizes">-</div>' +
+            '<div class="s2-image-overlay-controls">' +
+            '<div class="s2-image-overlay-group s2-image-overlay-mode">' +
+            '<button type="button" data-mode="1x">1x</button>' +
+            '<button type="button" data-mode="2x">2x</button>' +
+            '</div>' +
+            '</div>' +
+            '<div class="s2-image-overlay-formats">' +
+            '<label class="s2-image-format" data-format="jpeg"><input type="checkbox" data-format="jpeg"><span class="s2-format-name">jpg</span><span class="s2-format-size">-</span><span class="s2-format-info"></span></label>' +
+            '<label class="s2-image-format" data-format="png8"><input type="checkbox" data-format="png8"><span class="s2-format-name">png8</span><span class="s2-format-size">-</span><span class="s2-format-info"></span></label>' +
+            '<label class="s2-image-format" data-format="png24"><input type="checkbox" data-format="png24"><span class="s2-format-name">png24</span><span class="s2-format-size">-</span><span class="s2-format-info"></span></label>' +
+            '</div>';
+        container.appendChild(overlay);
+
+        var closeButton = doc.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 's2-image-overlay-close';
+        closeButton.innerHTML = '&times;';
+        closeButton.addEventListener('click', function () {
+            closeImageJob(job);
+        });
+        overlay.appendChild(closeButton);
+
+        overlay.querySelectorAll('button[data-mode]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var mode = button.getAttribute('data-mode');
+                if (mode) {
+                    switchImageJobMode(job, mode);
+                }
+            });
+        });
+
+        overlay.querySelectorAll('input[type="checkbox"][data-format]').forEach(function (input) {
+            input.addEventListener('change', function () {
+                var format = input.getAttribute('data-format');
+                if (format) {
+                    toggleImageJobFormat(job, format, input.checked);
+                }
+            });
+        });
+
+        var sizeGroup = doc.createElement('div');
+        sizeGroup.className = 's2-image-overlay-group s2-image-overlay-size';
+        sizeOptions.forEach(function (sizeOption) {
+            var button = doc.createElement('button');
+            button.type = 'button';
+            button.setAttribute('data-size', sizeOption === Infinity ? 'inf' : String(sizeOption));
+            button.innerHTML = sizeOption === Infinity ? '&infin;' : String(sizeOption);
+            button.addEventListener('click', function () {
+                var value = button.getAttribute('data-size');
+                if (value) {
+                    switchImageJobSize(job, value);
+                }
+            });
+            sizeGroup.appendChild(button);
+        });
+        var controls = overlay.querySelector('.s2-image-overlay-controls');
+        if (controls) {
+            controls.appendChild(sizeGroup);
+        }
+    }
+
+    job.overlay = {
+        overlay: overlay,
+        dims: overlay.querySelector('.s2-image-overlay-dims'),
+        sizes: overlay.querySelector('.s2-image-overlay-sizes'),
+        modeButtons: overlay.querySelectorAll('button[data-mode]'),
+        sizeButtons: overlay.querySelectorAll('button[data-size]'),
+        formatRows: {
+            jpeg: overlay.querySelector('.s2-image-format[data-format="jpeg"]'),
+            png8: overlay.querySelector('.s2-image-format[data-format="png8"]'),
+            png24: overlay.querySelector('.s2-image-format[data-format="png24"]')
+        }
+    };
+
+    updateImageJobOverlay(job);
+}
+
+function updateImageJobOverlay(job) {
+    if (!job || job.closed) {
+        return;
+    }
+    if (!job.overlay || !job.overlay.overlay || !job.overlay.overlay.isConnected) {
+        var img = findPreviewImageForJob(job);
+        if (img) {
+            renderImageOverlay(img, job, lastPreviewWrapper);
+        }
+    }
+    if (!job.overlay || !job.overlay.overlay || !job.overlay.overlay.isConnected) {
+        return;
+    }
+    var state = job.modes[job.currentMode];
+    var overlay = job.overlay;
+    var status = state && state.status ? state.status : 'idle';
+    overlay.overlay.setAttribute('data-status', status);
+
+    var bestSize = null;
+    if (state) {
+        ['jpeg', 'png8', 'png24'].forEach(function (format) {
+            if (!state.formatEnabled[format]) {
+                return;
+            }
+            var candidate = state.candidates[format];
+            if (candidate && typeof candidate.size === 'number') {
+                if (bestSize === null || candidate.size < bestSize) {
+                    bestSize = candidate.size;
+                }
+            }
+        });
+    }
+
+    var dimText = '-';
+    if (job.original.width && job.original.height) {
+        dimText = formatDimensions(job.original.width, job.original.height);
+        if (state && state.sourceInfo && typeof state.sourceInfo.width === 'number') {
+            if (state.sourceInfo.resized || state.sourceInfo.cropped) {
+                dimText += ' &rarr; ' + formatDimensions(state.sourceInfo.width, state.sourceInfo.height);
+            }
+        }
+    }
+    overlay.dims.innerHTML = dimText;
+
+    var sizeText = humanFileSize(job.original.size);
+    if (bestSize !== null) {
+        sizeText += ' &rarr; ' + humanFileSize(bestSize);
+    } else {
+        sizeText += ' &rarr; -';
+    }
+    overlay.sizes.innerHTML = sizeText;
+
+    overlay.modeButtons.forEach(function (button) {
+        var mode = button.getAttribute('data-mode');
+        if (mode === job.currentMode) {
+            button.classList.add('is-active');
+        } else {
+            button.classList.remove('is-active');
+        }
+    });
+
+    overlay.sizeButtons.forEach(function (button) {
+        var value = button.getAttribute('data-size');
+        var sizeValue = value === 'inf' ? Infinity : parseInt(value, 10);
+        if (state && state.sizeChoice === sizeValue) {
+            button.classList.add('is-active');
+        } else {
+            button.classList.remove('is-active');
+        }
+    });
+
+    ['jpeg', 'png8', 'png24'].forEach(function (format) {
+        var row = overlay.formatRows[format];
+        if (!row || !state) {
+            return;
+        }
+        var input = row.querySelector('input');
+        var size = row.querySelector('.s2-format-size');
+        var info = row.querySelector('.s2-format-info');
+        if (input) {
+            input.checked = !!state.formatEnabled[format];
+        }
+        if (state.candidates[format] && typeof state.candidates[format].size === 'number') {
+            size.textContent = humanFileSize(state.candidates[format].size);
+        } else {
+            size.textContent = state.candidateReady[format] ? '-' : '...';
+        }
+        var infoText = '';
+        if (format === 'jpeg' && state.candidates.jpeg && typeof state.candidates.jpeg.quality === 'number') {
+            infoText = 'q ' + Math.round(state.candidates.jpeg.quality * 100) + '%';
+        } else if (format === 'png8' && state.candidates.png8 && typeof state.candidates.png8.colors === 'number') {
+            infoText = 'colors ' + state.candidates.png8.colors;
+        }
+        if (infoText && !state.candidateReady[format]) {
+            infoText += '...';
+        }
+        info.textContent = infoText;
+        if (state.selectedType === format) {
+            row.classList.add('is-best');
+        } else {
+            row.classList.remove('is-best');
+        }
+    });
+}
+
 document.addEventListener('preview_updated.s2', function (event) {
     if (!event.detail || !event.detail.wrapper) {
         return;
@@ -1605,31 +2122,23 @@ document.addEventListener('preview_updated.s2', function (event) {
 
     lastPreviewWrapper = event.detail.wrapper;
     applyPendingImages(lastPreviewWrapper);
+
+    var images = lastPreviewWrapper.querySelectorAll('img');
+    images.forEach(function (img) {
+        var job = findImageJobForPreview(img);
+        if (job) {
+            renderImageOverlay(img, job, lastPreviewWrapper);
+        }
+    });
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    var altPressed = false;
-
-    document.addEventListener('keyup', function (e) {
-        altPressed = e.altKey;
-    });
-
     document.addEventListener('keydown', function (e) {
-        altPressed = e.altKey;
-
         if (e.ctrlKey && !e.shiftKey && e.code === 'KeyS') {
             document.dispatchEvent(new Event('save_form.s2'));
             e.preventDefault();
         }
     });
-
-    window.addEventListener('blur', function () {
-        altPressed = false;
-    });
-
-    isAltPressed = function () {
-        return altPressed;
-    }
 });
 
 function uploadBlobToPictureDir(blob, name, extension, dir, token) {
@@ -1675,306 +2184,794 @@ function uploadBlobToPictureDir(blob, name, extension, dir, token) {
         .finally(syncImageLoadingIndicator);
 }
 
-var imageFormatSelection = {
-    compareMaxSize: 512,
-    jpegQuality: 0.95,
-    jpegMinQuality: 0.6,
-    jpegQualitySearchSteps: 6,
-    jpegMinSsim: 0.985,
-    png8MinSsim: 0.98,
-    ssimTileSize: 64,
-    ssimTileWeight: 0.3,
-    png8MinPsnr: 40,
-    png24OptLevel: 2,
-    png8OptLevel: 2
-};
-
-function optimizeAndUploadFile(file, altPressed) {
-    console.time('optimizeAndUploadFile');
-    var uploadStarted = false;
-    var reserveInfo = null;
-    var reserveFailed = false;
-    var blobUrl = URL.createObjectURL(file);
+function createImageJob(file) {
     var now = new Date();
-    var dir = '/' + now.getFullYear() + '/' + ('0' + (now.getMonth() + 1)).slice(-2);
-    var suggestedName = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + "-" + ('0' + now.getDate()).slice(-2)
-        + "_" + ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + '.png';
-    var candidates = {
-        png24: null,
-        png8: null,
-        jpeg: null
+    var job = {
+        id: ++pasteImageCounter,
+        file: file,
+        blobUrl: URL.createObjectURL(file),
+        dir: '/' + now.getFullYear() + '/' + ('0' + (now.getMonth() + 1)).slice(-2),
+        suggestedName: now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + "-" + ('0' + now.getDate()).slice(-2)
+            + "_" + ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + '.png',
+        currentMode: '1x',
+        src: null,
+        original: {width: null, height: null, size: file ? file.size : null},
+        completedModes: { '1x': false, '2x': false },
+        modes: {},
+        overlay: null,
+        closed: false
     };
-    var candidateReady = {
-        png24: false,
-        png8: false,
-        jpeg: false
+    job.modes['1x'] = createModeState('1x');
+    job.modes['2x'] = createModeState('2x');
+    return job;
+}
+
+function createModeState(mode) {
+    return {
+        mode: mode,
+        policy: getModePolicy(mode, 1600),
+        sizeChoice: 1600,
+        formatEnabled: {jpeg: true, png8: true, png24: true},
+        formatInitialized: false,
+        candidates: {jpeg: null, png8: null, png24: null},
+        candidateReady: {jpeg: false, png8: false, png24: false},
+        started: {jpeg: false, png8: false, png24: false},
+        uploaded: {jpeg: null, png8: null, png24: null},
+        selectedType: null,
+        status: 'idle',
+        statusLabel: 'Waiting',
+        runId: 0,
+        reserveInfo: null,
+        reservePromise: null,
+        reserveDone: false,
+        reserveFailed: false,
+        sourceInfo: null,
+        sourcePromise: null,
+        analysisInfo: null,
+        analysisPromise: null,
+        pngSourcePromise: null,
+        displayWidth: null,
+        displayHeight: null,
+        ignoreCache: false,
+        cache: null,
+        sizeCaches: {},
+        uploadInProgress: false,
+        activeRun: false,
+        summaryLogged: false
     };
-    var analysisInfo = null;
-    var reserveDone = false;
-    console.time('image analysis');
-    var analysisPromise = imageUtils.analyzeImage(file, imageFormatSelection)
+}
+
+function resetModeState(state, ignoreCache) {
+    if (state.activeRun) {
+        state.activeRun = false;
+        markImageOperation(-1);
+    }
+    state.runId += 1;
+    state.policy = getModePolicy(state.mode, state.sizeChoice);
+    state.candidates = {jpeg: null, png8: null, png24: null};
+    state.candidateReady = {jpeg: false, png8: false, png24: false};
+    state.started = {jpeg: false, png8: false, png24: false};
+    state.selectedType = null;
+    state.status = 'starting';
+    state.statusLabel = 'Preparing';
+    state.reserveInfo = null;
+    state.reservePromise = null;
+    state.reserveDone = false;
+    state.reserveFailed = false;
+    state.sourceInfo = null;
+    state.sourcePromise = null;
+    state.analysisInfo = null;
+    state.analysisPromise = null;
+    state.pngSourcePromise = null;
+    state.displayWidth = null;
+    state.displayHeight = null;
+    state.uploadInProgress = false;
+    state.activeRun = true;
+    state.summaryLogged = false;
+    state.ignoreCache = ignoreCache;
+}
+
+function formatSelectionEquals(a, b) {
+    if (!a || !b) {
+        return false;
+    }
+    return a.jpeg === b.jpeg && a.png8 === b.png8 && a.png24 === b.png24;
+}
+
+function getSizeCacheKey(sizeChoice) {
+    return sizeChoice === Infinity ? 'inf' : String(sizeChoice);
+}
+
+function applyModePlaceholder(job, state, runId) {
+    if (!state.reserveInfo || !state.reserveInfo.file_path) {
+        return;
+    }
+    var dims = getDisplayDimensionsForMode(state.mode, state.sourceInfo);
+    state.displayWidth = dims.width;
+    state.displayHeight = dims.height;
+
+    var newSrc = state.reserveInfo.file_path;
+    pendingImageMap.set(newSrc, job.blobUrl);
+    applyPendingImages(lastPreviewWrapper);
+    if (job.src) {
+        replaceImageTagInEditor(job.src, newSrc, dims.width, dims.height);
+        updatePendingImageKey(job.src, newSrc);
+    } else {
+        insertImageTag(newSrc, dims.width, dims.height);
+    }
+    setJobSrc(job, newSrc);
+    updateImageJobOverlay(job);
+}
+
+function startModePipeline(job, mode, allowCache) {
+    if (!job || job.closed) {
+        return;
+    }
+    var state = job.modes[mode];
+    if (!state) {
+        return;
+    }
+    var sizeKey = getSizeCacheKey(state.sizeChoice);
+    var cached = allowCache && state.sizeCaches ? state.sizeCaches[sizeKey] : null;
+    if (cached && formatSelectionEquals(cached.formatEnabled, state.formatEnabled)) {
+        state.candidates = Object.assign({}, cached.candidates);
+        state.analysisInfo = cached.analysisInfo;
+        state.sourceInfo = cached.sourceInfo;
+        state.displayWidth = cached.displayWidth;
+        state.displayHeight = cached.displayHeight;
+        state.selectedType = cached.selectedType;
+        state.formatEnabled = Object.assign({}, cached.formatEnabled);
+        state.candidateReady = {jpeg: true, png8: true, png24: true};
+        state.status = 'done';
+        state.statusLabel = 'Cached';
+        updateImageJobOverlay(job);
+        if (cached.selectedPath && job.currentMode === mode) {
+            replaceImageTagInEditor(job.src, cached.selectedPath, state.displayWidth, state.displayHeight);
+            setJobSrc(job, cached.selectedPath);
+        }
+        return;
+    }
+
+    resetModeState(state, !allowCache);
+    var runId = state.runId;
+    markImageOperation(1);
+
+    state.sourcePromise = imageUtils.resizeImageFile(job.file, state.policy.maxUploadEdge, getResizeOptionsForMode(mode, state.sizeChoice))
         .then(function (info) {
-            analysisInfo = info;
-            console.timeEnd('image analysis');
-            maybeStartUpload();
+            if (state.runId !== runId) {
+                return null;
+            }
+            state.sourceInfo = info;
+            if (info && typeof info.originalWidth === 'number') {
+                job.original.width = info.originalWidth;
+                job.original.height = info.originalHeight;
+            }
+            if (info) {
+                var dims = getDisplayDimensionsForMode(state.mode, info);
+                state.displayWidth = dims.width;
+                state.displayHeight = dims.height;
+            }
+            if (!state.formatInitialized && info) {
+                if (shouldPreferJpegOnly(info.originalWidth, info.originalHeight)) {
+                    state.formatEnabled.png8 = false;
+                    state.formatEnabled.png24 = false;
+                }
+                state.formatInitialized = true;
+            }
+            updateImageJobOverlay(job);
             return info;
         })
         .catch(function () {
-            // TODO: Analysis failures force hasAlpha=false and can allow JPEG selection for PNGs; decide on a safer fallback.
-            analysisInfo = {hasAlpha: false, width: 0, height: 0, data: null, tiles: [], tileData: []};
-            console.timeEnd('image analysis');
-            maybeStartUpload();
-            return analysisInfo;
-        });
-    var pngSourcePromise = (file.type === 'image/png')
-        ? Promise.resolve(file)
-        : imageUtils.compressToPng(file, true);
-
-    markImageOperation(1);
-
-    /**
-     * Experiments show that now in Chrome file.type is 'image/png' no matter how the image is pasted.
-     * However, I prefer to write a general algorithm.
-     */
-    pngSourcePromise.then(function (pngFile) {
-        console.time('png24 optipng');
-        runOptipng(pngFile, function (optimizedBlob) {
-            var candidate = optimizedBlob || pngFile;
-            candidates.png24 = {
-                blob: candidate,
-                size: candidate.size
-            };
-            console.timeEnd('png24 optipng');
-            candidateReady.png24 = true;
-            maybeStartUpload();
-        }, {
-            quantize: false,
-            optLevel: imageFormatSelection.png24OptLevel
+            if (state.runId !== runId) {
+                return null;
+            }
+            return null;
         });
 
-        console.time('png8 optipng');
+    state.reservePromise = requestPictureCsrfToken(job.dir)
+        .then(function (csrfToken) {
+            return reservePictureName(job.dir, job.suggestedName, csrfToken);
+        })
+        .then(function (reserveInfo) {
+            if (state.runId !== runId) {
+                return null;
+            }
+            if (!reserveInfo || reserveInfo.success === false || !reserveInfo.file_path) {
+                throw new Error((reserveInfo && reserveInfo.message) ? reserveInfo.message : 'Unable to reserve image name.');
+            }
+            state.reserveInfo = reserveInfo;
+            state.reserveDone = true;
+            return reserveInfo;
+        })
+        .catch(function (error) {
+            if (state.runId !== runId) {
+                return null;
+            }
+            console.warn('Reserve error:', error);
+            state.reserveFailed = true;
+            state.reserveDone = true;
+            return null;
+        });
+
+    Promise.all([state.reservePromise, state.sourcePromise]).then(function () {
+        if (state.runId !== runId) {
+            return;
+        }
+        if (job.currentMode === mode && state.reserveInfo && state.sourceInfo) {
+            applyModePlaceholder(job, state, runId);
+        }
+    });
+
+    state.analysisPromise = state.sourcePromise
+        .then(function (info) {
+            if (!info || state.runId !== runId) {
+                return null;
+            }
+            state.status = 'analyzing';
+            state.statusLabel = 'Analyzing';
+            updateImageJobOverlay(job);
+            var srcFile = info.file || job.file;
+            return imageUtils.analyzeImage(srcFile, state.policy);
+        })
+        .then(function (info) {
+            if (state.runId !== runId) {
+                return null;
+            }
+            if (!info) {
+                info = {hasAlpha: false, width: 0, height: 0, data: null, tiles: [], tileData: []};
+            }
+            state.analysisInfo = info;
+            state.status = 'compressing';
+            state.statusLabel = 'Compressing';
+            updateImageJobOverlay(job);
+            startEnabledFormats(job, state, runId);
+            maybeStartUpload(job, state, runId);
+            return info;
+        })
+        .catch(function () {
+            if (state.runId !== runId) {
+                return null;
+            }
+            state.analysisInfo = {hasAlpha: false, width: 0, height: 0, data: null, tiles: [], tileData: []};
+            state.status = 'compressing';
+            state.statusLabel = 'Compressing';
+            updateImageJobOverlay(job);
+            startEnabledFormats(job, state, runId);
+            maybeStartUpload(job, state, runId);
+            return state.analysisInfo;
+        });
+}
+
+function startEnabledFormats(job, state, runId) {
+    ['jpeg', 'png8', 'png24'].forEach(function (format) {
+        if (state.formatEnabled[format]) {
+            startFormatTask(job, state, runId, format);
+        } else {
+            state.candidateReady[format] = true;
+        }
+    });
+}
+
+function startFormatTask(job, state, runId, format) {
+    if (!job || job.closed || !state) {
+        return;
+    }
+    if (state.started[format]) {
+        return;
+    }
+    state.started[format] = true;
+    state.candidateReady[format] = false;
+
+    if (!state.analysisPromise) {
+        return;
+    }
+
+    if (format === 'jpeg') {
+        state.analysisPromise.then(function () {
+            if (state.runId !== runId) {
+                return;
+            }
+            if (!state.analysisInfo || state.analysisInfo.hasAlpha || !state.analysisInfo.data) {
+                state.candidateReady.jpeg = true;
+                maybeStartUpload(job, state, runId);
+                updateImageJobOverlay(job);
+                return;
+            }
+            var srcFile = state.sourceInfo && state.sourceInfo.file ? state.sourceInfo.file : job.file;
+            imageUtils.findJpegCandidateForSsim(srcFile, state.analysisInfo, state.policy, '#ffffff', true, function (progress) {
+                if (state.runId !== runId || !progress) {
+                    return;
+                }
+                state.candidates.jpeg = {
+                    blob: null,
+                    size: progress.size,
+                    ssim: progress.ssim,
+                    ssimDownscale: progress.ssimDownscale,
+                    ssimTiles: progress.ssimTiles,
+                    quality: progress.quality
+                };
+                updateImageJobOverlay(job);
+            }).then(function (candidate) {
+                if (state.runId !== runId) {
+                    return;
+                }
+                if (candidate) {
+                    state.candidates.jpeg = candidate;
+                }
+                state.candidateReady.jpeg = true;
+                maybeStartUpload(job, state, runId);
+                updateImageJobOverlay(job);
+            }).catch(function () {
+                if (state.runId !== runId) {
+                    return;
+                }
+                state.candidateReady.jpeg = true;
+                maybeStartUpload(job, state, runId);
+                updateImageJobOverlay(job);
+            });
+        });
+        return;
+    }
+
+    if (!state.pngSourcePromise) {
+        state.pngSourcePromise = state.sourcePromise.then(function (info) {
+            var srcFile = info && info.file ? info.file : job.file;
+            return (srcFile.type === 'image/png')
+                ? Promise.resolve(srcFile)
+                : imageUtils.compressToPng(srcFile, true);
+        });
+    }
+
+    state.pngSourcePromise.then(function (pngFile) {
+        if (state.runId !== runId) {
+            return;
+        }
+        if (format === 'png24') {
+            runOptipng(pngFile, function (optimizedBlob) {
+                if (state.runId !== runId) {
+                    return;
+                }
+                var candidate = optimizedBlob || pngFile;
+                state.candidates.png24 = {
+                    blob: candidate,
+                    size: candidate.size
+                };
+                state.candidateReady.png24 = true;
+                maybeStartUpload(job, state, runId);
+                updateImageJobOverlay(job);
+            }, {
+                quantize: false,
+                optLevel: state.policy.png24OptLevel
+            });
+            return;
+        }
+
         runOptipng(pngFile, function (optimizedBlob, meta) {
+            if (state.runId !== runId) {
+                return;
+            }
             var quantResult = meta && meta.quantResult ? meta.quantResult : null;
             if (optimizedBlob && quantResult && quantResult.accepted) {
-                analysisPromise.then(function (info) {
-                    return imageUtils.computeCandidateSsimScore(optimizedBlob, info, imageFormatSelection);
+                state.analysisPromise.then(function (info) {
+                    if (!info || state.runId !== runId) {
+                        return null;
+                    }
+                    return imageUtils.computeCandidateSsimScore(optimizedBlob, info, state.policy);
                 }).then(function (score) {
-                    candidates.png8 = {
+                    if (state.runId !== runId) {
+                        return;
+                    }
+                    var colors = quantResult && typeof quantResult.paletteSize === 'number'
+                        ? quantResult.paletteSize
+                        : (quantResult && typeof quantResult.originalColors === 'number' ? quantResult.originalColors : null);
+                    state.candidates.png8 = {
                         blob: optimizedBlob,
                         size: optimizedBlob.size,
-                        ssim: score.score,
-                        ssimDownscale: score.downscale,
-                        ssimTiles: score.tiles
+                        ssim: score ? score.score : 0,
+                        ssimDownscale: score ? score.downscale : 0,
+                        ssimTiles: score ? score.tiles : [],
+                        psnr: quantResult.psnr,
+                        colors: colors
                     };
-                    console.timeEnd('png8 optipng');
-                    candidateReady.png8 = true;
-                    maybeStartUpload();
+                    state.candidateReady.png8 = true;
+                    maybeStartUpload(job, state, runId);
+                    updateImageJobOverlay(job);
                 }).catch(function () {
-                    candidates.png8 = {
+                    if (state.runId !== runId) {
+                        return;
+                    }
+                    var colors = quantResult && typeof quantResult.paletteSize === 'number'
+                        ? quantResult.paletteSize
+                        : (quantResult && typeof quantResult.originalColors === 'number' ? quantResult.originalColors : null);
+                    state.candidates.png8 = {
                         blob: optimizedBlob,
                         size: optimizedBlob.size,
                         ssim: 0,
                         ssimDownscale: 0,
-                        ssimTiles: []
+                        ssimTiles: [],
+                        psnr: quantResult.psnr,
+                        colors: colors
                     };
-                    console.timeEnd('png8 optipng');
-                    candidateReady.png8 = true;
-                    maybeStartUpload();
+                    state.candidateReady.png8 = true;
+                    maybeStartUpload(job, state, runId);
+                    updateImageJobOverlay(job);
                 });
                 return;
             }
-            console.timeEnd('png8 optipng');
-            candidateReady.png8 = true;
-            maybeStartUpload();
+            state.candidateReady.png8 = true;
+            maybeStartUpload(job, state, runId);
+            updateImageJobOverlay(job);
         }, {
             quantize: true,
-            minPsnr: imageFormatSelection.png8MinPsnr,
-            optLevel: imageFormatSelection.png8OptLevel,
-            requireQuantized: true
+            minPsnr: state.policy.png8MinPsnr,
+            optLevel: state.policy.png8OptLevel,
+            requireQuantized: true,
+            onProgress: function (progress) {
+                if (state.runId !== runId || !progress) {
+                    return;
+                }
+                if (progress.stage === 'quant') {
+                    var colors = progress.quantResult && typeof progress.quantResult.paletteSize === 'number'
+                        ? progress.quantResult.paletteSize
+                        : (progress.quantResult && typeof progress.quantResult.originalColors === 'number' ? progress.quantResult.originalColors : null);
+                    state.candidates.png8 = {
+                        blob: null,
+                        size: progress.size,
+                        ssim: 0,
+                        ssimDownscale: 0,
+                        ssimTiles: [],
+                        psnr: progress.quantResult ? progress.quantResult.psnr : null,
+                        colors: colors
+                    };
+                    updateImageJobOverlay(job);
+                }
+            }
         });
     }).catch(function () {
-        console.timeEnd('png24 optipng');
-        console.timeEnd('png8 optipng');
-        if (file.type === 'image/png') {
-            candidates.png24 = {
-                blob: file,
-                size: file.size
-            };
+        if (state.runId !== runId) {
+            return;
         }
-        candidateReady.png24 = true;
-        candidateReady.png8 = true;
-        maybeStartUpload();
+        state.candidateReady[format] = true;
+        maybeStartUpload(job, state, runId);
+        updateImageJobOverlay(job);
     });
+}
 
-    console.time('jpeg encode');
-    analysisPromise
-        .then(function (info) {
-            if (!info || !info.data || info.hasAlpha) {
-                console.timeEnd('jpeg encode');
-                candidateReady.jpeg = true;
-                maybeStartUpload();
-                return;
-            }
+function areEnabledCandidatesReady(state) {
+    return ['jpeg', 'png8', 'png24'].every(function (format) {
+        return !state.formatEnabled[format] || state.candidateReady[format];
+    });
+}
 
-            return imageUtils.findJpegCandidateForSsim(file, info, imageFormatSelection, '#ffffff', true)
-                .then(function (candidate) {
-                    if (candidate) {
-                        candidates.jpeg = candidate;
-                    }
-                    console.timeEnd('jpeg encode');
-                    candidateReady.jpeg = true;
-                    maybeStartUpload();
-                })
-                .catch(function () {
-                    console.timeEnd('jpeg encode');
-                    candidateReady.jpeg = true;
-                    maybeStartUpload();
-                });
-        })
-        .catch(function () {
-            console.timeEnd('jpeg encode');
-            candidateReady.jpeg = true;
-            maybeStartUpload();
-        });
-
-    Promise.all([
-        requestPictureCsrfToken(dir).then(function (csrfToken) {
-            return reservePictureName(dir, suggestedName, csrfToken);
-        }),
-        getImageDimensions(file)
-    ])
-        .then(function (results) {
-            reserveInfo = results[0];
-            var dimensions = results[1];
-
-            if (!reserveInfo || reserveInfo.success === false || !reserveInfo.file_path) {
-                throw new Error((reserveInfo && reserveInfo.message) ? reserveInfo.message : 'Unable to reserve image name.');
-            }
-
-            pendingImageMap.set(reserveInfo.file_path, blobUrl);
-            applyPendingImages(lastPreviewWrapper);
-            insertImageTag(reserveInfo.file_path, dimensions.width || 'auto', dimensions.height || 'auto', altPressed);
-            reserveDone = true;
-            maybeStartUpload();
-        })
-        .catch(function (error) {
-            console.warn('Reserve error:', error);
-            URL.revokeObjectURL(blobUrl);
-            reserveFailed = true;
-            reserveDone = true;
-            maybeStartUpload();
-        });
-
-    function maybeStartUpload() {
-        if (uploadStarted || !reserveDone || !analysisInfo) {
-            return;
-        }
-        if (!candidateReady.png24 || !candidateReady.png8 || !candidateReady.jpeg) {
-            return;
-        }
-
-        var choice = imageUtils.selectBestImageCandidate(analysisInfo.hasAlpha, candidates, imageFormatSelection);
-        if (!choice || !choice.candidate || !choice.candidate.blob) {
-            if (!analysisInfo.hasAlpha && candidates.jpeg) {
-                choice = {type: 'jpeg', candidate: candidates.jpeg};
-            } else if (candidates.png8) {
-                choice = {type: 'png8', candidate: candidates.png8};
-            } else if (candidates.png24) {
-                choice = {type: 'png24', candidate: candidates.png24};
-            } else {
-                markImageOperation(-1);
-                console.timeEnd('optimizeAndUploadFile');
-                return;
+function chooseBestCandidate(state) {
+    var filtered = {
+        png24: state.formatEnabled.png24 ? state.candidates.png24 : null,
+        png8: state.formatEnabled.png8 ? state.candidates.png8 : null,
+        jpeg: state.formatEnabled.jpeg ? state.candidates.jpeg : null
+    };
+    var choice = imageUtils.selectBestImageCandidate(state.analysisInfo && state.analysisInfo.hasAlpha, filtered, state.policy);
+    if (!choice || !choice.candidate || !choice.candidate.blob) {
+        if (!state.analysisInfo || !state.analysisInfo.hasAlpha) {
+            if (state.formatEnabled.jpeg && state.candidates.jpeg) {
+                return {type: 'jpeg', candidate: state.candidates.jpeg};
             }
         }
-
-        imageUtils.logImageCandidateDecision(choice, candidates, analysisInfo.hasAlpha, imageFormatSelection);
-
-        uploadStarted = true;
-
-        if (reserveInfo) {
-            var uploadPng24Backup = function () {
-                if (candidates.png24 && candidates.png24.blob) {
-                    uploadBlobToPictureDir(
-                        candidates.png24.blob,
-                        reserveInfo.name,
-                        null,
-                        reserveInfo.dir,
-                        reserveInfo.token
-                    ).catch(function (error) {
-                        console.warn('Backup upload error:', error);
-                    });
-                }
-            };
-
-            if (choice.type === 'jpeg') {
-                uploadPng24Backup();
-                var jpgName = reserveInfo.name.replace(/\.png$/i, '.jpg');
-                uploadBlobToPictureDir(choice.candidate.blob, jpgName, null, reserveInfo.dir)
-                    .then(function (result) {
-                    var newPath = result.res.file_path;
-                    replaceImageSrcInEditor(reserveInfo.file_path, newPath);
-                    updatePendingImageKey(reserveInfo.file_path, newPath);
-                    finalizePendingImage(newPath, blobUrl);
-                    markImageOperation(-1);
-                    console.timeEnd('optimizeAndUploadFile');
-                }).catch(function () {
-                    finalizePendingImage(reserveInfo.file_path, blobUrl);
-                    markImageOperation(-1);
-                    console.timeEnd('optimizeAndUploadFile');
-                });
-            } else if (choice.type === 'png8') {
-                uploadPng24Backup();
-                var png8Name = reserveInfo.name.replace(/\.png$/i, '-8.png');
-                if (png8Name === reserveInfo.name) {
-                    png8Name = reserveInfo.name + '-8.png';
-                }
-                uploadBlobToPictureDir(choice.candidate.blob, png8Name, null, reserveInfo.dir)
-                    .then(function (result) {
-                    var newPath = result.res.file_path;
-                    replaceImageSrcInEditor(reserveInfo.file_path, newPath);
-                    updatePendingImageKey(reserveInfo.file_path, newPath);
-                    finalizePendingImage(newPath, blobUrl);
-                    markImageOperation(-1);
-                    console.timeEnd('optimizeAndUploadFile');
-                }).catch(function () {
-                    finalizePendingImage(reserveInfo.file_path, blobUrl);
-                    markImageOperation(-1);
-                    console.timeEnd('optimizeAndUploadFile');
-                });
-            } else {
-                uploadBlobToPictureDir(
-                    choice.candidate.blob,
-                    reserveInfo.name,
-                    null,
-                    reserveInfo.dir,
-                    reserveInfo.token
-                ).then(function (result) {
-                    finalizePendingImage(result.res.file_path, blobUrl);
-                    markImageOperation(-1);
-                    console.timeEnd('optimizeAndUploadFile');
-                }).catch(function () {
-                    finalizePendingImage(reserveInfo.file_path, blobUrl);
-                    markImageOperation(-1);
-                    console.timeEnd('optimizeAndUploadFile');
-                });
-            }
-            return;
+        if (state.formatEnabled.png8 && state.candidates.png8) {
+            return {type: 'png8', candidate: state.candidates.png8};
         }
-
-        if (!reserveFailed) {
-            return;
+        if (state.formatEnabled.png24 && state.candidates.png24) {
+            return {type: 'png24', candidate: state.candidates.png24};
         }
-
-        var fallbackExtension = choice.type === 'jpeg' ? 'jpg' : 'png';
-        uploadBlobToPictureDir(choice.candidate.blob, null, fallbackExtension)
-            .then(function (result) {
-            ReturnImage(result.res.file_path, result.width || 'auto', result.height || 'auto');
-            markImageOperation(-1);
-            console.timeEnd('optimizeAndUploadFile');
-        }).catch(function () {
-            markImageOperation(-1);
-            console.timeEnd('optimizeAndUploadFile');
-        });
+        return null;
     }
+    return choice;
+}
+
+function numbersMatch(a, b) {
+    if (a === b) {
+        return true;
+    }
+    if (typeof a === 'number' && typeof b === 'number' && isFinite(a) && isFinite(b)) {
+        return Math.abs(a - b) <= 0.0001;
+    }
+    return false;
+}
+
+function candidateMatchesUpload(uploaded, candidate, format) {
+    if (!uploaded || !candidate || !uploaded.path) {
+        return false;
+    }
+    if (typeof uploaded.size !== 'number' || typeof candidate.size !== 'number') {
+        return false;
+    }
+    if (uploaded.size !== candidate.size) {
+        return false;
+    }
+    if (format === 'jpeg') {
+        if (!numbersMatch(uploaded.quality, candidate.quality)) {
+            return false;
+        }
+    } else if (format === 'png8') {
+        if (!numbersMatch(uploaded.psnr, candidate.psnr)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function maybeStartUpload(job, state, runId) {
+    if (!job || job.closed || !state) {
+        return;
+    }
+    if (state.runId !== runId || !state.reserveDone || !state.analysisInfo) {
+        return;
+    }
+    if (!areEnabledCandidatesReady(state)) {
+        return;
+    }
+
+    var choice = chooseBestCandidate(state);
+    if (!choice || !choice.candidate || !choice.candidate.blob) {
+        if (state.activeRun) {
+            state.activeRun = false;
+            markImageOperation(-1);
+        }
+        state.status = 'done';
+        state.statusLabel = 'No candidate';
+        updateImageJobOverlay(job);
+        return;
+    }
+
+    state.selectedType = choice.type;
+    updateImageJobOverlay(job);
+
+    var cached = candidateMatchesUpload(state.uploaded[choice.type], choice.candidate, choice.type);
+    if (cached) {
+        state.status = 'done';
+        state.statusLabel = 'Cached';
+        if (job.currentMode === state.mode) {
+            replaceImageTagInEditor(job.src, state.uploaded[choice.type].path, state.displayWidth, state.displayHeight);
+            setJobSrc(job, state.uploaded[choice.type].path);
+        }
+        if (!state.summaryLogged) {
+            logPipelineSummary(job, state);
+        }
+        if (state.activeRun) {
+            state.activeRun = false;
+            markImageOperation(-1);
+        }
+        updateImageJobOverlay(job);
+        return;
+    }
+
+    if (state.uploadInProgress) {
+        return;
+    }
+    state.uploadInProgress = true;
+    state.status = 'uploading';
+    state.statusLabel = 'Uploading';
+    updateImageJobOverlay(job);
+
+    var reserveInfo = state.reserveInfo;
+    var uploadPromise = null;
+    var targetName = reserveInfo ? reserveInfo.name : null;
+    var uploadDir = reserveInfo ? reserveInfo.dir : null;
+    var token = reserveInfo ? reserveInfo.token : null;
+
+    function finishUpload(newPath) {
+        if (state.runId !== runId || job.closed) {
+            return;
+        }
+        if (newPath && choice && choice.type) {
+            state.uploaded[choice.type] = {
+                path: newPath,
+                size: choice.candidate.size,
+                quality: choice.type === 'jpeg' ? choice.candidate.quality : null,
+                psnr: choice.type === 'png8' ? choice.candidate.psnr : null
+            };
+        }
+        state.status = 'done';
+        state.statusLabel = 'Done';
+        state.uploadInProgress = false;
+        if (newPath && job.currentMode === state.mode) {
+            if (job.src) {
+                replaceImageTagInEditor(job.src, newPath, state.displayWidth, state.displayHeight);
+                if (job.src !== newPath) {
+                    updatePendingImageKey(job.src, newPath);
+                }
+            } else {
+                insertImageTag(newPath, state.displayWidth || 'auto', state.displayHeight || 'auto');
+            }
+            setJobSrc(job, newPath);
+            finalizePendingImage(newPath, job.blobUrl);
+        } else if (state.reserveInfo) {
+            finalizePendingImage(state.reserveInfo.file_path, job.blobUrl);
+        }
+        job.completedModes[state.mode] = true;
+        state.cache = {
+            candidates: Object.assign({}, state.candidates),
+            analysisInfo: state.analysisInfo,
+            sourceInfo: state.sourceInfo,
+            displayWidth: state.displayWidth,
+            displayHeight: state.displayHeight,
+            selectedType: state.selectedType,
+            selectedPath: newPath,
+            formatEnabled: Object.assign({}, state.formatEnabled)
+        };
+        state.sizeCaches[getSizeCacheKey(state.sizeChoice)] = state.cache;
+        if (!state.summaryLogged) {
+            logPipelineSummary(job, state);
+        }
+        if (state.activeRun) {
+            state.activeRun = false;
+            markImageOperation(-1);
+        }
+        updateImageJobOverlay(job);
+    }
+
+    function failUpload() {
+        if (state.runId !== runId || job.closed) {
+            return;
+        }
+        state.status = 'done';
+        state.statusLabel = 'Failed';
+        state.uploadInProgress = false;
+        if (state.reserveInfo) {
+            finalizePendingImage(state.reserveInfo.file_path, job.blobUrl);
+        }
+        if (!state.summaryLogged) {
+            logPipelineSummary(job, state);
+        }
+        if (state.activeRun) {
+            state.activeRun = false;
+            markImageOperation(-1);
+        }
+        updateImageJobOverlay(job);
+    }
+
+    var uploadBackup = function () {
+        if (state.formatEnabled.png24 && state.candidates.png24 && state.candidates.png24.blob && reserveInfo) {
+            uploadBlobToPictureDir(
+                state.candidates.png24.blob,
+                reserveInfo.name,
+                null,
+                reserveInfo.dir,
+                reserveInfo.token
+            ).catch(function (error) {
+                console.warn('Backup upload error:', error);
+            });
+        }
+    };
+
+    if (choice.type === 'jpeg') {
+        uploadBackup();
+        targetName = reserveInfo ? reserveInfo.name.replace(/\.png$/i, '.jpg') : null;
+        uploadPromise = uploadBlobToPictureDir(choice.candidate.blob, targetName, null, uploadDir);
+    } else if (choice.type === 'png8') {
+        uploadBackup();
+        if (reserveInfo) {
+            targetName = reserveInfo.name.replace(/\.png$/i, '-8.png');
+            if (targetName === reserveInfo.name) {
+                targetName = reserveInfo.name + '-8.png';
+            }
+        }
+        uploadPromise = uploadBlobToPictureDir(choice.candidate.blob, targetName, null, uploadDir);
+    } else if (reserveInfo) {
+        uploadPromise = uploadBlobToPictureDir(choice.candidate.blob, reserveInfo.name, null, reserveInfo.dir, token);
+    }
+
+    if (!uploadPromise && state.reserveFailed) {
+        var fallbackExtension = choice.type === 'jpeg' ? 'jpg' : 'png';
+        uploadPromise = uploadBlobToPictureDir(choice.candidate.blob, null, fallbackExtension);
+    }
+
+    if (!uploadPromise) {
+        failUpload();
+        return;
+    }
+
+    uploadPromise.then(function (result) {
+        finishUpload(result && result.res ? result.res.file_path : null);
+    }).catch(function () {
+        failUpload();
+    });
+}
+
+function switchImageJobMode(job, mode) {
+    if (!job || job.closed || !job.modes[mode] || job.currentMode === mode) {
+        return;
+    }
+    job.currentMode = mode;
+    var allowCache = job.completedModes['1x'] && job.completedModes['2x'];
+    startModePipeline(job, mode, allowCache);
+    updateImageJobOverlay(job);
+}
+
+function switchImageJobSize(job, sizeValue) {
+    if (!job || job.closed || !job.modes[job.currentMode]) {
+        return;
+    }
+    var state = job.modes[job.currentMode];
+    var nextSize = sizeValue === 'inf' ? Infinity : parseInt(sizeValue, 10);
+    if (!nextSize && nextSize !== Infinity) {
+        return;
+    }
+    if (state.sizeChoice === nextSize) {
+        return;
+    }
+    state.sizeChoice = nextSize;
+    startModePipeline(job, job.currentMode, true);
+    updateImageJobOverlay(job);
+}
+
+function toggleImageJobFormat(job, format, enabled) {
+    if (!job || job.closed || !job.modes[job.currentMode]) {
+        return;
+    }
+    var state = job.modes[job.currentMode];
+    if (state.formatEnabled[format] === enabled) {
+        return;
+    }
+    state.formatEnabled[format] = enabled;
+    if (enabled) {
+        if (state.analysisInfo) {
+            startFormatTask(job, state, state.runId, format);
+        } else if (state.analysisPromise) {
+            state.analysisPromise.then(function () {
+                startFormatTask(job, state, state.runId, format);
+            });
+        }
+    } else {
+        state.candidateReady[format] = true;
+    }
+    maybeStartUpload(job, state, state.runId);
+    updateImageJobOverlay(job);
+}
+
+function logPipelineSummary(job, state) {
+    state.summaryLogged = true;
+    var summary = {
+        mode: state.mode,
+        original: {
+            width: job.original.width,
+            height: job.original.height,
+            size: job.original.size
+        },
+        resize: state.sourceInfo ? {
+            width: state.sourceInfo.width,
+            height: state.sourceInfo.height,
+            resized: state.sourceInfo.resized,
+            cropped: state.sourceInfo.cropped
+        } : null,
+        choice: state.selectedType,
+        candidates: {
+            jpeg: state.candidates.jpeg ? {
+                size: state.candidates.jpeg.size,
+                ssim: state.candidates.jpeg.ssim,
+                quality: state.candidates.jpeg.quality
+            } : null,
+            png8: state.candidates.png8 ? {
+                size: state.candidates.png8.size,
+                ssim: state.candidates.png8.ssim,
+                psnr: state.candidates.png8.psnr
+            } : null,
+            png24: state.candidates.png24 ? {
+                size: state.candidates.png24.size
+            } : null
+        },
+        thresholds: {
+            jpegMinSsim: state.policy.jpegMinSsim,
+            png8MinSsim: state.policy.png8MinSsim
+        }
+    };
+    console.info('Image optimization summary', summary);
+}
+
+function optimizeAndUploadFile(file) {
+    if (!file) {
+        return;
+    }
+    var job = createImageJob(file);
+    pasteImageJobs.set(job.id, job);
+    startModePipeline(job, job.currentMode, false);
 }
