@@ -262,13 +262,14 @@ export function initPreviewSync(eForm, sTextareaName) {
     }
 
     const scrollMap = new ScrollMap(function () {
-        const cm = s2_codemirror.get_current && s2_codemirror.get_current();
         const doc = previewFrame.contentDocument;
-        if (!cm || !doc) {
+        const srcScroller = s2_codemirror.getScrollerElement();
+        if (!srcScroller || !doc) {
             return [[0], [0]];
         }
 
         const scrollElement = getScrollElement(doc);
+        const lineCount = s2_codemirror.getLineCount();
         const resultNodes = doc.querySelectorAll('#preview-text-wrapper .line[data-line]');
         const mapSrc = [0];
         const mapResult = [0];
@@ -276,7 +277,12 @@ export function initPreviewSync(eForm, sTextareaName) {
         const seen = new Set();
 
         if (!resultNodes.length) {
-            const srcScroller = cm.getScrollerElement();
+            mapSrc.push(srcScroller.scrollHeight);
+            mapResult.push(scrollElement.scrollHeight);
+            mapLines.push(0);
+            return [mapSrc, mapResult, mapLines];
+        }
+        if (!lineCount) {
             mapSrc.push(srcScroller.scrollHeight);
             mapResult.push(scrollElement.scrollHeight);
             mapLines.push(0);
@@ -290,10 +296,8 @@ export function initPreviewSync(eForm, sTextareaName) {
             }
             seen.add(line);
 
-            const safeLine = Math.max(0, Math.min(line, cm.lineCount() - 1));
-            const srcTop = cm.heightAtLine
-                ? cm.heightAtLine(safeLine, 'local')
-                : cm.charCoords({line: safeLine, ch: 0}, 'local').top;
+            const safeLine = Math.max(0, Math.min(line, lineCount - 1));
+            const srcTop = s2_codemirror.getLineTop(safeLine);
             const resultTop = getNodeScrollTop(node);
 
             mapSrc.push(Math.round(srcTop));
@@ -301,7 +305,6 @@ export function initPreviewSync(eForm, sTextareaName) {
             mapLines.push(safeLine);
         });
 
-        const srcScroller = cm.getScrollerElement();
         const srcScrollHeight = srcScroller.scrollHeight;
         const lastSrcElemPos = mapSrc[mapSrc.length - 1];
         const allowedHeight = 5;
@@ -371,14 +374,13 @@ export function initPreviewSync(eForm, sTextareaName) {
             return;
         }
 
-        const cm = s2_codemirror.get_current && s2_codemirror.get_current();
         const doc = previewFrame.contentDocument;
-        if (!cm || !doc) {
+        const srcScroller = s2_codemirror.getScrollerElement();
+        if (!srcScroller || !doc) {
             return;
         }
 
         const scrollElement = getScrollElement(doc);
-        const srcScroller = cm.getScrollerElement();
 
         const previewScrollTargets = [
             scrollElement,
@@ -391,9 +393,9 @@ export function initPreviewSync(eForm, sTextareaName) {
         syncScroll = new SyncScroll(
             scrollMap,
             new Animator(function () {
-                return cm.getScrollInfo().top;
+                return s2_codemirror.getScrollTop();
             }, function (y) {
-                cm.scrollTo(null, y);
+                s2_codemirror.setScrollTop(y);
             }),
             new Animator(function () {
                 return scrollElement.scrollTop;

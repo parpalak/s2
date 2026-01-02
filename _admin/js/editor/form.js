@@ -145,17 +145,12 @@ export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaNam
         }
 
         function wireLivePreview() {
-            const cm = s2_codemirror.get_current && s2_codemirror.get_current();
-            if (!cm || !cm.on) {
-                return;
-            }
-
             const updatePreview = debounceWithMaxWait(function () {
                 s2_codemirror.flip();
                 checkChanges();
             }, 300, 3000);
 
-            cm.on('change', updatePreview);
+            s2_codemirror.onChange(updatePreview);
         }
 
         const recoveredText = localStorage.getItem('s2_curr_text');

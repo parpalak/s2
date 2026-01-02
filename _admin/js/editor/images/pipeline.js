@@ -163,30 +163,21 @@ function insertImageTag(src, width, height) {
 }
 
 function replaceImageSrcInEditor(oldSrc, newSrc) {
-    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
-    if (!cm || !cm.getSearchCursor) {
+    if (!oldSrc) {
         return;
     }
-
-    cm.operation(function () {
-        const safeOld = sanitizeImageSrc(oldSrc);
-        const safeNew = sanitizeImageSrc(newSrc);
-        const cursor = cm.getSearchCursor(safeOld, {line: 0, ch: 0});
-        while (cursor.findNext()) {
-            cursor.replace(safeNew);
-        }
-    });
+    const safeOld = sanitizeImageSrc(oldSrc);
+    const safeNew = sanitizeImageSrc(newSrc);
+    s2_codemirror.replaceAllText(safeOld, safeNew);
 }
 
 function replaceImageTagInEditor(oldSrc, newSrc, width, height) {
-    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
-    if (!cm || !cm.getSearchCursor || !oldSrc) {
+    if (!oldSrc) {
         return;
     }
 
-    const doc = cm.getDoc();
     const safeOld = sanitizeImageSrc(oldSrc);
-    const content = doc.getValue();
+    const content = s2_codemirror.getValue();
     const index = content.indexOf(safeOld);
     if (index === -1) {
         return;
@@ -215,7 +206,7 @@ function replaceImageTagInEditor(oldSrc, newSrc, width, height) {
     updated = ensureAttr(updated, 'width', widthValue);
     updated = ensureAttr(updated, 'height', heightValue);
 
-    doc.replaceRange(updated, doc.posFromIndex(start), doc.posFromIndex(end + 1));
+    s2_codemirror.replaceRangeByIndex(updated, start, end + 1);
 }
 
 function applyPendingImages(wrapper) {
@@ -1115,13 +1106,12 @@ function bindCodemirrorImageHandlers() {
     if (codemirrorHandlersBound) {
         return;
     }
-    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
-    if (!cm || !cm.on) {
+    if (!s2_codemirror.isReady()) {
         return;
     }
     codemirrorHandlersBound = true;
 
-    cm.on('paste', function (inst, event) {
+    s2_codemirror.onPaste(function (event) {
         var items = (event.clipboardData || event.originalEvent.clipboardData).items,
             hasImage = false;
 
@@ -1139,7 +1129,7 @@ function bindCodemirrorImageHandlers() {
         return !hasImage;
     });
 
-    cm.on('drop', function (cmInstance, e) {
+    s2_codemirror.onDrop(function (e) {
         var dt = e.dataTransfer;
         if (!dt || !dt.files) {
             return;
@@ -1169,10 +1159,7 @@ function bindCodemirrorImageHandlers() {
 
         if (processed) {
             // Move cursor to a new position where a file was drpopped
-            cmInstance.setSelection(cmInstance.coordsChar({
-                left: e.x,
-                top: e.y
-            }));
+            s2_codemirror.setSelectionFromCoords(e.x, e.y);
             e.preventDefault();
         }
     });

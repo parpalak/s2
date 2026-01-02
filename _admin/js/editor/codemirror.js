@@ -95,13 +95,97 @@ const s2_codemirror = (function () {
             if (instance && scrollTop)
                 instance.getScrollerElement().scrollTop = scrollTop;
         },
-        get_current: function () {
-            return instance;
-        },
 
         flip: function () {
             if (instance)
                 instance.save();
+        },
+        isReady: function () {
+            return !!instance;
+        },
+        onChange: function (handler) {
+            if (!instance || typeof handler !== 'function') {
+                return;
+            }
+            instance.on('change', function () {
+                handler();
+            });
+        },
+        onPaste: function (handler) {
+            if (!instance || typeof handler !== 'function') {
+                return;
+            }
+            instance.on('paste', function (cmInstance, event) {
+                handler(event);
+            });
+        },
+        onDrop: function (handler) {
+            if (!instance || typeof handler !== 'function') {
+                return;
+            }
+            instance.on('drop', function (cmInstance, event) {
+                handler(event);
+            });
+        },
+        setSelectionFromCoords: function (x, y) {
+            if (!instance) {
+                return;
+            }
+            instance.setSelection(instance.coordsChar({
+                left: x,
+                top: y
+            }));
+        },
+        replaceAllText: function (searchText, replacementText) {
+            if (!instance || !instance.getSearchCursor) {
+                return;
+            }
+            instance.operation(function () {
+                const cursor = instance.getSearchCursor(searchText, {line: 0, ch: 0});
+                while (cursor.findNext()) {
+                    cursor.replace(replacementText);
+                }
+            });
+        },
+        getValue: function () {
+            if (!instance) {
+                return '';
+            }
+            return instance.getValue();
+        },
+        replaceRangeByIndex: function (text, startIndex, endIndex) {
+            if (!instance) {
+                return;
+            }
+            const doc = instance.getDoc();
+            doc.replaceRange(text, doc.posFromIndex(startIndex), doc.posFromIndex(endIndex));
+        },
+        getLineCount: function () {
+            return instance ? instance.lineCount() : 0;
+        },
+        getLineTop: function (line) {
+            if (!instance) {
+                return 0;
+            }
+            if (instance.heightAtLine) {
+                return instance.heightAtLine(line, 'local');
+            }
+            return instance.charCoords({line: line, ch: 0}, 'local').top;
+        },
+        getScrollerElement: function () {
+            return instance ? instance.getScrollerElement() : null;
+        },
+        getScrollTop: function () {
+            if (!instance) {
+                return 0;
+            }
+            return instance.getScrollInfo().top;
+        },
+        setScrollTop: function (y) {
+            if (!instance) {
+                return;
+            }
+            instance.scrollTo(null, y);
         },
 
         addTag: function (sOpenTag, sCloseTag) {
