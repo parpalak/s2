@@ -16,7 +16,6 @@ import {setEditorDeps} from './deps.js';
 
 setEditorDeps({
     PopupMessages: window.PopupMessages,
-    imageUtils: window.imageUtils,
     autoComplete: window.autoComplete,
     s2_lang: window.s2_lang
 });

@@ -6,8 +6,8 @@
  * @package   S2
  */
 
-import {editorDeps} from '../deps.js';
 import {runOptipng} from '../../png-optimize-setup.js';
+import {resizeImageFile, analyzeImage, findJpegCandidateForSsim, compressToPng, computeCandidateSsimScore, selectBestImageCandidate} from '../../image_utils.js';
 import {s2_codemirror} from '../codemirror.js';
 import {imageState, formatDimensionValue, getModePolicy, getResizeOptionsForMode, getDisplayDimensionsForMode, shouldPreferJpegOnly, logPipelineSummary} from './state.js';
 import {renderImageOverlay, updateImageJobOverlay, detachJobOverlay} from './overlay.js';
@@ -504,7 +504,7 @@ function startModePipeline(job, mode, allowCache) {
     var runId = state.runId;
     markImageOperation(1);
 
-    state.sourcePromise = editorDeps.imageUtils.resizeImageFile(job.file, state.policy.maxUploadEdge, getResizeOptionsForMode(mode, state.sizeChoice))
+    state.sourcePromise = resizeImageFile(job.file, state.policy.maxUploadEdge, getResizeOptionsForMode(mode, state.sizeChoice))
         .then(function (info) {
             if (state.runId !== runId) {
                 return null;
@@ -579,7 +579,7 @@ function startModePipeline(job, mode, allowCache) {
             state.statusLabel = 'Analyzing';
             updateImageJobOverlay(job, overlayHandlers);
             var srcFile = info.file || job.file;
-            return editorDeps.imageUtils.analyzeImage(srcFile, state.policy);
+            return analyzeImage(srcFile, state.policy);
         })
         .then(function (info) {
             if (state.runId !== runId) {
@@ -646,7 +646,7 @@ function startFormatTask(job, state, runId, format) {
                 return;
             }
             var srcFile = state.sourceInfo && state.sourceInfo.file ? state.sourceInfo.file : job.file;
-            editorDeps.imageUtils.findJpegCandidateForSsim(srcFile, state.analysisInfo, state.policy, '#ffffff', true, function (progress) {
+            findJpegCandidateForSsim(srcFile, state.analysisInfo, state.policy, '#ffffff', true, function (progress) {
                 if (state.runId !== runId || !progress) {
                     return;
                 }
@@ -685,7 +685,7 @@ function startFormatTask(job, state, runId, format) {
             var srcFile = info && info.file ? info.file : job.file;
             return (srcFile.type === 'image/png')
                 ? Promise.resolve(srcFile)
-                : editorDeps.imageUtils.compressToPng(srcFile, true);
+                : compressToPng(srcFile, true);
         });
     }
 
@@ -723,7 +723,7 @@ function startFormatTask(job, state, runId, format) {
                     if (!info || state.runId !== runId) {
                         return null;
                     }
-                    return editorDeps.imageUtils.computeCandidateSsimScore(optimizedBlob, info, state.policy);
+                    return computeCandidateSsimScore(optimizedBlob, info, state.policy);
                 }).then(function (score) {
                     if (state.runId !== runId) {
                         return;
@@ -813,7 +813,7 @@ function chooseBestCandidate(state) {
         png8: state.formatEnabled.png8 ? state.candidates.png8 : null,
         jpeg: state.formatEnabled.jpeg ? state.candidates.jpeg : null
     };
-    var choice = editorDeps.imageUtils.selectBestImageCandidate(state.analysisInfo && state.analysisInfo.hasAlpha, filtered, state.policy);
+    var choice = selectBestImageCandidate(state.analysisInfo && state.analysisInfo.hasAlpha, filtered, state.policy);
     if (!choice || !choice.candidate || !choice.candidate.blob) {
         if (!state.analysisInfo || !state.analysisInfo.hasAlpha) {
             if (state.formatEnabled.jpeg && state.candidates.jpeg) {

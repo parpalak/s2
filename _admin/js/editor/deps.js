@@ -8,7 +8,6 @@
 
 const editorDeps = {
     PopupMessages: null,
-    imageUtils: null,
     autoComplete: null,
     s2_lang: null
 };
