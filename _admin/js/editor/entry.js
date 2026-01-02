@@ -13,21 +13,21 @@ import {initImagePipeline} from './images/pipeline.js';
 import {ClosePictureDialog, ReturnImage} from './dialogs.js';
 import {setEditorDeps} from './deps.js';
 
+const config = window.S2_EDITOR_CONFIG || {};
+
 setEditorDeps({
     PopupMessages: window.PopupMessages,
     autoComplete: window.autoComplete,
     s2_lang: window.s2_lang,
     CodeMirror: window.CodeMirror,
-    loadingIndicator: window.loadingIndicator
+    loadingIndicator: window.loadingIndicator,
+    sUrl: config.sUrl || window.sUrl || null,
+    morphdom: window.morphdom || null,
+    DisplayError: window.DisplayError || null
 });
 
 window.ReturnImage = ReturnImage;
 window.ClosePictureDialog = ClosePictureDialog;
-
-const config = window.S2_EDITOR_CONFIG || {};
-if (config.sUrl) {
-    window.sUrl = config.sUrl;
-}
 
 function bindDatalists(form, datalists) {
     if (!form || !Array.isArray(datalists)) {

@@ -10,6 +10,7 @@ import {runOptipng} from '../../png-optimize-setup.js';
 import {resizeImageFile, analyzeImage, findJpegCandidateForSsim, compressToPng, computeCandidateSsimScore, selectBestImageCandidate} from '../../image_utils.js';
 import {s2_codemirror} from '../codemirror.js';
 import {editorDeps} from '../deps.js';
+import {sanitizeUrlForAttribute} from '../utils/escape.js';
 import {imageState, formatDimensionValue, getModePolicy, getResizeOptionsForMode, getDisplayDimensionsForMode, shouldPreferJpegOnly, logPipelineSummary} from './state.js';
 import {renderImageOverlay, updateImageJobOverlay, detachJobOverlay} from './overlay.js';
 
@@ -148,12 +149,7 @@ function reservePictureName(dir, name, csrfToken) {
 }
 
 function sanitizeImageSrc(src) {
-    return encodeURI(src)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/'/g, '&#039;')
-        .replace(/"/g, '&quot;');
+    return sanitizeUrlForAttribute(src);
 }
 
 function insertImageTag(src, width, height) {

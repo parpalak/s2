@@ -6,8 +6,9 @@
  * @package   S2
  */
 
-import {editorDeps} from './deps.js';
+import {editorDeps, assertDeps} from './deps.js';
 import {s2_codemirror} from './codemirror.js';
+import {escapeHtml} from './utils/escape.js';
 
 function countNewlines(str) {
     let count = 0;
@@ -107,15 +108,6 @@ function applyLineMarkers(doc, wrapper, html) {
     }
 }
 
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
 function renderPreviewError(doc, message) {
     if (!doc) {
         return;
@@ -126,14 +118,20 @@ function renderPreviewError(doc, message) {
 }
 
 export async function Preview(sTitle, sHtmlContent, iArticleId, sTemplateId) {
+    if (!assertDeps(['s2_lang', 'sUrl'], 'Preview')) {
+        return;
+    }
+
     const d = window.frames['preview_frame'].document;
     let eHeader;
     let eText;
+    const sUrl = editorDeps.sUrl;
+    const morphdom = editorDeps.morphdom;
 
     if (sTemplateId !== Preview.lastTemplateId) {
         let response;
         try {
-            response = await fetch(window.sUrl + 'action=load_template&template_id=' + encodeURIComponent(sTemplateId) + '&article_id=' + encodeURIComponent(iArticleId));
+            response = await fetch(sUrl + 'action=load_template&template_id=' + encodeURIComponent(sTemplateId) + '&article_id=' + encodeURIComponent(iArticleId));
         } catch (error) {
             console.warn('Failed to load template preview:', error);
             renderPreviewError(d, editorDeps.s2_lang.unknown_error);
@@ -182,8 +180,8 @@ export async function Preview(sTitle, sHtmlContent, iArticleId, sTemplateId) {
                 const wrapper = d.createElement('div');
                 wrapper.innerHTML = sHtmlContent;
 
-                if (window.morphdom) {
-                    window.morphdom(eText, wrapper, {childrenOnly: true});
+                if (morphdom) {
+                    morphdom(eText, wrapper, {childrenOnly: true});
                 } else {
                     eText.innerHTML = sHtmlContent;
                 }

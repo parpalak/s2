@@ -11,6 +11,7 @@ import {hex_md5} from './hash.js';
 import {Preview, initPreviewSync} from './preview.js';
 import {PopupWindow} from './dialogs.js';
 import {s2_codemirror} from './codemirror.js';
+import {sanitizeUrlForAttribute} from './utils/escape.js';
 
 export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName, sTemplateId) {
     const sLowerEntityName = sEntityName.toLowerCase();
@@ -108,7 +109,7 @@ export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaNam
         let w = e.detail.width;
         let h = e.detail.height;
         let s = e.detail.file_path;
-        s = encodeURI(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#039;').replace(/"/g, '&quot;');
+        s = sanitizeUrlForAttribute(s);
 
         const sOpenTag = '<img src="' + s + '" width="' + w + '" height="' + h + '" ' + 'loading="lazy" alt="',
             sCloseTag = '" />';

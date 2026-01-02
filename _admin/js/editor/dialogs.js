@@ -6,20 +6,8 @@
  * @package   S2
  */
 
-function htmlEncode(str) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-        '`': '&#96;'
-    };
-
-    return str.replace(/[&<>"'`]/g, function (match) {
-        return map[match];
-    });
-}
+import {escapeHtml} from './utils/escape.js';
+import {editorDeps} from './deps.js';
 
 function PopupWindow(sTitle, sHeader, sInfo, sText) {
     const wnd = window.open('about:blank', '', '');
@@ -27,7 +15,7 @@ function PopupWindow(sTitle, sHeader, sInfo, sText) {
     const head = '<title>' + sTitle + '</title>' +
         '<style>html {height: 100%; margin: 0;} body {margin: 0 auto; padding: 9em 10% 1em; height: 100%; background: ' + color + '; font: 75% Verdana, sans-serif;} body, textarea {box-sizing: border-box;} h1 {margin: 0; padding: 0.5em 0 0;} textarea {width: 100%; height: 100%;} .text {position: absolute; top: 0; width: 80%;}</style>';
     const body = '<div class="text"><h1>' + sHeader + '</h1>' +
-        '<p>' + sInfo + '</p></div><textarea readonly="readonly">' + htmlEncode(sText) + '</textarea>';
+        '<p>' + sInfo + '</p></div><textarea readonly="readonly">' + escapeHtml(sText) + '</textarea>';
 
     wnd.document.open();
     wnd.document.write('<!DOCTYPE html><html><head>' + head + '</head><body>' + body + '</body></html>');
@@ -66,8 +54,8 @@ function ClosePictureDialog() {
 }
 
 function showErrorDialog(sError) {
-    if (typeof window.DisplayError === 'function') {
-        window.DisplayError(sError);
+    if (typeof editorDeps.DisplayError === 'function') {
+        editorDeps.DisplayError(sError);
     }
 }
 

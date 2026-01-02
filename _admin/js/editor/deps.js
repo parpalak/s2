@@ -11,7 +11,10 @@ const editorDeps = {
     autoComplete: null,
     s2_lang: null,
     CodeMirror: null,
-    loadingIndicator: null
+    loadingIndicator: null,
+    sUrl: null,
+    morphdom: null,
+    DisplayError: null
 };
 
 function setEditorDeps(nextDeps) {
@@ -25,4 +28,22 @@ function setEditorDeps(nextDeps) {
     });
 }
 
-export {editorDeps, setEditorDeps};
+function getEditorDeps() {
+    return editorDeps;
+}
+
+function assertDeps(requiredKeys, context) {
+    if (!Array.isArray(requiredKeys)) {
+        return true;
+    }
+    for (let i = 0; i < requiredKeys.length; i++) {
+        const key = requiredKeys[i];
+        if (!editorDeps[key]) {
+            console.warn('Missing editor dependency: ' + key + (context ? ' (' + context + ')' : ''));
+            return false;
+        }
+    }
+    return true;
+}
+
+export {editorDeps, setEditorDeps, getEditorDeps, assertDeps};
