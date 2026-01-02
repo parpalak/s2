@@ -7,12 +7,8 @@
  */
 
 const editorDeps = {
-    s2_codemirror: null,
     PopupMessages: null,
-    PopupWindow: null,
-    Preview: null,
     imageUtils: null,
-    runOptipng: null,
     autoComplete: null,
     s2_lang: null
 };

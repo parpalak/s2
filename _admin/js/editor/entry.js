@@ -11,17 +11,12 @@ import {initHtmlTextarea, initHtmlToolbar, SmartParagraphs} from './shortcuts.js
 import {initTagsAutocomplete} from './tags.js';
 import {initImagePipeline, optimizeAndUploadFile, uploadBlobToPictureDir} from './images/pipeline.js';
 import {s2_codemirror} from './codemirror.js';
-import {Preview} from './preview.js';
-import {PopupWindow, ReturnImage, ClosePictureDialog} from './dialogs.js';
+import {ReturnImage, ClosePictureDialog} from './dialogs.js';
 import {setEditorDeps} from './deps.js';
 
 setEditorDeps({
-    s2_codemirror: s2_codemirror,
     PopupMessages: window.PopupMessages,
-    PopupWindow: PopupWindow,
-    Preview: Preview,
     imageUtils: window.imageUtils,
-    runOptipng: window.runOptipng,
     autoComplete: window.autoComplete,
     s2_lang: window.s2_lang
 });
@@ -29,7 +24,6 @@ setEditorDeps({
 window.initHtmlTextarea = initHtmlTextarea;
 window.initHtmlToolbar = initHtmlToolbar;
 window.SmartParagraphs = SmartParagraphs;
-window.s2_codemirror = s2_codemirror;
 window.optimizeAndUploadFile = optimizeAndUploadFile;
 window.uploadBlobToPictureDir = uploadBlobToPictureDir;
 window.initTagsAutocomplete = initTagsAutocomplete;

@@ -8,7 +8,9 @@
 
 import {editorDeps} from './deps.js';
 import {hex_md5} from './hash.js';
-import {initPreviewSync} from './preview.js';
+import {Preview, initPreviewSync} from './preview.js';
+import {PopupWindow} from './dialogs.js';
+import {s2_codemirror} from './codemirror.js';
 
 export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaName, sTemplateId) {
     const sLowerEntityName = sEntityName.toLowerCase();
@@ -131,7 +133,7 @@ export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaNam
             if (previousText !== currentText) {
                 const absoluteUrl = new URL(eForm.action);
                 const id = absoluteUrl.searchParams.get('id');
-                editorDeps.Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
+                Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
                 previousText = currentText;
 
                 if (savedText !== currentText) {
@@ -143,13 +145,13 @@ export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaNam
         }
 
         function wireLivePreview() {
-            const cm = editorDeps.s2_codemirror.get_current && editorDeps.s2_codemirror.get_current();
+            const cm = s2_codemirror.get_current && s2_codemirror.get_current();
             if (!cm || !cm.on) {
                 return;
             }
 
             const updatePreview = debounceWithMaxWait(function () {
-                editorDeps.s2_codemirror.flip();
+                s2_codemirror.flip();
                 checkChanges();
             }, 300, 3000);
 
@@ -164,7 +166,7 @@ export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaNam
             editorDeps.PopupMessages.show(editorDeps.s2_lang.recovered_text_alert, [{
                 name: editorDeps.s2_lang.recovered_open,
                 action: function () {
-                    editorDeps.PopupWindow(editorDeps.s2_lang.recovered_text_alert, editorDeps.s2_lang.recovered_text, editorDeps.s2_lang.recovered_text_info, recoveredText);
+                    PopupWindow(editorDeps.s2_lang.recovered_text_alert, editorDeps.s2_lang.recovered_text, editorDeps.s2_lang.recovered_text_info, recoveredText);
                 }
             }]);
         }
@@ -195,7 +197,7 @@ export function initArticleEditForm(eForm, statusData, sEntityName, sTextareaNam
 
         const absoluteUrl = new URL(eForm.action);
         const id = absoluteUrl.searchParams.get('id');
-        editorDeps.Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
+        Preview(eForm.elements['title'].value, eForm.elements[sTextareaName].value, id, sTemplateId || eForm.elements['template'].value);
         handleChanges();
         document.addEventListener('save_article_end.s2', handleChanges);
 

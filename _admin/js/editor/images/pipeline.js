@@ -7,6 +7,8 @@
  */
 
 import {editorDeps} from '../deps.js';
+import {runOptipng} from '../../png-optimize-setup.js';
+import {s2_codemirror} from '../codemirror.js';
 import {imageState, formatDimensionValue, getModePolicy, getResizeOptionsForMode, getDisplayDimensionsForMode, shouldPreferJpegOnly, logPipelineSummary} from './state.js';
 import {renderImageOverlay, updateImageJobOverlay, detachJobOverlay} from './overlay.js';
 
@@ -161,7 +163,7 @@ function insertImageTag(src, width, height) {
 }
 
 function replaceImageSrcInEditor(oldSrc, newSrc) {
-    const cm = editorDeps.s2_codemirror.get_current && editorDeps.s2_codemirror.get_current();
+    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
     if (!cm || !cm.getSearchCursor) {
         return;
     }
@@ -177,7 +179,7 @@ function replaceImageSrcInEditor(oldSrc, newSrc) {
 }
 
 function replaceImageTagInEditor(oldSrc, newSrc, width, height) {
-    const cm = editorDeps.s2_codemirror.get_current && editorDeps.s2_codemirror.get_current();
+    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
     if (!cm || !cm.getSearchCursor || !oldSrc) {
         return;
     }
@@ -692,7 +694,7 @@ function startFormatTask(job, state, runId, format) {
             return;
         }
         if (format === 'png24') {
-            editorDeps.runOptipng(pngFile, function (optimizedBlob) {
+            runOptipng(pngFile, function (optimizedBlob) {
                 if (state.runId !== runId) {
                     return;
                 }
@@ -711,7 +713,7 @@ function startFormatTask(job, state, runId, format) {
             return;
         }
 
-        editorDeps.runOptipng(pngFile, function (optimizedBlob, meta) {
+        runOptipng(pngFile, function (optimizedBlob, meta) {
             if (state.runId !== runId) {
                 return;
             }
@@ -1113,7 +1115,7 @@ function bindCodemirrorImageHandlers() {
     if (codemirrorHandlersBound) {
         return;
     }
-    const cm = editorDeps.s2_codemirror.get_current && editorDeps.s2_codemirror.get_current();
+    const cm = s2_codemirror.get_current && s2_codemirror.get_current();
     if (!cm || !cm.on) {
         return;
     }

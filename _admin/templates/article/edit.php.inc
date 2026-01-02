@@ -184,7 +184,6 @@ $jsvarencode = static function ($var) {
     <button class="picture-dialog-close" onclick="this.parentNode.close()">&times;</button>
     <iframe src="" frameborder="0" id="picture_frame" name="picture_frame"></iframe>
 </dialog>
-<script src="<?php echo $basePath; ?>/_admin/js/png-optimize-setup.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/autoComplete.min.js"></script>
 <script>
     window.S2_EDITOR_CONFIG = {

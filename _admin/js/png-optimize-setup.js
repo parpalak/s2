@@ -1,13 +1,17 @@
-var runOptipng = (function () {
+const workerUrls = [
+    new URL('oxipng-worker.js', import.meta.url).toString(),
+    new URL('optipng-worker.js', import.meta.url).toString()
+];
+const quantWorkerUrl = new URL('png-quant-worker.js', import.meta.url).toString();
+
+const runOptipng = (function () {
     var worker = null;
     var workerLoaded = false;
     var workerFailed = false;
-    var workerUrls = ["js/oxipng-worker.js", "js/optipng-worker.js"];
     var workerUrlIndex = 0;
     var quantWorker = null;
     var quantWorkerLoaded = false;
     var quantWorkerFailed = false;
-    var quantWorkerUrl = "js/png-quant-worker.js";
     var QUANT_MIN_PSNR = 40;
 
     function printConsole(text) {
@@ -367,3 +371,5 @@ var runOptipng = (function () {
         });
     }
 })();
+
+export {runOptipng};

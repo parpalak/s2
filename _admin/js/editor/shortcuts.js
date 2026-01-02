@@ -6,26 +6,26 @@
  * @package   S2
  */
 
-import {editorDeps} from './deps.js';
 import {GetImage} from './dialogs.js';
+import {s2_codemirror} from './codemirror.js';
 
 export function initHtmlTextarea(eTextarea) {
     if (!eTextarea) {
         return;
     }
-    editorDeps.s2_codemirror.get_instance(eTextarea);
+    s2_codemirror.get_instance(eTextarea);
 
     document.addEventListener('insert_paragraph.s2', function (event) {
         const sType = event.detail.sType;
         if (sType === 'h2' || sType === 'h3' || sType === 'h4' || sType === 'blockquote' || sType === 'pre') {
-            editorDeps.s2_codemirror.paragraph('<' + sType + '>', '</' + sType + '>');
+            s2_codemirror.paragraph('<' + sType + '>', '</' + sType + '>');
         } else {
-            editorDeps.s2_codemirror.paragraph('<p' + (sType ? ' align="' + sType + '"' : '') + '>', '</p>');
+            s2_codemirror.paragraph('<p' + (sType ? ' align="' + sType + '"' : '') + '>', '</p>');
         }
     });
 
     document.addEventListener('insert_tag.s2', function (event) {
-        editorDeps.s2_codemirror.addTag(event.detail.sStart, event.detail.sEnd);
+        s2_codemirror.addTag(event.detail.sStart, event.detail.sEnd);
     });
 
     // Use parentNode to catch events from CodeMirror.
@@ -114,7 +114,7 @@ export function initHtmlToolbar(eToolbar) {
                 'li': () => tagSelection('li'),
                 'pre': () => insertParagraph('pre'),
                 'code': () => tagSelection('code'),
-                'parag': () => editorDeps.s2_codemirror.smart(),
+                'parag': () => s2_codemirror.smart(),
                 'fullscreen': function () {
                     if (!document.fullscreenElement) {
                         document.getElementById('id-article-editor-block').requestFullscreen().catch((err) => {

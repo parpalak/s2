@@ -7,6 +7,7 @@
  */
 
 import {editorDeps} from './deps.js';
+import {s2_codemirror} from './codemirror.js';
 
 function countNewlines(str) {
     let count = 0;
@@ -261,7 +262,7 @@ export function initPreviewSync(eForm, sTextareaName) {
     }
 
     const scrollMap = new ScrollMap(function () {
-        const cm = editorDeps.s2_codemirror.get_current && editorDeps.s2_codemirror.get_current();
+        const cm = s2_codemirror.get_current && s2_codemirror.get_current();
         const doc = previewFrame.contentDocument;
         if (!cm || !doc) {
             return [[0], [0]];
@@ -370,7 +371,7 @@ export function initPreviewSync(eForm, sTextareaName) {
             return;
         }
 
-        const cm = editorDeps.s2_codemirror.get_current && editorDeps.s2_codemirror.get_current();
+        const cm = s2_codemirror.get_current && s2_codemirror.get_current();
         const doc = previewFrame.contentDocument;
         if (!cm || !doc) {
             return;
