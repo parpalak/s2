@@ -31,6 +31,15 @@ while additional functionality can be implemented via
     - **PostgreSQL** (tested on 14),
     - **SQLite** (tested on 3.37).
 
+## Browser Requirements for Control Panel
+
+The admin UI relies on modern JavaScript (ES modules, async/await, fetch, WebAssembly) and modern CSS
+(CSS variables, grid, color-mix). Minimum supported browsers:
+
+- **Chrome / Edge** 111+
+- **Firefox** 113+ (ESR 115+)
+- **Safari** 16.2+
+
 ## Installation and upgrade
 
 ```bash
