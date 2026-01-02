@@ -1,12 +1,12 @@
 /**
- * HTML code highlighting
- *
  * CodeMirror initialization and helper functions.
  *
- * @copyright (C) 2012-2024 Roman Parpalak
- * @license MIT
- * @package S2
+ * @copyright 2025-2026 Roman Parpalak
+ * @license   https://opensource.org/license/mit MIT
+ * @package   S2
  */
+const CodeMirror = window.CodeMirror;
+
 const s2_codemirror = (function () {
     let instance, scrollTop = null;
 
@@ -63,62 +63,6 @@ const s2_codemirror = (function () {
                 foldGutter: true,
                 gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
                 selectionPointer: true
-            });
-
-            instance.on('paste', function (inst, event) {
-                var items = (event.clipboardData || event.originalEvent.clipboardData).items,
-                    hasImage = false;
-
-                for (var i = 0; i < items.length; i++) {
-                    var item = items[i];
-                    if (item.type.indexOf("image") !== -1) {
-                        optimizeAndUploadFile(item.getAsFile());
-                        hasImage = true;
-                    }
-                }
-
-                if (hasImage) {
-                    event.preventDefault();
-                }
-                return !hasImage;
-            });
-
-            instance.on('drop', function (cm, e) {
-                var dt = e.dataTransfer;
-                if (!dt || !dt.files) {
-                    return;
-                }
-
-                var files = dt.files, processed = false;
-                for (var i = files.length; i--;) {
-                    if (
-                        files[i].type === 'image/jpeg'
-                        || files[i].type === 'image/png'
-                    ) {
-                        processed = true;
-                        uploadBlobToPictureDir(files[i], files[i].name)
-                            .then(function (result) {
-                            document.dispatchEvent(new CustomEvent('return_image.s2', {
-                                detail: {
-                                    file_path: result.res.file_path,
-                                    width: result.width || 'auto',
-                                    height: result.height || 'auto'
-                                }
-                            }));
-                        }).catch(function (error) {
-                            console.warn('Upload error:', error);
-                        });
-                    }
-                }
-
-                if (processed) {
-                    // Move cursor to a new position where a file was drpopped
-                    cm.setSelection(cm.coordsChar({
-                        left: e.x,
-                        top: e.y
-                    }));
-                    e.preventDefault();
-                }
             });
 
             api.restore_scroll();
@@ -208,8 +152,11 @@ const s2_codemirror = (function () {
             if (!instance)
                 return false;
 
-            instance.setValue(SmartParagraphs(instance.getValue()));
-            return true;
+            if (typeof window.SmartParagraphs === 'function') {
+                instance.setValue(window.SmartParagraphs(instance.getValue()));
+                return true;
+            }
+            return false;
         },
 
         paragraph: function (sOpenTag, sCloseTag) {
@@ -311,3 +258,5 @@ const s2_codemirror = (function () {
 document.addEventListener('check_changes_start.s2', s2_codemirror.flip);
 document.addEventListener('save_article_start.s2', s2_codemirror.flip);
 document.addEventListener('changes_present.s2', s2_codemirror.flip);
+
+export {s2_codemirror};

@@ -26,7 +26,7 @@ HTML;
     public function getHtmlWithWrapper(callable $trans, string $id): string
     {
         return <<<HTML
-<div class="toolbar" id="{$id}-toolbar">
+<div class="toolbar html-toolbar" id="{$id}-toolbar">
     <button type="button" tabindex="-1" class="b" title="{$trans('Bold')}"></button>
     <button type="button" tabindex="-1" class="i" title="{$trans('Italic')}"></button>
     <button type="button" tabindex="-1" class="strike" title="{$trans('Strike')}"></button>
@@ -71,10 +71,6 @@ HTML;
         <iframe src="" frameborder="0" class="preview-frame" id="$id-preview-frame" name="preview_frame"></iframe>
     </div>
 </div>
-<script>
-    initHtmlTextarea(document.getElementById('$id'), '$id');
-    initHtmlToolbar(document.getElementById('$id-toolbar'));
-</script>
 HTML;
     }
 }

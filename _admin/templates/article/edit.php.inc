@@ -89,12 +89,10 @@ $jsvarencode = static function ($var) {
 <script src="<?php echo $basePath; ?>/_admin/lib/codemirror/matchesonscrollbar.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/lib/codemirror/search.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/lib/codemirror/searchcursor.js"></script>
-<script src="<?php echo $basePath; ?>/_admin/templates/article/codemirror_init.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/lib/morphdom-umd.min.js"></script>
 
 <script src="<?php echo $basePath; ?>/_admin/js/image-q.min.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/image_utils.js"></script>
-<script src="<?php echo $basePath; ?>/_admin/js/editor.js"></script>
 
 <section class="edit-content large-edit-form article-edit-content">
     <?php if (!empty($errorMessages)): ?>
@@ -187,23 +185,25 @@ $jsvarencode = static function ($var) {
     <iframe src="" frameborder="0" id="picture_frame" name="picture_frame"></iframe>
 </dialog>
 <script src="<?php echo $basePath; ?>/_admin/js/png-optimize-setup.js"></script>
-<script>
-    document.forms['article-form'].elements['template'].setAttribute('list', 'article-templates-datalist');
-    document.forms['article-form'].elements['template'].setAttribute('placeholder', '<?= $trans('inherited') ?>');
-    document.addEventListener('DOMContentLoaded', () => {
-        initArticleEditForm(document.forms['article-form'], <?= json_encode($statusData) ?>, 'Article', 'pagetext');
-    })
-
-    function ReturnImage(s, w, h) {
-        document.dispatchEvent(new CustomEvent('return_image.s2', {detail: {file_path: s, width: w, height: h}}));
-    }
-
-    function ClosePictureDialog() {
-        document.getElementById('picture_dialog').close();
-    }
-</script>
 <script src="<?php echo $basePath; ?>/_admin/js/autoComplete.min.js"></script>
 <script>
-    let sUrl = '<?php echo $basePath; ?>/_admin/ajax.php?';
-    initTagsAutocomplete('id-tags', <?= json_encode($tagsList) ?>);
+    window.S2_EDITOR_CONFIG = {
+        formName: 'article-form',
+        entityName: 'Article',
+        textareaName: 'pagetext',
+        templateId: null,
+        statusData: <?= json_encode($statusData) ?>,
+        tagsInputId: 'id-tags',
+        tagsList: <?= json_encode($tagsList) ?>,
+        sUrl: '<?php echo $basePath; ?>/_admin/ajax.php?',
+        datalists: [
+            {
+                inputName: 'template',
+                listId: 'article-templates-datalist',
+                placeholder: <?= json_encode($trans('inherited')) ?>
+            }
+        ]
+    };
+
 </script>
+<script type="module" src="<?php echo $basePath; ?>/_admin/js/editor/entry.js"></script>
