@@ -1,7 +1,7 @@
 self.window = self;
 
 try {
-    importScripts('image-q.min.js', 'pako.min.js', 'upng.js');
+    importScripts('../lib/image-q.min.js', '../lib/pako.min.js', '../lib/upng.js');
 } catch (error) {
     postMessage({type: 'init-error', message: (error && error.message) || 'Failed to load quantizer libs'});
 }

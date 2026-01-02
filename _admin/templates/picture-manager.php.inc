@@ -53,9 +53,9 @@ $maxFileSize = $bytesFromString(ini_get('upload_max_filesize'))
     <style>:root {
             --page-secondary-background: <?= $param('S2_ADMIN_COLOR') ?>;
         }</style>
-    <script src="<?php echo $basePath; ?>/_admin/js/jquery.js"></script>
-    <script src="<?php echo $basePath; ?>/_admin/js/jquery-tools.js"></script>
-    <script src="<?php echo $basePath; ?>/_admin/js/jquery.jstree.js"></script>
+    <script src="<?php echo $basePath; ?>/_admin/lib/jquery.js"></script>
+    <script src="<?php echo $basePath; ?>/_admin/lib/jquery-tools.js"></script>
+    <script src="<?php echo $basePath; ?>/_admin/lib/jquery.jstree.js"></script>
     <script src="<?php echo $basePath; ?>/_admin/js/pictman.js"></script>
     <script src="<?php echo $basePath; ?>/_admin/lang/<?php echo $locale; ?>/ui.js"></script>
 </head>

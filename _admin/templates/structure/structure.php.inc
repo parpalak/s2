@@ -26,9 +26,9 @@
 </section>
 <script src="<?php echo $basePath; ?>/_admin/js/ajax.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/lang/<?php echo $locale; ?>/ui.js"></script>
-<script src="<?php echo $basePath; ?>/_admin/js/jquery.js"></script>
-<script src="<?php echo $basePath; ?>/_admin/js/jquery-tools.js"></script>
-<script src="<?php echo $basePath; ?>/_admin/js/jquery.jstree.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/jquery.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/jquery-tools.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/jquery.jstree.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/js/structure.js"></script>
 <script>
     var sUrl = '<?php echo $basePath; ?>/_admin/ajax.php?';

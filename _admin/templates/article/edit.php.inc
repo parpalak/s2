@@ -91,7 +91,7 @@ $jsvarencode = static function ($var) {
 <script src="<?php echo $basePath; ?>/_admin/lib/codemirror/searchcursor.js"></script>
 <script src="<?php echo $basePath; ?>/_admin/lib/morphdom-umd.min.js"></script>
 
-<script src="<?php echo $basePath; ?>/_admin/js/image-q.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/image-q.min.js"></script>
 
 <section class="edit-content large-edit-form article-edit-content">
     <?php if (!empty($errorMessages)): ?>
@@ -183,7 +183,7 @@ $jsvarencode = static function ($var) {
     <button class="picture-dialog-close" onclick="this.parentNode.close()">&times;</button>
     <iframe src="" frameborder="0" id="picture_frame" name="picture_frame"></iframe>
 </dialog>
-<script src="<?php echo $basePath; ?>/_admin/js/autoComplete.min.js"></script>
+<script src="<?php echo $basePath; ?>/_admin/lib/autoComplete.min.js"></script>
 <script>
     window.S2_EDITOR_CONFIG = {
         formName: 'article-form',

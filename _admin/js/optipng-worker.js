@@ -1,5 +1,5 @@
 (function () {
-    importScripts('optipng.min.js');
+    importScripts('../lib/optipng.min.js');
 
     function print(text) {
         postMessage({'type': 'stdout', 'data': text});

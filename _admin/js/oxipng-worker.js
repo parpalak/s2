@@ -6,7 +6,7 @@
     var moduleReady = false;
 
     try {
-        importScripts('oxipng.js');
+        importScripts('../lib/oxipng.js');
     } catch (e) {
         postMessage({'type': 'init-error', 'message': e && e.message ? e.message : 'Failed to load oxipng.js'});
         return;
