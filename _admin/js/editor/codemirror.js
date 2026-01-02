@@ -188,6 +188,13 @@ const s2_codemirror = (function () {
         getLineCount: function () {
             return instance ? instance.lineCount() : 0;
         },
+        getCursorLine: function () {
+            if (!instance) {
+                return 0;
+            }
+            const cursor = instance.getCursor();
+            return cursor ? cursor.line : 0;
+        },
         getLineTop: function (line) {
             if (!instance) {
                 return 0;

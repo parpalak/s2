@@ -634,17 +634,17 @@ function ScrollMap(mapBuilder) {
         const scrollShift = offsetHeight / 2;
         const scrollLevel = scrollTop + scrollShift;
         const blockIndex = findBisect(scrollLevel, map[fromIndex]);
-        let srcScrollLevel = parseFloat(map[toIndex][blockIndex.val] * (1 - blockIndex.part));
+        let srcScrollLevel = map[toIndex][blockIndex.val] * (1 - blockIndex.part);
 
         if (map[toIndex][blockIndex.val + 1]) {
-            srcScrollLevel += parseFloat(map[toIndex][blockIndex.val + 1] * blockIndex.part);
+            srcScrollLevel += map[toIndex][blockIndex.val + 1] * blockIndex.part;
         }
 
         return srcScrollLevel - scrollShift;
     };
 
-    this.getAlignedInfo = function (eBlockNode, fromIndex, toIndex) {
-        if (map[fromIndex] === null) {
+    this.getPositionForLine = function (line, toIndex) {
+        if (map[2] === null) {
             map = mapBuilder();
         }
 
@@ -652,48 +652,21 @@ function ScrollMap(mapBuilder) {
             return null;
         }
 
-        const offsetHeight = eBlockNode.clientHeight || eBlockNode.offsetHeight;
-        const scrollTop = eBlockNode.scrollTop;
-
-        if (scrollTop === 0) {
-            return {
-                line: map[2][0] || 0,
-                srcTop: map[0][0] || 0,
-                resultTop: map[1][0] || 0
-            };
+        const lineNumber = Math.max(0, line);
+        const maxIndex = map[2].length - 1;
+        if (map[2][0] >= lineNumber) {
+            return map[toIndex][0] || 0;
+        }
+        if (map[2][maxIndex] <= lineNumber) {
+            return map[toIndex][maxIndex] || 0;
         }
 
-        const maxMapIndex = map[fromIndex].length - 1;
-        if (map[fromIndex][maxMapIndex] <= scrollTop + offsetHeight) {
-            return {
-                line: map[2][maxMapIndex] || map[2][map[2].length - 1] || 0,
-                srcTop: map[0][maxMapIndex] || map[0][map[0].length - 1] || 0,
-                resultTop: map[1][maxMapIndex] || map[1][map[1].length - 1] || 0
-            };
+        const blockIndex = findBisect(lineNumber, map[2]);
+        let position = map[toIndex][blockIndex.val] * (1 - blockIndex.part);
+        if (map[toIndex][blockIndex.val + 1]) {
+            position += map[toIndex][blockIndex.val + 1] * blockIndex.part;
         }
-
-        const scrollShift = offsetHeight / 2;
-        const scrollLevel = scrollTop + scrollShift;
-        const blockIndex = findBisect(scrollLevel, map[fromIndex]);
-        const lineA = map[2][blockIndex.val];
-        const lineB = map[2][blockIndex.val + 1];
-        const srcA = map[toIndex][blockIndex.val];
-        const srcB = map[toIndex][blockIndex.val + 1];
-        const otherIndex = toIndex === 0 ? 1 : 0;
-        const otherA = map[otherIndex][blockIndex.val];
-        const otherB = map[otherIndex][blockIndex.val + 1];
-
-        return {
-            line: Number.isFinite(lineA) && Number.isFinite(lineB)
-                ? Math.round(lineA + (lineB - lineA) * blockIndex.part)
-                : (Number.isFinite(lineA) ? lineA : null),
-            srcTop: Number.isFinite(srcA) && Number.isFinite(srcB)
-                ? Math.round(srcA + (srcB - srcA) * blockIndex.part)
-                : (Number.isFinite(srcA) ? srcA : null),
-            resultTop: Number.isFinite(otherA) && Number.isFinite(otherB)
-                ? Math.round(otherA + (otherB - otherA) * blockIndex.part)
-                : (Number.isFinite(otherA) ? otherA : null)
-        };
+        return position;
     };
 }
 
@@ -736,7 +709,31 @@ function SyncScroll(scrollMap, animatorSrc, animatorResult, eSrc, eResult, previ
 
     this.scrollToBottomIfRequired = function () {
         const srcViewport = eSrc.clientHeight || eSrc.offsetHeight || 0;
-        if (eSrc.scrollHeight >= srcViewport && eSrc.scrollHeight - srcViewport - eSrc.scrollTop < 5) {
+        const srcScrollHeight = eSrc.scrollHeight || 0;
+        if (srcScrollHeight <= srcViewport + 1) {
+            const lineCount = s2_codemirror.getLineCount();
+            if (!lineCount) {
+                return;
+            }
+            const cursorLine = s2_codemirror.getCursorLine();
+            const resultViewport = eResult.clientHeight || eResult.offsetHeight || 0;
+            const maxResultScroll = Math.max(0, (eResult.scrollHeight || 0) - resultViewport);
+            /*
+             * When CodeMirror has no scroll, there is no source scroll ratio to mirror.
+             * Use the cursor line as a proxy: find its mapped block in the preview
+             * and center that block in the viewport to avoid losing context.
+             */
+            const resultTop = scrollMap.getPositionForLine(cursorLine, 1);
+            if (resultTop === null) {
+                animatorResult.setPos(0);
+                return;
+            }
+            const target = Math.max(0, Math.min(maxResultScroll, Math.round(resultTop - resultViewport / 2)));
+            animatorResult.setPos(target);
+            return;
+        }
+
+        if (srcScrollHeight >= srcViewport && srcScrollHeight - srcViewport - eSrc.scrollTop < 5) {
             const resultViewport = eResult.clientHeight || eResult.offsetHeight || 0;
             animatorResult.setPos(Math.max(0, eResult.scrollHeight - resultViewport));
         }
