@@ -165,35 +165,18 @@
             alpha: !!hasAlpha,
             choice: choice ? choice.type : 'none',
             png24: candidates.png24 ? {size: candidates.png24.size} : null,
-            png8: candidates.png8 ? {size: candidates.png8.size, ssim: candidates.png8.ssim, ssimDownscale: candidates.png8.ssimDownscale, ssimTiles: candidates.png8.ssimTiles} : null,
-            jpeg: candidates.jpeg ? {size: candidates.jpeg.size, ssim: candidates.jpeg.ssim, ssimDownscale: candidates.jpeg.ssimDownscale, ssimTiles: candidates.jpeg.ssimTiles, quality: candidates.jpeg.quality} : null,
+            png8: candidates.png8 ? {size: candidates.png8.size, ssim: candidates.png8.ssim, ssimDownscale: candidates.png8.ssimDownscale} : null,
+            jpeg: candidates.jpeg ? {size: candidates.jpeg.size, ssim: candidates.jpeg.ssim, ssimDownscale: candidates.jpeg.ssimDownscale, quality: candidates.jpeg.quality} : null,
             thresholds: {
                 jpegMinSsim: policy.jpegMinSsim,
-                png8MinSsim: policy.png8MinSsim,
-                ssimTileWeight: policy.ssimTileWeight
+                png8MinSsim: policy.png8MinSsim
             }
         };
     }
 
-    function aggregateSsimScore(downscaleScore, tileScores, tileWeight) {
-        if (!tileScores || tileScores.length === 0) {
-            return downscaleScore;
-        }
-
-        var minTile = tileScores[0];
-        for (var i = 1; i < tileScores.length; i++) {
-            if (tileScores[i] < minTile) {
-                minTile = tileScores[i];
-            }
-        }
-
-        var weight = typeof tileWeight === 'number' ? tileWeight : 0.3;
-        return downscaleScore * (1 - weight) + minTile * weight;
-    }
-
     function computeCandidateSsimScore(blob, analysisInfo, policy) {
         if (!analysisInfo || !analysisInfo.data) {
-            return Promise.resolve({score: 0, downscale: 0, tiles: []});
+            return Promise.resolve({score: 0, downscale: 0});
         }
 
         return fileToImage(blob)
@@ -203,179 +186,27 @@
                     height: analysisInfo.height
                 });
                 var downscaleScore = calculateSsim(analysisInfo.data, downscale.data, analysisInfo.width, analysisInfo.height);
-                // Temporarily skip tile-based SSIM and rely on full-resolution score.
                 return {
                     score: downscaleScore,
-                    downscale: downscaleScore,
-                    tiles: []
+                    downscale: downscaleScore
                 };
             })
             .catch(function () {
-                return {score: 0, downscale: 0, tiles: []};
+                return {score: 0, downscale: 0};
             });
-    }
-
-    function selectSsimTiles(info, tileSize) {
-        if (!info || !info.data || !info.width || !info.height) {
-            return [];
-        }
-
-        var width = info.width;
-        var height = info.height;
-        var size = Math.max(16, Math.min(tileSize || 64, width, height));
-
-        if (width <= size || height <= size) {
-            return [{
-                x: 0,
-                y: 0,
-                width: width,
-                height: height,
-                sourceX: 0,
-                sourceY: 0,
-                sourceW: info.originalWidth || width,
-                sourceH: info.originalHeight || height
-            }];
-        }
-
-        var luma = toLumaRgba(info.data);
-        var step = size;
-        var maxX = width - size;
-        var maxY = height - size;
-        var bestEdge = null;
-        var bestSmooth = null;
-        var bestText = null;
-
-        function updateCandidate(candidate, value, mode) {
-            if (!candidate) {
-                return {value: value};
-            }
-            if (mode === 'max') {
-                return value > candidate.value ? {value: value} : candidate;
-            }
-            return value < candidate.value ? {value: value} : candidate;
-        }
-
-        for (var y = 0; y <= maxY; y += step) {
-            for (var x = 0; x <= maxX; x += step) {
-                var edgeSum = 0;
-                var edgeCount = 0;
-                var pixels = 0;
-
-                for (var yy = 0; yy < size - 1; yy++) {
-                    for (var xx = 0; xx < size - 1; xx++) {
-                        var idx = ((y + yy) * width + (x + xx)) * 4;
-                        var y0 = luma[idx];
-                        var y1 = luma[idx + 4];
-                        var y2 = luma[idx + width * 4];
-                        var grad = Math.abs(y1 - y0) + Math.abs(y2 - y0);
-                        edgeSum += grad;
-                        if (grad > 20) {
-                            edgeCount += 1;
-                        }
-                        pixels += 1;
-                    }
-                }
-
-                var edgeEnergy = edgeSum / Math.max(1, pixels);
-                var edgeRatio = edgeCount / Math.max(1, pixels);
-
-                var edgeCandidate = updateCandidate(bestEdge, edgeEnergy, 'max');
-                if (edgeCandidate !== bestEdge) {
-                    bestEdge = edgeCandidate;
-                    bestEdge.x = x;
-                    bestEdge.y = y;
-                }
-
-                var smoothCandidate = updateCandidate(bestSmooth, edgeEnergy, 'min');
-                if (smoothCandidate !== bestSmooth) {
-                    bestSmooth = smoothCandidate;
-                    bestSmooth.x = x;
-                    bestSmooth.y = y;
-                }
-
-                var textCandidate = updateCandidate(bestText, edgeRatio, 'max');
-                if (textCandidate !== bestText) {
-                    bestText = textCandidate;
-                    bestText.x = x;
-                    bestText.y = y;
-                }
-            }
-        }
-
-        var tiles = [];
-        function pushTile(candidate) {
-            if (!candidate) {
-                return;
-            }
-            for (var i = 0; i < tiles.length; i++) {
-                if (tiles[i].x === candidate.x && tiles[i].y === candidate.y) {
-                    return;
-                }
-            }
-            tiles.push({
-                x: candidate.x,
-                y: candidate.y,
-                width: size,
-                height: size
-            });
-        }
-
-        pushTile(bestEdge);
-        pushTile(bestSmooth);
-        pushTile(bestText);
-
-        var scaleX = (info.originalWidth || width) / width;
-        var scaleY = (info.originalHeight || height) / height;
-
-        tiles.forEach(function (tile) {
-            tile.sourceX = Math.round(tile.x * scaleX);
-            tile.sourceY = Math.round(tile.y * scaleY);
-            tile.sourceW = Math.round(tile.width * scaleX);
-            tile.sourceH = Math.round(tile.height * scaleY);
-        });
-
-        return tiles;
     }
 
     function analyzeImage(file, policy) {
         return getImageData(file).then(function (info) {
-            // Temporarily skip downscaling and tile selection.
-            // info.tiles = selectSsimTiles(info, policy.ssimTileSize);
-            // info.tileData = info.tiles.map(function (tile) {
-            //     var tileData = getImageDataFromImage(info.image, {
-            //         sx: tile.sourceX,
-            //         sy: tile.sourceY,
-            //         sw: tile.sourceW,
-            //         sh: tile.sourceH,
-            //         width: tile.width,
-            //         height: tile.height
-            //     });
-            //     return {
-            //         data: tileData.data,
-            //         width: tileData.width,
-            //         height: tileData.height
-            //     };
-            // });
             return info;
         });
     }
 
-    function getImageData(file, maxSize) {
+    function getImageData(file) {
         return fileToImage(file).then(function (img) {
             var width = img.naturalWidth || img.width;
             var height = img.naturalHeight || img.height;
-            var scale = 1;
-
-            if (typeof maxSize === 'number' && maxSize > 0) {
-                var maxDim = Math.max(width, height);
-                if (maxDim > maxSize) {
-                    scale = maxSize / maxDim;
-                }
-            }
-
-            var targetWidth = Math.max(1, Math.round(width * scale));
-            var targetHeight = Math.max(1, Math.round(height * scale));
-            var imageData = getImageDataFromImage(img, {width: targetWidth, height: targetHeight});
+            var imageData = getImageDataFromImage(img, {width: width, height: height});
             var hasAlpha = false;
             for (var i = 3; i < imageData.data.length; i += 4) {
                 if (imageData.data[i] < 255) {
@@ -611,7 +442,6 @@
                             size: blob.size,
                             ssim: score.score,
                             ssimDownscale: score.downscale,
-                            ssimTiles: score.tiles,
                             quality: q
                         };
                         if (typeof progress === 'function') {
@@ -620,8 +450,7 @@
                                 quality: q,
                                 size: blob.size,
                                 ssim: score.score,
-                                ssimDownscale: score.downscale,
-                                ssimTiles: score.tiles
+                                ssimDownscale: score.downscale
                             });
                         }
                         return candidate;
@@ -676,9 +505,7 @@
     root.imageUtils.calculateSsim = calculateSsim;
     root.imageUtils.selectBestImageCandidate = selectBestImageCandidate;
     root.imageUtils.logImageCandidateDecision = logImageCandidateDecision;
-    root.imageUtils.aggregateSsimScore = aggregateSsimScore;
     root.imageUtils.computeCandidateSsimScore = computeCandidateSsimScore;
-    root.imageUtils.selectSsimTiles = selectSsimTiles;
     root.imageUtils.analyzeImage = analyzeImage;
     root.imageUtils.getImageData = getImageData;
     root.imageUtils.getImageDataForSize = getImageDataForSize;

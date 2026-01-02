@@ -1421,14 +1421,11 @@ var previewOverlayStylesId = 's2-image-overlay-styles';
 var sizeOptions = [1024, 1200, 1600, Infinity];
 var imagePolicyConfig = {
     base: {
-        compareMaxSize: 512,
         maxUploadEdge: 1600,
         jpegQuality: 0.95,
         jpegMinQuality: 0.75,
         jpegQualitySearchSteps: 6,
         png8MinSsim: 0.98,
-        ssimTileSize: 64,
-        ssimTileWeight: 0.3,
         png8MinPsnr: 40,
         png24OptLevel: 2,
         png8OptLevel: 2
@@ -2418,7 +2415,7 @@ function startModePipeline(job, mode, allowCache) {
                 return null;
             }
             if (!info) {
-                info = {hasAlpha: false, width: 0, height: 0, data: null, tiles: [], tileData: []};
+                info = {hasAlpha: false, width: 0, height: 0, data: null};
             }
             state.analysisInfo = info;
             state.status = 'compressing';
@@ -2432,7 +2429,7 @@ function startModePipeline(job, mode, allowCache) {
             if (state.runId !== runId) {
                 return null;
             }
-            state.analysisInfo = {hasAlpha: false, width: 0, height: 0, data: null, tiles: [], tileData: []};
+            state.analysisInfo = {hasAlpha: false, width: 0, height: 0, data: null};
             state.status = 'compressing';
             state.statusLabel = 'Compressing';
             updateImageJobOverlay(job);
@@ -2487,7 +2484,6 @@ function startFormatTask(job, state, runId, format) {
                     size: progress.size,
                     ssim: progress.ssim,
                     ssimDownscale: progress.ssimDownscale,
-                    ssimTiles: progress.ssimTiles,
                     quality: progress.quality
                 };
                 updateImageJobOverlay(job);
@@ -2569,7 +2565,6 @@ function startFormatTask(job, state, runId, format) {
                         size: optimizedBlob.size,
                         ssim: score ? score.score : 0,
                         ssimDownscale: score ? score.downscale : 0,
-                        ssimTiles: score ? score.tiles : [],
                         psnr: quantResult.psnr,
                         colors: colors
                     };
@@ -2588,7 +2583,6 @@ function startFormatTask(job, state, runId, format) {
                         size: optimizedBlob.size,
                         ssim: 0,
                         ssimDownscale: 0,
-                        ssimTiles: [],
                         psnr: quantResult.psnr,
                         colors: colors
                     };
@@ -2619,7 +2613,6 @@ function startFormatTask(job, state, runId, format) {
                         size: progress.size,
                         ssim: 0,
                         ssimDownscale: 0,
-                        ssimTiles: [],
                         psnr: progress.quantResult ? progress.quantResult.psnr : null,
                         colors: colors
                     };
