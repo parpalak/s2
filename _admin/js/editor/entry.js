@@ -7,25 +7,20 @@
  */
 
 import {initArticleEditForm} from './form.js';
-import {initHtmlTextarea, initHtmlToolbar, SmartParagraphs} from './shortcuts.js';
+import {initHtmlTextarea, initHtmlToolbar} from './shortcuts.js';
 import {initTagsAutocomplete} from './tags.js';
-import {initImagePipeline, optimizeAndUploadFile, uploadBlobToPictureDir} from './images/pipeline.js';
-import {s2_codemirror} from './codemirror.js';
-import {ReturnImage, ClosePictureDialog} from './dialogs.js';
+import {initImagePipeline} from './images/pipeline.js';
+import {ClosePictureDialog, ReturnImage} from './dialogs.js';
 import {setEditorDeps} from './deps.js';
 
 setEditorDeps({
     PopupMessages: window.PopupMessages,
     autoComplete: window.autoComplete,
-    s2_lang: window.s2_lang
+    s2_lang: window.s2_lang,
+    CodeMirror: window.CodeMirror,
+    loadingIndicator: window.loadingIndicator
 });
 
-window.initHtmlTextarea = initHtmlTextarea;
-window.initHtmlToolbar = initHtmlToolbar;
-window.SmartParagraphs = SmartParagraphs;
-window.optimizeAndUploadFile = optimizeAndUploadFile;
-window.uploadBlobToPictureDir = uploadBlobToPictureDir;
-window.initTagsAutocomplete = initTagsAutocomplete;
 window.ReturnImage = ReturnImage;
 window.ClosePictureDialog = ClosePictureDialog;
 

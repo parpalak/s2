@@ -9,7 +9,9 @@
 const editorDeps = {
     PopupMessages: null,
     autoComplete: null,
-    s2_lang: null
+    s2_lang: null,
+    CodeMirror: null,
+    loadingIndicator: null
 };
 
 function setEditorDeps(nextDeps) {

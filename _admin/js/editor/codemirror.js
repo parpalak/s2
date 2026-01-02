@@ -5,13 +5,24 @@
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
-const CodeMirror = window.CodeMirror;
+import {smartParagraphs} from './text/paragraphs.js';
+import {editorDeps} from './deps.js';
+
+let codeMirrorInitialized = false;
+
+function getCodeMirror() {
+    return editorDeps.CodeMirror;
+}
 
 const s2_codemirror = (function () {
     let instance, scrollTop = null;
 
     /** Duplicate a current line in CodeMirror doc */
     function cmDuplicateLine(cm) {
+        const CodeMirror = getCodeMirror();
+        if (!CodeMirror) {
+            return;
+        }
         // get a position of a current cursor in a current cell
         const currentCursor = cm.doc.getCursor();
 
@@ -34,14 +45,28 @@ const s2_codemirror = (function () {
         cm.doc.setCursor(currentCursor.line + 1, currentCursor.ch);
     }
 
-    // from https://gist.github.com/Boorj/eb020e14487329431bdabc9141ee7ca1
-    CodeMirror.keyMap.pcDefault["Ctrl-D"] = cmDuplicateLine;
-    CodeMirror.keyMap.pcDefault["Ctrl-Y"] = CodeMirror.commands.deleteLine;
+    function ensureCodeMirror() {
+        const CodeMirror = getCodeMirror();
+        if (!CodeMirror) {
+            return null;
+        }
+        if (!codeMirrorInitialized) {
+            // from https://gist.github.com/Boorj/eb020e14487329431bdabc9141ee7ca1
+            CodeMirror.keyMap.pcDefault["Ctrl-D"] = cmDuplicateLine;
+            CodeMirror.keyMap.pcDefault["Ctrl-Y"] = CodeMirror.commands.deleteLine;
+            codeMirrorInitialized = true;
+        }
+        return CodeMirror;
+    }
 
 //    CodeMirror.keyMap.pcDefault["Ctrl-Y"] = CodeMirror.commands.findPersistent;
 
     const api = {
         get_instance: function (eTextarea) {
+            const CodeMirror = ensureCodeMirror();
+            if (!CodeMirror) {
+                return null;
+            }
             scrollTop = eTextarea.scrollTop;
 
             instance = CodeMirror.fromTextArea(eTextarea, {
@@ -236,11 +261,8 @@ const s2_codemirror = (function () {
             if (!instance)
                 return false;
 
-            if (typeof window.SmartParagraphs === 'function') {
-                instance.setValue(window.SmartParagraphs(instance.getValue()));
-                return true;
-            }
-            return false;
+            instance.setValue(smartParagraphs(instance.getValue()));
+            return true;
         },
 
         paragraph: function (sOpenTag, sCloseTag) {

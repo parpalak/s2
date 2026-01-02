@@ -9,10 +9,13 @@
 import {runOptipng} from '../../png-optimize-setup.js';
 import {resizeImageFile, analyzeImage, findJpegCandidateForSsim, compressToPng, computeCandidateSsimScore, selectBestImageCandidate} from '../../image_utils.js';
 import {s2_codemirror} from '../codemirror.js';
+import {editorDeps} from '../deps.js';
 import {imageState, formatDimensionValue, getModePolicy, getResizeOptionsForMode, getDisplayDimensionsForMode, shouldPreferJpegOnly, logPipelineSummary} from './state.js';
 import {renderImageOverlay, updateImageJobOverlay, detachJobOverlay} from './overlay.js';
 
-const loadingIndicator = window.loadingIndicator;
+function getLoadingIndicator() {
+    return editorDeps.loadingIndicator;
+}
 
 function setJobSrc(job, newSrc) {
     if (job.src && imageState.pasteImageBySrc.get(job.src) === job) {
@@ -297,7 +300,10 @@ function markImageOperation(delta) {
 }
 
 function syncImageLoadingIndicator() {
-    loadingIndicator(imageState.activeImageOperations > 0);
+    const loadingIndicator = getLoadingIndicator();
+    if (typeof loadingIndicator === 'function') {
+        loadingIndicator(imageState.activeImageOperations > 0);
+    }
 }
 
 export function uploadBlobToPictureDir(blob, name, extension, dir, token) {
