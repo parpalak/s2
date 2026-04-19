@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2007-2025 Roman Parpalak
+ * @copyright 2007-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -39,6 +39,7 @@ readonly class AuthManager
         private TemplateRenderer  $templateRenderer,
         private Translator        $translator,
         private string            $basePath,
+        private string            $baseUrl,
         private string            $urlPrefix,
         private string            $cookieName,
         private bool              $forceAdminHttps,
@@ -69,14 +70,15 @@ readonly class AuthManager
 
         if ($request->query->get('action') === 'logout') {
             $this->deleteSession($sessionId);
-            $response = new RedirectResponse($request->getSchemeAndHttpHost() . $request->getBaseUrl());
+            $response      = new RedirectResponse($request->getSchemeAndHttpHost() . $request->getBaseUrl());
+            $secureCookies = $this->shouldUseSecureCookies($request);
             $response->headers->setCookie(Cookie::create(
                 name: $this->cookieName,
                 value: '',
                 path: $this->basePath . '/_admin/',
-                secure: $this->forceAdminHttps,
+                secure: $secureCookies,
             ));
-            $response->headers->setCookie($this->createCommentCookie(''));
+            $response->headers->setCookie($this->createCommentCookie('', $secureCookies));
             return $response;
         }
 
@@ -186,13 +188,14 @@ readonly class AuthManager
             $response = $this->createLoginFormResponse($this->translator->trans($status . ' session'));
         }
 
+        $secureCookies = $this->shouldUseSecureCookies($request);
         $response->headers->setCookie(Cookie::create(
             name: $this->cookieName,
             value: '',
             path: $this->basePath . '/_admin/',
-            secure: $this->forceAdminHttps,
+            secure: $secureCookies,
         ));
-        $response->headers->setCookie($this->createCommentCookie(''));
+        $response->headers->setCookie($this->createCommentCookie('', $secureCookies));
 
         return $response;
     }
@@ -336,16 +339,17 @@ readonly class AuthManager
             ->execute()
         ;
 
-        $response = new JsonResponse(['success' => true]);
+        $response      = new JsonResponse(['success' => true]);
+        $secureCookies = $this->shouldUseSecureCookies($request);
 
         $response->headers->setCookie(Cookie::create(
             name: $this->cookieName,
             value: $sessionId,
             expire: $time + $this->cookieExpireTimeout(),
             path: $this->basePath . '/_admin/',
-            secure: $this->forceAdminHttps,
+            secure: $secureCookies,
         ));
-        $response->headers->setCookie($this->createCommentCookie($commentCookie));
+        $response->headers->setCookie($this->createCommentCookie($commentCookie, $secureCookies));
 
         return $response;
     }
@@ -426,18 +430,32 @@ readonly class AuthManager
         return self::SESSION_STATUS_OK;
     }
 
+    private function shouldUseSecureCookies(Request $request): bool
+    {
+        /*
+         * S2 can run on plain HTTP, so Secure cookies cannot be enabled unconditionally.
+         * Still, if the current installation is known to use HTTPS, cookies must not be
+         * allowed to leak over HTTP. We treat HTTPS as enabled when:
+         *
+         * - force_admin_https is enabled and the admin session is explicitly HTTPS-only;
+         * - the current request is already HTTPS;
+         * - base_url is configured as HTTPS, which is the webmaster's canonical-site setting.
+         */
+        return $this->forceAdminHttps || $request->isSecure() || str_starts_with(strtolower($this->baseUrl), 'https://');
+    }
+
     /**
      * Special cookie to mark that a user is logged in.
      * If this user has a permission, his comment will be published even in pre-moderation mode.
      */
-    private function createCommentCookie(string $value): Cookie
+    private function createCommentCookie(string $value, bool $secure): Cookie
     {
         return Cookie::create(
             name: $this->cookieName . '_c',
             value: $value,
             expire: $value !== '' ? $this->cookieExpireTimeout() + time() : 0,
             path: $this->basePath . ($this->urlPrefix === '' ? '/comment_sent' : '/'),
-            secure: false,
+            secure: $secure,
         );
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -187,6 +187,7 @@ class AdminExtension implements ExtensionInterface
                 $container->get(TemplateRenderer::class),
                 $container->get(Translator::class),
                 $container->getParameter('base_path'),
+                $container->getParameter('base_url'),
                 $container->getParameter('url_prefix'),
                 $container->getParameter('cookie_name'),
                 $container->getParameter('force_admin_https'),

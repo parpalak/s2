@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
  * @package   S2
  */
@@ -109,18 +109,18 @@ class Integration extends AbstractBrowserModule
         }
     }
 
-    public function createApplication(): Application
+    public function createApplication(array $parameterOverrides = []): Application
     {
         $application = new Application();
         $application->addExtension(new CmsExtension());
         $application->addExtension(new \s2_extensions\s2_blog\Extension());
         $application->addExtension(new \s2_extensions\s2_search\Extension());
-        $application->boot($this->collectParameters());
+        $application->boot($this->collectParameters($parameterOverrides));
 
         return $application;
     }
 
-    public function createAdminApplication(): Application
+    public function createAdminApplication(array $parameterOverrides = []): Application
     {
         $application = new Application();
         $application->addExtension(new CmsExtension());
@@ -129,7 +129,7 @@ class Integration extends AbstractBrowserModule
         $application->addExtension(new \s2_extensions\s2_blog\AdminExtension());
         $application->addExtension(new \s2_extensions\s2_search\Extension());
         $application->addExtension(new \s2_extensions\s2_search\AdminExtension());
-        $application->boot($this->collectParameters());
+        $application->boot($this->collectParameters($parameterOverrides));
 
         return $application;
     }
@@ -189,7 +189,7 @@ class Integration extends AbstractBrowserModule
         }
     }
 
-    protected function collectParameters(): array
+    protected function collectParameters(array $overrides = []): array
     {
         $imgDir = '_tests/_output/images';
 
@@ -226,7 +226,7 @@ class Integration extends AbstractBrowserModule
             })
         ];
 
-        return $result;
+        return array_replace($result, $overrides);
     }
 
     /**
