@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2023-2025 Roman Parpalak
+ * @copyright 2023-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -12,6 +12,7 @@ namespace S2\Cms\Asset;
 use MatthiasMullie\Minify\CSS;
 use MatthiasMullie\Minify\JS;
 use MatthiasMullie\Minify\Minify;
+use Psr\Log\LoggerInterface;
 use S2\Cms\HttpClient\HttpClient;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -29,6 +30,7 @@ class AssetMerge implements AssetMergeInterface
 
     public function __construct(
         private readonly HttpClient $httpClient,
+        private readonly LoggerInterface $logger,
         private readonly string     $publicCacheDir,
         private readonly string     $publicCachePath,
         private readonly string     $cacheFilenamePrefix,
@@ -78,6 +80,10 @@ class AssetMerge implements AssetMergeInterface
                 } catch (\Exception $e) {
                     // Store failed file and continue with next one
                     $this->failedExternalFiles[] = $fileToMerge;
+                    $this->logger->warning('Failed to fetch external asset.', [
+                        'url'       => $fileToMerge,
+                        'exception' => $e,
+                    ]);
                 }
             } else {
                 $minifier->add($fileToMerge);

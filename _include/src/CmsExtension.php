@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -211,10 +211,14 @@ class CmsExtension implements ExtensionInterface
         $container->set(HttpClient::class, function (Container $container) {
             return new HttpClient();
         });
+        $container->set('asset_http_client', function (Container $container) {
+            return new HttpClient(verifySsl: true);
+        });
 
         $container->set(AssetMergeFactory::class, function (Container $container) {
             return new AssetMergeFactory(
-                $container->get(HttpClient::class),
+                $container->get('asset_http_client'),
+                $container->get(LoggerInterface::class),
                 $container->getParameter('debug'),
                 // Not a cache_dir since it can be overridden via the config.php, but we need a public available path
                 $container->getParameter('root_dir') . '_cache/',
