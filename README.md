@@ -20,13 +20,13 @@ while additional functionality can be implemented via
 - **Extensible**: Plugins for added functionality (search, blog, etc.).
 - **Minimalist**: Focuses on essential features (80/20 principle).
 
-[Learn more in documentation](https://github.com/parpalak/s2/wiki/Features)
+[Learn more in the documentation](https://github.com/parpalak/s2/wiki/Features)
 
 ## Server Requirements
 
 - **Web server**
 - **PHP** 8.2 or higher.
-- One of supported databases:
+- One of the supported databases:
     - **MySQL** (tested on MariaDB 10.5 and higher, MySQL 8.0 and higher),
     - **PostgreSQL** (tested on 14),
     - **SQLite** (tested on 3.37).
@@ -68,6 +68,7 @@ See [details in the documentation](https://github.com/parpalak/s2/wiki/Installat
 
 ### For developers
 
+- [Development](_doc/development.md)
 - [Architecture Overview](_doc/architecture.md)
 - [Comments](_doc/comments.md)
 - [Extensions](_doc/extensions.md)

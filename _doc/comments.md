@@ -5,7 +5,9 @@ S2 includes a flexible and secure comment system designed to handle validation, 
 ### Comment Submission Flow
 
 1. **Request Handling**
-   Incoming comments are sent to the `CommentController`. This controller performs initial validation of the comment content.
+   Incoming comments are sent to the `CommentController`. This controller performs initial validation:
+   comments must be enabled, the target item must exist, the text and author name must be present,
+   the text must fit the size limit, the email must be valid, and the anti-bot question must be answered correctly.
 
 2. **Preview Mode**
    If the comment is submitted with the preview flag, it is formatted and returned without being stored or processed further.
@@ -31,11 +33,13 @@ S2 includes a flexible and secure comment system designed to handle validation, 
 
    The moderation decision is made by the `SpamDecision`:
 
-    - If the comment is `ham` and contains no links or HTML tags, it is published immediately.
-    - Comments classified as `spam` or `blatant` are never published directly.
-    - Comments marked as `ham` but containing links or HTML tags are always sent for manual review.
-    - If moderation is **enabled**, comments with spam check statuses `disabled` or `failed`
-      are sent for manual review.
+   - If the comment is `ham` and contains no links or HTML tags, it is published immediately.
+   - Comments classified as `spam` or `blatant` are never published directly.
+   - Comments marked as `ham` but containing links or HTML tags are always sent for manual review.
+   - If moderation is **enabled**, comments with spam check statuses `disabled` or `failed`
+     are sent for manual review.
+   - If moderation is **disabled**, comments with spam check statuses `disabled` or `failed`
+     can be published immediately as long as no other validation or spam-policy branch rejects them.
 
 ### Comment Publishing
 

@@ -44,5 +44,5 @@ There are two types of S2 config parameters:
     - **Extension-level views**: Require explicitly specifying the directory in `Viewer::render()`. Can also be overridden in themes.
 
 ## Extensions
-- Must contain a class named `Manifest` that implement [`ManifestInterface`](../_include/src/Extensions/ManifestInterface.php) (provides extension metadata).
-- Whether an extension is enabled is stored in the DB (the `extensions.disabled` field) and is not accessible via `DynamicConfigProvider`).
+- Must contain a class named `Manifest` that implements [`ManifestInterface`](../_include/src/Extensions/ManifestInterface.php) (provides extension metadata).
+- Whether an extension is enabled is stored in the DB (the `extensions.disabled` field) and is not accessible via `DynamicConfigProvider`.

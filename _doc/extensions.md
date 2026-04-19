@@ -10,7 +10,7 @@ that are automatically recognized and used by the system.
 Each extension **must** include a `Manifest.php` file,
 containing a `Manifest` class that implements `S2\Cms\Extensions\ManifestInterface`.
 
-Manifest describes the extension and may contain the code that will be executed
+The manifest describes the extension and may contain the code that will be executed
 when the extension is installed, updated, or uninstalled.
 
 Example:
@@ -22,23 +22,38 @@ declare(strict_types=1);
 
 namespace s2_extensions\extension_name;
 
-use S2\Cms\Extensions\Manifest;
 use S2\Cms\Extensions\ManifestInterface;
+use S2\Cms\Extensions\ManifestTrait;
+use S2\Cms\Framework\Container;
+use S2\Cms\Pdo\DbLayer;
+use S2\Cms\Pdo\SchemaBuilderInterface;
 
-class Manifest extends Manifest implements ManifestInterface
+class Manifest implements ManifestInterface
 {
-    public function getName(): string
+    use ManifestTrait;
+
+    public function getTitle(): string
     {
         return 'Your Extension Name';
+    }
+
+    public function getAuthor(): string
+    {
+        return 'Your Name';
+    }
+
+    public function getDescription(): string
+    {
+        return 'Short description of your extension.';
     }
 
     public function getVersion(): string
     {
         return '1.0.0';
     }
-    
+
     // ...
-    
+
     public function install(DbLayer $dbLayer, Container $container, ?string $currentVersion): void
     {
         // Setup a table
@@ -61,7 +76,7 @@ class Manifest extends Manifest implements ManifestInterface
             $config = [
                 'EXTENSION_NAME_PARAM1' => 'value1',
             ];
-    
+
             foreach ($config as $confName => $confValue) {
                 $dbLayer->insert('config')
                     ->setValue('name', ':name')->setParameter('name', $confName)
@@ -87,7 +102,7 @@ class Manifest extends Manifest implements ManifestInterface
 }
 ```
 
-You can use `S2\Cms\Extensions\ManifestTrait` to get a reasonable default implementation for some methods. 
+You can use `S2\Cms\Extensions\ManifestTrait` to get a reasonable default implementation for some methods.
 
 ## S2 Application Extensions
 
@@ -102,7 +117,12 @@ They must define classes implementing `S2\Cms\Framework\ExtensionInterface`:
 
 The most important part of the extension is the `registerListeners()` method,
 which registers event listeners to the events fired by the S2 core and other extensions.
-There is no documented events list due to the active development.
+The event list is not documented yet because this API is still under active development.
+To discover the current event surface, search the source tree for event classes and dispatch calls:
+
+```bash
+rg "class .*Event|dispatch\\(" _include/src _extensions
+```
 
 Let's take a look at a simple example:
 
@@ -144,7 +164,7 @@ class Extension implements ExtensionInterface
 
             return $translator;
         });
-        
+
         // Example for defining a new controller
         $container->set(Controller::class, static function (Container $container) {
             /** @var DynamicConfigProvider $provider */
@@ -209,8 +229,8 @@ You can look at the source code of other extensions for more advanced examples.
 
 ## Language Files
 
-Extensions can define its own translator and provide custom translation strings.
-In example above, the translator is defined in the `buildContainer()` method.
+Extensions can define their own translators and provide custom translation strings.
+In the example above, the translator is defined in the `buildContainer()` method.
 It assumes that the language files are located in the `_extensions/extension_name/lang/` directory.
 For example, a language file can be in `_extensions/extension_name/lang/English.php` with the following content:
 
@@ -239,11 +259,11 @@ $template->putInPlaceholder('text', $this->viewer->render('view.php', [...], 'ex
 ## Versioning
 
 Extension versions follow [Semantic Versioning](https://semver.org/):
-- The format is 1.2.3, where 1 is the major version, 2 is the minor version and 3 is the release.
+- The format is 1.2.3, where 1 is the major version, 2 is the minor version and 3 is the patch version.
 - Extensions in beta stages should be marked as 0.x.x.
-- After each time new functionality is added, the minor number should be increased.
+- When new functionality is added, the minor number should be increased.
 - When there are breaking changes, the major number should be increased.
-- Small bugfixes should increase the release number.
+- Small bugfixes should increase the patch number.
 
 ## Extensions Must Be Able to Be Disabled
 
@@ -252,17 +272,19 @@ This action does not run uninstall code,
 it only disables the usage of `Extension` and `AdminExtension` classes.
 It is important to keep in mind this situation when developing your extension.
 As a result, in general you cannot perform destructive actions on the core database
-(eg: delete a core configuration value, shrink a column to an unusable size, drop a table or column, etc.).
+(e.g., delete a core configuration value, shrink a column to an unusable size, drop a table or column, etc.).
 
 It is also important to make sure that any files in your extension that are accessed directly
 return some form of error message if they are accessed when the extension is disabled.
+Prefer routes and controllers registered from `Extension.php` for public entry points.
+For AJAX-like endpoints, add a route and route it to a controller instead of exposing a PHP file directly.
 
 ## Extensible Extensions
 
 You can split your extension into smaller extensions and connect them using dependencies.
 For example, a donation feature could be a separate extension that relies on a payment extension.
 This way, the payment extension can be used on its own or with other extensions,
-without the donation extension. 
+without the donation extension.
 
 You can also design your extensions to be extendable.
 By adding events, you allow other developers to modify or enhance your extension’s behavior.
