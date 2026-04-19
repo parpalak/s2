@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
@@ -28,7 +28,7 @@ readonly class CalendarBuilder
      *
      * @throws \S2\Cms\Pdo\DbLayerException
      */
-    public function calendar(?int $year = null, ?int $month = null, ?int $day = 0, string $url = '', array $dayUrls = null): string
+    public function calendar(?int $year = null, ?int $month = null, ?int $day = 0, string $url = '', ?array $dayUrls = null): string
     {
         if ($year === null) {
             $year = (int)date('Y');
