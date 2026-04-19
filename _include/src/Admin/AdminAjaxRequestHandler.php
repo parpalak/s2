@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2007-2025 Roman Parpalak
+ * @copyright 2007-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -765,7 +765,7 @@ class AdminAjaxRequestHandler
 
         $this->eventDispatcher->dispatch($event = new AdminAjaxControllerMapEvent($controllerMap));
 
-        $action     = $request->get('action', '');
+        $action     = $request->query->getString('action', $request->request->getString('action'));
         $controller = $event->controllerMap[$action] ?? static function () {
             return new Json(['success' => false, 'message' => 'Unknown action.'], Response::HTTP_BAD_REQUEST);
         };

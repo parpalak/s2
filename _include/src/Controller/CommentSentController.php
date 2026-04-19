@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2007-2025 Roman Parpalak
+ * @copyright 2007-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -52,8 +52,8 @@ readonly class CommentSentController implements ControllerInterface
      */
     public function handle(Request $request): Response
     {
-        $targetPath     = $request->get('go', '');
-        $commentHash    = $request->get('sign', '');
+        $targetPath     = $request->query->getString('go');
+        $commentHash    = $request->query->getString('sign');
         $moderatorEmail = $this->authProvider->getAuthenticatedModeratorEmail($request);
         $authorIp       = (string)$request->getClientIp();
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2025 Roman Parpalak
+ * @copyright 2025-2026 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
  * @package   S2
  */
@@ -60,6 +60,35 @@ class SpamDecisionCest
         } else {
             $I->assertEmpty($mails);
         }
+    }
+
+    public function testCommentSentPageReadsQueryParameters(\IntegrationTester $I): void
+    {
+        $I->setConfigValue('S2_PREMODERATION', '1');
+        $I->setSpamResponses([SpamDetectorReport::STATUS_HAM]);
+
+        $I->sendPost(
+            self::COMMENT_URL,
+            $this->commentData($this->composeText(true, false), 'moderator@example.com')
+        );
+
+        $I->seeResponseCodeIs(302);
+        $location = $I->grabLocation();
+        $I->assertStringContainsString('comment_sent', $location);
+        $I->assertStringContainsString('go=', $location);
+        $I->assertStringContainsString('sign=', $location);
+
+        $mailCountBefore = \count($I->grabModeratorMails());
+
+        $I->amOnPage($location);
+
+        $I->seeResponseCodeIs(200);
+
+        $mails = $I->grabModeratorMails();
+        $I->assertCount($mailCountBefore + 1, $mails);
+        $lastMail = $mails[array_key_last($mails)];
+        $I->assertEquals('moderator', $lastMail['moderatorName']);
+        $I->assertEquals('moderator@example.com', $lastMail['moderatorEmail']);
     }
 
     protected function decisionProvider(): array
@@ -355,7 +384,7 @@ class SpamDecisionCest
         ];
     }
 
-    private function commentData(string $text): array
+    private function commentData(string $text, string $email = 'tester@example.com'): array
     {
         $key = str_repeat('a', 21);
         $key[10] = '1';
@@ -364,7 +393,7 @@ class SpamDecisionCest
 
         return [
             'name'     => 'Tester',
-            'email'    => 'tester@example.com',
+            'email'    => $email,
             'text'     => $text,
             'key'      => $key,
             'question' => '15',
