@@ -485,9 +485,18 @@ function Animator(positionGetter, positionSetter) {
         v = 0,
         animationTime = 200,
         timerId,
-        startedAt = null;
+        startedAt = null,
+        // startedAt alone can't gate re-entry: it is written inside the rAF callback,
+        // so several setPos calls in one tick (iframe scroll fires on window/document/
+        // documentElement for a single user scroll) would all pass the !isReInit check
+        // and schedule orphan rAFs sharing this closure. After the animation's end
+        // branch nulls startedAt, a stray callback restarts the motion from x1 — the
+        // visible backward jump at the tail of a preview→source sync.
+        rafPending = false;
 
     const loop = function (timestamp) {
+        rafPending = false;
+
         if (startedAt === null) {
             startedAt = timestamp;
         }
@@ -505,6 +514,7 @@ function Animator(positionGetter, positionSetter) {
                     cb(Date.now());
                 }, 16);
             })(loop);
+            rafPending = true;
 
             if (isReInit) {
                 initMotion(reInitPosition, x);
@@ -555,7 +565,7 @@ function Animator(positionGetter, positionSetter) {
     }
 
     this.setPos = function (nextPos) {
-        isReInit = (startedAt !== null);
+        isReInit = (startedAt !== null) || rafPending;
         if (!isReInit) {
             x = positionGetter();
             initMotion(nextPos, x);
@@ -564,6 +574,7 @@ function Animator(positionGetter, positionSetter) {
                     cb(Date.now());
                 }, 16);
             })(loop);
+            rafPending = true;
         } else {
             reInitPosition = nextPos;
         }
@@ -573,6 +584,7 @@ function Animator(positionGetter, positionSetter) {
         startedAt = null;
         v = 0;
         cancelAnimationFrame(timerId);
+        rafPending = false;
         isReInit = false;
     };
 }
