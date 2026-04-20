@@ -139,6 +139,21 @@ class Integration extends AbstractBrowserModule
         return $this->publicApplication->container->get($serviceName);
     }
 
+    public function grabHttpHeader(string $name): ?string
+    {
+        return $this->response?->headers->get($name);
+    }
+
+    public function seeHttpHeader(string $name, string $expected): void
+    {
+        $this->assertSame($expected, $this->response?->headers->get($name));
+    }
+
+    public function sendRequestWithMethod(string $method, string $url): void
+    {
+        $this->doRequest(Request::create($url, $method));
+    }
+
     public function grabAdminService(string $serviceName): mixed
     {
         return $this->adminApplication->container->get($serviceName);

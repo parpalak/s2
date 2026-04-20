@@ -3,7 +3,7 @@
  * Application class.
  * Handles HTTP requests after building container definitions and registering event listeners.
  *
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -19,6 +19,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
@@ -86,23 +88,24 @@ class Application
             $service->clearState();
         }, $this->container->getByTagIfInstantiated(StatefulServiceInterface::class));
 
-        $attributes      = $this->matchRequest($request);
-        $controllerClass = $attributes['_controller'];
-        if (!$this->container->has($controllerClass)) {
-            throw new \LogicException(\sprintf('Controller "%s" must be defined in container.', $controllerClass));
-        }
-
-        $controller = $this->container->get($controllerClass);
-        if (!$controller instanceof ControllerInterface) {
-            throw new \LogicException(\sprintf('Controller "%s" must implement "%s".', $controllerClass, ControllerInterface::class));
-        }
-
         /** @var RequestStack $requestStack */
         $requestStack = $this->container->has(RequestStack::class) ? $this->container->get(RequestStack::class) : null;
         $requestStack?->push($request);
 
-        $response = null;
+        $controllerClass = null;
+        $response        = null;
         try {
+            $attributes      = $this->matchRequest($request);
+            $controllerClass = $attributes['_controller'];
+            if (!$this->container->has($controllerClass)) {
+                throw new \LogicException(\sprintf('Controller "%s" must be defined in container.', $controllerClass));
+            }
+
+            $controller = $this->container->get($controllerClass);
+            if (!$controller instanceof ControllerInterface) {
+                throw new \LogicException(\sprintf('Controller "%s" must implement "%s".', $controllerClass, ControllerInterface::class));
+            }
+
             $response = $controller->handle($request);
             if ($response->isNotFound()) {
                 throw new NotFoundException();
@@ -110,48 +113,57 @@ class Application
             if (\extension_loaded('newrelic')) {
                 newrelic_name_transaction($controllerClass . (!$response->isSuccessful() ? '_' . $response->getStatusCode() : ''));
             }
-        } catch (NotFoundException $e) {
+        } catch (MethodNotAllowedException $e) {
+            $allow    = implode(', ', $e->getAllowedMethods());
+            $response = $this->createErrorResponse(
+                Response::HTTP_METHOD_NOT_ALLOWED,
+                '405 Method Not Allowed',
+                'The requested method is not allowed for this URL. Allowed: ' . htmlspecialchars($allow, ENT_QUOTES, 'UTF-8') . '.',
+                ['Allow' => $allow]
+            );
+            if (\extension_loaded('newrelic')) {
+                newrelic_name_transaction('method_not_allowed');
+            }
+        } catch (NotFoundException | ResourceNotFoundException) {
             /** @var EventDispatcherInterface $eventDispatcher */
             $eventDispatcher = $this->container->get(EventDispatcherInterface::class);
             $notFoundEvent   = new NotFoundEvent($request, $response);
             $eventDispatcher->dispatch($notFoundEvent);
-            $response = $notFoundEvent->response;
-            if ($response === null) {
-                $response = new Response('<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="Generator" content="S2">
-    <title>404 Not Found</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-        }
-    </style>
-</head>
-<body>
-    <h1>404 Not Found</h1>
-    <hr>
-    <p>The page you are looking for does not exist.</p>
-</body>
-</html>', Response::HTTP_NOT_FOUND);
-            }
+            $response = $notFoundEvent->response ?? $this->createErrorResponse(
+                Response::HTTP_NOT_FOUND,
+                '404 Not Found',
+                'The page you are looking for does not exist.'
+            );
 
             if (\extension_loaded('newrelic')) {
-                newrelic_name_transaction($controllerClass . '_' . $response->getStatusCode());
+                newrelic_name_transaction(($controllerClass ?? 'not_found') . '_' . $response->getStatusCode());
             }
         } catch (ConfigurationException $e) {
-            // $e->getMessage() may contain HTML markup so it's not escaped here
-            $message  = $e->getMessage();
-            $title    = $e->title ?? 'An error was encountered';
-            $response = new Response('<!DOCTYPE html>
+            // $e->title and $e->getMessage() may contain HTML markup so they are not escaped here
+            $response = $this->createErrorResponse(
+                Response::HTTP_SERVICE_UNAVAILABLE,
+                $e->title ?? 'An error was encountered',
+                $e->getMessage()
+            );
+        } finally {
+            $requestStack?->pop();
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
+    private function createErrorResponse(int $status, string $title, string $body, array $headers = []): Response
+    {
+        return new Response('<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="Generator" content="S2">
-    <title>Error</title>
+    <title>' . $title . '</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -161,14 +173,9 @@ class Application
 <body>
     <h1>' . $title . '</h1>
     <hr>
-    <p>' . $message . '</p>
+    <p>' . $body . '</p>
 </body>
-</html>', Response::HTTP_SERVICE_UNAVAILABLE);
-        } finally {
-            $requestStack?->pop();
-        }
-
-        return $response;
+</html>', $status, $headers);
     }
 
     private function getRoutes(): RouteCollection
@@ -183,6 +190,10 @@ class Application
         return $this->routes;
     }
 
+    /**
+     * @throws MethodNotAllowedException
+     * @throws ResourceNotFoundException
+     */
     private function matchRequest(Request $request): array
     {
         $context = new RequestContext();
