@@ -106,7 +106,7 @@ class CmsExtension implements ExtensionInterface
             }
 
             if (!\in_array($db_type, \PDO::getAvailableDrivers(), true)) {
-                throw new \RuntimeException('This PHP environment does not have PDO "%s" support built in. It is required if you want to use this type of database. Consult the PHP documentation for further assistance.');
+                throw new \RuntimeException(\sprintf('This PHP environment does not have PDO "%s" support built in. It is required if you want to use this type of database. Consult the PHP documentation for further assistance.', $db_type));
             }
 
             return match ($db_type) {
