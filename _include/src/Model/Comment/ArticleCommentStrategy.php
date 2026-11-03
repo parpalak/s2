@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2007-2024 Roman Parpalak
+ * @copyright 2007-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -69,7 +69,7 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
      * {@inheritdoc}
      * @throws DbLayerException
      */
-    public function save(int $targetId, string $name, string $email, bool $showEmail, bool $subscribed, string $text, string $ip): int
+    public function save(int $targetId, string $name, string $email, bool $showEmail, bool $subscribed, string $text, string $ip, string $spamCheckStatus = ''): int
     {
         $this->dbLayer
             ->insert('art_comments')
@@ -84,6 +84,7 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
             ->setValue('shown', '0')
             ->setValue('good', '0')
             ->setValue('text', ':text')->setParameter('text', $text)
+            ->setValue('spam_check_status', ':spam_check_status')->setParameter('spam_check_status', $spamCheckStatus)
             ->execute()
         ;
 
@@ -117,7 +118,7 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
     public function getRecentComment(string $hash, string $ip): ?CommentDto
     {
         $result = $this->dbLayer
-            ->select('id', 'article_id AS target_id', 'email', 'text', 'nick AS name')
+            ->select('id', 'article_id AS target_id', 'email', 'text', 'nick AS name', 'spam_check_status')
             ->from('art_comments')
             ->where('ip = :ip')
             ->setParameter('ip', $ip)
@@ -130,7 +131,7 @@ readonly class ArticleCommentStrategy implements CommentStrategyInterface
 
         foreach ($result->fetchAssocAll() as $comment) {
             if ($hash === CommentController::commentHash($comment['id'], $comment['target_id'], $comment['email'], $ip, \get_class($this))) {
-                return new CommentDto($comment['id'], $comment['target_id'], $comment['name'], $comment['email'], $comment['text']);
+                return new CommentDto($comment['id'], $comment['target_id'], $comment['name'], $comment['email'], $comment['text'], $comment['spam_check_status']);
             }
         }
 

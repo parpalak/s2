@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -20,7 +20,7 @@ interface CommentStrategyInterface
 
     public function getTargetById(int $targetId): ?TargetDto;
 
-    public function save(int $targetId, string $name, string $email, bool $showEmail, bool $subscribed, string $text, string $ip): int;
+    public function save(int $targetId, string $name, string $email, bool $showEmail, bool $subscribed, string $text, string $ip, string $spamCheckStatus = ''): int;
 
     public function notifySubscribers(int $commentId): void;
 

@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use S2\Cms\Asset\AssetMergeFactory;
 use S2\Cms\Comment\AkismetProxy;
+use S2\Cms\Comment\SpamDigestNotifier;
 use S2\Cms\Comment\SpamDetectorInterface;
 use S2\Cms\Comment\SpamDecisionProvider;
 use S2\Cms\Comment\SpamDecisionProviderInterface;
@@ -387,6 +388,18 @@ class CmsExtension implements ExtensionInterface
             );
         });
 
+        $container->set(SpamDigestNotifier::class, static function (Container $container) {
+            return new SpamDigestNotifier(
+                $container->get(DbLayer::class),
+                $container->get(\PDO::class),
+                $container->get(QueuePublisher::class),
+                $container->get(UserProvider::class),
+                $container->get(CommentMailer::class),
+                $container->getParameter('base_url') . '/_admin/index.php',
+                $container->get(LoggerInterface::class),
+            );
+        }, [QueueHandlerInterface::class]);
+
         $container->set(CommentMailer::class, function (Container $container) {
             /** @var DynamicConfigProvider $provider */
             $provider = $container->get(DynamicConfigProvider::class);
@@ -468,6 +481,7 @@ class CmsExtension implements ExtensionInterface
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
                 $container->get(SpamDecisionProviderInterface::class),
+                $container->get(SpamDigestNotifier::class),
                 $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
                 $provider->getBoolProxy('S2_PREMODERATION'),
             );

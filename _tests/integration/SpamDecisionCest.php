@@ -11,6 +11,7 @@ namespace integration;
 
 use Codeception\Example;
 use S2\Cms\Comment\SpamDetectorReport;
+use S2\Cms\Queue\QueueConsumer;
 
 /**
  * @group spam
@@ -52,6 +53,10 @@ class SpamDecisionCest
 
         $this->assertLastComment($I, shown: $example['expectShown'], totalStart: $startCount);
 
+        // Spam notifications are delivered by the queue, regular mail is immediate.
+        $consumer = $I->grabService(QueueConsumer::class);
+        while ($consumer->runQueue()) {
+        }
         $mails = $I->grabModeratorMails();
         if ($example['expectMail']) {
             $I->assertNotEmpty($mails);

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2023-2024 Roman Parpalak
+ * @copyright 2023-2026 Roman Parpalak
  * @license MIT
  * @package S2
  */
@@ -17,7 +17,7 @@ readonly class QueuePublisher
     {
     }
 
-    public function publish(string $id, string $code, array $payload = []): void
+    public function publish(string $id, string $code, array $payload = [], int $availableAt = 0): void
     {
         if (\strlen($id) > 80) {
             throw new \DomainException('Id length must not exceed 80 characters');
@@ -32,6 +32,12 @@ readonly class QueuePublisher
             throw new \InvalidArgumentException($e->getMessage(), 0, $e);
         }
 
+        // Order new immediate jobs by publication time as well, so a continuous
+        // stream of ready jobs cannot starve an older scheduled job.
+        if ($availableAt === 0) {
+            $availableAt = time();
+        }
+
         $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
         switch ($driverName) {
             case 'mysql':
@@ -39,13 +45,13 @@ readonly class QueuePublisher
                 // for releasing a lock even if the row was just locked with SELECT ... FOR UPDATE and not modified yet.
                 // Moreover, there is no INSERT ... NOWAIT operator. Let's make it by hands.
                 $this->pdo->exec('SET innodb_lock_wait_timeout = 0;');
-                $statement = $this->pdo->prepare('INSERT IGNORE INTO ' . $this->dbPrefix . 'queue (id, code, payload) VALUES (:id, :code, :payload)');
+                $statement = $this->pdo->prepare('INSERT IGNORE INTO ' . $this->dbPrefix . 'queue (id, code, payload, available_at) VALUES (:id, :code, :payload, :available_at)');
                 break;
 
             case 'sqlite':
                 $this->pdo->setAttribute(\PDO::ATTR_TIMEOUT, 1);
             case 'pgsql':
-                $statement = $this->pdo->prepare('INSERT INTO ' . $this->dbPrefix . 'queue (id, code, payload) VALUES (:id, :code, :payload) ON CONFLICT DO NOTHING');
+                $statement = $this->pdo->prepare('INSERT INTO ' . $this->dbPrefix . 'queue (id, code, payload, available_at) VALUES (:id, :code, :payload, :available_at) ON CONFLICT DO NOTHING');
                 break;
 
             default:
@@ -54,9 +60,10 @@ readonly class QueuePublisher
 
         try {
             $statement->execute([
-                'id'      => $id,
-                'code'    => $code,
-                'payload' => $data,
+                'id'           => $id,
+                'code'         => $code,
+                'payload'      => $data,
+                'available_at' => $availableAt,
             ]);
         } catch (\PDOException $e) {
             if (

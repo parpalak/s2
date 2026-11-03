@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2009-2025 Roman Parpalak
+ * @copyright 2009-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -106,7 +106,34 @@ readonly class CommentMailer
         return $this->sendMail($moderatorEmail, $subject, $message, $headers);
     }
 
-    private function sendMail(string $email, string $subject, string $message, array $headers): bool
+    public function mailSpamDigest(string $name, string $email, int $count, array $samples, string $adminUrl): bool
+    {
+        $quotes = [];
+        foreach ($samples as $sample) {
+            $quotes[] = \sprintf($this->translator->trans('Spam digest sample'), $sample['title'], $sample['count'], $sample['quote']);
+        }
+        $message = strtr($this->translator->trans('Spam digest pattern'), [
+            '<name>' => $name,
+            '<count>' => (string)$count,
+            '<samples>' => implode("\n\n", $quotes),
+            '<url>' => $adminUrl,
+        ]);
+        $message = str_replace(["\n", "\0"], ["\r\n", ''], $message);
+        $subject = '=?UTF-8?B?' . base64_encode($this->translator->trans('Spam digest subject')) . '?=';
+        $from = $this->getWebmasterNameAndEmail();
+
+        return $this->sendMail($email, $subject, $message, [
+            'From' => $from,
+            'Date' => gmdate('r'),
+            'MIME-Version' => '1.0',
+            'Content-transfer-encoding' => '8bit',
+            'Content-type' => 'text/plain; charset=utf-8',
+            'X-Mailer' => 'S2 Mailer',
+            'Reply-To' => $from,
+        ]);
+    }
+
+    protected function sendMail(string $email, string $subject, string $message, array $headers): bool
     {
         $headersFormatted = $this->formatHeaders($headers);
 

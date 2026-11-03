@@ -422,4 +422,17 @@ readonly class IntegrationCommentMailer extends \S2\Cms\Mail\CommentMailer
     ): bool {
         return true;
     }
+
+    protected function sendMail(string $email, string $subject, string $message, array $headers): bool
+    {
+        $this->helper->recordModeratorMail([
+            'moderatorEmail' => $email,
+            'text' => $message,
+            'subject' => $subject,
+            'headers' => $headers,
+            'spamReportStatus' => SpamDetectorReport::STATUS_SPAM,
+            'isPublished' => false,
+        ]);
+        return true;
+    }
 }

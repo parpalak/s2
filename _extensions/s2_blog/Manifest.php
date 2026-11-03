@@ -4,7 +4,7 @@
  *
  * Allows to add a blog to your S2 site
  *
- * @copyright 2007-2025 Roman Parpalak
+ * @copyright 2007-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   s2_blog
  */
@@ -109,6 +109,7 @@ class Manifest implements ManifestInterface
                     ->addBoolean('shown', default: true)
                     ->addBoolean('sent', default: true)
                     ->addBoolean('good')
+                    ->addString('spam_check_status', 16)
                     ->addText('text', nullable: false)
                     ->addForeignKey(
                         'fk_post',

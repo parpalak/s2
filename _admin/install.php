@@ -2,7 +2,7 @@
 /**
  * Installation script for S2.
  *
- * @copyright 2009-2025 Roman Parpalak
+ * @copyright 2009-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -25,7 +25,7 @@ use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 
 define('S2_VERSION', '2.0dev');
-define('S2_DB_REVISION', 24);
+define('S2_DB_REVISION', 25);
 define('MIN_PHP_VERSION', '8.2.0');
 
 define('S2_ROOT', '../');

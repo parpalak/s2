@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace S2\Cms\Controller;
 
+use S2\Cms\Comment\SpamDetectorReport;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
 use S2\Cms\Helper\StringHelper;
@@ -66,6 +67,12 @@ readonly class CommentSentController implements ControllerInterface
             if ($moderatorEmail === $comment->email) {
                 // We have confirmed that the moderator is the one who has really sent the comment
                 return $this->publishAndNotifyAndGetRedirectResponse($commentStrategy, $comment, $targetPath);
+            }
+
+            if ($comment->spamCheckStatus === SpamDetectorReport::STATUS_SPAM) {
+                // Already queued by CommentController. Never mail the full spam
+                // text or send a second notification on repeated redirects.
+                break;
             }
 
             $moderators = $this->userProvider->getModerators([$comment->email]);

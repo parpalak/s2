@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2007-2025 Roman Parpalak
+ * @copyright 2007-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use S2\Cms\Config\BoolProxy;
 use S2\Cms\Comment\SpamDetectorComment;
 use S2\Cms\Comment\SpamDecision;
+use S2\Cms\Comment\SpamDigestNotifier;
 use S2\Cms\Comment\SpamDecisionProviderInterface;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Framework\ControllerInterface;
@@ -44,6 +45,7 @@ readonly class CommentController implements ControllerInterface
         private LoggerInterface               $logger,
         private CommentMailer                 $commentMailer,
         private SpamDecisionProviderInterface $spamDecisionProvider,
+        private SpamDigestNotifier            $spamDigestNotifier,
         private BoolProxy                     $commentsEnabled,
         private BoolProxy                     $premoderationEnabled,
     ) {
@@ -196,7 +198,7 @@ readonly class CommentController implements ControllerInterface
         $moderationRequired = $spamDecision->shouldModerate($this->premoderationEnabled->get());
 
         // Save the comment
-        $commentId = $this->commentStrategy->save($target->id, $name, $email, $showEmail, $subscribed, $text, (string)$request->getClientIp());
+        $commentId = $this->commentStrategy->save($target->id, $name, $email, $showEmail, $subscribed, $text, (string)$request->getClientIp(), $spamDecision->getStatus());
 
         $message = StringHelper::bbcodeToMail($text);
 
@@ -209,7 +211,20 @@ readonly class CommentController implements ControllerInterface
          * @see CommentSentController
          * @see \S2\Cms\Model\AuthManager::createCommentCookie
          */
-        foreach ($this->userProvider->getModerators([], $moderationRequired && $isOnline ? [$email] : []) as $moderator) {
+        $isSpam = $spamDecision->getReport()->isSpam();
+        // Spam notifications are queued here for every moderator; the redirect
+        // controller must not send the full text again, even for a spoofed email.
+        foreach ($this->userProvider->getModerators([], !$isSpam && $moderationRequired && $isOnline ? [$email] : []) as $moderator) {
+            if ($isSpam) {
+                $this->spamDigestNotifier->enqueue(
+                    \get_class($this->commentStrategy) . ':' . $commentId,
+                    $moderator->email,
+                    $text,
+                    $target->title,
+                    \get_class($this->commentStrategy) . ':' . $target->id,
+                );
+                continue;
+            }
             $this->commentMailer->mailToModerator(
                 $moderator->login,
                 $moderator->email,

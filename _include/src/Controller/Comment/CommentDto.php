@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -17,6 +17,7 @@ readonly class CommentDto
         public string $name,
         public string $email,
         public string $text,
+        public string $spamCheckStatus = '',
     ) {
     }
 

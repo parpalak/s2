@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2011-2025 Roman Parpalak
+ * @copyright 2011-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -15,7 +15,7 @@ use S2\Cms\Pdo\SchemaBuilderInterface;
 
 class MigrationManager
 {
-    private const S2_DB_LAST_REVISION = 24;
+    private const S2_DB_LAST_REVISION = 25;
 
     public function __construct(
         private readonly DbLayer $dbLayer,
@@ -276,6 +276,17 @@ class MigrationManager
             );
 
             $this->dbLayer->dropField('users_online', 'salt');
+        }
+
+        if ($currentRevision < 25) {
+            $this->dbLayer->addField('queue', 'available_at', SchemaBuilderInterface::TYPE_UNSIGNED_INTEGER, null, false, '0');
+            $this->dbLayer->addIndex('queue', 'available_at_idx', ['available_at']);
+            Installer::createSpamNotificationTable($this->dbLayer);
+            foreach (['art_comments', 's2_blog_comments'] as $table) {
+                if ($this->dbLayer->tableExists($table) && !$this->dbLayer->fieldExists($table, 'spam_check_status')) {
+                    $this->dbLayer->addField($table, 'spam_check_status', SchemaBuilderInterface::TYPE_STRING, 16, false, '');
+                }
+            }
         }
 
         $this->dbLayer->update('config')

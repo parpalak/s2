@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -112,6 +112,7 @@ readonly class Installer
                 ->addBoolean('shown', false, true)
                 ->addBoolean('sent', false, true)
                 ->addBoolean('good')
+                ->addString('spam_check_status', 16)
                 ->addText('text', nullable: false)
                 ->addForeignKey(
                     'fk_article',
@@ -196,12 +197,29 @@ readonly class Installer
             ;
         });
 
+        self::createSpamNotificationTable($this->dbLayer);
+
         $this->dbLayer->createTable('queue', function (SchemaBuilderInterface $table) {
             $table
                 ->addString('id', 80, default: null)
                 ->addString('code', 80, default: null)
                 ->addText('payload', nullable: false)
+                ->addInteger('available_at', true)
+                ->addIndex('available_at_idx', ['available_at'])
                 ->setPrimaryKey(['id', 'code'])
+            ;
+        });
+    }
+
+    public static function createSpamNotificationTable(DbLayer $dbLayer): void
+    {
+        $dbLayer->createTable('spam_notifications', static function (SchemaBuilderInterface $table) {
+            $table
+                ->addString('email', 80, default: null)
+                ->addInteger('next_send_at', true)
+                ->addInteger('pending_count', true)
+                ->addText('samples', nullable: false)
+                ->setPrimaryKey(['email'])
             ;
         });
     }
@@ -211,6 +229,7 @@ readonly class Installer
      */
     public function dropTables(): void
     {
+        $this->dbLayer->dropTable('spam_notifications');
         $this->dbLayer->dropTable('queue');
         $this->dbLayer->dropTable('article_tag');
         $this->dbLayer->dropTable('tags');

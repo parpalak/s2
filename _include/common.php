@@ -2,7 +2,7 @@
 /**
  * Loads common data and performs various functions necessary for the site to work properly.
  *
- * @copyright 2009-2025 Roman Parpalak
+ * @copyright 2009-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -196,10 +196,10 @@ if (defined('S2_ADMIN_MODE') && session_status() !== PHP_SESSION_ACTIVE) {
     ini_set('session.cookie_httponly', true);
 }
 
-if ($dynamicConfigProvider->getIntProxy('S2_DB_REVISION')->get() < 24) {
+if ($dynamicConfigProvider->getIntProxy('S2_DB_REVISION')->get() < 25) {
     /** @var MigrationManager $migrationManager */
     $migrationManager = $app->container->get(MigrationManager::class);
-    $migrationManager->migrate($dynamicConfigProvider->getIntProxy('S2_DB_REVISION')->get(), 24);
+    $migrationManager->migrate($dynamicConfigProvider->getIntProxy('S2_DB_REVISION')->get(), 25);
 
     $dynamicConfigProvider->regenerate();
 }

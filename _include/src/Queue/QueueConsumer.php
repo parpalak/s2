@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2023-2024 Roman Parpalak
+ * @copyright 2023-2026 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
  * @package   S2
  */
@@ -41,8 +41,8 @@ class QueueConsumer
     {
         $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
         $sql        = match ($driverName) {
-            'mysql', 'pgsql' => 'SELECT * FROM ' . $this->dbPrefix . 'queue LIMIT 1 FOR UPDATE NOWAIT',
-            'sqlite' => 'SELECT * FROM ' . $this->dbPrefix . 'queue LIMIT 1',
+            'mysql', 'pgsql' => 'SELECT * FROM ' . $this->dbPrefix . 'queue WHERE available_at <= ' . time() . ' ORDER BY available_at, id LIMIT 1 FOR UPDATE NOWAIT',
+            'sqlite' => 'SELECT * FROM ' . $this->dbPrefix . 'queue WHERE available_at <= ' . time() . ' ORDER BY available_at, id LIMIT 1',
             default => throw new \RuntimeException(sprintf('Driver "%s" is not supported.', $driverName)),
         };
 

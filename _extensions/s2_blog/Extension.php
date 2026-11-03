@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/licenses/MIT MIT
  * @package   s2_blog
  */
@@ -14,6 +14,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use S2\Cms\Asset\AssetPack;
 use S2\Cms\Comment\SpamDecisionProviderInterface;
+use S2\Cms\Comment\SpamDigestNotifier;
 use S2\Cms\Config\DynamicConfigProvider;
 use S2\Cms\Controller\Comment\CommentStrategyInterface;
 use S2\Cms\Controller\CommentController;
@@ -313,6 +314,7 @@ class Extension implements ExtensionInterface
                 $container->get(LoggerInterface::class),
                 $container->get(CommentMailer::class),
                 $container->get(SpamDecisionProviderInterface::class),
+                $container->get(SpamDigestNotifier::class),
                 $provider->getBoolProxy('S2_ENABLED_COMMENTS'),
                 $provider->getBoolProxy('S2_PREMODERATION'),
             );

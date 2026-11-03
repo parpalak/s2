@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   http://opensource.org/licenses/MIT MIT
  * @package   S2
  */
@@ -24,6 +24,26 @@ use S2\Rose\Storage\Exception\InvalidEnvironmentException;
  */
 class QueueCest
 {
+    public function testDelayedJobsDoNotBlockReadyJobs(IntegrationTester $I): void
+    {
+        $publisher = $I->grabService(QueuePublisher::class);
+        $consumer = $I->grabService(QueueConsumer::class);
+        $db = $I->grabService(DbLayer::class);
+        $publisher->publish('a_delayed', 'test', [], time() + 3600);
+        $publisher->publish('b_ready', 'test');
+
+        $I->assertTrue($consumer->runQueue());
+        $I->assertFalse($consumer->runQueue());
+        $I->assertSame(['a_delayed'], $db->select('id')->from('queue')->execute()->fetchColumn());
+
+        $db->update('queue')->set('available_at', (string)(time() - 10))->execute();
+        $publisher->publish('0_new_ready', 'test');
+        $I->assertTrue($consumer->runQueue());
+        $I->assertSame(['0_new_ready'], $db->select('id')->from('queue')->execute()->fetchColumn());
+        $I->assertTrue($consumer->runQueue());
+        $I->assertFalse($consumer->runQueue());
+    }
+
     protected function _before()
     {
     }
