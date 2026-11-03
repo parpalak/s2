@@ -287,6 +287,9 @@ return [
     'Sessions'               => 'Сеансы',
     'Current session'        => 'Текущий сеанс',
 
+    // Queue
+    'Process after'          => 'Обработать после',
+
     // Pictures tab
     'Upload file'            => 'Загрузка файла',
     'Upload limit'           => '<small title="Параметры upload_max_filesize и post_max_size в php.ini">Каждый файл до&nbsp;%1$s, всего до&nbsp;%2$s за&nbsp;раз.</small>',

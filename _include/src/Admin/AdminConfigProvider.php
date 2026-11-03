@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2024-2025 Roman Parpalak
+ * @copyright 2024-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -912,6 +912,12 @@ class AdminConfigProvider implements StatefulServiceInterface
                     ->addField(new FieldConfig(
                         name: 'code',
                         type: new DbColumnFieldType(FieldConfig::DATA_TYPE_STRING, true),
+                    ))
+                    ->addField(new FieldConfig(
+                        name: 'available_at',
+                        label: $this->translator->trans('Process after'),
+                        type: new DbColumnFieldType(FieldConfig::DATA_TYPE_UNIXTIME),
+                        sortable: true,
                     ))
                     ->addField(new FieldConfig(
                         name: 'payload',

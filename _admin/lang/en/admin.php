@@ -287,6 +287,9 @@ return [
     'Sessions'               => 'Sessions',
     'Current session'        => 'Current session',
 
+    // Queue
+    'Process after'          => 'Process after',
+
     // Pictures
     'Upload file'            => 'Upload file',
     'Upload limit'           => '<small title="Parameters upload_max_filesize and post_max_size in php.ini">Each file up to&nbsp;%1$s, total up to %2$s at once.</small>',
