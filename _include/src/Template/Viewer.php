@@ -2,7 +2,7 @@
 /**
  * Renders views.
  *
- * @copyright 2014-2025 Roman Parpalak
+ * @copyright 2014-2026 Roman Parpalak
  * @license   https://opensource.org/license/mit MIT
  * @package   S2
  */
@@ -10,6 +10,7 @@
 namespace S2\Cms\Template;
 
 use S2\Cms\Config\StringProxy;
+use S2\Cms\Helper\DateHelper;
 use S2\Cms\Model\UrlBuilder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -76,17 +77,7 @@ class Viewer
      */
     public function date(int $time): string
     {
-        if (!$time) {
-            return '';
-        }
-
-        $format = $this->translator->trans('Date format');
-        $date   = date($format, $time);
-        if (str_contains($format, 'F')) {
-            $date = str_replace(date('F', $time), $this->translator->trans(date('F', $time) . ' genitive'), $date);
-        }
-
-        return $date;
+        return DateHelper::format($time, $this->translator->trans('Date format'), $this->translator);
     }
 
     /**
@@ -94,17 +85,7 @@ class Viewer
      */
     public function dateAndTime(int $time): string
     {
-        if (!$time) {
-            return '';
-        }
-
-        $format = $this->translator->trans('Time format');
-        $date   = date($format, $time);
-        if (str_contains($format, 'F')) {
-            $date = str_replace(date('F', $time), $this->translator->trans(date('F', $time) . ' genitive'), $date);
-        }
-
-        return $date;
+        return DateHelper::format($time, $this->translator->trans('Time format'), $this->translator);
     }
 
     /**

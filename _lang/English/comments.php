@@ -3,10 +3,13 @@
 return [
 
     'Spam digest subject' => 'Comments held by the spam filter',
-    'Spam digest sample' => "On “%s” (comments: %d):\n“%s”",
+    'Spam digest sample' => 'On “<title>” (%count% comment):|On “<title>” (%count% comments):',
+    'Spam digest quote' => "<received>“<quote>”",
+    'Spam digest summary' => 'The spam filter held %count% comment since the previous notification.|The spam filter held %count% comments since the previous notification.',
+    'Spam digest received' => 'Received: %time%',
     'Spam digest pattern' => 'Hello, <name>.
 
-Comments held by the spam filter since the previous notification: <count>.
+<summary>
 They remain hidden. Below are short excerpts from up to five different messages.
 
 <samples>
@@ -14,7 +17,7 @@ They remain hidden. Below are short excerpts from up to five different messages.
 Review the comments in the control panel:
 <url>
 
-This message was sent automatically. Spam notifications are sent at most once an hour.',
+This message was sent automatically. Spam notifications are sent at most once every 6 hours.',
 
 	'Save comment'             => 'Copy your comment somewhere to prevent its loss.',
 	'Go back'                  => 'Go <a href="javascript:history.back()">back</a> and&nbsp;fix errors.',

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace S2\Cms\Mail;
 
 use S2\Cms\Config\StringProxy;
+use S2\Cms\Helper\DateHelper;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CommentMailer
@@ -110,11 +111,23 @@ readonly class CommentMailer
     {
         $quotes = [];
         foreach ($samples as $sample) {
-            $quotes[] = \sprintf($this->translator->trans('Spam digest sample'), $sample['title'], $sample['count'], $sample['quote']);
+            $received = '';
+            if (isset($sample['received_at'])) {
+                $time = DateHelper::format($sample['received_at'], $this->translator->trans('Time format'), $this->translator);
+                if (($sample['last_received_at'] ?? $sample['received_at']) !== $sample['received_at']) {
+                    $time .= ' – ' . DateHelper::format($sample['last_received_at'], $this->translator->trans('Time format'), $this->translator);
+                }
+                $received = $this->translator->trans('Spam digest received', ['%time%' => $time]) . "\n";
+            }
+            $quotes[] = strtr($this->translator->trans('Spam digest sample', ['%count%' => $sample['count']]) . "\n" . $this->translator->trans('Spam digest quote'), [
+                '<title>' => $sample['title'],
+                '<received>' => $received,
+                '<quote>' => $sample['quote'],
+            ]);
         }
         $message = strtr($this->translator->trans('Spam digest pattern'), [
             '<name>' => $name,
-            '<count>' => (string)$count,
+            '<summary>' => $this->translator->trans('Spam digest summary', ['%count%' => $count]),
             '<samples>' => implode("\n\n", $quotes),
             '<url>' => $adminUrl,
         ]);

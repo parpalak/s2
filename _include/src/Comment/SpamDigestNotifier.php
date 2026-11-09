@@ -24,7 +24,7 @@ readonly class SpamDigestNotifier implements QueueHandlerInterface
 {
     public const COMMENT_CODE = 'spam_comment';
     public const DIGEST_CODE = 'spam_digest';
-    public const INTERVAL = 3600;
+    public const INTERVAL = 6 * 3600;
     private const MAX_SAMPLES = 5;
 
     public function __construct(
@@ -45,8 +45,9 @@ readonly class SpamDigestNotifier implements QueueHandlerInterface
             'sample' => [
                 'hash' => hash('sha256', $targetKey . "\0" . $text),
                 'title' => self::excerpt($title, 100),
-                'quote' => self::excerpt($text, 150),
+                'quote' => self::excerpt($text, 100),
                 'count' => 1,
+                'received_at' => time(),
             ],
         ]);
     }
@@ -88,6 +89,9 @@ readonly class SpamDigestNotifier implements QueueHandlerInterface
             foreach ($samples as &$existing) {
                 if ($existing['hash'] === $sample['hash']) {
                     ++$existing['count'];
+                    if (isset($sample['received_at'])) {
+                        $existing['last_received_at'] = $sample['received_at'];
+                    }
                     $found = true;
                     break;
                 }

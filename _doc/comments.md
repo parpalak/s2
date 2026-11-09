@@ -71,14 +71,14 @@ If the emails do not match:
 
 Saved comments classified as `spam` notify moderators through the existing job queue.
 The first notification is sent as soon as the queue processes it. Further comments
-are accumulated into a digest sent no sooner than one hour after the previous
+are accumulated into a digest sent no sooner than six hours after the previous
 notification, separately for each moderator. Article and blog comments share this limit.
 Regular moderation notifications retain their existing full-text format.
 
 A spam digest contains the total number of newly held comments and up to five
-different excerpts. Each excerpt is limited to 150 characters; HTML, BBCode,
+different excerpts. Each excerpt is limited to 100 characters; HTML, BBCode,
 links, email addresses and line breaks are removed or replaced. Identical comments
-on the same article are grouped with a repetition count. The full original text
+on the same article are grouped with a repetition count and the first and last receipt times (in the server timezone). The full original text
 remains available in the control panel. Spam authors' names and email addresses
 are not included in the digest or its headers.
 
@@ -87,4 +87,4 @@ The existing background processing after requests (when PHP-FPM supports
 `fastcgi_finish_request`) can deliver digests, but delivery during quiet periods
 requires running `php /path/to/s2/cron.php` periodically, for example once a minute.
 An empty interval sends no email and stops scheduling further checks. Failed mail
-delivery retains the digest and schedules another attempt in an hour.
+delivery retains the digest and schedules another attempt in six hours.
